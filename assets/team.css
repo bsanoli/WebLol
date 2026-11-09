@@ -148,7 +148,7 @@ th{color:var(--mut);font-size:12px;text-transform:uppercase;letter-spacing:.5px;
 .sq.ban{font-size:13px}
 .sq.us{opacity:1;box-shadow:0 0 0 1px #fff6 inset}
 .dz{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px 16px}
-.tm{display:grid;grid-template-rows:subgrid;grid-row:span 9;min-width:0}
+.tm{display:grid;grid-template-rows:subgrid;grid-row:span 8;min-width:0}
 .tmh{margin:0;font-size:13px;font-weight:800;display:flex;gap:6px;flex-wrap:wrap;justify-content:space-between;align-items:center;padding:10px;border-radius:6px}
 .tm.b .tmh{background:linear-gradient(90deg,#1e4a8f,transparent);color:#9cc4ff}
 .tm.r .tmh{background:linear-gradient(270deg,#8f2a2a,transparent);color:#ffb0b0;flex-direction:row-reverse}
@@ -435,7 +435,7 @@ header nav button { border-radius: 8px; }
   .draft-view .dz {
     flex: 1;
     row-gap: 3px;
-    grid-template-rows: repeat(3, max-content) repeat(3, auto) max-content repeat(2, auto);
+    grid-template-rows: repeat(2, max-content) repeat(3, auto) max-content repeat(2, auto);
   }
   .draft-view .pk { padding-block: 3px; }
   .draft-view :is(.cbtns button, .vtog button, .dside button, #target select, .roles button, .gtools input, .gtools select, #draft-comp, #csearch, #cname) {
@@ -518,3 +518,34 @@ header nav button { border-radius: 8px; }
 #notes-toggle.has-notes::after { content: ""; width: 7px; height: 7px; border-radius: 50%; background: var(--gold); }
 .notes-panel { padding: 0 18px 12px; }
 #comp-notes { width: 100%; min-height: 150px; resize: vertical; }
+
+/* Anotações recolhíveis também na ordem do draft */
+.draft-view .plan-head > h2 { padding: 6px 10px; }
+.draft-view .plan-head { padding-right: 10px; }
+.draft-view #notes-toggle { min-height: 28px; padding: 3px 8px; font-size: 12px; }
+.notes-panel.draft { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; padding: 0 10px 8px; }
+.notes-panel.draft[hidden] { display: none; }
+.notes-panel.draft #comp-notes, #dnote { width: 100%; min-height: 90px; resize: vertical; }
+.notes-panel .control-label { display: block; margin-bottom: 4px; }
+.notes-panel .draft-lane-notes { grid-column: 1 / -1; padding: 0; }
+@media (max-width: 540px) { .notes-panel.draft { grid-template-columns: 1fr; } }
+
+/* Barra do lado no centro, na linha dos bans */
+.draft-bans .tmh { margin-inline-start: auto; padding: 4px 10px; }
+.tm.r .draft-bans .tmh { margin-inline-start: 0; margin-inline-end: auto; }
+.tm.b .draft-bans .tmh { flex-direction: row-reverse; background: linear-gradient(270deg,#1e4a8f,transparent); }
+.tm.r .draft-bans .tmh { flex-direction: row; background: linear-gradient(90deg,#8f2a2a,transparent); }
+.draft-view .draft-bans { flex-wrap: nowrap; }
+
+/* Pick: infos no canto superior esquerdo, lane abaixo, campeões abaixo */
+.draft-view .pk.mine { display: flex; flex-direction: column; align-items: flex-start; justify-content: flex-start; gap: 4px; padding: 6px 8px; min-height: 92px; }
+.draft-view .pk.r.mine { align-items: flex-end; }
+.draft-view .pk.mine .pk-target { width: auto; }
+.draft-view .pk.mine .pkf { flex-direction: column; align-items: flex-start; gap: 5px; max-width: none; }
+.draft-view .pk.r.mine .pkf { align-items: flex-end; }
+.draft-view .pk.mine .dm .av { width: 34px; height: 34px; }
+.draft-view .pk.them { align-content: start; min-height: 92px; padding: 6px 8px; }
+@media (min-width: 1000px) { .draft-view .pk.them { display: flex; align-items: flex-start; } }
+.plan-head > h2 { font-size: 16px; color: var(--txt); margin: 0; }
+.draft-view .plan-head > h2 { display: flex; align-items: baseline; flex-wrap: wrap; gap: 2px 8px; }
+@media (max-width: 540px) { .plan-head { padding-left: 10px; padding-bottom: 6px; } .plan-head > h2 { padding-left: 0 !important; } }

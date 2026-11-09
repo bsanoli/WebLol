@@ -6,7 +6,7 @@
 <title>Comps do Time</title>
 <link rel="stylesheet" href="./assets/base.css">
 <link rel="stylesheet" href="./assets/team.css">
-  <script type="module" crossorigin src="./assets/camp-C-gZ177w.js"></script>
+  <script type="module" crossorigin src="./assets/camp-CBnPhE-a.js"></script>
   <link rel="modulepreload" crossorigin href="./assets/icon-CCnttXuK.js">
   <link rel="modulepreload" crossorigin href="./assets/lol-media-CEZ9PJoJ.js">
 </head>
@@ -46,7 +46,11 @@
     <div class="plan-head"><h2>2. Monte o plano <span class="saved" id="saved" role="status"></span></h2>
       <button type="button" id="notes-toggle" aria-expanded="false" aria-controls="notes-panel"><span class="caret" aria-hidden="true">▾</span> Anotações da composição</button></div>
     <div id="notes-panel" class="notes-panel" hidden>
-      <textarea id="comp-notes" aria-label="Anotações da composição" placeholder="Plano de jogo, condição de vitória, power spikes, quem é o engage, contra o que é fraca, ordem de picks..."></textarea>
+      <div id="dnote-wrap" class="notes-field" hidden><label class="control-label" for="dnote" id="dnote-label">Plano do draft</label>
+        <textarea id="dnote" placeholder="Ex: se banirem a Akali, first pick vira Vi..."></textarea></div>
+      <div class="notes-field"><label class="control-label" for="comp-notes" id="comp-notes-label" hidden>Anotações da composição</label>
+        <textarea id="comp-notes" aria-label="Anotações da composição" placeholder="Plano de jogo, condição de vitória, power spikes, quem é o engage, contra o que é fraca, ordem de picks..."></textarea></div>
+      <ul id="notes-lanes" class="draft-lane-notes" aria-label="Observações por posição" hidden></ul>
     </div>
     <div id="editor"></div>
   </div>

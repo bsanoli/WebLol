@@ -87,9 +87,6 @@ function renderEditor(){
   $("#v-comps").classList.toggle("draft-view",dv);
   $("#draft-comp").hidden=!dv;
   const comments=$("#draft-comments");
-  comments.hidden=!dv;
-  const notes=`<label class="control-label" for="notes">Anotações da composição</label>
-  <textarea id="notes" placeholder="Plano de jogo, condição de vitória, power spikes, quem é o engage, contra o que é fraca, ordem de picks...">${esc(c.notes)}</textarea>`;
   $("#editor").innerHTML=`<div class="editor-controls"><div><label class="control-label" for="cname">Nome da composição</label><input id="cname" value="${esc(c.name)}" placeholder="Nome da comp (ex: Engage bot, Poke, Split...)"></div>
   <div class="vtog"><button data-view="lanes" aria-pressed="${!dv}" class="${dv?"":"on"}">Opções por posição</button><button data-view="draft" aria-pressed="${dv}" class="${dv?"on":""}">Ordem do draft</button></div></div>
   <button type="button" class="jump-picker" data-picker>${iconMarkup("roles")} Escolher campeões</button>
@@ -102,28 +99,25 @@ function renderEditor(){
    </div>`).join("")}
   `;
   renderNotesPanel(c,dv);
-  if(dv){
-    const d=draftOf(c);
-    const laneNotes=LANES.filter(l=>c.laneNotes[l.k])
-      .map(l=>`<li><b>${l.n}</b> ${esc(c.laneNotes[l.k])}</li>`).join("");
-    comments.innerHTML=`<h2 id="draft-comments-title">Comentários</h2>
-      <div class="draft-comment-fields">
-        <div><label class="control-label" for="dnote">Plano do draft · ${DRAFT_SIDE[d.side]}</label>
-          <textarea id="dnote" placeholder="Ex: se banirem a Akali, first pick vira Vi...">${esc(d.note[d.side])}</textarea></div>
-        <div>${notes}</div>
-      </div>
-      ${laneNotes?`<ul class="draft-lane-notes" aria-label="Observações por posição">${laneNotes}</ul>`:""}`;
-  }else comments.replaceChildren();
+  comments.replaceChildren();comments.hidden=true;
   renderTarget();
 }
 let notesOpen=false;
 function renderNotesPanel(c,dv){
   const btn=$("#notes-toggle"),panel=$("#notes-panel"),ta=$("#comp-notes");
-  btn.hidden=dv;panel.hidden=dv||!notesOpen;
-  btn.setAttribute("aria-expanded",String(notesOpen&&!dv));
+  panel.hidden=!notesOpen;panel.classList.toggle("draft",dv);
+  btn.setAttribute("aria-expanded",String(notesOpen));
   btn.classList.toggle("on",notesOpen);
-  btn.classList.toggle("has-notes",!!(c.notes||"").trim());
+  const d=dv?draftOf(c):null;
+  btn.classList.toggle("has-notes",!!((c.notes||"").trim()||(d&&(d.note[d.side]||"").trim())));
   if(document.activeElement!==ta)ta.value=c.notes||"";
+  $("#dnote-wrap").hidden=!dv;$("#comp-notes-label").hidden=!dv;
+  if(dv){
+    $("#dnote-label").textContent=`Plano do draft · ${DRAFT_SIDE[d.side]}`;
+    if(document.activeElement!==$("#dnote"))$("#dnote").value=d.note[d.side]||"";
+  }
+  const ln=LANES.filter(l=>c.laneNotes[l.k]).map(l=>`<li><b>${l.n}</b> ${esc(c.laneNotes[l.k])}</li>`).join("");
+  $("#notes-lanes").innerHTML=ln;$("#notes-lanes").hidden=!dv||!ln;
 }
 $("#notes-toggle").addEventListener("click",()=>{
   notesOpen=!notesOpen;renderNotesPanel(cur(),S.view==="draft");
@@ -133,9 +127,9 @@ const touch=()=>{cur().updated=Date.now()};
 $("#v-comps").addEventListener("input",e=>{
   const c=cur();
   if(e.target.id==="cname"){c.name=e.target.value;touch();save();renderList()}
-  else if(e.target.id==="notes"||e.target.id==="comp-notes"){c.notes=e.target.value;touch();save();$("#notes-toggle").classList.toggle("has-notes",!!c.notes.trim())}
+  else if(e.target.id==="notes"||e.target.id==="comp-notes"){c.notes=e.target.value;touch();save();renderNotesPanel(c,S.view==="draft")}
   else if(e.target.dataset.ln){c.laneNotes[e.target.dataset.ln]=e.target.value;touch();save()}
-  else if(e.target.id==="dnote"){const d=draftOf(c);d.note[d.side]=e.target.value;touch();save()}
+  else if(e.target.id==="dnote"){const d=draftOf(c);d.note[d.side]=e.target.value;touch();save();renderNotesPanel(c,true)}
   else if(e.target.dataset.slot!=null){const d=draftOf(c),o=d.order[d.side],i=+e.target.dataset.slot,v=e.target.value,j=o.indexOf(v);[o[i],o[j]]=[v,o[i]];active=v;touch();save();renderEditor();$(`[data-slot="${i}"]`).focus({preventScroll:true})}
 });
 $("#editor").addEventListener("click",e=>{
@@ -190,22 +184,23 @@ const DRAFT_SIDE = {blue:"Lado azul", red:"Lado vermelho"} as const;
 function draftHTML(c){
   const d=draftOf(c),us=d.side==="blue"?"B":"R";
   // sequência oficial -> número global de cada slot
-  const seq=[],cnt={B:{pick:0,ban:0},R:{pick:0,ban:0}};
-  DORDER.forEach(([ph,slots],pi)=>slots.forEach(s=>{const[t,k]=s.split(":");const i=cnt[t][k]++;seq.push({t,k,i,code:t+(k==="ban"?"B":"")+(i+1),ph:pi,n:seq.length+1})}));
+  // picks e bans têm numeração própria (1º a 10º pick, 1º a 10º ban)
+  const seq=[],cnt={B:{pick:0,ban:0},R:{pick:0,ban:0}},kc={pick:0,ban:0};
+  DORDER.forEach(([ph,slots],pi)=>slots.forEach(s=>{const[t,k]=s.split(":");const i=cnt[t][k]++;seq.push({t,k,i,code:t+(k==="ban"?"B":"")+(i+1),ph:pi,n:++kc[k]})}));
   const find=(t,k,i)=>seq.find(s=>s.t===t&&s.k===k&&s.i===i);
   const mini=(n,l,j)=>`<span class="dm${j===0?" main":""}" draggable="true" data-n="${esc(n)}" data-from="${l}" title="${j+1}ª opção: ${esc(n)} · clique para virar principal ou arraste para reordenar">${img(n)}<button class="x" data-rm="${esc(n)}" aria-label="Remover ${esc(n)}">${iconMarkup("close")}</button></span>`;
   const PHN=["Bans 1","Picks 1","Bans 2","Picks 2"];
   // faixa da sequência
   let h=`<div class="draft-toolbar"><div class="dside" role="group" aria-label="Lado da equipe"><span>Nossa equipe</span>
     ${Object.entries(DRAFT_SIDE).map(([key,label])=>`<button data-side="${key}" aria-pressed="${d.side===key}" class="${d.side===key?`on ${key[0]}`:""}">${label}</button>`).join("")}</div>
-  <div class="dseq" role="group" aria-label="Sequência de picks e bans">${PHN.map((p,pi)=>`<div class="dsg"><div class="dsl">${p}</div><div class="dsc">${seq.filter(s=>s.ph===pi).map(s=>`<span class="sq ${s.t==="B"?"b":"r"} ${s.k}${s.t===us?" us":""}" title="${s.n}º: ${s.t==="B"?"Azul":"Vermelho"} ${s.k==="ban"?"bane":"escolhe"}">${s.k==="ban"?"⊘":s.n}</span>`).join("")}</div></div>`).join("")}</div></div>`;
+  <div class="dseq" role="group" aria-label="Sequência de picks e bans">${PHN.map((p,pi)=>`<div class="dsg"><div class="dsl">${p}</div><div class="dsc">${seq.filter(s=>s.ph===pi).map(s=>`<span class="sq ${s.t==="B"?"b":"r"} ${s.k}${s.t===us?" us":""}" title="${s.n}º ${s.k==="ban"?"ban":"pick"}: ${s.t==="B"?"Azul":"Vermelho"} ${s.k==="ban"?"bane":"escolhe"}">${s.k==="ban"?"⊘":s.n}</span>`).join("")}</div></div>`).join("")}</div></div>`;
   const team=t=>{
     const mine=t===us,side=t==="B"?"b":"r";
     const banSq=i=>{const s=find(t,"ban",i),n=mine?c.lanes.ban[i]:null;
-      return `<div class="bsq${n?" has":""}${mine?" mine":""}${mine&&active==="ban"?" act":""}" ${mine?`data-l="ban" data-bi="${i}"`:""} title="${s.n}º do draft">
+      return `<div class="bsq${n?" has":""}${mine?" mine":""}${mine&&active==="ban"?" act":""}" ${mine?`data-l="ban" data-bi="${i}"`:""} title="${s.n}º ban">
         ${n?`<span class="dm" draggable="true" data-n="${esc(n)}" data-from="ban">${img(n)}<button class="x" data-rm="${esc(n)}" aria-label="Remover ${esc(n)}">${iconMarkup("close")}</button></span>`:`<span class="bn">${s.n}</span>`}</div>`};
     const pick=i=>{const s=find(t,"pick",i),tip=PICKTIP[s.code]||"";
-      const meta=`<span class="pkh"><b>${s.code}</b><span title="${s.n}º do draft">${s.n}º</span>${tip?`<i>${tip}</i>`:""}</span>`;
+      const meta=`<span class="pkh"><b>${s.code}</b><span title="${s.n}º pick">${s.n}º pick</span>${tip?`<i>${tip}</i>`:""}</span>`;
       if(!mine)return `<div class="pk ${side} them">${meta}<div class="pkn">Pick adversário</div></div>`;
       const l=d.order[d.side][i],L=LN[l],ch=c.lanes[l],m=ch[0];
       const editing=active===l;
@@ -218,10 +213,10 @@ function draftHTML(c){
         <div class="pkf"><select data-slot="${i}" aria-label="Posição do pick ${t}${i+1}" title="Lane deste pick">${PLANES.map(x=>`<option value="${x}"${x===l?" selected":""}>${LN[x].n}</option>`).join("")}</select>
         ${ch.length?`<div class="alts">${ch.map((n,j)=>mini(n,l,j)).join("")}</div>`:""}</div></div>`};
     return `<section class="tm ${side}${mine?" mine":""}" aria-labelledby="draft-side-${side}">
-      <h3 class="tmh" id="draft-side-${side}">${DRAFT_SIDE[t==="B"?"blue":"red"]}<span>${mine?"Nossa equipe":"Adversário"}</span></h3>
       <div class="draft-bans">
         ${mine?`<button type="button" class="draft-ban-target" data-draft-target="ban" aria-pressed="${active==="ban"}">Bans ${active==="ban"?'<span class="draft-editing">Editando</span>':""}</button>`:'<div class="draft-phase">Bans</div>'}
         <div class="bans" role="group" aria-label="Bans da primeira e da segunda fase">${[0,1,2].map(banSq).join("")}<span class="bgap"></span>${[3,4].map(banSq).join("")}</div>
+        <h3 class="tmh" id="draft-side-${side}">${DRAFT_SIDE[t==="B"?"blue":"red"]}<span>${mine?"Nossa equipe":"Adversário"}</span></h3>
       </div>
       <div class="draft-phase">Picks · Fase 1</div>
       ${[0,1,2].map(pick).join("")}
