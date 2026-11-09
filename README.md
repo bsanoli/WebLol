@@ -34,3 +34,7 @@ Para atualizar essas imagens, instale o Pillow no Python e rode `python scripts/
 ## GitHub Pages
 
 O GitHub Pages serve a raiz da branch `main`. Rode `npm run pages:prepare` para gerar o build e atualizar `index.html`, `camp.html`, `worlds.html` e `assets/` na raiz. Inclua esses arquivos no commit que vai para a `main`. Edite os arquivos fonte em `src/` e `public/`.
+
+## Versões da interface
+
+A aba Administração tem um item recolhível "Versões da interface". A cada mudança visível na interface, acrescente uma versão no topo de `src/data/ui-versions.ts`, dizendo o que mudou.

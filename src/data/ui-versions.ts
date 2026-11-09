@@ -1,0 +1,64 @@
+// Histórico de mudanças da interface, mostrado só na aba Administração.
+// A cada mudança visível, acrescente uma versão no topo da lista.
+export interface UiVersion {
+  version: string
+  date: string // AAAA-MM-DD
+  changes: string[]
+}
+
+export const UI_VERSIONS: UiVersion[] = [
+  {
+    version: "1.7",
+    date: "2026-11-09",
+    changes: [
+      "Ordem do draft: as anotações (plano do draft, anotações da comp e obs. das lanes) ficam no mesmo painel recolhível ao lado de \"Monte o plano\". A caixa de comentários do rodapé saiu.",
+      "Ordem do draft: a barra Lado azul / Lado vermelho foi para o centro da linha dos bans.",
+      "Ordem do draft: picks e bans têm numeração própria (1º a 10º cada).",
+      "Ordem do draft: o card do pick tem as informações no canto, a lane logo abaixo e os campeões maiores.",
+      "Composições: as anotações viraram um painel recolhível ao lado de \"Monte o plano\".",
+      "Administração: novo item \"Versões da interface\" com este histórico.",
+    ],
+  },
+  {
+    version: "1.6",
+    date: "2026-11-09",
+    changes: [
+      "Worlds: visão geral melhorada.",
+      "Draft: interface do editor de draft atualizada.",
+      "Mapa tático: interface atualizada.",
+    ],
+  },
+  {
+    version: "1.5",
+    date: "2026-11-09",
+    changes: ["Novo visual do painel inteiro (cabeçalho, abas, botões e cartões)."],
+  },
+  {
+    version: "1.4",
+    date: "2026-11-09",
+    changes: [
+      "Administração: seção Admins para liberar outro admin com senha provisória. No primeiro acesso ele cria a senha dele.",
+    ],
+  },
+  {
+    version: "1.3",
+    date: "2026-11-09",
+    changes: [
+      "Login só com o Riot ID: não precisa mais escolher a pasta do OneDrive.",
+      "Administração: botões \"Importar da pasta\" e \"Baixar backup completo\"; lista de usuários por aparelho.",
+    ],
+  },
+  {
+    version: "1.2",
+    date: "2026-11-09",
+    changes: [
+      "Login com Riot ID (nome + #TAG) e admin com senha.",
+      "Botão \"Enviar para aprovação\" e aba Administração para aprovar ou recusar envios.",
+    ],
+  },
+  {
+    version: "1.1",
+    date: "2026-11-09",
+    changes: ["Painel do time com as abas Worlds e Campeonato num só site."],
+  },
+]

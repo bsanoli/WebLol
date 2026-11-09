@@ -6,6 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import "./index.css"
 import { connectAnalytics } from "./analytics-bridge"
 import { iconMarkup } from "./client/icon"
+import { UI_VERSIONS } from "./data/ui-versions"
 
 const sections = [
   { id: "worlds", label: "Worlds", icon: "worlds" },
@@ -93,7 +94,7 @@ connectAnalytics(document.getElementById("v-worlds") as HTMLIFrameElement)
 async function start() {
   try {
     // The classic shell still looks up this helper by its global name.
-    Object.assign(window, { iconMarkup })
+    Object.assign(window, { iconMarkup, UI_VERSIONS })
     await loadClassicScript("./assets/sync.js")
     await loadClassicScript("./assets/shell.js")
   } catch {
