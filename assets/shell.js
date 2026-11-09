@@ -196,7 +196,9 @@ async function renderAdmin(){
      <input type="password" id="admmy" placeholder="Sua senha de admin" style="max-width:220px"> <input type="password" id="admtmp" placeholder="Senha provisória dele" style="max-width:220px"> <button class="pri" id="admok">Liberar</button> <span class="bad" id="admerr"></span></div></div>
    <h2>Banco e backup</h2><div class="card"><span class="mut">Chave do admin: ${esc(KEYS.fp)}</span>
     <div class="btns"><button id="exp">Baixar backup completo</button><button id="imp">Importar da pasta</button><button id="lock">Bloquear admin neste aparelho</button><button id="refresh">Atualizar</button></div>
-    <p class="mut">Guarde o backup completo na pasta Admin do OneDrive de tempos em tempos.</p></div>`;
+    <p class="mut">Guarde o backup completo na pasta Admin do OneDrive de tempos em tempos.</p></div>
+   <details class="card" id="uiver"><summary>Versões da interface${(window.UI_VERSIONS||[])[0]?` <span class="mut">(atual: v${esc(window.UI_VERSIONS[0].version)})</span>`:""}</summary>
+    ${(window.UI_VERSIONS||[]).map(v=>`<div style="margin-top:10px"><b>v${esc(v.version)}</b> <span class="mut">${esc(v.date.split("-").reverse().join("/"))}</span><ul style="margin:4px 0 0;padding-left:20px">${v.changes.map(c=>`<li>${esc(c)}</li>`).join("")}</ul></div>`).join("")||'<span class="mut">Sem histórico.</span>'}</details>`;
   const pick=si=>{const s=subs[si],ap=[],rj=[];document.querySelectorAll(`[data-s="${si}"]`).forEach(cb=>{const c={...s.changes[+cb.dataset.c],sid:s.id,from:s.from};(cb.checked?ap:rj).push(c)});return{s,ap,rj}};
   el.querySelectorAll("[data-ap]").forEach(b=>b.onclick=async()=>{const{s,ap,rj}=pick(+b.dataset.ap);b.disabled=true;await publish(ap,rj,`Envio de ${s.from}`);await dbDel("envios",s.doc).catch(()=>{});renderAdmin()});
   el.querySelectorAll("[data-rj]").forEach(b=>b.onclick=async()=>{const s=subs[+b.dataset.rj];if(!confirm(`Recusar todas as alterações de ${s.from}?`))return;b.disabled=true;await publish([],s.changes.map(c=>({...c,sid:s.id,from:s.from})),`Envio de ${s.from} recusado`);await dbDel("envios",s.doc).catch(()=>{});renderAdmin()});
