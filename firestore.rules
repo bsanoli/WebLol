@@ -1,9 +1,9 @@
 rules_version = '2';
 // Regras do banco do time. Cole no Firebase em Firestore Database > Regras e clique em Publicar.
-// O e-mail abaixo é o do admin cadastrado em Authentication.
+// Os e-mails abaixo são os dos admins cadastrados em Authentication (um por admin).
 service cloud.firestore {
   match /databases/{database}/documents {
-    function isAdmin() { return request.auth != null && request.auth.token.email == 'brunoltzinv@gmail.com'; }
+    function isAdmin() { return request.auth != null && request.auth.token.email in ['brunoltzinv@gmail.com']; }
     function signedIn() { return request.auth != null; }
 
     // Versão oficial (assinada pelo admin) e chave pública do admin: todos leem, só o admin grava.

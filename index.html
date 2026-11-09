@@ -94,12 +94,14 @@ const lsSet=(k,v)=>{try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}};
 const fmtD=t=>new Date(t).toLocaleString("pt-BR",{dateStyle:"short",timeStyle:"short"});
 function toast(m,ms=3200){const t=$("#toast");t.textContent=m;t.classList.add("on");clearTimeout(toast.t);toast.t=setTimeout(()=>t.classList.remove("on"),ms)}
 const KEY="lol-comps-time-v1",UKEY="lol-user",BKEY="lol-base",SKEY="lol-sent",FPKEY="lol-admin-fp";
-const ADMIN_ID="brunoltz#ltz";
+// admins do app (Riot ID → e-mail no Firebase). Todos usam a mesma chave de admin, cada um com a sua senha.
+const ADMINS={"brunoltz#ltz":"brunoltzinv@gmail.com","panda#zada":""};
 const ADMIN_FP="fdb898843944d55e"; // impressão digital da chave do admin (fixa no app: um admin.json falso é recusado)
 const normId=s=>String(s).replace(/\s+/g,"").toLowerCase();
 const dispId=s=>{const[n,t]=String(s).split("#");return n.trim()+"#"+(t||"").trim().toUpperCase()};
 const safeName=id=>normId(id).replace("#","_").replace(/[^a-z0-9_\-]/g,"_");
-const isAdminId=id=>normId(id)===ADMIN_ID;
+const isAdminId=id=>Object.prototype.hasOwnProperty.call(ADMINS,normId(id));
+const adminEmail=id=>ADMINS[normId(id)]||"";
 
 /* ===== IndexedDB (guarda a pasta escolhida e as chaves do admin neste PC) ===== */
 const idb=new Promise((res,rej)=>{const r=indexedDB.open("lol-time",1);r.onupgradeneeded=()=>r.result.createObjectStore("kv");r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error)});
@@ -124,10 +126,14 @@ async function createAdmin(pw){
   return{id:"brunoltz#LTZ",created:Date.now(),salt:b64(salt),encPub:await C.exportKey("jwk",ek.publicKey),sigPub:await C.exportKey("jwk",sk.publicKey),
     encPriv:await aesEnc(k,await C.exportKey("pkcs8",ek.privateKey)),sigPriv:await aesEnc(k,await C.exportKey("pkcs8",sk.privateKey))};
 }
-async function unlockAdmin(admin,pw){ // lança erro se a senha estiver errada
-  const k=await pwKey(pw,ub64(admin.salt));
-  const encPriv=await C.importKey("pkcs8",await aesDec(k,admin.encPriv),RSA_IMP,false,["decrypt"]);
-  const sigPriv=await C.importKey("pkcs8",await aesDec(k,admin.sigPriv),ECD,false,["sign"]);
+// cada admin tem a sua "fechadura": as mesmas chaves privadas, trancadas com a senha dele
+const slotOf=(admin,id)=>admin&&(normId(id)===normId(admin.id)?admin:admin.slots?.[normId(id)]);
+async function slotRaw(admin,id,pw){const s=slotOf(admin,id);if(!s)throw new Error("noslot");const k=await pwKey(pw,ub64(s.salt));return{enc:await aesDec(k,s.encPriv),sig:await aesDec(k,s.sigPriv)}}
+async function makeSlot(raw,pw,temp){const salt=crypto.getRandomValues(new Uint8Array(16)),k=await pwKey(pw,salt);return{salt:b64(salt),encPriv:await aesEnc(k,raw.enc),sigPriv:await aesEnc(k,raw.sig),temp:!!temp,at:Date.now()}}
+async function unlockAdmin(admin,pw,id=admin.id){ // lança erro se a senha estiver errada
+  const raw=await slotRaw(admin,id,pw);
+  const encPriv=await C.importKey("pkcs8",raw.enc,RSA_IMP,false,["decrypt"]);
+  const sigPriv=await C.importKey("pkcs8",raw.sig,ECD,false,["sign"]);
   const keys={encPriv,sigPriv,fp:await fingerprint(admin)};await idbSet("adminKeys",keys);return keys;
 }
 async function seal(admin,obj){ // criptografa para o admin (só a chave privada dele abre)
@@ -143,7 +149,6 @@ async function verifyObj(admin,o){try{const pub=await C.importKey("jwk",admin.si
 /* ================= banco online (Firebase / Firestore) ================= */
 // Configuração pública do projeto Firebase (não é segredo: quem protege os dados são as regras do banco).
 const FB_CONFIG={apiKey:"AIzaSyB5J_tjV5a6XTqZTjI09zeIgMiilcaQ5u4",authDomain:"weblol-42ef7.firebaseapp.com",projectId:"weblol-42ef7",storageBucket:"weblol-42ef7.firebasestorage.app",messagingSenderId:"214350102733",appId:"1:214350102733:web:3cb8d6f4137435f7e62984"};
-const FB_ADMIN_EMAIL="brunoltzinv@gmail.com"; // e-mail do admin cadastrado no Firebase Authentication
 const FBV="10.12.2";
 let ADMIN=null,KEYS=null,OFF=null; // OFF = versão oficial {version,at,data,log}
 const ONLINE=!!FB_CONFIG;
@@ -156,9 +161,10 @@ async function fb(){
   await new Promise(r=>{const off=au.onAuthStateChanged(auth,()=>{off();r()})});
   return FB={db:fs.getFirestore(a),auth,au,fs};
 }
-const fbIsAdmin=()=>!!FB&&!!FB.auth.currentUser&&FB.auth.currentUser.email===FB_ADMIN_EMAIL;
+const fbIsAdmin=()=>!!FB&&!!FB.auth.currentUser&&Object.values(ADMINS).includes(FB.auth.currentUser.email);
 async function fbUser(){const{auth,au}=await fb();if(!auth.currentUser)await au.signInAnonymously(auth);return auth.currentUser}
-async function fbAdminLogin(pw){const{auth,au}=await fb();if(fbIsAdmin())return;await au.signInWithEmailAndPassword(auth,FB_ADMIN_EMAIL,pw)}
+const meId=()=>pendingId||user()?.id||"";
+async function fbAdminLogin(pw){const{auth,au}=await fb(),em=adminEmail(meId());if(!em)throw new Error("sem e-mail");if(auth.currentUser?.email===em)return;await au.signInWithEmailAndPassword(auth,em,pw)}
 async function dbGet(col,id){const{db,fs}=await fb();const s=await fs.getDoc(fs.doc(db,col,id));return s.exists()?s.data():null}
 async function dbSet(col,id,data,merge){const{db,fs}=await fb();await fs.setDoc(fs.doc(db,col,id),data,merge?{merge:true}:{})}
 async function dbList(col){const{db,fs}=await fb();return(await fs.getDocs(fs.collection(db,col))).docs.map(d=>({id:d.id,...d.data()}))}
@@ -293,7 +299,7 @@ async function publish(approved,rejected,label){
 }
 // desbloqueia as chaves do admin e entra no banco como admin (mesma senha; se a do banco for outra, usa fbpw)
 async function adminUnlock(pw,fbpw){
-  const keys=await unlockAdmin(ADMIN,pw);
+  const keys=await unlockAdmin(ADMIN,pw,meId());
   try{await fbAdminLogin(fbpw||pw)}catch(e){const err=new Error("fb");err.keys=keys;throw err}
   return keys;
 }
@@ -358,18 +364,36 @@ async function afterId(){
   merr("Conectando ao banco do time...");
   let r;try{await fb();r=await readOfficial()}catch(e){r={err:"net"}}
   if(r.err==="fp")return modal(`<h3>⚠ Banco adulterado</h3><p>A chave do admin guardada no banco do time não é a original. Por segurança o app não vai usar esses dados. Avise o admin.</p><div class="row"><button class="pri" onclick="stepId()">Voltar</button></div>`);
-  if(isAdminId(pendingId)){if(!ONLINE)return merr("O banco online ainda não foi configurado neste app.");if(r.err==="net")return merr("Não consegui conectar ao banco do time. Verifique a internet.");return ADMIN?stepAdminPw():stepImport()}
+  if(isAdminId(pendingId)){if(!ONLINE)return merr("O banco online ainda não foi configurado neste app.");if(r.err==="net")return merr("Não consegui conectar ao banco do time. Verifique a internet.");if(!ADMIN)return stepImport();if(!slotOf(ADMIN,pendingId))return merr("Este Riot ID ainda não foi liberado como admin. Peça ao Bruno para adicionar você na aba Administração.");return stepAdminPw()}
   if(r.err==="net"||r.err==="noadmin")toast("O banco do time ainda não está disponível. Você pode usar normalmente e enviar depois.",5000);
   finishLogin(false);
 }
 function stepAdminPw(){
   modal(`<h3>Login do admin</h3><p>Este Riot ID é o administrador. Digite a senha de admin.</p>
-   <label>Senha</label><input type="password" id="pw"><div id="fbw" style="display:none"><label>Senha do Firebase (do e-mail ${esc(FB_ADMIN_EMAIL)})</label><input type="password" id="fpw"></div><div class="err"></div>
+   <label>Senha</label><input type="password" id="pw"><div id="fbw" style="display:none"><label>Senha do Firebase (do e-mail ${esc(adminEmail(pendingId))})</label><input type="password" id="fpw"></div><div class="err"></div>
    <div class="row"><button id="back">Voltar</button><button class="pri" id="ok">Entrar</button></div>`);
   const go=async()=>{$("#ok").disabled=true;merr("Verificando...");
-    try{KEYS=await adminUnlock($("#pw").value,$("#fpw").value);finishLogin(true)}
+    try{const pw=$("#pw").value;KEYS=await adminUnlock(pw,$("#fpw").value);if(slotOf(ADMIN,pendingId).temp)return stepNewPw(pw);finishLogin(true)}
     catch(e){$("#ok").disabled=false;if(e.message==="fb"){$("#fbw").style.display="";merr($("#fpw").value?"Senha do Firebase incorreta.":"A senha do Firebase é diferente da senha de admin. Digite a do Firebase também.");$("#fpw").focus()}else merr("Senha incorreta.")}};
   $("#ok").onclick=go;$("#mbox").querySelectorAll("input").forEach(i=>i.addEventListener("keydown",e=>{if(e.key==="Enter")go()}));$("#back").onclick=stepId;
+}
+// primeiro acesso de um admin novo: troca a senha provisória pela senha dele
+function stepNewPw(tmp){
+  modal(`<h3>Crie a sua senha de admin</h3><p>Você entrou com a senha provisória. Agora crie a sua senha. Só você vai saber, e ela também vira a sua senha do banco do time.</p>
+   <label>Nova senha (mínimo 8 caracteres)</label><input type="password" id="np"><label>Repita a senha</label><input type="password" id="np2"><div class="err"></div>
+   <div class="row"><button class="pri" id="ok">Salvar senha</button></div>`);
+  const go=async()=>{const a=$("#np").value,b=$("#np2").value;if(a.length<8)return merr("Use pelo menos 8 caracteres.");if(a!==b)return merr("As senhas não são iguais.");if(a===tmp)return merr("Escolha uma senha diferente da provisória.");
+    $("#ok").disabled=true;merr("Salvando...");
+    try{await setSlot(meId(),await makeSlot(await slotRaw(ADMIN,meId(),tmp),a,false));await FB.au.updatePassword(FB.auth.currentUser,a);finishLogin(true)}
+    catch(e){merr("Erro: "+e.message);$("#ok").disabled=false}};
+  $("#ok").onclick=go;$("#mbox").querySelectorAll("input").forEach(i=>i.addEventListener("keydown",e=>{if(e.key==="Enter")go()}));
+}
+// grava (ou remove, com slot=null) a fechadura de um admin no admin.json do banco
+async function setSlot(id,slot){
+  const cur=await getJ("oficial","admin");if(!cur||await fingerprint(cur)!==await fingerprint(ADMIN))throw new Error("chave do admin no banco mudou");
+  if(normId(id)===normId(cur.id))throw new Error("o admin principal não pode ser alterado aqui");
+  const slots={...(cur.slots||{})};if(slot)slots[normId(id)]=slot;else delete slots[normId(id)];cur.slots=slots;
+  await putJ("oficial","admin",cur);ADMIN=cur;
 }
 function stepImport(){
   modal(`<h3>Importar os dados do time</h3><p>O banco online do time ainda está vazio. Escolha a pasta antiga do OneDrive (<b>Time</b>, ou a pasta de backup em <b>Admin</b>) para copiar a chave do admin, a versão oficial e os envios para o banco. Isso só é feito uma vez.</p>
@@ -379,7 +403,7 @@ function stepImport(){
     const fa=await findAdmin(root);if(!fa)return merr(`A pasta ${root.name} não tem o admin.json. Escolha a pasta Time ou a pasta backup do Admin.`);const adm=fa.adm;
     if(ADMIN_FP&&await fingerprint(adm)!==ADMIN_FP)return merr("O admin.json desta pasta não é o original.");
     ADMIN=adm;modal(`<h3>Senha de admin</h3><p>Digite a senha de admin para entrar no banco e copiar os dados da pasta <b>${esc(root.name)}</b>.</p>
-     <label>Senha</label><input type="password" id="pw"><div id="fbw" style="display:none"><label>Senha do Firebase (do e-mail ${esc(FB_ADMIN_EMAIL)})</label><input type="password" id="fpw"></div><div class="err"></div>
+     <label>Senha</label><input type="password" id="pw"><div id="fbw" style="display:none"><label>Senha do Firebase (do e-mail ${esc(adminEmail(pendingId))})</label><input type="password" id="fpw"></div><div class="err"></div>
      <div class="row"><button class="pri" id="ok">Importar</button></div>`);
     const go=async()=>{$("#ok").disabled=true;merr("Verificando...");
       try{KEYS=await adminUnlock($("#pw").value,$("#fpw").value)}
@@ -428,6 +452,13 @@ async function renderAdmin(){
    <h2>Usuários</h2>
    <div class="card"><table><tr><th>Usuário</th><th>Aparelhos</th><th>Última cópia (backup)</th><th></th></tr>
     ${ulist.map((u,i)=>`<tr><td>${esc(u.name)}</td><td>${u.n}</td><td>${u.bk?fmtD(u.bk.at):'<span class="mut">—</span>'}</td><td>${u.bk?`<button data-bk="${i}">Baixar backup</button>`:""}</td></tr>`).join("")||'<tr><td colspan="4" class="mut">Nenhum usuário ainda.</td></tr>'}</table></div>
+   <h2>Admins</h2>
+   <div class="card"><table><tr><th>Riot ID</th><th>E-mail no banco</th><th>Situação</th><th></th></tr>
+    ${Object.entries(ADMINS).map(([id,em])=>{const sl=slotOf(ADMIN,id),main=normId(id)===normId(ADMIN.id),me=normId(id)===normId(user().id);
+      const st=main?"principal":!sl?'<span class="mut">não liberado</span>':sl.temp?'<span style="color:var(--gold)">aguardando o 1º acesso</span>':'<span class="ok">ativo</span>';
+      return`<tr><td>${esc(dispId(id))}</td><td>${em?esc(em):'<span class="bad">falta o e-mail no app</span>'}</td><td>${st}</td><td>${main||me||!em?"":`<button data-adm="${esc(id)}">${sl?"Nova senha provisória":"Liberar admin"}</button>`}${sl&&!main&&!me?` <button class="dng" data-rmadm="${esc(id)}">Remover</button>`:""}</td></tr>`}).join("")}</table>
+    <div id="admform" style="display:none;margin-top:10px"><p>Liberar <b id="admwho"></b>. Primeiro cadastre o e-mail dele no Firebase (Authentication › Usuários) com uma senha provisória. Depois digite aqui a mesma senha provisória e passe para ele. No primeiro acesso ele cria a senha dele.</p>
+     <input type="password" id="admmy" placeholder="Sua senha de admin" style="max-width:220px"> <input type="password" id="admtmp" placeholder="Senha provisória dele" style="max-width:220px"> <button class="pri" id="admok">Liberar</button> <span class="bad" id="admerr"></span></div></div>
    <h2>Banco e backup</h2><div class="card"><span class="mut">Chave do admin: ${esc(KEYS.fp)}</span>
     <div class="btns"><button id="exp">Baixar backup completo</button><button id="imp">Importar da pasta</button><button id="lock">Bloquear admin neste aparelho</button><button id="refresh">Atualizar</button></div>
     <p class="mut">Guarde o backup completo na pasta Admin do OneDrive de tempos em tempos.</p></div>`;
@@ -437,6 +468,13 @@ async function renderAdmin(){
   el.querySelectorAll("[data-delf]").forEach(b=>b.onclick=async()=>{await dbDel("envios",subs[+b.dataset.delf].doc).catch(()=>{});renderAdmin()});
   el.querySelectorAll("[data-bk]").forEach(b=>b.onclick=async()=>{const u=ulist[+b.dataset.bk];const d=await unseal(KEYS,JSON.parse(u.bk.enc));const a=document.createElement("a");a.href=URL.createObjectURL(new Blob([JSON.stringify({comps:d.data.comps,plays:d.data.plays},null,2)],{type:"application/json"}));a.download=`backup-${safeName(u.name)}.json`;a.click()});
   const pm=$("#pubmine");if(pm)pm.onclick=()=>publish(mine.map(c=>({...c,sid:"admin",from:user().id})),[],"Alterações do admin");
+  let admId=null;
+  el.querySelectorAll("[data-adm]").forEach(b=>b.onclick=()=>{admId=b.dataset.adm;$("#admwho").textContent=dispId(admId);$("#admform").style.display="";$("#admmy").focus()});
+  $("#admok").onclick=async()=>{const t=$("#admtmp").value;if(t.length<6)return $("#admerr").textContent="A senha provisória precisa de 6 caracteres ou mais";
+    $("#admok").disabled=true;$("#admerr").textContent="";
+    try{await setSlot(admId,await makeSlot(await slotRaw(ADMIN,user().id,$("#admmy").value),t,true));toast(`${dispId(admId)} liberado como admin. Passe a senha provisória para ele.`,6000);renderAdmin()}
+    catch(e){$("#admerr").textContent=e.message==="noslot"?"Seu acesso de admin não foi encontrado":/decrypt|operation/i.test(e.message+e.name)?"Sua senha está incorreta":e.message;$("#admok").disabled=false}};
+  el.querySelectorAll("[data-rmadm]").forEach(b=>b.onclick=async()=>{const id=b.dataset.rmadm;if(!confirm(`Remover ${dispId(id)} dos admins? Ele não vai mais conseguir entrar como admin.`))return;try{await setSlot(id,null);renderAdmin()}catch(e){toast("Erro: "+e.message)}});
   $("#exp").onclick=exportBackup;$("#imp").onclick=importFlow;
   $("#lock").onclick=async()=>{await idbDel("adminKeys");KEYS=null;try{await FB.au.signOut(FB.auth)}catch(e){}renderAdmin()};
   $("#refresh").onclick=async()=>{await sync();renderAdmin()};
