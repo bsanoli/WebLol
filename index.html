@@ -143,7 +143,7 @@ async function verifyObj(admin,o){try{const pub=await C.importKey("jwk",admin.si
 /* ================= banco online (Firebase / Firestore) ================= */
 // Configuração pública do projeto Firebase (não é segredo: quem protege os dados são as regras do banco).
 const FB_CONFIG={apiKey:"AIzaSyB5J_tjV5a6XTqZTjI09zeIgMiilcaQ5u4",authDomain:"weblol-42ef7.firebaseapp.com",projectId:"weblol-42ef7",storageBucket:"weblol-42ef7.firebasestorage.app",messagingSenderId:"214350102733",appId:"1:214350102733:web:3cb8d6f4137435f7e62984"};
-const FB_ADMIN_EMAIL=""; // e-mail do admin cadastrado no Firebase Authentication
+const FB_ADMIN_EMAIL="brunoltzinv@gmail.com"; // e-mail do admin cadastrado no Firebase Authentication
 const FBV="10.12.2";
 let ADMIN=null,KEYS=null,OFF=null; // OFF = versão oficial {version,at,data,log}
 const ONLINE=!!FB_CONFIG;
