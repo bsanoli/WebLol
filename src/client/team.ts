@@ -69,75 +69,95 @@ function renderList(){
     .map(c=>`<option value="${esc(c.id)}">${esc(c.name)}</option>`).join("");
   $("#clist").innerHTML=matches
    .map(c=>{const firsts=["top","jg","mid","adc","sup"].map(l=>c.lanes[l][0]).filter(Boolean);
-     return `<button class="ci${c.id===S.cur?" on":""}" aria-pressed="${c.id===S.cur}" data-id="${c.id}"><b>${esc(c.name)}</b>
-      <span class="mini">${firsts.map(img).join("")||'<small style="color:var(--mut)">vazia</small>'}</span></button>`}).join("")||'<div style="color:var(--mut);padding:10px;font-size:12px">Nenhuma comp.</div>';
+     return `<div class="composition-item"><button class="ci${c.id===S.cur?" on":""}" aria-pressed="${c.id===S.cur}" data-id="${c.id}"><b>${esc(c.name)}</b>
+      <span class="mini">${firsts.map(img).join("")||'<small style="color:var(--mut)">vazia</small>'}</span></button><details class="composition-menu"><summary aria-label="Ações de ${esc(c.name)}">⋯</summary><div><button data-comp-action="duplicate" data-id="${c.id}">${iconMarkup("duplicate")} Duplicar</button><button data-comp-action="delete" data-id="${c.id}" class="dng">${iconMarkup("trash")} Excluir</button></div></details></div>`}).join("")||'<div style="color:var(--mut);padding:10px;font-size:12px">Nenhuma comp.</div>';
 }
 function selectComp(id){S.cur=id;save(false);renderAll();publishTeamRoute("comps")}
-$("#clist").onclick=e=>{const it=e.target.closest(".ci");if(it)selectComp(it.dataset.id)};
+$("#clist").onclick=e=>{const action=e.target.closest("[data-comp-action]");if(action){if(action.dataset.compAction==="duplicate")duplicateComp(action.dataset.id);else deleteComp(action.dataset.id);return}const it=e.target.closest(".ci");if(it)selectComp(it.dataset.id)};
+function closeCompositionMenus(target?: EventTarget | null){
+  document.querySelectorAll<HTMLDetailsElement>("#clist .composition-menu[open]").forEach(menu=>{
+    if(!(target instanceof Node && menu.contains(target)))menu.open=false;
+  });
+}
+document.addEventListener("click", e=>closeCompositionMenus(e.target));
+window.addEventListener("blur", ()=>closeCompositionMenus());
 $("#draft-comp").onchange=e=>selectComp(e.target.value);
 $("#csearch").oninput=renderList;
 $("#new").onclick=()=>{const c=blank("Comp "+(S.comps.length+1));S.comps.unshift(c);S.cur=c.id;active="top";save();renderAll();publishTeamRoute("comps");setTimeout(()=>{$("#cname").focus();$("#cname").select()},0)};
-$("#dup").onclick=()=>{const c=JSON.parse(JSON.stringify(cur()));c.id=uid();c.name+=" (cópia)";c.updated=Date.now();S.comps.unshift(c);S.cur=c.id;save();renderAll();publishTeamRoute("comps")};
-$("#del").onclick=()=>{const c=cur();if(!confirm(`Excluir a comp "${c.name}"?`))return;S.comps=S.comps.filter(x=>x.id!==c.id);if(!S.comps.length)S.comps.push(blank());S.cur=S.comps[0].id;save();renderAll();publishTeamRoute("comps")};
+function duplicateComp(id){const c=JSON.parse(JSON.stringify(S.comps.find(c=>c.id===id)));c.id=uid();c.name+=" (cópia)";c.updated=Date.now();S.comps.unshift(c);S.cur=c.id;save();renderAll();publishTeamRoute("comps")};
+function deleteComp(id){const c=S.comps.find(c=>c.id===id);if(!confirm(`Excluir a comp "${c.name}"?`))return;S.comps=S.comps.filter(x=>x.id!==c.id);if(!S.comps.length)S.comps.push(blank());if(!S.comps.some(x=>x.id===S.cur))S.cur=S.comps[0].id;save();renderAll();publishTeamRoute("comps")};
 
 /* ===== Editor ===== */
+function optionHTML(n,l,i){
+  return `<div class="chip ${i===0?"primary":"alternative"}" draggable="true" data-n="${esc(n)}" data-from="${l}">
+    <button class="champ-priority" data-priority="${esc(n)}" data-lane="${l}" aria-label="Priorizar ${esc(n)} em ${LN[l].n}" title="${i+1}ª opção · tornar principal">${img(n)}${i===0?`<span><small>Principal</small><b>${esc(n)}</b></span>`:""}</button>
+    <details class="option-menu"><summary aria-label="Opções de ${esc(n)}">⋯</summary><div><span>${i+1}ª opção · ${esc(n)}</span><button data-move="-1" data-n="${esc(n)}" data-lane="${l}" ${i===0?"disabled":""}>Mover antes</button><button data-move="1" data-n="${esc(n)}" data-lane="${l}" ${i===cur().lanes[l].length-1?"disabled":""}>Mover depois</button><button data-rm="${esc(n)}">Remover ${esc(n)}</button></div></details>
+  </div>`;
+}
+function pickArt(name){
+  return name ? lolImage(champArt(name)?.splash, "pick-splash") : "";
+}
+
+function laneNoteHTML(c, lane){
+  const note=c.laneNotes[lane.k]||"";
+  return `<details class="lane-note">
+    <summary aria-label="Observação de ${lane.n}" title="${esc(note||"Adicionar observação")}">
+      ${iconMarkup("edit")}<span class="pick-note-preview">${esc(note||"Nota")}</span>
+    </summary>
+    <label>Observação de ${lane.n}<input data-ln="${lane.k}" value="${esc(note)}" placeholder="Plano para esta posição"></label>
+  </details>`;
+}
+
+function renderDraftLaneNotes(c){
+  const list=$("#notes-lanes");
+  if(!list)return;
+  list.innerHTML=LANES.filter(lane=>c.laneNotes[lane.k]?.trim())
+    .map(lane=>`<li><b>${lane.n}</b> ${esc(c.laneNotes[lane.k])}</li>`).join("");
+  list.hidden=!list.childElementCount;
+}
+
 function renderEditor(){
-  const c=cur();
-  const dv=S.view==="draft";
+  const c=cur(),dv=S.view==="draft";
+  const notesOpen=$("#composition-notes")?.open;
   $("#v-comps").classList.toggle("draft-view",dv);
   $("#draft-comp").hidden=true;
-  const comments=$("#draft-comments");
-  $("#editor").innerHTML=`<div class="editor-controls"><div><label class="control-label" for="cname">Nome da composição</label><input id="cname" value="${esc(c.name)}" placeholder="Nome da comp (ex: Engage bot, Poke, Split...)"></div>
-  <div class="vtog"><button data-view="lanes" aria-pressed="${!dv}" class="${dv?"":"on"}">Opções por posição</button><button data-view="draft" aria-pressed="${dv}" class="${dv?"on":""}">Ordem do draft</button></div></div>
-  <button type="button" class="jump-picker" data-picker>${iconMarkup("roles")} Escolher campeões</button>
-  ${dv?draftHTML(c):LANES.map(l=>`<div class="lane${active===l.k?" act":""}" data-l="${l.k}" style="--lc:var(${l.c})">
-     <div class="lh"><button class="ln" aria-pressed="${active===l.k}">${l.n}</button>
-     <div class="chips">${c.lanes[l.k].map((n,i)=>`<span class="chip" draggable="true" data-n="${esc(n)}" data-from="${l.k}">${img(n)}<span class="n">${esc(n)}</span>${c.lanes[l.k].length>1?`<span class="ord">${i+1}º</span>`:""}<button class="x" data-rm="${esc(n)}" aria-label="Remover ${esc(n)}">${iconMarkup("close")}</button></span>`).join("")
-       ||'<span class="empty">Selecione esta posição e adicione campeões no catálogo.</span>'}</div>
-       ${active===l.k?'<span class="hint">Selecionada</span>':""}</div>
-     <input class="lane-obs" aria-label="Observações de ${l.n}" data-ln="${l.k}" value="${esc(c.laneNotes[l.k]||"")}" placeholder="obs. da lane (opcional)">
-   </div>`).join("")}
-  `;
-  renderNotesPanel(c,dv);
-  comments.replaceChildren();comments.hidden=true;
+  const notes=`<details id="composition-notes" ${notesOpen?"open":""}><summary>Anotações da composição</summary><label class="control-label" for="notes">Plano geral</label><textarea id="notes" placeholder="Plano de jogo, condição de vitória…">${esc(c.notes)}</textarea>${dv?`<label class="control-label" for="dnote">Plano do draft · ${DRAFT_SIDE[draftOf(c).side]}</label><textarea id="dnote">${esc(draftOf(c).note[draftOf(c).side])}</textarea><ul id="notes-lanes" class="draft-lane-notes" aria-label="Observações por posição" hidden></ul>`:""}</details>`;
+  $("#editor").innerHTML=`<div class="editor-controls"><input id="cname" aria-label="Nome da composição" value="${esc(c.name)}" placeholder="Nome da composição"><div class="vtog"><button data-view="lanes" aria-pressed="${!dv}" class="${dv?"":"on"}">Opções por posição</button><button data-view="draft" aria-pressed="${dv}" class="${dv?"on":""}">Ordem do draft</button></div></div>
+  ${notes}<button type="button" class="jump-picker" data-picker>${iconMarkup("plus")} Adicionar campeão</button>
+  ${dv?draftHTML(c):LANES.map(l=>`<div class="lane${active===l.k?" act":""}${l.k==="ban"?" ban-strip":""}" data-l="${l.k}" style="--lc:var(${l.c})">
+  ${l.k==="ban"?"":pickArt(c.lanes[l.k][0])}
+  <button class="ln" data-draft-target="${l.k}" aria-pressed="${active===l.k}">${l.n}${active===l.k?'<span class="selection-mark">●</span>':""}</button>
+  <div class="chips">${c.lanes[l.k].map((n,i)=>optionHTML(n,l.k,i)).join("")||'<span class="empty">Adicionar campeão</span>'}</div>
+${laneNoteHTML(c,l)}</div>`).join("")}
+  <p class="help">Clique no retrato para priorizar. Arraste para reordenar ou use o menu ⋯ de cada campeão.</p>`;
+  renderDraftLaneNotes(c);
   renderTarget();
 }
-let notesOpen=false;
-function renderNotesPanel(c,dv){
-  const btn=$("#notes-toggle"),panel=$("#notes-panel"),ta=$("#comp-notes");
-  panel.hidden=!notesOpen;panel.classList.toggle("draft",dv);
-  btn.setAttribute("aria-expanded",String(notesOpen));
-  btn.classList.toggle("on",notesOpen);
-  const d=dv?draftOf(c):null;
-  btn.classList.toggle("has-notes",!!((c.notes||"").trim()||(d&&(d.note[d.side]||"").trim())));
-  if(document.activeElement!==ta)ta.value=c.notes||"";
-  $("#dnote-wrap").hidden=!dv;$("#comp-notes-label").hidden=!dv;
-  if(dv){
-    $("#dnote-label").textContent=`Plano do draft · ${DRAFT_SIDE[d.side]}`;
-    if(document.activeElement!==$("#dnote"))$("#dnote").value=d.note[d.side]||"";
-  }
-  const ln=LANES.filter(l=>c.laneNotes[l.k]).map(l=>`<li><b>${l.n}</b> ${esc(c.laneNotes[l.k])}</li>`).join("");
-  $("#notes-lanes").innerHTML=ln;$("#notes-lanes").hidden=!dv||!ln;
-}
-$("#notes-toggle").addEventListener("click",()=>{
-  notesOpen=!notesOpen;renderNotesPanel(cur(),S.view==="draft");
-  if(notesOpen)$("#comp-notes").focus();
-});
 const touch=()=>{cur().updated=Date.now()};
 $("#v-comps").addEventListener("input",e=>{
   const c=cur();
   if(e.target.id==="cname"){c.name=e.target.value;touch();save();renderList()}
-  else if(e.target.id==="notes"||e.target.id==="comp-notes"){c.notes=e.target.value;touch();save();renderNotesPanel(c,S.view==="draft")}
-  else if(e.target.dataset.ln){c.laneNotes[e.target.dataset.ln]=e.target.value;touch();save()}
-  else if(e.target.id==="dnote"){const d=draftOf(c);d.note[d.side]=e.target.value;touch();save();renderNotesPanel(c,true)}
+  else if(e.target.id==="notes"){c.notes=e.target.value;touch();save()}
+  else if(e.target.dataset.ln){
+    const value=e.target.value;
+    c.laneNotes[e.target.dataset.ln]=value;
+    const note=e.target.closest(".lane-note");
+    note.querySelector(".pick-note-preview").textContent=value||"Nota";
+    note.querySelector("summary").title=value||"Adicionar observação";
+    renderDraftLaneNotes(c);
+    touch();save();
+  }
+  else if(e.target.id==="dnote"){const d=draftOf(c);d.note[d.side]=e.target.value;touch();save()}
   else if(e.target.dataset.slot!=null){const d=draftOf(c),o=d.order[d.side],i=+e.target.dataset.slot,v=e.target.value,j=o.indexOf(v);[o[i],o[j]]=[v,o[i]];active=v;touch();save();renderEditor();$(`[data-slot="${i}"]`).focus({preventScroll:true})}
 });
 $("#editor").addEventListener("click",e=>{
-  if(e.target.closest("[data-picker]")){ $("#pick-target").focus(); return }
+  if(e.target.closest("[data-picker]")){ openPicker(); return }
+  const priority=e.target.closest("[data-priority]"),move=e.target.closest("[data-move]");
+  if(priority||move){const b=priority||move,l=b.dataset.lane,a=cur().lanes[l],n=b.dataset.priority||b.dataset.n,i=a.indexOf(n);if(priority){a.splice(i,1);a.unshift(n)}else{const j=i+Number(b.dataset.move);if(j>=0&&j<a.length)[a[i],a[j]]=[a[j],a[i]]}active=l;touch();save();renderEditor();renderList();renderGrid();(S.view==="draft"?$(`[data-draft-target="${l}"]`):[...document.querySelectorAll("[data-priority]")].find(b=>b.dataset.priority===n&&b.dataset.lane===l))?.focus({preventScroll:true});return}
   const rm=e.target.closest("[data-rm]");
-  if(rm){const l=rm.closest("[data-l]").dataset.l;const c=cur();c.lanes[l]=c.lanes[l].filter(n=>n!==rm.dataset.rm);touch();save();renderEditor();renderList();renderGrid();return}
-  const dmc=e.target.closest(".pk .dm");if(dmc){const l=dmc.dataset.from,c=cur(),n=dmc.dataset.n;c.lanes[l]=[n,...c.lanes[l].filter(x=>x!==n)];active=l;touch();save();renderEditor();renderList();return}
-  const vb=e.target.closest("[data-view]");if(vb){S.view=vb.dataset.view;save(false);renderEditor();publishTeamRoute("comps");return}
+  if(rm){const l=rm.closest("[data-l]").dataset.l;const c=cur();c.lanes[l]=c.lanes[l].filter(n=>n!==rm.dataset.rm);touch();save();renderEditor();renderList();renderGrid();$(`[data-draft-target="${l}"]`)?.focus({preventScroll:true});return}
+
+  const vb=e.target.closest("[data-view]");if(vb){S.view=vb.dataset.view;save(false);renderEditor();$(`[data-view="${S.view}"]`).focus({preventScroll:true});publishTeamRoute("comps");return}
   const sb=e.target.closest("[data-side]");if(sb){draftOf(cur()).side=sb.dataset.side;touch();save();renderEditor();$(`[data-side="${sb.dataset.side}"]`).focus({preventScroll:true});return}
   const target=e.target.closest("[data-draft-target]");
   if(target){
@@ -146,7 +166,7 @@ $("#editor").addEventListener("click",e=>{
     $(`[data-draft-target="${active}"]`).focus({preventScroll:true});
     return;
   }
-  if(["INPUT","TEXTAREA","SELECT","OPTION"].includes(e.target.tagName))return;
+  if(e.target.closest("details")||["INPUT","TEXTAREA","SELECT","OPTION"].includes(e.target.tagName))return;
   const ln=e.target.closest("[data-l]");if(ln&&ln.dataset.l!==active){active=ln.dataset.l;renderEditor()}
 });
 // arrastar e soltar
@@ -183,12 +203,11 @@ const PICKTIP={B1:"First pick",B2:"dupla",B3:"dupla",R1:"dupla",R2:"dupla",R3:"f
 const DRAFT_SIDE = {blue:"Lado azul", red:"Lado vermelho"} as const;
 function draftHTML(c){
   const d=draftOf(c),us=d.side==="blue"?"B":"R";
-  // sequência oficial -> número global de cada slot
   // picks e bans têm numeração própria (1º a 10º pick, 1º a 10º ban)
   const seq=[],cnt={B:{pick:0,ban:0},R:{pick:0,ban:0}},kc={pick:0,ban:0};
   DORDER.forEach(([ph,slots],pi)=>slots.forEach(s=>{const[t,k]=s.split(":");const i=cnt[t][k]++;seq.push({t,k,i,code:t+(k==="ban"?"B":"")+(i+1),ph:pi,n:++kc[k]})}));
   const find=(t,k,i)=>seq.find(s=>s.t===t&&s.k===k&&s.i===i);
-  const mini=(n,l,j)=>`<span class="dm${j===0?" main":""}" draggable="true" data-n="${esc(n)}" data-from="${l}" title="${j+1}ª opção: ${esc(n)} · clique para virar principal ou arraste para reordenar">${img(n)}<button class="x" data-rm="${esc(n)}" aria-label="Remover ${esc(n)}">${iconMarkup("close")}</button></span>`;
+  const mini=(n,l,j)=>optionHTML(n,l,j);
   const PHN=["Bans 1","Picks 1","Bans 2","Picks 2"];
   // faixa da sequência
   let h=`<div class="draft-toolbar"><div class="dside" role="group" aria-label="Lado da equipe"><span>Nossa equipe</span>
@@ -201,17 +220,20 @@ function draftHTML(c){
         ${n?`<span class="dm" draggable="true" data-n="${esc(n)}" data-from="ban">${img(n)}<button class="x" data-rm="${esc(n)}" aria-label="Remover ${esc(n)}">${iconMarkup("close")}</button></span>`:`<span class="bn">${s.n}</span>`}</div>`};
     const pick=i=>{const s=find(t,"pick",i),tip=PICKTIP[s.code]||"";
       const meta=`<span class="pkh"><b>${s.code}</b><span title="${s.n}º pick">${s.n}º pick</span>${tip?`<i>${tip}</i>`:""}</span>`;
-      if(!mine)return `<div class="pk ${side} them">${meta}<div class="pkn">Pick adversário</div></div>`;
+      if(!mine)return `<div class="pk ${side} them">${meta}<div class="pkn">${iconMarkup("roles")} A definir</div></div>`;
       const l=d.order[d.side][i],L=LN[l],ch=c.lanes[l],m=ch[0];
       const editing=active===l;
       return `<div class="pk ${side} mine${editing?" act":""}" data-l="${l}" style="--lc:var(${L.c})">
-        ${m?lolImage(champArt(m)?.splash,"pk-art"):""}
-        <button type="button" class="pk-target" data-draft-target="${l}" aria-pressed="${editing}">
-          ${meta}
+        ${pickArt(m)}
+        <button type="button" class="pk-target" data-draft-target="${l}" aria-pressed="${editing}" aria-label="${s.code} · ${L.n}${m?" · "+esc(m):" · Escolher campeão"}">
+          ${meta}${m?img(m):iconMarkup("roles")}
           <span class="pkn${m?"":" pk-empty"}">${m?esc(m):"Escolher campeão"}</span>
         </button>
         <div class="pkf"><select data-slot="${i}" aria-label="Posição do pick ${t}${i+1}" title="Lane deste pick">${PLANES.map(x=>`<option value="${x}"${x===l?" selected":""}>${LN[x].n}</option>`).join("")}</select>
-        ${ch.length?`<div class="alts">${ch.map((n,j)=>mini(n,l,j)).join("")}</div>`:""}</div></div>`};
+        ${laneNoteHTML(c,L)}
+        ${m?mini(m,l,0):""}
+        ${ch.length>1?`<div class="alts draft-alternatives" role="group" aria-label="Alternativas de ${L.n}"><span class="draft-alternatives-label" aria-hidden="true">Alternativas</span>${ch.slice(1).map((n,j)=>mini(n,l,j+1)).join("")}</div>`:""}
+        </div></div>`};
     return `<section class="tm ${side}${mine?" mine":""}" aria-labelledby="draft-side-${side}">
       <div class="draft-bans">
         ${mine?`<button type="button" class="draft-ban-target" data-draft-target="ban" aria-pressed="${active==="ban"}">Bans ${active==="ban"?'<span class="draft-editing">Editando</span>':""}</button>`:'<div class="draft-phase">Bans</div>'}
@@ -226,32 +248,28 @@ function draftHTML(c){
   h+=`<div class="dz">${team("B")}${team("R")}</div>`;
   const extra=c.lanes.ban.slice(5);
   if(extra.length)h+=`<div class="lbl">Bans alternativos</div><div class="alts" data-l="ban">${extra.map((n,j)=>mini(n,"ban",j+5)).join("")}</div>`;
-  h+=`<div class="help draft-help">Borda dourada: opção principal. Clique em uma opção para priorizá-la ou arraste para reordenar.</div>`;
+  h+=`<div class="help draft-help">Retrato em destaque: opção principal. Clique em uma opção para priorizá-la ou arraste para reordenar.</div>`;
   return h;
 }
 
 /* ===== Grade de campeões ===== */
 let role="all";
-const ROLEBTN=[["all","Todos"],["top","Top"],["jg","Jungle"],["mid","Mid"],["adc","ADC"],["sup","Suporte"],["ws","Jogados no Worlds"]];
-$("#roles").innerHTML=ROLEBTN.map(([k,n])=>`<button data-r="${k}" class="${k==="all"?"on":""}">${n}</button>`).join("");
-$("#roles").onclick=e=>{const b=e.target.closest("button");if(!b)return;role=b.dataset.r;document.querySelectorAll("#roles button").forEach(x=>x.classList.toggle("on",x===b));resetGrid()};
-const resetGrid=()=>{renderGrid();$("#grid").scrollTop=0};$("#search").oninput=resetGrid;$("#sort").onchange=resetGrid;
-function renderTarget(){const l=LN[active];
+const ROLEBTN=[["all","Todos"],["top","Top"],["jg","Jungle"],["mid","Mid"],["adc","ADC"],["sup","Suporte"]];
+$("#roles").innerHTML=ROLEBTN.map(([k,n])=>`<button data-r="${k}" aria-pressed="${k==="all"}" class="${k==="all"?"on":""}">${n}</button>`).join("");
+$("#roles").onclick=e=>{const b=e.target.closest("button");if(!b)return;role=b.dataset.r;document.querySelectorAll("#roles button").forEach(x=>{x.classList.toggle("on",x===b);x.setAttribute("aria-pressed",String(x===b))});resetGrid()};
+const resetGrid=()=>{renderGrid();$("#grid").scrollTop=0};$("#search").oninput=resetGrid;$("#sort").onchange=resetGrid;$("#worlds-only").onchange=resetGrid;
+function renderTarget(){
   const c=cur();
   $("#grid").querySelectorAll(".ch").forEach(button => button.setAttribute("aria-pressed", c.lanes[active].includes(button.dataset.n)));
-  let context="";
-  if(S.view==="draft"){
-    const d=draftOf(c),side=DRAFT_SIDE[d.side];
-    const slot=d.side[0].toUpperCase()+(d.order[d.side].indexOf(active)+1);
-    context=active==="ban"?`Editando bans · ${side}`:`Editando pick ${slot} · ${side}`;
-  }
-  $("#target").innerHTML=`${context?`<strong class="draft-target-context">${context}</strong>`:""}<label for="pick-target">${context?"Posição ou bans":"Adicionar na posição"}</label><select id="pick-target">${LANES.map(pos=>`<option value="${pos.k}" ${pos.k===active?"selected":""}>${pos.n}</option>`).join("")}</select><small>Clique em um campeão para adicionar ou remover de ${l.n}.</small>`;
+  let context=LN[active].n;
+  if(S.view==="draft"&&active!=="ban"){const d=draftOf(c);context=d.side[0].toUpperCase()+(d.order[d.side].indexOf(active)+1)+" · "+context}
+  $("#target").innerHTML=`<strong class="draft-target-context">Adicionando em ${context}</strong><label for="pick-target">Destino da edição</label><select id="pick-target">${LANES.map(pos=>`<option value="${pos.k}" ${pos.k===active?"selected":""}>${pos.n}</option>`).join("")}</select><small>Clique para adicionar ou remover do destino.</small>`;
 }
 $("#target").addEventListener("change",e=>{if(e.target.id!=="pick-target")return;active=e.target.value;renderEditor();$("#pick-target").focus({preventScroll:true})});
 function renderGrid(){
   const q=$("#search").value.toLowerCase().replace(/[^a-z]/g,""),c=cur(),srt=$("#sort").value;
   const where={};for(const l of LANES)for(const n of c.lanes[l.k])(where[n]=where[n]||[]).push(l);
-  let L=CH.filter(ch=>(!q||ch.n.toLowerCase().replace(/[^a-z]/g,"").includes(q))&&(role==="all"||(role==="ws"?WS.c[ch.n]:ch.r.includes(role))));
+  let L=CH.filter(ch=>(!$("#worlds-only").checked||WS.c[ch.n])&&(!q||ch.n.toLowerCase().replace(/[^a-z]/g,"").includes(q))&&(role==="all"||ch.r.includes(role)));
   if(srt==="ws")L.sort((a,b)=>((WS.c[b.n]||[0])[0]-(WS.c[a.n]||[0])[0])||a.n.localeCompare(b.n));
   else if(srt==="wsb")L.sort((a,b)=>((WS.c[b.n]||[0,0,0])[2]-(WS.c[a.n]||[0,0,0])[2])||a.n.localeCompare(b.n));
   else L.sort((a,b)=>a.n.localeCompare(b.n));
@@ -267,7 +285,50 @@ $("#grid").onclick=e=>{
   const ch=e.target.closest(".ch");if(!ch)return;const n=ch.dataset.n,c=cur(),a=c.lanes[active];
   if(a.includes(n))c.lanes[active]=a.filter(x=>x!==n);else a.push(n);
   touch();save();renderEditor();renderList();renderGrid();
+  [...$("#grid").querySelectorAll(".ch")].find(button=>button.dataset.n===n)?.focus({preventScroll:true});
 };
+
+
+let pickerTrigger=null;
+const pickerDialog=$("#picker-dialog"),picker=$("#champ-picker");
+function openPicker(){pickerTrigger=document.activeElement;pickerDialog.append(picker);pickerDialog.showModal();$("#search").focus()}
+pickerDialog.addEventListener("close",()=>{$("#comps").append(picker);(document.querySelector("[data-picker]")||pickerTrigger)?.focus()});
+$("#close-picker").onclick=()=>pickerDialog.close();
+window.matchMedia("(min-width: 1100px)").addEventListener("change",e=>{if(e.matches&&pickerDialog.open)pickerDialog.close()});
+const paletteMenu=document.querySelector<HTMLDetailsElement>("#composition-palette");
+const paletteTrigger=paletteMenu.querySelector("summary");
+const paletteOptions=[...paletteMenu.querySelectorAll<HTMLButtonElement>(".palette-option")];
+const paletteKey="weblol-composition-palette";
+const previousPalettes=new Map([
+  ["turquoise","tokyo-night"],["violet","dracula"],["pink","catppuccin"],
+  ["lime","monokai"],["silver","nord"],["amber","solarized"],
+]);
+function setPalette(choice: HTMLButtonElement){
+  $("#v-comps").dataset.palette=choice.dataset.palette;
+  pickerDialog.dataset.palette=choice.dataset.palette;
+  $("#palette-name").textContent=choice.textContent.trim();
+  paletteOptions.forEach(option=>option.setAttribute("aria-pressed",String(option===choice)));
+}
+paletteOptions.forEach(option=>option.addEventListener("click",()=>{
+  setPalette(option);
+  paletteMenu.open=false;
+  paletteTrigger.focus();
+  try{localStorage.setItem(paletteKey,option.dataset.palette)}catch{}
+}));
+paletteMenu.addEventListener("keydown",event=>{
+  if(event.key!=="Escape"||!paletteMenu.open)return;
+  event.preventDefault();
+  paletteMenu.open=false;
+  paletteTrigger.focus();
+});
+document.addEventListener("click",event=>{
+  if(event.target instanceof Node&&!paletteMenu.contains(event.target))paletteMenu.open=false;
+});
+try{
+  const stored=localStorage.getItem(paletteKey);
+  const name=previousPalettes.get(stored)??stored;
+  setPalette(paletteOptions.find(option=>option.dataset.palette===name)??paletteOptions[0]);
+}catch{setPalette(paletteOptions[0])}
 
 /* ===== Exportar / Importar ===== */
 $("#exp").onclick=()=>{

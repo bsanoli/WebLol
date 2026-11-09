@@ -8,6 +8,14 @@ export interface UiVersion {
 
 export const UI_VERSIONS: UiVersion[] = [
   {
+    version: "1.8",
+    date: "2026-11-09",
+    changes: [
+      "Composições: editor e catálogo atualizados, com arte de campeão nos picks definidos e menu de ações em cada composição.",
+      "Composições: dez temas com amostras de cor. WebLol usa o dourado original e a escolha fica salva no navegador.",
+    ],
+  },
+  {
     version: "1.7",
     date: "2026-11-09",
     changes: [

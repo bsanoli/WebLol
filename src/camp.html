@@ -6,6 +6,7 @@
 <title>Comps do Time</title>
 <link rel="stylesheet" href="/assets/base.css">
 <link rel="stylesheet" href="/assets/team.css">
+<link rel="stylesheet" href="/assets/compositions.css">
 </head>
 <body>
 <header>
@@ -24,36 +25,43 @@
 
 <section id="v-comps" class="view on">
  <div class="comp-workspace">
- <div class="page-head"><h1>Composições do time</h1><p>Monte opções por posição, organize a ordem do draft e registre o plano de jogo.</p></div>
+ <div class="page-head">
+  <h1>Composições do time</h1>
+  <details class="palette" id="composition-palette">
+   <summary><span class="palette-label">Tema</span> <span class="palette-preview" aria-hidden="true"></span> <strong id="palette-name">WebLol</strong></summary>
+   <div class="palette-options" role="group" aria-label="Temas da composição">
+    <button type="button" class="palette-option" data-palette="weblol" aria-pressed="true"><span class="palette-preview" aria-hidden="true"></span> WebLol</button>
+    <button type="button" class="palette-option" data-palette="dracula" aria-pressed="false"><span class="palette-preview" aria-hidden="true"></span> Dracula</button>
+    <button type="button" class="palette-option" data-palette="monokai" aria-pressed="false"><span class="palette-preview" aria-hidden="true"></span> Monokai</button>
+    <button type="button" class="palette-option" data-palette="nord" aria-pressed="false"><span class="palette-preview" aria-hidden="true"></span> Nord</button>
+    <button type="button" class="palette-option" data-palette="solarized" aria-pressed="false"><span class="palette-preview" aria-hidden="true"></span> Solarized Dark</button>
+    <button type="button" class="palette-option" data-palette="tokyo-night" aria-pressed="false"><span class="palette-preview" aria-hidden="true"></span> Tokyo Night</button>
+    <button type="button" class="palette-option" data-palette="catppuccin" aria-pressed="false"><span class="palette-preview" aria-hidden="true"></span> Catppuccin Mocha</button>
+    <button type="button" class="palette-option" data-palette="gruvbox" aria-pressed="false"><span class="palette-preview" aria-hidden="true"></span> Gruvbox Dark</button>
+    <button type="button" class="palette-option" data-palette="one-dark" aria-pressed="false"><span class="palette-preview" aria-hidden="true"></span> One Dark</button>
+    <button type="button" class="palette-option" data-palette="everforest" aria-pressed="false"><span class="palette-preview" aria-hidden="true"></span> Everforest</button>
+   </div>
+  </details>
+ </div>
  <div id="comps">
   <div class="box comp-library">
-    <h2><span class="lib-t-full">1. Escolha uma composição</span><span class="lib-t-draft">1. Composição</span></h2>
+    <h2>Composições salvas</h2>
     <div class="library-search"><label class="control-label" for="csearch">Filtrar composições</label><input id="csearch" placeholder="Nome ou campeão"></div>
     <div id="clist"></div>
     <select id="draft-comp" aria-label="Escolher composição" hidden></select>
     <div class="cbtns">
       <button class="pri" id="new"><svg class="icon" aria-hidden="true" focusable="false"><use href="assets/icons.svg#plus"></use></svg> Nova composição</button>
-      <button id="dup"><svg class="icon" aria-hidden="true" focusable="false"><use href="assets/icons.svg#duplicate"></use></svg> Duplicar</button>
-      <button id="del" class="dng"><svg class="icon" aria-hidden="true" focusable="false"><use href="assets/icons.svg#trash"></use></svg> Excluir</button>
-      <button id="copy-comp"><svg class="icon" aria-hidden="true" focusable="false"><use href="assets/icons.svg#link"></use></svg> Copiar link da composição</button>
     </div>
   </div>
 
   <div class="box comp-editor">
-    <div class="plan-head"><h2>2. Monte o plano <span class="saved" id="saved" role="status"></span></h2>
-      <button type="button" id="notes-toggle" aria-expanded="false" aria-controls="notes-panel"><span class="caret" aria-hidden="true">▾</span> Anotações da composição</button></div>
-    <div id="notes-panel" class="notes-panel" hidden>
-      <div id="dnote-wrap" class="notes-field" hidden><label class="control-label" for="dnote" id="dnote-label">Plano do draft</label>
-        <textarea id="dnote" placeholder="Ex: se banirem a Akali, first pick vira Vi..."></textarea></div>
-      <div class="notes-field"><label class="control-label" for="comp-notes" id="comp-notes-label" hidden>Anotações da composição</label>
-        <textarea id="comp-notes" aria-label="Anotações da composição" placeholder="Plano de jogo, condição de vitória, power spikes, quem é o engage, contra o que é fraca, ordem de picks..."></textarea></div>
-      <ul id="notes-lanes" class="draft-lane-notes" aria-label="Observações por posição" hidden></ul>
-    </div>
+    <div class="editor-status"><span class="saved" id="saved" role="status">Salvo neste navegador</span>
+      <button id="copy-comp"><svg class="icon" aria-hidden="true" focusable="false"><use href="assets/icons.svg#link"></use></svg> Copiar link da composição</button></div>
     <div id="editor"></div>
   </div>
 
   <div class="box champ-picker" id="champ-picker">
-    <h2>3. Adicione campeões</h2>
+    <div class="picker-heading"><h2 id="picker-title">Campeões</h2><button id="close-picker" aria-label="Fechar catálogo">Fechar</button></div>
     <div id="target"></div>
     <div class="gtools">
       <label>Buscar campeão<input id="search" placeholder="Nome do campeão"></label>
@@ -63,14 +71,14 @@
         <option value="wsb">Mais banidos no Worlds 2026</option>
       </select></label>
     </div>
-    <div class="roles" id="roles"></div>
+    <div class="filter-heading">Filtrar catálogo por posição</div><div class="roles" id="roles"></div><label class="worlds-filter"><input type="checkbox" id="worlds-only"> Participaram do Worlds</label>
     <div id="grid"></div>
     <div class="foot" id="gfoot"></div>
   </div>
 
  </div>
  </div>
- <section class="box draft-comments" id="draft-comments" aria-labelledby="draft-comments-title" hidden></section>
+ <dialog id="picker-dialog" aria-labelledby="picker-title"></dialog>
 </section>
 
 <section id="v-map" class="view">
