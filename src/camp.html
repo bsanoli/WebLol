@@ -40,7 +40,11 @@
   </div>
 
   <div class="box comp-editor">
-    <h2>2. Monte o plano <span class="saved" id="saved" role="status"></span></h2>
+    <div class="plan-head"><h2>2. Monte o plano <span class="saved" id="saved" role="status"></span></h2>
+      <button type="button" id="notes-toggle" aria-expanded="false" aria-controls="notes-panel"><span class="caret" aria-hidden="true">▾</span> Anotações da composição</button></div>
+    <div id="notes-panel" class="notes-panel" hidden>
+      <textarea id="comp-notes" aria-label="Anotações da composição" placeholder="Plano de jogo, condição de vitória, power spikes, quem é o engage, contra o que é fraca, ordem de picks..."></textarea>
+    </div>
     <div id="editor"></div>
   </div>
 

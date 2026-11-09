@@ -100,7 +100,8 @@ function renderEditor(){
      <div class="chips">${c.lanes[l.k].map((n,i)=>`<span class="chip" draggable="true" data-n="${esc(n)}" data-from="${l.k}">${img(n)}<span class="n">${esc(n)}</span>${c.lanes[l.k].length>1?`<span class="ord">${i+1}º</span>`:""}<button class="x" data-rm="${esc(n)}" aria-label="Remover ${esc(n)}">${iconMarkup("close")}</button></span>`).join("")
        ||'<span class="empty">Selecione esta posição e adicione campeões no catálogo.</span>'}</div>
    </div>`).join("")}
-  ${dv?"":`${notes}<div class="help">Atualizada em ${new Date(c.updated).toLocaleString("pt-BR")} · Mais de um campeão por lane = opções (a ordem vira prioridade; arraste para reordenar).</div>`}`;
+  `;
+  renderNotesPanel(c,dv);
   if(dv){
     const d=draftOf(c);
     const laneNotes=LANES.filter(l=>c.laneNotes[l.k])
@@ -115,11 +116,24 @@ function renderEditor(){
   }else comments.replaceChildren();
   renderTarget();
 }
+let notesOpen=false;
+function renderNotesPanel(c,dv){
+  const btn=$("#notes-toggle"),panel=$("#notes-panel"),ta=$("#comp-notes");
+  btn.hidden=dv;panel.hidden=dv||!notesOpen;
+  btn.setAttribute("aria-expanded",String(notesOpen&&!dv));
+  btn.classList.toggle("on",notesOpen);
+  btn.classList.toggle("has-notes",!!(c.notes||"").trim());
+  if(document.activeElement!==ta)ta.value=c.notes||"";
+}
+$("#notes-toggle").addEventListener("click",()=>{
+  notesOpen=!notesOpen;renderNotesPanel(cur(),S.view==="draft");
+  if(notesOpen)$("#comp-notes").focus();
+});
 const touch=()=>{cur().updated=Date.now()};
 $("#v-comps").addEventListener("input",e=>{
   const c=cur();
   if(e.target.id==="cname"){c.name=e.target.value;touch();save();renderList()}
-  else if(e.target.id==="notes"){c.notes=e.target.value;touch();save()}
+  else if(e.target.id==="notes"||e.target.id==="comp-notes"){c.notes=e.target.value;touch();save();$("#notes-toggle").classList.toggle("has-notes",!!c.notes.trim())}
   else if(e.target.dataset.ln){c.laneNotes[e.target.dataset.ln]=e.target.value;touch();save()}
   else if(e.target.id==="dnote"){const d=draftOf(c);d.note[d.side]=e.target.value;touch();save()}
   else if(e.target.dataset.slot!=null){const d=draftOf(c),o=d.order[d.side],i=+e.target.dataset.slot,v=e.target.value,j=o.indexOf(v);[o[i],o[j]]=[v,o[i]];active=v;touch();save();renderEditor();$(`[data-slot="${i}"]`).focus({preventScroll:true})}

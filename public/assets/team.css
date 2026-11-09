@@ -509,3 +509,12 @@ header nav button { border-radius: 8px; }
 #know .obj p { font-size: 14px; line-height: 1.6; }
 #know .ktabs button { min-height: 44px; }
 #know .kgrid { grid-template-columns: repeat(auto-fill,minmax(min(100%,270px),1fr)); }
+
+.plan-head > h2 { padding: 18px 18px 12px; }
+.plan-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding-right: 18px; flex-wrap: wrap; }
+#notes-toggle { display: inline-flex; align-items: center; gap: 6px; }
+#notes-toggle .caret { display: inline-block; transition: transform .2s; }
+#notes-toggle.on .caret { transform: rotate(180deg); }
+#notes-toggle.has-notes::after { content: ""; width: 7px; height: 7px; border-radius: 50%; background: var(--gold); }
+.notes-panel { padding: 0 18px 12px; }
+#comp-notes { width: 100%; min-height: 150px; resize: vertical; }
