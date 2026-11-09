@@ -590,3 +590,14 @@ header nav button { border-radius: 8px; }
 #comps .comp-library #clist ~ .cbtns { justify-items: stretch; }
 #comps .comp-library .cbtns button { width: 100%; justify-content: center; }
 @media (max-width: 999px) { #v-comps #comps .comp-library .library-search label { width: 1px; } }
+
+/* Card da lane: campeões à direita do nome, obs. abaixo */
+.lane .lh { flex-wrap: nowrap; align-items: center; margin-bottom: 6px; }
+.lane .lh .chips { flex: 1; min-width: 0; margin: 0; }
+.lane .lh .hint { flex: none; }
+.lane .lane-obs { display: block; width: 100%; min-height: 30px; padding: 3px 8px; font-size: 12px; }
+@media (max-width: 540px) { .lane .lh { flex-wrap: wrap; } }
+/* Item 1 estica até embaixo também na visão por posição */
+@media (min-width: 1000px) {
+  #comps .comp-library { position: static; max-height: none; align-self: stretch; min-height: 0; }
+}

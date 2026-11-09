@@ -92,10 +92,10 @@ function renderEditor(){
   <button type="button" class="jump-picker" data-picker>${iconMarkup("roles")} Escolher campeões</button>
   ${dv?draftHTML(c):LANES.map(l=>`<div class="lane${active===l.k?" act":""}" data-l="${l.k}" style="--lc:var(${l.c})">
      <div class="lh"><button class="ln" aria-pressed="${active===l.k}">${l.n}</button>
-       <input aria-label="Observações de ${l.n}" data-ln="${l.k}" value="${esc(c.laneNotes[l.k]||"")}" placeholder="obs. da lane (opcional)">
-       ${active===l.k?'<span class="hint">Selecionada</span>':""}</div>
      <div class="chips">${c.lanes[l.k].map((n,i)=>`<span class="chip" draggable="true" data-n="${esc(n)}" data-from="${l.k}">${img(n)}<span class="n">${esc(n)}</span>${c.lanes[l.k].length>1?`<span class="ord">${i+1}º</span>`:""}<button class="x" data-rm="${esc(n)}" aria-label="Remover ${esc(n)}">${iconMarkup("close")}</button></span>`).join("")
        ||'<span class="empty">Selecione esta posição e adicione campeões no catálogo.</span>'}</div>
+       ${active===l.k?'<span class="hint">Selecionada</span>':""}</div>
+     <input class="lane-obs" aria-label="Observações de ${l.n}" data-ln="${l.k}" value="${esc(c.laneNotes[l.k]||"")}" placeholder="obs. da lane (opcional)">
    </div>`).join("")}
   `;
   renderNotesPanel(c,dv);
