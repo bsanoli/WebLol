@@ -69,34 +69,47 @@
    <canvas id="cv"></canvas>
   </div>
   <div id="mside">
-   <div class="box">
-    <h2>Jogada</h2>
-    <div class="row"><select id="psel" aria-label="Jogada selecionada"></select></div>
-    <div class="row"><button id="copy-play"><svg class="icon" aria-hidden="true" focusable="false"><use href="assets/icons.svg#link"></use></svg> Copiar link da jogada</button></div>
-    <div class="row"><button id="pnew" class="pri"><svg class="icon" aria-hidden="true" focusable="false"><use href="assets/icons.svg#plus"></use></svg> Nova jogada</button><button id="pren"><svg class="icon" aria-hidden="true" focusable="false"><use href="assets/icons.svg#edit"></use></svg> Renomear</button><button id="pdel" class="dng"><svg class="icon" aria-hidden="true" focusable="false"><use href="assets/icons.svg#trash"></use></svg> Excluir</button></div>
-   </div>
-   <div class="box">
-    <h2>Posições prontas</h2>
-    <div class="row"><button data-pre="base">Todos na base</button><button data-pre="lane">Fase de rotas (~1:30)</button></div>
-    <h2 style="margin-top:12px">Composição de cada lado</h2>
-    <div class="row"><span style="color:#3d8bff;font-weight:700;width:62px">Azul</span><select id="cb" aria-label="Composição do lado azul"></select></div>
-    <div class="row"><span style="color:#ff4d4d;font-weight:700;width:62px">Vermelho</span><select id="cr" aria-label="Composição do lado vermelho"></select></div>
-    <div class="row" style="margin-top:8px"><label class="help"><input type="checkbox" id="useimg" checked style="flex:none"> Usar imagem oficial do mapa</label></div>
-   </div>
-   <div class="box">
-    <h2>Ferramenta</h2>
-    <div class="row seg"><button data-tool="move" aria-pressed="true" class="on"><svg class="icon" aria-hidden="true" focusable="false"><use href="assets/icons.svg#move"></use></svg> Mover</button><button data-tool="draw" aria-pressed="false"><svg class="icon" aria-hidden="true" focusable="false"><use href="assets/icons.svg#draw"></use></svg> Desenhar seta</button><button data-tool="erase" aria-pressed="false" title="Clique numa seta para apagar só ela"><svg class="icon" aria-hidden="true" focusable="false"><use href="assets/icons.svg#erase"></use></svg> Apagar seta</button></div>
-    <div class="row"><button id="undo" title="Desfazer (Ctrl+Z)"><svg class="icon" aria-hidden="true" focusable="false"><use href="assets/icons.svg#undo"></use></svg> Desfazer</button><button id="redo" title="Refazer (Ctrl+Y)"><svg class="icon" aria-hidden="true" focusable="false"><use href="assets/icons.svg#redo"></use></svg> Refazer</button><button id="clr" class="dng" title="Apaga todas as setas"><svg class="icon" aria-hidden="true" focusable="false"><use href="assets/icons.svg#trash"></use></svg> Limpar tudo</button></div>
-    <div class="row" id="cols" style="margin-top:8px"></div>
-   </div>
-   <div class="box">
-    <h2>Sequência da jogada</h2>
-    <div id="sstat" class="sstat"></div>
+   <section class="box map-card" aria-labelledby="map-play-title">
+    <h2 id="map-play-title">Jogada</h2>
+    <select id="psel" aria-label="Jogada selecionada"></select>
+    <div class="map-actions">
+     <button id="pnew" class="pri"><svg class="icon" aria-hidden="true" focusable="false"><use href="assets/icons.svg#plus"></use></svg> Nova jogada</button>
+     <button id="copy-play"><svg class="icon" aria-hidden="true" focusable="false"><use href="assets/icons.svg#link"></use></svg> Copiar link</button>
+     <button id="pren"><svg class="icon" aria-hidden="true" focusable="false"><use href="assets/icons.svg#edit"></use></svg> Renomear</button>
+     <button id="pdel" class="dng"><svg class="icon" aria-hidden="true" focusable="false"><use href="assets/icons.svg#trash"></use></svg> Excluir</button>
+    </div>
+   </section>
+   <section class="box map-card" aria-labelledby="map-positions-title">
+    <h2 id="map-positions-title">Posições prontas</h2>
+    <div class="map-actions"><button data-pre="base">Todos na base</button><button data-pre="lane">Fase de rotas (~1:30)</button></div>
+    <div class="map-group">
+     <h3>Composição de cada lado</h3>
+     <div class="map-sides">
+      <label for="cb" class="map-blue">Azul</label><select id="cb"></select>
+      <label for="cr" class="map-red">Vermelho</label><select id="cr"></select>
+     </div>
+    </div>
+    <label class="map-check"><input type="checkbox" id="useimg" checked> Usar imagem oficial do mapa</label>
+   </section>
+   <section class="box map-card" aria-labelledby="map-tools-title">
+    <h2 id="map-tools-title">Ferramenta</h2>
+    <div class="map-actions map-modes seg" role="group" aria-label="Modo da ferramenta"><button data-tool="move" aria-pressed="true" class="on"><svg class="icon" aria-hidden="true" focusable="false"><use href="assets/icons.svg#move"></use></svg> Mover</button><button data-tool="draw" aria-pressed="false"><svg class="icon" aria-hidden="true" focusable="false"><use href="assets/icons.svg#draw"></use></svg> Desenhar seta</button><button data-tool="erase" aria-pressed="false" title="Clique numa seta para apagar só ela"><svg class="icon" aria-hidden="true" focusable="false"><use href="assets/icons.svg#erase"></use></svg> Apagar seta</button></div>
+    <div class="map-group">
+     <h3 id="map-colors-title">Cor da seta</h3>
+     <div id="cols" role="group" aria-labelledby="map-colors-title"></div>
+    </div>
+    <div class="map-actions map-history"><button id="undo" title="Desfazer (Ctrl+Z)"><svg class="icon" aria-hidden="true" focusable="false"><use href="assets/icons.svg#undo"></use></svg> Desfazer</button><button id="redo" title="Refazer (Ctrl+Y)"><svg class="icon" aria-hidden="true" focusable="false"><use href="assets/icons.svg#redo"></use></svg> Refazer</button><button id="clr" class="dng" title="Apaga todas as setas"><svg class="icon" aria-hidden="true" focusable="false"><use href="assets/icons.svg#trash"></use></svg> Limpar setas</button></div>
+   </section>
+   <section class="box map-card" aria-labelledby="map-sequence-title">
+    <h2 id="map-sequence-title">Sequência da jogada</h2>
+    <div id="sstat" class="sstat" role="status"></div>
     <ol id="steps"></ol>
-    <div class="row"><button id="sadd" class="pri" style="flex:1"><svg class="icon" aria-hidden="true" focusable="false"><use href="assets/icons.svg#plus"></use></svg> Novo passo</button><button id="sedit" class="edt" title="Liga/desliga a edição do passo selecionado"><svg class="icon" aria-hidden="true" focusable="false"><use href="assets/icons.svg#edit"></use></svg> Modo edição desligado</button></div>
-    <div class="row" style="margin-top:10px"><button id="sprev" aria-label="Passo anterior"><svg class="icon" aria-hidden="true" focusable="false"><use href="assets/icons.svg#previous"></use></svg></button><button id="splay" class="pri" style="flex:1"><svg class="icon" aria-hidden="true" focusable="false"><use href="assets/icons.svg#play"></use></svg> Reproduzir</button><button id="snext" aria-label="Próximo passo"><svg class="icon" aria-hidden="true" focusable="false"><use href="assets/icons.svg#next"></use></svg></button></div>
-    <div class="row"><label class="help">Velocidade <input type="range" id="spd" min="0.4" max="3" step="0.1" value="1.2" style="vertical-align:middle"> <span id="spdv">1.2s</span></label></div>
-   </div>
+    <div class="map-actions"><button id="sadd" class="pri"><svg class="icon" aria-hidden="true" focusable="false"><use href="assets/icons.svg#plus"></use></svg> Novo passo</button><button id="sedit" class="edt" aria-pressed="false" title="Liga/desliga a edição do passo selecionado"><svg class="icon" aria-hidden="true" focusable="false"><use href="assets/icons.svg#edit"></use></svg> Modo edição</button></div>
+    <div class="map-group">
+     <div class="map-playback"><button id="sprev" aria-label="Passo anterior"><svg class="icon" aria-hidden="true" focusable="false"><use href="assets/icons.svg#previous"></use></svg></button><button id="splay"><svg class="icon" aria-hidden="true" focusable="false"><use href="assets/icons.svg#play"></use></svg> Reproduzir</button><button id="snext" aria-label="Próximo passo"><svg class="icon" aria-hidden="true" focusable="false"><use href="assets/icons.svg#next"></use></svg></button></div>
+     <label class="map-speed" for="spd">Velocidade <input type="range" id="spd" min="0.4" max="3" step="0.1" value="1.2"> <span id="spdv">1.2s</span></label>
+    </div>
+   </section>
    <details class="help"><summary>Como montar uma jogada</summary><br>1. Arraste as bolinhas para a posição inicial e clique em <b>Novo passo</b>.<br>2. Mova as bolinhas para o próximo momento e clique em <b>Novo passo</b> de novo. Repita para cada momento.<br>3. Clique em <b><svg class="icon" aria-hidden="true" focusable="false"><use href="assets/icons.svg#play"></use></svg> Reproduzir</b>.<br><b>Corrigir um passo:</b> ligue o <b>Modo edição</b>, clique no passo e mexa no mapa. Com o modo edição desligado, nenhum passo é alterado. Clique no nome de um passo para renomear.<br><b>Setas:</b> use <b>Apagar seta</b> e clique numa seta para apagar só ela. <b>Ctrl+Z</b> desfaz e <b>Ctrl+Y</b> refaz (setas e movimentos das bolinhas).</details>
   </div>
  </div>

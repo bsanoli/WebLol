@@ -538,9 +538,9 @@ function drawLines(lines){
 window.addEventListener("resize",()=>drawLines(play().live.lines));
 
 // ferramentas
-const COLS=["#ffd34d","#3d8bff","#ff4d4d","#ffffff","#5be08a"];
-$("#cols").innerHTML=COLS.map(c=>`<button class="col${c===M.color?" on":""}" data-c="${c}" style="background:${c}"></button>`).join("")+'<span class="help">cor da seta</span>';
-$("#cols").onclick=e=>{const b=e.target.closest("[data-c]");if(!b)return;M.color=b.dataset.c;document.querySelectorAll(".col").forEach(x=>x.classList.toggle("on",x===b))};
+const COLS=[["#ffd34d","Amarela"],["#3d8bff","Azul"],["#ff4d4d","Vermelha"],["#ffffff","Branca"],["#5be08a","Verde"]];
+$("#cols").innerHTML=COLS.map(([c,name])=>`<button class="col${c===M.color?" on":""}" data-c="${c}" style="--swatch:${c}" aria-label="${name}" aria-pressed="${c===M.color}"></button>`).join("");
+$("#cols").onclick=e=>{const b=e.target.closest("[data-c]");if(!b)return;M.color=b.dataset.c;$("#cols").querySelectorAll("[data-c]").forEach(x=>{x.classList.toggle("on",x===b);x.setAttribute("aria-pressed",String(x===b))})};
 document.querySelectorAll("[data-tool]").forEach(b=>b.onclick=()=>{M.tool=b.dataset.tool;document.querySelectorAll("[data-tool]").forEach(x=>{x.classList.toggle("on",x===b);x.setAttribute("aria-pressed",x===b)});$("#map").classList.toggle("draw",M.tool==="draw");$("#map").classList.toggle("erase",M.tool==="erase");hover=-1;drawLines(play().live.lines)});
 $("#clr").onclick=()=>{if(!play().live.lines.length)return;pushUndo();play().live.lines=[];save(false);drawLines([]);syncStep()};
 document.querySelectorAll("[data-pre]").forEach(b=>b.onclick=()=>{if(M.playing)return;pushUndo();animateTo(preset(b.dataset.pre),play().live.lines)});
@@ -570,7 +570,7 @@ function renderPlays(){
   $("#psel").innerHTML=plays().map(x=>`<option value="${x.id}"${x.id===p.id?" selected":""}>${esc(x.name)} (${x.steps.length} passos)</option>`).join("");
   const opts=`<option value="">Só a função (TOP, JG...)</option>`+S.comps.map(c=>`<option value="${c.id}">${esc(c.name)}</option>`).join("");
   $("#cb").innerHTML=opts;$("#cr").innerHTML=opts;$("#cb").value=p.cb||"";$("#cr").value=p.cr||"";
-  $("#steps").innerHTML=p.steps.map((s,i)=>`<li data-i="${i}" class="${i===M.sel?"on":""}"><input data-lab="${i}" value="${esc(s.label||"Passo "+(i+1))}" title="Clique para renomear"><button data-sdel="${i}" aria-label="Apagar passo ${i+1}">${iconMarkup("close")}</button></li>`).join("")||'<li class="none" style="cursor:default;color:var(--mut)">Nenhum passo ainda.</li>';
+  $("#steps").innerHTML=p.steps.map((s,i)=>`<li data-i="${i}" class="${i===M.sel?"on":""}"><input data-lab="${i}" value="${esc(s.label||"Passo "+(i+1))}" aria-label="Nome do passo ${i+1}" title="Clique para renomear"><button data-sdel="${i}" aria-label="Apagar passo ${i+1}">${iconMarkup("close")}</button></li>`).join("")||'<li class="none">Nenhum passo ainda.</li>';
   renderStat();
   renderTokens();drawLines(p.live.lines);
 }
@@ -585,7 +585,7 @@ $("#cr").onchange=()=>{play().cr=$("#cr").value;save(false);renderTokens()};
 function syncStep(){const p=play();if(!M.edit||M.playing||M.sel<0||!p.steps[M.sel])return;const s=p.steps[M.sel];s.pos=clone(p.live.pos);s.lines=clone(p.live.lines);save(false);flashStep()}
 let tFl;function flashStep(){const el=$("#sstat .ok");if(!el)return;el.style.opacity=1;clearTimeout(tFl);tFl=setTimeout(()=>el.style.opacity=0,900)}
 function renderStat(){const p=play(),s=p.steps[M.sel],b=$("#sedit");
-  b.classList.toggle("on",!!M.edit);b.innerHTML=iconMarkup("edit")+" "+(M.edit?"Modo edição ligado":"Modo edição desligado");b.setAttribute("aria-pressed",M.edit);
+  b.classList.toggle("on",!!M.edit);b.setAttribute("aria-pressed",M.edit);
   $("#sstat").className="sstat"+(M.edit&&s?" ed":"");
   $("#sstat").innerHTML=M.playing?`${iconMarkup("play")} Reproduzindo...`:M.edit?(s?`${iconMarkup("edit")} <b>Modo edição ligado</b>: o que você mover no mapa é salvo no <b>passo ${M.sel+1}</b>. <span class="ok">${iconMarkup("check")} salvo</span>`:`${iconMarkup("edit")} Modo edição ligado: clique num passo da lista para escolher qual editar.`):p.steps.length?`${iconMarkup("lock")} Modo edição desligado: mover as bolinhas não altera nenhum passo. Para criar o próximo, mova e clique em <b>Novo passo</b>. Para corrigir um passo, selecione e ligue o modo edição.`:"Posicione as bolinhas e clique em <b>Novo passo</b> para salvar o primeiro momento da jogada.";}
 $("#sadd").onclick=()=>{if(M.playing)return;const p=play(),at=M.sel>=0?M.sel+1:p.steps.length;p.steps.splice(at,0,{label:"Passo "+(p.steps.length+1),pos:clone(p.live.pos),lines:clone(p.live.lines)});M.sel=at;save();renderPlays();toast(`Passo ${at+1} salvo com a posição atual`)};
