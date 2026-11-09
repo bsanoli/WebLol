@@ -3,7 +3,7 @@ rules_version = '2';
 // Os e-mails abaixo são os dos admins cadastrados em Authentication (um por admin).
 service cloud.firestore {
   match /databases/{database}/documents {
-    function isAdmin() { return request.auth != null && request.auth.token.email in ['brunoltzinv@gmail.com']; }
+    function isAdmin() { return request.auth != null && request.auth.token.email in ['brunoltzinv@gmail.com', 'fabiano.rong@gmail.com']; }
     function signedIn() { return request.auth != null; }
 
     // Versão oficial (assinada pelo admin) e chave pública do admin: todos leem, só o admin grava.

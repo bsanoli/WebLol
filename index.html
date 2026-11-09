@@ -95,7 +95,7 @@ const fmtD=t=>new Date(t).toLocaleString("pt-BR",{dateStyle:"short",timeStyle:"s
 function toast(m,ms=3200){const t=$("#toast");t.textContent=m;t.classList.add("on");clearTimeout(toast.t);toast.t=setTimeout(()=>t.classList.remove("on"),ms)}
 const KEY="lol-comps-time-v1",UKEY="lol-user",BKEY="lol-base",SKEY="lol-sent",FPKEY="lol-admin-fp";
 // admins do app (Riot ID → e-mail no Firebase). Todos usam a mesma chave de admin, cada um com a sua senha.
-const ADMINS={"brunoltz#ltz":"brunoltzinv@gmail.com","panda#zada":""};
+const ADMINS={"brunoltz#ltz":"brunoltzinv@gmail.com","panda#zada":"fabiano.rong@gmail.com"};
 const ADMIN_FP="fdb898843944d55e"; // impressão digital da chave do admin (fixa no app: um admin.json falso é recusado)
 const normId=s=>String(s).replace(/\s+/g,"").toLowerCase();
 const dispId=s=>{const[n,t]=String(s).split("#");return n.trim()+"#"+(t||"").trim().toUpperCase()};
