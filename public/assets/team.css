@@ -549,3 +549,34 @@ header nav button { border-radius: 8px; }
 .plan-head > h2 { font-size: 16px; color: var(--txt); margin: 0; }
 .draft-view .plan-head > h2 { display: flex; align-items: baseline; flex-wrap: wrap; gap: 2px 8px; }
 @media (max-width: 540px) { .plan-head { padding-left: 10px; padding-bottom: 6px; } .plan-head > h2 { padding-left: 0 !important; } }
+
+/* Biblioteca de composições como coluna à esquerda de "Monte o plano" */
+.draft-view #clist { display: grid; }
+.comp-library > h2 { font-size: 15px; }
+@media (min-width: 1000px) {
+  #comps, .draft-view #comps { grid-template-columns: 210px minmax(0, 1.8fr) minmax(260px, .55fr); grid-template-rows: auto; gap: 14px; }
+  #comps .comp-library, .draft-view #comps .comp-library {
+    grid-column: 1; grid-row: 1; display: flex; flex-direction: column; gap: 10px; padding: 12px;
+    position: sticky; top: 80px; max-height: calc(100dvh - 96px); align-self: start;
+  }
+  .draft-view #comps .comp-library { position: static; max-height: none; align-self: stretch; min-height: 0; }
+  .draft-view .comp-library > h2 { display: block; padding: 0; }
+  .library-search, .draft-view .library-search { display: block; }
+  .draft-view .library-search label { position: static; width: auto; height: auto; overflow: visible; clip-path: none; }
+  #clist, .draft-view #clist { grid-template-columns: 1fr; max-height: none; flex: 1 1 auto; min-height: 80px; overflow: auto; padding: 0; gap: 6px; }
+  .ci { padding: 8px 10px; }
+  #clist ~ .cbtns, .draft-view #clist ~ .cbtns { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+  #clist ~ .cbtns button, .draft-view .cbtns button { white-space: normal; min-height: 34px; font-size: 12px; padding: 5px 6px; }
+  #new, #copy-comp { grid-column: 1 / -1; grid-row: auto; }
+  .comp-editor, .draft-view .comp-editor { grid-column: 2; grid-row: 1; }
+  .champ-picker, .draft-view .champ-picker { grid-column: 3; grid-row: 1; }
+  .gtools, .draft-view .gtools { flex-wrap: wrap; }
+  #target, .draft-view #target { grid-template-columns: minmax(0, 1fr); }
+}
+@media (max-width: 999px) {
+  .draft-view #comps .comp-library { grid-template-columns: minmax(0, 1fr); }
+  .draft-view .library-search, .draft-view #clist, .draft-view #clist ~ .cbtns { grid-column: 1; grid-row: auto; }
+  .draft-view #clist { grid-template-columns: 1fr; max-height: 160px; }
+}
+#clist { align-content: start; grid-auto-rows: max-content; }
+#clist .ci { width: auto; min-width: 0; overflow: hidden; }

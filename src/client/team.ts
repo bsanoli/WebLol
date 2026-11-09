@@ -85,7 +85,7 @@ function renderEditor(){
   const c=cur();
   const dv=S.view==="draft";
   $("#v-comps").classList.toggle("draft-view",dv);
-  $("#draft-comp").hidden=!dv;
+  $("#draft-comp").hidden=true;
   const comments=$("#draft-comments");
   $("#editor").innerHTML=`<div class="editor-controls"><div><label class="control-label" for="cname">Nome da composição</label><input id="cname" value="${esc(c.name)}" placeholder="Nome da comp (ex: Engage bot, Poke, Split...)"></div>
   <div class="vtog"><button data-view="lanes" aria-pressed="${!dv}" class="${dv?"":"on"}">Opções por posição</button><button data-view="draft" aria-pressed="${dv}" class="${dv?"on":""}">Ordem do draft</button></div></div>
