@@ -1,0 +1,32 @@
+:root {
+  color-scheme: dark;
+  --wl-bg: #0d1118;
+  --wl-surface: #141b26;
+  --wl-raised: #1c2634;
+  --wl-line: #344154;
+  --wl-text: #edf1f7;
+  --wl-muted: #abb8cb;
+  --wl-accent: #e7c47c;
+  --wl-on-accent: #20190d;
+  --wl-danger: #ff9393;
+  --wl-success: #79d9a9;
+  --wl-font: "Segoe UI", system-ui, sans-serif;
+  --wl-gutter: clamp(12px, 2.5vw, 32px);
+}
+body { font-family: var(--wl-font); }
+[hidden] { display: none !important; }
+:where(button, input, textarea, select, a, summary, [tabindex]):focus-visible {
+  outline: 2px solid var(--wl-accent);
+  outline-offset: 2px;
+}
+.icon {
+  display: inline-block;
+  width: 1.1em;
+  height: 1.1em;
+  vertical-align: -.15em;
+  flex: none;
+}
+td, .kpi, .bar { font-variant-numeric: tabular-nums; }
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { transition: none !important; scroll-behavior: auto !important; }
+}

@@ -31,4 +31,4 @@ Para atualizar essas imagens, instale o Pillow no Python e rode `python scripts/
 
 ## GitHub Pages
 
-O site compilado fica em `dist/`. Para publicar esta estrutura, configure o Pages para publicar esse diretório como artefato de um workflow do GitHub Actions que execute `npm ci` e `npm run build`. Se o Pages estiver configurado para servir diretamente a raiz da `main`, será necessário trocar a origem da publicação antes de integrar a refatoração.
+O GitHub Pages serve a raiz da branch `main`. Rode `npm run pages:prepare` para gerar o build e atualizar `index.html`, `camp.html`, `worlds.html` e `assets/` na raiz. Inclua esses arquivos no commit que vai para a `main`. Edite os arquivos fonte em `src/` e `public/`.
