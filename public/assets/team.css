@@ -601,3 +601,9 @@ header nav button { border-radius: 8px; }
 @media (min-width: 1000px) {
   #comps .comp-library { position: static; max-height: none; align-self: stretch; min-height: 0; }
 }
+
+/* Faixa de ordem: ícone de ban desenhado (sempre centralizado) e faixa no meio da linha */
+.sq.ban { font-size: 0; }
+.sq.ban::before { content: ""; width: 58%; height: 58%; box-sizing: border-box; border: 1.5px solid #fff; border-radius: 50%;
+  background: linear-gradient(to bottom right, transparent calc(50% - .75px), #fff calc(50% - .75px), #fff calc(50% + .75px), transparent calc(50% + .75px)); }
+.draft-toolbar .dseq { flex: 1 1 auto; justify-content: center; margin-inline-start: 16px; }
