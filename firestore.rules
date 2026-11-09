@@ -1,0 +1,38 @@
+rules_version = '2';
+// Regras do banco do time. Cole no Firebase em Firestore Database > Regras e clique em Publicar.
+// Troque SEU_EMAIL pelo e-mail do admin cadastrado em Authentication.
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function isAdmin() { return request.auth != null && request.auth.token.email == 'SEU_EMAIL'; }
+    function signedIn() { return request.auth != null; }
+
+    // Versão oficial (assinada pelo admin) e chave pública do admin: todos leem, só o admin grava.
+    match /oficial/{doc} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+    match /versoes/{doc} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // Envios criptografados para o admin: qualquer um do time cria, só o admin lê e apaga.
+    match /envios/{id} {
+      allow create: if signedIn()
+        && request.resource.data.uid == request.auth.uid
+        && request.resource.data.enc is string
+        && request.resource.data.enc.size() < 800000;
+      allow read, update, delete: if isAdmin();
+    }
+
+    // Um registro por pessoa e aparelho (perfil + backup criptografado).
+    // Cada aparelho só mexe no seu próprio registro.
+    match /usuarios/{id} {
+      allow create, update: if signedIn()
+        && request.resource.data.uid == request.auth.uid
+        && id.matches('.*~' + request.auth.uid)
+        && (resource == null || resource.data.uid == request.auth.uid);
+      allow read, write: if isAdmin();
+    }
+  }
+}

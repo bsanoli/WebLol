@@ -140,16 +140,41 @@ async function unseal(keys,o){const raw=await C.decrypt({name:"RSA-OAEP"},keys.e
 async function signObj(keys,obj){const body=JSON.stringify(obj);return{body,sig:b64(await C.sign(ECS,keys.sigPriv,TE.encode(body)))}}
 async function verifyObj(admin,o){try{const pub=await C.importKey("jwk",admin.sigPub,ECD,false,["verify"]);return await C.verify(ECS,pub,ub64(o.sig),TE.encode(o.body))?JSON.parse(o.body):null}catch(e){return null}}
 
-/* ================= pasta do time (File System Access API) ================= */
-let ROOT=null,ADMIN=null,KEYS=null,OFF=null; // OFF = versão oficial {version,at,data,log}
-async function dirAt(path,create){let d=ROOT;for(const p of path)d=await d.getDirectoryHandle(p,{create});return d}
-async function readJSON(path){try{const d=await dirAt(path.slice(0,-1),false);return JSON.parse(await (await (await d.getFileHandle(path.at(-1))).getFile()).text())}catch(e){return null}}
-async function writeJSON(path,obj){const d=await dirAt(path.slice(0,-1),true);const fh=await d.getFileHandle(path.at(-1),{create:true});const w=await fh.createWritable();await w.write(JSON.stringify(obj));await w.close()}
-async function listDir(path){try{const d=await dirAt(path,false),out=[];for await(const[n,h]of d.entries())out.push([n,h]);return out}catch(e){return[]}}
-async function removeFile(path){try{const d=await dirAt(path.slice(0,-1),false);await d.removeEntry(path.at(-1))}catch(e){}}
-async function pickFolder(){
-  if(!window.showDirectoryPicker){alert("Este navegador não permite escolher pasta. Use o Google Chrome ou o Microsoft Edge.");return false}
-  try{ROOT=await showDirectoryPicker({id:"lol-time",mode:"readwrite"});await idbSet("root",ROOT);return true}catch(e){return false}
+/* ================= banco online (Firebase / Firestore) ================= */
+// Configuração pública do projeto Firebase (não é segredo: quem protege os dados são as regras do banco).
+const FB_CONFIG=null;
+const FB_ADMIN_EMAIL=""; // e-mail do admin cadastrado no Firebase Authentication
+const FBV="10.12.2";
+let ADMIN=null,KEYS=null,OFF=null; // OFF = versão oficial {version,at,data,log}
+const ONLINE=!!FB_CONFIG;
+let FB=null;
+async function fb(){
+  if(FB)return FB;if(!ONLINE)throw new Error("banco online não configurado");
+  const u=n=>`https://www.gstatic.com/firebasejs/${FBV}/firebase-${n}.js`;
+  const[app,au,fs]=await Promise.all([import(u("app")),import(u("auth")),import(u("firestore"))]);
+  const a=app.initializeApp(FB_CONFIG),auth=au.getAuth(a);
+  await new Promise(r=>{const off=au.onAuthStateChanged(auth,()=>{off();r()})});
+  return FB={db:fs.getFirestore(a),auth,au,fs};
+}
+const fbIsAdmin=()=>!!FB&&!!FB.auth.currentUser&&FB.auth.currentUser.email===FB_ADMIN_EMAIL;
+async function fbUser(){const{auth,au}=await fb();if(!auth.currentUser)await au.signInAnonymously(auth);return auth.currentUser}
+async function fbAdminLogin(pw){const{auth,au}=await fb();if(fbIsAdmin())return;await au.signInWithEmailAndPassword(auth,FB_ADMIN_EMAIL,pw)}
+async function dbGet(col,id){const{db,fs}=await fb();const s=await fs.getDoc(fs.doc(db,col,id));return s.exists()?s.data():null}
+async function dbSet(col,id,data,merge){const{db,fs}=await fb();await fs.setDoc(fs.doc(db,col,id),data,merge?{merge:true}:{})}
+async function dbList(col){const{db,fs}=await fb();return(await fs.getDocs(fs.collection(db,col))).docs.map(d=>({id:d.id,...d.data()}))}
+async function dbDel(col,id){const{db,fs}=await fb();await fs.deleteDoc(fs.doc(db,col,id))}
+const getJ=async(col,id)=>{const d=await dbGet(col,id);if(!d)return null;try{return JSON.parse(d.json)}catch(e){return null}};
+const putJ=(col,id,obj)=>dbSet(col,id,{json:JSON.stringify(obj),at:Date.now()});
+
+/* ===== pasta antiga do OneDrive (só para importar uma vez para o banco) ===== */
+async function fDir(root,path){let d=root;for(const p of path)d=await d.getDirectoryHandle(p);return d}
+async function fRead(root,path){try{const d=await fDir(root,path.slice(0,-1));return JSON.parse(await (await (await d.getFileHandle(path.at(-1))).getFile()).text())}catch(e){return null}}
+async function fList(root,path){try{const d=await fDir(root,path),out=[];for await(const[n,h]of d.entries())out.push([n,h]);return out}catch(e){return[]}}
+// acha o admin.json na pasta escolhida: Time (oficial/), pasta de backup do admin, ou a pasta Admin (backup/)
+async function findAdmin(root){for(const pre of[["oficial"],[],["backup"],["Time","oficial"]]){const adm=await fRead(root,[...pre,"admin.json"]);if(adm)return{pre,adm}}return null}
+async function pickOldFolder(){
+  if(!window.showDirectoryPicker){alert("Para importar a pasta use o Google Chrome ou o Microsoft Edge.");return null}
+  try{return await showDirectoryPicker({id:"lol-time",mode:"read"})}catch(e){return null}
 }
 
 /* ================= dados: diferenças e versões ================= */
@@ -195,19 +220,20 @@ function isSampleOnly(S){return!S||(S.comps||[]).length<=1&&(!S.comps?.length||/
 /* ================= sincronização ================= */
 let reloadCamp=()=>{};
 async function readOfficial(){
-  ADMIN=await readJSON(["oficial","admin.json"]);if(!ADMIN)return{err:"noadmin"};
+  ADMIN=await getJ("oficial","admin");if(!ADMIN)return{err:"noadmin"};
   const fp=await fingerprint(ADMIN),pin=lsGet(FPKEY);
   if(ADMIN_FP&&fp!==ADMIN_FP){ADMIN=null;return{err:"fp"}}
   if(pin&&pin!==fp)return{err:"fp"};lsSet(FPKEY,fp);
-  const raw=await readJSON(["oficial","dados.json"]);if(!raw)return{err:"nodata"};
+  const raw=await getJ("oficial","dados");if(!raw)return{err:"nodata"};
   const d=await verifyObj(ADMIN,raw);if(!d)return{err:"sig"};
   return{off:d};
 }
+let NET=false; // última leitura do banco funcionou
 async function sync(opts={}){
-  if(!ROOT)return setSync("Sem pasta do time","warn");
-  const r=await readOfficial();
-  BADROOT=r.err==="noadmin";
-  if(r.err){const m={noadmin:"⚠ Pasta errada: clique e escolha a pasta Time",nodata:"Sem versão oficial ainda",fp:"⚠ Chave do admin mudou! Não sincronizado",sig:"⚠ Versão oficial com assinatura inválida"}[r.err];setSync(m,r.err==="fp"||r.err==="sig"||r.err==="noadmin"?"bad":"warn");if(r.err==="noadmin")updateStatus();return}
+  if(!ONLINE)return setSync("Banco online não configurado","warn");
+  let r;try{await fb();r=await readOfficial()}catch(e){r={err:"net"}}
+  NET=r.err!=="net";
+  if(r.err){const m={net:"⚠ Sem conexão com o banco do time",noadmin:"Banco do time ainda vazio (o admin precisa importar)",nodata:"Sem versão oficial ainda",fp:"⚠ Chave do admin mudou! Não sincronizado",sig:"⚠ Versão oficial com assinatura inválida"}[r.err];setSync(m,r.err==="noadmin"||r.err==="nodata"?"warn":"bad");updateStatus(true);return}
   OFF=r.off;const base=lsGet(BKEY),S=local()||{};
   let changed=false,notes=[];
   if(!base){
@@ -227,51 +253,91 @@ async function sync(opts={}){
   updateStatus();
 }
 function setSync(t,c){$("#sync").textContent=t;$("#sync").className="chip "+(c||"")}
-function updateStatus(){
+function updateStatus(keepChip){
   const u=user();$("#user").innerHTML=u?`${esc(u.id)}${u.admin?" <small>ADMIN</small>":""}`:"";
   document.body.classList.toggle("isadmin",!!u?.admin);
-  if(!ROOT){setSync(u?"Pasta do time não conectada":"…","warn");$("#sync").onclick=connectFolder;$("#sync").style.cursor="pointer";$("#send").style.display="none";return}
-  $("#sync").onclick=BADROOT?repick:()=>sync().then(()=>toast("Sincronizado"));$("#sync").style.cursor="pointer";
-  if(BADROOT){setSync("⚠ Pasta errada: clique e escolha a pasta Time","bad");$("#send").style.display="none";return}
-  if(OFF)setSync(`☁ Versão oficial v${OFF.version}`,"ok");
-  const p=pending(),sent=new Set(lsGet(SKEY,[])),uns=p.filter(c=>!sent.has(c.h)),wait=p.length-uns.length;
+  $("#sync").onclick=()=>sync().then(()=>NET&&toast("Sincronizado"));$("#sync").style.cursor="pointer";
   const b=$("#send");
-  if(u?.admin){b.style.display=p.length?"":"none";b.className="pri";b.textContent=`Publicar minhas alterações (${p.length})`;b.onclick=()=>publish(p.map(c=>({...c,sid:"admin",from:u.id})),[],"Alterações do admin")}
+  if(!ONLINE||!OFF){if(!keepChip&&!ONLINE)setSync("Banco online não configurado","warn");b.style.display="none";return}
+  if(!keepChip)setSync(`☁ Versão oficial v${OFF.version}`,"ok");
+  const p=pending(),sent=new Set(lsGet(SKEY,[])),uns=p.filter(c=>!sent.has(c.h)),wait=p.length-uns.length;
+  if(u?.admin){b.style.display=p.length?"":"none";b.className="pri";b.disabled=false;b.textContent=`Publicar minhas alterações (${p.length})`;b.onclick=()=>publish(p.map(c=>({...c,sid:"admin",from:u.id})),[],"Alterações do admin")}
   else{b.style.display=p.length?"":"none";b.className=uns.length?"pri":"";b.textContent=uns.length?`Enviar para aprovação (${uns.length})`:`⏳ ${wait} aguardando o admin`;b.disabled=!uns.length;b.onclick=sendChanges}
 }
+const devId=async u=>safeName(u.id)+"~"+(await fbUser()).uid; // um registro por pessoa e aparelho
 async function sendChanges(){
-  const u=user(),base=lsGet(BKEY);if(!ROOT||!ADMIN||!base)return toast("Conecte a pasta do time primeiro");
+  const u=user(),base=lsGet(BKEY);if(!ADMIN||!base)return toast("Sem conexão com o banco do time");
   const sent=lsGet(SKEY,[]),ch=pending().filter(c=>!sent.includes(c.h));if(!ch.length)return;
   const sub={id:uid(),from:u.id,at:Date.now(),baseVersion:base.version,changes:ch};
-  try{await writeJSON(["usuarios",safeName(u.id),"envios",sub.id+".lolenc"],await seal(ADMIN,sub));
+  try{const me=await fbUser();await dbSet("envios",sub.id,{uid:me.uid,from:safeName(u.id),at:sub.at,enc:JSON.stringify(await seal(ADMIN,sub))});
     lsSet(SKEY,[...sent,...ch.map(c=>c.h)].slice(-500));toast(`${ch.length} alteração(ões) enviada(s) para o admin aprovar`);backupNow()}
-  catch(e){toast("Não consegui gravar na pasta do time: "+e.message)}
+  catch(e){toast("Não consegui enviar para o banco do time: "+e.message)}
   updateStatus();
 }
 let tBk;function scheduleBackup(){clearTimeout(tBk);tBk=setTimeout(backupNow,8000)}
-async function backupNow(){const u=user();if(!ROOT||!ADMIN||!u)return;try{await writeJSON(["usuarios",safeName(u.id),"backup.lolenc"],await seal(ADMIN,{user:u.id,at:Date.now(),data:local()}))}catch(e){}}
+async function backupNow(){const u=user();if(!ONLINE||!ADMIN||!u||u.admin)return;
+  try{const me=await fbUser();await dbSet("usuarios",await devId(u),{uid:me.uid,user:u.id,at:Date.now(),ua:navigator.userAgent,backup:JSON.stringify(await seal(ADMIN,{user:u.id,at:Date.now(),data:local()}))},true)}catch(e){}}
 addEventListener("storage",e=>{if(e.key===KEY){updateStatus();scheduleBackup()}});
 
 /* ================= admin: publicar / aprovar ================= */
 async function publish(approved,rejected,label){
-  if(!KEYS)return toast("Desbloqueie o admin primeiro");
-  const r=await readOfficial();if(r.err&&r.err!=="nodata")return toast("Erro lendo a versão oficial: "+r.err);
+  if(!KEYS||!fbIsAdmin()){show("admin");return toast("Desbloqueie o admin primeiro")}
+  let r;try{r=await readOfficial()}catch(e){r={err:"sem conexão"}}if(r.err&&r.err!=="nodata")return toast("Erro lendo a versão oficial: "+r.err);
   const cur=r.off||{version:0,data:{comps:[],plays:[]},log:[]};
   const v=cur.version+1,at=Date.now();
   const log=[...cur.log,...approved.map(c=>({v,at,sid:c.sid,from:c.from,kind:c.kind,op:c.op,id:c.id,name:itemName(c),h:c.h,status:"approved"})),...rejected.map(c=>({v,at,sid:c.sid,from:c.from,kind:c.kind,op:c.op,id:c.id,name:itemName(c),h:c.h,status:"rejected"}))];
   const off={version:v,at,label,data:applyChanges(cur.data,approved),log};
-  await writeJSON(["oficial","dados.json"],await signObj(KEYS,off));
-  await writeJSON(["oficial","versoes","v"+off.version+".json"],await signObj(KEYS,off));
+  const signed=await signObj(KEYS,off);
+  try{await putJ("versoes","v"+off.version,signed);await putJ("oficial","dados",signed)}catch(e){return toast("Não consegui publicar: "+e.message)}
   await sync();renderAdmin();toast(`Versão oficial v${off.version} publicada`);
 }
+// desbloqueia as chaves do admin e entra no banco como admin (mesma senha; se a do banco for outra, usa fbpw)
+async function adminUnlock(pw,fbpw){
+  const keys=await unlockAdmin(ADMIN,pw);
+  try{await fbAdminLogin(fbpw||pw)}catch(e){const err=new Error("fb");err.keys=keys;throw err}
+  return keys;
+}
 
-/* ================= tela de login / primeiro acesso ================= */
+/* ================= importar a pasta antiga do OneDrive para o banco ================= */
+async function importFolder(root,log=()=>{}){
+  const fa=await findAdmin(root);
+  if(!fa)throw new Error(`a pasta ${root.name} não tem o admin.json. Escolha a pasta Time (ou a pasta backup do Admin).`);
+  const{pre,adm}=fa;
+  if(ADMIN_FP&&await fingerprint(adm)!==ADMIN_FP)throw new Error("o admin.json desta pasta não é o original");
+  let n=0;
+  if(!await dbGet("oficial","admin")){await putJ("oficial","admin",adm);n++}
+  const vers=[];for(const[fn,fh]of await fList(root,[...pre,"versoes"])){const m=/^v(\d+)\.json$/.exec(fn);if(!m||fh.kind!=="file")continue;
+    const o=JSON.parse(await (await fh.getFile()).text());if(await verifyObj(adm,o)){await putJ("versoes","v"+m[1],o);vers.push(+m[1]);n++;log(`versão v${m[1]}`)}}
+  const dados=await fRead(root,[...pre,"dados.json"]),dv=dados&&await verifyObj(adm,dados);
+  const cur=await getJ("oficial","dados"),cv=cur&&await verifyObj(adm,cur);
+  if(dv&&(!cv||dv.version>cv.version)){await putJ("oficial","dados",dados);n++;log(`versão oficial v${dv.version}`)}
+  for(const[uname,uh]of await fList(root,["usuarios"])){if(uh.kind!=="directory")continue;
+    for(const[fn,fh]of await fList(root,["usuarios",uname,"envios"])){if(!fn.endsWith(".lolenc"))continue;
+      const id=fn.replace(/\.lolenc$/,"");await dbSet("envios",id,{uid:"importado",from:uname,at:(await fh.getFile()).lastModified,enc:await (await fh.getFile()).text()});n++;log(`envio de ${uname}`)}
+    try{const f=await (await uh.getFileHandle("backup.lolenc")).getFile();await dbSet("usuarios",uname+"~importado",{uid:"importado",user:uname,at:f.lastModified,backup:await f.text()});n++}catch(e){}
+  }
+  return n;
+}
+async function importFlow(){
+  const root=await pickOldFolder();if(!root)return;
+  toast("Importando a pasta "+root.name+"...",8000);
+  try{const n=await importFolder(root,m=>toast("Importado: "+m,1500));await sync();renderAdmin();toast(`Importação concluída: ${n} item(ns) copiados para o banco`,5000)}
+  catch(e){alert("Não consegui importar: "+e.message)}
+}
+async function exportBackup(){ // cópia completa para guardar na pasta Admin do OneDrive
+  const vers=(await dbList("versoes")).map(d=>({id:d.id,obj:JSON.parse(d.json)})).sort((a,b)=>+a.id.slice(1)-+b.id.slice(1));
+  const out={fmt:"lol-time-backup",at:Date.now(),admin:ADMIN,dados:await getJ("oficial","dados"),versoes:Object.fromEntries(vers.map(v=>[v.id,v.obj]))};
+  const a=document.createElement("a");a.href=URL.createObjectURL(new Blob([JSON.stringify(out,null,1)],{type:"application/json"}));
+  a.download=`backup-time-${new Date().toISOString().slice(0,10)}.json`;a.click();
+}
+
+/* ================= tela de login ================= */
 function modal(html){$("#mbox").innerHTML=html;$("#modal").classList.add("on");const i=$("#mbox input");i&&setTimeout(()=>i.focus(),50)}
 const closeModal=()=>$("#modal").classList.remove("on");
 const merr=m=>{const e=$("#mbox .err");if(e)e.textContent=m};
 let pendingId=null;
 function stepId(){
-  modal(`<h3>Bem-vindo ao painel do time</h3><p>Entre com o seu nome de usuário do LoL (Riot ID). Você só precisa fazer isso uma vez neste PC.</p>
+  modal(`<h3>Bem-vindo ao painel do time</h3><p>Entre com o seu nome de usuário do LoL (Riot ID). Você só precisa fazer isso uma vez neste aparelho.</p>
    <label>Riot ID</label>
    <div class="rid"><input id="rname" placeholder="Nome (ex: brunoltz)" maxlength="16" autocomplete="off" spellcheck="false"><span>#</span><input id="rtag" placeholder="TAG" maxlength="5" autocomplete="off" spellcheck="false"></div>
    <div class="err"></div>
@@ -280,7 +346,7 @@ function stepId(){
   const go=()=>{const n=nm.value.trim(),tag=tg.value.replace(/[#\s]/g,"").toUpperCase();
     if(n.length<3)return merr("Digite o nome (mínimo 3 letras)."),nm.focus();
     if(!/^[A-Za-z0-9]{2,5}$/.test(tag))return merr("Digite a TAG depois do # (2 a 5 letras ou números)."),tg.focus();
-    pendingId=n+"#"+tag;ROOT?afterFolder():stepFolder()};
+    pendingId=n+"#"+tag;afterId()};
   // se a pessoa digitar ou colar "nome#TAG" no primeiro campo, separa sozinho
   nm.addEventListener("input",()=>{if(nm.value.includes("#")){const[a,...r]=nm.value.split("#");nm.value=a.trim();tg.value=(r.join("")+tg.value).replace(/\s/g,"").slice(0,5);tg.focus()}});
   tg.addEventListener("input",()=>{const p=tg.selectionStart;tg.value=tg.value.replace(/[#\s]/g,"").toUpperCase();tg.setSelectionRange(p,p)});
@@ -288,84 +354,69 @@ function stepId(){
   tg.addEventListener("keydown",e=>{if(e.key==="Enter"){e.preventDefault();go()}if(e.key==="Backspace"&&!tg.value)nm.focus()});
   $("#ok").onclick=go;
 }
-const FOLDER="Time";
-function stepFolder(){
-  const adm=isAdminId(pendingId);
-  modal(`<h3>Escolha a pasta do time</h3>
-   <p>Na próxima janela, selecione a pasta compartilhada do time no <b>OneDrive</b>: é a pasta <b>${FOLDER}</b> (dentro dela ficam as pastas <b>oficial</b> e <b>usuarios</b>).</p>
-   <div class="fpath">📁 OneDrive › <b>${FOLDER}</b> <span class="mut">(no PC do Bruno: lol › ${FOLDER})</span></div>
-   <p>Clique uma vez na pasta <b>${FOLDER}</b> e depois em <b>Selecionar pasta</b>. Em seguida o navegador pergunta se a página pode ver e salvar arquivos nessa pasta: clique em <b>Permitir</b> (ou <b>Editar arquivos</b>).<br><br>É nessa pasta que ficam a versão oficial do time e os seus envios criptografados. Não escolha outra pasta.</p>
-   <div class="err"></div><div class="row">${adm?"":'<button id="skip">Pular por enquanto</button>'}<button class="pri" id="pick">Escolher a pasta ${FOLDER}</button></div>`);
-  $("#pick").onclick=async()=>{if(!await pickFolder())return merr("Nenhuma pasta escolhida.");
-    if(!await validRoot())return wrongFolder();afterFolder()};
-  if(!adm)$("#skip").onclick=()=>finishLogin(false);
-}
-const validRoot=async()=>!!(await readJSON(["oficial","admin.json"]));
-function wrongFolder(){
-  const inner=ROOT&&ROOT.name==="usuarios";
-  modal(`<h3>Pasta errada</h3><p>A pasta <b>${esc(ROOT?.name||"")}</b> não tem os dados do time.${inner?"<br><br>Você escolheu a pasta <b>usuarios de dentro</b>. Volte um nível e escolha a pasta <b>${FOLDER}</b>, que fica por fora dela.":""}<br><br>A pasta certa é a <b>${FOLDER}</b>. Dentro dela tem as pastas <b>oficial</b> e <b>usuarios</b>.</p>
-   <div class="fpath">📁 ${FOLDER} ✅ &nbsp;&nbsp;→&nbsp;&nbsp; <span class="mut">oficial · usuarios</span></div>
-   <div class="row"><button class="pri" id="again">Escolher de novo</button></div>`);
-  $("#again").onclick=async()=>{ROOT=null;await idbDel("root");if(user())repick();else stepFolder()};
-}
-async function repick(){closeModal();if(!await pickFolder())return updateStatus();if(!await validRoot())return wrongFolder();if(user()?.admin&&!KEYS)KEYS=await idbGet("adminKeys");BADROOT=false;await sync();renderAdmin();toast("Pasta do time conectada")}
-let BADROOT=false;
-async function afterFolder(){
-  ADMIN=await readJSON(["oficial","admin.json"]);
-  if(ADMIN&&ADMIN_FP&&await fingerprint(ADMIN)!==ADMIN_FP){ADMIN=null;return modal(`<h3>⚠ Pasta adulterada</h3><p>O arquivo do admin nesta pasta não é o original. Por segurança o app não vai usar esta pasta. Avise o admin.</p><div class="row"><button class="pri" onclick="stepFolder()">Escolher outra pasta</button></div>`)}
-  if(isAdminId(pendingId))return ADMIN?stepAdminPw():stepAdminNew();
-  if(!ADMIN)toast("O admin ainda não configurou esta pasta. Você pode usar normalmente e enviar depois.",5000);
+async function afterId(){
+  merr("Conectando ao banco do time...");
+  let r;try{await fb();r=await readOfficial()}catch(e){r={err:"net"}}
+  if(r.err==="fp")return modal(`<h3>⚠ Banco adulterado</h3><p>A chave do admin guardada no banco do time não é a original. Por segurança o app não vai usar esses dados. Avise o admin.</p><div class="row"><button class="pri" onclick="stepId()">Voltar</button></div>`);
+  if(isAdminId(pendingId)){if(!ONLINE)return merr("O banco online ainda não foi configurado neste app.");if(r.err==="net")return merr("Não consegui conectar ao banco do time. Verifique a internet.");return ADMIN?stepAdminPw():stepImport()}
+  if(r.err==="net"||r.err==="noadmin")toast("O banco do time ainda não está disponível. Você pode usar normalmente e enviar depois.",5000);
   finishLogin(false);
 }
 function stepAdminPw(){
   modal(`<h3>Login do admin</h3><p>Este Riot ID é o administrador. Digite a senha de admin.</p>
-   <label>Senha</label><input type="password" id="pw"><div class="err"></div>
+   <label>Senha</label><input type="password" id="pw"><div id="fbw" style="display:none"><label>Senha do Firebase (do e-mail ${esc(FB_ADMIN_EMAIL)})</label><input type="password" id="fpw"></div><div class="err"></div>
    <div class="row"><button id="back">Voltar</button><button class="pri" id="ok">Entrar</button></div>`);
-  const go=async()=>{$("#ok").disabled=true;merr("Verificando...");try{KEYS=await unlockAdmin(ADMIN,$("#pw").value);finishLogin(true)}catch(e){merr("Senha incorreta.");$("#ok").disabled=false}};
-  $("#ok").onclick=go;$("#pw").addEventListener("keydown",e=>{if(e.key==="Enter")go()});$("#back").onclick=stepId;
+  const go=async()=>{$("#ok").disabled=true;merr("Verificando...");
+    try{KEYS=await adminUnlock($("#pw").value,$("#fpw").value);finishLogin(true)}
+    catch(e){$("#ok").disabled=false;if(e.message==="fb"){$("#fbw").style.display="";merr($("#fpw").value?"Senha do Firebase incorreta.":"A senha do Firebase é diferente da senha de admin. Digite a do Firebase também.");$("#fpw").focus()}else merr("Senha incorreta.")}};
+  $("#ok").onclick=go;$("#mbox").querySelectorAll("input").forEach(i=>i.addEventListener("keydown",e=>{if(e.key==="Enter")go()}));$("#back").onclick=stepId;
 }
-function stepAdminNew(){
-  modal(`<h3>Configurar o admin</h3><p>Esta pasta ainda não tem admin. Crie a senha de admin de <b>${esc(pendingId)}</b>.<br><br>⚠ Guarde bem esta senha: sem ela ninguém consegue ler os envios criptografados nem publicar versões, nem você.</p>
-   <label>Senha (mínimo 8 caracteres)</label><input type="password" id="pw"><label>Repita a senha</label><input type="password" id="pw2"><div class="err"></div>
-   <div class="row"><button id="back">Voltar</button><button class="pri" id="ok">Criar admin</button></div>`);
+function stepImport(){
+  modal(`<h3>Importar os dados do time</h3><p>O banco online do time ainda está vazio. Escolha a pasta antiga do OneDrive (<b>Time</b>, ou a pasta de backup em <b>Admin</b>) para copiar a chave do admin, a versão oficial e os envios para o banco. Isso só é feito uma vez.</p>
+   <div class="err"></div><div class="row"><button id="back">Voltar</button><button class="pri" id="pick">Escolher a pasta</button></div>`);
   $("#back").onclick=stepId;
-  $("#ok").onclick=async()=>{const a=$("#pw").value,b=$("#pw2").value;if(a.length<8)return merr("Use pelo menos 8 caracteres.");if(a!==b)return merr("As senhas não são iguais.");
-    $("#ok").disabled=true;merr("Gerando chaves de criptografia...");
-    try{if(ADMIN_FP)return merr("Este app já tem um admin definido. Escolha a pasta original do time.");if(await readJSON(["oficial","admin.json"]))return merr("Já existe um admin nesta pasta.");
-      ADMIN=await createAdmin(a);await writeJSON(["oficial","admin.json"],ADMIN);KEYS=await unlockAdmin(ADMIN,a);lsSet(FPKEY,await fingerprint(ADMIN));
-      const off={version:1,at:Date.now(),label:"Versão inicial",data:shared(local()),log:[]};
-      await writeJSON(["oficial","dados.json"],await signObj(KEYS,off));await writeJSON(["oficial","versoes","v1.json"],await signObj(KEYS,off));
-      lsSet(BKEY,{version:1,data:off.data});finishLogin(true)}
-    catch(e){merr("Erro: "+e.message);$("#ok").disabled=false}};
+  $("#pick").onclick=async()=>{const root=await pickOldFolder();if(!root)return merr("Nenhuma pasta escolhida.");
+    const fa=await findAdmin(root);if(!fa)return merr(`A pasta ${root.name} não tem o admin.json. Escolha a pasta Time ou a pasta backup do Admin.`);const adm=fa.adm;
+    if(ADMIN_FP&&await fingerprint(adm)!==ADMIN_FP)return merr("O admin.json desta pasta não é o original.");
+    ADMIN=adm;modal(`<h3>Senha de admin</h3><p>Digite a senha de admin para entrar no banco e copiar os dados da pasta <b>${esc(root.name)}</b>.</p>
+     <label>Senha</label><input type="password" id="pw"><div id="fbw" style="display:none"><label>Senha do Firebase (do e-mail ${esc(FB_ADMIN_EMAIL)})</label><input type="password" id="fpw"></div><div class="err"></div>
+     <div class="row"><button class="pri" id="ok">Importar</button></div>`);
+    const go=async()=>{$("#ok").disabled=true;merr("Verificando...");
+      try{KEYS=await adminUnlock($("#pw").value,$("#fpw").value)}
+      catch(e){$("#ok").disabled=false;if(e.message==="fb"){$("#fbw").style.display="";merr("Digite também a senha do Firebase.")}else merr("Senha incorreta.");return}
+      try{merr("Copiando para o banco...");const n=await importFolder(root,m=>merr("Copiando: "+m));toast(`${n} item(ns) copiados para o banco`,5000);finishLogin(true)}
+      catch(e){merr("Erro: "+e.message);$("#ok").disabled=false}};
+    $("#ok").onclick=go;$("#mbox").querySelectorAll("input").forEach(i=>i.addEventListener("keydown",e=>{if(e.key==="Enter")go()}))};
 }
 async function finishLogin(admin){
   lsSet(UKEY,{id:pendingId,admin,created:Date.now()});closeModal();
-  if(ROOT&&ADMIN&&!admin){try{await writeJSON(["usuarios",safeName(pendingId),"perfil.lolenc"],await seal(ADMIN,{id:pendingId,created:Date.now(),ua:navigator.userAgent}))}catch(e){}}
+  if(ONLINE&&!admin){try{const me=await fbUser();await dbSet("usuarios",await devId({id:pendingId}),{uid:me.uid,user:pendingId,created:Date.now(),at:Date.now(),ua:navigator.userAgent},true)}catch(e){}}
   await sync();backupNow();updateStatus();if(admin)renderAdmin();toast(`Bem-vindo, ${pendingId}!`);
 }
-async function connectFolder(){
-  if(ROOT){try{if(await ROOT.requestPermission({mode:"readwrite"})==="granted"){await sync();return renderAdmin()}}catch(e){}}
-  repick()
-}
-$("#logout").onclick=async()=>{if(!confirm("Sair deste usuário neste PC? (as comps salvas continuam aqui)"))return;localStorage.removeItem(UKEY);await idbDel("adminKeys");KEYS=null;updateStatus();pendingId=null;stepId()};
+$("#logout").onclick=async()=>{if(!confirm("Sair deste usuário neste aparelho? (as comps salvas continuam aqui)"))return;localStorage.removeItem(UKEY);await idbDel("adminKeys");KEYS=null;try{if(FB)await FB.au.signOut(FB.auth)}catch(e){}updateStatus();pendingId=null;stepId()};
 
 /* ================= aba Administração ================= */
 async function renderAdmin(){
   const el=$("#admin");if(!user()?.admin)return;
-  if(!ROOT||!ADMIN){el.innerHTML=`<h2>Administração</h2><div class="card">Conecte a pasta do time para ver os envios. <button class="pri" id="cf">Conectar pasta</button></div>`;$("#cf").onclick=connectFolder;return}
-  if(!KEYS){el.innerHTML=`<h2>Administração</h2><div class="card"><p>Digite a senha de admin para desbloquear neste PC.</p><input type="password" id="apw" style="max-width:300px"> <button class="pri" id="aok">Desbloquear</button> <span class="bad" id="aerr"></span></div>`;
-    $("#aok").onclick=async()=>{try{KEYS=await unlockAdmin(ADMIN,$("#apw").value);renderAdmin()}catch(e){$("#aerr").textContent="Senha incorreta"}};return}
+  if(!ONLINE){el.innerHTML=`<h2>Administração</h2><div class="card">O banco online ainda não foi configurado neste app.</div>`;return}
+  if(!ADMIN){el.innerHTML=`<h2>Administração</h2><div class="card">O banco do time está vazio ou sem conexão. <button class="pri" id="imp">Importar da pasta</button> <button id="refresh">Tentar de novo</button></div>`;$("#imp").onclick=importFlow;$("#refresh").onclick=async()=>{await sync();renderAdmin()};return}
+  try{await fb()}catch(e){}
+  if(!KEYS||!fbIsAdmin()){el.innerHTML=`<h2>Administração</h2><div class="card"><p>Digite a senha de admin para desbloquear neste aparelho.</p><input type="password" id="apw" style="max-width:300px"> <span id="afw" style="display:none"><input type="password" id="afpw" placeholder="Senha do Firebase" style="max-width:220px"></span> <button class="pri" id="aok">Desbloquear</button> <span class="bad" id="aerr"></span></div>`;
+    const go=async()=>{try{KEYS=await adminUnlock($("#apw").value,$("#afpw").value);renderAdmin()}catch(e){if(e.message==="fb"){$("#afw").style.display="";$("#aerr").textContent="Digite também a senha do Firebase"}else $("#aerr").textContent="Senha incorreta"}};
+    $("#aok").onclick=go;el.querySelectorAll("input").forEach(i=>i.addEventListener("keydown",e=>{if(e.key==="Enter")go()}));return}
   el.innerHTML=`<h2>Administração</h2><p class="mut">Carregando envios...</p>`;
-  const done=new Set((OFF?.log||[]).map(l=>l.sid)),subs=[],users=[];
-  for(const[uname,uh]of await listDir(["usuarios"])){if(uh.kind!=="directory")continue;
-    let bk=null;try{bk=(await (await uh.getFileHandle("backup.lolenc")).getFile()).lastModified}catch(e){}
-    users.push({uname,bk});
-    for(const[fn,fh]of await listDir(["usuarios",uname,"envios"])){if(!fn.endsWith(".lolenc"))continue;
-      try{const s=await unseal(KEYS,JSON.parse(await (await fh.getFile()).text()));s.file=["usuarios",uname,"envios",fn];if(done.has(s.id)){await removeFile(s.file);continue}subs.push(s)}catch(e){subs.push({id:fn,from:uname,err:true,file:["usuarios",uname,"envios",fn]})}}}
+  const done=new Set((OFF?.log||[]).map(l=>l.sid)),subs=[],users=new Map();
+  let envs=[],regs=[];
+  try{[envs,regs]=await Promise.all([dbList("envios"),dbList("usuarios")])}catch(e){el.innerHTML=`<h2>Administração</h2><div class="card bad">Não consegui ler o banco: ${esc(e.message)}</div>`;return}
+  for(const d of envs){
+    try{const s=await unseal(KEYS,JSON.parse(d.enc));s.doc=d.id;if(done.has(s.id)){await dbDel("envios",d.id);continue}subs.push(s)}catch(e){subs.push({id:d.id,doc:d.id,from:d.from,err:true})}}
+  for(const r of regs){const k=normId(r.user||r.id.split("~")[0]),o=users.get(k)||{name:r.user||k,n:0,bk:null};o.n++;
+    if(r.backup&&(!o.bk||r.at>o.bk.at))o.bk={at:r.at,doc:r.id,enc:r.backup};users.set(k,o)}
+  const ulist=[...users.values()].sort((a,b)=>a.name.localeCompare(b.name));
   subs.sort((a,b)=>(a.at||0)-(b.at||0));
   const mine=pending();
   el.innerHTML=`<h2>Envios aguardando aprovação (${subs.length})</h2>
-   ${subs.length?subs.map((s,si)=>s.err?`<div class="card"><span class="bad">Não consegui abrir o envio ${esc(s.id)} de ${esc(s.from)} (arquivo corrompido ou de outra chave).</span> <button data-delf="${si}" class="dng">Apagar arquivo</button></div>`:`
+   ${subs.length?subs.map((s,si)=>s.err?`<div class="card"><span class="bad">Não consegui abrir o envio ${esc(s.id)} de ${esc(s.from)} (corrompido ou de outra chave).</span> <button data-delf="${si}" class="dng">Apagar envio</button></div>`:`
     <div class="card"><div class="hd"><b>${esc(s.from)}</b><span class="mut">${fmtD(s.at)} · baseado na v${s.baseVersion}${OFF&&s.baseVersion<OFF.version?` <span style="color:var(--gold)">(versão oficial agora é v${OFF.version})</span>`:""}</span></div>
      ${s.changes.map((c,ci)=>`<label class="chg"><input type="checkbox" data-s="${si}" data-c="${ci}" checked><div><span class="op ${c.op}">${OPN[c.op]}</span> ${KN[c.kind]} <b>${esc(itemName(c))}</b><div class="det">${describe(c)}</div></div></label>`).join("")}
      <div class="btns"><button class="pri" data-ap="${si}">✓ Aprovar marcadas</button><button class="dng" data-rj="${si}">✕ Recusar tudo</button></div></div>`).join(""):`<div class="card mut">Nenhum envio pendente. 🎉</div>`}
@@ -375,16 +426,19 @@ async function renderAdmin(){
    <div class="card"><table><tr><th>Versão</th><th>Data</th><th>De</th><th>O quê</th><th>Status</th></tr>
     ${(OFF?.log||[]).slice().reverse().slice(0,150).map(l=>`<tr><td>v${l.v}</td><td>${fmtD(l.at)}</td><td>${esc(l.from)}</td><td><span class="op ${l.op}">${OPN[l.op]}</span> ${KN[l.kind]} ${esc(l.name)}</td><td class="${l.status==="approved"?"ok":"bad"}">${l.status==="approved"?"aprovada":"recusada"}</td></tr>`).join("")||'<tr><td colspan="5" class="mut">Ainda sem histórico.</td></tr>'}</table></div>
    <h2>Usuários</h2>
-   <div class="card"><table><tr><th>Pasta</th><th>Última cópia (backup)</th><th></th></tr>
-    ${users.map((u,i)=>`<tr><td>${esc(u.uname)}</td><td>${u.bk?fmtD(u.bk):'<span class="mut">—</span>'}</td><td>${u.bk?`<button data-bk="${i}">Baixar backup</button>`:""}</td></tr>`).join("")||'<tr><td colspan="3" class="mut">Nenhum usuário ainda.</td></tr>'}</table></div>
-   <h2>Este PC</h2><div class="card"><span class="mut">Chave do admin: ${esc(KEYS.fp)}</span> <button id="lock">Bloquear admin neste PC</button> <button id="refresh">Atualizar</button></div>`;
+   <div class="card"><table><tr><th>Usuário</th><th>Aparelhos</th><th>Última cópia (backup)</th><th></th></tr>
+    ${ulist.map((u,i)=>`<tr><td>${esc(u.name)}</td><td>${u.n}</td><td>${u.bk?fmtD(u.bk.at):'<span class="mut">—</span>'}</td><td>${u.bk?`<button data-bk="${i}">Baixar backup</button>`:""}</td></tr>`).join("")||'<tr><td colspan="4" class="mut">Nenhum usuário ainda.</td></tr>'}</table></div>
+   <h2>Banco e backup</h2><div class="card"><span class="mut">Chave do admin: ${esc(KEYS.fp)}</span>
+    <div class="btns"><button id="exp">Baixar backup completo</button><button id="imp">Importar da pasta</button><button id="lock">Bloquear admin neste aparelho</button><button id="refresh">Atualizar</button></div>
+    <p class="mut">Guarde o backup completo na pasta Admin do OneDrive de tempos em tempos.</p></div>`;
   const pick=si=>{const s=subs[si],ap=[],rj=[];document.querySelectorAll(`[data-s="${si}"]`).forEach(cb=>{const c={...s.changes[+cb.dataset.c],sid:s.id,from:s.from};(cb.checked?ap:rj).push(c)});return{s,ap,rj}};
-  el.querySelectorAll("[data-ap]").forEach(b=>b.onclick=async()=>{const{s,ap,rj}=pick(+b.dataset.ap);b.disabled=true;await publish(ap,rj,`Envio de ${s.from}`);await removeFile(s.file);renderAdmin()});
-  el.querySelectorAll("[data-rj]").forEach(b=>b.onclick=async()=>{const s=subs[+b.dataset.rj];if(!confirm(`Recusar todas as alterações de ${s.from}?`))return;b.disabled=true;await publish([],s.changes.map(c=>({...c,sid:s.id,from:s.from})),`Envio de ${s.from} recusado`);await removeFile(s.file);renderAdmin()});
-  el.querySelectorAll("[data-delf]").forEach(b=>b.onclick=async()=>{await removeFile(subs[+b.dataset.delf].file);renderAdmin()});
-  el.querySelectorAll("[data-bk]").forEach(b=>b.onclick=async()=>{const u=users[+b.dataset.bk];const d=await unseal(KEYS,await readJSON(["usuarios",u.uname,"backup.lolenc"]));const a=document.createElement("a");a.href=URL.createObjectURL(new Blob([JSON.stringify({comps:d.data.comps,plays:d.data.plays},null,2)],{type:"application/json"}));a.download=`backup-${u.uname}.json`;a.click()});
+  el.querySelectorAll("[data-ap]").forEach(b=>b.onclick=async()=>{const{s,ap,rj}=pick(+b.dataset.ap);b.disabled=true;await publish(ap,rj,`Envio de ${s.from}`);await dbDel("envios",s.doc).catch(()=>{});renderAdmin()});
+  el.querySelectorAll("[data-rj]").forEach(b=>b.onclick=async()=>{const s=subs[+b.dataset.rj];if(!confirm(`Recusar todas as alterações de ${s.from}?`))return;b.disabled=true;await publish([],s.changes.map(c=>({...c,sid:s.id,from:s.from})),`Envio de ${s.from} recusado`);await dbDel("envios",s.doc).catch(()=>{});renderAdmin()});
+  el.querySelectorAll("[data-delf]").forEach(b=>b.onclick=async()=>{await dbDel("envios",subs[+b.dataset.delf].doc).catch(()=>{});renderAdmin()});
+  el.querySelectorAll("[data-bk]").forEach(b=>b.onclick=async()=>{const u=ulist[+b.dataset.bk];const d=await unseal(KEYS,JSON.parse(u.bk.enc));const a=document.createElement("a");a.href=URL.createObjectURL(new Blob([JSON.stringify({comps:d.data.comps,plays:d.data.plays},null,2)],{type:"application/json"}));a.download=`backup-${safeName(u.name)}.json`;a.click()});
   const pm=$("#pubmine");if(pm)pm.onclick=()=>publish(mine.map(c=>({...c,sid:"admin",from:user().id})),[],"Alterações do admin");
-  $("#lock").onclick=async()=>{await idbDel("adminKeys");KEYS=null;renderAdmin()};
+  $("#exp").onclick=exportBackup;$("#imp").onclick=importFlow;
+  $("#lock").onclick=async()=>{await idbDel("adminKeys");KEYS=null;try{await FB.au.signOut(FB.auth)}catch(e){}renderAdmin()};
   $("#refresh").onclick=async()=>{await sync();renderAdmin()};
 }
 
@@ -404,17 +458,12 @@ document.querySelectorAll("#top .tab").forEach(b=>b.onclick=()=>show(b.dataset.t
 
 /* ================= início ================= */
 (async function init(){
-  ROOT=await idbGet("root");
-  if(ROOT){try{if(await ROOT.queryPermission({mode:"readwrite"})!=="granted"){ROOT_PENDING=ROOT;ROOT=null}}catch(e){ROOT=null}}
   KEYS=user()?.admin?await idbGet("adminKeys"):null;
-  if(ROOT)await sync({reload:false});
   updateStatus();
-  if(!ROOT&&typeof ROOT_PENDING!=="undefined"&&user()){setSync("🔌 Clique para reconectar a pasta do time","warn");$("#sync").onclick=async()=>{ROOT=ROOT_PENDING;try{if(await ROOT.requestPermission({mode:"readwrite"})!=="granted")ROOT=null}catch(e){ROOT=null}if(ROOT){await sync();renderAdmin()}else updateStatus()}}
   const f=lsGet("lol-aba-principal","worlds");show(["worlds","camp","admin"].includes(f)?f:"worlds");
-  if(!user())stepId();
-  setInterval(async()=>{if(!ROOT)return;const r=await readOfficial();if(r.off&&OFF&&r.off.version!==OFF.version){await sync();toast(`Nova versão oficial v${r.off.version} carregada`)}},60000);
+  if(!user())stepId();else if(ONLINE){setSync("Conectando...","");await sync({reload:false});if(user()?.admin)renderAdmin()}
+  setInterval(async()=>{if(!ONLINE||!user())return;let r;try{r=await readOfficial()}catch(e){return}if(r.off&&(!OFF||r.off.version!==OFF.version)){await sync();toast(`Nova versão oficial v${r.off.version} carregada`)}},60000);
 })();
-var ROOT_PENDING;
 </script>
 </body>
 </html>
