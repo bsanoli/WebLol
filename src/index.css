@@ -1,0 +1,21 @@
+@import "tailwindcss";
+
+@theme inline {
+  --color-background: var(--wl-bg);
+  --color-foreground: var(--wl-text);
+  --color-card: var(--wl-surface);
+  --color-card-foreground: var(--wl-text);
+  --color-primary: var(--wl-accent);
+  --color-primary-foreground: var(--wl-on-accent);
+  --color-secondary: var(--wl-raised);
+  --color-secondary-foreground: var(--wl-text);
+  --color-muted: var(--wl-raised);
+  --color-muted-foreground: var(--wl-muted);
+  --color-accent: var(--wl-raised);
+  --color-accent-foreground: var(--wl-text);
+  --color-border: var(--wl-line);
+  --color-input: var(--wl-line);
+  --color-ring: var(--wl-accent);
+  --color-destructive: var(--wl-danger);
+  --radius-lg: 12px;
+}
