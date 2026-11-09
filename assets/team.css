@@ -580,3 +580,13 @@ header nav button { border-radius: 8px; }
 }
 #clist { align-content: start; grid-auto-rows: max-content; }
 #clist .ci { width: auto; min-width: 0; overflow: hidden; }
+.lib-t-draft { display: none; }
+.draft-view .lib-t-full { display: none; }
+.draft-view .lib-t-draft { display: inline; }
+/* Coluna 1: tudo alinhado à esquerda e ocupando a largura toda */
+#comps .comp-library > *, #comps .comp-library .library-search > * { width: 100%; margin-inline: 0; }
+#v-comps .comp-library .control-label { padding-inline: 0; margin-inline: 0; text-align: left; }
+#comps .comp-library .ci { text-align: left; }
+#comps .comp-library #clist ~ .cbtns { justify-items: stretch; }
+#comps .comp-library .cbtns button { width: 100%; justify-content: center; }
+@media (max-width: 999px) { .draft-view #comps .comp-library .library-search label { width: 1px; } }
