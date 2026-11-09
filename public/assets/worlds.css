@@ -56,13 +56,13 @@ h2{font-family:var(--display);font-weight:700;font-size:22px;margin:0 0 2px;lett
 .lanecard{display:flex;flex-direction:column;justify-content:flex-start;background:var(--surface);border:1px solid var(--line);border-top:4px solid var(--c);border-radius:10px;padding:14px 12px;cursor:pointer;text-align:left;font:inherit;color:inherit}
 .lanecard h3{font-family:var(--display);font-size:20px;margin:0 0 8px;color:var(--c)}
 .lanecard ol{margin:0;padding:0;list-style:none;display:grid;gap:6px}
-.lanecard li,.lchead{display:grid;grid-template-columns:minmax(0,1fr) 40px 50px;align-items:center;gap:8px;font-size:14px}
+.lanecard li,.lchead{display:grid;grid-template-columns:minmax(0,1fr) 36px 52px;align-items:center;gap:8px;font-size:14px}
 .lchead{font-size:10.5px;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);margin-bottom:6px}
-.lchead span:nth-child(n+2),.lanecard li .g{text-align:right}
-.lanecard li .g{font-family:var(--mono);font-size:14px}
+.lchead span:nth-child(n+2),.lanecard .lane-games{text-align:center}
+.lanecard .lane-games{font-family:var(--mono);font-size:14px}
 .ell{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
 .lanecard .ell{white-space:normal;line-height:1.2}
-.lanecard .wr{min-width:0;width:50px;padding:2px 0}
+.lanecard .wr{min-width:0;width:100%;padding:3px 6px;text-align:center;white-space:nowrap}
 .lanecard .av{width:24px;height:24px;margin-right:7px;font-size:8px}
 .lanecard li b{font-weight:600;min-width:0}
 .lanecard .more{font-size:12px;color:var(--muted);margin-top:10px}
@@ -91,8 +91,11 @@ tr.detail td{background:var(--mid-bg);padding:14px 16px}
 .chips{display:flex;flex-wrap:wrap;gap:5px}
 .chip{background:var(--surface);border:1px solid var(--line);border-radius:999px;padding:1px 9px;font-size:13px}
 .na{color:var(--muted)}
-.mulist{display:grid;max-height:520px;overflow-y:auto;border-top:1px solid var(--line)}
-.murow{all:unset;cursor:pointer;display:grid;grid-template-columns:1fr auto auto;gap:10px;align-items:center;padding:8px 16px;border-bottom:1px solid var(--line);font-size:14px;font-weight:600}
+.matchups-view{container-type:inline-size}
+.matchups-grid{display:grid;gap:20px}
+.mu-picker{padding:0;overflow:hidden}
+.mulist{--row-height:52px;display:grid;align-content:start;max-height:calc(var(--row-height) * 5 + 1px);overflow-y:auto;border-top:1px solid var(--line)}
+.murow{all:unset;box-sizing:border-box;min-height:var(--row-height);cursor:pointer;display:grid;grid-template-columns:minmax(0,1fr) auto auto;gap:10px;align-items:center;padding:8px 16px;border-bottom:1px solid var(--line);font-size:14px;font-weight:600}
 .murow:hover{background:var(--mid-bg)}.murow[aria-pressed="true"]{background:var(--gold-soft);box-shadow:inset 3px 0 0 var(--gold)}
 .murow:focus-visible{outline:2px solid var(--gold);outline-offset:-2px}
 .muhead{display:flex;align-items:center;gap:6px}.muhead .av{width:52px;height:52px;margin-right:12px;font-size:14px}
@@ -100,17 +103,23 @@ tr.detail td{background:var(--mid-bg);padding:14px 16px}
 .wl{display:inline-flex;gap:2px}.wl i{width:8px;height:14px;border-radius:2px;display:block}.wl .w{background:var(--good)}.wl .l{background:var(--bad);opacity:.7}
 .duel{display:grid;grid-template-columns:minmax(0,1fr) minmax(80px,2fr) minmax(0,1fr) 40px;gap:10px;align-items:center;font-size:14px;font-weight:600}
 .duel .val{font-family:var(--mono);font-size:13px;text-align:right}
-@media (max-width:760px){#mudetail{grid-column:auto!important}.mulist{max-height:260px}}
+@container (min-width:1060px){
+  .matchups-grid{grid-template-columns:repeat(3,minmax(0,1fr))}
+  #mudetail{grid-column:span 2}
+  .mu-picker{contain:size;display:grid;grid-template-rows:auto minmax(0,1fr)}
+  .mulist{max-height:none}
+}
 #tip{position:fixed;z-index:50;pointer-events:none;background:var(--ink);color:var(--bg);font-size:12.5px;line-height:1.4;padding:6px 9px;border-radius:6px;max-width:260px;box-shadow:0 4px 14px rgba(0,0,0,.25)}
 [data-tip]{cursor:help}
 .track i[data-tip]:hover{filter:brightness(1.15)}
 .build{display:grid;gap:12px}
 .items{display:grid;gap:4px}
-.item{display:grid;grid-template-columns:20px minmax(0,1fr) 70px 38px;align-items:center;gap:8px;padding:3px 2px;font-size:13.5px;border-bottom:1px dashed var(--line)}
+.item{display:grid;grid-template-columns:minmax(0,1fr) minmax(24px,56px) 40px;align-items:center;gap:8px;padding:3px 2px;font-size:13.5px;border-bottom:1px dashed var(--line)}
+.item-ranked{grid-template-columns:20px minmax(0,1fr) minmax(24px,56px) 40px}
 .item:last-child{border-bottom:none}
 .item .n{display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;border-radius:4px;background:var(--gold-soft);color:var(--gold);font:600 11px var(--mono)}
 .item .p{font-family:var(--mono);font-size:12px;color:var(--muted);text-align:right}
-.item .pb{width:70px;height:6px;background:var(--mid-bg);border-radius:2px;overflow:hidden}.item .pb i{display:block;height:100%;background:var(--gold)}
+.item .pb{width:100%;height:6px;background:var(--mid-bg);border-radius:2px;overflow:hidden}.item .pb i{display:block;height:100%;background:var(--gold)}
 .item-name,.rune-token{display:flex;align-items:center;min-width:0;gap:5px}
 .item-name span{overflow-wrap:anywhere}
 .build-icon{width:23px;height:23px;object-fit:contain;flex:none;border-radius:4px}
@@ -119,8 +128,7 @@ tr.detail td{background:var(--mid-bg);padding:14px 16px}
 .rune-group{display:flex;flex-wrap:wrap;gap:4px 12px}
 .rune-group+.rune-group{border-top:1px dashed var(--line);padding-top:6px}
 .runes b{color:var(--gold)}
-.bcards{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,380px),1fr));gap:14px}
-.bcards:has(> .build-back){grid-template-columns:minmax(0,1fr)}
+.bcards{display:grid;grid-template-columns:minmax(0,1fr);gap:14px}
 .build-route{background:var(--surface);border:1px solid var(--line);color:var(--ink);border-radius:8px;padding:6px 10px;font:inherit;font-size:13px;cursor:pointer}
 .build-route:hover{border-color:var(--gold)}
 .bcard .build-route{margin-bottom:10px}

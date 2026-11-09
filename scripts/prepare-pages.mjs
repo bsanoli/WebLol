@@ -15,8 +15,8 @@ if (existsSync(assets)) rmSync(assets, { recursive: true })
 for (const path of pages) {
   const source = join(dist, path)
   const destination = join(root, path)
-  if (path === "index.html") {
-    writeFileSync(destination, readFileSync(source, "utf8").replace(/\r\n/g, "\n"))
+  if (path.endsWith(".html")) {
+    writeFileSync(destination, readFileSync(source, "utf8").replace(/\r+\n/g, "\n"))
   } else {
     cpSync(source, destination, { recursive: true })
   }

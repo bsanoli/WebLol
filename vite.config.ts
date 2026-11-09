@@ -9,6 +9,11 @@ export default defineConfig({
   base: "./",
   plugins: [react(), tailwindcss()],
   build: {
+    rolldownOptions: {
+      input: ["index.html", "worlds.html", "camp.html"].map(page =>
+        fileURLToPath(new URL(`./src/${page}`, import.meta.url)),
+      ),
+    },
     outDir: fileURLToPath(new URL("./dist", import.meta.url)),
     emptyOutDir: true,
   },

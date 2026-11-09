@@ -1,3 +1,7 @@
+// @ts-nocheck -- O editor legado ainda depende de estado dinâmico vindo do armazenamento local.
+import { iconMarkup } from "./icon"
+import { LOL_DATA, lolAsset, lolChampion, lolImage } from "./lol-media"
+
 /* ===== Campeões (funções do editor e catálogo local da Riot) ===== */
 const BASE=`Aatrox|Aatrox|T;Ahri|Ahri|M;Akali|Akali|MT;Akshan|Akshan|MT;Alistar|Alistar|S;Ambessa|Ambessa|TJ;Amumu|Amumu|JS;Anivia|Anivia|M;Annie|Annie|MS;Aphelios|Aphelios|A;Ashe|Ashe|AS;Aurelion Sol|AurelionSol|M;Aurora|Aurora|MT;Azir|Azir|M;Bard|Bard|S;Bel'Veth|Belveth|J;Blitzcrank|Blitzcrank|S;Brand|Brand|SMJ;Braum|Braum|S;Briar|Briar|J;Caitlyn|Caitlyn|A;Camille|Camille|TS;Cassiopeia|Cassiopeia|MT;Cho'Gath|Chogath|TM;Corki|Corki|MA;Darius|Darius|T;Diana|Diana|JM;Dr. Mundo|DrMundo|TJ;Draven|Draven|A;Ekko|Ekko|JM;Elise|Elise|J;Evelynn|Evelynn|J;Ezreal|Ezreal|A;Fiddlesticks|Fiddlesticks|J;Fiora|Fiora|T;Fizz|Fizz|M;Galio|Galio|MS;Gangplank|Gangplank|T;Garen|Garen|T;Gnar|Gnar|T;Gragas|Gragas|JTS;Graves|Graves|J;Gwen|Gwen|TJ;Hecarim|Hecarim|J;Heimerdinger|Heimerdinger|MS;Hwei|Hwei|MS;Illaoi|Illaoi|T;Irelia|Irelia|TM;Ivern|Ivern|J;Janna|Janna|S;Jarvan IV|JarvanIV|J;Jax|Jax|TJ;Jayce|Jayce|TM;Jhin|Jhin|A;Jinx|Jinx|A;K'Sante|KSante|T;Kai'Sa|Kaisa|A;Kalista|Kalista|A;Karma|Karma|SM;Karthus|Karthus|J;Kassadin|Kassadin|M;Katarina|Katarina|M;Kayle|Kayle|T;Kayn|Kayn|J;Kennen|Kennen|T;Kha'Zix|Khazix|J;Kindred|Kindred|J;Kled|Kled|T;Kog'Maw|KogMaw|A;LeBlanc|Leblanc|M;Lee Sin|LeeSin|J;Leona|Leona|S;Lillia|Lillia|J;Lissandra|Lissandra|M;Locke|Locke|M;Lucian|Lucian|A;Lulu|Lulu|S;Lux|Lux|SM;Malphite|Malphite|TS;Malzahar|Malzahar|M;Maokai|Maokai|STJ;Master Yi|MasterYi|J;Mel|Mel|MS;Milio|Milio|S;Miss Fortune|MissFortune|A;Mordekaiser|Mordekaiser|T;Morgana|Morgana|S;Naafiri|Naafiri|M;Nami|Nami|S;Nasus|Nasus|T;Nautilus|Nautilus|S;Neeko|Neeko|MS;Nidalee|Nidalee|J;Nilah|Nilah|A;Nocturne|Nocturne|J;Nunu & Willump|Nunu|J;Olaf|Olaf|TJ;Orianna|Orianna|M;Ornn|Ornn|T;Pantheon|Pantheon|TSJ;Poppy|Poppy|TJS;Pyke|Pyke|S;Qiyana|Qiyana|JM;Quinn|Quinn|T;Rakan|Rakan|S;Rammus|Rammus|J;Rek'Sai|RekSai|J;Rell|Rell|S;Renata Glasc|Renata|S;Renekton|Renekton|T;Rengar|Rengar|J;Riven|Riven|T;Rumble|Rumble|T;Ryze|Ryze|M;Samira|Samira|A;Sejuani|Sejuani|J;Senna|Senna|SA;Seraphine|Seraphine|SA;Sett|Sett|TS;Shaco|Shaco|J;Shen|Shen|T;Shyvana|Shyvana|J;Singed|Singed|T;Sion|Sion|T;Sivir|Sivir|A;Skarner|Skarner|J;Smolder|Smolder|A;Sona|Sona|S;Soraka|Soraka|S;Swain|Swain|SM;Sylas|Sylas|MJ;Syndra|Syndra|M;Tahm Kench|TahmKench|ST;Taliyah|Taliyah|JM;Talon|Talon|MJ;Taric|Taric|S;Teemo|Teemo|T;Thresh|Thresh|S;Tristana|Tristana|AM;Trundle|Trundle|JT;Tryndamere|Tryndamere|T;Twisted Fate|TwistedFate|M;Twitch|Twitch|A;Udyr|Udyr|J;Urgot|Urgot|T;Varus|Varus|A;Vayne|Vayne|AT;Veigar|Veigar|M;Vel'Koz|Velkoz|SM;Vex|Vex|M;Vi|Vi|J;Viego|Viego|J;Viktor|Viktor|M;Vladimir|Vladimir|MT;Volibear|Volibear|JT;Warwick|Warwick|J;Wukong|MonkeyKing|JT;Xayah|Xayah|A;Xerath|Xerath|MS;Xin Zhao|XinZhao|J;Yasuo|Yasuo|M;Yone|Yone|MT;Yorick|Yorick|T;Yunara|Yunara|A;Yuumi|Yuumi|S;Zaahen|Zaahen|TJ;Zac|Zac|J;Zed|Zed|M;Zeri|Zeri|A;Ziggs|Ziggs|AM;Zilean|Zilean|S;Zoe|Zoe|M;Zyra|Zyra|S`;
 const RL={T:"top",J:"jg",M:"mid",A:"adc",S:"sup"};
@@ -75,13 +79,14 @@ function renderEditor(){
   const c=cur();
   const dv=S.view==="draft";
   $("#editor").innerHTML=`<label class="control-label" for="cname">Nome da composição</label><input id="cname" value="${esc(c.name)}" placeholder="Nome da comp (ex: Engage bot, Poke, Split...)">
-  <div class="vtog"><button data-view="lanes" class="${dv?"":"on"}">Por lane</button><button data-view="draft" class="${dv?"on":""}">Draft (ordem de picks e bans)</button></div>
+  <div class="vtog"><button data-view="lanes" aria-pressed="${!dv}" class="${dv?"":"on"}">Opções por posição</button><button data-view="draft" aria-pressed="${dv}" class="${dv?"on":""}">Ordem do draft</button></div>
+  <button type="button" class="jump-picker" data-picker>${iconMarkup("roles")} Escolher campeões</button>
   ${dv?draftHTML(c):LANES.map(l=>`<div class="lane${active===l.k?" act":""}" data-l="${l.k}" style="--lc:var(${l.c})">
      <div class="lh"><button class="ln" aria-pressed="${active===l.k}">${l.n}</button>
        <input aria-label="Observações de ${l.n}" data-ln="${l.k}" value="${esc(c.laneNotes[l.k]||"")}" placeholder="obs. da lane (opcional)">
        ${active===l.k?'<span class="hint">Selecionada</span>':""}</div>
      <div class="chips">${c.lanes[l.k].map((n,i)=>`<span class="chip" draggable="true" data-n="${esc(n)}" data-from="${l.k}">${img(n)}<span class="n">${esc(n)}</span>${c.lanes[l.k].length>1?`<span class="ord">${i+1}º</span>`:""}<button class="x" data-rm="${esc(n)}" aria-label="Remover ${esc(n)}">${iconMarkup("close")}</button></span>`).join("")
-       ||'<span class="empty">Sem campeões — selecione esta lane e clique na lista ao lado, ou arraste.</span>'}</div>
+       ||'<span class="empty">Selecione esta posição e adicione campeões no catálogo.</span>'}</div>
    </div>`).join("")}
   <label class="control-label" for="notes">Anotações da composição</label>
   <textarea id="notes" placeholder="Plano de jogo, condição de vitória, power spikes, quem é o engage, contra o que é fraca, ordem de picks...">${esc(c.notes)}</textarea>
@@ -95,14 +100,22 @@ $("#editor").addEventListener("input",e=>{
   else if(e.target.id==="notes"){c.notes=e.target.value;touch();save()}
   else if(e.target.dataset.ln){c.laneNotes[e.target.dataset.ln]=e.target.value;touch();save()}
   else if(e.target.id==="dnote"){const d=draftOf(c);d.note[d.side]=e.target.value;touch();save()}
-  else if(e.target.dataset.slot!=null){const d=draftOf(c),o=d.order[d.side],i=+e.target.dataset.slot,v=e.target.value,j=o.indexOf(v);[o[i],o[j]]=[v,o[i]];active=v;touch();save();renderEditor()}
+  else if(e.target.dataset.slot!=null){const d=draftOf(c),o=d.order[d.side],i=+e.target.dataset.slot,v=e.target.value,j=o.indexOf(v);[o[i],o[j]]=[v,o[i]];active=v;touch();save();renderEditor();$(`[data-slot="${i}"]`).focus({preventScroll:true})}
 });
 $("#editor").addEventListener("click",e=>{
+  if(e.target.closest("[data-picker]")){ $("#pick-target").focus(); return }
   const rm=e.target.closest("[data-rm]");
   if(rm){const l=rm.closest("[data-l]").dataset.l;const c=cur();c.lanes[l]=c.lanes[l].filter(n=>n!==rm.dataset.rm);touch();save();renderEditor();renderList();renderGrid();return}
   const dmc=e.target.closest(".pk .dm");if(dmc){const l=dmc.dataset.from,c=cur(),n=dmc.dataset.n;c.lanes[l]=[n,...c.lanes[l].filter(x=>x!==n)];active=l;touch();save();renderEditor();renderList();return}
   const vb=e.target.closest("[data-view]");if(vb){S.view=vb.dataset.view;save(false);renderEditor();publishTeamRoute("comps");return}
-  const sb=e.target.closest("[data-side]");if(sb){draftOf(cur()).side=sb.dataset.side;touch();save();renderEditor();return}
+  const sb=e.target.closest("[data-side]");if(sb){draftOf(cur()).side=sb.dataset.side;touch();save();renderEditor();$(`[data-side="${sb.dataset.side}"]`).focus({preventScroll:true});return}
+  const target=e.target.closest("[data-draft-target]");
+  if(target){
+    active=target.dataset.draftTarget;
+    renderEditor();
+    $(`[data-draft-target="${active}"]`).focus({preventScroll:true});
+    return;
+  }
   if(["INPUT","TEXTAREA","SELECT","OPTION"].includes(e.target.tagName))return;
   const ln=e.target.closest("[data-l]");if(ln&&ln.dataset.l!==active){active=ln.dataset.l;renderEditor()}
 });
@@ -137,43 +150,55 @@ function draftOf(c){
   return d;
 }
 const PICKTIP={B1:"First pick",B2:"dupla",B3:"dupla",R1:"dupla",R2:"dupla",R3:"fecha fase 1",R4:"abre fase 2",B4:"dupla",B5:"dupla",R5:"Last pick"};
+const DRAFT_SIDE = {blue:"Lado azul", red:"Lado vermelho"} as const;
 function draftHTML(c){
   const d=draftOf(c),us=d.side==="blue"?"B":"R";
   // sequência oficial -> número global de cada slot
   const seq=[],cnt={B:{pick:0,ban:0},R:{pick:0,ban:0}};
   DORDER.forEach(([ph,slots],pi)=>slots.forEach(s=>{const[t,k]=s.split(":");const i=cnt[t][k]++;seq.push({t,k,i,code:t+(k==="ban"?"B":"")+(i+1),ph:pi,n:seq.length+1})}));
   const find=(t,k,i)=>seq.find(s=>s.t===t&&s.k===k&&s.i===i);
-  const art=n=>{const splash=champArt(n)?.splash;return splash?lolAsset(splash):""};
   const mini=(n,l,j)=>`<span class="dm${j===0?" main":""}" draggable="true" data-n="${esc(n)}" data-from="${l}" title="${j+1}ª opção: ${esc(n)} · clique para virar principal ou arraste para reordenar">${img(n)}<button class="x" data-rm="${esc(n)}" aria-label="Remover ${esc(n)}">${iconMarkup("close")}</button></span>`;
   const PHN=["Bans 1","Picks 1","Bans 2","Picks 2"];
   // faixa da sequência
-  let h=`<div class="dtop"><div class="dside"><span>Nós somos:</span>
-    <button data-side="blue" class="${d.side==="blue"?"on b":""}">Lado azul</button>
-    <button data-side="red" class="${d.side==="red"?"on r":""}">Lado vermelho</button></div></div>
-  <div class="dseq">${PHN.map((p,pi)=>`<div class="dsg"><div class="dsl">${p}</div><div class="dsc">${seq.filter(s=>s.ph===pi).map(s=>`<span class="sq ${s.t==="B"?"b":"r"} ${s.k}${s.t===us?" us":""}" title="${s.n}º: ${s.t==="B"?"Azul":"Vermelho"} ${s.k==="ban"?"bane":"escolhe"}">${s.k==="ban"?"⊘":s.n}</span>`).join("")}</div></div>`).join("")}</div>`;
+  let h=`<div class="dtop"><div class="dside" role="group" aria-label="Lado da equipe"><span>Nossa equipe</span>
+    ${Object.entries(DRAFT_SIDE).map(([key,label])=>`<button data-side="${key}" aria-pressed="${d.side===key}" class="${d.side===key?`on ${key[0]}`:""}">${label}</button>`).join("")}</div></div>
+  <details class="draft-guide"><summary>Consultar a sequência de picks e bans</summary><div class="dseq">${PHN.map((p,pi)=>`<div class="dsg"><div class="dsl">${p}</div><div class="dsc">${seq.filter(s=>s.ph===pi).map(s=>`<span class="sq ${s.t==="B"?"b":"r"} ${s.k}${s.t===us?" us":""}" title="${s.n}º: ${s.t==="B"?"Azul":"Vermelho"} ${s.k==="ban"?"bane":"escolhe"}">${s.k==="ban"?"⊘":s.n}</span>`).join("")}</div></div>`).join("")}</div></details>`;
   const team=t=>{
     const mine=t===us,side=t==="B"?"b":"r";
     const banSq=i=>{const s=find(t,"ban",i),n=mine?c.lanes.ban[i]:null;
       return `<div class="bsq${n?" has":""}${mine?" mine":""}${mine&&active==="ban"?" act":""}" ${mine?`data-l="ban" data-bi="${i}"`:""} title="${s.n}º do draft">
         ${n?`<span class="dm" draggable="true" data-n="${esc(n)}" data-from="ban">${img(n)}<button class="x" data-rm="${esc(n)}" aria-label="Remover ${esc(n)}">${iconMarkup("close")}</button></span>`:`<span class="bn">${s.n}</span>`}</div>`};
-    const pick=i=>{const s=find(t,"pick",i),tip=PICKTIP[t+(i+1)]||"";
-      if(!mine)return `<div class="pk ${side} them"><div class="pkh"><b>${t}${i+1}</b> · ${s.n}º do draft${tip?` · <i>${tip}</i>`:""}</div><div class="pkn">?</div></div>`;
+    const pick=i=>{const s=find(t,"pick",i),tip=PICKTIP[s.code]||"";
+      const meta=`<span class="pkh"><b>${s.code}</b><span>${s.n}º do draft</span>${tip?`<i>${tip}</i>`:""}</span>`;
+      if(!mine)return `<div class="pk ${side} them">${meta}<div class="pkn">Pick adversário</div></div>`;
       const l=d.order[d.side][i],L=LN[l],ch=c.lanes[l],m=ch[0];
-      return `<div class="pk ${side} mine${active===l?" act":""}" data-l="${l}" style="--lc:var(${L.c});${m?`--art:url('${art(m)}')`:""}">
-        <div class="pkh"><b>${t}${i+1}</b> · ${s.n}º do draft${tip?` · <i>${tip}</i>`:""}</div>
-        <div class="pkn">${m?esc(m):'<span style="color:var(--mut);font-size:13px">sem campeão</span>'}</div>
-        <div class="pkf"><select data-slot="${i}" title="Lane deste pick">${PLANES.map(x=>`<option value="${x}"${x===l?" selected":""}>${LN[x].n}</option>`).join("")}</select>
-        <div class="alts">${ch.map((n,j)=>mini(n,l,j)).join("")}</div></div>
+      const editing=active===l;
+      return `<div class="pk ${side} mine${editing?" act":""}" data-l="${l}" style="--lc:var(${L.c})">
+        ${m?lolImage(champArt(m)?.splash,"pk-art"):""}
+        <button type="button" class="pk-target" data-draft-target="${l}" aria-pressed="${editing}">
+          ${meta}
+          <span class="pkn${m?"":" pk-empty"}">${m?esc(m):"Escolher campeão"}</span>
+        </button>
+        <div class="pkf"><select data-slot="${i}" aria-label="Posição do pick ${t}${i+1}" title="Lane deste pick">${PLANES.map(x=>`<option value="${x}"${x===l?" selected":""}>${LN[x].n}</option>`).join("")}</select>
+        ${editing?'<span class="draft-editing">Editando</span>':""}</div>
+        ${ch.length?`<div class="alts">${ch.map((n,j)=>mini(n,l,j)).join("")}</div>`:""}
         ${c.laneNotes[l]?`<div class="pkno">${iconMarkup("note")} ${esc(c.laneNotes[l])}</div>`:""}</div>`};
-    return `<div class="tm ${side}${mine?" mine":""}"><div class="tmh">${t==="B"?"Lado azul":"Lado vermelho"} <span>${mine?"NÓS":"ADVERSÁRIO"}</span></div>
-      <div class="bans">${[0,1,2].map(banSq).join("")}<span class="bgap"></span>${[3,4].map(banSq).join("")}</div>
-      ${[0,1,2,3,4].map(pick).join("")}</div>`;
+    return `<section class="tm ${side}${mine?" mine":""}" aria-labelledby="draft-side-${side}">
+      <h3 class="tmh" id="draft-side-${side}">${DRAFT_SIDE[t==="B"?"blue":"red"]}<span>${mine?"Nossa equipe":"Adversário"}</span></h3>
+      <div class="draft-bans">
+        ${mine?`<button type="button" class="draft-ban-target" data-draft-target="ban" aria-pressed="${active==="ban"}">Bans ${active==="ban"?'<span class="draft-editing">Editando</span>':""}</button>`:'<div class="draft-phase">Bans</div>'}
+        <div class="bans" role="group" aria-label="Bans da primeira e da segunda fase">${[0,1,2].map(banSq).join("")}<span class="bgap"></span>${[3,4].map(banSq).join("")}</div>
+      </div>
+      <div class="draft-phase">Picks · Fase 1</div>
+      ${[0,1,2].map(pick).join("")}
+      <div class="draft-phase">Picks · Fase 2</div>
+      ${[3,4].map(pick).join("")}</section>`;
   };
   h+=`<div class="dz">${team("B")}${team("R")}</div>`;
   const extra=c.lanes.ban.slice(5);
   if(extra.length)h+=`<div class="lbl">Bans alternativos</div><div class="alts" data-l="ban">${extra.map((n,j)=>mini(n,"ban",j+5)).join("")}</div>`;
-  h+=`<div class="help" style="margin-top:8px">Clique num pick seu e depois nos campeões ao lado para adicionar opções. A 1ª (borda dourada) é a principal e aparece na foto: arraste as miniaturas para reordenar ou clique numa para ela virar a principal. Clique num quadrado de ban para banir. Troque a lane de cada pick no seletor.</div>
-  <div class="lbl">Plano do draft · ${d.side==="blue"?"lado azul":"lado vermelho"}</div>
+  h+=`<div class="help draft-help">Selecione um pick ou os bans da sua equipe e escolha campeões no catálogo. A opção principal tem borda dourada. Clique em outra miniatura para torná-la principal ou arraste para reordenar.</div>
+  <label class="control-label" for="dnote">Plano do draft · ${d.side==="blue"?"lado azul":"lado vermelho"}</label>
    <textarea id="dnote" style="width:100%;min-height:80px" placeholder="Ex: se banirem a Akali, first pick vira Vi; guardar o top para o último pick...">${esc(d.note[d.side])}</textarea>`;
   return h;
 }
@@ -185,7 +210,17 @@ $("#roles").innerHTML=ROLEBTN.map(([k,n])=>`<button data-r="${k}" class="${k==="
 $("#roles").onclick=e=>{const b=e.target.closest("button");if(!b)return;role=b.dataset.r;document.querySelectorAll("#roles button").forEach(x=>x.classList.toggle("on",x===b));resetGrid()};
 const resetGrid=()=>{renderGrid();$("#grid").scrollTop=0};$("#search").oninput=resetGrid;$("#sort").onchange=resetGrid;
 function renderTarget(){const l=LN[active];
-  $("#grid").querySelectorAll(".ch").forEach(button => button.setAttribute("aria-pressed", cur().lanes[active].includes(button.dataset.n)));$("#target").innerHTML=`<span>Destino dos campeões</span><b style="--lc:var(${l.c})">${l.n}</b><small>Selecione para adicionar ou remover.</small>`}
+  const c=cur();
+  $("#grid").querySelectorAll(".ch").forEach(button => button.setAttribute("aria-pressed", c.lanes[active].includes(button.dataset.n)));
+  let context="";
+  if(S.view==="draft"){
+    const d=draftOf(c),side=DRAFT_SIDE[d.side];
+    const slot=d.side[0].toUpperCase()+(d.order[d.side].indexOf(active)+1);
+    context=active==="ban"?`Editando bans · ${side}`:`Editando pick ${slot} · ${side}`;
+  }
+  $("#target").innerHTML=`${context?`<strong class="draft-target-context">${context}</strong>`:""}<label for="pick-target">${context?"Posição ou bans":"Adicionar na posição"}</label><select id="pick-target">${LANES.map(pos=>`<option value="${pos.k}" ${pos.k===active?"selected":""}>${pos.n}</option>`).join("")}</select><small>Clique em um campeão para adicionar ou remover de ${l.n}.</small>`;
+}
+$("#target").addEventListener("change",e=>{if(e.target.id!=="pick-target")return;active=e.target.value;renderEditor();$("#pick-target").focus({preventScroll:true})});
 function renderGrid(){
   const q=$("#search").value.toLowerCase().replace(/[^a-z]/g,""),c=cur(),srt=$("#sort").value;
   const where={};for(const l of LANES)for(const n of c.lanes[l.k])(where[n]=where[n]||[]).push(l);

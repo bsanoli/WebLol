@@ -242,7 +242,12 @@ function applyFrameRoute(frame) {
 }
 
 for (const frame of frames) {
-  frame.addEventListener("load", () => applyFrameRoute(frame));
+  frame.addEventListener("load", () => {
+    if (!frame.hasAttribute("srcdoc")) return;
+    frame.dataset.ready = "true";
+    if (frame.id === "v-" + currentScreen) $("#screen-loading").hidden = true;
+    applyFrameRoute(frame);
+  });
   frame.addEventListener("weblol:navigate", ({ detail }) => {
     if (frame.id !== "v-" + currentScreen) return;
     writeRoute(detail.path, detail.replace);
@@ -283,6 +288,7 @@ async function loadScreen(name) {
     } catch {
       loaded.delete(name);
       if (currentScreen === name) {
+        $("#screen-loading").hidden = true;
         const error = $("#screen-error");
         error.textContent = "Não foi possível carregar esta área. Selecione a aba para tentar novamente.";
         error.hidden = false;
@@ -296,6 +302,7 @@ function show(t) {
   currentScreen = t;
   $("#copy-link").hidden = t === "admin";
   $("#screen-error").hidden = true;
+  $("#screen-loading").hidden = t === "admin" || $("#v-" + t).dataset.ready === "true";
   document.querySelectorAll("#top .tab").forEach(button => {
     const active = button.dataset.t === t;
     button.classList.toggle("on", active);

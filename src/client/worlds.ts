@@ -1,13 +1,17 @@
-const LANES=[["Top","--top"],["Jungle","--jungle"],["Mid","--midlane"],["ADC","--adc"],["Suporte","--sup"]];
-const LC=Object.fromEntries(LANES);
+// @ts-nocheck -- A tela legada ainda usa estado e eventos DOM sem tipos explícitos.
+import { iconMarkup } from "./icon"
+import DATA from "../data/worlds.json"
+import { lolAsset, lolChampion } from "./lol-media"
+import { buildHtml, buildsTable } from "./worlds-builds"
+import { LANES, LC, pct, wrPill, ico, esc, championSlug } from "./worlds-display"
+
 const G=DATA.games, C=DATA.champs;
-const pct=x=>Math.round(x*100)+"%";
-const wrPill=(w,n)=>{if(!n)return '<span class="wr">–</span>';const r=w/n;return `<span class="wr ${r>=.55?'g':r<=.45?'b':''}" data-tip="Win rate: ${w} vitórias e ${n-w} derrotas em ${n} jogos">${pct(r)}</span>`};
 const tipEl=()=>document.getElementById('tip');
 function showTip(t,x,y){const el=tipEl();el.textContent=t;el.hidden=false;const r=el.getBoundingClientRect();let L=x+14,T=y+16;if(L+r.width>innerWidth-8)L=x-r.width-14;if(T+r.height>innerHeight-8)T=y-r.height-12;el.style.left=Math.max(8,L)+"px";el.style.top=Math.max(8,T)+"px"}
 document.addEventListener('mousemove',e=>{const t=e.target.closest&&e.target.closest('[data-tip]');if(t)showTip(t.dataset.tip,e.clientX,e.clientY);else tipEl().hidden=true});
 document.addEventListener('focusin',e=>{const t=e.target.closest('[data-tip]');if(t){const r=t.getBoundingClientRect();showTip(t.dataset.tip,r.left,r.bottom)}});
 document.addEventListener('focusout',()=>tipEl().hidden=true);
+document.addEventListener('keydown',e=>{if(e.key==='Escape')tipEl().hidden=true});
 document.addEventListener('scroll',()=>tipEl().hidden=true,true);
 const TIPS={picks:"Jogos em que o campeão foi escolhido nesta lane",wr:"Vitórias ÷ jogos do campeão no torneio",bans:"Quantas vezes foi banido",pres:"% dos jogos em que foi pickado ou banido",kda:"(Abates + Assistências) ÷ Mortes, pelas médias por jogo",k:"Abates por jogo (média)",d:"Mortes por jogo (média)",a:"Assistências por jogo (média)",name:"Clique para ordenar",n:"Jogos coletados do jogador",team:"Time",lane:"Lane principal",chs:"Campeões mais jogados (jogos)"};
 const dot=l=>l?`<span class="dot" style="background:var(${LC[l]})" title="${l}"></span>`:'';
@@ -19,9 +23,6 @@ function showSort(sort) {
     else heading.removeAttribute("aria-sort");
   });
 }
-const ini=n=>n.replace(/[^A-Za-z ]/g,"").split(" ").map(w=>w[0]).join("").slice(0,2).toUpperCase();
-const ico=(n,l)=>`<span class="av"${l?` style="--ring:var(${LC[l]})"`:''} data-i="${ini(n)}">${lolImage(lolChampion(n)?.portrait)}</span>`;
-const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 const kdaOf=(k,d,a)=>d?(k+a)/d:k+a;
 
 // KPIs
@@ -43,8 +44,6 @@ const laneSelect = document.getElementById("lane-select");
 const laneById = new Map(LANES.map(([lane]) => [lane.toLowerCase(), lane]));
 let selectedLane = "top";
 let laneChampion = "", laneQuery = "", buildChampion = "", buildQuery = "", playerQuery = "", playerLane = "";
-const championSlug = name => name.normalize("NFD").replace(/\p{M}/gu, "").toLowerCase()
-  .replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
 const worldsPaths = { geral: "", campeoes: "/campeoes", builds: "/builds", matchups: "/confrontos", comps: "/composicoes", jogadores: "/jogadores" };
 const laneFromParam = value => laneById.get(value) || "";
 
@@ -105,6 +104,8 @@ function go(id) {
 }
 
 function render(id){
+  window.frameElement?.dispatchEvent(new CustomEvent("weblol:analytics-clear"));
+  document.getElementById("kpis").hidden = !!window.frameElement || id !== "geral";
   if(!validTab(id))id="geral";
   const isLane = laneById.has(id) || id === "campeoes";
   if (laneById.has(id)) selectedLane = id;
@@ -116,12 +117,19 @@ function render(id){
     else button.removeAttribute("aria-current");
   });
   const v=document.getElementById('view');
+  if (v.contains(laneFilter)) v.before(laneFilter);
   if(id==="geral")v.innerHTML=overview();
   else if(id==="jogadores"){v.innerHTML=playersView();wirePlayers()}
   else if(id==="matchups"){v.innerHTML=muView();wireMu()}
   else if(id==="comps"){v.innerHTML=compsView();wireComps()}
   else if(id==="builds"){v.innerHTML=buildsView();wireBuilds()}
-  else{const lane=laneById.get(selectedLane);v.innerHTML=laneView(lane);wireLane(lane)}
+  else{const lane=laneById.get(selectedLane);v.innerHTML=laneView(lane);v.querySelector(".tools").prepend(laneFilter);wireLane(lane)}
+  document.body.dataset.page = isLane ? "campeoes" : id;
+  if(id === "geral" || id === "jogadores") window.frameElement?.dispatchEvent(new CustomEvent("weblol:analytics", { detail: {
+    kind: id === "geral" ? "overview" : "players", games: G, players: DATA.players,
+    champions: C.map(c => ({name:c.name,picks:c.picks,wins:c.wins,bans:c.bans,portrait:lolChampion(c.name)?.portrait ? lolAsset(lolChampion(c.name).portrait) : undefined}))
+  }}));
+  enhanceAnalyticsUI();
 }
 
 function barList(list,valFn,max,segs,vw=52,tipFn=null){
@@ -139,15 +147,22 @@ function overview(){
   const presRows=barList(pres,c=>pct((c.picks+c.bans)/G),G,c=>[[c.picks,'--pick',`${c.name}: ${c.picks} picks (${c.wins}V ${c.picks-c.wins}D)`],[c.bans,'--ban',`${c.name}: ${c.bans} bans`]],52,c=>`Presença: ${c.picks} picks + ${c.bans} bans = ${c.picks+c.bans} de ${G} jogos`);
   const lanes=LANES.map(([l,col])=>{
     const ls=C.filter(c=>c.lanes[l]).sort((a,b)=>b.lanes[l].picks-a.lanes[l].picks).slice(0,5);
-    return `<button class="lanecard" style="--c:var(${col})" data-go="${l.toLowerCase()}"><h3>${l}</h3><div class="lchead"><span>Campeão</span><span data-tip="Jogos nesta lane">Jogos</span><span data-tip="Win rate geral do campeão">WR</span></div><ol>${ls.map(c=>`<li><b class="nmi">${ico(c.name)}<span class="ell" title="${esc(c.name)}">${esc(c.name)}</span></b><span class="g" data-tip="${esc(c.name)} jogou ${c.lanes[l].picks} vezes de ${l}">${c.lanes[l].picks}</span>${wrPill(c.wins,c.picks)}</li>`).join("")}</ol><div class="more" style="margin-top:auto;padding-top:10px">Ver campeões · ${l} →</div></button>`}).join("");
-  setTimeout(()=>document.querySelectorAll('[data-go]').forEach(b=>b.onclick=()=>go(b.dataset.go)));
-  return `<div class="grid2">
+    return `<button class="lanecard" style="--c:var(${col})" data-go="${l.toLowerCase()}"><h3>${l}</h3><div class="lchead"><span>Campeão</span><span data-tip="Jogos nesta lane">Jogos</span><span data-tip="Taxa de vitória do campeão em todas as posições">Vitórias</span></div><ol>${ls.map(c=>`<li><b class="nmi">${ico(c.name)}<span class="ell" title="${esc(c.name)}">${esc(c.name)}</span></b><span class="lane-games" data-tip="${esc(c.name)} jogou ${c.lanes[l].picks} vezes de ${l}">${c.lanes[l].picks}</span>${wrPill(c.wins,c.picks)}</li>`).join("")}</ol><div class="more" >Ver campeões · ${l} →</div></button>`}).join("");
+  setTimeout(() => {
+    document.querySelectorAll(".lanecard[data-go]").forEach(card => {
+      card.onclick = () => {
+        go(card.dataset.go);
+        window.scrollTo({ top: 0, behavior: "instant" });
+      };
+    });
+  });
+  return `<div id="analytics-root"><div class="grid2">
    <section class="panel"><h2>Mais pickados</h2><p class="hint">Barra = jogos (verde vitórias, vermelho derrotas). À direita, a taxa de vitória.</p>${pickRows}</section>
    <section class="panel"><h2>Mais banidos</h2><p class="hint">Bans e % dos ${G} jogos em que o campeão foi banido.</p>${banRows}</section>
   </div>
   <section class="panel" style="margin-top:20px"><h2>Prioridade no draft</h2><p class="hint">Presença = % dos jogos em que o campeão foi pickado ou banido.</p>
    <div class="legend"><span><i class="dot" style="background:var(--pick)"></i>Picks</span><span><i class="dot" style="background:var(--ban)"></i>Bans</span></div>${presRows}</section>
-  <div class="lanes">${lanes}</div>`;
+  </div><section class="lane-overview"><h2>Explore por posição</h2><p class="hint">Mais escolhidos em cada posição. A taxa de vitória considera todos os jogos do campeão.</p><div class="lanes">${lanes}</div></section>`;
 }
 
 // Lane view
@@ -158,7 +173,7 @@ function laneRows(lane){
     kda:L.n?kdaOf(L.k,L.d,L.a):-1,k:L.n?L.k:-1,d:L.n?L.d:-1,a:L.n?L.a:-1}});
 }
 function laneView(lane){
-  return `<section><h2 style="color:var(${LC[lane]})">${lane}</h2><p class="hint">Clique num campeão para ver runa, itens, jogadores e times. Clique no título da coluna para ordenar.</p>
+  return `<section><h2>Campeões por posição</h2><p class="hint">Abra um campeão para ver a amostra, os jogadores e a build. Os cabeçalhos ordenam a tabela.</p>
   <div class="tools"><input id="q" type="search" placeholder="Buscar campeão…" aria-label="Buscar campeão"></div>
   <div class="tablewrap"><table><thead><tr>${LCOLS.map(([k,l])=>`<th><button data-k="${k}" data-tip="${TIPS[k]}">${l}${sortIcons}</button></th>`).join("")}</tr></thead><tbody id="tb"></tbody></table></div></section>`;
 }
@@ -178,64 +193,33 @@ function wireLane(lane){
        <td>${wrPill(c.wins,c.picks)}</td><td class="num" data-tip="Banido em ${c.bans} de ${G} jogos">${c.bans}</td><td class="num" data-tip="${c.picks} picks + ${c.bans} bans em ${G} jogos">${pct(r.pres)}</td>
        <td class="num kda" data-tip="${has?`(${L.k.toFixed(1)} + ${L.a.toFixed(1)}) ÷ ${L.d.toFixed(1)}`:"Sem dados"}">${has?r.kda.toFixed(2):'<span class="na">–</span>'}</td>
        <td class="num">${has?L.k.toFixed(1):'–'}</td><td class="num">${has?L.d.toFixed(1):'–'}</td><td class="num">${has?L.a.toFixed(1):'–'}</td></tr>
-       <tr class="detail" ${open?'':'hidden'}><td colspan="9">${has?`<div class="dgrid">
+       <tr class="detail" ${open?'':'hidden'}><td colspan="9"><div class="champion-detail">${has?`<div class="dgrid">
         <div><h4>Resultado na amostra</h4>${L.w}V – ${L.n-L.w}D em ${L.n} jogos${L.n<L.picks?` <span class="na">(de ${L.picks})</span>`:''}</div>
 
         <div><h4>Quem jogou</h4><div class="chips">${L.players.map(([p,n])=>`<span class="chip">${esc(p)} · ${n}</span>`).join("")}</div></div>
         <div><h4>Times</h4><div class="chips">${L.teams.map(([t,n])=>`<span class="chip">${esc(t)} · ${n}</span>`).join("")}</div></div>
-       </div><div style="margin-top:14px">${buildHtml(c)}</div>`:`<span class="na">Sem detalhes coletados para este campeão (poucos jogos). ${c.picks} jogos no total, ${c.wins} vitórias.</span>`}</td></tr>`}).join("");
+       </div>${buildHtml(c)}`:`<span class="na">Sem detalhes coletados para este campeão (poucos jogos). ${c.picks} jogos no total, ${c.wins} vitórias.</span>`}</div></td></tr>`}).join("");
   };
   tb.onclick=e=>{
     const tr=e.target.closest('tr.main');if(!tr)return;
     const previous=tb.querySelector("tr.open");
-    if(previous){previous.classList.remove("open");previous.nextElementSibling.hidden=true}
+    if(previous){previous.classList.remove("open");previous.nextElementSibling.hidden=true;previous.setAttribute("aria-expanded","false")}
     laneChampion=tr===previous?"":tr.dataset.champion;
-    if(laneChampion){tr.classList.add("open");tr.nextElementSibling.hidden=false}
-    publish();
+    if(laneChampion){tr.classList.add("open");tr.nextElementSibling.hidden=false;tr.setAttribute("aria-expanded","true")}
+    enhanceAnalyticsUI();publish();
   };
   tb.onkeydown=e=>{if((e.key==="Enter"||e.key===" ")&&e.target.matches('tr.main')){e.preventDefault();e.target.click()}};
   document.querySelector('thead').onclick=e=>{const b=e.target.closest('button');if(!b)return;const k=b.dataset.k;laneSort=laneSort.k===k?{k,d:-laneSort.d}:{k,d:k==="name"||k==="d"?1:-1};draw()};
-  q.oninput=()=>{laneQuery=q.value;laneChampion="";draw();publish(true)};
+  q.oninput=()=>{laneQuery=q.value;laneChampion="";draw();enhanceAnalyticsUI();publish(true)};
   draw();
+  enhanceAnalyticsUI();
   if(laneChampion)tb.querySelector("tr.open")?.scrollIntoView({block:"nearest"});
 }
 
 // Builds
-const PTXT=(n,p,what)=>`${n}: usado em ${p}% dos jogos ${what}`;
-const buildIcon=(kind,name)=>lolImage(LOL_DATA[kind][lolKey(name)],`build-icon build-icon-${kind}`);
-function itemsHtml(list,what,kind,num=false){
-  return `<div class="items">${list.map(([n,p,en],i)=>{
-    const names=kind==="spell"?(en||n).split(" and "):[en||n];
-    const icons=names.map(name=>buildIcon(kind,name)).join("");
-    const label=kind==="rune"?LOL_DATA.runeNames[lolKey(names[0])]||n:n;
-    return `<span class="item" data-tip="${esc(PTXT(label,p,what)+(en&&en!==label?` · em inglês: ${en}`:""))}">${num?`<span class="n">${i+1}</span>`:'<span></span>'}<span class="item-name">${icons}<span>${esc(label)}</span></span><span class="pb"><i style="width:${p}%"></i></span><span class="p">${p}%</span></span>`;
-  }).join("")}</div>`;
-}
-function runePage(rows,english){
-  return `<div class="runes">${rows.map((row,i)=>{
-    const names=english[i]?.split(", ")||[];
-    return `<div class="rune-group">${row.split(", ").map((name,j)=>{
-      const original=names[j]||name;
-      const label=esc(LOL_DATA.runeNames[lolKey(original)]||name);
-      return `<span class="rune-token" data-tip="${esc(original)}">${buildIcon("rune",original)}${i===0?`<b>${label}</b>`:label}</span>`;
-    }).join("")}</div>`;
-  }).join("")}</div>`;
-}
-function buildHtml(c){const b=c.build;if(!b)return `<span class="na">Build não disponível no site para ${esc(c.name)}.</span>`;
-  const w=`de ${c.name}`;
-  return `<div class="build">
-   ${b.items?`<div><h4>Itens (mais usados primeiro)</h4>${itemsHtml(b.items,w,"item",true)}</div>`:''}
-   ${b.support?`<div><h4>Item de suporte</h4>${itemsHtml(b.support,w,"item")}</div>`:''}
-   ${b.boots?`<div><h4>Botas</h4>${itemsHtml(b.boots,w,"item")}</div>`:''}
-   <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px">
-    ${b.keys?`<div><h4>Runa principal</h4>${itemsHtml(b.keys,w,"rune")}</div>`:''}
-    ${b.spells?`<div><h4>Feitiços</h4>${itemsHtml(b.spells,w,"spell")}</div>`:''}
-   </div>
-   ${b.runes?`<div><h4>Página de runas mais usada</h4>${runePage(b.runes,b.runes_en||[])}</div>`:''}
-  </div>`}
 let bLane="";
 function buildsView(){
-  return `<section><h2>Builds</h2><p class="hint">Itens, botas, runas e feitiços mais usados pelos profissionais. A % é a fração dos jogos do campeão em que aquilo apareceu. Nomes em português; passe o mouse para ver o nome em inglês. Alguns itens novos ainda estão em inglês.</p>
+  return `<section class="builds-page"><h2>Builds</h2><p class="hint">Compare as escolhas mais frequentes no Worlds. Os percentuais ao lado dos itens, runas e feitiços indicam a frequência de uso.</p>
   <div class="tools"><input id="bq" type="search" placeholder="Buscar campeão ou item…" aria-label="Buscar campeão ou item">
   <select id="bl" aria-label="Filtrar por lane"><option value="">Todas as lanes</option>${LANES.map(([l])=>`<option ${l===bLane?'selected':''}>${l}</option>`).join("")}</select></div>
   <div class="bcards" id="bc"></div></section>`}
@@ -247,11 +231,14 @@ function wireBuilds(){
   const draw=()=>{const f=q.value.trim().toLowerCase();bLane=sel.value;
     const matches=list.filter(c=>buildChampion ? championSlug(c.name)===buildChampion :
       (!bLane||c.lanes[bLane])&&(c.name.toLowerCase().includes(f)||JSON.stringify(c.build).toLowerCase().includes(f)));
-    const cards=matches.map(c=>`<article class="bcard"><h3>${ico(c.name,c.main)}${esc(c.name)} <span class="na" style="font:500 13px var(--body);margin-left:8px">${c.main} · ${c.picks} jogos</span><span style="margin-left:auto">${wrPill(c.wins,c.picks)}</span></h3>
-      ${buildChampion?'':`<button class="build-route" data-build="${championSlug(c.name)}" aria-label="Abrir build de ${esc(c.name)}">Abrir build</button>`}
-      ${buildHtml(c)}</article>`).join("");
+    const champion=buildChampion && matches[0];
+    const content=champion
+      ? `<article class="bcard"><h3>${ico(champion.name,champion.main)}${esc(champion.name)} <span class="build-meta">${champion.main} · ${champion.picks} jogos</span><span class="build-winrate">${wrPill(champion.wins,champion.picks)} <small>de vitórias</small></span></h3>${buildHtml(champion)}</article>`
+      : matches.length ? buildsTable(matches) : "";
     const back=buildChampion ? '<div class="build-back"><button class="build-route" data-build="">Voltar à lista de builds</button></div>' : '';
-    bc.innerHTML=back+(cards||'<p class="na">Nenhum campeão encontrado.</p>');
+    bc.classList.toggle("build-detail", !!buildChampion);
+    bc.innerHTML=back+(content||'<div class="empty-state" role="status"><h3>Nenhuma build encontrada</h3><p>Tente outro campeão ou item, ou selecione todas as posições.</p></div>');
+    enhanceAnalyticsUI();
   };
   bc.onclick=e=>{
     const button=e.target.closest("[data-build]");if(!button)return;
@@ -269,6 +256,7 @@ let plSort={k:"n",d:-1};
 const PCOLS=[["name","Jogador"],["team","Time"],["lane","Lane"],["n","Jogos"],["wr","Win rate"],["kda","KDA"],["chs","Campeões"]];
 function playersView(){
   return `<section><h2>Jogadores</h2><p class="hint">Desempenho de cada jogador nos campeões com detalhes coletados (${DATA.players.reduce((s,p)=>s+p.n,0)} participações). Não inclui todos os jogos do torneio.</p>
+  <details class="comparison-disclosure" ${window.frameElement?"":"hidden"}><summary>Comparar o desempenho de dois jogadores</summary><div id="analytics-root"></div></details>
   <div class="tools"><input id="pq" type="search" placeholder="Buscar jogador ou time…" aria-label="Buscar jogador ou time">
   <select id="pl" aria-label="Filtrar por lane"><option value="">Todas as lanes</option>${LANES.map(([l])=>`<option>${l}</option>`).join("")}</select></div>
   <div class="tablewrap"><table><thead><tr>${PCOLS.map(([k,l])=>`<th><button data-k="${k}" data-tip="${k==="wr"?"Vitórias ÷ jogos do jogador":k==="kda"?"(Abates + Assistências) ÷ Mortes, somando todos os jogos":TIPS[k]}">${l}${sortIcons}</button></th>`).join("")}</tr></thead><tbody id="ptb"></tbody></table></div></section>`;
@@ -288,18 +276,19 @@ function wirePlayers(){
       <td><div class="chips">${p.ch.map(([c,n])=>`<span class="chip">${ico(c)}${esc(c)} · ${n}</span>`).join("")}</div></td></tr>`).join("");
   };
   document.querySelector('thead').onclick=e=>{const b=e.target.closest('button');if(!b)return;const k=b.dataset.k;plSort=plSort.k===k?{k,d:-plSort.d}:{k,d:["name","team","lane"].includes(k)?1:-1};draw()};
-  q.oninput=()=>{playerQuery=q.value;draw();publish(true)};
-  sel.onchange=()=>{playerLane=sel.value;draw();publish()};
+  q.oninput=()=>{playerQuery=q.value;draw();enhanceAnalyticsUI();publish(true)};
+  sel.onchange=()=>{playerLane=sel.value;draw();enhanceAnalyticsUI();publish()};
   draw();
+  enhanceAnalyticsUI();
 }
 // Matchups
 let muLane="Mid", muChamp=null;
 function muView(){
-  return `<section><h2>Confrontos por posição</h2><p class="hint">Como cada campeão foi contra o adversário direto da mesma lane. Base: ${DATA.mgames} jogos com draft completo. Escolha a lane e o campeão.</p>
+  return `<section class="matchups-view"><h2>Confrontos por posição</h2><p class="hint">Como cada campeão foi contra o adversário direto da mesma lane. Base: ${DATA.mgames} jogos com draft completo. Escolha a lane e o campeão.</p>
   <nav id="mulanes" style="margin:0 0 12px">${LANES.map(([l])=>`<button data-l="${l}" aria-selected="${l===muLane}">${dot(l)}${l}</button>`).join("")}</nav>
-  <div class="grid2" style="grid-template-columns:repeat(auto-fit,minmax(min(100%,340px),1fr))">
-   <div class="panel" style="padding:0;overflow:hidden"><div style="padding:14px 16px 6px"><h2 style="font-size:18px">Escolha o campeão</h2></div><div id="mulist" class="mulist"></div></div>
-   <div class="panel" id="mudetail" style="grid-column:span 2;min-width:0"></div>
+  <div class="matchups-grid">
+   <div class="panel mu-picker"><div style="padding:14px 16px 6px"><h2 style="font-size:18px">Escolha o campeão</h2></div><div id="mulist" class="mulist"></div></div>
+   <div class="panel" id="mudetail"></div>
   </div>
   <section class="panel" style="margin-top:20px"><h2>Confrontos mais repetidos</h2><p class="hint">Duelos que mais aconteceram nesta lane. A barra mostra quem venceu mais.</p><div id="mutop" class="bars"></div></section></section>`;
 }
@@ -316,15 +305,15 @@ function wireMu(){
   const good=ops.filter(o=>o[1]>=2&&o[2]/o[1]>=.6), bad=ops.filter(o=>o[1]>=2&&o[2]/o[1]<=.4);
   document.getElementById('mudetail').innerHTML=`<div class="muhead">${ico(muChamp,muLane)}<div><h2 style="margin:0">${esc(muChamp)} <span class="na" style="font-size:16px">${muLane}</span></h2>
     <div class="hint" style="margin:0">${tot} jogos · ${tw}V ${tot-tw}D · ${ops.length} adversários diferentes</div></div></div>
-   <div class="chips" style="margin:12px 0">${good.length?`<span class="na" style="font-size:12px;align-self:center">Bom contra:</span>`+good.map(o=>`<span class="chip good">${ico(o[0])}${esc(o[0])} ${o[2]}-${o[1]-o[2]}</span>`).join(""):""}
-   ${bad.length?`<span class="na" style="font-size:12px;align-self:center;margin-left:8px">Sofre contra:</span>`+bad.map(o=>`<span class="chip bad">${ico(o[0])}${esc(o[0])} ${o[2]}-${o[1]-o[2]}</span>`).join(""):""}</div>
+   <div class="chips" style="margin:12px 0">${good.length?`<span class="na" style="font-size:12px;align-self:center">Maior taxa de vitória:</span>`+good.map(o=>`<span class="chip good">${ico(o[0])}${esc(o[0])} ${o[2]}-${o[1]-o[2]}</span>`).join(""):""}
+   ${bad.length?`<span class="na" style="font-size:12px;align-self:center;margin-left:8px">Menor taxa de vitória:</span>`+bad.map(o=>`<span class="chip bad">${ico(o[0])}${esc(o[0])} ${o[2]}-${o[1]-o[2]}</span>`).join(""):""}</div>
    <div class="tablewrap" style="border:none"><table><thead><tr><th style="padding:10px">Contra</th><th style="padding:10px;text-align:right">Jogos</th><th style="padding:10px">Resultado</th><th style="padding:10px;text-align:right">KDA ${esc(muChamp)}</th><th style="padding:10px;text-align:right">KDA adversário</th><th style="padding:10px;text-align:right">K / D / A médio</th></tr></thead>
    <tbody>${ops.map(o=>{const[op,n,w,k,d,a,ok,od,oa]=o;const my=kdaOf(k,d,a),their=kdaOf(ok,od,oa);
      return `<tr><td class="champ"><span class="nmi">${ico(op,muLane)}${esc(op)}</span></td><td class="num">${n}</td>
      <td><span class="mini"><span class="wl" data-tip="${w} vitórias e ${n-w} derrotas contra ${esc(op)}">${'<i class="w"></i>'.repeat(w)}${'<i class="l"></i>'.repeat(n-w)}</span>${wrPill(w,n)}</span></td>
      <td class="num kda" style="color:var(${my>=their?'--good':'--bad'})" data-tip="KDA de ${esc(muChamp)} nesses jogos: (${k} + ${a}) ÷ ${d}">${my.toFixed(2)}</td><td class="num" data-tip="KDA de ${esc(op)} nesses jogos: (${ok} + ${oa}) ÷ ${od}">${their.toFixed(2)}</td>
      <td class="num">${(k/n).toFixed(1)} / ${(d/n).toFixed(1)} / ${(a/n).toFixed(1)}</td></tr>`}).join("")}</tbody></table></div>
-   <p class="hint" style="margin:10px 0 0">Com 1 ou 2 jogos o resultado é só um indício. Bom contra / sofre contra só considera duelos com 2 jogos ou mais.</p>`;
+   <p class="hint" style="margin:10px 0 0">Com 1 ou 2 jogos o resultado é só um indício. Os destaques consideram duelos com pelo menos 2 jogos.</p>`;
   // most repeated duels in lane
   const seen=new Set(), pairs=[];
   for(const [c,ops2] of Object.entries(M))for(const o of ops2){const key=[c,o[0]].sort().join("|");if(seen.has(key))continue;seen.add(key);pairs.push({a:c,b:o[0],n:o[1],w:o[2]})}
@@ -363,13 +352,30 @@ function wireComps(){
     document.getElementById('cl').innerHTML=L.map(g=>compCard(g,q)).join("")||'<p class="hint">Nenhum jogo encontrado.</p>';
   };
   const publish = (replace = false) => publishWorlds("comps", [], {time:cTeam, fase:cSt, busca:cQ}, replace);
-  document.getElementById('cq').oninput=e=>{cQ=e.target.value;draw();publish(true)};
-  document.getElementById('ct').onchange=e=>{cTeam=e.target.value;draw();publish()};
-  document.getElementById('cs').onchange=e=>{cSt=e.target.value;draw();publish()};
+  document.getElementById('cq').oninput=e=>{cQ=e.target.value;draw();enhanceAnalyticsUI();publish(true)};
+  document.getElementById('ct').onchange=e=>{cTeam=e.target.value;draw();enhanceAnalyticsUI();publish()};
+  document.getElementById('cs').onchange=e=>{cSt=e.target.value;draw();enhanceAnalyticsUI();publish()};
   draw();
+  enhanceAnalyticsUI();
 }
 
 if (!window.frameElement) {
   addEventListener("hashchange", () => render(location.hash.slice(1) || "geral"));
   render(location.hash.slice(1) || "geral");
 } else render("geral");
+
+function enhanceAnalyticsUI() {
+  document.querySelectorAll(".tablewrap").forEach(el => {
+    el.tabIndex = 0; el.setAttribute("role", "region");
+    el.setAttribute("aria-label", "Tabela de estatísticas. Role horizontalmente para ver todas as colunas.");
+  });
+  document.querySelectorAll("tr.main").forEach(el => el.setAttribute("aria-expanded", String(el.classList.contains("open"))));
+  document.querySelectorAll("[data-tip]").forEach(el => {
+    if (el.matches(".item,.rune-token,.preview-item")) el.tabIndex = 0;
+    el.setAttribute("aria-describedby", "tip");
+  });
+  for (const id of ["tb", "ptb"]) {
+    const body = document.getElementById(id);
+    if(body && !body.children.length) body.innerHTML = `<tr><td colspan="${id === "tb" ? 9 : 7}"><div class="empty-state" role="status"><h3>Nenhum resultado</h3><p>Revise a busca ou o filtro de posição para encontrar outros resultados.</p></div></td></tr>`;
+  }
+}

@@ -4,6 +4,8 @@ import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import "./index.css"
+import { connectAnalytics } from "./analytics-bridge"
+import { iconMarkup } from "./client/icon"
 
 const sections = [
   { id: "worlds", label: "Worlds", icon: "worlds" },
@@ -25,9 +27,9 @@ function App() {
   return (
     <>
       <header id="top">
-        <div className="flex items-center gap-2 font-bold text-primary">
+        <a href="#/worlds" aria-label="WebLol, página inicial" className="flex items-center gap-2 rounded-sm font-bold text-primary hover:underline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-ring">
           <Icon name="flag" /> WebLol
-        </div>
+        </a>
         <nav aria-label="Áreas do painel" className="flex flex-wrap gap-1">
           {sections.map(({ id, label, icon }) => (
             <Button key={id} variant="ghost" className="tab" data-t={id}>
@@ -64,7 +66,8 @@ function App() {
             </Card>
           </div>
         </section>
-        <div id="screen-error" role="status" hidden className="p-4" />
+        <div id="screen-loading" role="status" hidden className="screen-message">Carregando esta área…</div>
+        <div id="screen-error" role="status" hidden className="screen-message" />
       </main>
       <dialog id="modal" aria-labelledby="modal-title"><div id="mbox" /></dialog>
       <div className="toast" id="toast" role="status" />
@@ -85,9 +88,12 @@ function loadClassicScript(path: string): Promise<void> {
 const root = createRoot(document.getElementById("app")!)
 flushSync(() => root.render(<App />))
 
+connectAnalytics(document.getElementById("v-worlds") as HTMLIFrameElement)
+
 async function start() {
   try {
-    await loadClassicScript("./assets/icon.js")
+    // The classic shell still looks up this helper by its global name.
+    Object.assign(window, { iconMarkup })
     await loadClassicScript("./assets/sync.js")
     await loadClassicScript("./assets/shell.js")
   } catch {

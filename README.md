@@ -21,7 +21,9 @@ npm ci
 npm run dev
 ```
 
-A interface principal fica em `src/` e usa React, TypeScript, Tailwind CSS e componentes shadcn/ui. As telas de estatísticas e do time ficam em `public/worlds.html` e `public/camp.html`. Os scripts existentes de draft, mapa e sincronização ficam em `public/assets/`.
+A interface usa React, TypeScript, Tailwind CSS e componentes shadcn/ui. O Vite compila as três entradas em `src/` (`index.html`, `worlds.html` e `camp.html`). Os dados do Worlds e o catálogo da Riot ficam em JSON, em `src/data/`.
+
+Use TypeScript para código novo da aplicação. As exceções são `public/assets/shell.js` e `public/assets/sync.js`, que compartilham o estado legado de autenticação e sincronização, e os utilitários Node existentes em `scripts/*.mjs`. As entradas legadas `worlds.ts` e `team.ts` ainda têm verificação de tipos desativada durante a migração. Os módulos extraídos delas, incluindo as builds, passam pelo `typecheck` normal.
 
 Para conferir a versão compilada, execute `npm run build` e `npm run preview`. Na prévia, é possível consultar o Worlds sem entrar. Na área do time, use seu Riot ID para acessar a sincronização com o Firestore.
 
