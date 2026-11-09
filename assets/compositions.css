@@ -395,6 +395,11 @@ body:has(#v-comps.on) > header button,
 #v-comps .pkf select { border-color:color-mix(in srgb,var(--lc) 46%,var(--line)); }
 #v-comps .ch:hover:not([aria-pressed=true]) { background:var(--panel2); border-color:var(--mut); }
 
+@media (min-width:1100px) {
+  #v-comps:not(.draft-view) #editor { display:flex; flex:1 0 auto; flex-direction:column; }
+  #v-comps:not(.draft-view) .lane:not(.ban-strip) { flex:1 0 auto; }
+}
+
 @media (min-width:1600px) {
   #v-comps .page-head { padding:14px 24px 12px; }
   #v-comps #comps {
@@ -423,6 +428,8 @@ body:has(#v-comps.on) > header button,
   #v-comps .champ-priority b { font-size:18px; }
   #v-comps .champ-priority small { font-size:11px; }
   #v-comps .chip .av { width:40px; height:40px; }
+  #v-comps .lane:not(.ban-strip) .chip .av { width:44px; height:44px; }
+  #v-comps .lane:not(.ban-strip) .chip.primary .av { width:64px; height:64px; }
   #v-comps .ban-strip { min-height:70px; }
   #v-comps .ban-strip .chip.primary .av { width:40px; height:40px; }
   #v-comps .ban-strip .chip.primary { margin-right:0; }
