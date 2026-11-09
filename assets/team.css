@@ -340,23 +340,23 @@ header nav button { border-radius: 8px; }
 
 /* Draft workspace */
 .draft-view #clist { display: none; }
-.draft-view #comps .comp-library {
+#v-comps #comps .comp-library {
   grid-template-columns: minmax(120px, 1fr) minmax(120px, .75fr) auto;
   align-items: center; padding: 8px 10px; gap: 8px;
 }
-.draft-view #draft-comp { grid-column: 1; grid-row: 1; min-width: 0; width: 100%; }
-.draft-view .library-search { grid-column: 2; grid-row: 1; display: flex; align-items: center; gap: 6px; }
-.draft-view #csearch { min-height: 0; margin: 0; }
-.draft-view .library-search label { flex: none; }
-.draft-view #clist ~ .cbtns { grid-column: 3; grid-row: 1; }
-.draft-view #comps { gap: 8px; padding: 0 var(--wl-gutter) 8px; }
-.draft-view .box > h2 { padding: 6px 10px; display: flex; align-items: baseline; justify-content: space-between; flex-wrap: wrap; gap: 2px 8px; }
-.draft-view .comp-library > h2 { display: none; }
-.draft-view #editor { padding: 0 10px 8px; }
-.draft-view .editor-controls { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: end; gap: 8px; margin-bottom: 6px; }
-.draft-view #cname { font-size: 14px; margin: 0; }
-.draft-view .vtog, .draft-view .dside, .draft-view .dseq { margin: 0; }
-.draft-view .vtog { gap: 4px; }
+#v-comps #draft-comp { grid-column: 1; grid-row: 1; min-width: 0; width: 100%; }
+#v-comps .library-search { grid-column: 2; grid-row: 1; display: flex; align-items: center; gap: 6px; }
+#v-comps #csearch { min-height: 0; margin: 0; }
+#v-comps .library-search label { flex: none; }
+#v-comps #clist ~ .cbtns { grid-column: 3; grid-row: 1; }
+#v-comps #comps { gap: 8px; padding: 0 var(--wl-gutter) 8px; }
+#v-comps .box > h2 { padding: 6px 10px; display: flex; align-items: baseline; justify-content: space-between; flex-wrap: wrap; gap: 2px 8px; }
+#v-comps .comp-library > h2 { display: none; }
+#v-comps #editor { padding: 0 10px 8px; }
+#v-comps .editor-controls { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: end; gap: 8px; margin-bottom: 6px; }
+#v-comps #cname { font-size: 14px; margin: 0; }
+#v-comps .vtog, #v-comps .dside, #v-comps .dseq { margin: 0; }
+#v-comps .vtog { gap: 4px; }
 .draft-toolbar { display: flex; align-items: center; flex-wrap: wrap; gap: 6px 12px; margin-bottom: 6px; }
 .draft-view .dseq { padding: 0; gap: 6px; }
 .draft-view .dsg { gap: 2px; }
@@ -393,24 +393,24 @@ header nav button { border-radius: 8px; }
 .draft-comments :is(#notes, #dnote) { display: block; width: 100%; min-height: 44px; height: 44px; margin: 0; padding: 4px 8px; resize: vertical; font-size: 13px; }
 .draft-lane-notes { display: flex; flex-wrap: wrap; gap: 4px 12px; list-style: none; margin: 0; padding: 0 10px 8px; font-size: 12px; overflow-wrap: anywhere; }
 .draft-lane-notes b { color: var(--gold); }
-.draft-view .champ-picker { position: static; }
-.draft-view #target { grid-template-columns: minmax(0, 1fr) auto; margin: 0 10px 4px; padding: 4px 6px; gap: 2px 6px; }
-.draft-view #target label { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
-.draft-view .gtools, .draft-view .roles { gap: 4px; padding: 0 10px 4px; }
-.draft-view .gtools { flex-wrap: nowrap; }
-.draft-view .gtools label { margin: 0; }
-.draft-view #grid { gap: 4px; padding: 4px 10px; grid-template-columns: repeat(auto-fill, minmax(56px, 1fr)); overscroll-behavior: contain; }
-.draft-view .ch { padding: 4px 2px; gap: 3px; }
-.draft-view .ch .av { width: 42px; height: 42px; }
-.draft-view .ch .nm { font-size: 11px; }
+#v-comps .champ-picker { position: static; }
+#v-comps #target { grid-template-columns: minmax(0, 1fr) auto; margin: 0 10px 4px; padding: 4px 6px; gap: 2px 6px; }
+#v-comps #target label { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+#v-comps .gtools, #v-comps .roles { gap: 4px; padding: 0 10px 4px; }
+#v-comps .gtools { flex-wrap: nowrap; }
+#v-comps .gtools label { margin: 0; }
+#v-comps #grid { gap: 4px; padding: 4px 10px; grid-template-columns: repeat(auto-fill, minmax(56px, 1fr)); overscroll-behavior: contain; }
+#v-comps .ch { padding: 4px 2px; gap: 3px; }
+#v-comps .ch .av { width: 42px; height: 42px; }
+#v-comps .ch .nm { font-size: 11px; }
 
 @media (min-width: 1000px) {
   body:has(.draft-view.on) { display: flex; flex-direction: column; height: 100dvh; }
   .draft-view.on { flex: 1; min-height: 0; }
   .draft-view .comp-workspace { display: flex; flex-direction: column; min-height: 100%; }
-  .draft-view .page-head { padding-block: 6px; }
-  .draft-view .page-head h1 { font-size: 24px; }
-  .draft-view .page-head p { display: none; }
+  #v-comps .page-head { padding-block: 6px; }
+  #v-comps .page-head h1 { font-size: 24px; }
+  #v-comps .page-head p { display: none; }
   .draft-view #comps { flex: 1; align-items: stretch; grid-template-rows: auto 1fr; }
   .draft-view .comp-editor { grid-column: 1; grid-row: 2; }
   .draft-view #editor { display: flex; flex-direction: column; flex: 1; }
@@ -426,9 +426,9 @@ header nav button { border-radius: 8px; }
   .draft-lane-notes { grid-column: 1; gap: 0 8px; padding: 0 8px 0 0; }
   .draft-view .champ-picker { grid-column: 2; grid-row: 2; }
   .draft-view #grid { flex: 1 1 0; min-height: 110px; max-height: none; }
-  .draft-view .editor-controls > div:first-child { display: flex; align-items: center; gap: 6px; }
-  .draft-view .editor-controls .control-label { margin: 0; flex: none; }
-  .draft-view .vtog button { flex: auto; white-space: nowrap; }
+  #v-comps .editor-controls > div:first-child { display: flex; align-items: center; gap: 6px; }
+  #v-comps .editor-controls .control-label { margin: 0; flex: none; }
+  #v-comps .vtog button { flex: auto; white-space: nowrap; }
   .draft-view .pk-target, .draft-view .pk.them { display: flex; align-items: center; flex-wrap: wrap; gap: 1px 6px; }
   .draft-view .pk.r .pk-target, .draft-view .pk.r.them { justify-content: flex-end; }
   .draft-view .pkn { margin: 0; }
@@ -438,26 +438,26 @@ header nav button { border-radius: 8px; }
     grid-template-rows: repeat(2, max-content) repeat(3, auto) max-content repeat(2, auto);
   }
   .draft-view .pk { padding-block: 3px; }
-  .draft-view :is(.cbtns button, .vtog button, .dside button, #target select, .roles button, .gtools input, .gtools select, #draft-comp, #csearch, #cname) {
+  #v-comps :is(.cbtns button, .vtog button, .dside button, #target select, .roles button, .gtools input, .gtools select, #draft-comp, #csearch, #cname) {
     min-height: 28px; padding: 3px 7px; font-size: 12px;
   }
 }
 @media (1000px <= width < 1150px) {
-  .draft-view .dside > span { display: none; }
+  #v-comps .dside > span { display: none; }
   .draft-toolbar { column-gap: 8px; }
   .draft-view .sq { width: 16px; }
   .draft-view #grid { min-height: 90px; }
 }
 @media (max-width: 999px) {
-  .draft-view #comps .comp-library { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-  .draft-view #clist ~ .cbtns { grid-column: 1 / -1; grid-row: 2; }
-  .draft-view .library-search label { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
-  .draft-view #draft-comp, .draft-view #csearch { min-height: 44px; }
+  #v-comps #comps .comp-library { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  #v-comps #clist ~ .cbtns { grid-column: 1 / -1; grid-row: 2; }
+  #v-comps .library-search label { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
+  #v-comps #draft-comp, #v-comps #csearch { min-height: 44px; }
   .draft-view .pk-target { min-height: 44px; }
 }
 @media (max-width: 540px) {
-  .draft-view .editor-controls, .draft-comment-fields { grid-template-columns: 1fr; }
-  .draft-view .cbtns { justify-content: start; }
+  #v-comps .editor-controls, .draft-comment-fields { grid-template-columns: 1fr; }
+  #v-comps .cbtns { justify-content: start; }
   .draft-view .tm:not(.mine) { margin-top: 4px; }
 }
 
@@ -520,9 +520,9 @@ header nav button { border-radius: 8px; }
 #comp-notes { width: 100%; min-height: 150px; resize: vertical; }
 
 /* Anotações recolhíveis também na ordem do draft */
-.draft-view .plan-head > h2 { padding: 6px 10px; }
-.draft-view .plan-head { padding-right: 10px; }
-.draft-view #notes-toggle { min-height: 28px; padding: 3px 8px; font-size: 12px; }
+#v-comps .plan-head > h2 { padding: 6px 10px; }
+#v-comps .plan-head { padding-right: 10px; }
+#v-comps #notes-toggle { min-height: 28px; padding: 3px 8px; font-size: 12px; }
 .notes-panel.draft { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; padding: 0 10px 8px; }
 .notes-panel.draft[hidden] { display: none; }
 .notes-panel.draft #comp-notes, #dnote { width: 100%; min-height: 90px; resize: vertical; }
@@ -547,7 +547,7 @@ header nav button { border-radius: 8px; }
 .draft-view .pk.them { align-content: start; min-height: 92px; padding: 6px 8px; }
 @media (min-width: 1000px) { .draft-view .pk.them { display: flex; align-items: flex-start; } }
 .plan-head > h2 { font-size: 16px; color: var(--txt); margin: 0; }
-.draft-view .plan-head > h2 { display: flex; align-items: baseline; flex-wrap: wrap; gap: 2px 8px; }
+#v-comps .plan-head > h2 { display: flex; align-items: baseline; flex-wrap: wrap; gap: 2px 8px; }
 @media (max-width: 540px) { .plan-head { padding-left: 10px; padding-bottom: 6px; } .plan-head > h2 { padding-left: 0 !important; } }
 
 /* Biblioteca de composições como coluna à esquerda de "Monte o plano" */
@@ -560,33 +560,33 @@ header nav button { border-radius: 8px; }
     position: sticky; top: 80px; max-height: calc(100dvh - 96px); align-self: start;
   }
   .draft-view #comps .comp-library { position: static; max-height: none; align-self: stretch; min-height: 0; }
-  .draft-view .comp-library > h2 { display: block; padding: 0; }
-  .library-search, .draft-view .library-search { display: block; }
-  .draft-view .library-search label { position: static; width: auto; height: auto; overflow: visible; clip-path: none; }
-  #clist, .draft-view #clist { grid-template-columns: 1fr; max-height: none; flex: 1 1 auto; min-height: 80px; overflow: auto; padding: 0; gap: 6px; }
+  #v-comps .comp-library > h2 { display: block; padding: 0; }
+  .library-search, #v-comps .library-search { display: block; }
+  #v-comps .library-search label { position: static; width: auto; height: auto; overflow: visible; clip-path: none; }
+  #clist, #v-comps #clist { grid-template-columns: 1fr; max-height: none; flex: 1 1 auto; min-height: 80px; overflow: auto; padding: 0; gap: 6px; }
   .ci { padding: 8px 10px; }
-  #clist ~ .cbtns, .draft-view #clist ~ .cbtns { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
-  #clist ~ .cbtns button, .draft-view .cbtns button { white-space: normal; min-height: 34px; font-size: 12px; padding: 5px 6px; }
+  #clist ~ .cbtns, #v-comps #clist ~ .cbtns { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+  #clist ~ .cbtns button, #v-comps .cbtns button { white-space: normal; min-height: 34px; font-size: 12px; padding: 5px 6px; }
   #new, #copy-comp { grid-column: 1 / -1; grid-row: auto; }
   .comp-editor, .draft-view .comp-editor { grid-column: 2; grid-row: 1; }
   .champ-picker, .draft-view .champ-picker { grid-column: 3; grid-row: 1; }
-  .gtools, .draft-view .gtools { flex-wrap: wrap; }
-  #target, .draft-view #target { grid-template-columns: minmax(0, 1fr); }
+  .gtools, #v-comps .gtools { flex-wrap: wrap; }
+  #target, #v-comps #target { grid-template-columns: minmax(0, 1fr); }
 }
 @media (max-width: 999px) {
-  .draft-view #comps .comp-library { grid-template-columns: minmax(0, 1fr); }
-  .draft-view .library-search, .draft-view #clist, .draft-view #clist ~ .cbtns { grid-column: 1; grid-row: auto; }
-  .draft-view #clist { grid-template-columns: 1fr; max-height: 160px; }
+  #v-comps #comps .comp-library { grid-template-columns: minmax(0, 1fr); }
+  #v-comps .library-search, #v-comps #clist, #v-comps #clist ~ .cbtns { grid-column: 1; grid-row: auto; }
+  #v-comps #clist { grid-template-columns: 1fr; max-height: 160px; }
 }
 #clist { align-content: start; grid-auto-rows: max-content; }
 #clist .ci { width: auto; min-width: 0; overflow: hidden; }
 .lib-t-draft { display: none; }
-.draft-view .lib-t-full { display: none; }
-.draft-view .lib-t-draft { display: inline; }
+#v-comps .lib-t-full { display: none; }
+#v-comps .lib-t-draft { display: inline; }
 /* Coluna 1: tudo alinhado à esquerda e ocupando a largura toda */
 #comps .comp-library > *, #comps .comp-library .library-search > * { width: 100%; margin-inline: 0; }
-#v-comps .comp-library .control-label { padding-inline: 0; margin-inline: 0; text-align: left; }
+#v-comps .box.comp-library .control-label { padding-inline: 0; margin-inline: 0; text-align: left; }
 #comps .comp-library .ci { text-align: left; }
 #comps .comp-library #clist ~ .cbtns { justify-items: stretch; }
 #comps .comp-library .cbtns button { width: 100%; justify-content: center; }
-@media (max-width: 999px) { .draft-view #comps .comp-library .library-search label { width: 1px; } }
+@media (max-width: 999px) { #v-comps #comps .comp-library .library-search label { width: 1px; } }
