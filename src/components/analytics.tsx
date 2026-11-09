@@ -64,15 +64,20 @@ export function TournamentOverview({ champions, games }: { champions: ChampionSu
   const presence = [...champions].sort((a, b) => b.picks + b.bans - a.picks - a.bans).slice(0, 15)
   if (!champions.length || games <= 0) return <div className="empty-state" role="status">Ainda não há jogos disponíveis para esta análise.</div>
   return <div className="analytics-dashboard">
-    <div className="metric-grid">
-      <MetricCard label="Jogos do torneio" value={games} note="Play-In até as Semifinais" />
-      <MetricCard label="Campeões no draft" value={champions.length} note="Escolhidos ou banidos" />
-      <MetricCard label="Mais escolhido" value={picks[0].name} portrait={picks[0].portrait} note={`${picks[0].picks} jogos · ${percent(picks[0].wins / picks[0].picks)} de vitórias`} />
-      <MetricCard label="Mais banido" value={bans[0].name} portrait={bans[0].portrait} note={`${bans[0].bans} bans · ${percent(bans[0].bans / games)} dos jogos`} />
+    <div className="draft-overview">
+      <section className="draft-summary" aria-labelledby="draft-summary-title">
+        <h2 id="draft-summary-title">Resumo do torneio</h2>
+        <div className="metric-grid">
+          <MetricCard label="Jogos analisados" value={games} note="Play-In até as semifinais" />
+          <MetricCard label="Campeões no draft" value={champions.length} note="Escolhidos ou banidos" />
+          <MetricCard label="Mais escolhido" value={picks[0].name} portrait={picks[0].portrait} note={`${picks[0].picks} jogos · ${percent(picks[0].wins / picks[0].picks)} de vitórias`} />
+          <MetricCard label="Mais banido" value={bans[0].name} portrait={bans[0].portrait} note={`${bans[0].bans} bans · ${percent(bans[0].bans / games)} dos jogos`} />
+        </div>
+      </section>
+      <RankedBars title="Prioridade no draft" description="Percentual de jogos em que cada campeão foi escolhido ou banido."
+        maximum={games} legends={[{ label: "Picks", kind: "pick" }, { label: "Bans", kind: "ban" }]}
+        rows={presence.map(c => ({ ...c, value: percent((c.picks + c.bans) / games), description: `${c.name}: ${c.picks} picks e ${c.bans} bans em ${games} jogos. Presença: ${percent((c.picks + c.bans) / games)}.`, segments: [{ value: c.picks, kind: "pick" }, { value: c.bans, kind: "ban" }] }))} />
     </div>
-    <RankedBars title="Prioridade no draft" description="Presença nos jogos: escolhas e banimentos somados. A escala considera o total do torneio."
-      maximum={games} legends={[{ label: "Picks", kind: "pick" }, { label: "Bans", kind: "ban" }]}
-      rows={presence.map(c => ({ ...c, value: percent((c.picks + c.bans) / games), description: `${c.name}: ${c.picks} picks e ${c.bans} bans em ${games} jogos. Presença: ${percent((c.picks + c.bans) / games)}.`, segments: [{ value: c.picks, kind: "pick" }, { value: c.bans, kind: "ban" }] }))} />
     <div className="analytics-columns">
       <RankedBars title="Campeões mais escolhidos" description="Quantidade de jogos e taxa de vitória. Amostras maiores ajudam a contextualizar o resultado."
         maximum={picks[0].picks} legends={[{ label: "Vitórias", kind: "win" }, { label: "Derrotas", kind: "loss" }]}

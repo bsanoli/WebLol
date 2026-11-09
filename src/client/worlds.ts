@@ -88,7 +88,9 @@ laneSelect.innerHTML = [...laneById].map(([id, lane]) => `<option value="${id}">
 laneSelect.onchange = () => go(laneSelect.value);
 tabsEl.onclick = e => {
   const button = e.target.closest("button");
-  if (button) go(button.dataset.id === "campeoes" ? selectedLane : button.dataset.id);
+  if (!button) return;
+  go(button.dataset.id === "campeoes" ? selectedLane : button.dataset.id);
+  window.scrollTo(0, 0);
 };
 function go(id) {
   if (!validTab(id)) id = "geral";

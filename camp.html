@@ -6,7 +6,7 @@
 <title>Comps do Time</title>
 <link rel="stylesheet" href="./assets/base.css">
 <link rel="stylesheet" href="./assets/team.css">
-  <script type="module" crossorigin src="./assets/camp-btf2msm2.js"></script>
+  <script type="module" crossorigin src="./assets/camp-FgdzaYj0.js"></script>
   <link rel="modulepreload" crossorigin href="./assets/icon-CCnttXuK.js">
   <link rel="modulepreload" crossorigin href="./assets/lol-media-CEZ9PJoJ.js">
 </head>
@@ -26,12 +26,14 @@
 <p id="route-note" class="route-note" role="status" hidden></p>
 
 <section id="v-comps" class="view on">
+ <div class="comp-workspace">
  <div class="page-head"><h1>Composições do time</h1><p>Monte opções por posição, organize a ordem do draft e registre o plano de jogo.</p></div>
  <div id="comps">
   <div class="box comp-library">
     <h2>1. Escolha uma composição</h2>
     <div class="library-search"><label class="control-label" for="csearch">Filtrar composições</label><input id="csearch" placeholder="Nome ou campeão"></div>
     <div id="clist"></div>
+    <select id="draft-comp" aria-label="Escolher composição" hidden></select>
     <div class="cbtns">
       <button class="pri" id="new"><svg class="icon" aria-hidden="true" focusable="false"><use href="assets/icons.svg#plus"></use></svg> Nova composição</button>
       <button id="dup"><svg class="icon" aria-hidden="true" focusable="false"><use href="assets/icons.svg#duplicate"></use></svg> Duplicar</button>
@@ -60,7 +62,10 @@
     <div id="grid"></div>
     <div class="foot" id="gfoot"></div>
   </div>
+
  </div>
+ </div>
+ <section class="box draft-comments" id="draft-comments" aria-labelledby="draft-comments-title" hidden></section>
 </section>
 
 <section id="v-map" class="view">

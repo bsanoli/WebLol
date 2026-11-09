@@ -1,4 +1,4 @@
-body{margin:0}[hidden]{display:none!important}
+body{margin:0}
 
 /* Layout: scoreboard header with tabs, then one view at a time: overview bars, lane tables, players */
 *{box-sizing:border-box}
@@ -137,7 +137,6 @@ tr.detail td{background:var(--mid-bg);padding:14px 16px}
 .bcard h3 .av{width:34px;height:34px;margin-right:10px}
 .bcard h4,.build h4{margin:0 0 5px;font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted)}
 .foot{color:var(--muted);font-size:12.5px;margin-top:22px;max-width:75ch}
-@media (prefers-reduced-motion:reduce){*{transition:none!important}}
 @media (max-width:520px){.bar{grid-template-columns:18px 92px 1fr 44px}.kpis{gap:16px}}
 :root {
   --bg: var(--wl-bg); --surface: var(--wl-surface); --ink: var(--wl-text);
