@@ -11,6 +11,7 @@ export const UI_VERSIONS: UiVersion[] = [
     version: "1.7",
     date: "2026-11-09",
     changes: [
+      "Composições: a escolha da comp voltou a ser uma coluna de botões à esquerda de \"Monte o plano\", com o nome da comp e os campeões principais.",
       "Ordem do draft: as anotações (plano do draft, anotações da comp e obs. das lanes) ficam no mesmo painel recolhível ao lado de \"Monte o plano\". A caixa de comentários do rodapé saiu.",
       "Ordem do draft: a barra Lado azul / Lado vermelho foi para o centro da linha dos bans.",
       "Ordem do draft: picks e bans têm numeração própria (1º a 10º cada).",
