@@ -207,7 +207,7 @@ async function sync(opts={}){
   if(!ROOT)return setSync("Sem pasta do time","warn");
   const r=await readOfficial();
   BADROOT=r.err==="noadmin";
-  if(r.err){const m={noadmin:"⚠ Pasta errada: clique e escolha a pasta Usuarios",nodata:"Sem versão oficial ainda",fp:"⚠ Chave do admin mudou! Não sincronizado",sig:"⚠ Versão oficial com assinatura inválida"}[r.err];setSync(m,r.err==="fp"||r.err==="sig"||r.err==="noadmin"?"bad":"warn");if(r.err==="noadmin")updateStatus();return}
+  if(r.err){const m={noadmin:"⚠ Pasta errada: clique e escolha a pasta Time",nodata:"Sem versão oficial ainda",fp:"⚠ Chave do admin mudou! Não sincronizado",sig:"⚠ Versão oficial com assinatura inválida"}[r.err];setSync(m,r.err==="fp"||r.err==="sig"||r.err==="noadmin"?"bad":"warn");if(r.err==="noadmin")updateStatus();return}
   OFF=r.off;const base=lsGet(BKEY),S=local()||{};
   let changed=false,notes=[];
   if(!base){
@@ -232,7 +232,7 @@ function updateStatus(){
   document.body.classList.toggle("isadmin",!!u?.admin);
   if(!ROOT){setSync(u?"Pasta do time não conectada":"…","warn");$("#sync").onclick=connectFolder;$("#sync").style.cursor="pointer";$("#send").style.display="none";return}
   $("#sync").onclick=BADROOT?repick:()=>sync().then(()=>toast("Sincronizado"));$("#sync").style.cursor="pointer";
-  if(BADROOT){setSync("⚠ Pasta errada: clique e escolha a pasta Usuarios","bad");$("#send").style.display="none";return}
+  if(BADROOT){setSync("⚠ Pasta errada: clique e escolha a pasta Time","bad");$("#send").style.display="none";return}
   if(OFF)setSync(`☁ Versão oficial v${OFF.version}`,"ok");
   const p=pending(),sent=new Set(lsGet(SKEY,[])),uns=p.filter(c=>!sent.has(c.h)),wait=p.length-uns.length;
   const b=$("#send");
@@ -288,11 +288,11 @@ function stepId(){
   tg.addEventListener("keydown",e=>{if(e.key==="Enter"){e.preventDefault();go()}if(e.key==="Backspace"&&!tg.value)nm.focus()});
   $("#ok").onclick=go;
 }
-const FOLDER="Usuarios";
+const FOLDER="Time";
 function stepFolder(){
   const adm=isAdminId(pendingId);
   modal(`<h3>Escolha a pasta do time</h3>
-   <p>Na próxima janela, selecione a pasta compartilhada do time no <b>OneDrive</b>: é a pasta <b>${FOLDER}</b>, a mesma onde está este arquivo HTML.</p>
+   <p>Na próxima janela, selecione a pasta compartilhada do time no <b>OneDrive</b>: é a pasta <b>${FOLDER}</b> (dentro dela ficam as pastas <b>oficial</b> e <b>usuarios</b>).</p>
    <div class="fpath">📁 OneDrive › <b>${FOLDER}</b> <span class="mut">(no PC do Bruno: lol › ${FOLDER})</span></div>
    <p>Clique uma vez na pasta <b>${FOLDER}</b> e depois em <b>Selecionar pasta</b>. Em seguida o navegador pergunta se a página pode ver e salvar arquivos nessa pasta: clique em <b>Permitir</b> (ou <b>Editar arquivos</b>).<br><br>É nessa pasta que ficam a versão oficial do time e os seus envios criptografados. Não escolha outra pasta.</p>
    <div class="err"></div><div class="row">${adm?"":'<button id="skip">Pular por enquanto</button>'}<button class="pri" id="pick">Escolher a pasta ${FOLDER}</button></div>`);
@@ -303,8 +303,8 @@ function stepFolder(){
 const validRoot=async()=>!!(await readJSON(["oficial","admin.json"]));
 function wrongFolder(){
   const inner=ROOT&&ROOT.name==="usuarios";
-  modal(`<h3>Pasta errada</h3><p>A pasta <b>${esc(ROOT?.name||"")}</b> não tem os dados do time.${inner?"<br><br>Você escolheu a pasta <b>usuarios de dentro</b>. Volte um nível e escolha a pasta <b>Usuarios de fora</b>.":""}<br><br>A pasta certa é a <b>${FOLDER}</b> onde está o arquivo HTML. Dentro dela tem as pastas <b>oficial</b> e <b>usuarios</b>.</p>
-   <div class="fpath">📁 ${FOLDER} ✅ &nbsp;&nbsp;→&nbsp;&nbsp; <span class="mut">oficial · usuarios · LoL_Worlds_e_Campeonato.html</span></div>
+  modal(`<h3>Pasta errada</h3><p>A pasta <b>${esc(ROOT?.name||"")}</b> não tem os dados do time.${inner?"<br><br>Você escolheu a pasta <b>usuarios de dentro</b>. Volte um nível e escolha a pasta <b>${FOLDER}</b>, que fica por fora dela.":""}<br><br>A pasta certa é a <b>${FOLDER}</b>. Dentro dela tem as pastas <b>oficial</b> e <b>usuarios</b>.</p>
+   <div class="fpath">📁 ${FOLDER} ✅ &nbsp;&nbsp;→&nbsp;&nbsp; <span class="mut">oficial · usuarios</span></div>
    <div class="row"><button class="pri" id="again">Escolher de novo</button></div>`);
   $("#again").onclick=async()=>{ROOT=null;await idbDel("root");if(user())repick();else stepFolder()};
 }
