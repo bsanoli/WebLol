@@ -607,3 +607,13 @@ header nav button { border-radius: 8px; }
 .sq.ban::before { content: ""; width: 58%; height: 58%; box-sizing: border-box; border: 1.5px solid #fff; border-radius: 50%;
   background: linear-gradient(to bottom right, transparent calc(50% - .75px), #fff calc(50% - .75px), #fff calc(50% + .75px), transparent calc(50% + .75px)); }
 .draft-toolbar .dseq { flex: 1 1 auto; justify-content: center; margin-inline-start: 16px; }
+
+/* Faixa de ordem logo acima das barras Lado azul / Lado vermelho, centralizada na divisória */
+.dseq-row { display: flex; justify-content: center; margin: 0 0 6px; }
+.dseq-row .dseq { flex: none; margin: 0; justify-content: center; }
+/* Sem o título "Composições do time" (fica só para leitores de tela) */
+#v-comps .page-head { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; padding: 0; }
+#v-comps #comps { padding-top: 12px; }
+/* Imagem de fundo do pick maior */
+.pk.mine { overflow: hidden; }
+.pk-art { transform: scale(1.35); transform-origin: 60% 25%; object-position: center 20%; }

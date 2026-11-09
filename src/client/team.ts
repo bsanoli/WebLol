@@ -192,8 +192,8 @@ function draftHTML(c){
   const PHN=["Bans 1","Picks 1","Bans 2","Picks 2"];
   // faixa da sequência
   let h=`<div class="draft-toolbar"><div class="dside" role="group" aria-label="Lado da equipe"><span>Nossa equipe</span>
-    ${Object.entries(DRAFT_SIDE).map(([key,label])=>`<button data-side="${key}" aria-pressed="${d.side===key}" class="${d.side===key?`on ${key[0]}`:""}">${label}</button>`).join("")}</div>
-  <div class="dseq" role="group" aria-label="Sequência de picks e bans">${PHN.map((p,pi)=>`<div class="dsg"><div class="dsl">${p}</div><div class="dsc">${seq.filter(s=>s.ph===pi).map(s=>`<span class="sq ${s.t==="B"?"b":"r"} ${s.k}${s.t===us?" us":""}" title="${s.n}º ${s.k==="ban"?"ban":"pick"}: ${s.t==="B"?"Azul":"Vermelho"} ${s.k==="ban"?"bane":"escolhe"}">${s.k==="ban"?"":s.n}</span>`).join("")}</div></div>`).join("")}</div></div>`;
+    ${Object.entries(DRAFT_SIDE).map(([key,label])=>`<button data-side="${key}" aria-pressed="${d.side===key}" class="${d.side===key?`on ${key[0]}`:""}">${label}</button>`).join("")}</div></div>
+  <div class="dseq-row"><div class="dseq" role="group" aria-label="Sequência de picks e bans">${PHN.map((p,pi)=>`<div class="dsg"><div class="dsl">${p}</div><div class="dsc">${seq.filter(s=>s.ph===pi).map(s=>`<span class="sq ${s.t==="B"?"b":"r"} ${s.k}${s.t===us?" us":""}" title="${s.n}º ${s.k==="ban"?"ban":"pick"}: ${s.t==="B"?"Azul":"Vermelho"} ${s.k==="ban"?"bane":"escolhe"}">${s.k==="ban"?"":s.n}</span>`).join("")}</div></div>`).join("")}</div></div>`;
   const team=t=>{
     const mine=t===us,side=t==="B"?"b":"r";
     const banSq=i=>{const s=find(t,"ban",i),n=mine?c.lanes.ban[i]:null;
