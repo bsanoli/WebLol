@@ -249,6 +249,16 @@
 .item .pb { height: 4px; overflow: hidden; border-radius: 2px; background: var(--line); }
 .item .pb i { display: block; height: 100%; background: var(--gold); opacity: .72; }
 .item-name { gap: 8px; }
+.build-icon-trigger {
+  display: inline-flex;
+  flex: none;
+  padding: 0;
+  border: 0;
+  border-radius: 4px;
+  background: transparent;
+  cursor: pointer;
+}
+.build-icon-trigger:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
 .build .build-icon { width: 26px; height: 26px; }
 .build-expanded .build-icon-item { width: 28px; height: 28px; }
 .rune-frequency .item { padding-block: 6px; }
@@ -319,13 +329,44 @@
 @container (min-width: 400px) {
   .build-expanded .rune-shards .rune-options { min-height: 32px; }
 }
+@media (min-width: 960px) {
+  .bcard .build-runes:has(.rune-page),
+  .bcard .build-runes .build-section:has(.rune-page) {
+    display: flex;
+    flex-direction: column;
+  }
+  .bcard .build-runes .build-section:has(.rune-page),
+  .bcard .rune-page { flex: 1; }
+  .bcard .rune-page { display: grid; }
+  @container (min-width: 400px) {
+    .bcard .rune-trees {
+      width: min(100%, 560px);
+      margin-inline: auto;
+      grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr) minmax(0, .75fr);
+      grid-template-rows: auto repeat(4, minmax(var(--rune-size), 1fr));
+      align-items: stretch;
+      column-gap: 12px;
+      --rune-size: clamp(32px, 8.4cqi, 40px);
+      --rune-gap: 6px;
+    }
+    .bcard .rune-trees > :is(.rune-tree, .rune-shards) {
+      display: grid;
+      grid-row: span 5;
+      grid-template-rows: subgrid;
+    }
+    .bcard .rune-tree-heading { margin-bottom: 0; }
+    .bcard .rune-slots { grid-row: span 4; grid-template-rows: subgrid; }
+    .bcard .rune-options { align-items: center; }
+    .bcard .rune-shards { --rune-size: 26px; }
+  }
+}
 .build-expanded .build-section:has(.rune-page, .runes) + .build-section { margin-top: 8px; padding-top: 8px; }
 .build-section:has(.rune-page, .runes) + .build-section {
   margin-top: 16px;
   padding-top: 12px;
   border-top: 1px solid var(--build-divider);
 }
-#tip.rune-tip {
+#tip.game-tip {
   box-sizing: border-box;
   width: min(360px, calc(100vw - 32px));
   max-width: none;
@@ -339,9 +380,49 @@
   font-size: 13px;
   line-height: 1.5;
 }
-#tip.rune-tip strong { display: flex; align-items: center; gap: 8px; color: var(--gold); font-size: 15px; }
-#tip.rune-tip img { width: 30px; height: 30px; object-fit: contain; }
-#tip.rune-tip p { margin: 8px 0; color: var(--ink); white-space: pre-line; overflow-wrap: anywhere; }
+#tip .game-tip-title { display: flex; align-items: center; gap: 8px; color: var(--gold); font-size: 15px; }
+#tip.game-tip img { width: 30px; height: 30px; object-fit: contain; }
+#tip .game-tip-description p { margin: 8px 0; color: var(--ink); overflow-wrap: anywhere; }
+#tip .effect-heading {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 6px;
+  margin-top: 10px;
+  padding-top: 8px;
+  border-top: 1px solid var(--line);
+  color: var(--gold);
+}
+#tip .effect-heading > .icon { width: 14px; height: 14px; }
+#tip .effect-heading + p { margin-top: 3px; }
+#tip .effect-heading small { color: var(--muted); font-size: 11px; }
+#tip .effect-term {
+  display: inline;
+  border: 0;
+  padding: 0;
+  background: none;
+  font: inherit;
+  font-weight: 600;
+  color: var(--gold);
+  text-decoration: underline dotted;
+  text-underline-offset: 3px;
+  cursor: help;
+}
+#tip .effect-term[data-tone="damage"] { color: var(--wl-danger); }
+#tip .effect-term[data-tone="magic"] { color: var(--wl-info); }
+#tip .effect-term[data-tone="recovery"] { color: var(--wl-success); }
+#tip .effect-term:focus-visible { outline: 2px solid currentColor; outline-offset: 2px; }
+#tip .effect-definition {
+  position: fixed;
+  box-sizing: border-box;
+  width: min(260px, calc(100vw - 16px));
+  padding: 8px 10px;
+  border: 1px solid var(--gold);
+  border-radius: var(--wl-control-radius);
+  background: var(--wl-raised);
+  color: var(--ink);
+  box-shadow: 0 4px 14px rgb(0 0 0 / .3);
+}
 .comparison-disclosure { margin: 18px 0; }
 .comparison-disclosure > summary { color: var(--gold); cursor: pointer; min-height: 44px; padding: 12px 16px; background: var(--surface); border: 1px solid var(--line); border-radius: var(--wl-control-radius); font-weight: 600; }
 .comparison-disclosure[open] > summary { margin-bottom: 12px; }

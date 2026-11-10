@@ -47,6 +47,32 @@ RUNE_DESCRIPTION_VALUES = {
     "@HealAmount@": "1 a 23 de Vida, conforme o nível",
     "@BaseHeal@": "10 a 54,71 (conforme o nível)",
 }
+# Item tooltips from Data Dragon can expose zeroes for values calculated in game.
+# Keep the effect text where the static catalog cannot supply the value.
+ITEM_DESCRIPTION_VALUES = {
+    "3040": {"0 de Poder de Habilidade": "Poder de Habilidade adicional com base no Mana máximo",
+             "0 de Escudo": "um Escudo que escala com o Mana"},
+    "3071": {"0 de Velocidade de Movimento": "Velocidade de Movimento adicional"},
+    "3073": {"0% de Velocidade de Ataque": "Velocidade de Ataque adicional",
+             "0% de Velocidade de Movimento": "Velocidade de Movimento adicional"},
+    "3084": {" (0s) por alvo": ""},
+    "3121": {"0 de Vida": "Vida adicional com base no Mana máximo"},
+    "3142": {"0 de Velocidade de Movimento": "Velocidade de Movimento adicional",
+             " por 0s": " temporariamente"},
+    "3171": {"0 de Velocidade de Movimento": "Velocidade de Movimento adicional"},
+    "3173": {"0 de Escudo": "um Escudo"},
+    "3174": {"0 de Escudo": "um Escudo"},
+    "3302": {"0 de Dano Mágico adicional": "Dano Mágico adicional"},
+    "6695": {"reduz em 0% Escudos": "reduz Escudos", "reduz os Escudos recebidos em 0%": "reduz o Escudo atual"},
+    "663146": {"0 de Dano Mágico": "Dano Mágico"},
+    "2510": {"0 de Dano Mágico adicional": "Dano Mágico adicional", "cura você em 0": "cura você"},
+    "2520": {"0 de Dano Verdadeiro": "Dano Verdadeiro"},
+    "2522": {"0 de dano de habilidade, Escudo e cura aumentados": "aumento de dano de habilidade, Escudos e curas"},
+    "2524": {" por 0s": " temporariamente", "0 de Velocidade de Ataque": "Velocidade de Ataque adicional"},
+    "2525": {"0 de Vida máxima": "Vida máxima adicional", "0 de Vida": "Vida"},
+    "2530": {"0% de Potência de Escudo e Cura": "Potência de Escudo e Cura adicional com base no Mana"},
+    "3095": {"0 de Dano Mágico adicional": "Dano Mágico adicional"},
+}
 
 
 def fetch(url):
@@ -67,13 +93,38 @@ def key(name):
     return re.sub(r"[^a-z0-9]", "", name.lower())
 
 
-def rune_description(html):
+def tooltip_text(html):
     text = re.sub(r"<(?:br|hr)\s*/?>|</li>", "\n", html, flags=re.I)
     text = unescape(re.sub(r"<[^>]+>", "", text))
-    for token, value in RUNE_DESCRIPTION_VALUES.items():
-        text = text.replace(token, value)
     text = re.sub(r"[^\S\n]+", " ", text)
-    return re.sub(r" *\n *", "\n", re.sub(r"\n{3,}", "\n\n", text)).strip()
+    text = re.sub(r" *\n *", "\n", text)
+    return re.sub(r"\n{3,}", "\n\n", text).strip()
+
+
+def add_build_details(manifest):
+    items = catalog(WORLDS, "item", "pt_BR")["data"]
+    spells = catalog(WORLDS, "summoner", "pt_BR")["data"]
+    heading = re.compile(r"<(passive|active)>(.*?)</\1>[^<]*<br>")
+    manifest["itemDetails"] = {}
+    for name, icon in manifest["item"].items():
+        item_id = Path(icon).stem
+        item = items[item_id]
+        html = re.sub(r"<active>ATIVOS</active>[^<]*<br>", "", item["description"])
+        effects = {tooltip_text(label): kind for kind, label in heading.findall(html)}
+        html = heading.sub(lambda match: "<br><br>" + match[0], html)
+        description = tooltip_text(html)
+        for placeholder, value in ITEM_DESCRIPTION_VALUES.get(item_id, {}).items():
+            description = re.sub(r"(?<!\d)" + re.escape(placeholder), value, description)
+        description = description.replace(" (0s)", "")
+        detail = {"name": item["name"], "description": description}
+        if effects:
+            detail["effects"] = effects
+        manifest["itemDetails"][name] = detail
+    manifest["spellDetails"] = {
+        name: {"name": spells[Path(icon).stem]["name"],
+               "description": tooltip_text(spells[Path(icon).stem]["description"])}
+        for name, icon in manifest["spell"].items()
+    }
 
 
 def add_runes(manifest, add):
@@ -103,7 +154,10 @@ def add_runes(manifest, add):
                     translation = localized.get(rune["id"], rune)
                     manifest["runeNames"][name] = translation["name"]
                     if version == WORLDS:
-                        manifest["runeDescriptions"][name] = rune_description(translation["longDesc"])
+                        description = tooltip_text(translation["longDesc"])
+                        for token, value in RUNE_DESCRIPTION_VALUES.items():
+                            description = description.replace(token, value)
+                        manifest["runeDescriptions"][name] = description
 
     for name, icon in SHARDS.items():
         filename = f"StatMods{icon}Icon.png"
@@ -155,6 +209,7 @@ def main():
                 manifest["spell"][key(name)] = add("spell", filename, f"{version}/img/spell/{filename}", version)
 
     add_runes(manifest, add)
+    add_build_details(manifest)
 
     manifest["map"] = add("map", "map11.png", f"{BASE}/img/map/map11.png")
     manifest["sources"] = {"base": BASE, "worlds": newer}

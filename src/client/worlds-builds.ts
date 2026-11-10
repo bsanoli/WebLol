@@ -10,7 +10,13 @@ type BuildOption = (string | number)[]
 type BuildIconKind = "item" | "rune" | "spell"
 
 const PTXT=(n: string,p: number,what: string)=>`${n}: usado em ${p}% dos jogos ${what}`;
-const buildIcon=(kind: BuildIconKind,name: string)=>lolImage(LOL_DATA[kind][lolKey(name)],`build-icon build-icon-${kind}`);
+function buildIcon(kind: BuildIconKind, name: string, interactive = true) {
+  const key = lolKey(name);
+  const icon = lolImage(LOL_DATA[kind][key], `build-icon build-icon-${kind}`);
+  if (!icon || !interactive) return icon;
+  const label = kind === "rune" ? LOL_DATA.runeNames[key] : LOL_DATA[`${kind}Details`][key]?.name;
+  return `<button type="button" class="build-icon-trigger" data-game-tip="${kind}:${key}" aria-label="${esc(label ?? name)}">${icon}</button>`;
+}
 const buildOptionNames=(kind: BuildIconKind,name: string)=>kind==="spell"?name.split(" and "):[name];
 
 export function buildSample(sample: LaneSample, position?: string) {
@@ -34,9 +40,9 @@ function itemsHtml(list: BuildOption[],what: string,kind: BuildIconKind,num=fals
   return `<ul class="items${kind==="rune"?" rune-frequency":""}">${list.map(([n,p,en],i)=>{
     if(typeof n!=="string"||typeof p!=="number")return "";
     const names=buildOptionNames(kind,typeof en==="string"?en:n);
-    const icons=names.map(name=>buildIcon(kind,name)).join("");
+    const icons=names.map(name=>buildIcon(kind,name,kind!=="rune")).join("");
     const label=kind==="rune"?LOL_DATA.runeNames[lolKey(names[0])]||n:n;
-    const runeTip=kind==="rune"?` data-rune-tip="${lolKey(names[0])}"`:"";
+    const runeTip=kind==="rune"?` data-game-tip="rune:${lolKey(names[0])}"`:"";
     return `<li class="item${num?" item-ranked":""}" data-tip="${esc(PTXT(label,p,what)+(en&&en!==label?` · em inglês: ${en}`:""))}"${runeTip}>${num?`<span class="n">${i+1}</span>`:""}<span class="item-name">${icons}<span>${esc(label)}</span></span><span class="pb" aria-hidden="true"><i style="width:${p}%"></i></span><span class="p">${p}%</span></li>`;
   }).join("")}</ul>`;
 }
@@ -62,7 +68,7 @@ export function buildHtml(c: Champion, layout: "page" | "expanded" = "page"){con
       ${column("Runas",[runeDetails,keyRunes],"build-runes")}
     </div>`;
   }
-  return `<div class="build">${column("Build e feitiços",[equipment,boots,spells])}${column("Runas",[runeDetails,keyRunes])}</div>`;
+  return `<div class="build">${column("Build e feitiços",[equipment,boots,spells])}${column("Runas",[runeDetails,keyRunes],"build-runes")}</div>`;
 }
 
 const missingBuildOption='<span class="na" aria-label="Sem dados">—</span>';

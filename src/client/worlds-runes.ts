@@ -13,7 +13,7 @@ function runeName(key: string) {
 }
 
 function runeChoice(key: string, status: string, active = false) {
-  return `<button type="button" class="rune-choice${active ? " is-selected" : ""}" aria-label="${esc(`${runeName(key)} · ${status}`)}" data-tip="${status}" data-rune-tip="${esc(key)}">
+  return `<button type="button" class="rune-choice${active ? " is-selected" : ""}" aria-label="${esc(`${runeName(key)} · ${status}`)}" data-tip="${status}" data-game-tip="rune:${esc(key)}">
     ${lolImage(LOL_DATA.rune[key], "build-icon")}
   </button>`
 }

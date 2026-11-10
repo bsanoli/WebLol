@@ -3,6 +3,7 @@ import { iconMarkup, laneIconMarkup } from "./icon"
 import DATA from "../data/worlds.json"
 import { LOL_DATA, lolAsset, lolChampion, lolKey } from "./lol-media"
 import { buildHtml, buildSample, buildsTable } from "./worlds-builds"
+import { effectText } from "./worlds-effect-text"
 import { LANES, LC, pct, wrPill, ico, esc, championSlug, teamLogo, teamRegion } from "./worlds-display"
 import { initializeTheme } from "./theme"
 
@@ -10,40 +11,89 @@ initializeTheme()
 
 const G=DATA.games, C=DATA.champs;
 const tipEl=()=>document.getElementById('tip');
-let tipTarget, dismissedRune;
+const tipSelector = "[data-game-tip], [data-tip]";
+let tipTarget, dismissedGameTip;
+let definitionTerm;
+function hideDefinition() {
+  if (!definitionTerm) return;
+  definitionTerm.removeAttribute("aria-describedby");
+  definitionTerm = undefined;
+  tipEl().querySelector(".effect-definition")?.remove();
+}
+function showDefinition(term) {
+  if (definitionTerm === term) return;
+  hideDefinition();
+  const definition = document.createElement("div");
+  definition.id = "effect-definition";
+  definition.className = "effect-definition";
+  definition.setAttribute("role", "tooltip");
+  definition.textContent = term.dataset.definition;
+  tipEl().append(definition);
+  definitionTerm = term;
+  term.setAttribute("aria-describedby", definition.id);
+  const anchor = term.getBoundingClientRect();
+  const panel = tipEl().getBoundingClientRect();
+  const {width, height} = definition.getBoundingClientRect();
+  const right = document.documentElement.clientWidth - width - 8;
+  const beside = panel.right <= right ? panel.right : panel.left - width;
+  const fitsBeside = beside >= 8 && beside <= right;
+  const left = fitsBeside ? beside : anchor.left + (anchor.width - width) / 2;
+  const top = fitsBeside || anchor.bottom + height <= innerHeight - 8 ? anchor.bottom : anchor.top - height;
+  definition.style.left = Math.max(8, Math.min(left, right)) + "px";
+  definition.style.top = Math.max(8, Math.min(top, innerHeight - height - 8)) + "px";
+}
 function hideTip() {
+  hideDefinition();
+  if (tipTarget?.dataset.gameTip) tipTarget.removeAttribute("aria-describedby");
   tipEl().hidden = true;
   tipTarget = undefined;
 }
 function showTip(target, x, y) {
   const el = tipEl();
-  const { tip, runeTip } = target.dataset;
-  if (runeTip && tipTarget === target && !el.hidden) return;
-  el.classList.toggle("rune-tip", Boolean(runeTip));
-  el.textContent = tip;
-  if (runeTip) {
+  const { tip, gameTip } = target.dataset;
+  if (gameTip && tipTarget === target && !el.hidden) return;
+  hideDefinition();
+  if (tipTarget?.dataset.gameTip) tipTarget.removeAttribute("aria-describedby");
+  el.classList.toggle("game-tip", Boolean(gameTip));
+  el.setAttribute("role", gameTip ? "region" : "tooltip");
+  el.removeAttribute("aria-labelledby");
+  el.style.maxHeight = "";
+  el.textContent = tip ?? "";
+  if (gameTip) {
+    const [kind, key] = gameTip.split(":");
+    const detail = kind === "rune"
+      ? { name: LOL_DATA.runeNames[key], description: LOL_DATA.runeDescriptions[key] }
+      : LOL_DATA[`${kind}Details`][key];
     const heading = document.createElement("strong");
-    const icon = LOL_DATA.rune[runeTip];
+    heading.id = "game-tip-title";
+    heading.className = "game-tip-title";
+    el.setAttribute("aria-labelledby", heading.id);
+    const icon = LOL_DATA[kind][key];
     if (icon) {
       const img = document.createElement("img");
       img.alt = "";
       img.src = lolAsset(icon);
       heading.append(img);
     }
-    heading.append(LOL_DATA.runeNames[runeTip] ?? runeTip);
-    const description = document.createElement("p");
-    description.textContent = LOL_DATA.runeDescriptions[runeTip] ?? "Descrição indisponível no patch 26.20.";
+    heading.append(detail?.name ?? key);
+    const description = effectText(detail?.description ?? "Descrição indisponível no patch 26.20.", detail?.effects);
     el.prepend(heading, description);
   }
   el.hidden = false;
   tipTarget = target;
   const {width, height} = el.getBoundingClientRect();
-  if (runeTip) {
+  if (gameTip) {
+    target.setAttribute("aria-describedby", el.id);
     const anchor = target.getBoundingClientRect();
+    const above = Math.max(0, anchor.top - 8);
+    const below = Math.max(0, innerHeight - anchor.bottom - 8);
+    const placeAbove = height <= above || (height > below && above >= below);
+    const availableHeight = placeAbove ? above : below;
+    el.style.maxHeight = availableHeight + "px";
     const left = anchor.left + (anchor.width - width) / 2;
-    const top = anchor.top - height >= 8 ? anchor.top - height : anchor.bottom;
+    const top = placeAbove ? anchor.top - Math.min(height, availableHeight) : anchor.bottom;
     el.style.left = Math.max(8, Math.min(left, document.documentElement.clientWidth - width - 8)) + "px";
-    el.style.top = Math.max(8, Math.min(top, innerHeight - height - 8)) + "px";
+    el.style.top = Math.max(8, top) + "px";
     return;
   }
   const left = x + 14 + width > innerWidth - 8 ? x - width - 14 : x + 14;
@@ -52,35 +102,78 @@ function showTip(target, x, y) {
   el.style.top = Math.max(8, top) + "px";
 }
 document.addEventListener("mousemove", e => {
-  if (tipEl().contains(e.target)) return;
-  const target = e.target.closest?.("[data-tip]");
-  if (target && target === dismissedRune) return;
-  dismissedRune = undefined;
+  if (tipEl().contains(e.target)) {
+    const term = e.target.closest(".effect-term");
+    if (term) showDefinition(term);
+    return;
+  }
+  if (definitionTerm !== document.activeElement) hideDefinition();
+  const target = e.target.closest?.(tipSelector);
+  if (target && target === dismissedGameTip) return;
+  dismissedGameTip = undefined;
   if (target) showTip(target, e.clientX, e.clientY);
   else hideTip();
 });
 document.addEventListener("focusin", e => {
-  const target = e.target.closest("[data-tip]");
+  if (tipEl().contains(e.target)) {
+    if (e.target.matches(".effect-term")) showDefinition(e.target);
+    return;
+  }
+  const target = e.target.closest(tipSelector);
   if (!target) return;
   const {left, bottom} = target.getBoundingClientRect();
-  dismissedRune = undefined;
+  dismissedGameTip = undefined;
   showTip(target, left, bottom);
 });
 document.addEventListener("click", e => {
-  const target = e.target.closest?.("[data-rune-tip]");
+  const term = e.target.closest?.(".effect-term");
+  if (term && tipEl().contains(term)) {
+    showDefinition(term);
+    return;
+  }
+  const target = e.target.closest?.("[data-game-tip]");
   if (target) showTip(target);
 });
-document.addEventListener("focusout", hideTip);
+document.addEventListener("focusout", e => {
+  if (!e.relatedTarget || (!tipEl().contains(e.relatedTarget) && e.relatedTarget !== tipTarget)) hideTip();
+});
 document.addEventListener("keydown", e => {
+  const panel = tipEl();
+  if (e.key === "Tab" && tipTarget?.dataset.gameTip && !panel.hidden) {
+    const terms = panel.querySelectorAll(".effect-term");
+    if (!e.shiftKey && e.target === tipTarget && terms.length) {
+      e.preventDefault();
+      terms[0].focus();
+      return;
+    }
+    if ((e.shiftKey && e.target === terms[0]) || (!e.shiftKey && e.target === terms[terms.length - 1])) {
+      if (e.shiftKey) e.preventDefault();
+      hideDefinition();
+      tipTarget.focus({preventScroll: true});
+      if (!e.shiftKey) hideTip();
+      return;
+    }
+  }
   if (e.key !== "Escape") return;
-  if (tipTarget?.dataset.runeTip) dismissedRune = tipTarget;
+  if (panel.contains(e.target)) tipTarget?.focus({preventScroll: true});
+  if (tipTarget?.dataset.gameTip) dismissedGameTip = tipTarget;
   hideTip();
 });
 document.addEventListener("scroll", e => {
-  if (e.target !== tipEl()) hideTip();
+  if (e.target !== tipEl()) {
+    hideTip();
+    return;
+  }
+  hideDefinition();
+  const term = document.activeElement;
+  if (e.target.contains(term) && term.matches(".effect-term:focus-visible")) {
+    const {top, bottom} = term.getBoundingClientRect();
+    const panel = e.target.getBoundingClientRect();
+    if (top >= panel.top && bottom <= panel.bottom) showDefinition(term);
+  }
 }, true);
 document.addEventListener("pointerdown", event => {
-  if (tipTarget?.dataset.runeTip && !tipTarget.contains(event.target) && !tipEl().contains(event.target)) hideTip();
+  if (tipTarget?.dataset.gameTip && !tipTarget.contains(event.target) && !tipEl().contains(event.target)) hideTip();
   const trigger = document.querySelector('.comp-picker-trigger[aria-expanded="true"]');
   if (trigger && !trigger.parentElement.contains(event.target)) trigger.click();
 });
