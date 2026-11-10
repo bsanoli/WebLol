@@ -120,7 +120,7 @@ function render(id){
   });
   const v=document.getElementById('view');
   if (v.contains(laneFilter)) v.before(laneFilter);
-  if(id==="geral")v.innerHTML=overview();
+  if(id==="geral"){v.innerHTML=overview();wireLaneOverview(v)}
   else if(id==="jogadores"){v.innerHTML=playersView();wirePlayers()}
   else if(id==="matchups"){v.innerHTML=muView();wireMu()}
   else if(id==="comps"){v.innerHTML=compsView();wireComps()}
@@ -147,24 +147,45 @@ function overview(){
   const pickRows=`<div class="bars">${picks.map((c,i)=>`<div class="bar" style="grid-template-columns:22px minmax(110px,150px) 1fr 34px 52px"><span class="rk">${i+1}</span><span class="nm">${ico(c.name,c.main)}${esc(c.name)}</span><span class="track" data-tip="${esc(c.name)}: ${c.wins} vitórias e ${c.picks-c.wins} derrotas em ${c.picks} jogos"><i style="width:${c.wins/mp*100}%;background:var(--good)" data-tip="${esc(c.name)}: ${c.wins} vitórias"></i><i style="width:${(c.picks-c.wins)/mp*100}%;background:var(--bad);opacity:.55" data-tip="${esc(c.name)}: ${c.picks-c.wins} derrotas"></i></span><span class="val" data-tip="Jogos com ${esc(c.name)}: ${c.wins} vitórias, ${c.picks-c.wins} derrotas">${c.picks}</span><span>${wrPill(c.wins,c.picks)}</span></div>`).join("")}</div>`;
   const banRows=barList(bans,c=>`${c.bans} <span class="na">· ${pct(c.bans/G)}</span>`,mb,c=>[[c.bans,'--ban',`${c.name}: banido em ${c.bans} de ${G} jogos (${pct(c.bans/G)})`]],82,c=>`Bans de ${c.name} e % dos ${G} jogos`);
   const presRows=barList(pres,c=>pct((c.picks+c.bans)/G),G,c=>[[c.picks,'--pick',`${c.name}: ${c.picks} picks (${c.wins}V ${c.picks-c.wins}D)`],[c.bans,'--ban',`${c.name}: ${c.bans} bans`]],52,c=>`Presença: ${c.picks} picks + ${c.bans} bans = ${c.picks+c.bans} de ${G} jogos`);
-  const lanes=LANES.map(([l,col])=>{
-    const ls=C.filter(c=>c.lanes[l]).sort((a,b)=>b.lanes[l].picks-a.lanes[l].picks).slice(0,5);
-    return `<button class="lanecard" style="--c:var(${col})" data-go="${l.toLowerCase()}"><h3>${l}</h3><div class="lchead"><span>Campeão</span><span data-tip="Jogos nesta lane">Jogos</span><span data-tip="Taxa de vitória do campeão em todas as posições">Vitórias</span></div><ol>${ls.map(c=>`<li><b class="nmi">${ico(c.name)}<span class="ell" title="${esc(c.name)}">${esc(c.name)}</span></b><span class="lane-games" data-tip="${esc(c.name)} jogou ${c.lanes[l].picks} vezes de ${l}">${c.lanes[l].picks}</span>${wrPill(c.wins,c.picks)}</li>`).join("")}</ol><div class="more" >Ver campeões · ${l} →</div></button>`}).join("");
-  setTimeout(() => {
-    document.querySelectorAll(".lanecard[data-go]").forEach(card => {
-      card.onclick = () => {
-        go(card.dataset.go);
-        window.scrollTo({ top: 0, behavior: "instant" });
-      };
-    });
-  });
+  const lanes = LANES.map(([lane]) => {
+    const id = lane.toLowerCase();
+    const champions = C.filter(c => c.lanes[lane]).sort((a,b) => b.lanes[lane].picks - a.lanes[lane].picks).slice(0, 5);
+    const rows = champions.map(c => {
+      const name = esc(c.name);
+      const games = c.lanes[lane].picks;
+      return `<tr>
+        <th scope="row"><span class="lane-champion">${ico(c.name)}<span title="${name}">${name}</span></span></th>
+        <td data-tip="${name} jogou ${games} vezes de ${lane}">${games}</td>
+        <td>${wrPill(c.wins, c.picks)}</td>
+      </tr>`;
+    }).join("");
+    const href = window.frameElement ? `./#/worlds/campeoes?posicao=${id}` : `#${id}`;
+    return `<article class="lane-card" data-go="${id}">
+      <h3 id="lane-title-${id}">${lane}</h3>
+      <table aria-labelledby="lane-title-${id}">
+        <thead><tr><th scope="col">Campeão</th><th scope="col" data-tip="Jogos nesta lane">Jogos</th><th scope="col" data-tip="Taxa de vitória do campeão em todas as posições">Vitórias</th></tr></thead>
+        <tbody>${rows}</tbody>
+      </table>
+      <a class="lane-card-link" href="${href}" aria-label="Ver todos os campeões de ${lane}">Ver todos os campeões ${iconMarkup("next")}</a>
+    </article>`;
+  }).join("");
   return `<div id="analytics-root"><div class="grid2">
    <section class="panel"><h2>Mais pickados</h2><p class="hint">Barra = jogos (verde vitórias, vermelho derrotas). À direita, a taxa de vitória.</p>${pickRows}</section>
    <section class="panel"><h2>Mais banidos</h2><p class="hint">Bans e % dos ${G} jogos em que o campeão foi banido.</p>${banRows}</section>
   </div>
   <section class="panel" style="margin-top:20px"><h2>Prioridade no draft</h2><p class="hint">Presença = % dos jogos em que o campeão foi pickado ou banido.</p>
    <div class="legend"><span><i class="dot" style="background:var(--pick)"></i>Picks</span><span><i class="dot" style="background:var(--ban)"></i>Bans</span></div>${presRows}</section>
-  </div><section class="lane-overview"><h2>Explore por posição</h2><p class="hint">Mais escolhidos em cada posição. A taxa de vitória considera todos os jogos do campeão.</p><div class="lanes">${lanes}</div></section>`;
+  </div><section class="lane-overview"><h2>Explore por posição</h2><p class="hint">Mais escolhidos em cada posição. A taxa de vitória considera todos os jogos do campeão.</p><div class="lane-grid">${lanes}</div></section>`;
+}
+
+function wireLaneOverview(view) {
+  view.querySelector(".lane-grid").onclick = event => {
+    const card = event.target.closest(".lane-card");
+    if (!card || event.ctrlKey || event.metaKey || event.shiftKey || event.altKey) return;
+    event.preventDefault();
+    go(card.dataset.go);
+    window.scrollTo({ top: 0, behavior: "instant" });
+  };
 }
 
 // Lane view

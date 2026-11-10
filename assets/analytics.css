@@ -80,15 +80,56 @@
 .chart-value { font-size: 13px; font-weight: 600; text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
 .chart-footer { border-top: 1px solid var(--line); margin-top: 12px; padding-top: 10px; display: flex; justify-content: space-between; align-items: center; gap: 12px; font-size: 12px; color: var(--muted); }
 .analytics-columns { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 20px; }
-.lane-overview { margin-top: 28px; }
-.lane-overview .lanes { margin-top: 12px; }
-.lanecard { border-top-width: 2px; padding: 16px; }
-.lanecard li { min-height: 38px; }
-.lanecard .lchead { margin-bottom: 8px; letter-spacing: 0; font-size: 11px; text-transform: none; }
-.lanecard .av { margin-right: 0; }
-.lanecard .nmi { gap: 8px; }
-.lanecard .ell { overflow-wrap: anywhere; }
-.lanecard .more { margin-top: auto; padding-top: 12px; }
+.lane-overview { margin-top: 28px; container-type: inline-size; }
+.lane-grid { display: grid; gap: 12px; margin-top: 12px; }
+@container (min-width: 464px) { .lane-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@container (min-width: 704px) { .lane-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+@container (min-width: 1184px) { .lane-grid { grid-template-columns: repeat(5, minmax(0, 1fr)); } }
+.lane-card {
+  --lane-divider: color-mix(in srgb, var(--line) 62%, var(--surface));
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  border: 1px solid var(--line);
+  border-radius: var(--wl-panel-radius);
+  background: var(--surface);
+  cursor: pointer;
+}
+.lane-card h3 { margin: 0; padding: 12px 12px 8px; font: 700 16px/1.25 var(--wl-font); }
+.lane-card table { table-layout: fixed; font-size: 13px; }
+.lane-card :is(th, td) { padding: 4px 0; border-bottom: 1px solid var(--lane-divider); vertical-align: middle; }
+.lane-card th { position: static; background: transparent; letter-spacing: normal; text-transform: none; }
+.lane-card thead th { color: var(--muted); font-size: 12px; font-weight: 400; }
+.lane-card tr > :first-child { padding-left: 12px; }
+.lane-card tr > :nth-child(n+2) { text-align: right; }
+.lane-card tr > :last-child { padding-right: 12px; }
+.lane-card thead th:nth-child(2) { width: 36px; }
+.lane-card thead th:nth-child(3) { width: 62px; }
+.lane-card td { color: var(--muted); white-space: nowrap; }
+.lane-card tbody th { color: var(--ink); font-size: 13px; font-weight: 600; }
+.lane-card tbody tr:hover { background: var(--mid-bg); }
+.lane-champion { display: flex; align-items: center; gap: 8px; }
+.lane-champion > span:last-child { min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+.lane-card .av { width: 26px; height: 26px; margin: 0; border-radius: var(--wl-control-radius); box-shadow: none; }
+.lane-card .wr { min-width: 0; padding: 0; background: none; font-size: inherit; }
+.lane-card .wr.g { color: color-mix(in srgb, var(--good) 65%, var(--muted)); }
+.lane-card .wr.b { color: color-mix(in srgb, var(--bad) 65%, var(--muted)); }
+.lane-card-link {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-top: auto;
+  min-height: 44px;
+  padding: 8px 12px;
+  border-radius: 0 0 var(--wl-panel-radius) var(--wl-panel-radius);
+  color: var(--gold);
+  font-size: 13px;
+  font-weight: 600;
+  text-decoration: none;
+}
+.lane-card-link:hover { background: var(--mid-bg); }
+.lane-card-link:focus-visible { outline-offset: -2px; }
 .champion-detail { width: min(100%, calc(100vw - 2 * var(--wl-gutter) - 40px)); }
 .champion-detail .dgrid { grid-template-columns: repeat(auto-fit,minmax(min(100%,180px),1fr)); gap: 12px 20px; padding-bottom: 16px; margin-bottom: 16px; border-bottom: 1px solid var(--line); }
 .tools { padding: 14px; border: 1px solid var(--line); background: var(--surface); border-radius: var(--wl-panel-radius); gap: 12px; margin: 18px 0; }

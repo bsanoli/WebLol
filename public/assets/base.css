@@ -89,7 +89,7 @@ body { font: 15px/1.5 var(--wl-font); background: var(--wl-bg); color: var(--wl-
   vertical-align: -.15em;
   flex: none;
 }
-td, .kpi, .bar, .wr, .kda, .lane-games { font-variant-numeric: tabular-nums; }
+td, .kpi, .bar, .wr, .kda { font-variant-numeric: tabular-nums; }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { transition: none !important; scroll-behavior: auto !important; }
 }
