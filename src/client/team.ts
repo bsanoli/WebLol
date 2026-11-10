@@ -1,5 +1,5 @@
 // @ts-nocheck -- O editor legado ainda depende de estado dinâmico vindo do armazenamento local.
-import { iconMarkup } from "./icon"
+import { iconMarkup, laneIconMarkup } from "./icon"
 import { LOL_DATA, lolAsset, lolChampion, lolImage } from "./lol-media"
 
 /* ===== Campeões (funções do editor e catálogo local da Riot) ===== */
@@ -151,7 +151,7 @@ function renderEditor(){
   ${notes}<button data-slot="button" data-variant="default" type="button" class="jump-picker" data-picker>${iconMarkup("plus")} Adicionar campeão</button>
   ${dv?draftHTML(c):LANES.map(l=>`<div class="lane${active===l.k?" act":""}${l.k==="ban"?" ban-strip":""}" data-l="${l.k}" style="--lc:var(${l.c})">
   ${l.k==="ban"?"":pickArt(c.lanes[l.k][0])}
-  <button class="ln" data-draft-target="${l.k}" aria-pressed="${active===l.k}">${l.n}${active===l.k?'<span class="selection-mark">●</span>':""}</button>
+  <button class="ln lane-label" data-draft-target="${l.k}" aria-pressed="${active===l.k}">${laneIconMarkup(l.k)}${l.n}</button>
   <div class="chips">${c.lanes[l.k].map((n,i)=>optionHTML(n,l.k,i)).join("")||'<span class="empty">Adicionar campeão</span>'}</div>
 ${laneNoteHTML(c,l)}</div>`).join("")}
   <p class="help">Clique no retrato para priorizar. Arraste para reordenar ou use o menu ⋯ de cada campeão.</p>`;
@@ -254,7 +254,7 @@ function draftHTML(c){
           ${meta}${m?img(m):iconMarkup("roles")}
           <span class="pkn${m?"":" pk-empty"}">${m?esc(m):"Escolher campeão"}</span>
         </button>
-        <div class="pkf"><select data-slot="${i}" aria-label="Posição do pick ${t}${i+1}" title="Lane deste pick">${PLANES.map(x=>`<option value="${x}"${x===l?" selected":""}>${LN[x].n}</option>`).join("")}</select>
+        <div class="pkf"><span class="lane-label">${laneIconMarkup(l)}<select data-slot="${i}" aria-label="Posição do pick ${t}${i+1}" title="Lane deste pick">${PLANES.map(x=>`<option value="${x}"${x===l?" selected":""}>${LN[x].n}</option>`).join("")}</select></span>
         ${laneNoteHTML(c,L)}
         ${m?mini(m,l,0):""}
         ${ch.length>1?`<div class="alts draft-alternatives" role="group" aria-label="Alternativas de ${L.n}"><span class="draft-alternatives-label" aria-hidden="true">Alternativas</span>${ch.slice(1).map((n,j)=>mini(n,l,j+1)).join("")}</div>`:""}
@@ -279,8 +279,8 @@ function draftHTML(c){
 
 /* ===== Grade de campeões ===== */
 let role="all";
-const ROLEBTN=[["all","Todos"],["top","Top"],["jg","Jungle"],["mid","Mid"],["adc","ADC"],["sup","Suporte"]];
-$("#roles").innerHTML=ROLEBTN.map(([k,n])=>`<button data-slot="button" data-variant="ghost" data-size="sm" data-r="${k}" aria-pressed="${k==="all"}" class="${k==="all"?"on":""}">${n}</button>`).join("");
+const ROLEBTN=[{k:"all",n:"Todos"},...LANES.filter(l=>l.k!=="ban")];
+$("#roles").innerHTML=ROLEBTN.map(({k,n})=>`<button data-slot="button" data-variant="ghost" data-size="sm" data-r="${k}" aria-pressed="${k==="all"}" class="${k==="all"?"on":""}"><span class="lane-label">${laneIconMarkup(k)}${n}</span></button>`).join("");
 $("#roles").onclick=e=>{const b=e.target.closest("button");if(!b)return;role=b.dataset.r;document.querySelectorAll("#roles button").forEach(x=>{x.classList.toggle("on",x===b);x.setAttribute("aria-pressed",String(x===b))});resetGrid()};
 const resetGrid=()=>{renderGrid();$("#grid").scrollTop=0};$("#search").oninput=resetGrid;$("#sort").onchange=resetGrid;$("#worlds-only").onchange=resetGrid;
 function renderTarget(){

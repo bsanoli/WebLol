@@ -1,5 +1,5 @@
 // @ts-nocheck -- A tela legada ainda usa estado e eventos DOM sem tipos explícitos.
-import { iconMarkup } from "./icon"
+import { iconMarkup, laneIconMarkup } from "./icon"
 import DATA from "../data/worlds.json"
 import { lolAsset, lolChampion } from "./lol-media"
 import { buildHtml, buildsTable } from "./worlds-builds"
@@ -14,7 +14,6 @@ document.addEventListener('focusout',()=>tipEl().hidden=true);
 document.addEventListener('keydown',e=>{if(e.key==='Escape')tipEl().hidden=true});
 document.addEventListener('scroll',()=>tipEl().hidden=true,true);
 const TIPS={picks:"Jogos em que o campeão foi escolhido nesta lane",wr:"Vitórias ÷ jogos do campeão no torneio",bans:"Quantas vezes foi banido",pres:"% dos jogos em que foi pickado ou banido",kda:"(Abates + Assistências) ÷ Mortes, pelas médias por jogo",k:"Abates por jogo (média)",d:"Mortes por jogo (média)",a:"Assistências por jogo (média)",name:"Clique para ordenar",n:"Jogos coletados do jogador",team:"Time",lane:"Lane principal",chs:"Campeões mais jogados (jogos)"};
-const dot=l=>l?`<span class="dot" style="background:var(${LC[l]})" title="${l}"></span>`:'';
 const sortIcons = `<span class="sort-asc">${iconMarkup("ascending")}</span><span class="sort-desc">${iconMarkup("descending")}</span>`;
 function showSort(sort) {
   document.querySelectorAll("th button[data-k]").forEach(button => {
@@ -161,7 +160,7 @@ function overview(){
     }).join("");
     const href = window.frameElement ? `./#/worlds/campeoes?posicao=${id}` : `#${id}`;
     return `<article class="wl-panel lane-card" data-go="${id}">
-      <h3 class="wl-card-title" id="lane-title-${id}">${lane}</h3>
+      <h3 class="wl-card-title" id="lane-title-${id}"><span class="lane-label">${laneIconMarkup(lane)}${lane}</span></h3>
       <table aria-labelledby="lane-title-${id}">
         <thead><tr><th scope="col">Campeão</th><th scope="col" data-tip="Jogos nesta lane">Jogos</th><th scope="col" data-tip="Taxa de vitória do campeão em todas as posições">Vitórias</th></tr></thead>
         <tbody>${rows}</tbody>
@@ -294,7 +293,7 @@ function wirePlayers(){
     const list=rows.filter(p=>(!l||p.lane===l)&&(p.name.toLowerCase().includes(f)||p.team.toLowerCase().includes(f)))
       .sort((a,b)=>{const x=a[plSort.k],y=b[plSort.k];return (typeof x==="string"?x.localeCompare(y):x-y)*plSort.d||b.n-a.n});
     showSort(plSort);
-    tb.innerHTML=list.map(p=>`<tr><td class="champ">${esc(p.name)}</td><td>${esc(p.team)}</td><td><span class="mini">${dot(p.lane)}${p.lane}</span></td>
+    tb.innerHTML=list.map(p=>`<tr><td class="champ">${esc(p.name)}</td><td><span class="lane-label">${laneIconMarkup(p.lane)}${p.lane}</span></td>
       <td class="num">${p.n}</td><td class="num">${wrPill(p.w,p.n)}</td><td class="num kda">${p.kda.toFixed(2)}</td>
       <td><div class="chips">${p.ch.map(([c,n])=>`<span class="chip">${ico(c)}${esc(c)} · ${n}</span>`).join("")}</div></td></tr>`).join("");
   };
@@ -308,7 +307,7 @@ function wirePlayers(){
 let muLane="Mid", muChamp=null;
 function muView(){
   return `<section class="matchups-view"><h2>Confrontos por posição</h2><p class="hint">Como cada campeão foi contra o adversário direto da mesma lane. Base: ${DATA.mgames} jogos com draft completo. Escolha a lane e o campeão.</p>
-  <nav id="mulanes" style="margin:0 0 12px">${LANES.map(([l])=>`<button data-slot="button" data-variant="ghost" data-l="${l}" aria-selected="${l===muLane}">${dot(l)}${l}</button>`).join("")}</nav>
+  <nav id="mulanes" style="margin:0 0 12px">${LANES.map(([l])=>`<button data-slot="button" data-variant="ghost" data-l="${l}" aria-selected="${l===muLane}"><span class="lane-label">${laneIconMarkup(l)}${l}</span></button>`).join("")}</nav>
   <div class="matchups-grid">
    <div class="wl-panel panel mu-picker"><div style="padding:14px 16px 6px"><h2 style="font-size:18px">Escolha o campeão</h2></div><div id="mulist" class="mulist"></div></div>
    <div class="wl-panel panel" id="mudetail"></div>
@@ -361,7 +360,7 @@ function compCard(g,q){
   const side=(c,p,k,r)=>{const ch=`<td${r?' class="r"':''}><span class="ch">${ico(c)}<span>${hl(c)}<span class="pl">${hl(p)}</span></span></span></td>`,kd=`<td class="k${r?'':' r'}" data-tip="Abates / Mortes / Assistências de ${esc(p)}">${k}</td>`;return r?kd+ch:ch+kd};
   return `<article class="wl-panel cg"><div class="st">${esc(g.st)} · Jogo ${g.g}</div>
   <div class="tm"><span class="${g.bw?'won':'lost'}" data-tip="Lado azul${g.bw?' · venceu':''}">${esc(g.b)}${g.bw?` ${iconMarkup("check")}`:''}</span><span class="vs">vs</span><span class="${g.bw?'lost':'won'}" data-tip="Lado vermelho${g.bw?'':' · venceu'}">${esc(g.r)}${g.bw?'':` ${iconMarkup("check")}`}</span></div>
-  <table>${g.p.map(([l,cb,pb,kb,cr,pr,kr])=>`<tr>${side(cb,pb,kb,0)}<td class="ln">${dot(l)}</td>${side(cr,pr,kr,1)}</tr>`).join("")}</table></article>`;
+  <table>${g.p.map(([l,cb,pb,kb,cr,pr,kr])=>`<tr>${side(cb,pb,kb,0)}<td class="ln">${laneIconMarkup(l,true)}</td>${side(cr,pr,kr,1)}</tr>`).join("")}</table></article>`;
 }
 function wireComps(){
   const order=g=>{const m=g.s.match(/(\d+)/g)||[];const base=g.s.startsWith('play')?0:g.s.includes('quarter')?200:g.s.includes('semi')?300:g.s.includes('final')?400:100;return base+(+m[0]||0)*10+(+m[1]||0)/100};

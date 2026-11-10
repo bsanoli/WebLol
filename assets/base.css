@@ -114,6 +114,20 @@ body { font: var(--wl-body-size)/1.5 var(--wl-font); background: var(--wl-bg); c
   vertical-align: -.15em;
   flex: none;
 }
+.lane-icon {
+  display: inline-block;
+  width: 16px;
+  height: 16px;
+  flex: none;
+  object-fit: contain;
+  vertical-align: middle;
+}
+.lane-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  white-space: nowrap;
+}
 td, .kpi, .bar, .wr, .kda { font-variant-numeric: tabular-nums; }
 :where(table) { width: 100%; border-collapse: collapse; font-size: var(--wl-detail-size); }
 :where(th, td) { padding: 8px 12px; border-bottom: 1px solid var(--wl-divider); text-align: left; vertical-align: middle; }
