@@ -35,11 +35,11 @@ document.getElementById('kpis').innerHTML=[[G,"jogos"],[C.length,"campeões usad
 
 const TABS = [
   ["geral", "Visão geral", "chart"],
-  ["campeoes", "Campeões", "roles"],
-  ["builds", "Builds", "box"],
+  ["campeoes", "Campeões", "champion"],
+  ["builds", "Builds", "inventory"],
   ["matchups", "Confrontos", "matchups"],
-  ["comps", "Composições", "team"],
-  ["jogadores", "Jogadores", "users"],
+  ["comps", "Composições", "composition"],
+  ["jogadores", "Jogadores", "player"],
 ];
 const tabsEl = document.getElementById("tabs");
 const laneFilter = document.getElementById("lane-filter");
@@ -400,7 +400,7 @@ function compsView(){
     </div>
     <div class="wl-panel comp-filters" role="group" aria-label="Filtrar jogos">
       <label for="cq">Buscar<input id="cq" type="search" placeholder="Campeão ou jogador" value="${esc(cQ||"")}"></label>
-      ${compPicker({id:"cc", label:"Campeões", value:`${iconMarkup("team")} Escolher campeões`, hint:"cc-hint",
+      ${compPicker({id:"cc", label:"Campeões", value:`${iconMarkup("champion-add")} Escolher campeões`, hint:"cc-hint",
         options:compChampions, image:ico, search:"Buscar campeão", empty:"Nenhum campeão encontrado.", clear:"Limpar seleções",
         category:{label:"Rota jogada no Worlds", all:"Todas", values:LANES.map(([lane]) => lane), icon:laneIconMarkup, forName:name => [...compChampionLanes.get(name)]}})}
       ${compPicker({id:"ct", label:"Times", value:teamFilterLabel(),

@@ -60,8 +60,10 @@ nav{display:flex;gap:6px}
 .lanefig .mm.b{color:var(--wl-side-blue);letter-spacing:-2px}.lanefig .mm.r{color:var(--wl-side-red);letter-spacing:-2px;flex:1}
 .kgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:12px}
 .obj{padding:var(--wl-panel-padding)}
-.obj h3{margin:0 0 8px;color:var(--txt);font:700 var(--wl-card-title-size)/1.25 var(--wl-font)}
-.obj h3 .icon{color:var(--mut)}
+.obj h3{display:flex;align-items:center;gap:8px;margin:0 0 8px;color:var(--txt);font:700 var(--wl-card-title-size)/1.25 var(--wl-font)}
+.obj h3 svg.icon{color:var(--mut)}
+.game-icon{width:20px;height:20px;object-fit:contain}
+.obj h3 .game-icon{width:24px;height:24px}
 .kv{display:flex;justify-content:space-between;gap:8px;padding:6px 0;border-bottom:1px solid var(--wl-divider);font-size:var(--wl-detail-size)}
 .kv span:first-child{color:var(--mut)}
 .kv span:last-child{font-weight:600;text-align:right;font-variant-numeric:tabular-nums}

@@ -245,13 +245,13 @@ function draftHTML(c){
         ${n?`<span class="dm" draggable="true" data-n="${esc(n)}" data-from="ban">${img(n)}<button class="x" data-rm="${esc(n)}" aria-label="Remover ${esc(n)}">${iconMarkup("close")}</button></span>`:`<span class="bn">${s.n}</span>`}</div>`};
     const pick=i=>{const s=find(t,"pick",i),tip=PICKTIP[s.code]||"";
       const meta=`<span class="pkh"><b>${s.code}</b><span title="${s.n}º pick">${s.n}º pick</span>${tip?`<i>${tip}</i>`:""}</span>`;
-      if(!mine)return `<div class="pk ${side} them">${meta}<div class="pkn">${iconMarkup("roles")} A definir</div></div>`;
+      if(!mine)return `<div class="pk ${side} them">${meta}<div class="pkn">${iconMarkup("champion")} A definir</div></div>`;
       const l=d.order[d.side][i],L=LN[l],ch=c.lanes[l],m=ch[0];
       const editing=active===l;
       return `<div class="pk ${side} mine${editing?" act":""}" data-l="${l}" style="--lc:var(${L.c})">
         ${pickArt(m)}
         <button type="button" class="pk-target" data-draft-target="${l}" aria-pressed="${editing}" aria-label="${s.code} · ${L.n}${m?" · "+esc(m):" · Escolher campeão"}">
-          ${meta}${m?img(m):iconMarkup("roles")}
+          ${meta}${m?img(m):iconMarkup("champion-add")}
           <span class="pkn${m?"":" pk-empty"}">${m?esc(m):"Escolher campeão"}</span>
         </button>
         <div class="pkf"><span class="lane-label">${laneIconMarkup(l)}<select data-slot="${i}" aria-label="Posição do pick ${t}${i+1}" title="Lane deste pick">${PLANES.map(x=>`<option value="${x}"${x===l?" selected":""}>${LN[x].n}</option>`).join("")}</select></span>
@@ -429,12 +429,16 @@ $("#copy-comp").onclick=()=>publishTeamRoute("comps",{copy:true});
 $("#copy-play").onclick=()=>publishTeamRoute("map",{copy:true});
 
 /* ===== Conhecimento: tempos dos objetivos ===== */
+function gameIconMarkup(file: string) {
+  return `<img class="icon game-icon" src="assets/lol/hud/${file}.png" width="24" height="24" alt="">`;
+}
+
 const OBJ=[
- {n:"Dragões elementais",c:"#e08a3c",first:"5:00",resp:"5:00",rs:300,rows:[["Onde","Rio de baixo"],["Alma","4º dragão do mesmo time"],["Rift elemental","Muda o mapa após o 2º dragão"]],p:"O 3º dragão define o elemento da Alma (o mapa muda depois do 2º)."},
- {n:"Dragão Ancião",c:"#9fd3e6",first:"6:00 após a Alma",resp:"6:00",rs:360,rows:[["Onde","Rio de baixo"],["Buff","~2:30 · executa inimigos com vida baixa"]],p:"Só aparece depois que algum time pega a Alma de dragão."},
- {n:"Vastilarvas (Voidgrubs)",c:"#a36be0",first:"8:00",resp:"Não volta",rows:[["Onde","Fosso de cima (do Barão)"],["Quantidade","3 larvas, 1 onda só"],["Some","~14:45 se ninguém pegar"]],p:"Desde o patch 25.9 não existe mais a 2ª onda. Bônus contra torres para quem pegar."},
- {n:"Arauto do Vale",c:"#d75a8c",first:"15:00",resp:"Não volta",rows:[["Onde","Fosso de cima"],["Some","19:45 se ninguém pegar"],["Uso","Olho do Arauto para derrubar torre"]],p:"Um por jogo. Divide o fosso com o Barão, que nasce aos 20:00."},
- {n:"Barão Na'Shor",c:"#8a6be0",first:"20:00",resp:"6:00",rs:360,rows:[["Onde","Fosso de cima"],["Buff","3:00 · empodera minions e recall"]],p:"Voltou para 20:00 na temporada 2026 (patch 26.1)."},
+ {n:"Dragões elementais",icon:"dragon",c:"#e08a3c",first:"5:00",resp:"5:00",rs:300,rows:[["Onde","Rio de baixo"],["Alma","4º dragão do mesmo time"],["Rift elemental","Muda o mapa após o 2º dragão"]],p:"O 3º dragão define o elemento da Alma (o mapa muda depois do 2º)."},
+ {n:"Dragão Ancião",icon:"dragon_elder",c:"#9fd3e6",first:"6:00 após a Alma",resp:"6:00",rs:360,rows:[["Onde","Rio de baixo"],["Buff","~2:30 · executa inimigos com vida baixa"]],p:"Só aparece depois que algum time pega a Alma de dragão."},
+ {n:"Vastilarvas (Voidgrubs)",icon:"grub",c:"#a36be0",first:"8:00",resp:"Não volta",rows:[["Onde","Fosso de cima (do Barão)"],["Quantidade","3 larvas, 1 onda só"],["Some","~14:45 se ninguém pegar"]],p:"Desde o patch 25.9 não existe mais a 2ª onda. Bônus contra torres para quem pegar."},
+ {n:"Arauto do Vale",icon:"riftherald",c:"#d75a8c",first:"15:00",resp:"Não volta",rows:[["Onde","Fosso de cima"],["Some","19:45 se ninguém pegar"],["Uso","Olho do Arauto para derrubar torre"]],p:"Um por jogo. Divide o fosso com o Barão, que nasce aos 20:00."},
+ {n:"Barão Na'Shor",icon:"baron",c:"#8a6be0",first:"20:00",resp:"6:00",rs:360,rows:[["Onde","Fosso de cima"],["Buff","3:00 · empodera minions e recall"]],p:"Voltou para 20:00 na temporada 2026 (patch 26.1)."},
 ];
 const CAMPS=[
  ["Buffs (Azul / Vermelho)","0:55","5:00",300],
@@ -482,7 +486,7 @@ const WAVE_HTML=`
 <h2 class="ks">Técnicas</h2>
 <div class="kgrid wv">
  <div class="wl-panel obj"><h3>${iconMarkup("freeze")} Freeze (congelar)</h3>
-  <div class="lanefig"><span class="tw b">${iconMarkup("tower")}</span><span class="zone">zona do freeze</span><span class="mm b">●●</span><span class="mm r">●●●●●</span><span class="tw r">${iconMarkup("tower")}</span></div>
+  <div class="lanefig"><span class="tw b">${gameIconMarkup("tower")}</span><span class="zone">zona do freeze</span><span class="mm b">●●</span><span class="mm r">●●●●●</span><span class="tw r">${gameIconMarkup("tower")}</span></div>
   <p><b>O que é:</b> segurar a wave parada logo <b>fora do alcance da sua torre</b>, só dando last hit.</p>
   <p><b>Como:</b> a wave inimiga precisa ser maior que a sua (uns 3–4 minions a mais) para ficar parada ali. Deixe a wave vir até você, só dê o último golpe e não bata nos minions à toa. Se a sua wave estiver grande demais, deixe ela bater na torre inimiga e monte o freeze com a próxima.</p>
   <p><b>Quando:</b> você está na frente e quer negar farm/XP; o caçador inimigo está do outro lado do mapa; o inimigo não tem como quebrar o freeze sem se arriscar.</p>
@@ -491,7 +495,7 @@ const WAVE_HTML=`
   <p><b>O que é:</b> matar só os casters (ou só last hit) para a sua wave sobreviver e se somar com a próxima. Em 2–3 waves vira uma wave gigante.</p>
   <p><b>Quando:</b> antes de um dive; antes de voltar para a base com a wave batendo na torre; para criar pressão enquanto o time faz objetivo do outro lado; quando o canhão está chegando.</p>
   <p><b>Dica:</b> comece o slow push logo depois que a wave "resetou" no meio. O ideal é a wave grande chegar na torre na mesma hora que o seu caçador.</p></div>
- <div class="wl-panel obj"><h3>${iconMarkup("fast")} Fast push (empurrar rápido)</h3>
+ <div class="wl-panel obj"><h3>${gameIconMarkup("push")} Fast push (empurrar rápido)</h3>
   <p><b>O que é:</b> matar a wave o mais rápido possível com habilidades.</p>
   <p><b>Quando:</b> para dar <b>recall</b> sem perder farm; para <b>rotacionar</b> (roam, ajudar no rio); para ter <b>prio</b> antes de dragão, vastilarvas, arauto ou barão; quando o inimigo precisa voltar para a base.</p>
   <p><b>Cuidado:</b> empurrar rápido sem motivo deixa a wave perto da torre inimiga e você exposto a gank.</p></div>
@@ -503,7 +507,7 @@ const WAVE_HTML=`
   <p><b>O que é:</b> trazer a wave para mais perto da sua torre de propósito.</p>
   <p><b>Como:</b> pare de bater na wave e fique atrás; ou ataque o campeão inimigo perto dos minions dele para eles virarem em você e você recua andando (eles te seguem). Os minions inimigos vão andar até você.</p>
   <p><b>Quando:</b> para montar um freeze; quando você está mais fraco e precisa farmar seguro; quando o caçador inimigo está perto da sua lane.</p></div>
- <div class="wl-panel obj"><h3>${iconMarkup("tower")} Stack para dive</h3>
+ <div class="wl-panel obj"><h3>${gameIconMarkup("tower")} Stack para dive</h3>
   <p><b>Receita:</b> 2–3 waves empilhadas (slow push) + caçador ou suporte perto + inimigo com pouca vida ou sem Flash.</p>
   <p><b>Timing:</b> entre logo que a wave grande chegar na torre: os minions tomam os tiros e a torre troca de alvo. Quem toma o primeiro tiro sai do alcance e outro segura a torre.</p>
   <p><b>Não mergulhe</b> sem wave: a torre só bate em vocês. Em 2026 a placa quebrada dá <b>20s de resistência extra</b> à torre (Bulwark), então dive depois de quebrar placas fica mais caro.</p></div>
@@ -534,11 +538,11 @@ const WAVE_HTML=`
 
 function renderKnow(){
   const kt=S.kTab||"obj";
-  $("#know").innerHTML=`<div class="ktabs"><button data-slot="button" data-variant="ghost" data-kt="obj" aria-pressed="${kt==="obj"}" class="${kt==="obj"?"on":""}">${iconMarkup("clock")} Objetivos e tempos</button><button data-slot="button" data-variant="ghost" data-kt="wave" aria-pressed="${kt==="wave"}" class="${kt==="wave"?"on":""}">${iconMarkup("wave")} Controle de wave</button></div>
+  $("#know").innerHTML=`<div class="ktabs"><button data-slot="button" data-variant="ghost" data-kt="obj" aria-pressed="${kt==="obj"}" class="${kt==="obj"?"on":""}">${iconMarkup("clock")} Objetivos e tempos</button><button data-slot="button" data-variant="ghost" data-kt="wave" aria-pressed="${kt==="wave"}" class="${kt==="wave"?"on":""}">${gameIconMarkup("bluemelee_circle_classic")} Controle de wave</button></div>
   <div id="k-wave" style="display:${kt==="wave"?"block":"none"}">${WAVE_HTML}</div>
   <div id="k-obj" style="display:${kt==="obj"?"block":"none"}">
   <div class="warn">${iconMarkup("warning")} Tempos da temporada 2026 (patch 26.1 em diante, jogo atual 16.x). As mudanças vieram do preview oficial da Riot e de guias de 2026; os primeiros spawns da selva são das notas do patch 26.1; os tempos de volta dos campos pequenos são os de sempre. Confirmem no jogo se algum patch novo mexer nisso. Os tempos são do relógio do jogo.</div>
-  <div class="kgrid">${OBJ.map((o,i)=>`<div class="wl-panel obj"><h3>${o.n}</h3>
+  <div class="kgrid">${OBJ.map((o,i)=>`<div class="wl-panel obj"><h3>${gameIconMarkup(o.icon)}<span>${o.n}</span></h3>
      <div class="kv"><span>Primeiro spawn</span><span>${o.first}</span></div>
      <div class="kv"><span>Volta em</span><span>${o.resp}</span></div>
      ${o.rows.map(r=>`<div class="kv"><span>${r[0]}</span><span>${r[1]}</span></div>`).join("")}

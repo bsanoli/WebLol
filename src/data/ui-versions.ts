@@ -8,6 +8,14 @@ export interface UiVersion {
 
 export const UI_VERSIONS: UiVersion[] = [
   {
+    version: "1.12",
+    date: "2026-11-10",
+    changes: [
+      "Conhecimento: objetivos, minions, torres e fast push usam ícones do League of Legends.",
+      "Navegação e draft: ícones distintos para equipe, composições, campeões, builds e picks vazios.",
+    ],
+  },
+  {
     version: "1.11",
     date: "2026-11-10",
     changes: [

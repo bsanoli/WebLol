@@ -31,6 +31,8 @@ As imagens do jogo ficam em `public/assets/lol/` e vêm do [Riot Data Dragon](ht
 
 Para atualizar essas imagens, instale o Pillow no Python e rode `python scripts/download-lol-assets.py`. O script baixa o catálogo, verifica se todos os itens, runas e feitiços das builds têm correspondência e gera o manifesto usado pelas telas. O build do site usa os arquivos locais.
 
+Os ícones de Conhecimento em `public/assets/lol/hud/` vêm do CommunityDragon 16.22. Os objetivos e a torre são do [minimapa](https://raw.communitydragon.org/16.22/game/assets/ux/minimap/icons/), o `push.png` vem dos [pings](https://raw.communitydragon.org/16.22/game/assets/ux/minimap/pings/) e o `bluemelee_circle_classic.png` vem do [HUD do minion corpo a corpo](https://raw.communitydragon.org/16.22/game/assets/characters/sru_orderminionmelee/hud/).
+
 ## GitHub Pages
 
 O GitHub Pages serve a raiz da branch `main`. Rode `npm run pages:prepare` para gerar o build e atualizar `index.html`, `camp.html`, `worlds.html` e `assets/` na raiz. Inclua esses arquivos no commit que vai para a `main`. Edite os arquivos fonte em `src/` e `public/`.
