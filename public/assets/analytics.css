@@ -583,7 +583,7 @@
 @container (min-width: 242px) {
   #cc-picker .comp-picker-categories { grid-template-columns: repeat(6, minmax(0, 1fr)); }
 }
-.comp-picker-grid { display: grid; grid-template-columns: repeat(auto-fill, 44px); gap: 8px; max-height: min(200px, 40vh); overflow: auto; padding: 4px; }
+.comp-picker-grid { display: grid; grid-template-columns: repeat(auto-fill, 44px); justify-content: space-around; gap: 8px; max-height: min(200px, 40vh); overflow: auto; padding: 4px; }
 .comp-picker-grid button { position: relative; width: 44px; height: 44px; padding: 0; border: 2px solid transparent; border-radius: var(--wl-control-radius); background: none; cursor: pointer; }
 .comp-picker-grid button:hover { border-color: var(--muted); }
 .comp-picker-grid button[aria-pressed=true] { border-color: var(--wl-accent); }
