@@ -1,4 +1,7 @@
 import { lolChampion, lolImage } from "./lol-media"
+import { iconMarkup } from "./icon"
+
+export const sortIcons = `<span class="sort-asc">${iconMarkup("ascending")}</span><span class="sort-desc">${iconMarkup("descending")}</span>`;
 
 export const LANES=[["Top","--top"],["Jungle","--jungle"],["Mid","--midlane"],["ADC","--adc"],["Suporte","--sup"]];
 export const LC=Object.fromEntries(LANES);
