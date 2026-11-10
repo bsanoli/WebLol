@@ -24,7 +24,7 @@ Use os tokens de `public/assets/compositions.css` para componentes novos nesta t
 | `--comp-card-radius` | 6 px | Cards de composição e de campeão, linhas de posição, menus e grupo do seletor de modo. Um botão que funciona como card segue este raio. |
 | `--comp-control-radius` | 4 px | Campos de texto, áreas de texto, seletores, botões de ação e de navegação da área do time, filtros, chips e tags. |
 
-Os cards de pick usam cantos retos na faixa esquerda de 5 px e cantos de card no lado direito. Marcadores circulares de cor e seleção são indicadores visuais. Caixas de seleção, botões de opção e controles deslizantes seguem a forma nativa. Mantenha a geometria em todos os estados de foco, seleção e hover.
+Os cards de pick e a composição ativa usam uma faixa sólida de 5 px à esquerda, definida em `--comp-card-edge`, com cantos retos nesse lado. A faixa da composição ativa usa a cor do tema. Marcadores circulares de cor e seleção são indicadores visuais. Caixas de seleção, botões de opção e controles deslizantes seguem a forma nativa.
 
 ## Compatibilidade
 

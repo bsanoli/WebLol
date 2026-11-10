@@ -614,5 +614,4 @@ header nav button { border-radius: 8px; }
 #v-comps .page-head { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; padding: 0; }
 #v-comps #comps { padding-top: 12px; }
 /* Imagem de fundo do pick maior */
-.pk.mine { overflow: hidden; }
 .pk-art { transform: scale(1.35); transform-origin: 60% 25%; object-position: center 20%; }

@@ -26,6 +26,7 @@
 :root {
   --comp-panel-radius:8px;
   --comp-card-radius:6px;
+  --comp-card-edge:5px;
   --comp-control-radius:4px;
 }
 
@@ -145,7 +146,11 @@ body:has(#v-comps.on) { display:block; height:auto; }
 .composition-item { position:relative; min-width:0; }
 #v-comps #clist .ci { width:100%; padding:10px; border:1px solid var(--line); border-radius:var(--comp-card-radius); }
 #v-comps .ci b { display:block; padding-right:24px; font-size:13px; overflow-wrap:anywhere; }
-#v-comps .ci.on { border-color:var(--comp-accent); background:var(--comp-tint); box-shadow:inset 3px 0 var(--comp-accent); }
+#v-comps #clist .ci.on {
+  border-left:var(--comp-card-edge) solid var(--comp-accent);
+  border-radius:0 var(--comp-card-radius) var(--comp-card-radius) 0;
+  background:var(--comp-tint);
+}
 #v-comps .mini { display:flex; gap:3px; margin-top:6px; flex-wrap:wrap; }
 #v-comps .mini .av { width:min(26px,calc((100% - 12px) / 5)); height:auto; aspect-ratio:1; border-radius:var(--comp-control-radius); }
 #v-comps #clist ~ .cbtns { display:block; margin-top:auto; padding-top:18px; }
@@ -212,7 +217,7 @@ summary::-webkit-details-marker { display:none; }
 #v-comps .bsq { width:26px; height:26px; }
 #v-comps .bsq.act { border-color:var(--comp-accent); box-shadow:none; }
 #v-comps .draft-phase { font-size:10px; min-height:18px; justify-content:start; }
-#v-comps .pk { min-height:58px; padding:5px; text-align:left; border:1px solid var(--line); border-left:5px solid var(--line); border-radius:0 var(--comp-card-radius) var(--comp-card-radius) 0; }
+#v-comps .pk { min-height:58px; padding:5px; text-align:left; border:1px solid var(--line); border-left:var(--comp-card-edge) solid var(--line); border-radius:0 var(--comp-card-radius) var(--comp-card-radius) 0; }
 #v-comps .pk.b { border-left-color:#3e7bfa; }
 #v-comps .pk.r { border-left-color:#ff6262; }
 #v-comps .pk.mine { display:flex; align-items:center; flex-wrap:wrap; gap:4px; }
@@ -291,6 +296,14 @@ body:has(#v-comps.on) > header button,
  #v-comps .jump-picker { display:flex; gap:6px; width:100%; justify-content:center; margin:0 0 10px; background:var(--comp-tint); border-color:var(--comp-accent); color:var(--comp-accent); }
  #v-comps #clist { display:grid; grid-template-columns:repeat(auto-fill,minmax(180px,1fr)); }
  #v-comps #clist ~ .cbtns { margin:0; padding-top:0; }
+
+ /* Anchor popups to the row so they fit even when a trigger is near an edge. */
+ #v-comps #editor :is(.chip,.option-menu,.lane-note) { position:static; }
+ #v-comps #editor .alts[data-l=ban] { position:relative; }
+ #v-comps #editor :is(.option-menu > div,.lane-note > label) {
+   inset-inline:8px;
+   min-width:0;
+ }
 }
 @media (max-width:600px) {
  #v-comps .page-head { padding:8px 12px; }

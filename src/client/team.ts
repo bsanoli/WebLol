@@ -75,7 +75,10 @@ function renderList(){
 function selectComp(id){S.cur=id;save(false);renderAll();publishTeamRoute("comps")}
 $("#clist").onclick=e=>{const action=e.target.closest("[data-comp-action]");if(action){if(action.dataset.compAction==="duplicate")duplicateComp(action.dataset.id);else deleteComp(action.dataset.id);return}const it=e.target.closest(".ci");if(it)selectComp(it.dataset.id)};
 function closeCompositionMenus(target?: EventTarget | null){
-  document.querySelectorAll<HTMLDetailsElement>("#clist .composition-menu[open]").forEach(menu=>{
+  const openMenus=document.querySelectorAll<HTMLDetailsElement>(
+    "#v-comps details[open]:is(.composition-menu,.option-menu,.lane-note,.palette)"
+  );
+  openMenus.forEach(menu=>{
     if(!(target instanceof Node && menu.contains(target)))menu.open=false;
   });
 }
@@ -91,7 +94,7 @@ function deleteComp(id){const c=S.comps.find(c=>c.id===id);if(!confirm(`Excluir 
 function optionHTML(n,l,i){
   return `<div class="chip ${i===0?"primary":"alternative"}" draggable="true" data-n="${esc(n)}" data-from="${l}">
     <button class="champ-priority" data-priority="${esc(n)}" data-lane="${l}" aria-label="Priorizar ${esc(n)} em ${LN[l].n}" title="${i+1}ª opção · tornar principal">${img(n)}${i===0?`<span><small>Principal</small><b>${esc(n)}</b></span>`:""}</button>
-    <details class="option-menu"><summary aria-label="Opções de ${esc(n)}">⋯</summary><div><span>${i+1}ª opção · ${esc(n)}</span><button data-move="-1" data-n="${esc(n)}" data-lane="${l}" ${i===0?"disabled":""}>Mover antes</button><button data-move="1" data-n="${esc(n)}" data-lane="${l}" ${i===cur().lanes[l].length-1?"disabled":""}>Mover depois</button><button data-rm="${esc(n)}">Remover ${esc(n)}</button></div></details>
+    <details class="option-menu" name="champion-editor-menu"><summary aria-label="Opções de ${esc(n)}">⋯</summary><div><span>${i+1}ª opção · ${esc(n)}</span><button data-move="-1" data-n="${esc(n)}" data-lane="${l}" ${i===0?"disabled":""}>Mover antes</button><button data-move="1" data-n="${esc(n)}" data-lane="${l}" ${i===cur().lanes[l].length-1?"disabled":""}>Mover depois</button><button data-rm="${esc(n)}">Remover ${esc(n)}</button></div></details>
   </div>`;
 }
 function pickArt(name){
@@ -100,7 +103,7 @@ function pickArt(name){
 
 function laneNoteHTML(c, lane){
   const note=c.laneNotes[lane.k]||"";
-  return `<details class="lane-note">
+  return `<details class="lane-note" name="champion-editor-menu">
     <summary aria-label="Observação de ${lane.n}" title="${esc(note||"Adicionar observação")}">
       ${iconMarkup("edit")}<span class="pick-note-preview">${esc(note||"Nota")}</span>
     </summary>
@@ -320,9 +323,6 @@ paletteMenu.addEventListener("keydown",event=>{
   event.preventDefault();
   paletteMenu.open=false;
   paletteTrigger.focus();
-});
-document.addEventListener("click",event=>{
-  if(event.target instanceof Node&&!paletteMenu.contains(event.target))paletteMenu.open=false;
 });
 try{
   const stored=localStorage.getItem(paletteKey);
