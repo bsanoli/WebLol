@@ -65,7 +65,7 @@ export function buildsTable(champions: (Champion & { build: ChampionBuild })[]){
     const {build}=c;
     const items=(build.items||build.support||[]).slice(0,3);
     return `<tr>
-      <th scope="row"><span class="build-champion">${ico(c.name,c.main)}<span>${esc(c.name)}<small>${esc(c.main)}</small></span></span></th>
+      <th scope="row"><span class="build-champion">${ico(c.name)}<span>${esc(c.name)}<small>${esc(c.main)}</small></span></span></th>
       <td class="build-stat">${c.picks}</td>
       <td class="build-stat">${wrPill(c.wins,c.picks)}</td>
       <td><div class="build-options">${items.map(entry=>buildPreviewOption(entry,"item")).join("")||missingBuildOption}</div></td>

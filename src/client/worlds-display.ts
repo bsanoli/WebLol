@@ -36,7 +36,7 @@ export function teamLogo(team: string) {
 export const pct=(x: number)=>Math.round(x*100)+"%";
 export const wrPill=(w: number,n: number)=>{if(!n)return '<span class="wr" aria-label="Sem jogos">—</span>';const r=w/n;return `<span class="wr ${r>=.55?'g':r<=.45?'b':''}" data-tip="Win rate: ${w} vitórias e ${n-w} derrotas em ${n} jogos">${pct(r)}</span>`};
 const ini=(n: string)=>n.replace(/[^A-Za-z ]/g,"").split(" ").map(w=>w[0]).join("").slice(0,2).toUpperCase();
-export const ico=(n: string,l?: string)=>`<span class="av"${l?` style="--ring:var(${LC[l]})"`:''} data-i="${ini(n)}">${lolImage(lolChampion(n)?.portrait)}</span>`;
+export const ico=(n: string)=>`<span class="av" data-i="${ini(n)}">${lolImage(lolChampion(n)?.portrait)}</span>`;
 export const esc=(s: unknown)=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c] ?? c));
 export const championSlug = (name: string) => name.normalize("NFD").replace(/\p{M}/gu, "").toLowerCase()
   .replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");

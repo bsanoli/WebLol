@@ -151,7 +151,8 @@ summary::-webkit-details-marker { display:none; }
 .champ-priority small { color:var(--mut); font-size:10px; }
 .champ-priority b { font-size:14px; }
 #v-comps .chip .av { border-radius:var(--wl-control-radius); width:32px; height:32px; }
-#v-comps .chip.primary .av { width:44px; height:44px; border:1px solid var(--line); }
+#v-comps .chip.primary .av { width:44px; height:44px; }
+#v-comps.draft-view .chip.primary .av { border:1px solid var(--line); }
 #v-comps .chip.primary { margin-right:12px; }
 .option-menu { position:relative; align-self:center; }
 .option-menu summary { min-width:18px; width:18px; font-size:12px; color:var(--mut); }

@@ -133,17 +133,22 @@ function render(id){
   enhanceAnalyticsUI();
 }
 
+function rankedChampion(champion){
+  const name=esc(champion.name);
+  return `<span class="nm">${ico(champion.name)}${laneIconMarkup(champion.main,true)}<span class="ranked-name" title="${name}">${name}</span></span>`;
+}
+
 function barList(list,valFn,max,segs,vw=52,tipFn=null){
   return `<div class="bars">${list.map((c,i)=>{
     const s=segs(c).map(([w,col,tip])=>`<i style="width:${w/max*100}%;background:var(${col})" data-tip="${esc(tip||"")}"></i>`).join("");
-    return `<div class="bar" style="grid-template-columns:22px minmax(110px,150px) 1fr ${vw}px"><span class="rk">${i+1}</span><span class="nm">${ico(c.name,c.main)}${esc(c.name)}</span><span class="track">${s}</span><span class="val" data-tip="${esc(tipFn?tipFn(c):"")}">${valFn(c)}</span></div>`}).join("")}</div>`;
+    return `<div class="bar" style="grid-template-columns:22px minmax(110px,150px) 1fr ${vw}px"><span class="rk">${i+1}</span>${rankedChampion(c)}<span class="track">${s}</span><span class="val" data-tip="${esc(tipFn?tipFn(c):"")}">${valFn(c)}</span></div>`}).join("")}</div>`;
 }
 function overview(){
   const picks=[...C].sort((a,b)=>b.picks-a.picks||b.wins-a.wins).slice(0,15);
   const bans=[...C].sort((a,b)=>b.bans-a.bans||b.picks-a.picks).slice(0,15);
   const pres=[...C].sort((a,b)=>(b.picks+b.bans)-(a.picks+a.bans)).slice(0,15);
   const mp=picks[0].picks, mb=bans[0].bans;
-  const pickRows=`<div class="bars">${picks.map((c,i)=>`<div class="bar" style="grid-template-columns:22px minmax(110px,150px) 1fr 34px 52px"><span class="rk">${i+1}</span><span class="nm">${ico(c.name,c.main)}${esc(c.name)}</span><span class="track" data-tip="${esc(c.name)}: ${c.wins} vitórias e ${c.picks-c.wins} derrotas em ${c.picks} jogos"><i style="width:${c.wins/mp*100}%;background:var(--good)" data-tip="${esc(c.name)}: ${c.wins} vitórias"></i><i style="width:${(c.picks-c.wins)/mp*100}%;background:var(--bad);opacity:.55" data-tip="${esc(c.name)}: ${c.picks-c.wins} derrotas"></i></span><span class="val" data-tip="Jogos com ${esc(c.name)}: ${c.wins} vitórias, ${c.picks-c.wins} derrotas">${c.picks}</span><span>${wrPill(c.wins,c.picks)}</span></div>`).join("")}</div>`;
+  const pickRows=`<div class="bars">${picks.map((c,i)=>`<div class="bar" style="grid-template-columns:22px minmax(110px,150px) 1fr 34px 52px"><span class="rk">${i+1}</span>${rankedChampion(c)}<span class="track" data-tip="${esc(c.name)}: ${c.wins} vitórias e ${c.picks-c.wins} derrotas em ${c.picks} jogos"><i style="width:${c.wins/mp*100}%;background:var(--good)" data-tip="${esc(c.name)}: ${c.wins} vitórias"></i><i style="width:${(c.picks-c.wins)/mp*100}%;background:var(--bad);opacity:.55" data-tip="${esc(c.name)}: ${c.picks-c.wins} derrotas"></i></span><span class="val" data-tip="Jogos com ${esc(c.name)}: ${c.wins} vitórias, ${c.picks-c.wins} derrotas">${c.picks}</span><span>${wrPill(c.wins,c.picks)}</span></div>`).join("")}</div>`;
   const banRows=barList(bans,c=>`${c.bans} <span class="na">· ${pct(c.bans/G)}</span>`,mb,c=>[[c.bans,'--ban',`${c.name}: banido em ${c.bans} de ${G} jogos (${pct(c.bans/G)})`]],82,c=>`Bans de ${c.name} e % dos ${G} jogos`);
   const presRows=barList(pres,c=>pct((c.picks+c.bans)/G),G,c=>[[c.picks,'--pick',`${c.name}: ${c.picks} picks (${c.wins}V ${c.picks-c.wins}D)`],[c.bans,'--ban',`${c.name}: ${c.bans} bans`]],52,c=>`Presença: ${c.picks} picks + ${c.bans} bans = ${c.picks+c.bans} de ${G} jogos`);
   const lanes = LANES.map(([lane]) => {
@@ -255,7 +260,7 @@ function wireBuilds(){
       (!bLane||c.lanes[bLane])&&(c.name.toLowerCase().includes(f)||JSON.stringify(c.build).toLowerCase().includes(f)));
     const champion=buildChampion && matches[0];
     const content=champion
-      ? `<article class="wl-panel bcard"><h3>${ico(champion.name,champion.main)}${esc(champion.name)} <span class="build-meta">${champion.main} · ${champion.picks} jogos</span><span class="build-winrate">${wrPill(champion.wins,champion.picks)} <small>de vitórias</small></span></h3>${buildHtml(champion)}</article>`
+      ? `<article class="wl-panel bcard"><h3>${ico(champion.name)}${esc(champion.name)} <span class="build-meta">${champion.main} · ${champion.picks} jogos</span><span class="build-winrate">${wrPill(champion.wins,champion.picks)} <small>de vitórias</small></span></h3>${buildHtml(champion)}</article>`
       : matches.length ? buildsTable(matches) : "";
     const back=buildChampion ? '<div class="build-back"><button data-slot="button" data-variant="outline" data-size="sm" class="build-route" data-build="">Voltar à lista de builds</button></div>' : '';
     bc.classList.toggle("build-detail", !!buildChampion);
@@ -320,18 +325,18 @@ function wireMu(){
   if(!muChamp||!M[muChamp])muChamp=champs[0]&&champs[0].c;
   document.getElementById('mulanes').onclick=e=>{const b=e.target.closest('button');if(!b)return;muLane=b.dataset.l;muChamp=null;render("matchups");publishWorlds("matchups",[muLane.toLowerCase()])};
   const list=document.getElementById('mulist');
-  list.innerHTML=champs.map(x=>`<button class="murow" aria-pressed="${x.c===muChamp}" data-c="${esc(x.c)}"><span class="nmi">${ico(x.c,muLane)}${esc(x.c)}</span><span class="na">${x.n} jogos</span>${wrPill(x.w,x.n)}</button>`).join("");
+  list.innerHTML=champs.map(x=>`<button class="murow" aria-pressed="${x.c===muChamp}" data-c="${esc(x.c)}"><span class="nmi">${ico(x.c)}${esc(x.c)}</span><span class="na">${x.n} jogos</span>${wrPill(x.w,x.n)}</button>`).join("");
   list.onclick=e=>{const b=e.target.closest('button');if(!b)return;muChamp=b.dataset.c;wireMu();publishWorlds("matchups",[muLane.toLowerCase(),championSlug(muChamp)])};
   const ops=(M[muChamp]||[]).slice().sort((a,b)=>b[1]-a[1]||b[2]/b[1]-a[2]/a[1]);
   const tot=ops.reduce((s,o)=>s+o[1],0), tw=ops.reduce((s,o)=>s+o[2],0);
   const good=ops.filter(o=>o[1]>=2&&o[2]/o[1]>=.6), bad=ops.filter(o=>o[1]>=2&&o[2]/o[1]<=.4);
-  document.getElementById('mudetail').innerHTML=`<div class="muhead">${ico(muChamp,muLane)}<div><h2 style="margin:0">${esc(muChamp)} <span class="na" style="font-size:16px">${muLane}</span></h2>
+  document.getElementById('mudetail').innerHTML=`<div class="muhead">${ico(muChamp)}<div><h2 style="margin:0">${esc(muChamp)} <span class="na" style="font-size:16px">${muLane}</span></h2>
     <div class="hint" style="margin:0">${tot} jogos · ${tw}V ${tot-tw}D · ${ops.length} adversários diferentes</div></div></div>
    <div class="chips" style="margin:12px 0">${good.length?`<span class="na" style="font-size:12px;align-self:center">Maior taxa de vitória:</span>`+good.map(o=>`<span class="chip good">${ico(o[0])}${esc(o[0])} ${o[2]}-${o[1]-o[2]}</span>`).join(""):""}
    ${bad.length?`<span class="na" style="font-size:12px;align-self:center;margin-left:8px">Menor taxa de vitória:</span>`+bad.map(o=>`<span class="chip bad">${ico(o[0])}${esc(o[0])} ${o[2]}-${o[1]-o[2]}</span>`).join(""):""}</div>
    <div class="wl-panel tablewrap" style="border:none"><table><thead><tr><th style="padding:10px">Contra</th><th style="padding:10px;text-align:right">Jogos</th><th style="padding:10px">Resultado</th><th style="padding:10px;text-align:right">KDA ${esc(muChamp)}</th><th style="padding:10px;text-align:right">KDA adversário</th><th style="padding:10px;text-align:right">K / D / A médio</th></tr></thead>
    <tbody>${ops.map(o=>{const[op,n,w,k,d,a,ok,od,oa]=o;const my=kdaOf(k,d,a),their=kdaOf(ok,od,oa);
-     return `<tr><td class="champ"><span class="nmi">${ico(op,muLane)}${esc(op)}</span></td><td class="num">${n}</td>
+     return `<tr><td class="champ"><span class="nmi">${ico(op)}${esc(op)}</span></td><td class="num">${n}</td>
      <td><span class="mini"><span class="wl" data-tip="${w} vitórias e ${n-w} derrotas contra ${esc(op)}">${'<i class="w"></i>'.repeat(w)}${'<i class="l"></i>'.repeat(n-w)}</span>${wrPill(w,n)}</span></td>
      <td class="num kda" style="color:var(${my>=their?'--good':'--bad'})" data-tip="KDA de ${esc(muChamp)} nesses jogos: (${k} + ${a}) ÷ ${d}">${my.toFixed(2)}</td><td class="num" data-tip="KDA de ${esc(op)} nesses jogos: (${ok} + ${oa}) ÷ ${od}">${their.toFixed(2)}</td>
      <td class="num">${(k/n).toFixed(1)} / ${(d/n).toFixed(1)} / ${(a/n).toFixed(1)}</td></tr>`}).join("")}</tbody></table></div>
@@ -341,27 +346,58 @@ function wireMu(){
   for(const [c,ops2] of Object.entries(M))for(const o of ops2){const key=[c,o[0]].sort().join("|");if(seen.has(key))continue;seen.add(key);pairs.push({a:c,b:o[0],n:o[1],w:o[2]})}
   pairs.sort((x,y)=>y.n-x.n);
   const top=pairs.slice(0,10), mx=top.length?top[0].n:1;
-  document.getElementById('mutop').innerHTML=top.map(p=>`<div class="duel"><span class="nmi">${ico(p.a,muLane)}${esc(p.a)}</span>
+  document.getElementById('mutop').innerHTML=top.map(p=>`<div class="duel"><span class="nmi">${ico(p.a)}${esc(p.a)}</span>
     <span class="track"><i style="width:${p.w/p.n*100}%;background:var(${LC[muLane]})"></i><i style="width:${(p.n-p.w)/p.n*100}%;background:var(--line)"></i></span>
-    <span class="nmi" style="justify-content:flex-end">${esc(p.b)}${ico(p.b,muLane).replace('margin-right:7px','')}</span><span class="val">${p.w}-${p.n-p.w}</span></div>`).join("");
+    <span class="nmi" style="justify-content:flex-end">${esc(p.b)}${ico(p.b)}</span><span class="val">${p.w}-${p.n-p.w}</span></div>`).join("");
 }
 let cTeam="",cQ="",cSt="";
 function compsView(){
   const teams=[...new Set(DATA.comps.flatMap(g=>[g.b,g.r]))].sort();
   const sts=[...new Set(DATA.comps.map(g=>g.st))];
-  return `<section><h2>Composições do Worlds</h2><p class="hint">Composição completa de cada jogo: quem jogou contra quem, com campeão, jogador e K/D/A por lane. Lado azul à esquerda, vermelho à direita. O ícone de confirmação ${iconMarkup("check")} marca o vencedor. Base: ${DATA.mgames} jogos com draft completo.</p>
-  <div class="wl-panel tools"><input id="cq" type="search" placeholder="Buscar campeão ou jogador…" aria-label="Buscar campeão ou jogador" value="${esc(cQ||"")}">
-  <select id="ct" aria-label="Time"><option value="">Todos os times</option>${teams.map(t=>`<option${t===cTeam?' selected':''}>${esc(t)}</option>`).join("")}</select>
-  <select id="cs" aria-label="Fase"><option value="">Todas as fases</option>${sts.map(t=>`<option${t===cSt?' selected':''}>${esc(t)}</option>`).join("")}</select></div>
-  <p class="hint" id="cn"></p><div class="cgrid" id="cl"></div></section>`;
+  return `<section class="worlds-compositions" aria-labelledby="comps-title">
+    <div class="comps-intro">
+      <h2 id="comps-title">Composições do Worlds</h2>
+      <p class="hint">Compare campeões, jogadores e KDA nas cinco rotas de cada partida. A base reúne ${DATA.mgames} jogos com draft completo.</p>
+    </div>
+    <div class="wl-panel comp-filters" role="group" aria-label="Filtrar jogos">
+      <label for="cq">Buscar<input id="cq" type="search" placeholder="Campeão ou jogador" value="${esc(cQ||"")}"></label>
+      <label for="ct">Time<select id="ct"><option value="">Todos os times</option>${teams.map(t=>`<option${t===cTeam?' selected':''}>${esc(t)}</option>`).join("")}</select></label>
+      <label for="cs">Fase<select id="cs"><option value="">Todas as fases</option>${sts.map(t=>`<option${t===cSt?' selected':''}>${esc(t)}</option>`).join("")}</select></label>
+    </div>
+    <p class="comp-count" id="cn" role="status"></p>
+    <div class="cgrid" id="cl"></div>
+  </section>`;
 }
 function compCard(g,q){
   const hl=t=>q&&t.toLowerCase().includes(q)?`<mark>${esc(t)}</mark>`:esc(t);
-  const team=(name, color, won)=>`<span class="match-team ${won?"won":"lost"}" data-tip="Lado ${color}${won?" · venceu":""}">${teamLogo(name)}<span>${esc(name)}${won?` ${iconMarkup("check")}`:""}</span></span>`;
-  const side=(c,p,k,r)=>{const ch=`<td${r?' class="r"':''}><span class="ch">${ico(c)}<span>${hl(c)}<span class="pl">${hl(p)}</span></span></span></td>`,kd=`<td class="k${r?'':' r'}" data-tip="Abates / Mortes / Assistências de ${esc(p)}">${k}</td>`;return r?kd+ch:ch+kd};
-  return `<article class="wl-panel cg"><div class="st">${esc(g.st)} · Jogo ${g.g}</div>
-  <div class="tm">${team(g.b,"azul",g.bw)}<span class="vs">vs</span>${team(g.r,"vermelho",!g.bw)}</div>
-  <table>${g.p.map(([l,cb,pb,kb,cr,pr,kr])=>`<tr>${side(cb,pb,kb,0)}<td class="ln">${laneIconMarkup(l,true)}</td>${side(cr,pr,kr,1)}</tr>`).join("")}</table></article>`;
+  const team=(name, color, won)=>`<div class="match-team" data-side="${color}">
+    ${teamLogo(name)}
+    <strong class="match-team-name">${esc(name)}${won?`&nbsp;<span class="match-winner" role="img" aria-label="Vencedor" title="Vencedor">${iconMarkup("check")}</span>`:""}</strong>
+  </div>`;
+  const side=(champion, player, kda, right)=>{
+    const pick=`<td class="match-pick"><div class="match-champion">
+      ${ico(champion)}<div><strong>${hl(champion)}</strong><small>${hl(player)}</small></div>
+    </div></td>`;
+    const score=`<td class="match-kda" data-tip="Abates / Mortes / Assistências de ${esc(player)}">${kda}</td>`;
+    return right ? score+pick : pick+score;
+  };
+  return `<article class="wl-panel cg">
+    <h3 class="match-game">${esc(g.st)} <span aria-hidden="true">·</span> Jogo ${g.g}</h3>
+    <div class="match-details">
+      <div class="match-scoreboard">${team(g.b,"azul",g.bw)}<span class="vs">VS</span>${team(g.r,"vermelho",!g.bw)}</div>
+      <table class="match-lanes" aria-label="Duelos por rota entre ${esc(g.b)} e ${esc(g.r)}">
+        <colgroup><col><col class="kda-column"><col class="lane-column"><col class="kda-column"><col></colgroup>
+        <thead><tr>
+          <th scope="col" aria-label="Campeão e jogador do lado azul">Campeão</th>
+          <th scope="col" aria-label="KDA do lado azul">KDA</th>
+          <th scope="col">Rota</th>
+          <th scope="col" aria-label="KDA do lado vermelho">KDA</th>
+          <th scope="col" aria-label="Campeão e jogador do lado vermelho">Campeão</th>
+        </tr></thead>
+        <tbody>${g.p.map(([l,cb,pb,kb,cr,pr,kr])=>`<tr>${side(cb,pb,kb,false)}<td class="match-lane">${laneIconMarkup(l,true)}</td>${side(cr,pr,kr,true)}</tr>`).join("")}</tbody>
+      </table>
+    </div>
+  </article>`;
 }
 function wireComps(){
   const order=g=>{const m=g.s.match(/(\d+)/g)||[];const base=g.s.startsWith('play')?0:g.s.includes('quarter')?200:g.s.includes('semi')?300:g.s.includes('final')?400:100;return base+(+m[0]||0)*10+(+m[1]||0)/100};
@@ -370,9 +406,9 @@ function wireComps(){
     const q=(cQ||"").trim().toLowerCase();
     const L=all.filter(g=>(!cTeam||g.b===cTeam||g.r===cTeam)&&(!cSt||g.st===cSt)&&(!q||g.p.some(r=>[r[1],r[2],r[4],r[5]].some(t=>t.toLowerCase().includes(q)))));
     let extra="";
-    if(cTeam){const w=L.filter(g=>(g.b===cTeam)===g.bw).length;extra=` · ${esc(cTeam)}: ${w} vitórias e ${L.length-w} derrotas`}
-    document.getElementById('cn').innerHTML=`${L.length} jogo${L.length===1?'':'s'}${extra}`;
-    document.getElementById('cl').innerHTML=L.map(g=>compCard(g,q)).join("")||'<p class="hint">Nenhum jogo encontrado.</p>';
+    if(cTeam){const w=L.filter(g=>(g.b===cTeam)===g.bw).length;extra=`<span>${esc(cTeam)} · ${w} vitórias · ${L.length-w} derrotas</span>`}
+    document.getElementById('cn').innerHTML=`<strong>${L.length} jogo${L.length===1?'':'s'}</strong>${extra}`;
+    document.getElementById('cl').innerHTML=L.map(g=>compCard(g,q)).join("")||'<div class="empty-state"><h3>Nenhum jogo encontrado</h3><p>Revise a busca ou os filtros de time e fase.</p></div>';
   };
   const publish = (replace = false) => publishWorlds("comps", [], {time:cTeam, fase:cSt, busca:cQ}, replace);
   document.getElementById('cq').oninput=e=>{cQ=e.target.value;draw();enhanceAnalyticsUI();publish(true)};
