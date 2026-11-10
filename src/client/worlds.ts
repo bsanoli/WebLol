@@ -2,7 +2,7 @@
 import { iconMarkup, laneIconMarkup } from "./icon"
 import DATA from "../data/worlds.json"
 import { lolAsset, lolChampion } from "./lol-media"
-import { buildHtml, buildsTable } from "./worlds-builds"
+import { buildHtml, buildSample, buildsTable } from "./worlds-builds"
 import { LANES, LC, pct, wrPill, ico, esc, championSlug, teamLogo } from "./worlds-display"
 
 const G=DATA.games, C=DATA.champs;
@@ -220,12 +220,7 @@ function wireLane(lane){
        <td class="num">${wrPill(c.wins,c.picks)}</td><td class="num" data-tip="Banido em ${c.bans} de ${G} jogos">${c.bans}</td><td class="num" data-tip="${c.picks} picks + ${c.bans} bans em ${G} jogos">${pct(r.pres)}</td>
        <td class="num kda" data-tip="${has?`(${L.k.toFixed(1)} + ${L.a.toFixed(1)}) ÷ ${L.d.toFixed(1)}`:"Sem dados"}">${has?r.kda.toFixed(2):'<span class="na">–</span>'}</td>
        <td class="num">${has?L.k.toFixed(1):'–'}</td><td class="num">${has?L.d.toFixed(1):'–'}</td><td class="num">${has?L.a.toFixed(1):'–'}</td></tr>
-       <tr class="detail" ${open?'':'hidden'}><td colspan="9"><div class="champion-detail">${has?`<div class="dgrid">
-        <div><h4>Resultado na amostra</h4>${L.w}V – ${L.n-L.w}D em ${L.n} jogos${L.n<L.picks?` <span class="na">(de ${L.picks})</span>`:''}</div>
-
-        <div><h4>Quem jogou</h4><div class="chips">${L.players.map(([p,n])=>`<span class="chip">${esc(p)} · ${n}</span>`).join("")}</div></div>
-        <div><h4>Times</h4><div class="chips">${L.teams.map(([t,n])=>`<span class="chip">${esc(t)} · ${n}</span>`).join("")}</div></div>
-       </div>${buildHtml(c)}`:`<span class="na">Sem detalhes coletados para este campeão (poucos jogos). ${c.picks} jogos no total, ${c.wins} vitórias.</span>`}</div></td></tr>`}).join("");
+       <tr class="detail" ${open?'':'hidden'}><td colspan="9"><div class="champion-detail">${has?`${buildSample(L)}${buildHtml(c)}`:`<span class="na">Sem detalhes coletados para este campeão (poucos jogos). ${c.picks} jogos no total, ${c.wins} vitórias.</span>`}</div></td></tr>`}).join("");
   };
   tb.onclick=e=>{
     const tr=e.target.closest('tr.main');if(!tr)return;
@@ -259,8 +254,11 @@ function wireBuilds(){
     const matches=list.filter(c=>buildChampion ? championSlug(c.name)===buildChampion :
       (!bLane||c.lanes[bLane])&&(c.name.toLowerCase().includes(f)||JSON.stringify(c.build).toLowerCase().includes(f)));
     const champion=buildChampion && matches[0];
+    const samples=champion ? Object.entries(champion.lanes)
+      .filter(([, sample]) => sample.n)
+      .map(([position, sample]) => buildSample(sample, position)).join("") : "";
     const content=champion
-      ? `<article class="wl-panel bcard"><h3>${ico(champion.name)}${esc(champion.name)} <span class="build-meta">${champion.main} · ${champion.picks} jogos</span><span class="build-winrate">${wrPill(champion.wins,champion.picks)} <small>de vitórias</small></span></h3>${buildHtml(champion)}</article>`
+      ? `<article class="wl-panel bcard"><h3>${ico(champion.name)}${esc(champion.name)} <span class="build-meta">${champion.main} · ${champion.picks} jogos</span><span class="build-winrate">${wrPill(champion.wins,champion.picks)} <small>de vitórias</small></span></h3>${samples}${buildHtml(champion)}</article>`
       : matches.length ? buildsTable(matches) : "";
     const back=buildChampion ? '<div class="build-back"><button data-slot="button" data-variant="outline" data-size="sm" class="build-route" data-build="">Voltar à lista de builds</button></div>' : '';
     bc.classList.toggle("build-detail", !!buildChampion);

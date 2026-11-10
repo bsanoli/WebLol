@@ -32,7 +32,7 @@ function treePanel(tree: RuneTree, selected: string[], secondary = false) {
   return `<div class="rune-tree">
     <div class="rune-tree-heading">
       ${lolImage(tree.icon, "build-icon")}
-      <div><h5>${esc(tree.name)}</h5><span>${secondary ? "Árvore secundária" : "Árvore primária"}</span></div>
+      <div><h6>${esc(tree.name)}</h6><span>${secondary ? "Árvore secundária" : "Árvore primária"}</span></div>
     </div>
     <div class="rune-slots">${slots.map(slot => {
       const choice = selected.find(key => slot.includes(key))
@@ -78,7 +78,7 @@ export function runePage(rows: string[], english: string[]) {
   return `<div class="rune-page">
     <div class="rune-trees">${treePanel(primaryTree, primary)}${treePanel(secondaryTree, secondary, true)}</div>
     <div class="rune-shards">
-      <h5>Fragmentos de atributos</h5>
+      <h6>Fragmentos de atributos</h6>
       ${shards.length
         ? `<div class="rune-shard-slots">${shardRows.map((slot, i) => runeSlot(slot, shards[i])).join("")}</div>`
         : '<p class="na">Fragmentos indisponíveis nesta amostra.</p>'}
