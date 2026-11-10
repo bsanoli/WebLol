@@ -3,6 +3,7 @@
   --wl-motion-fast: 120ms;
   --wl-motion-normal: 180ms;
   --wl-motion-panel: 240ms;
+  --wl-motion-chart: 420ms;
   --wl-motion-ease: cubic-bezier(.22, 1, .36, 1);
   --wl-motion-distance: 6px;
 }
@@ -111,7 +112,20 @@ details:not([open])::details-content { pointer-events: none; }
 .saved, .sstat .ok { transition: opacity var(--wl-motion-normal) ease; }
 #sync-label { transition: color var(--wl-motion-fast) ease; }
 
+/* Grow stacked segments together, preserving their relative proportions.
+   The track, text and final numeric value remain stationary and readable. */
+.ranked-bars .chart-fill {
+  display: flex;
+  width: 100%;
+  height: 100%;
+  transform-origin: left center;
+  transform: scaleX(0);
+  transition: transform var(--wl-motion-chart) var(--wl-motion-ease);
+}
+.ranked-bars [data-bar-visible=true] .chart-fill { transform: scaleX(1); }
+
 @media (prefers-reduced-motion: reduce) {
+  .ranked-bars .chart-fill { transform: none; }
   *, *::before, *::after, details::details-content {
     animation: none !important;
     transition: none !important;

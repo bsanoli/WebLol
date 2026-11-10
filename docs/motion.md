@@ -23,6 +23,11 @@ menos animação. Não adie mudanças de estado ou foco para esperar uma animaç
 
 Alterações nos picks são imediatas, sem animação de entrada nas posições.
 
+Os rankings da visão geral do Worlds preenchem as barras em 420 ms quando entram
+na área visível, uma vez por montagem. Os segmentos crescem juntos, preservando
+as proporções, com números disponíveis desde o início. Expandir o ranking anima
+apenas as linhas novas. Com movimento reduzido, as barras aparecem completas.
+
 Não aplique transformações nos iframes nem no mapa/canvas: eles contêm elementos
 fixos e coordenadas de interação. A animação de navegação ocorre no conteúdo.
 Evite animações contínuas, efeitos em cada linha de tabela e `transition: all`.

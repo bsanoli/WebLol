@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button"
-import { useState } from "react"
+import { useEffect, useRef, useState } from "react"
 
 export interface ChampionSummary {
   name: string
@@ -41,6 +41,27 @@ interface BarRow {
   description: string
   segments: { value: number; kind: string }[]
 }
+
+function RankedBarTrack({ segments, maximum }: Pick<BarRow, "segments"> & { maximum: number }) {
+  const track = useRef<HTMLSpanElement>(null)
+  const [visible, setVisible] = useState(false)
+  useEffect(() => {
+    const element = track.current
+    const owner = element?.ownerDocument.defaultView
+    if (!element || !owner) return
+    // These charts live in the Worlds iframe; use its viewport for visibility.
+    const observer = new owner.IntersectionObserver(entries => {
+      if (!entries.some(entry => entry.isIntersecting)) return
+      setVisible(true)
+      observer.disconnect()
+    }, { threshold: .15 })
+    observer.observe(element)
+    return () => observer.disconnect()
+  }, [])
+  return <span className="chart-track" ref={track} data-bar-visible={visible} aria-hidden="true">
+    <span className="chart-fill">{segments.map(({ value, kind }) => <i key={kind} className={`series-${kind}`} style={{ width: `${maximum > 0 ? Math.min(100, Math.max(0, value / maximum * 100)) : 0}%` }} />)}</span>
+  </span>
+}
 export function RankedBars({ title, description, rows, maximum, legends }: {
   title: string; description: string; rows: BarRow[]; maximum: number; legends: { label: string; kind: string }[]
 }) {
@@ -52,7 +73,7 @@ export function RankedBars({ title, description, rows, maximum, legends }: {
       <li key={row.name} tabIndex={0} aria-label={`${index + 1}. ${row.description}`} data-tip={row.description}>
         <span className="chart-rank" aria-hidden="true">{index + 1}</span>
         <span className="chart-name">{row.portrait && <img src={row.portrait} alt="" loading="lazy" />}<b>{row.name}</b></span>
-        <span className="chart-track" aria-hidden="true">{row.segments.map(({ value, kind }) => <i key={kind} className={`series-${kind}`} style={{ width: `${maximum > 0 ? Math.min(100, Math.max(0, value / maximum * 100)) : 0}%` }} />)}</span>
+        <RankedBarTrack segments={row.segments} maximum={maximum} />
         <strong className="chart-value">{row.value}</strong>
       </li>)}</ol>
     <div className="chart-footer"><span>Escala: 0–{maximum} jogos</span>{rows.length > 8 && <Button variant="outline" size="sm" onClick={() => setExpanded(!expanded)} aria-expanded={expanded}>{expanded ? "Mostrar 8" : "Mostrar 15"}</Button>}</div>
