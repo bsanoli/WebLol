@@ -56,6 +56,28 @@ function save(flash=true){
   if (flash || $("#saved").textContent === "Falha ao salvar") $("#saved").textContent = "Salvo neste navegador";
 }
 const cur=()=>S.comps.find(c=>c.id===S.cur);
+$("#clear-local").onclick=()=>{
+  let base;
+  try {
+    base=JSON.parse(localStorage.getItem("lol-base"));
+    if(base && (!Array.isArray(base.data?.comps)||!Array.isArray(base.data?.plays)))throw new Error("Base inválida");
+  } catch {
+    toast("Não consegui ler a versão salva do time. Nada foi apagado.");
+    return;
+  }
+  const destination=base?`a última versão oficial sincronizada (v${base.version})`:"os dados iniciais do site";
+  if(!confirm(`Limpar suas alterações neste navegador?\n\nTodas as composições e jogadas locais serão substituídas por ${destination}.\nSeu login e tema serão mantidos. Envios já feitos para aprovação não serão cancelados.\n\nSe quiser guardar uma cópia, clique em Cancelar e use Exportar antes de continuar.`))return;
+  try {
+    if(base){
+      localStorage.setItem(KEY,JSON.stringify({comps:base.data.comps,plays:base.data.plays,cur:base.data.comps[0]?.id,curPlay:base.data.plays[0]?.id}));
+    }else localStorage.removeItem(KEY);
+  }catch{
+    toast("Não consegui limpar as alterações no navegador. Tente novamente.");
+    return;
+  }
+  // Recarregar também descarta animações e históricos de desfazer do mapa.
+  window.location.reload();
+};
 let active="top";
 
 function toast(m){const t=$("#toast");t.textContent=m;t.classList.add("on");setTimeout(()=>t.classList.remove("on"),2200)}

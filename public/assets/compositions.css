@@ -355,6 +355,8 @@ body:has(#v-comps.on) > header button,
 }
 #v-comps .editor-status { flex-direction:column-reverse; align-items:flex-end; gap:2px; }
 #v-comps .editor-status .saved { display:block; font-size:10px; }
+#v-comps .local-save-actions { display:flex; align-items:center; justify-content:flex-end; flex-wrap:wrap; gap:8px; }
+#v-comps #clear-local { min-height:32px; padding:4px 8px; font-size:11px; }
 #v-comps .option-menu[open] { z-index:15; }
 @media (max-width:600px) { #v-comps .editor-status { flex-direction:row; align-items:center; justify-content:space-between; } }
 #v-comps .dside button.on.b { background:#2458ad; border-color:#5a91ef; color:#fff; }

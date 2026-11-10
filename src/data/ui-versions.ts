@@ -8,6 +8,13 @@ export interface UiVersion {
 
 export const UI_VERSIONS: UiVersion[] = [
   {
+    version: "1.9",
+    date: "2026-11-09",
+    changes: [
+      "Composições: botão Limpar alterações restaura a última versão oficial sincronizada ou os dados iniciais, com confirmação e preservação do login e tema.",
+    ],
+  },
+  {
     version: "1.8",
     date: "2026-11-09",
     changes: [
