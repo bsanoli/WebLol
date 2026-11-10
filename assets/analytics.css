@@ -169,25 +169,61 @@
 .empty-state { grid-column: 1 / -1; padding: 32px 20px; text-align: center; border: 1px dashed var(--line); border-radius: var(--wl-panel-radius); color: var(--muted); }
 .empty-state h3 { color: var(--ink); font-size: 18px; margin: 0 0 8px; }
 .empty-state p { margin: 0; font-size: 14px; }
-.builds-table-wrap > .builds-table { min-width: 920px; }
-.builds-table :is(th, td) { padding: 10px; }
+.builds-table-wrap > .builds-table { min-width: 0; table-layout: fixed; --build-preview-size: 34px; }
+.builds-table :is(th, td) { padding: 11px clamp(8px, 1.1vw, 16px); vertical-align: middle; }
 .builds-table thead th { white-space: nowrap; }
+.builds-table .build-summary-row { height: 66px; cursor: pointer; }
 .builds-table tbody th { text-transform: none; letter-spacing: 0; text-align: left; color: var(--ink); }
-.builds-table .build-stat { text-align: center; }
-.build-champion { display: flex; align-items: center; gap: 8px; min-width: 110px; }
-.build-champion .av { width: 32px; height: 32px; margin: 0; }
-.build-champion small { display: block; margin-top: 3px; color: var(--muted); font-size: 12px; font-weight: 400; }
-.build-options { display: grid; gap: 4px; min-width: 155px; }
-.build-option { display: grid; grid-template-columns: auto minmax(0,1fr) auto; align-items: center; gap: 6px; font-size: 12px; line-height: 1.4; }
-.build-option-icons { display: flex; gap: 2px; }
-.build-option-icons .build-icon { width: 22px; height: 22px; }
-.build-option-runes { align-items: flex-end; gap: 0; min-width: 39px; }
-.build-option-runes .build-icon-rune { width: 25px; height: 25px; }
+.builds-table .build-stat { text-align: center; font-variant-numeric: tabular-nums; }
+.builds-table .build-col-games { width: 8%; }
+.builds-table .build-col-win { width: 10%; }
+.builds-table .build-col-items { width: 22%; }
+.builds-table .build-col-boots, .builds-table .build-col-runes { width: 11%; }
+.builds-table .build-col-spells { width: 13%; }
+.builds-table tbody .build-col-champion { padding: 11px clamp(8px, 1.1vw, 16px); }
+.builds-table .build-champion { display: flex; align-items: center; gap: 8px; min-height: 0; padding: 0; overflow-wrap: anywhere; }
+.build-champion .av { width: 40px; height: 40px; margin: 0; }
+.build-champion small { display: block; margin-top: 2px; color: var(--muted); font-size: 12px; font-weight: 400; }
+.build-option-icons { display: flex; align-items: center; gap: 5px; }
+.build-option-icons .build-icon { width: var(--build-preview-size); height: var(--build-preview-size); }
+.build-option-icons .build-icon:not(.build-icon-rune) { border: 1px solid var(--line); }
+.builds-table .build-icon-trigger:hover { box-shadow: 0 0 0 1px var(--gold); }
+.builds-table .build-summary-row > :is(th, td) { transition: background-color 150ms ease; }
+.builds-table .build-icon-trigger { transition: box-shadow 150ms ease; }
+.build-option-runes { align-items: flex-end; gap: 0; }
 .build-option-secondary { display: flex; margin-left: -3px; }
-.build-option-secondary .build-icon { width: 17px; height: 17px; border-radius: 50%; background: var(--mid-bg); }
-.build-option-name { overflow-wrap: anywhere; }
-.build-frequency { color: var(--muted); white-space: nowrap; text-align: right; }
-.builds-table .build-route { white-space: nowrap; }
+.build-option-secondary .build-icon { width: 21px; height: 21px; border-radius: 50%; background: var(--mid-bg); }
+.builds-table .build-toggle:focus-visible { outline-offset: 2px; }
+.build-toggle .icon { flex: none; width: 14px; height: 14px; color: var(--muted); transition: transform 150ms ease; }
+.build-summary-row:has(.build-toggle[aria-expanded="true"]) > :is(th, td) { background: var(--mid-bg); }
+.build-toggle[aria-expanded="true"] .icon { color: var(--gold); transform: rotate(90deg); }
+.build-inline-heading { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 10px; }
+.build-inline-heading h3 { margin: 0; font-size: 16px; }
+.build-inline-heading small { margin-inline-start: 5px; color: var(--muted); font-size: 12px; font-weight: 500; }
+@media (768px <= width < 1024px) {
+  .builds-table-wrap > .builds-table { --build-preview-size: 32px; }
+  .build-option-icons { gap: 4px; }
+  .build-option-runes { gap: 0; }
+}
+@media (max-width: 767px) {
+  .builds-table-wrap > .builds-table { --build-preview-size: clamp(24px, 7.5vw, 32px); }
+  .builds-table :is(th, td), .builds-table tbody .build-col-champion { padding-inline: 6px; }
+  .builds-table :is(.build-col-games, .build-col-boots, .build-col-runes, .build-col-spells) { display: none; }
+  .builds-table .build-col-items { width: calc(3 * var(--build-preview-size) + 20px); }
+  .builds-table .build-col-win { width: 56px; }
+  .builds-table thead th { font-size: 10px; letter-spacing: 0; }
+  .builds-table .build-champion { gap: 6px; }
+  .build-champion .av { width: 30px; height: 30px; }
+  .build-option-icons { gap: 4px; }
+}
+@media (max-width: 360px) {
+  .builds-table .build-summary-row > :is(th, td) { padding-block: 7px; }
+  .builds-table .build-col-win { width: 50px; }
+  .build-champion .av { width: 26px; height: 26px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .builds-table :is(.build-summary-row > :is(th, td), .build-icon-trigger, .build-toggle .icon) { transition: none; }
+}
 .bcard { display: flex; flex-direction: column; }
 .builds-page:has(.build-detail) > :is(.hint,.tools) { display: none; }
 .builds-page:has(.build-detail) > h2 { margin-bottom: 12px; }

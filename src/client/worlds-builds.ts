@@ -1,3 +1,4 @@
+import { iconMarkup } from "./icon"
 import type DATA from "../data/worlds.json"
 import { LOL_DATA, lolImage, lolKey, type RuneTree } from "./lol-media"
 import { championSlug, esc, ico, teamLogo, wrPill } from "./worlds-display"
@@ -10,12 +11,12 @@ type BuildOption = (string | number)[]
 type BuildIconKind = "item" | "rune" | "spell"
 
 const PTXT=(n: string,p: number,what: string)=>`${n}: usado em ${p}% dos jogos ${what}`;
-function buildIcon(kind: BuildIconKind, name: string, interactive = true) {
+function buildIcon(kind: BuildIconKind, name: string, interactive = true, usage = "") {
   const key = lolKey(name);
   const icon = lolImage(LOL_DATA[kind][key], `build-icon build-icon-${kind}`);
   if (!icon || !interactive) return icon;
   const label = kind === "rune" ? LOL_DATA.runeNames[key] : LOL_DATA[`${kind}Details`][key]?.name;
-  return `<button type="button" class="build-icon-trigger" data-game-tip="${kind}:${key}" aria-label="${esc(label ?? name)}">${icon}</button>`;
+  return `<button type="button" class="build-icon-trigger" data-game-tip="${kind}:${key}" aria-label="${esc(label ?? name)}"${usage ? ` data-tip="${esc(usage)}"` : ""}>${icon}</button>`;
 }
 const buildOptionNames=(kind: BuildIconKind,name: string)=>kind==="spell"?name.split(" and "):[name];
 
@@ -71,6 +72,13 @@ export function buildHtml(c: Champion, layout: "page" | "expanded" = "page"){con
   return `<div class="build">${column("Build e feitiços",[equipment,boots,spells])}${column("Runas",[runeDetails,keyRunes],"build-runes")}</div>`;
 }
 
+export function buildDetails(champion: Champion, layout: "page" | "expanded" = "page") {
+  const samples = Object.entries(champion.lanes)
+    .filter(([, sample]) => sample.n)
+    .map(([position, sample]) => buildSample(sample, position)).join("");
+  return samples + buildHtml(champion, layout);
+}
+
 const missingBuildOption='<span class="na" aria-label="Sem dados">—</span>';
 function secondaryRuneTree(build: ChampionBuild){
   const mainRune=build.keys?.[0];
@@ -79,40 +87,45 @@ function secondaryRuneTree(build: ChampionBuild){
   if(primary[0]===lolKey(String(mainRune[2]||mainRune[0])))return secondaryTree;
 }
 
-function buildPreviewOption(entry: BuildOption | undefined,kind: BuildIconKind,secondaryTree?: RuneTree){
-  if(!entry)return missingBuildOption;
+function buildPreviewIcons(entry: BuildOption, kind: BuildIconKind) {
   const [name,frequency,english]=entry;
-  if(typeof name!=="string"||typeof frequency!=="number")return missingBuildOption;
+  if(typeof name!=="string"||typeof frequency!=="number")return "";
   const names=buildOptionNames(kind,typeof english==="string"?english:name);
-  const title=kind==="rune"?LOL_DATA.runeNames[lolKey(names[0])]||name:name;
-  const icons=names.map(value=>buildIcon(kind,value)).join("");
+  const usage=kind==="spell"
+    ? `${name} · combinação usada em ${frequency}% dos jogos`
+    : `Usado em ${frequency}% dos jogos`;
+  return names.map(value=>buildIcon(kind,value,true,usage)).join("");
+}
+
+function buildPreviewOption(entry: BuildOption | undefined,kind: BuildIconKind,secondaryTree?: RuneTree){
+  const icons=entry ? buildPreviewIcons(entry,kind) : "";
+  if(!icons)return missingBuildOption;
   const secondaryLabel=secondaryTree?`Árvore secundária da página de runas mais usada: ${secondaryTree.name}`:"";
   const secondaryIcon=secondaryTree?`<span class="build-option-secondary" role="img" aria-label="${esc(secondaryLabel)}" title="${esc(secondaryLabel)}">${lolImage(secondaryTree.icon,"build-icon")}</span>`:"";
-  return `<div class="build-option"><span class="build-option-icons${kind==="rune"?" build-option-runes":""}">${icons}${secondaryIcon}</span>
-    <span class="build-option-name">${esc(title)}</span><span class="build-frequency">${frequency}%</span>
-  </div>`;
+  return `<div class="build-option-icons${kind==="rune"?" build-option-runes":""}">${icons}${secondaryIcon}</div>`;
 }
 
 export function buildsTable(champions: (Champion & { build: ChampionBuild })[]){
   const rows=champions.map(c=>{
     const {build}=c;
-    const items=(build.items||build.support||[]).slice(0,3);
-    return `<tr>
-      <th scope="row"><span class="build-champion">${ico(c.name)}<span>${esc(c.name)}<small>${esc(c.main)}</small></span></span></th>
-      <td class="build-stat">${c.picks}</td>
-      <td class="build-stat">${wrPill(c.wins,c.picks)}</td>
-      <td><div class="build-options">${items.map(entry=>buildPreviewOption(entry,"item")).join("")||missingBuildOption}</div></td>
-      <td>${buildPreviewOption(build.boots?.[0],"item")}</td>
-      <td>${buildPreviewOption(build.keys?.[0],"rune",secondaryRuneTree(build))}</td>
-      <td>${buildPreviewOption(build.spells?.[0],"spell")}</td>
-      <td><button data-slot="button" data-variant="outline" data-size="sm" type="button" class="build-route" data-build="${championSlug(c.name)}" aria-label="Abrir build de ${esc(c.name)}">Ver build</button></td>
-    </tr>`;
+    const items=(build.items?.length ? build.items : build.support ?? []).slice(0,3);
+    const slug=championSlug(c.name);
+    return `<tr class="build-summary-row">
+      <th scope="row" class="build-col-champion"><button type="button" class="build-champion build-toggle" data-build-toggle="${slug}" aria-expanded="false" aria-controls="build-detail-${slug}">${iconMarkup("next")}${ico(c.name)}<span>${esc(c.name)}<small>${esc(c.main)}</small></span></button></th>
+      <td class="build-col-games build-stat">${c.picks}</td>
+      <td class="build-col-win build-stat">${wrPill(c.wins,c.picks)}</td>
+      <td class="build-col-items"><div class="build-option-icons">${items.map(entry=>buildPreviewIcons(entry,"item")).join("")||missingBuildOption}</div></td>
+      <td class="build-col-boots">${buildPreviewOption(build.boots?.[0],"item")}</td>
+      <td class="build-col-runes">${buildPreviewOption(build.keys?.[0],"rune",secondaryRuneTree(build))}</td>
+      <td class="build-col-spells">${buildPreviewOption(build.spells?.[0],"spell")}</td>
+    </tr>
+    <tr class="detail build-inline-detail" id="build-detail-${slug}" hidden><td colspan="7"></td></tr>`;
   }).join("");
-  return `<div class="wl-panel tablewrap builds-table-wrap" role="region" aria-label="Comparação de builds" tabindex="0">
+  return `<div class="wl-panel tablewrap builds-table-wrap" role="region" aria-label="Comparação de builds">
     <table class="builds-table" aria-label="Builds por campeão">
-      <thead><tr><th scope="col">Campeão</th><th scope="col" class="build-stat">Jogos</th><th scope="col" class="build-stat">Vitórias</th>
-      <th scope="col">Itens mais usados</th><th scope="col">Botas</th><th scope="col">Runa principal</th>
-      <th scope="col">Feitiços</th><th scope="col">Detalhes</th></tr></thead>
+      <thead><tr><th scope="col" class="build-col-champion">Campeão</th><th scope="col" class="build-col-games build-stat">Jogos</th><th scope="col" class="build-col-win build-stat">Win rate</th>
+      <th scope="col" class="build-col-items">Itens</th><th scope="col" class="build-col-boots">Botas</th><th scope="col" class="build-col-runes">Runas</th>
+      <th scope="col" class="build-col-spells">Feitiços</th></tr></thead>
       <tbody>${rows}</tbody>
     </table>
   </div>`;

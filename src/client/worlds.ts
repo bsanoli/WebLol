@@ -2,7 +2,7 @@
 import { iconMarkup, laneIconMarkup } from "./icon"
 import DATA from "../data/worlds.json"
 import { LOL_DATA, lolAsset, lolChampion, lolKey } from "./lol-media"
-import { buildHtml, buildSample, buildsTable } from "./worlds-builds"
+import { buildDetails, buildHtml, buildSample, buildsTable } from "./worlds-builds"
 import { effectText } from "./worlds-effect-text"
 import { LANES, LC, pct, wrPill, ico, esc, championSlug, teamLogo, teamRegion } from "./worlds-display"
 import { initializeTheme } from "./theme"
@@ -406,8 +406,14 @@ function wireLane(lane){
 
 // Builds
 let bLane="";
+const compactBuilds = matchMedia("(max-width: 767px)");
+function syncBuildDetailSpan() {
+  const cell = document.querySelector(".build-inline-detail:not([hidden]) > td");
+  if (cell) cell.colSpan = compactBuilds.matches ? 3 : 7;
+}
+compactBuilds.addEventListener("change", syncBuildDetailSpan);
 function buildsView(){
-  return `<section class="builds-page"><h2>Builds</h2><p class="hint">Compare as escolhas mais frequentes no Worlds. Os percentuais ao lado dos itens, runas e feitiços indicam a frequência de uso.</p>
+  return `<section class="builds-page"><h2>Builds</h2><p class="hint">Selecione uma linha para abrir a build. Os ícones mostram o efeito e a frequência de uso.</p>
   <div class="wl-panel tools"><input id="bq" type="search" placeholder="Buscar campeão ou item…" aria-label="Buscar campeão ou item">
   <select id="bl" aria-label="Filtrar por lane"><option value="">Todas as lanes</option>${LANES.map(([l])=>`<option ${l===bLane?'selected':''}>${l}</option>`).join("")}</select></div>
   <div class="bcards" id="bc"></div></section>`}
@@ -420,22 +426,48 @@ function wireBuilds(){
     const matches=list.filter(c=>buildChampion ? championSlug(c.name)===buildChampion :
       (!bLane||c.lanes[bLane])&&(c.name.toLowerCase().includes(f)||JSON.stringify(c.build).toLowerCase().includes(f)));
     const champion=buildChampion && matches[0];
-    const samples=champion ? Object.entries(champion.lanes)
-      .filter(([, sample]) => sample.n)
-      .map(([position, sample]) => buildSample(sample, position)).join("") : "";
     const content=champion
-      ? `<article class="wl-panel bcard"><h3>${ico(champion.name)}${esc(champion.name)} <span class="build-meta">${champion.main} · ${champion.picks} jogos</span><span class="build-winrate">${wrPill(champion.wins,champion.picks)} <small>de vitórias</small></span></h3>${samples}${buildHtml(champion)}</article>`
+      ? `<article class="wl-panel bcard"><h3>${ico(champion.name)}${esc(champion.name)} <span class="build-meta">${champion.main} · ${champion.picks} jogos</span><span class="build-winrate">${wrPill(champion.wins,champion.picks)} <small>de vitórias</small></span></h3>${buildDetails(champion)}</article>`
       : matches.length ? buildsTable(matches) : "";
     const back=buildChampion ? '<div class="build-back"><button data-slot="button" data-variant="outline" data-size="sm" class="build-route" data-build="">Voltar à lista de builds</button></div>' : '';
     bc.classList.toggle("build-detail", !!buildChampion);
     bc.innerHTML=back+(content||'<div class="empty-state" role="status"><h3>Nenhuma build encontrada</h3><p>Tente outro campeão ou item, ou selecione todas as posições.</p></div>');
     enhanceAnalyticsUI();
   };
+  const setExpanded = (button, expanded) => {
+    button.setAttribute("aria-expanded", String(expanded));
+    const detail = document.getElementById(button.getAttribute("aria-controls"));
+    detail.hidden = !expanded;
+    return detail.cells[0];
+  };
   bc.onclick=e=>{
+    const toggle=e.target.closest("[data-build-toggle]") ??
+      (!e.target.closest("button") && e.target.closest(".build-summary-row")?.querySelector("[data-build-toggle]"));
+    if(toggle){
+      const previous=bc.querySelector('.build-toggle[aria-expanded="true"]');
+      if(previous)setExpanded(previous,false);
+      if(previous!==toggle){
+        const cell=setExpanded(toggle,true);
+        syncBuildDetailSpan();
+        if(!cell.firstElementChild){
+          const champion=list.find(c=>championSlug(c.name)===toggle.dataset.buildToggle);
+          cell.innerHTML=`<div class="champion-detail"><div class="build-inline-heading">
+            <h3>Build de ${esc(champion.name)} <small>${champion.picks} jogos</small></h3>
+            <button data-slot="button" data-variant="outline" data-size="sm" type="button" data-build="${toggle.dataset.buildToggle}">Abrir página da build</button>
+          </div>${buildDetails(champion,"expanded")}</div>`;
+          enhanceAnalyticsUI();
+        }
+      }
+      toggle.scrollIntoView({block:"nearest"});
+      return;
+    }
     const button=e.target.closest("[data-build]");if(!button)return;
+    const previous=buildChampion;
     buildChampion=button.dataset.build;
     draw();publish();
-    bc.querySelector("button")?.focus();
+    const next=buildChampion ? bc.querySelector(".build-back button")
+      : bc.querySelector(`[data-build-toggle="${previous}"]`);
+    (next ?? q).focus();
   };
   q.oninput=()=>{buildQuery=q.value;buildChampion="";draw();publish(true)};
   sel.onchange=()=>{buildChampion="";draw();publish()};
@@ -785,7 +817,7 @@ if (!window.frameElement) {
 } else render("geral");
 
 function enhanceAnalyticsUI() {
-  document.querySelectorAll(".tablewrap").forEach(el => {
+  document.querySelectorAll(".tablewrap:not(.builds-table-wrap)").forEach(el => {
     el.tabIndex = 0; el.setAttribute("role", "region");
     el.setAttribute("aria-label", "Tabela de estatísticas. Role horizontalmente para ver todas as colunas.");
   });
