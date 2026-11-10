@@ -162,7 +162,11 @@
 .tools #lane-select { margin: 0; min-width: 100px; }
 .build-min-games { display: flex; align-items: center; gap: 8px; font-size: 13px; }
 .tools .build-min-games input { width: 76px; flex: none; }
-#build-clear-all { min-height: 44px; margin-inline-start: auto; }
+.builds-page > .tools :is(#bq, #bl, #bmin, #build-clear-all) {
+  height: var(--wl-button-height);
+  min-height: var(--wl-button-height);
+}
+#build-clear-all { margin-inline-start: auto; }
 .tablewrap th:has(button:is([data-k="picks"],[data-k="wr"],[data-k="bans"],[data-k="pres"],[data-k="kda"],[data-k="k"],[data-k="d"],[data-k="a"],[data-k="n"])) { text-align: right; }
 .tablewrap > table { min-width: 720px; }
 .tablewrap th button { width: 100%; min-height: var(--wl-button-height); padding-inline: 12px; box-sizing: border-box; }
@@ -558,7 +562,7 @@
 }
 .comp-picker { container-type: inline-size; }
 .build-lane-picker { position: relative; }
-#bl { min-height: 44px; padding-inline: 10px; }
+#bl { padding-inline: 10px; }
 #bl[aria-expanded="true"] > .icon { transform: rotate(180deg); }
 .build-lane-value { display: flex; }
 .build-lane-menu {
