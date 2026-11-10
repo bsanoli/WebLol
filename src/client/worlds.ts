@@ -4,6 +4,9 @@ import DATA from "../data/worlds.json"
 import { lolAsset, lolChampion, lolKey } from "./lol-media"
 import { buildHtml, buildSample, buildsTable } from "./worlds-builds"
 import { LANES, LC, pct, wrPill, ico, esc, championSlug, teamLogo, teamRegion } from "./worlds-display"
+import { initializeTheme } from "./theme"
+
+initializeTheme()
 
 const G=DATA.games, C=DATA.champs;
 const tipEl=()=>document.getElementById('tip');

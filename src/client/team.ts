@@ -1,6 +1,9 @@
 // @ts-nocheck -- O editor legado ainda depende de estado dinâmico vindo do armazenamento local.
 import { iconMarkup, laneIconMarkup } from "./icon"
 import { LOL_DATA, lolAsset, lolChampion, lolImage } from "./lol-media"
+import { initializeTheme } from "./theme"
+
+initializeTheme()
 
 /* ===== Campeões (funções do editor e catálogo local da Riot) ===== */
 const BASE=`Aatrox|Aatrox|T;Ahri|Ahri|M;Akali|Akali|MT;Akshan|Akshan|MT;Alistar|Alistar|S;Ambessa|Ambessa|TJ;Amumu|Amumu|JS;Anivia|Anivia|M;Annie|Annie|MS;Aphelios|Aphelios|A;Ashe|Ashe|AS;Aurelion Sol|AurelionSol|M;Aurora|Aurora|MT;Azir|Azir|M;Bard|Bard|S;Bel'Veth|Belveth|J;Blitzcrank|Blitzcrank|S;Brand|Brand|SMJ;Braum|Braum|S;Briar|Briar|J;Caitlyn|Caitlyn|A;Camille|Camille|TS;Cassiopeia|Cassiopeia|MT;Cho'Gath|Chogath|TM;Corki|Corki|MA;Darius|Darius|T;Diana|Diana|JM;Dr. Mundo|DrMundo|TJ;Draven|Draven|A;Ekko|Ekko|JM;Elise|Elise|J;Evelynn|Evelynn|J;Ezreal|Ezreal|A;Fiddlesticks|Fiddlesticks|J;Fiora|Fiora|T;Fizz|Fizz|M;Galio|Galio|MS;Gangplank|Gangplank|T;Garen|Garen|T;Gnar|Gnar|T;Gragas|Gragas|JTS;Graves|Graves|J;Gwen|Gwen|TJ;Hecarim|Hecarim|J;Heimerdinger|Heimerdinger|MS;Hwei|Hwei|MS;Illaoi|Illaoi|T;Irelia|Irelia|TM;Ivern|Ivern|J;Janna|Janna|S;Jarvan IV|JarvanIV|J;Jax|Jax|TJ;Jayce|Jayce|TM;Jhin|Jhin|A;Jinx|Jinx|A;K'Sante|KSante|T;Kai'Sa|Kaisa|A;Kalista|Kalista|A;Karma|Karma|SM;Karthus|Karthus|J;Kassadin|Kassadin|M;Katarina|Katarina|M;Kayle|Kayle|T;Kayn|Kayn|J;Kennen|Kennen|T;Kha'Zix|Khazix|J;Kindred|Kindred|J;Kled|Kled|T;Kog'Maw|KogMaw|A;LeBlanc|Leblanc|M;Lee Sin|LeeSin|J;Leona|Leona|S;Lillia|Lillia|J;Lissandra|Lissandra|M;Locke|Locke|M;Lucian|Lucian|A;Lulu|Lulu|S;Lux|Lux|SM;Malphite|Malphite|TS;Malzahar|Malzahar|M;Maokai|Maokai|STJ;Master Yi|MasterYi|J;Mel|Mel|MS;Milio|Milio|S;Miss Fortune|MissFortune|A;Mordekaiser|Mordekaiser|T;Morgana|Morgana|S;Naafiri|Naafiri|M;Nami|Nami|S;Nasus|Nasus|T;Nautilus|Nautilus|S;Neeko|Neeko|MS;Nidalee|Nidalee|J;Nilah|Nilah|A;Nocturne|Nocturne|J;Nunu & Willump|Nunu|J;Olaf|Olaf|TJ;Orianna|Orianna|M;Ornn|Ornn|T;Pantheon|Pantheon|TSJ;Poppy|Poppy|TJS;Pyke|Pyke|S;Qiyana|Qiyana|JM;Quinn|Quinn|T;Rakan|Rakan|S;Rammus|Rammus|J;Rek'Sai|RekSai|J;Rell|Rell|S;Renata Glasc|Renata|S;Renekton|Renekton|T;Rengar|Rengar|J;Riven|Riven|T;Rumble|Rumble|T;Ryze|Ryze|M;Samira|Samira|A;Sejuani|Sejuani|J;Senna|Senna|SA;Seraphine|Seraphine|SA;Sett|Sett|TS;Shaco|Shaco|J;Shen|Shen|T;Shyvana|Shyvana|J;Singed|Singed|T;Sion|Sion|T;Sivir|Sivir|A;Skarner|Skarner|J;Smolder|Smolder|A;Sona|Sona|S;Soraka|Soraka|S;Swain|Swain|SM;Sylas|Sylas|MJ;Syndra|Syndra|M;Tahm Kench|TahmKench|ST;Taliyah|Taliyah|JM;Talon|Talon|MJ;Taric|Taric|S;Teemo|Teemo|T;Thresh|Thresh|S;Tristana|Tristana|AM;Trundle|Trundle|JT;Tryndamere|Tryndamere|T;Twisted Fate|TwistedFate|M;Twitch|Twitch|A;Udyr|Udyr|J;Urgot|Urgot|T;Varus|Varus|A;Vayne|Vayne|AT;Veigar|Veigar|M;Vel'Koz|Velkoz|SM;Vex|Vex|M;Vi|Vi|J;Viego|Viego|J;Viktor|Viktor|M;Vladimir|Vladimir|MT;Volibear|Volibear|JT;Warwick|Warwick|J;Wukong|MonkeyKing|JT;Xayah|Xayah|A;Xerath|Xerath|MS;Xin Zhao|XinZhao|J;Yasuo|Yasuo|M;Yone|Yone|MT;Yorick|Yorick|T;Yunara|Yunara|A;Yuumi|Yuumi|S;Zaahen|Zaahen|TJ;Zac|Zac|J;Zed|Zed|M;Zeri|Zeri|A;Ziggs|Ziggs|AM;Zilean|Zilean|S;Zoe|Zoe|M;Zyra|Zyra|S`;
@@ -98,7 +101,7 @@ function selectComp(id){S.cur=id;save(false);renderAll();publishTeamRoute("comps
 $("#clist").onclick=e=>{const action=e.target.closest("[data-comp-action]");if(action){if(action.dataset.compAction==="duplicate")duplicateComp(action.dataset.id);else deleteComp(action.dataset.id);return}const it=e.target.closest(".ci");if(it)selectComp(it.dataset.id)};
 function closeCompositionMenus(target?: EventTarget | null){
   const openMenus=document.querySelectorAll<HTMLDetailsElement>(
-    "#v-comps details[open]:is(.composition-menu,.option-menu,.lane-note,.palette)"
+    "#v-comps details[open]:is(.composition-menu,.option-menu,.lane-note)"
   );
   openMenus.forEach(menu=>{
     if(!(target instanceof Node && menu.contains(target)))menu.open=false;
@@ -320,37 +323,6 @@ function openPicker(){pickerTrigger=document.activeElement;pickerDialog.append(p
 pickerDialog.addEventListener("close",()=>{$("#comps").append(picker);(document.querySelector("[data-picker]")||pickerTrigger)?.focus()});
 $("#close-picker").onclick=()=>pickerDialog.close();
 window.matchMedia("(min-width: 1100px)").addEventListener("change",e=>{if(e.matches&&pickerDialog.open)pickerDialog.close()});
-const paletteMenu=document.querySelector<HTMLDetailsElement>("#composition-palette");
-const paletteTrigger=paletteMenu.querySelector("summary");
-const paletteOptions=[...paletteMenu.querySelectorAll<HTMLButtonElement>(".palette-option")];
-const paletteKey="weblol-composition-palette";
-const previousPalettes=new Map([
-  ["turquoise","tokyo-night"],["violet","dracula"],["pink","catppuccin"],
-  ["lime","monokai"],["silver","nord"],["amber","solarized"],
-]);
-function setPalette(choice: HTMLButtonElement){
-  $("#v-comps").dataset.palette=choice.dataset.palette;
-  pickerDialog.dataset.palette=choice.dataset.palette;
-  $("#palette-name").textContent=choice.textContent.trim();
-  paletteOptions.forEach(option=>option.setAttribute("aria-pressed",String(option===choice)));
-}
-paletteOptions.forEach(option=>option.addEventListener("click",()=>{
-  setPalette(option);
-  paletteMenu.open=false;
-  paletteTrigger.focus();
-  try{localStorage.setItem(paletteKey,option.dataset.palette)}catch{}
-}));
-paletteMenu.addEventListener("keydown",event=>{
-  if(event.key!=="Escape"||!paletteMenu.open)return;
-  event.preventDefault();
-  paletteMenu.open=false;
-  paletteTrigger.focus();
-});
-try{
-  const stored=localStorage.getItem(paletteKey);
-  const name=previousPalettes.get(stored)??stored;
-  setPalette(paletteOptions.find(option=>option.dataset.palette===name)??paletteOptions[0]);
-}catch{setPalette(paletteOptions[0])}
 
 /* ===== Exportar / Importar ===== */
 $("#exp").onclick=()=>{

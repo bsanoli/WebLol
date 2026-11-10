@@ -3,9 +3,11 @@ import { createRoot } from "react-dom/client"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { ThemePicker } from "@/components/theme-picker"
 import "./index.css"
 import { connectAnalytics } from "./analytics-bridge"
 import { iconMarkup } from "./client/icon"
+import { initializeTheme } from "./client/theme"
 import { UI_VERSIONS } from "./data/ui-versions"
 
 const sections = [
@@ -13,6 +15,8 @@ const sections = [
   { id: "camp", label: "Área do time", icon: "team" },
   { id: "admin", label: "Administração", icon: "admin" },
 ] as const
+
+const initialPalette = initializeTheme()
 
 type IconName = (typeof sections)[number]["icon"] | "flag" | "link" | "reset" | "exit"
 
@@ -38,7 +42,8 @@ function App() {
             </Button>
           ))}
         </nav>
-        <div className="toolbar flex flex-wrap items-center gap-2" aria-label="Conta e sincronização">
+        <div className="toolbar flex flex-wrap items-center gap-2" aria-label="Preferências, conta e sincronização">
+          <ThemePicker initialPalette={initialPalette} />
           <Button id="copy-link" variant="outline" hidden>
             <Icon name="link" /> Copiar link
           </Button>
