@@ -3,7 +3,7 @@ import { iconMarkup, laneIconMarkup } from "./icon"
 import DATA from "../data/worlds.json"
 import { lolAsset, lolChampion } from "./lol-media"
 import { buildHtml, buildsTable } from "./worlds-builds"
-import { LANES, LC, pct, wrPill, ico, esc, championSlug } from "./worlds-display"
+import { LANES, LC, pct, wrPill, ico, esc, championSlug, teamLogo } from "./worlds-display"
 
 const G=DATA.games, C=DATA.champs;
 const tipEl=()=>document.getElementById('tip');
@@ -293,7 +293,7 @@ function wirePlayers(){
     const list=rows.filter(p=>(!l||p.lane===l)&&(p.name.toLowerCase().includes(f)||p.team.toLowerCase().includes(f)))
       .sort((a,b)=>{const x=a[plSort.k],y=b[plSort.k];return (typeof x==="string"?x.localeCompare(y):x-y)*plSort.d||b.n-a.n});
     showSort(plSort);
-    tb.innerHTML=list.map(p=>`<tr><td class="champ">${esc(p.name)}</td><td><span class="lane-label">${laneIconMarkup(p.lane)}${p.lane}</span></td>
+    tb.innerHTML=list.map(p=>`<tr><td class="champ">${esc(p.name)}</td><td><span class="team-cell">${teamLogo(p.team)}${esc(p.team)}</span></td><td><span class="lane-label">${laneIconMarkup(p.lane)}${p.lane}</span></td>
       <td class="num">${p.n}</td><td class="num">${wrPill(p.w,p.n)}</td><td class="num kda">${p.kda.toFixed(2)}</td>
       <td><div class="chips">${p.ch.map(([c,n])=>`<span class="chip">${ico(c)}${esc(c)} · ${n}</span>`).join("")}</div></td></tr>`).join("");
   };
@@ -357,9 +357,10 @@ function compsView(){
 }
 function compCard(g,q){
   const hl=t=>q&&t.toLowerCase().includes(q)?`<mark>${esc(t)}</mark>`:esc(t);
+  const team=(name, color, won)=>`<span class="match-team ${won?"won":"lost"}" data-tip="Lado ${color}${won?" · venceu":""}">${teamLogo(name)}<span>${esc(name)}${won?` ${iconMarkup("check")}`:""}</span></span>`;
   const side=(c,p,k,r)=>{const ch=`<td${r?' class="r"':''}><span class="ch">${ico(c)}<span>${hl(c)}<span class="pl">${hl(p)}</span></span></span></td>`,kd=`<td class="k${r?'':' r'}" data-tip="Abates / Mortes / Assistências de ${esc(p)}">${k}</td>`;return r?kd+ch:ch+kd};
   return `<article class="wl-panel cg"><div class="st">${esc(g.st)} · Jogo ${g.g}</div>
-  <div class="tm"><span class="${g.bw?'won':'lost'}" data-tip="Lado azul${g.bw?' · venceu':''}">${esc(g.b)}${g.bw?` ${iconMarkup("check")}`:''}</span><span class="vs">vs</span><span class="${g.bw?'lost':'won'}" data-tip="Lado vermelho${g.bw?'':' · venceu'}">${esc(g.r)}${g.bw?'':` ${iconMarkup("check")}`}</span></div>
+  <div class="tm">${team(g.b,"azul",g.bw)}<span class="vs">vs</span>${team(g.r,"vermelho",!g.bw)}</div>
   <table>${g.p.map(([l,cb,pb,kb,cr,pr,kr])=>`<tr>${side(cb,pb,kb,0)}<td class="ln">${laneIconMarkup(l,true)}</td>${side(cr,pr,kr,1)}</tr>`).join("")}</table></article>`;
 }
 function wireComps(){

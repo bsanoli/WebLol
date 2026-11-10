@@ -247,7 +247,7 @@
   .tools input, .tools select { width: 100%; flex: 1 1 100%; min-width: 0; }
   .tablewrap td.champ { position: sticky; left: 0; background: var(--surface); z-index: 1; }
   .cg { overflow-x: auto; }
-  .cg table { min-width: 440px; }
+  .cg :is(.tm, table) { min-width: 320px; }
 }
 
 @media (max-width: 359px) {
