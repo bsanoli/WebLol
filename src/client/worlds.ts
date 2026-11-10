@@ -1,9 +1,9 @@
 // @ts-nocheck -- A tela legada ainda usa estado e eventos DOM sem tipos explícitos.
 import { iconMarkup, laneIconMarkup } from "./icon"
 import DATA from "../data/worlds.json"
-import { lolAsset, lolChampion } from "./lol-media"
+import { lolAsset, lolChampion, lolKey } from "./lol-media"
 import { buildHtml, buildSample, buildsTable } from "./worlds-builds"
-import { LANES, LC, pct, wrPill, ico, esc, championSlug, teamLogo } from "./worlds-display"
+import { LANES, LC, pct, wrPill, ico, esc, championSlug, teamLogo, teamRegion } from "./worlds-display"
 
 const G=DATA.games, C=DATA.champs;
 const tipEl=()=>document.getElementById('tip');
@@ -13,6 +13,10 @@ document.addEventListener('focusin',e=>{const t=e.target.closest('[data-tip]');i
 document.addEventListener('focusout',()=>tipEl().hidden=true);
 document.addEventListener('keydown',e=>{if(e.key==='Escape')tipEl().hidden=true});
 document.addEventListener('scroll',()=>tipEl().hidden=true,true);
+document.addEventListener("pointerdown", event => {
+  const trigger = document.querySelector('.comp-picker-trigger[aria-expanded="true"]');
+  if (trigger && !trigger.parentElement.contains(event.target)) trigger.click();
+});
 const TIPS={picks:"Jogos em que o campeão foi escolhido nesta lane",wr:"Vitórias ÷ jogos do campeão no torneio",bans:"Quantas vezes foi banido",pres:"% dos jogos em que foi pickado ou banido",kda:"(Abates + Assistências) ÷ Mortes, pelas médias por jogo",k:"Abates por jogo (média)",d:"Mortes por jogo (média)",a:"Assistências por jogo (média)",name:"Clique para ordenar",n:"Jogos coletados do jogador",team:"Time",lane:"Lane principal",chs:"Campeões mais jogados (jogos)"};
 const sortIcons = `<span class="sort-asc">${iconMarkup("ascending")}</span><span class="sort-desc">${iconMarkup("descending")}</span>`;
 function showSort(sort) {
@@ -74,6 +78,7 @@ window.applyWebLolRoute = ([page, first, second], params) => {
     cQ = query;
     cTeam = params.get("time") || "";
     cSt = params.get("fase") || "";
+    cChamps = new Set((params.get("campeoes") || "").split(",").filter(slug => compChampions.has(slug)));
     if (!DATA.comps.some(game => game.b === cTeam || game.r === cTeam)) cTeam = "";
     if (!DATA.comps.some(game => game.st === cSt)) cSt = "";
   }
@@ -348,7 +353,43 @@ function wireMu(){
     <span class="track"><i style="width:${p.w/p.n*100}%;background:var(${LC[muLane]})"></i><i style="width:${(p.n-p.w)/p.n*100}%;background:var(--line)"></i></span>
     <span class="nmi" style="justify-content:flex-end">${esc(p.b)}${ico(p.b)}</span><span class="val">${p.w}-${p.n-p.w}</span></div>`).join("");
 }
-let cTeam="",cQ="",cSt="";
+const compChampionLanes = new Map();
+for (const game of DATA.comps) {
+  for (const [lane, blue, , , red] of game.p) {
+    for (const name of [blue, red]) {
+      if (!compChampionLanes.has(name)) compChampionLanes.set(name, new Set());
+      compChampionLanes.get(name).add(lane);
+    }
+  }
+}
+const compChampions = new Map(
+  [...compChampionLanes.keys()]
+    .sort((a, b) => a.localeCompare(b, "pt-BR"))
+    .map(name => [championSlug(name), name]),
+);
+let cTeam="",cQ="",cSt="",cChamps=new Set();
+const teamFilterLabel = () => cTeam ? `${teamLogo(cTeam)}<span class="comp-team-name" title="${esc(cTeam)}">${esc(cTeam)}</span>` : "Todos os times";
+function compPicker({id, label, value, hint, options, image, search, empty, clear, category}) {
+  return `<div class="comp-picker-field"><span>${label}</span>
+    <button id="${id}" class="comp-picker-trigger" type="button" data-slot="button" data-variant="outline" aria-expanded="false" aria-controls="${id}-picker"${hint ? ` aria-describedby="${hint}"` : ""}>
+      <span class="comp-picker-value">${value}</span>${iconMarkup("descending")}
+    </button>
+    <div id="${id}-picker" class="comp-picker" role="group" aria-label="Filtro de ${label.toLowerCase()}" hidden>
+      <input class="comp-picker-search" type="search" aria-label="${search}" placeholder="${search}">
+      <div class="comp-picker-categories" role="group" aria-label="${category.label}">
+        <button type="button" data-category="" data-slot="button" data-variant="outline" aria-pressed="true">${category.all}</button>
+        ${category.values.map(name => `<button type="button" data-category="${esc(name)}" data-slot="button" data-variant="outline" aria-label="${esc(name)}" title="${esc(name)}" aria-pressed="false">${category.icon ? category.icon(name) : esc(name)}</button>`).join("")}
+      </div>
+      <div class="comp-picker-grid" role="group" aria-label="${label} disponíveis">
+        ${[...options].map(([key, name]) => `<button type="button" data-option="${esc(key)}" data-categories="${esc(category.forName(name).join(","))}" aria-label="${esc(name)}" aria-pressed="false" title="${esc(name)}">${image(name)}<span class="comp-picker-check">${iconMarkup("check")}</span></button>`).join("")}
+      </div>
+      <p class="comp-filter-hint" role="status" hidden>${empty}</p>
+      <div class="comp-picker-actions">
+        <button type="button" data-picker-clear data-slot="button" data-variant="ghost">${iconMarkup("reset")} ${clear}</button>
+      </div>
+    </div>
+  </div>`;
+}
 function compsView(){
   const teams=[...new Set(DATA.comps.flatMap(g=>[g.b,g.r]))].sort();
   const sts=[...new Set(DATA.comps.map(g=>g.st))];
@@ -359,22 +400,107 @@ function compsView(){
     </div>
     <div class="wl-panel comp-filters" role="group" aria-label="Filtrar jogos">
       <label for="cq">Buscar<input id="cq" type="search" placeholder="Campeão ou jogador" value="${esc(cQ||"")}"></label>
-      <label for="ct">Time<select id="ct"><option value="">Todos os times</option>${teams.map(t=>`<option${t===cTeam?' selected':''}>${esc(t)}</option>`).join("")}</select></label>
+      ${compPicker({id:"cc", label:"Campeões", value:`${iconMarkup("team")} Escolher campeões`, hint:"cc-hint",
+        options:compChampions, image:ico, search:"Buscar campeão", empty:"Nenhum campeão encontrado.", clear:"Limpar seleções",
+        category:{label:"Rota jogada no Worlds", all:"Todas", values:LANES.map(([lane]) => lane), icon:laneIconMarkup, forName:name => [...compChampionLanes.get(name)]}})}
+      ${compPicker({id:"ct", label:"Times", value:teamFilterLabel(),
+        options:teams.map(team => [team, team]), image:teamLogo, search:"Buscar time", empty:"Nenhum time encontrado.", clear:"Todos os times",
+        category:{label:"Região", all:"Todas", values:[...new Set(teams.map(teamRegion).filter(Boolean))].sort(), forName:name => [teamRegion(name)]}})}
       <label for="cs">Fase<select id="cs"><option value="">Todas as fases</option>${sts.map(t=>`<option${t===cSt?' selected':''}>${esc(t)}</option>`).join("")}</select></label>
+      <button id="comp-clear-all" type="button" data-slot="button" data-variant="outline">${iconMarkup("reset")} Limpar todos os filtros</button>
+      <p id="cc-hint" class="comp-filter-hint">A partida precisa ter todos os campeões selecionados, em qualquer lado.</p>
+      <div id="cc-active" class="comp-filter-chips" role="group" aria-label="Campeões selecionados" hidden></div>
     </div>
     <p class="comp-count" id="cn" role="status"></p>
     <div class="cgrid" id="cl"></div>
   </section>`;
 }
-function compCard(g,q){
-  const hl=t=>q&&t.toLowerCase().includes(q)?`<mark>${esc(t)}</mark>`:esc(t);
+function wireCompPicker(id, {isSelected, onSelect, onClear}) {
+  const trigger = document.getElementById(id);
+  const field = trigger.parentElement;
+  const picker = document.getElementById(`${id}-picker`);
+  const search = picker.querySelector("input");
+  const grid = picker.querySelector(".comp-picker-grid");
+  const categories = picker.querySelector(".comp-picker-categories");
+  let category = "";
+  const empty = picker.querySelector('[role="status"]');
+  const clear = picker.querySelector("[data-picker-clear]");
+  const options = [...grid.querySelectorAll("button")].map(button => ({
+    button,
+    name: lolKey(button.getAttribute("aria-label")),
+    code: button.querySelector("[data-team]")?.dataset.team || "",
+    categories: button.dataset.categories.split(","),
+  }));
+  const setOpen = open => {
+    picker.hidden = !open;
+    trigger.setAttribute("aria-expanded", String(open));
+  };
+  const close = () => {
+    setOpen(false);
+    trigger.focus();
+  };
+  trigger.onclick = () => {
+    setOpen(picker.hidden);
+    if (!picker.hidden && trigger.matches(":focus-visible")) search.focus();
+  };
+  field.onfocusout = e => {
+    if (e.relatedTarget && !field.contains(e.relatedTarget)) setOpen(false);
+  };
+  field.onkeydown = e => {
+    if (e.key !== "Escape" || picker.hidden) return;
+    e.preventDefault();
+    close();
+  };
+  const filterOptions = () => {
+    const query = lolKey(search.value);
+    for (const option of options) {
+      const matchesCategory = !category || option.categories.includes(category);
+      option.button.hidden = !matchesCategory || !(option.name.includes(query) || option.code.includes(query));
+    }
+    empty.hidden = options.some(({button}) => !button.hidden);
+    grid.scrollTop = 0;
+  };
+  const setCategory = value => {
+    category = value;
+    for (const chip of categories.querySelectorAll("button")) {
+      chip.setAttribute("aria-pressed", String(chip.dataset.category === category));
+    }
+    filterOptions();
+  };
+  categories.onclick = e => {
+    const chip = e.target.closest("button[data-category]");
+    if (chip) setCategory(chip.dataset.category);
+  };
+  search.oninput = filterOptions;
+  grid.onclick = e => {
+    const option = e.target.closest("button[data-option]");
+    if (option) onSelect(option.dataset.option);
+  };
+  clear.onclick = () => {
+    if (clear.getAttribute("aria-disabled") !== "true") onClear();
+  };
+  return {trigger, close, resetBrowseFilters() {
+    search.value = "";
+    setCategory("");
+  }, sync() {
+    let hasSelection = false;
+    for (const {button} of options) {
+      const selected = isSelected(button.dataset.option);
+      button.setAttribute("aria-pressed", String(selected));
+      hasSelection ||= selected;
+    }
+    clear.setAttribute("aria-disabled", String(!hasSelection));
+  }};
+}
+function compCard(g, q, champions){
+  const hl=(text, selected=false)=>selected || (q && text.toLowerCase().includes(q)) ? `<mark>${esc(text)}</mark>` : esc(text);
   const team=(name, color, won)=>`<div class="match-team" data-side="${color}">
     ${teamLogo(name)}
     <strong class="match-team-name">${esc(name)}${won?`&nbsp;<span class="match-winner" role="img" aria-label="Vencedor" title="Vencedor">${iconMarkup("check")}</span>`:""}</strong>
   </div>`;
   const side=(champion, player, kda, right)=>{
     const pick=`<td class="match-pick"><div class="match-champion">
-      ${ico(champion)}<div><strong>${hl(champion)}</strong><small>${hl(player)}</small></div>
+      ${ico(champion)}<div><strong>${hl(champion, champions.has(champion))}</strong><small>${hl(player)}</small></div>
     </div></td>`;
     const score=`<td class="match-kda" data-tip="Abates / Mortes / Assistências de ${esc(player)}">${kda}</td>`;
     return right ? score+pick : pick+score;
@@ -400,18 +526,94 @@ function compCard(g,q){
 function wireComps(){
   const order=g=>{const m=g.s.match(/(\d+)/g)||[];const base=g.s.startsWith('play')?0:g.s.includes('quarter')?200:g.s.includes('semi')?300:g.s.includes('final')?400:100;return base+(+m[0]||0)*10+(+m[1]||0)/100};
   const all=DATA.comps.slice().sort((a,b)=>order(b)-order(a)||a.g-b.g);
+  const activeChampions = document.getElementById("cc-active");
+  const search = document.getElementById("cq");
+  const stage = document.getElementById("cs");
+  const clearAll = document.getElementById("comp-clear-all");
+  const hasFilters = () => Boolean(cQ || cTeam || cSt || cChamps.size);
+  const drawChampions = () => {
+    championPicker.sync();
+    activeChampions.hidden = cChamps.size === 0;
+    activeChampions.innerHTML = [...cChamps].map(slug => {
+      const name = compChampions.get(slug);
+      return `<button type="button" data-slot="button" data-variant="outline" data-champion="${slug}" aria-label="Remover ${esc(name)} do filtro">${ico(name)}${esc(name)}${iconMarkup("close")}</button>`;
+    }).join("");
+  };
   const draw=()=>{
+    clearAll.setAttribute("aria-disabled", String(!hasFilters()));
     const q=(cQ||"").trim().toLowerCase();
-    const L=all.filter(g=>(!cTeam||g.b===cTeam||g.r===cTeam)&&(!cSt||g.st===cSt)&&(!q||g.p.some(r=>[r[1],r[2],r[4],r[5]].some(t=>t.toLowerCase().includes(q)))));
+    const champions = [...cChamps].map(slug => compChampions.get(slug));
+    const L = all.filter(g =>
+      (!cTeam || g.b === cTeam || g.r === cTeam) &&
+      (!cSt || g.st === cSt) &&
+      champions.every(name => g.p.some(([, blue, , , red]) => blue === name || red === name)) &&
+      (!q || g.p.some(r => [r[1], r[2], r[4], r[5]].some(t => t.toLowerCase().includes(q))))
+    );
     let extra="";
     if(cTeam){const w=L.filter(g=>(g.b===cTeam)===g.bw).length;extra=`<span>${esc(cTeam)} · ${w} vitórias · ${L.length-w} derrotas</span>`}
     document.getElementById('cn').innerHTML=`<strong>${L.length} jogo${L.length===1?'':'s'}</strong>${extra}`;
-    document.getElementById('cl').innerHTML=L.map(g=>compCard(g,q)).join("")||'<div class="empty-state"><h3>Nenhum jogo encontrado</h3><p>Revise a busca ou os filtros de time e fase.</p></div>';
+    const highlightedChampions = new Set(champions);
+    document.getElementById('cl').innerHTML=L.map(g=>compCard(g,q,highlightedChampions)).join("")||'<div class="empty-state"><h3>Nenhum jogo encontrado</h3><p>Remova um campeão ou ajuste os outros filtros para ver mais partidas.</p></div>';
   };
-  const publish = (replace = false) => publishWorlds("comps", [], {time:cTeam, fase:cSt, busca:cQ}, replace);
-  document.getElementById('cq').oninput=e=>{cQ=e.target.value;draw();enhanceAnalyticsUI();publish(true)};
-  document.getElementById('ct').onchange=e=>{cTeam=e.target.value;draw();enhanceAnalyticsUI();publish()};
-  document.getElementById('cs').onchange=e=>{cSt=e.target.value;draw();enhanceAnalyticsUI();publish()};
+  const publish = (replace = false) => publishWorlds("comps", [], {time:cTeam, fase:cSt, busca:cQ, campeoes:[...cChamps].join(",")}, replace);
+  const updateResults = () => {
+    draw();
+    enhanceAnalyticsUI();
+    publish();
+  };
+  const updateChampions = () => {
+    drawChampions();
+    updateResults();
+  };
+  const championPicker = wireCompPicker("cc", {
+    isSelected: slug => cChamps.has(slug),
+    onSelect: slug => {
+      if (cChamps.has(slug)) cChamps.delete(slug);
+      else cChamps.add(slug);
+      updateChampions();
+    },
+    onClear: () => {
+      cChamps.clear();
+      updateChampions();
+    },
+  });
+  const drawTeam = () => {
+    teamPicker.trigger.querySelector(".comp-picker-value").innerHTML = teamFilterLabel();
+    teamPicker.sync();
+  };
+  const selectTeam = team => {
+    cTeam = team;
+    drawTeam();
+    teamPicker.close();
+    updateResults();
+  };
+  const teamPicker = wireCompPicker("ct", {
+    isSelected: team => team === cTeam,
+    onSelect: selectTeam,
+    onClear: () => selectTeam(""),
+  });
+  activeChampions.onclick = e => {
+    const button = e.target.closest("button[data-champion]");
+    if (!button) return;
+    cChamps.delete(button.dataset.champion);
+    updateChampions();
+    championPicker.trigger.focus();
+  };
+  search.oninput = () => { cQ=search.value; draw(); enhanceAnalyticsUI(); publish(true); };
+  stage.onchange = () => { cSt=stage.value; updateResults(); };
+  clearAll.onclick = () => {
+    if (!hasFilters()) return;
+    search.value = cQ = "";
+    stage.value = cSt = "";
+    cTeam = "";
+    cChamps.clear();
+    championPicker.resetBrowseFilters();
+    teamPicker.resetBrowseFilters();
+    drawTeam();
+    updateChampions();
+  };
+  teamPicker.sync();
+  drawChampions();
   draw();
   enhanceAnalyticsUI();
 }

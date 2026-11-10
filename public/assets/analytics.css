@@ -272,12 +272,63 @@
 .comps-intro .hint { margin: 0; }
 .comp-filters {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) repeat(2, clamp(160px, 17%, 230px));
+  grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr) repeat(2, minmax(0, .8fr)) auto;
+  align-items: end;
   gap: 12px;
   padding: 12px;
 }
-.comp-filters label { display: grid; gap: 4px; min-width: 0; color: var(--muted); font-size: var(--wl-label-size); }
-.comp-filters :is(input, select) { width: 100%; min-width: 0; color: var(--ink); }
+.comp-filters :is(label, .comp-picker-field) { display: grid; gap: 4px; min-width: 0; color: var(--muted); font-size: var(--wl-label-size); }
+.comp-filters :is(input, select) { width: 100%; min-width: 0; min-height: 44px; color: var(--ink); }
+.comp-filter-hint { grid-column: 1/-1; margin: 0; color: var(--muted); font-size: 13px; }
+#comp-clear-all { min-height: 44px; justify-self: end; }
+.comp-picker-field { position: relative; }
+.comp-picker-trigger { min-width: 0; min-height: 44px; height: auto; justify-content: space-between; padding-inline: 10px; text-align: left; white-space: normal; }
+.comp-picker-trigger .icon { flex: none; }
+.comp-picker-trigger[aria-expanded=true] > .icon { transform: rotate(180deg); }
+.comp-picker-value { display: flex; align-items: center; gap: 6px; min-width: 0; overflow-wrap: anywhere; }
+.comp-picker-value .team-logo { width: 20px; height: 20px; }
+.comp-team-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.comp-picker {
+  position: absolute;
+  z-index: 3;
+  container-type: inline-size;
+  inset-block-start: calc(100% + 6px);
+  inset-inline: 0;
+  padding: 8px;
+  border: 1px solid var(--line);
+  border-radius: var(--wl-panel-radius);
+  background: var(--surface);
+  box-shadow: 0 8px 24px color-mix(in srgb, var(--bg) 75%, transparent);
+}
+.comp-picker-search { margin-bottom: 8px; }
+.comp-picker-categories { display: grid; gap: 4px; margin-bottom: 8px; }
+.comp-picker-categories button { min-width: 0; min-height: 32px; height: auto; padding-inline: 4px; font-size: 12px; }
+.comp-picker-categories .lane-icon { width: 18px; height: 18px; }
+#cc-picker .comp-picker-categories { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+#ct-picker .comp-picker-categories { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+#ct-picker [data-category=""] { grid-column: 1/-1; }
+@container (min-width: 150px) {
+  #ct-picker .comp-picker-categories { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+}
+@container (min-width: 242px) {
+  #cc-picker .comp-picker-categories { grid-template-columns: repeat(6, minmax(0, 1fr)); }
+}
+.comp-picker-grid { display: grid; grid-template-columns: repeat(auto-fill, 44px); gap: 8px; max-height: min(200px, 40vh); overflow: auto; padding: 4px; }
+.comp-picker-grid button { position: relative; width: 44px; height: 44px; padding: 0; border: 2px solid transparent; border-radius: var(--wl-control-radius); background: none; cursor: pointer; }
+.comp-picker-grid button:hover { border-color: var(--muted); }
+.comp-picker-grid button[aria-pressed=true] { border-color: var(--wl-accent); }
+.comp-picker-grid .av { display: flex; width: 100%; height: 100%; margin: 0; }
+.comp-picker-grid .team-logo { display: block; margin: auto; }
+.comp-picker-check { position: absolute; right: 0; bottom: 0; display: none; padding: 2px; border-radius: 4px 0 0 0; background: var(--wl-accent); color: var(--bg); }
+.comp-picker-check .icon { display: block; width: 13px; height: 13px; }
+.comp-picker-grid button[aria-pressed=true] .comp-picker-check { display: block; }
+.comp-picker-actions { display: flex; justify-content: flex-end; margin-top: 8px; border-top: 1px solid var(--line); padding-top: 4px; }
+.comp-picker-actions button { min-width: 0; min-height: 44px; height: auto; padding-inline: 6px; white-space: normal; }
+.comp-filter-chips { grid-column: 1/-1; display: flex; flex-wrap: wrap; gap: 8px; }
+.comp-filter-chips[hidden] { display: none; }
+.comp-filter-chips button { min-height: 44px; max-width: 100%; white-space: normal; }
+.comp-filter-chips .av { width: 22px; height: 22px; margin: 0; }
+.comp-filter-chips .icon { width: 14px; height: 14px; }
 .comp-count { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 12px; margin: 14px 0 10px; color: var(--muted); font-size: 13px; }
 .comp-count strong { color: var(--ink); font-size: 14px; }
 .cgrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 420px), 1fr)); gap: var(--wl-panel-gap); }
@@ -315,6 +366,15 @@
 .cg mark { background: var(--gold-soft); color: inherit; border-radius: var(--wl-control-radius); }
 .foot { padding-top: 20px; border-top: 1px solid var(--line); max-width: none; line-height: 1.7; }
 @media (max-width: 1100px) { .analytics-columns { grid-template-columns: 1fr; } }
+@media (max-width: 1023px) {
+  .comp-filters { grid-template-columns: minmax(0, .9fr) minmax(0, 1fr) minmax(0, 1.1fr) minmax(0, 1fr) auto; gap: 8px; }
+  .comp-picker-trigger { gap: 4px; padding-inline: 8px; font-size: 13px; }
+  .comp-picker-value .icon { display: none; }
+}
+@media (max-width: 859px) {
+  .comp-filters { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  #comp-clear-all { grid-column: 1/-1; }
+}
 @media (max-width: 759px) {
   .metric-grid { grid-template-columns: repeat(2,minmax(0,1fr)); }
   .metric-card { padding: 12px; }
@@ -330,8 +390,6 @@
   .tools #lane-filter { width: 100%; }
   .tools input, .tools select { width: 100%; flex: 1 1 100%; min-width: 0; }
   .tablewrap td.champ { position: sticky; left: 0; background: var(--surface); z-index: 1; }
-  .comp-filters { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
-  .comp-filters label:first-child { grid-column: 1/-1; }
   .cg { overflow-x: auto; padding-inline: 10px; }
   .match-details { min-width: 320px; }
   .match-team .team-logo { width: 26px; height: 26px; }

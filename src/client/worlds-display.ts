@@ -3,33 +3,37 @@ import { lolChampion, lolImage } from "./lol-media"
 export const LANES=[["Top","--top"],["Jungle","--jungle"],["Mid","--midlane"],["ADC","--adc"],["Suporte","--sup"]];
 export const LC=Object.fromEntries(LANES);
 
-// Escudos exibidos pela Riot na lista oficial de classificados do Worlds 2026.
-// https://lolesports.com/en-US/tournament/115660540725177488/overview
+// Escudos e ligas dos classificados do Worlds 2026.
+// https://lolesports.com/en-GB/news/worlds-2026-primer
 const teams = [
-  ["Anyone's Legend", "al"],
-  ["Bilibili Gaming", "blg"],
-  ["Cloud9", "c9"],
-  ["CTBC Flying Oyster", "cfo"],
-  ["Dplus Kia", "dk"],
-  ["FURIA", "fur"],
-  ["G2 Esports", "g2"],
-  ["Gen.G", "gen"],
-  ["Hanwha Life Esports", "hle"],
-  ["Invictus Gaming", "ig"],
-  ["Karmine Corp", "kc"],
-  ["LOS", "los"],
-  ["LYON", "lyon"],
-  ["Movistar KOI", "mkoi"],
-  ["MVK", "mvk"],
-  ["T1", "t1"],
-  ["Top Esports", "tes"],
-  ["Team Liquid", "tl"],
-  ["Team Secret Whales", "tsw"],
+  ["Anyone's Legend", "al", "LPL"],
+  ["Bilibili Gaming", "blg", "LPL"],
+  ["Cloud9", "c9", "LCS"],
+  ["CTBC Flying Oyster", "cfo", "LCP"],
+  ["Dplus Kia", "dk", "LCK"],
+  ["FURIA", "fur", "CBLOL"],
+  ["G2 Esports", "g2", "LEC"],
+  ["Gen.G", "gen", "LCK"],
+  ["Hanwha Life Esports", "hle", "LCK"],
+  ["Invictus Gaming", "ig", "LPL"],
+  ["Karmine Corp", "kc", "LEC"],
+  ["LOS", "los", "CBLOL"],
+  ["LYON", "lyon", "LCS"],
+  ["Movistar KOI", "mkoi", "LEC"],
+  ["MVK", "mvk", "LCP"],
+  ["T1", "t1", "LCK"],
+  ["Top Esports", "tes", "LPL"],
+  ["Team Liquid", "tl", "LCS"],
+  ["Team Secret Whales", "tsw", "LCP"],
 ];
-const teamLogos = new Map(teams.flatMap(([name, code]) => [[name.toLowerCase(), code], [code, code]] as const));
+const teamByName = new Map(teams.flatMap(([name, code, region]) => {
+  const team = {code, region};
+  return [[name.toLowerCase(), team], [code, team]] as const;
+}));
+export const teamRegion = (name: string) => teamByName.get(name.toLowerCase())?.region;
 
 export function teamLogo(team: string) {
-  const code = teamLogos.get(team.toLowerCase());
+  const code = teamByName.get(team.toLowerCase())?.code;
   return code ? `<img class="team-logo" data-team="${code}" src="assets/worlds-teams/${code}.png" width="32" height="32" loading="lazy" alt="">` : "";
 }
 
