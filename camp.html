@@ -4,10 +4,10 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Comps do Time</title>
-<link rel="stylesheet" href="./assets/base.css?v=6b0bad63">
-<link rel="stylesheet" href="./assets/team.css?v=c46e7c26">
-<link rel="stylesheet" href="./assets/compositions.css?v=957a7ae2">
-  <script type="module" crossorigin src="./assets/camp-G869tHjW.js?v=cca4c095"></script>
+<link rel="stylesheet" href="./assets/base.css?v=e20c806f">
+<link rel="stylesheet" href="./assets/team.css?v=a782d3f5">
+<link rel="stylesheet" href="./assets/compositions.css?v=469eef82">
+  <script type="module" crossorigin src="./assets/camp-vB3khI4k.js?v=e54ff63a"></script>
   <link rel="modulepreload" crossorigin href="./assets/icon-CCnttXuK.js?v=eb639de5">
   <link rel="modulepreload" crossorigin href="./assets/lol-media-CEZ9PJoJ.js?v=d2481682">
 </head>
@@ -47,7 +47,7 @@
   </details>
  </div>
  <div id="comps">
-  <div class="box comp-library">
+  <div class="wl-panel box comp-library">
     <h2>Composições salvas</h2>
     <div class="library-search"><label class="control-label" for="csearch">Filtrar composições</label><input id="csearch" placeholder="Nome ou campeão"></div>
     <div id="clist"></div>
@@ -57,13 +57,13 @@
     </div>
   </div>
 
-  <div class="box comp-editor">
+  <div class="wl-panel box comp-editor">
     <div class="editor-status"><div class="local-save-actions"><span class="saved" id="saved" role="status">Salvo neste navegador</span><button data-slot="button" data-variant="destructive" data-size="sm" type="button" id="clear-local">Limpar alterações</button></div>
       <button data-slot="button" data-variant="outline" data-size="sm" id="copy-comp"><svg class="icon" aria-hidden="true" focusable="false"><use href="assets/icons.svg#link"></use></svg> Copiar link da composição</button></div>
     <div id="editor"></div>
   </div>
 
-  <div class="box champ-picker" id="champ-picker">
+  <div class="wl-panel box champ-picker" id="champ-picker">
     <div class="picker-heading"><h2 id="picker-title">Campeões</h2><button data-slot="button" data-variant="outline" id="close-picker" aria-label="Fechar catálogo">Fechar</button></div>
     <div id="target"></div>
     <div class="gtools">
@@ -81,7 +81,7 @@
 
  </div>
  </div>
- <dialog id="picker-dialog" aria-labelledby="picker-title"></dialog>
+ <dialog class="wl-panel" id="picker-dialog" aria-labelledby="picker-title"></dialog>
 </section>
 
 <section id="v-map" class="view">
@@ -93,8 +93,8 @@
    <canvas id="cv"></canvas>
   </div>
   <div id="mside">
-   <section class="box map-card" aria-labelledby="map-play-title">
-    <h2 id="map-play-title">Jogada</h2>
+   <section class="wl-panel box map-card" aria-labelledby="map-play-title">
+    <h2 class="wl-card-title" id="map-play-title">Jogada</h2>
     <select id="psel" aria-label="Jogada selecionada"></select>
     <div class="map-actions">
      <button data-slot="button" data-variant="default" id="pnew"><svg class="icon" aria-hidden="true" focusable="false"><use href="assets/icons.svg#plus"></use></svg> Nova jogada</button>
@@ -103,8 +103,8 @@
      <button data-slot="button" data-variant="destructive" id="pdel"><svg class="icon" aria-hidden="true" focusable="false"><use href="assets/icons.svg#trash"></use></svg> Excluir</button>
     </div>
    </section>
-   <section class="box map-card" aria-labelledby="map-positions-title">
-    <h2 id="map-positions-title">Posições prontas</h2>
+   <section class="wl-panel box map-card" aria-labelledby="map-positions-title">
+    <h2 class="wl-card-title" id="map-positions-title">Posições prontas</h2>
     <div class="map-actions"><button data-slot="button" data-variant="outline" data-pre="base">Todos na base</button><button data-slot="button" data-variant="outline" data-pre="lane">Fase de rotas (~1:30)</button></div>
     <div class="map-group">
      <h3>Composição de cada lado</h3>
@@ -115,8 +115,8 @@
     </div>
     <label class="map-check"><input type="checkbox" id="useimg" checked> Usar imagem oficial do mapa</label>
    </section>
-   <section class="box map-card" aria-labelledby="map-tools-title">
-    <h2 id="map-tools-title">Ferramenta</h2>
+   <section class="wl-panel box map-card" aria-labelledby="map-tools-title">
+    <h2 class="wl-card-title" id="map-tools-title">Ferramenta</h2>
     <div class="map-actions map-modes seg" role="group" aria-label="Modo da ferramenta"><button data-slot="button" data-variant="ghost" data-tool="move" aria-pressed="true" class="on"><svg class="icon" aria-hidden="true" focusable="false"><use href="assets/icons.svg#move"></use></svg> Mover</button><button data-slot="button" data-variant="ghost" data-tool="draw" aria-pressed="false"><svg class="icon" aria-hidden="true" focusable="false"><use href="assets/icons.svg#draw"></use></svg> Desenhar seta</button><button data-slot="button" data-variant="ghost" data-tool="erase" aria-pressed="false" title="Clique numa seta para apagar só ela"><svg class="icon" aria-hidden="true" focusable="false"><use href="assets/icons.svg#erase"></use></svg> Apagar seta</button></div>
     <div class="map-group">
      <h3 id="map-colors-title">Cor da seta</h3>
@@ -124,8 +124,8 @@
     </div>
     <div class="map-actions map-history"><button data-slot="button" data-variant="outline" id="undo" title="Desfazer (Ctrl+Z)"><svg class="icon" aria-hidden="true" focusable="false"><use href="assets/icons.svg#undo"></use></svg> Desfazer</button><button data-slot="button" data-variant="outline" id="redo" title="Refazer (Ctrl+Y)"><svg class="icon" aria-hidden="true" focusable="false"><use href="assets/icons.svg#redo"></use></svg> Refazer</button><button data-slot="button" data-variant="destructive" id="clr" title="Apaga todas as setas"><svg class="icon" aria-hidden="true" focusable="false"><use href="assets/icons.svg#trash"></use></svg> Limpar setas</button></div>
    </section>
-   <section class="box map-card" aria-labelledby="map-sequence-title">
-    <h2 id="map-sequence-title">Sequência da jogada</h2>
+   <section class="wl-panel box map-card" aria-labelledby="map-sequence-title">
+    <h2 class="wl-card-title" id="map-sequence-title">Sequência da jogada</h2>
     <div id="sstat" class="sstat" role="status"></div>
     <ol id="steps"></ol>
     <div class="map-actions"><button data-slot="button" data-variant="default" id="sadd"><svg class="icon" aria-hidden="true" focusable="false"><use href="assets/icons.svg#plus"></use></svg> Novo passo</button><button data-slot="button" data-variant="ghost" id="sedit" class="edt" aria-pressed="false" title="Liga/desliga a edição do passo selecionado"><svg class="icon" aria-hidden="true" focusable="false"><use href="assets/icons.svg#edit"></use></svg> Modo edição</button></div>

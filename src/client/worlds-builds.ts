@@ -75,7 +75,7 @@ export function buildsTable(champions: (Champion & { build: ChampionBuild })[]){
       <td><button data-slot="button" data-variant="outline" data-size="sm" type="button" class="build-route" data-build="${championSlug(c.name)}" aria-label="Abrir build de ${esc(c.name)}">Ver build</button></td>
     </tr>`;
   }).join("");
-  return `<div class="tablewrap builds-table-wrap" role="region" aria-label="Comparação de builds" tabindex="0">
+  return `<div class="wl-panel tablewrap builds-table-wrap" role="region" aria-label="Comparação de builds" tabindex="0">
     <table class="builds-table" aria-label="Builds por campeão">
       <thead><tr><th scope="col">Campeão</th><th scope="col" class="build-stat">Jogos</th><th scope="col" class="build-stat">Vitórias</th>
       <th scope="col">Itens mais usados</th><th scope="col">Botas</th><th scope="col">Runa principal</th>

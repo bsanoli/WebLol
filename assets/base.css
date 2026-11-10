@@ -56,27 +56,52 @@
   --wl-font-display: "Barlow Condensed", var(--wl-font);
   --wl-title-size: clamp(28px, 3.5vw, 40px);
   --wl-section-size: 22px;
+  --wl-card-title-size: 16px;
+  --wl-body-size: 15px;
+  --wl-detail-size: 13px;
+  --wl-label-size: 12px;
   --wl-control-radius: 4px;
   --wl-card-radius: 6px;
   --wl-panel-radius: 8px;
   --wl-backdrop: rgb(4 8 14 / 78%);
   --wl-button-height: 40px;
   --wl-button-height-sm: 32px;
+  --wl-panel-padding: 16px;
+  --wl-panel-gap: 16px;
+  --wl-content-width: 1520px;
   --wl-gutter: clamp(12px, 2.5vw, 32px);
 }
-body { font: 15px/1.5 var(--wl-font); background: var(--wl-bg); color: var(--wl-text); }
+:root, [data-palette] {
+  --wl-divider: color-mix(in srgb, var(--wl-line) 62%, var(--wl-surface));
+  --wl-win-text: color-mix(in srgb, var(--wl-success) 65%, var(--wl-muted));
+  --wl-loss-text: color-mix(in srgb, var(--wl-danger) 65%, var(--wl-muted));
+}
+body { font: var(--wl-body-size)/1.5 var(--wl-font); background: var(--wl-bg); color: var(--wl-text); }
 :where(h1, h2, h3) { font-family: var(--wl-font-display); font-weight: 700; line-height: 1.15; }
 :where(h1) { font-size: var(--wl-title-size); }
 :where(h2) { font-size: var(--wl-section-size); }
+:where(.wl-panel, [data-slot=card]) {
+  min-width: 0;
+  background: var(--wl-surface);
+  border: 1px solid var(--wl-line);
+  border-radius: var(--wl-panel-radius);
+}
+.wl-card-title { font: 700 var(--wl-card-title-size)/1.25 var(--wl-font); }
 :where(input, select, textarea, button) { font: inherit; color: inherit; }
 :where(input:not([type=checkbox],[type=radio],[type=range],[type=file]), select, textarea) {
-  padding: 7px 10px;
+  box-sizing: border-box;
+  padding: 6px 10px;
   background: var(--wl-bg);
   border: 1px solid var(--wl-line);
   border-radius: var(--wl-control-radius);
+  font-size: var(--wl-detail-size);
 }
+:where(input:not([type=checkbox],[type=radio],[type=range],[type=file]), select) { min-height: var(--wl-button-height); }
+:where(input:not([type=checkbox],[type=radio],[type=range],[type=file]), textarea):where(:hover:not(:disabled,[readonly])),
+:where(select:hover:not(:disabled)) { border-color: var(--wl-muted); }
 :where(input, textarea)::placeholder { color: var(--wl-muted); }
 :where(input[type=checkbox], input[type=radio], input[type=range]) { accent-color: var(--wl-accent); }
+:where(input, select, textarea):disabled { opacity: .55; }
 [hidden] { display: none !important; }
 :where(button, input, textarea, select, a, summary, [tabindex]):focus-visible {
   outline: 2px solid var(--wl-accent);
@@ -90,6 +115,26 @@ body { font: 15px/1.5 var(--wl-font); background: var(--wl-bg); color: var(--wl-
   flex: none;
 }
 td, .kpi, .bar, .wr, .kda { font-variant-numeric: tabular-nums; }
+:where(table) { width: 100%; border-collapse: collapse; font-size: var(--wl-detail-size); }
+:where(th, td) { padding: 8px 12px; border-bottom: 1px solid var(--wl-divider); text-align: left; vertical-align: middle; }
+:where(th) { color: var(--wl-muted); font-size: var(--wl-label-size); font-weight: 600; }
+.toast {
+  position: fixed;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  max-width: 90vw;
+  padding: 8px 16px;
+  border: 1px solid var(--wl-line);
+  border-radius: var(--wl-card-radius);
+  background: var(--wl-raised);
+  opacity: 0;
+  transition: opacity .15s;
+  pointer-events: none;
+  z-index: 60;
+}
+.toast.on { opacity: 1; }
+dialog::backdrop { background: var(--wl-backdrop); }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { transition: none !important; scroll-behavior: auto !important; }
 }
@@ -117,7 +162,7 @@ td, .kpi, .bar, .wr, .kda { font-variant-numeric: tabular-nums; }
   transition: background-color .15s, border-color .15s, color .15s;
 }
 [data-slot=button] svg { width: 16px; height: 16px; flex: none; pointer-events: none; }
-[data-slot=button]:where(:hover:not(:disabled,[aria-disabled=true])) { border-color: var(--wl-accent); }
+[data-slot=button]:where(:hover:not(:disabled,[aria-disabled=true])) { border-color: var(--wl-muted); }
 [data-slot=button]:focus-visible { outline: 2px solid var(--wl-accent); outline-offset: 2px; }
 [data-slot=button]:where(:disabled,[aria-disabled=true]) { opacity: .55; cursor: default; }
 [data-slot=button]:where([data-variant=default]) {

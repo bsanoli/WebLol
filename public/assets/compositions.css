@@ -1,5 +1,4 @@
-#v-comps :is(h1,h2,#cname,.tmh,.draft-phase,.dsl,.sq,.pkh b,.pk.mine .pkn:not(.pk-empty),.champ-priority b),
-#picker-dialog .picker-heading h2 {
+#v-comps :is(h1,#cname,.tmh,.draft-phase,.dsl,.sq,.pkh b,.pk.mine .pkn:not(.pk-empty),.champ-priority b) {
   font-family:var(--wl-font-display);
   font-weight:700;
 }
@@ -63,8 +62,9 @@ body {
   --wl-accent:var(--comp-accent); --wl-on-accent:var(--comp-on-accent);
   --bg:var(--wl-bg); --panel:var(--wl-surface); --panel2:var(--wl-raised);
   --line:var(--wl-line); --txt:var(--wl-text); --mut:var(--wl-muted); --gold:var(--wl-accent);
-  background:var(--bg); color:var(--txt);
+  color:var(--txt);
 }
+#v-comps { background:var(--bg); }
 body:has(#v-comps.on) { display:block; height:auto; }
 #v-comps .page-head {
   display:flex; justify-content:flex-end; position:relative; width:auto; height:auto;
@@ -201,7 +201,7 @@ summary::-webkit-details-marker { display:none; }
 /* Catalog filters and editing destination have separate visual treatments. */
 #v-comps .champ-picker { position:static; }
 .picker-heading { display:flex; align-items:center; justify-content:space-between; padding:12px 12px 6px; }
-.picker-heading h2 { margin:0; font-size:16px; }
+.picker-heading h2 { margin:0; font:700 var(--wl-card-title-size)/1.25 var(--wl-font); }
 #close-picker { display:none; }
 #v-comps #target,#picker-dialog #target { display:grid; grid-template-columns:1fr auto; margin:0 10px 10px; padding:8px; gap:4px; background:var(--comp-tint); border-color:var(--comp-accent); border-radius:var(--wl-card-radius); }
 #target .draft-target-context { font-size:12px; grid-column:1/-1; color:var(--comp-accent); }
@@ -209,8 +209,7 @@ summary::-webkit-details-marker { display:none; }
 #v-comps #target select,#picker-dialog #target select { min-height:28px; font-size:12px; padding:2px 5px; }
 #target small { font-size:10px; }
 #v-comps .gtools,#picker-dialog .gtools { display:grid; padding:0 10px 8px; gap:6px; }
-.gtools label { font-size:11px; }
-#v-comps .gtools input,#v-comps .gtools select { min-height:32px; font-size:12px; margin:2px 0 0; }
+:is(#v-comps,#picker-dialog) .gtools :is(input, select) { min-height:var(--wl-button-height-sm); margin:2px 0 0; }
 .filter-heading { padding:0 10px 5px; font-size:11px; color:var(--mut); }
 #v-comps .roles,#picker-dialog .roles { gap:4px; padding:0 10px 6px; }
 /* Compact controls inside the draft and catalog use the shared radius. */
@@ -238,8 +237,7 @@ summary::-webkit-details-marker { display:none; }
 #champ-picker .ch[aria-pressed=true] .av { box-shadow:0 0 0 2px var(--comp-accent); }
 .ch[aria-pressed=true] .tag { display:none; }
 #v-comps .ch[aria-pressed=true],#picker-dialog .ch[aria-pressed=true] { border-color:var(--comp-accent); background:var(--comp-tint); }
-#picker-dialog { background:var(--panel); color:var(--txt); border:1px solid var(--line); border-radius:var(--wl-panel-radius); padding:0; width:min(560px,calc(100% - 24px)); max-height:90dvh; }
-#picker-dialog::backdrop { background:var(--wl-backdrop); }
+#picker-dialog { color:var(--txt); padding:0; width:min(560px,calc(100% - 24px)); max-height:90dvh; }
 #picker-dialog .champ-picker { border:0; }
 #picker-dialog #close-picker { display:block; min-height:44px; }
 #picker-dialog #grid { max-height:45dvh; }
@@ -379,18 +377,18 @@ summary::-webkit-details-marker { display:none; }
   #v-comps #comps {
     grid-template-columns:minmax(216px, .66fr) minmax(0, 3.55fr) minmax(350px,1.18fr);
     padding-inline:24px;
-    gap:16px;
+    gap:var(--wl-panel-gap);
   }
-  #v-comps #comps .comp-library { padding:16px; gap:14px; }
+  #v-comps #comps .comp-library { padding:var(--wl-panel-padding); gap:12px; }
   #v-comps #clist .ci { padding:12px; }
   #v-comps .ci b { font-size:14px; white-space:normal; padding-right:20px; }
   #v-comps .mini .av { width:min(32px,calc((100% - 12px) / 5)); }
   #v-comps #editor { padding:12px 16px 14px; }
   #v-comps .editor-status { right:16px; top:14px; }
-  #v-comps #cname { font-size:30px; min-height:42px; }
+  #v-comps #cname { font-size:var(--wl-section-size); min-height:var(--wl-button-height); }
   #v-comps .lane {
-    min-height:90px;
-    padding:9px 14px;
+    min-height:76px;
+    padding:8px 12px;
     grid-template-columns:112px minmax(0,1fr) minmax(140px,21%);
     gap:14px;
     margin-bottom:8px;
@@ -403,8 +401,8 @@ summary::-webkit-details-marker { display:none; }
   #v-comps .champ-priority small { font-size:11px; }
   #v-comps .chip .av { width:40px; height:40px; }
   #v-comps .lane:not(.ban-strip) .chip .av { width:44px; height:44px; }
-  #v-comps .lane:not(.ban-strip) .chip.primary .av { width:64px; height:64px; }
-  #v-comps .ban-strip { min-height:70px; }
+  #v-comps .lane:not(.ban-strip) .chip.primary .av { width:54px; height:54px; }
+  #v-comps .ban-strip { min-height:64px; }
   #v-comps .ban-strip .chip.primary .av { width:40px; height:40px; }
   #v-comps .ban-strip .chip.primary { margin-right:0; }
   #v-comps .lane-note summary {
@@ -428,7 +426,7 @@ summary::-webkit-details-marker { display:none; }
   #v-comps .tmh { padding:8px 10px; font-size:14px; }
   #v-comps .bsq { width:34px; height:34px; }
   #v-comps .pk {
-    min-height:clamp(86px, calc((100dvh - 510px) / 5), 102px);
+    min-height:clamp(76px, calc((100dvh - 550px) / 5), 96px);
     padding:8px 10px;
   }
   #v-comps .pk.mine .pick-splash { width:90%; }

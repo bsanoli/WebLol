@@ -70,7 +70,7 @@ function App() {
         <div id="screen-loading" role="status" hidden className="screen-message">Carregando esta área…</div>
         <div id="screen-error" role="status" hidden className="screen-message" />
       </main>
-      <dialog id="modal" aria-labelledby="modal-title"><div id="mbox" /></dialog>
+      <dialog id="modal" aria-labelledby="modal-title"><div className="wl-panel" id="mbox" /></dialog>
       <div className="toast" id="toast" role="status" />
     </>
   )

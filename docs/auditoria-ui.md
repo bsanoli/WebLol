@@ -18,3 +18,11 @@ O painel tem duas tarefas distintas: consultar o Worlds e preparar o jogo do tim
 Os blocos de resumo, ranking e comparação são componentes React/TypeScript. O restante das telas continua no fluxo existente. Não há nova dependência, consulta de rede ou alteração de dados. A comparação usa os totais já coletados, com médias por jogo calculadas a partir da amostra de cada jogador. A base não traz CS, dano ou visão e não há radar existente. Um radar futuro depende de métricas e referências comparáveis por posição.
 
 Referências para decisões de navegação e densidade de informação: [OP.GG](https://op.gg/), [OP.GG Esports](https://esports.op.gg/), [Mobalytics](https://mobalytics.gg/lol) e [League of Graphs](https://www.leagueofgraphs.com/).
+
+## Padrões compartilhados
+
+“Explore por posição” serve de referência para a densidade das análises. As tabelas compartilham divisores discretos, cabeçalhos secundários e números tabulares. Os percentuais de vitória usam cor no texto e mantêm o mesmo arredondamento e os mesmos limiares de destaque.
+
+Os tokens ficam em `public/assets/base.css`, carregado nas três entradas. Use `.wl-panel` para superfícies em HTML e `Card` para superfícies em React. Ambos compartilham fundo, borda e raio. Use `--wl-panel-padding` e `--wl-panel-gap` para painéis comuns e `.wl-card-title` para títulos compactos. Os botões React e HTML compartilham `data-slot="button"`, as variantes e os tamanhos. Campos de uma linha seguem a altura padrão dos botões, com a altura compacta no catálogo de campeões e nas calculadoras.
+
+Worlds, Mapa, Conhecimento e Administração usam o mesmo limite de largura. O editor de Composições mantém o espaço necessário para mostrar biblioteca, editor e catálogo lado a lado. Os temas de Composições continuam a alimentar os tokens locais, e as cores de lado, resultado e posição ficam restritas aos pontos em que codificam informação.

@@ -45,7 +45,7 @@ export function RankedBars({ title, description, rows, maximum, legends }: {
   title: string; description: string; rows: BarRow[]; maximum: number; legends: { label: string; kind: string }[]
 }) {
   const [expanded, setExpanded] = useState(false)
-  return <section className="analytics-panel">
+  return <section className="wl-panel analytics-panel">
     <div className="analytics-heading"><h2>{title}</h2><p>{description}</p></div>
     <div className="chart-legend">{legends.map(({ label, kind }) => <span key={kind}><i className={`series-${kind}`} />{label}</span>)}</div>
     <ol className="ranked-bars">{rows.slice(0, expanded ? 15 : 8).map((row, index) =>
@@ -66,7 +66,7 @@ export function TournamentOverview({ champions, games }: { champions: ChampionSu
   if (!champions.length || games <= 0) return <div className="empty-state" role="status">Ainda não há jogos disponíveis para esta análise.</div>
   return <div className="analytics-dashboard">
     <div className="draft-overview">
-      <section className="draft-summary" aria-labelledby="draft-summary-title">
+      <section className="wl-panel draft-summary" aria-labelledby="draft-summary-title">
         <h2 id="draft-summary-title">Resumo do torneio</h2>
         <div className="metric-grid">
           <MetricCard label="Jogos analisados" value={games} note="Play-In até as semifinais" />
@@ -104,7 +104,7 @@ export function PlayerComparison({ players }: { players: PlayerSummary[] }) {
     { label: "Mortes / jogo", unit: "", read: (p: PlayerSummary) => p.n ? p.d / p.n : 0 },
     { label: "Assistências / jogo", unit: "", read: (p: PlayerSummary) => p.n ? p.a / p.n : 0 },
   ]
-  return <section className="analytics-panel player-comparison">
+  return <section className="wl-panel analytics-panel player-comparison">
     <div className="analytics-heading"><h3>Comparar jogadores</h3><p>Mesma posição, apenas jogos coletados. As barras usam a mesma escala por métrica; não representam uma nota geral.</p></div>
     <div className="comparison-selectors">
       <label>Jogador A<select value={first.name} onChange={e => setFirst(e.target.value)}>{players.map(p => <option key={p.name} value={p.name}>{p.name} · {p.team} · {p.lane}</option>)}</select><small>{first.n} jogos · {first.w} vitórias · {first.n - first.w} derrotas</small></label>

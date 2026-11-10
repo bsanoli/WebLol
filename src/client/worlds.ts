@@ -28,7 +28,7 @@ const kdaOf=(k,d,a)=>d?(k+a)/d:k+a;
 // KPIs
 const topBan=[...C].sort((a,b)=>b.bans-a.bans)[0], topPick=[...C].sort((a,b)=>b.picks-a.picks)[0];
 document.getElementById('kpis').innerHTML=[[G,"jogos"],[C.length,"campeões usados"],[topBan.name,`mais banido · ${pct(topBan.bans/G)}`],[topPick.name,`mais pickado · ${topPick.picks}`]]
- .map(([v,l],i)=>`<div class="kpi" data-tip="${["Total de jogos do Play-In até as Semifinais","Campeões que foram pickados ou banidos pelo menos uma vez",`${topBan.name} foi banido em ${topBan.bans} de ${G} jogos`,`${topPick.name} foi escolhido em ${topPick.picks} jogos (${topPick.wins} vitórias)`][i]}"><div class="v">${esc(v)}</div><div class="l">${l}</div></div>`).join("");
+ .map(([v,l],i)=>`<div class="wl-panel kpi" data-tip="${["Total de jogos do Play-In até as Semifinais","Campeões que foram pickados ou banidos pelo menos uma vez",`${topBan.name} foi banido em ${topBan.bans} de ${G} jogos`,`${topPick.name} foi escolhido em ${topPick.picks} jogos (${topPick.wins} vitórias)`][i]}"><div class="v">${esc(v)}</div><div class="l">${l}</div></div>`).join("");
 
 const TABS = [
   ["geral", "Visão geral", "chart"],
@@ -160,8 +160,8 @@ function overview(){
       </tr>`;
     }).join("");
     const href = window.frameElement ? `./#/worlds/campeoes?posicao=${id}` : `#${id}`;
-    return `<article class="lane-card" data-go="${id}">
-      <h3 id="lane-title-${id}">${lane}</h3>
+    return `<article class="wl-panel lane-card" data-go="${id}">
+      <h3 class="wl-card-title" id="lane-title-${id}">${lane}</h3>
       <table aria-labelledby="lane-title-${id}">
         <thead><tr><th scope="col">Campeão</th><th scope="col" data-tip="Jogos nesta lane">Jogos</th><th scope="col" data-tip="Taxa de vitória do campeão em todas as posições">Vitórias</th></tr></thead>
         <tbody>${rows}</tbody>
@@ -170,10 +170,10 @@ function overview(){
     </article>`;
   }).join("");
   return `<div id="analytics-root"><div class="grid2">
-   <section class="panel"><h2>Mais pickados</h2><p class="hint">Barra = jogos (verde vitórias, vermelho derrotas). À direita, a taxa de vitória.</p>${pickRows}</section>
-   <section class="panel"><h2>Mais banidos</h2><p class="hint">Bans e % dos ${G} jogos em que o campeão foi banido.</p>${banRows}</section>
+   <section class="wl-panel panel"><h2>Mais pickados</h2><p class="hint">Barra = jogos (verde vitórias, vermelho derrotas). À direita, a taxa de vitória.</p>${pickRows}</section>
+   <section class="wl-panel panel"><h2>Mais banidos</h2><p class="hint">Bans e % dos ${G} jogos em que o campeão foi banido.</p>${banRows}</section>
   </div>
-  <section class="panel" style="margin-top:20px"><h2>Prioridade no draft</h2><p class="hint">Presença = % dos jogos em que o campeão foi pickado ou banido.</p>
+  <section class="wl-panel panel" style="margin-top:20px"><h2>Prioridade no draft</h2><p class="hint">Presença = % dos jogos em que o campeão foi pickado ou banido.</p>
    <div class="legend"><span><i class="dot" style="background:var(--pick)"></i>Picks</span><span><i class="dot" style="background:var(--ban)"></i>Bans</span></div>${presRows}</section>
   </div><section class="lane-overview"><h2>Explore por posição</h2><p class="hint">Mais escolhidos em cada posição. A taxa de vitória considera todos os jogos do campeão.</p><div class="lane-grid">${lanes}</div></section>`;
 }
@@ -197,8 +197,8 @@ function laneRows(lane){
 }
 function laneView(lane){
   return `<section><h2>Campeões por posição</h2><p class="hint">Abra um campeão para ver a amostra, os jogadores e a build. Os cabeçalhos ordenam a tabela.</p>
-  <div class="tools"><input id="q" type="search" placeholder="Buscar campeão…" aria-label="Buscar campeão"></div>
-  <div class="tablewrap"><table><thead><tr>${LCOLS.map(([k,l])=>`<th><button data-k="${k}" data-tip="${TIPS[k]}">${l}${sortIcons}</button></th>`).join("")}</tr></thead><tbody id="tb"></tbody></table></div></section>`;
+  <div class="wl-panel tools"><input id="q" type="search" placeholder="Buscar campeão…" aria-label="Buscar campeão"></div>
+  <div class="wl-panel tablewrap"><table><thead><tr>${LCOLS.map(([k,l])=>`<th><button data-k="${k}" data-tip="${TIPS[k]}">${l}${sortIcons}</button></th>`).join("")}</tr></thead><tbody id="tb"></tbody></table></div></section>`;
 }
 function wireLane(lane){
   const rows=laneRows(lane), max=Math.max(...rows.map(r=>r.picks));
@@ -213,7 +213,7 @@ function wireLane(lane){
       const shared=Object.keys(c.lanes).length>1?`<span class="na" style="font-weight:400"> · também ${Object.keys(c.lanes).filter(x=>x!==lane).join(", ")}</span>`:"";
       return `<tr class="main${open?' open':''}" data-champion="${slug}" tabindex="0"><td class="champ"><span class="chev">${iconMarkup("next")}</span>${ico(c.name)}${esc(c.name)}${shared}</td>
        <td class="num" data-tip="${r.picks} jogos de ${lane}"><div class="mini" style="justify-content:flex-end">${r.picks}<span class="track"><i style="width:${r.picks/max*100}%;background:var(${LC[lane]})"></i></span></div></td>
-       <td>${wrPill(c.wins,c.picks)}</td><td class="num" data-tip="Banido em ${c.bans} de ${G} jogos">${c.bans}</td><td class="num" data-tip="${c.picks} picks + ${c.bans} bans em ${G} jogos">${pct(r.pres)}</td>
+       <td class="num">${wrPill(c.wins,c.picks)}</td><td class="num" data-tip="Banido em ${c.bans} de ${G} jogos">${c.bans}</td><td class="num" data-tip="${c.picks} picks + ${c.bans} bans em ${G} jogos">${pct(r.pres)}</td>
        <td class="num kda" data-tip="${has?`(${L.k.toFixed(1)} + ${L.a.toFixed(1)}) ÷ ${L.d.toFixed(1)}`:"Sem dados"}">${has?r.kda.toFixed(2):'<span class="na">–</span>'}</td>
        <td class="num">${has?L.k.toFixed(1):'–'}</td><td class="num">${has?L.d.toFixed(1):'–'}</td><td class="num">${has?L.a.toFixed(1):'–'}</td></tr>
        <tr class="detail" ${open?'':'hidden'}><td colspan="9"><div class="champion-detail">${has?`<div class="dgrid">
@@ -243,7 +243,7 @@ function wireLane(lane){
 let bLane="";
 function buildsView(){
   return `<section class="builds-page"><h2>Builds</h2><p class="hint">Compare as escolhas mais frequentes no Worlds. Os percentuais ao lado dos itens, runas e feitiços indicam a frequência de uso.</p>
-  <div class="tools"><input id="bq" type="search" placeholder="Buscar campeão ou item…" aria-label="Buscar campeão ou item">
+  <div class="wl-panel tools"><input id="bq" type="search" placeholder="Buscar campeão ou item…" aria-label="Buscar campeão ou item">
   <select id="bl" aria-label="Filtrar por lane"><option value="">Todas as lanes</option>${LANES.map(([l])=>`<option ${l===bLane?'selected':''}>${l}</option>`).join("")}</select></div>
   <div class="bcards" id="bc"></div></section>`}
 function wireBuilds(){
@@ -256,7 +256,7 @@ function wireBuilds(){
       (!bLane||c.lanes[bLane])&&(c.name.toLowerCase().includes(f)||JSON.stringify(c.build).toLowerCase().includes(f)));
     const champion=buildChampion && matches[0];
     const content=champion
-      ? `<article class="bcard"><h3>${ico(champion.name,champion.main)}${esc(champion.name)} <span class="build-meta">${champion.main} · ${champion.picks} jogos</span><span class="build-winrate">${wrPill(champion.wins,champion.picks)} <small>de vitórias</small></span></h3>${buildHtml(champion)}</article>`
+      ? `<article class="wl-panel bcard"><h3>${ico(champion.name,champion.main)}${esc(champion.name)} <span class="build-meta">${champion.main} · ${champion.picks} jogos</span><span class="build-winrate">${wrPill(champion.wins,champion.picks)} <small>de vitórias</small></span></h3>${buildHtml(champion)}</article>`
       : matches.length ? buildsTable(matches) : "";
     const back=buildChampion ? '<div class="build-back"><button data-slot="button" data-variant="outline" data-size="sm" class="build-route" data-build="">Voltar à lista de builds</button></div>' : '';
     bc.classList.toggle("build-detail", !!buildChampion);
@@ -280,9 +280,9 @@ const PCOLS=[["name","Jogador"],["team","Time"],["lane","Lane"],["n","Jogos"],["
 function playersView(){
   return `<section><h2>Jogadores</h2><p class="hint">Desempenho de cada jogador nos campeões com detalhes coletados (${DATA.players.reduce((s,p)=>s+p.n,0)} participações). Não inclui todos os jogos do torneio.</p>
   <details class="comparison-disclosure" ${window.frameElement?"":"hidden"}><summary>Comparar o desempenho de dois jogadores</summary><div id="analytics-root"></div></details>
-  <div class="tools"><input id="pq" type="search" placeholder="Buscar jogador ou time…" aria-label="Buscar jogador ou time">
+  <div class="wl-panel tools"><input id="pq" type="search" placeholder="Buscar jogador ou time…" aria-label="Buscar jogador ou time">
   <select id="pl" aria-label="Filtrar por lane"><option value="">Todas as lanes</option>${LANES.map(([l])=>`<option>${l}</option>`).join("")}</select></div>
-  <div class="tablewrap"><table><thead><tr>${PCOLS.map(([k,l])=>`<th><button data-k="${k}" data-tip="${k==="wr"?"Vitórias ÷ jogos do jogador":k==="kda"?"(Abates + Assistências) ÷ Mortes, somando todos os jogos":TIPS[k]}">${l}${sortIcons}</button></th>`).join("")}</tr></thead><tbody id="ptb"></tbody></table></div></section>`;
+  <div class="wl-panel tablewrap"><table><thead><tr>${PCOLS.map(([k,l])=>`<th><button data-k="${k}" data-tip="${k==="wr"?"Vitórias ÷ jogos do jogador":k==="kda"?"(Abates + Assistências) ÷ Mortes, somando todos os jogos":TIPS[k]}">${l}${sortIcons}</button></th>`).join("")}</tr></thead><tbody id="ptb"></tbody></table></div></section>`;
 }
 function wirePlayers(){
   const rows=DATA.players.map(p=>({...p,wr:p.w/p.n,kda:kdaOf(p.k,p.d,p.a),chs:p.ch.length}));
@@ -295,7 +295,7 @@ function wirePlayers(){
       .sort((a,b)=>{const x=a[plSort.k],y=b[plSort.k];return (typeof x==="string"?x.localeCompare(y):x-y)*plSort.d||b.n-a.n});
     showSort(plSort);
     tb.innerHTML=list.map(p=>`<tr><td class="champ">${esc(p.name)}</td><td>${esc(p.team)}</td><td><span class="mini">${dot(p.lane)}${p.lane}</span></td>
-      <td class="num">${p.n}</td><td>${wrPill(p.w,p.n)}</td><td class="num kda">${p.kda.toFixed(2)}</td>
+      <td class="num">${p.n}</td><td class="num">${wrPill(p.w,p.n)}</td><td class="num kda">${p.kda.toFixed(2)}</td>
       <td><div class="chips">${p.ch.map(([c,n])=>`<span class="chip">${ico(c)}${esc(c)} · ${n}</span>`).join("")}</div></td></tr>`).join("");
   };
   document.querySelector('thead').onclick=e=>{const b=e.target.closest('button');if(!b)return;const k=b.dataset.k;plSort=plSort.k===k?{k,d:-plSort.d}:{k,d:["name","team","lane"].includes(k)?1:-1};draw()};
@@ -310,10 +310,10 @@ function muView(){
   return `<section class="matchups-view"><h2>Confrontos por posição</h2><p class="hint">Como cada campeão foi contra o adversário direto da mesma lane. Base: ${DATA.mgames} jogos com draft completo. Escolha a lane e o campeão.</p>
   <nav id="mulanes" style="margin:0 0 12px">${LANES.map(([l])=>`<button data-slot="button" data-variant="ghost" data-l="${l}" aria-selected="${l===muLane}">${dot(l)}${l}</button>`).join("")}</nav>
   <div class="matchups-grid">
-   <div class="panel mu-picker"><div style="padding:14px 16px 6px"><h2 style="font-size:18px">Escolha o campeão</h2></div><div id="mulist" class="mulist"></div></div>
-   <div class="panel" id="mudetail"></div>
+   <div class="wl-panel panel mu-picker"><div style="padding:14px 16px 6px"><h2 style="font-size:18px">Escolha o campeão</h2></div><div id="mulist" class="mulist"></div></div>
+   <div class="wl-panel panel" id="mudetail"></div>
   </div>
-  <section class="panel" style="margin-top:20px"><h2>Confrontos mais repetidos</h2><p class="hint">Duelos que mais aconteceram nesta lane. A barra mostra quem venceu mais.</p><div id="mutop" class="bars"></div></section></section>`;
+  <section class="wl-panel panel" style="margin-top:20px"><h2>Confrontos mais repetidos</h2><p class="hint">Duelos que mais aconteceram nesta lane. A barra mostra quem venceu mais.</p><div id="mutop" class="bars"></div></section></section>`;
 }
 function wireMu(){
   const M=DATA.matchups[muLane]||{};
@@ -330,7 +330,7 @@ function wireMu(){
     <div class="hint" style="margin:0">${tot} jogos · ${tw}V ${tot-tw}D · ${ops.length} adversários diferentes</div></div></div>
    <div class="chips" style="margin:12px 0">${good.length?`<span class="na" style="font-size:12px;align-self:center">Maior taxa de vitória:</span>`+good.map(o=>`<span class="chip good">${ico(o[0])}${esc(o[0])} ${o[2]}-${o[1]-o[2]}</span>`).join(""):""}
    ${bad.length?`<span class="na" style="font-size:12px;align-self:center;margin-left:8px">Menor taxa de vitória:</span>`+bad.map(o=>`<span class="chip bad">${ico(o[0])}${esc(o[0])} ${o[2]}-${o[1]-o[2]}</span>`).join(""):""}</div>
-   <div class="tablewrap" style="border:none"><table><thead><tr><th style="padding:10px">Contra</th><th style="padding:10px;text-align:right">Jogos</th><th style="padding:10px">Resultado</th><th style="padding:10px;text-align:right">KDA ${esc(muChamp)}</th><th style="padding:10px;text-align:right">KDA adversário</th><th style="padding:10px;text-align:right">K / D / A médio</th></tr></thead>
+   <div class="wl-panel tablewrap" style="border:none"><table><thead><tr><th style="padding:10px">Contra</th><th style="padding:10px;text-align:right">Jogos</th><th style="padding:10px">Resultado</th><th style="padding:10px;text-align:right">KDA ${esc(muChamp)}</th><th style="padding:10px;text-align:right">KDA adversário</th><th style="padding:10px;text-align:right">K / D / A médio</th></tr></thead>
    <tbody>${ops.map(o=>{const[op,n,w,k,d,a,ok,od,oa]=o;const my=kdaOf(k,d,a),their=kdaOf(ok,od,oa);
      return `<tr><td class="champ"><span class="nmi">${ico(op,muLane)}${esc(op)}</span></td><td class="num">${n}</td>
      <td><span class="mini"><span class="wl" data-tip="${w} vitórias e ${n-w} derrotas contra ${esc(op)}">${'<i class="w"></i>'.repeat(w)}${'<i class="l"></i>'.repeat(n-w)}</span>${wrPill(w,n)}</span></td>
@@ -351,7 +351,7 @@ function compsView(){
   const teams=[...new Set(DATA.comps.flatMap(g=>[g.b,g.r]))].sort();
   const sts=[...new Set(DATA.comps.map(g=>g.st))];
   return `<section><h2>Composições do Worlds</h2><p class="hint">Composição completa de cada jogo: quem jogou contra quem, com campeão, jogador e K/D/A por lane. Lado azul à esquerda, vermelho à direita. O ícone de confirmação ${iconMarkup("check")} marca o vencedor. Base: ${DATA.mgames} jogos com draft completo.</p>
-  <div class="tools"><input id="cq" type="search" placeholder="Buscar campeão ou jogador…" aria-label="Buscar campeão ou jogador" value="${esc(cQ||"")}">
+  <div class="wl-panel tools"><input id="cq" type="search" placeholder="Buscar campeão ou jogador…" aria-label="Buscar campeão ou jogador" value="${esc(cQ||"")}">
   <select id="ct" aria-label="Time"><option value="">Todos os times</option>${teams.map(t=>`<option${t===cTeam?' selected':''}>${esc(t)}</option>`).join("")}</select>
   <select id="cs" aria-label="Fase"><option value="">Todas as fases</option>${sts.map(t=>`<option${t===cSt?' selected':''}>${esc(t)}</option>`).join("")}</select></div>
   <p class="hint" id="cn"></p><div class="cgrid" id="cl"></div></section>`;
@@ -359,7 +359,7 @@ function compsView(){
 function compCard(g,q){
   const hl=t=>q&&t.toLowerCase().includes(q)?`<mark>${esc(t)}</mark>`:esc(t);
   const side=(c,p,k,r)=>{const ch=`<td${r?' class="r"':''}><span class="ch">${ico(c)}<span>${hl(c)}<span class="pl">${hl(p)}</span></span></span></td>`,kd=`<td class="k${r?'':' r'}" data-tip="Abates / Mortes / Assistências de ${esc(p)}">${k}</td>`;return r?kd+ch:ch+kd};
-  return `<article class="cg"><div class="st">${esc(g.st)} · Jogo ${g.g}</div>
+  return `<article class="wl-panel cg"><div class="st">${esc(g.st)} · Jogo ${g.g}</div>
   <div class="tm"><span class="${g.bw?'won':'lost'}" data-tip="Lado azul${g.bw?' · venceu':''}">${esc(g.b)}${g.bw?` ${iconMarkup("check")}`:''}</span><span class="vs">vs</span><span class="${g.bw?'lost':'won'}" data-tip="Lado vermelho${g.bw?'':' · venceu'}">${esc(g.r)}${g.bw?'':` ${iconMarkup("check")}`}</span></div>
   <table>${g.p.map(([l,cb,pb,kb,cr,pr,kr])=>`<tr>${side(cb,pb,kb,0)}<td class="ln">${dot(l)}</td>${side(cr,pr,kr,1)}</tr>`).join("")}</table></article>`;
 }

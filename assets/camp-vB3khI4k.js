@@ -44,7 +44,7 @@ Não foi jogado no Worlds 2026`);return`<button class="ch${a?` in`:``}" aria-pre
       <span class="nm">${p(e.n)}</span></button>`}).join(``)||`<div style="color:var(--mut)">Nenhum campeão encontrado.</div>`,f(`#gfoot`).textContent=`${i.length} de ${s.length} campeões · imagens: Riot Data Dragon · passe o mouse para ver os números do Worlds 2026`}f(`#grid`).onclick=e=>{let t=e.target.closest(`.ch`);if(!t)return;let n=t.dataset.n,r=C(),i=r.lanes[w];i.includes(n)?r.lanes[w]=i.filter(e=>e!==n):i.push(n),O(),S(),D(),E(),M(),[...f(`#grid`).querySelectorAll(`.ch`)].find(e=>e.dataset.n===n)?.focus({preventScroll:!0})};var _e=null,N=f(`#picker-dialog`),ve=f(`#champ-picker`);function ye(){_e=document.activeElement,N.append(ve),N.showModal(),f(`#search`).focus()}N.addEventListener(`close`,()=>{f(`#comps`).append(ve),(document.querySelector(`[data-picker]`)||_e)?.focus()}),f(`#close-picker`).onclick=()=>N.close(),window.matchMedia(`(min-width: 1100px)`).addEventListener(`change`,e=>{e.matches&&N.open&&N.close()});var P=document.querySelector(`#composition-palette`),be=P.querySelector(`summary`),F=[...P.querySelectorAll(`.palette-option`)],xe=`weblol-composition-palette`,Se=new Map([[`turquoise`,`tokyo-night`],[`violet`,`dracula`],[`pink`,`catppuccin`],[`lime`,`monokai`],[`silver`,`nord`],[`amber`,`solarized`]]);function Ce(e){f(`#v-comps`).dataset.palette=e.dataset.palette,N.dataset.palette=e.dataset.palette,f(`#palette-name`).textContent=e.textContent.trim(),F.forEach(t=>t.setAttribute(`aria-pressed`,String(t===e)))}F.forEach(e=>e.addEventListener(`click`,()=>{Ce(e),P.open=!1,be.focus();try{localStorage.setItem(xe,e.dataset.palette)}catch{}})),P.addEventListener(`keydown`,e=>{e.key===`Escape`&&P.open&&(e.preventDefault(),P.open=!1,be.focus())});try{let e=localStorage.getItem(xe),t=Se.get(e)??e;Ce(F.find(e=>e.dataset.palette===t)??F[0])}catch{Ce(F[0])}f(`#exp`).onclick=()=>{let e=new Blob([JSON.stringify({app:`lol-comps-time`,version:1,exported:new Date().toISOString(),comps:x.comps,plays:x.plays},null,2)],{type:`application/json`}),t=document.createElement(`a`);t.href=URL.createObjectURL(e),t.download=`comps-time-${new Date().toISOString().slice(0,10)}.json`,t.click(),setTimeout(()=>URL.revokeObjectURL(t.href),1e3)},f(`#impb`).onclick=()=>f(`#imp`).click(),f(`#imp`).onchange=async e=>{let t=e.target.files[0];if(t){try{let e=JSON.parse(await t.text()),n=e.comps||e;if(!Array.isArray(n))throw 0;let r=confirm(`Arquivo com ${n.length} comp(s).\n\nOK = SUBSTITUIR as comps atuais\nCancelar = JUNTAR com as atuais`),i=n.map(e=>{let t=b(e.name);t.notes=e.notes||``,t.laneNotes=e.laneNotes||{},e.draft&&(t.draft=e.draft),t.updated=e.updated||Date.now();for(let n of u)t.lanes[n.k]=Array.isArray(e.lanes?.[n.k])?e.lanes[n.k].map(String):[];return t.id=r&&e.id||t.id,t});if(x.comps=r?i:[...i,...x.comps],x.cur=x.comps[0].id,Array.isArray(e.plays)){let t=e.plays.filter(e=>e&&e.live&&Array.isArray(e.steps)).map(e=>({...e,id:r&&e.id||y()}));x.plays=r?t:[...R(),...t],R()}X(),S(),$(),I(f(`nav [aria-pressed=true]`)?.dataset.v||`comps`),T(`${i.length} comp(s) importada(s)`)}catch{alert(`Arquivo inválido. Use um .json exportado por esta página.`)}e.target.value=``}};var we={comps:`composicoes`,map:`mapa`,know:`conhecimento`},Te={obj:`objetivos`,wave:`wave`},Ee=[...document.querySelectorAll(`header nav [data-v]`)];function De(e){Ee.forEach(t=>{let n=t.dataset.v===e;t.classList.toggle(`on`,n),t.setAttribute(`aria-pressed`,n)}),document.querySelectorAll(`.view`).forEach(t=>t.classList.toggle(`on`,t.id===`v-`+e)),e===`map`&&X()}function I(e,{includeItem:t=!0,copy:n=!1}={}){f(`#route-note`).hidden=!0;let r=`/time/`+we[e];e===`know`&&(r+=`/`+(Te[x.kTab]||Te.obj)),t&&e===`comps`&&(r+=`/`+encodeURIComponent(x.cur)+`?modo=`+(x.view===`draft`?`draft`:`lane`)),t&&e===`map`&&(r+=`/`+encodeURIComponent(x.curPlay)),window.frameElement?.dispatchEvent(new CustomEvent(`weblol:navigate`,{detail:{path:r,copy:n}}))}window.applyWebLolRoute=([e,t],n)=>{let r=Object.keys(we).find(t=>we[t]===e)||`comps`,i=``,a=e=>encodeURIComponent(e.id)===t;if(r===`comps`){if(t){let e=x.comps.find(a);e?(x.cur=e.id,f(`#csearch`).value=``):i=`A composição deste link não está disponível neste navegador. Conecte a pasta do time para carregar a versão oficial.`}let e=n.get(`modo`);(e===`draft`||e===`lane`)&&(x.view=e===`draft`?`draft`:`lanes`),$()}else if(r===`map`&&t){let e=R().find(a);e&&x.curPlay!==e.id&&(L.playing=!1,L.sel=-1,x.curPlay=e.id),e||(i=`A jogada deste link não está disponível neste navegador. Conecte a pasta do time para carregar a versão oficial.`)}else r===`know`&&(t&&(x.kTab=t===`wave`?`wave`:`obj`),Pe());let o=f(`#route-note`);o.textContent=i,o.hidden=!i,De(r)},Ee.forEach(e=>e.onclick=()=>{let t=e.dataset.v;De(t),I(t,{includeItem:!1})}),f(`#copy-comp`).onclick=()=>I(`comps`,{copy:!0}),f(`#copy-play`).onclick=()=>I(`map`,{copy:!0});var Oe=[{n:`Dragões elementais`,c:`#e08a3c`,first:`5:00`,resp:`5:00`,rs:300,rows:[[`Onde`,`Rio de baixo`],[`Alma`,`4º dragão do mesmo time`],[`Rift elemental`,`Muda o mapa após o 2º dragão`]],p:`O 3º dragão define o elemento da Alma (o mapa muda depois do 2º).`},{n:`Dragão Ancião`,c:`#9fd3e6`,first:`6:00 após a Alma`,resp:`6:00`,rs:360,rows:[[`Onde`,`Rio de baixo`],[`Buff`,`~2:30 · executa inimigos com vida baixa`]],p:`Só aparece depois que algum time pega a Alma de dragão.`},{n:`Vastilarvas (Voidgrubs)`,c:`#a36be0`,first:`8:00`,resp:`Não volta`,rows:[[`Onde`,`Fosso de cima (do Barão)`],[`Quantidade`,`3 larvas, 1 onda só`],[`Some`,`~14:45 se ninguém pegar`]],p:`Desde o patch 25.9 não existe mais a 2ª onda. Bônus contra torres para quem pegar.`},{n:`Arauto do Vale`,c:`#d75a8c`,first:`15:00`,resp:`Não volta`,rows:[[`Onde`,`Fosso de cima`],[`Some`,`19:45 se ninguém pegar`],[`Uso`,`Olho do Arauto para derrubar torre`]],p:`Um por jogo. Divide o fosso com o Barão, que nasce aos 20:00.`},{n:`Barão Na'Shor`,c:`#8a6be0`,first:`20:00`,resp:`6:00`,rs:360,rows:[[`Onde`,`Fosso de cima`],[`Buff`,`3:00 · empodera minions e recall`]],p:`Voltou para 20:00 na temporada 2026 (patch 26.1).`}],ke=[[`Buffs (Azul / Vermelho)`,`0:55`,`5:00`,300],[`Scuttle (caranguejo do rio)`,`2:55`,`2:30`,150],[`Lobos / Aves (Raptors)`,`0:55`,`2:15`,135],[`Gromp / Krugs`,`1:07`,`2:15`,135],[`Inibidor`,`—`,`5:00`,300],[`Minions (1ª onda)`,`0:30`,`—`,0]],Ae=[[`Ondas de minions`,`1ª onda aos 0:30. Depois da fase de rotas a cada 25s, e a cada 20s no fim do jogo.`],[`Super minions`,`Saem em toda onda enquanto o inibidor estiver caído.`],[`Torre do Nexus`,`Volta com 40% de vida.`],[`Faelights`,`Pontos fixos que dão visão extra; alguns desde o início, mais quando o mapa muda pelo dragão.`]],je=e=>{let t=String(e).trim().match(/^(\d{1,2})[:.,h ]?(\d{2})?$/);return t?t[1]*60+ +(t[2]||0):null},Me=e=>`${Math.floor(e/60)}:${String(e%60).padStart(2,`0`)}`,Ne=`
 <div class="warn">${e(`book`)} Guia de controle de wave para a temporada 2026. Os números da wave são das notas dos patches 26.1 e 26.9. As técnicas (freeze, slow push, etc.) são os fundamentos de sempre, ajustados aos tempos novos.</div>
 
-<div class="ks">Números da wave em 2026</div>
+<h2 class="ks">Números da wave em 2026</h2>
 <table>
 <tr><td style="width:230px;color:var(--gold)">1ª wave</td><td>Sai da base aos <b>0:30</b> (antes era 1:05).</td></tr>
 <tr><td style="color:var(--gold)">Intervalo entre waves</td><td><b>30s</b> até 14:00 · <b>25s</b> de 14:00 a 30:00 · <b>20s</b> depois dos 30:00.</td></tr>
@@ -57,47 +57,47 @@ Não foi jogado no Worlds 2026`);return`<button class="ch${a?` in`:``}" aria-pre
 <tr><td style="color:var(--gold)">Torres</td><td>Placas agora são <b>permanentes</b> e existem também nas torres internas e de inibidor. Wave grande batendo na torre vira ouro de placa o jogo todo.</td></tr>
 </table>
 
-<div class="ks">Quem a wave favorece</div>
+<h2 class="ks">Quem a wave favorece</h2>
 <div class="kgrid">
- <div class="obj" style="--oc:#4cc38a"><h3>A wave empurra para quem…</h3>
+ <div class="wl-panel obj"><h3>A wave empurra para quem…</h3>
   <p style="font-size:13px;color:var(--txt);line-height:1.6">• tem <b>mais minions vivos</b> (um caster a mais já faz diferença)<br>• tem o <b>canhão</b> na wave (canhão vivo = wave mais forte)<br>• matou a wave inimiga primeiro (a próxima wave dele chega e empurra)<br>• tem campeão com <b>limpeza em área</b> ou mais nível<br>• tem o <b>caçador por perto</b> (pode empurrar sem medo)</p></div>
- <div class="obj" style="--oc:#3d8bff"><h3>Onde a wave está</h3>
+ <div class="wl-panel obj"><h3>Onde a wave está</h3>
   <p style="font-size:13px;color:var(--txt);line-height:1.6">• <b>Perto da SUA torre:</b> você está seguro, o inimigo fica exposto ao gank e perde farm se não chegar perto.<br>• <b>No meio:</b> neutra, ninguém tem vantagem grande.<br>• <b>Perto da torre DELE:</b> você tem prioridade (pode sair da lane primeiro), mas está exposto a gank.</p></div>
- <div class="obj" style="--oc:#c8a85a"><h3>Prioridade (prio)</h3>
+ <div class="wl-panel obj"><h3>Prioridade (prio)</h3>
   <p style="font-size:13px;color:var(--txt);line-height:1.6">Ter <b>prio</b> é ter a wave empurrada para o lado inimigo. Quem tem prio chega primeiro no rio, no dragão, nas vastilarvas e no arauto. Antes de qualquer objetivo, o time precisa de prio em mid e na lane do lado do objetivo.</p></div>
 </div>
 
-<div class="ks">Técnicas</div>
+<h2 class="ks">Técnicas</h2>
 <div class="kgrid wv">
- <div class="obj" style="--oc:#5be08a"><h3>${e(`freeze`)} Freeze (congelar)</h3>
+ <div class="wl-panel obj"><h3>${e(`freeze`)} Freeze (congelar)</h3>
   <div class="lanefig"><span class="tw b">${e(`tower`)}</span><span class="zone">zona do freeze</span><span class="mm b">●●</span><span class="mm r">●●●●●</span><span class="tw r">${e(`tower`)}</span></div>
   <p><b>O que é:</b> segurar a wave parada logo <b>fora do alcance da sua torre</b>, só dando last hit.</p>
   <p><b>Como:</b> a wave inimiga precisa ser maior que a sua (uns 3–4 minions a mais) para ficar parada ali. Deixe a wave vir até você, só dê o último golpe e não bata nos minions à toa. Se a sua wave estiver grande demais, deixe ela bater na torre inimiga e monte o freeze com a próxima.</p>
   <p><b>Quando:</b> você está na frente e quer negar farm/XP; o caçador inimigo está do outro lado do mapa; o inimigo não tem como quebrar o freeze sem se arriscar.</p>
   <p><b>Cuidado:</b> freeze não gera prio. Você fica preso na lane e não ajuda em objetivo.</p></div>
- <div class="obj" style="--oc:#4fa3ff"><h3>${e(`layers`)} Slow push (empilhar)</h3>
+ <div class="wl-panel obj"><h3>${e(`layers`)} Slow push (empilhar)</h3>
   <p><b>O que é:</b> matar só os casters (ou só last hit) para a sua wave sobreviver e se somar com a próxima. Em 2–3 waves vira uma wave gigante.</p>
   <p><b>Quando:</b> antes de um dive; antes de voltar para a base com a wave batendo na torre; para criar pressão enquanto o time faz objetivo do outro lado; quando o canhão está chegando.</p>
   <p><b>Dica:</b> comece o slow push logo depois que a wave "resetou" no meio. O ideal é a wave grande chegar na torre na mesma hora que o seu caçador.</p></div>
- <div class="obj" style="--oc:#ff9d4d"><h3>${e(`fast`)} Fast push (empurrar rápido)</h3>
+ <div class="wl-panel obj"><h3>${e(`fast`)} Fast push (empurrar rápido)</h3>
   <p><b>O que é:</b> matar a wave o mais rápido possível com habilidades.</p>
   <p><b>Quando:</b> para dar <b>recall</b> sem perder farm; para <b>rotacionar</b> (roam, ajudar no rio); para ter <b>prio</b> antes de dragão, vastilarvas, arauto ou barão; quando o inimigo precisa voltar para a base.</p>
   <p><b>Cuidado:</b> empurrar rápido sem motivo deixa a wave perto da torre inimiga e você exposto a gank.</p></div>
- <div class="obj" style="--oc:#ff6a8c"><h3>${e(`reset`)} Crash e reset</h3>
+ <div class="wl-panel obj"><h3>${e(`reset`)} Crash e reset</h3>
   <p><b>O que é:</b> levar uma wave grande até bater na torre inimiga.</p>
   <p><b>Por que:</b> o inimigo perde minions embaixo da torre (difícil de farmar) e a wave "volta" (bounce) para o meio ou para você. É o melhor momento para dar recall: você volta e a wave ainda não chegou na sua torre.</p>
   <p><b>Melhor momento:</b> crashar a <b>wave de canhão</b>, que dura mais embaixo da torre.</p></div>
- <div class="obj" style="--oc:#b38be0"><h3>${e(`undo`)} Puxar a wave (pull)</h3>
+ <div class="wl-panel obj"><h3>${e(`undo`)} Puxar a wave (pull)</h3>
   <p><b>O que é:</b> trazer a wave para mais perto da sua torre de propósito.</p>
   <p><b>Como:</b> pare de bater na wave e fique atrás; ou ataque o campeão inimigo perto dos minions dele para eles virarem em você e você recua andando (eles te seguem). Os minions inimigos vão andar até você.</p>
   <p><b>Quando:</b> para montar um freeze; quando você está mais fraco e precisa farmar seguro; quando o caçador inimigo está perto da sua lane.</p></div>
- <div class="obj" style="--oc:#e0605a"><h3>${e(`tower`)} Stack para dive</h3>
+ <div class="wl-panel obj"><h3>${e(`tower`)} Stack para dive</h3>
   <p><b>Receita:</b> 2–3 waves empilhadas (slow push) + caçador ou suporte perto + inimigo com pouca vida ou sem Flash.</p>
   <p><b>Timing:</b> entre logo que a wave grande chegar na torre: os minions tomam os tiros e a torre troca de alvo. Quem toma o primeiro tiro sai do alcance e outro segura a torre.</p>
   <p><b>Não mergulhe</b> sem wave: a torre só bate em vocês. Em 2026 a placa quebrada dá <b>20s de resistência extra</b> à torre (Bulwark), então dive depois de quebrar placas fica mais caro.</p></div>
 </div>
 
-<div class="ks">O que fazer em cada situação</div>
+<h2 class="ks">O que fazer em cada situação</h2>
 <table><tr><th>Situação</th><th>O que fazer com a wave</th></tr>
 <tr><td>Vou dar recall</td><td>Fast push ou crash a wave na torre e volte. Melhor ainda numa wave de canhão.</td></tr>
 <tr><td>Dragão / vastilarvas / arauto em ~1 min</td><td>Mid e a lane do lado do objetivo empurram para ter prio. Bot e mid chegam primeiro no dragão; top e mid nas vastilarvas e no arauto.</td></tr>
@@ -110,7 +110,7 @@ Não foi jogado no Worlds 2026`);return`<button class="ch${a?` in`:``}" aria-pre
 <tr><td>Barão / fim de jogo</td><td>Empurre as side lanes antes do objetivo (as waves chegam a cada 20–25s). Waves no lado inimigo puxam a atenção dele.</td></tr>
 </table>
 
-<div class="ks">Erros comuns</div>
+<h2 class="ks">Erros comuns</h2>
 <table>
 <tr><td style="width:230px;color:var(--red)">Empurrar sem motivo</td><td>Wave perto da torre inimiga sem visão = gank fácil.</td></tr>
 <tr><td style="color:var(--red)">Recall com a wave vindo</td><td>Você perde a wave inteira na sua torre (e a torre pode perder placa).</td></tr>
@@ -122,17 +122,17 @@ Não foi jogado no Worlds 2026`);return`<button class="ch${a?` in`:``}" aria-pre
   <div id="k-wave" style="display:${t===`wave`?`block`:`none`}">${Ne}</div>
   <div id="k-obj" style="display:${t===`obj`?`block`:`none`}">
   <div class="warn">${e(`warning`)} Tempos da temporada 2026 (patch 26.1 em diante, jogo atual 16.x). As mudanças vieram do preview oficial da Riot e de guias de 2026; os primeiros spawns da selva são das notas do patch 26.1; os tempos de volta dos campos pequenos são os de sempre. Confirmem no jogo se algum patch novo mexer nisso. Os tempos são do relógio do jogo.</div>
-  <div class="kgrid">${Oe.map((e,t)=>`<div class="obj" style="--oc:${e.c}"><h3>${e.n}</h3>
+  <div class="kgrid">${Oe.map((e,t)=>`<div class="wl-panel obj"><h3>${e.n}</h3>
      <div class="kv"><span>Primeiro spawn</span><span>${e.first}</span></div>
      <div class="kv"><span>Volta em</span><span>${e.resp}</span></div>
      ${e.rows.map(e=>`<div class="kv"><span>${e[0]}</span><span>${e[1]}</span></div>`).join(``)}
      <p>${e.p}</p>
      ${e.rs?`<div class="calc">Morreu em <input data-o="${e.rs}" placeholder="mm:ss"> → volta <span class="r" id="r${t}">—</span></div>`:``}
    </div>`).join(``)}</div>
-  <div class="ks">Selva e estruturas</div>
+  <h2 class="ks">Selva e estruturas</h2>
   <table><tr><th>O quê</th><th>Primeiro spawn</th><th>Volta em</th><th>Calculadora</th></tr>
   ${ke.map((e,t)=>`<tr><td>${e[0]}</td><td>${e[1]}</td><td>${e[2]}</td><td>${e[3]?`<div class="calc" style="margin:0">morreu <input data-o="${e[3]}" placeholder="mm:ss"> → <span class="r">—</span></div>`:``}</td></tr>`).join(``)}</table>
-  <div class="ks">Ouro das torres e placas (patch 26.1)</div>
+  <h2 class="ks">Ouro das torres e placas (patch 26.1)</h2>
   <table><tr><th>Torre</th><th>Placas</th><th>Ouro por placa</th><th>Total</th><th>Detalhes</th></tr>
   <tr><td>Externa (T1)</td><td>5</td><td>120</td><td>até 600</td><td>A placa perde 10 de ouro por minuto a partir dos 11:00, no máximo −40 (fica em 80 a partir dos 15:00). Torre destruída não dá ouro extra (antes dava 250). Total mínimo de 400.</td></tr>
   <tr><td>Interna (T2)</td><td>5</td><td>120</td><td>600</td><td>Os 600 de ouro foram divididos entre as 5 placas (novo em 2026).</td></tr>
@@ -140,9 +140,9 @@ Não foi jogado no Worlds 2026`);return`<button class="ch${a?` in`:``}" aria-pre
   <tr><td>Primeira torre do jogo</td><td>—</td><td>—</td><td>+300</td><td>Dividido entre os aliados próximos. Primeiro abate do jogo vale +100.</td></tr>
   </table>
   <p style="color:var(--mut);font-size:12px;margin:8px 0 0">Placas são permanentes (não caem mais aos 14:00) e caem quando a torre perde 10%, 25%, 45%, 70% e 100% da vida. Cada placa quebrada dá 20s de resistência extra (Bulwark) à torre. Valores do patch 26.1: patches seguintes podem ter ajustado o ouro.</p>
-  <div class="ks">Outras regras de 2026</div>
+  <h2 class="ks">Outras regras de 2026</h2>
   <table>${Ae.map(e=>`<tr><td style="width:180px;color:var(--gold)">${e[0]}</td><td>${e[1]}</td></tr>`).join(``)}</table>
-  <div class="ks">Linha do tempo do início de jogo</div>
+  <h2 class="ks">Linha do tempo do início de jogo</h2>
   <table><tr><th>Tempo</th><th>Evento</th></tr>
   ${[[`0:30`,`1ª onda de minions`],[`0:55`,`Buffs e campos da selva`],[`1:07`,`Gromp e Krugs`],[`2:55`,`Scuttles`],[`5:00`,`1º dragão`],[`8:00`,`Vastilarvas (única onda)`],[`15:00`,`Arauto do Vale`],[`19:45`,`Arauto some se ninguém pegou`],[`20:00`,`Barão Na'Shor`]].map(e=>`<tr><td style="width:100px;font-weight:700">${e[0]}</td><td>${e[1]}</td></tr>`).join(``)}</table>
   <p style="color:var(--mut);font-size:12px;margin-top:18px">Fontes: <a style="color:var(--acc)" href="https://www.leagueoflegends.com/news/dev/dev-2026-season-one-gameplay-preview/" target="_blank">Riot — /dev 2026 Season One</a> · <a style="color:var(--acc)" href="https://www.nerfplz.com/2026/08/every-summoners-rift-objective.html" target="_blank">nerfplz — Every Summoner's Rift objective</a> · <a style="color:var(--acc)" href="https://www.riftpatchnotes.com/lol/unit/void-grubs" target="_blank">riftpatchnotes — Voidgrubs</a> · <a style="color:var(--acc)" href="https://www.leagueoflegends.com/en-sg/news/game-updates/patch-26-1-notes/" target="_blank">Riot — Notas do patch 26.1</a></p></div>`}f(`#know`).addEventListener(`click`,e=>{let t=e.target.closest(`[data-kt]`);t&&(x.kTab=t.dataset.kt,S(!1),Pe(),I(`know`))}),f(`#know`).addEventListener(`input`,e=>{let t=e.target.closest(`[data-o]`);if(!t)return;let n=je(t.value),r=t.parentElement.querySelector(`.r`);r.textContent=n==null?`—`:Me(n+ +t.dataset.o)});var Fe=[`top`,`jg`,`mid`,`adc`,`sup`],Ie={top:`TOP`,jg:`JG`,mid:`MID`,adc:`ADC`,sup:`SUP`},Le=[...Fe.map(e=>`b_`+e),...Fe.map(e=>`r_`+e)],Re=([e,t])=>[t,e],ze={base:{top:[4,90],jg:[7,93],mid:[10,96],adc:[4,96],sup:[10,90]},lane:{top:[8,38],jg:[24,50],mid:[42,58],adc:[62,93],sup:[60,89]}};function Be(e){let t={};for(let n of Fe)t[`b_`+n]=ze[e][n].slice(),t[`r_`+n]=Re(ze[e][n]);return t}var Ve=e=>({id:y(),name:e||`Nova jogada`,live:{pos:Be(`lane`),lines:[]},steps:[],cb:``,cr:``}),L={tool:`move`,color:`#ffd34d`,sel:-1,playing:!1};function R(){return Array.isArray(x.plays)&&x.plays.length||(x.plays=[Ve(`Jogada 1`)],x.curPlay=x.plays[0].id),x.plays.some(e=>e.id===x.curPlay)||(x.curPlay=x.plays[0].id),x.plays}var z=()=>R().find(e=>e.id===x.curPlay),B=e=>JSON.parse(JSON.stringify(e));(function(){let e=[[7,30],[8,54],[7,74],[39,61],[32,68],[24,76],[70,93],[46,92],[26,93],[11,89]],t=(e,t)=>`<rect x="${e[0]-1.3}" y="${e[1]-1.3}" width="2.6" height="2.6" rx=".5" fill="${t}" stroke="#000" stroke-width=".3"/>`,n=[[24,47,`#4fa3ff`],[52,75,`#ff6a4d`]];f(`#schem`).innerHTML=`<rect width="100" height="100" fill="#1b2a1e"/>
