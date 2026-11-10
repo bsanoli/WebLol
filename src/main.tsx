@@ -9,6 +9,7 @@ import { connectAnalytics } from "./analytics-bridge"
 import { iconMarkup } from "./client/icon"
 import { initializeTheme } from "./client/theme"
 import { UI_VERSIONS } from "./data/ui-versions"
+import { initializeMotionNav } from "./client/motion"
 
 const sections = [
   { id: "worlds", label: "Worlds", icon: "worlds" },
@@ -93,6 +94,7 @@ function loadClassicScript(path: string): Promise<void> {
 
 const root = createRoot(document.getElementById("app")!)
 flushSync(() => root.render(<App />))
+initializeMotionNav("#top nav")
 
 connectAnalytics(document.getElementById("v-worlds") as HTMLIFrameElement)
 

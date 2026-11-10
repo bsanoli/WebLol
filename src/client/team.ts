@@ -2,8 +2,10 @@
 import { iconMarkup, laneIconMarkup } from "./icon"
 import { LOL_DATA, lolAsset, lolChampion, lolImage } from "./lol-media"
 import { initializeTheme } from "./theme"
+import { initializeMotionNav, revealContent } from "./motion"
 
 initializeTheme()
+initializeMotionNav("header nav")
 
 /* ===== Campeões (funções do editor e catálogo local da Riot) ===== */
 const BASE=`Aatrox|Aatrox|T;Ahri|Ahri|M;Akali|Akali|MT;Akshan|Akshan|MT;Alistar|Alistar|S;Ambessa|Ambessa|TJ;Amumu|Amumu|JS;Anivia|Anivia|M;Annie|Annie|MS;Aphelios|Aphelios|A;Ashe|Ashe|AS;Aurelion Sol|AurelionSol|M;Aurora|Aurora|MT;Azir|Azir|M;Bard|Bard|S;Bel'Veth|Belveth|J;Blitzcrank|Blitzcrank|S;Brand|Brand|SMJ;Braum|Braum|S;Briar|Briar|J;Caitlyn|Caitlyn|A;Camille|Camille|TS;Cassiopeia|Cassiopeia|MT;Cho'Gath|Chogath|TM;Corki|Corki|MA;Darius|Darius|T;Diana|Diana|JM;Dr. Mundo|DrMundo|TJ;Draven|Draven|A;Ekko|Ekko|JM;Elise|Elise|J;Evelynn|Evelynn|J;Ezreal|Ezreal|A;Fiddlesticks|Fiddlesticks|J;Fiora|Fiora|T;Fizz|Fizz|M;Galio|Galio|MS;Gangplank|Gangplank|T;Garen|Garen|T;Gnar|Gnar|T;Gragas|Gragas|JTS;Graves|Graves|J;Gwen|Gwen|TJ;Hecarim|Hecarim|J;Heimerdinger|Heimerdinger|MS;Hwei|Hwei|MS;Illaoi|Illaoi|T;Irelia|Irelia|TM;Ivern|Ivern|J;Janna|Janna|S;Jarvan IV|JarvanIV|J;Jax|Jax|TJ;Jayce|Jayce|TM;Jhin|Jhin|A;Jinx|Jinx|A;K'Sante|KSante|T;Kai'Sa|Kaisa|A;Kalista|Kalista|A;Karma|Karma|SM;Karthus|Karthus|J;Kassadin|Kassadin|M;Katarina|Katarina|M;Kayle|Kayle|T;Kayn|Kayn|J;Kennen|Kennen|T;Kha'Zix|Khazix|J;Kindred|Kindred|J;Kled|Kled|T;Kog'Maw|KogMaw|A;LeBlanc|Leblanc|M;Lee Sin|LeeSin|J;Leona|Leona|S;Lillia|Lillia|J;Lissandra|Lissandra|M;Locke|Locke|M;Lucian|Lucian|A;Lulu|Lulu|S;Lux|Lux|SM;Malphite|Malphite|TS;Malzahar|Malzahar|M;Maokai|Maokai|STJ;Master Yi|MasterYi|J;Mel|Mel|MS;Milio|Milio|S;Miss Fortune|MissFortune|A;Mordekaiser|Mordekaiser|T;Morgana|Morgana|S;Naafiri|Naafiri|M;Nami|Nami|S;Nasus|Nasus|T;Nautilus|Nautilus|S;Neeko|Neeko|MS;Nidalee|Nidalee|J;Nilah|Nilah|A;Nocturne|Nocturne|J;Nunu & Willump|Nunu|J;Olaf|Olaf|TJ;Orianna|Orianna|M;Ornn|Ornn|T;Pantheon|Pantheon|TSJ;Poppy|Poppy|TJS;Pyke|Pyke|S;Qiyana|Qiyana|JM;Quinn|Quinn|T;Rakan|Rakan|S;Rammus|Rammus|J;Rek'Sai|RekSai|J;Rell|Rell|S;Renata Glasc|Renata|S;Renekton|Renekton|T;Rengar|Rengar|J;Riven|Riven|T;Rumble|Rumble|T;Ryze|Ryze|M;Samira|Samira|A;Sejuani|Sejuani|J;Senna|Senna|SA;Seraphine|Seraphine|SA;Sett|Sett|TS;Shaco|Shaco|J;Shen|Shen|T;Shyvana|Shyvana|J;Singed|Singed|T;Sion|Sion|T;Sivir|Sivir|A;Skarner|Skarner|J;Smolder|Smolder|A;Sona|Sona|S;Soraka|Soraka|S;Swain|Swain|SM;Sylas|Sylas|MJ;Syndra|Syndra|M;Tahm Kench|TahmKench|ST;Taliyah|Taliyah|JM;Talon|Talon|MJ;Taric|Taric|S;Teemo|Teemo|T;Thresh|Thresh|S;Tristana|Tristana|AM;Trundle|Trundle|JT;Tryndamere|Tryndamere|T;Twisted Fate|TwistedFate|M;Twitch|Twitch|A;Udyr|Udyr|J;Urgot|Urgot|T;Varus|Varus|A;Vayne|Vayne|AT;Veigar|Veigar|M;Vel'Koz|Velkoz|SM;Vex|Vex|M;Vi|Vi|J;Viego|Viego|J;Viktor|Viktor|M;Vladimir|Vladimir|MT;Volibear|Volibear|JT;Warwick|Warwick|J;Wukong|MonkeyKing|JT;Xayah|Xayah|A;Xerath|Xerath|MS;Xin Zhao|XinZhao|J;Yasuo|Yasuo|M;Yone|Yone|MT;Yorick|Yorick|T;Yunara|Yunara|A;Yuumi|Yuumi|S;Zaahen|Zaahen|TJ;Zac|Zac|J;Zed|Zed|M;Zeri|Zeri|A;Ziggs|Ziggs|AM;Zilean|Zilean|S;Zoe|Zoe|M;Zyra|Zyra|S`;
@@ -145,6 +147,7 @@ function renderDraftLaneNotes(c){
 }
 
 function renderEditor(){
+  const previousMode=$("#editor").dataset.motionMode;
   const c=cur(),dv=S.view==="draft";
   const notesOpen=$("#composition-notes")?.open;
   $("#v-comps").classList.toggle("draft-view",dv);
@@ -160,6 +163,9 @@ ${laneNoteHTML(c,l)}</div>`).join("")}
   <p class="help">Clique no retrato para priorizar. Arraste para reordenar ou use o menu ⋯ de cada campeão.</p>`;
   renderDraftLaneNotes(c);
   renderTarget();
+  const motionMode=c.id+":"+S.view;
+  $("#editor").dataset.motionMode=motionMode;
+  if(previousMode!==motionMode)revealContent($("#editor"));
 }
 const touch=()=>{cur().updated=Date.now()};
 $("#v-comps").addEventListener("input",e=>{
@@ -320,7 +326,12 @@ $("#grid").onclick=e=>{
 let pickerTrigger=null;
 const pickerDialog=$("#picker-dialog"),picker=$("#champ-picker");
 function openPicker(){pickerTrigger=document.activeElement;pickerDialog.append(picker);pickerDialog.showModal();$("#search").focus()}
-pickerDialog.addEventListener("close",()=>{$("#comps").append(picker);(document.querySelector("[data-picker]")||pickerTrigger)?.focus()});
+pickerDialog.addEventListener("close",()=>{
+  (document.querySelector("[data-picker]")||pickerTrigger)?.focus();
+  // Keep the content in place through the native dialog exit transition.
+  void Promise.allSettled(pickerDialog.getAnimations().map(animation=>animation.finished))
+    .then(()=>{if(!pickerDialog.open)$("#comps").append(picker)});
+});
 $("#close-picker").onclick=()=>pickerDialog.close();
 window.matchMedia("(min-width: 1100px)").addEventListener("change",e=>{if(e.matches&&pickerDialog.open)pickerDialog.close()});
 
@@ -539,7 +550,7 @@ function renderKnow(){
   ${[["0:30","1ª onda de minions"],["0:55","Buffs e campos da selva"],["1:07","Gromp e Krugs"],["2:55","Scuttles"],["5:00","1º dragão"],["8:00","Vastilarvas (única onda)"],["15:00","Arauto do Vale"],["19:45","Arauto some se ninguém pegou"],["20:00","Barão Na'Shor"]].map(r=>`<tr><td style="width:100px;font-weight:700">${r[0]}</td><td>${r[1]}</td></tr>`).join("")}</table>
   <p style="color:var(--mut);font-size:12px;margin-top:18px">Fontes: <a style="color:var(--acc)" href="https://www.leagueoflegends.com/news/dev/dev-2026-season-one-gameplay-preview/" target="_blank">Riot — /dev 2026 Season One</a> · <a style="color:var(--acc)" href="https://www.nerfplz.com/2026/08/every-summoners-rift-objective.html" target="_blank">nerfplz — Every Summoner's Rift objective</a> · <a style="color:var(--acc)" href="https://www.riftpatchnotes.com/lol/unit/void-grubs" target="_blank">riftpatchnotes — Voidgrubs</a> · <a style="color:var(--acc)" href="https://www.leagueoflegends.com/en-sg/news/game-updates/patch-26-1-notes/" target="_blank">Riot — Notas do patch 26.1</a></p></div>`;
 }
-$("#know").addEventListener("click",e=>{const b=e.target.closest("[data-kt]");if(!b)return;S.kTab=b.dataset.kt;save(false);renderKnow();publishTeamRoute("know")});
+$("#know").addEventListener("click",e=>{const b=e.target.closest("[data-kt]");if(!b||S.kTab===b.dataset.kt)return;S.kTab=b.dataset.kt;save(false);renderKnow();revealContent($("#know"));$("#know [aria-pressed=true]")?.focus({preventScroll:true});publishTeamRoute("know")});
 $("#know").addEventListener("input",e=>{const inp=e.target.closest("[data-o]");if(!inp)return;const s=toS(inp.value);const out=inp.parentElement.querySelector(".r");out.textContent=s==null?"—":fmt(s+ +inp.dataset.o)});
 
 /* ===== Mapa tático ===== */

@@ -1,0 +1,120 @@
+/* Shared by the shell and both iframe documents. Keep state changes immediate. */
+:root {
+  --wl-motion-fast: 120ms;
+  --wl-motion-normal: 180ms;
+  --wl-motion-panel: 240ms;
+  --wl-motion-ease: cubic-bezier(.22, 1, .36, 1);
+  --wl-motion-distance: 6px;
+}
+
+:is(button, summary, input, select, textarea, .ci, .lane, .pk, .bsq, #steps li) {
+  transition-property: background-color, border-color, color, box-shadow, opacity;
+  transition-duration: var(--wl-motion-fast);
+  transition-timing-function: var(--wl-motion-ease);
+}
+button:not(:disabled,[aria-disabled=true]):active { opacity: .78; }
+
+/* Animate the content, not the iframe: transforms on frames affect fixed UI. */
+section.view.on, #v-admin.on > .wrap {
+  animation: wl-reveal var(--wl-motion-panel) var(--wl-motion-ease);
+}
+@keyframes wl-reveal {
+  from { opacity: 0; translate: 0 var(--wl-motion-distance); }
+  to { opacity: 1; translate: 0 0; }
+}
+
+.wl-motion-nav { position: relative; }
+.wl-motion-nav::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: var(--wl-nav-width, 0px);
+  height: 2px;
+  border-radius: 2px;
+  background: var(--wl-accent);
+  transform: translate(var(--wl-nav-x, 0px), var(--wl-nav-y, 0px));
+  pointer-events: none;
+}
+.wl-motion-nav[data-motion-ready]::after {
+  transition: transform var(--wl-motion-panel) var(--wl-motion-ease),
+    width var(--wl-motion-panel) var(--wl-motion-ease);
+}
+
+/* Native discrete transitions retain the top layer until the exit finishes.
+   Browsers without support still open and close normally. */
+dialog {
+  opacity: 0;
+  translate: 0 var(--wl-motion-distance);
+  scale: .985;
+  transition: opacity var(--wl-motion-normal) var(--wl-motion-ease),
+    translate var(--wl-motion-panel) var(--wl-motion-ease),
+    scale var(--wl-motion-panel) var(--wl-motion-ease),
+    display var(--wl-motion-panel) allow-discrete,
+    overlay var(--wl-motion-panel) allow-discrete;
+}
+dialog[open] { opacity: 1; translate: 0 0; scale: 1; }
+dialog:not([open]) { pointer-events: none; }
+dialog::backdrop {
+  opacity: 0;
+  transition: opacity var(--wl-motion-normal) ease,
+    display var(--wl-motion-panel) allow-discrete,
+    overlay var(--wl-motion-panel) allow-discrete;
+}
+dialog[open]::backdrop { opacity: 1; }
+@starting-style {
+  dialog[open] { opacity: 0; translate: 0 var(--wl-motion-distance); scale: .985; }
+  dialog[open]::backdrop { opacity: 0; }
+}
+
+/* Details covers mouse, keyboard, Escape and programmatic outside dismissal. */
+details::details-content {
+  opacity: 0;
+  transition: opacity var(--wl-motion-normal) var(--wl-motion-ease),
+    content-visibility var(--wl-motion-normal) allow-discrete;
+}
+details[open]::details-content { opacity: 1; }
+:is(.palette, .composition-menu, .option-menu, .lane-note)::details-content {
+  translate: 0 calc(-1 * var(--wl-motion-distance));
+  transition: opacity var(--wl-motion-normal) var(--wl-motion-ease),
+    translate var(--wl-motion-normal) var(--wl-motion-ease),
+    content-visibility var(--wl-motion-normal) allow-discrete;
+}
+:is(.palette, .composition-menu, .option-menu, .lane-note)[open]::details-content { translate: 0 0; }
+/* Outgoing menu content stays visible briefly, but cannot receive a click. */
+details:not([open])::details-content { pointer-events: none; }
+.palette > summary::after { transition: transform var(--wl-motion-normal) var(--wl-motion-ease); }
+.palette[open] > summary::after { transform: rotate(225deg); }
+@supports (interpolate-size: allow-keywords) {
+  details:not(.palette,.composition-menu,.option-menu,.lane-note)::details-content {
+    interpolate-size: allow-keywords;
+    block-size: 0;
+    overflow: clip;
+    transition: block-size var(--wl-motion-panel) var(--wl-motion-ease),
+      opacity var(--wl-motion-normal) var(--wl-motion-ease),
+      content-visibility var(--wl-motion-panel) allow-discrete;
+  }
+  details:not(.palette,.composition-menu,.option-menu,.lane-note)[open]::details-content { block-size: auto; }
+}
+
+#tip {
+  opacity: 1;
+  transition: opacity var(--wl-motion-fast) ease, display var(--wl-motion-fast) allow-discrete;
+}
+#tip[hidden] { opacity: 0; }
+@starting-style { #tip:not([hidden]) { opacity: 0; } }
+.toast {
+  translate: 0 var(--wl-motion-distance);
+  transition: opacity var(--wl-motion-normal) ease, translate var(--wl-motion-normal) var(--wl-motion-ease);
+}
+.toast.on { translate: 0 0; }
+.saved, .sstat .ok { transition: opacity var(--wl-motion-normal) ease; }
+#sync-label { transition: color var(--wl-motion-fast) ease; }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after, details::details-content {
+    animation: none !important;
+    transition: none !important;
+    scroll-behavior: auto !important;
+  }
+}

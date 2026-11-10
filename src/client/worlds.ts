@@ -6,8 +6,10 @@ import { buildDetails, buildHtml, buildLaneHighlights, buildMatchups, buildSampl
 import { effectText } from "./worlds-effect-text"
 import { LANES, LC, pct, wrPill, ico, esc, championSlug, sortIcons, teamLogo, teamRegion } from "./worlds-display"
 import { initializeTheme } from "./theme"
+import { initializeMotionNav, revealContent } from "./motion"
 
 initializeTheme()
+initializeMotionNav("#tabs")
 
 const G=DATA.games, C=DATA.champs;
 const tipEl=()=>document.getElementById('tip');
@@ -294,6 +296,7 @@ function go(id) {
 }
 
 function render(id){
+  const previousPage=document.body.dataset.page;
   hideTip();
   window.frameElement?.dispatchEvent(new CustomEvent("weblol:analytics-clear"));
   document.getElementById("kpis").hidden = !!window.frameElement || id !== "geral";
@@ -316,6 +319,7 @@ function render(id){
   else if(id==="builds"){v.innerHTML=buildsView();wireBuilds()}
   else{const lane=laneById.get(selectedLane);v.innerHTML=laneView(lane);v.querySelector(".tools").prepend(laneFilter);wireLane(lane)}
   document.body.dataset.page = isLane ? "campeoes" : id;
+  if(previousPage!==document.body.dataset.page)revealContent(v);
   if(id === "geral" || id === "jogadores") window.frameElement?.dispatchEvent(new CustomEvent("weblol:analytics", { detail: {
     kind: id === "geral" ? "overview" : "players", games: G, players: DATA.players,
     champions: C.map(c => ({name:c.name,picks:c.picks,wins:c.wins,bans:c.bans,portrait:lolChampion(c.name)?.portrait ? lolAsset(lolChampion(c.name).portrait) : undefined}))
@@ -417,7 +421,7 @@ function wireLane(lane){
     const previous=tb.querySelector("tr.open");
     if(previous){previous.classList.remove("open");previous.nextElementSibling.hidden=true;previous.setAttribute("aria-expanded","false")}
     laneChampion=tr===previous?"":tr.dataset.champion;
-    if(laneChampion){tr.classList.add("open");tr.nextElementSibling.hidden=false;tr.setAttribute("aria-expanded","true")}
+    if(laneChampion){tr.classList.add("open");tr.nextElementSibling.hidden=false;tr.setAttribute("aria-expanded","true");revealContent(tr.nextElementSibling.querySelector(".champion-detail"),true)}
     enhanceAnalyticsUI();publish();
   };
   tb.onkeydown=e=>{if((e.key==="Enter"||e.key===" ")&&e.target.matches('tr.main')){e.preventDefault();e.target.click()}};
@@ -507,6 +511,7 @@ function wireBuilds(){
     button.setAttribute("aria-expanded", String(expanded));
     const detail = document.getElementById(button.getAttribute("aria-controls"));
     detail.hidden = !expanded;
+    if(expanded)revealContent(detail.cells[0].firstElementChild,true);
     return detail.cells[0];
   };
   const toggleBuild = toggle => {
