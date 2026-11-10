@@ -18,7 +18,7 @@ const sections = [
 
 const initialPalette = initializeTheme()
 
-type IconName = (typeof sections)[number]["icon"] | "flag" | "link" | "reset" | "exit"
+type IconName = (typeof sections)[number]["icon"] | "link" | "reset" | "exit"
 
 function Icon({ name }: { name: IconName }) {
   return (
@@ -32,8 +32,8 @@ function App() {
   return (
     <>
       <header id="top">
-        <a href="#/worlds" aria-label="WebLol, página inicial" className="flex items-center gap-2 rounded-sm font-bold text-primary hover:underline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-ring">
-          <Icon name="flag" /> WebLol
+        <a href="#/worlds" aria-label="WebLol, página inicial" className="flex min-h-[var(--wl-button-height)] shrink-0 items-center rounded-sm hover:brightness-110 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-ring">
+          <img src="./assets/brand/weblol-logo-horizontal-transparent.png" alt="" width="1200" height="185" className="h-auto w-[120px]" />
         </a>
         <nav aria-label="Áreas do painel" className="flex flex-wrap gap-1">
           {sections.map(({ id, label, icon }) => (

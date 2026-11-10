@@ -8,6 +8,10 @@ export default defineConfig({
   publicDir: fileURLToPath(new URL("./public", import.meta.url)),
   base: "./",
   plugins: [react(), tailwindcss()],
+  server: {
+    port: 5173,
+    strictPort: true,
+  },
   build: {
     rolldownOptions: {
       input: ["index.html", "worlds.html", "camp.html"].map(page =>
