@@ -9,6 +9,7 @@ export const LOL_DATA: {
   item: CatalogLookup<string>
   rune: CatalogLookup<string>
   runeNames: CatalogLookup<string>
+  runeDescriptions: CatalogLookup<string>
   runeTrees: CatalogLookup<RuneTree>
   spell: CatalogLookup<string>
   map: string

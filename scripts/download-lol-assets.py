@@ -1,6 +1,7 @@
 """Download Riot Data Dragon art used by WebLol. Requires Python and Pillow."""
 
 from concurrent.futures import ThreadPoolExecutor
+from html import unescape
 from io import BytesIO
 import json
 from pathlib import Path
@@ -31,6 +32,21 @@ SHARD_NAMES = {
     "Move Speed": "Velocidade de Movimento",
     "Tenacity and Slow Resist": "Tenacidade e Resistência a Lentidão",
 }
+SHARD_DESCRIPTIONS = {
+    "Ability Haste": "+8 de Aceleração de Habilidade.",
+    "Adaptive Force": "+5,4 de Dano de Ataque adicional ou +9 de Poder de Habilidade (adaptativo).",
+    "Attack Speed": "+10% de Velocidade de Ataque.",
+    "Health": "+65 de Vida.",
+    "Health Scaling": "+10 a 200 de Vida, conforme o nível.",
+    "Move Speed": "+2,5% de Velocidade de Movimento.",
+    "Tenacity and Slow Resist": "+15% de Tenacidade e Resistência a Lentidão.",
+}
+# Data Dragon leaves these in-game substitutions unresolved in 16.20.1.
+RUNE_DESCRIPTION_VALUES = {
+    "@f3@": "270",
+    "@HealAmount@": "1 a 23 de Vida, conforme o nível",
+    "@BaseHeal@": "10 a 54,71 (conforme o nível)",
+}
 
 
 def fetch(url):
@@ -51,13 +67,22 @@ def key(name):
     return re.sub(r"[^a-z0-9]", "", name.lower())
 
 
+def rune_description(html):
+    text = re.sub(r"<(?:br|hr)\s*/?>|</li>", "\n", html, flags=re.I)
+    text = unescape(re.sub(r"<[^>]+>", "", text))
+    for token, value in RUNE_DESCRIPTION_VALUES.items():
+        text = text.replace(token, value)
+    text = re.sub(r"[^\S\n]+", " ", text)
+    return re.sub(r" *\n *", "\n", re.sub(r"\n{3,}", "\n\n", text)).strip()
+
+
 def add_runes(manifest, add):
     # Keep the display slots from the tournament patch. Older icons remain
     # available for historical entries whose rune no longer occupies a slot.
     for version in (WORLDS, BASE):
         trees = catalog(version, "runesReforged")
         localized_trees = catalog(version, "runesReforged", "pt_BR")
-        localized = {r["id"]: r["name"] for t in localized_trees for s in t["slots"] for r in s["runes"]}
+        localized = {r["id"]: r for t in localized_trees for s in t["slots"] for r in s["runes"]}
         tree_names = {t["id"]: t["name"] for t in localized_trees}
         for tree in trees:
             tree_key = tree["key"]
@@ -75,12 +100,16 @@ def add_runes(manifest, add):
                         continue
                     icon = rune["icon"]
                     manifest["rune"][name] = add("rune", icon.rsplit("/", 1)[1], f"img/{icon}")
-                    manifest["runeNames"][name] = localized.get(rune["id"], rune["name"])
+                    translation = localized.get(rune["id"], rune)
+                    manifest["runeNames"][name] = translation["name"]
+                    if version == WORLDS:
+                        manifest["runeDescriptions"][name] = rune_description(translation["longDesc"])
 
     for name, icon in SHARDS.items():
         filename = f"StatMods{icon}Icon.png"
         manifest["rune"][key(name)] = add("rune", filename, f"img/perk-images/StatMods/{filename}")
         manifest["runeNames"][key(name)] = SHARD_NAMES[name]
+        manifest["runeDescriptions"][key(name)] = SHARD_DESCRIPTIONS[name]
 
 
 def main():
@@ -94,7 +123,7 @@ def main():
     jobs = {}
     newer = {}
     manifest = {"champions": {}, "item": {}, "rune": {}, "runeNames": {},
-                "runeTrees": {}, "spell": {}}
+                "runeDescriptions": {}, "runeTrees": {}, "spell": {}}
 
     def add(kind, filename, source, version=BASE):
         path = f"lol/{kind}/{filename}"

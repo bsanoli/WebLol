@@ -1,7 +1,7 @@
 // @ts-nocheck -- A tela legada ainda usa estado e eventos DOM sem tipos explícitos.
 import { iconMarkup, laneIconMarkup } from "./icon"
 import DATA from "../data/worlds.json"
-import { lolAsset, lolChampion, lolKey } from "./lol-media"
+import { LOL_DATA, lolAsset, lolChampion, lolKey } from "./lol-media"
 import { buildHtml, buildSample, buildsTable } from "./worlds-builds"
 import { LANES, LC, pct, wrPill, ico, esc, championSlug, teamLogo, teamRegion } from "./worlds-display"
 import { initializeTheme } from "./theme"
@@ -10,13 +10,77 @@ initializeTheme()
 
 const G=DATA.games, C=DATA.champs;
 const tipEl=()=>document.getElementById('tip');
-function showTip(t,x,y){const el=tipEl();el.textContent=t;el.hidden=false;const r=el.getBoundingClientRect();let L=x+14,T=y+16;if(L+r.width>innerWidth-8)L=x-r.width-14;if(T+r.height>innerHeight-8)T=y-r.height-12;el.style.left=Math.max(8,L)+"px";el.style.top=Math.max(8,T)+"px"}
-document.addEventListener('mousemove',e=>{const t=e.target.closest&&e.target.closest('[data-tip]');if(t)showTip(t.dataset.tip,e.clientX,e.clientY);else tipEl().hidden=true});
-document.addEventListener('focusin',e=>{const t=e.target.closest('[data-tip]');if(t){const r=t.getBoundingClientRect();showTip(t.dataset.tip,r.left,r.bottom)}});
-document.addEventListener('focusout',()=>tipEl().hidden=true);
-document.addEventListener('keydown',e=>{if(e.key==='Escape')tipEl().hidden=true});
-document.addEventListener('scroll',()=>tipEl().hidden=true,true);
+let tipTarget, dismissedRune;
+function hideTip() {
+  tipEl().hidden = true;
+  tipTarget = undefined;
+}
+function showTip(target, x, y) {
+  const el = tipEl();
+  const { tip, runeTip } = target.dataset;
+  if (runeTip && tipTarget === target && !el.hidden) return;
+  el.classList.toggle("rune-tip", Boolean(runeTip));
+  el.textContent = tip;
+  if (runeTip) {
+    const heading = document.createElement("strong");
+    const icon = LOL_DATA.rune[runeTip];
+    if (icon) {
+      const img = document.createElement("img");
+      img.alt = "";
+      img.src = lolAsset(icon);
+      heading.append(img);
+    }
+    heading.append(LOL_DATA.runeNames[runeTip] ?? runeTip);
+    const description = document.createElement("p");
+    description.textContent = LOL_DATA.runeDescriptions[runeTip] ?? "Descrição indisponível no patch 26.20.";
+    el.prepend(heading, description);
+  }
+  el.hidden = false;
+  tipTarget = target;
+  const {width, height} = el.getBoundingClientRect();
+  if (runeTip) {
+    const anchor = target.getBoundingClientRect();
+    const left = anchor.left + (anchor.width - width) / 2;
+    const top = anchor.top - height >= 8 ? anchor.top - height : anchor.bottom;
+    el.style.left = Math.max(8, Math.min(left, document.documentElement.clientWidth - width - 8)) + "px";
+    el.style.top = Math.max(8, Math.min(top, innerHeight - height - 8)) + "px";
+    return;
+  }
+  const left = x + 14 + width > innerWidth - 8 ? x - width - 14 : x + 14;
+  const top = y + 16 + height > innerHeight - 8 ? y - height - 12 : y + 16;
+  el.style.left = Math.max(8, left) + "px";
+  el.style.top = Math.max(8, top) + "px";
+}
+document.addEventListener("mousemove", e => {
+  if (tipEl().contains(e.target)) return;
+  const target = e.target.closest?.("[data-tip]");
+  if (target && target === dismissedRune) return;
+  dismissedRune = undefined;
+  if (target) showTip(target, e.clientX, e.clientY);
+  else hideTip();
+});
+document.addEventListener("focusin", e => {
+  const target = e.target.closest("[data-tip]");
+  if (!target) return;
+  const {left, bottom} = target.getBoundingClientRect();
+  dismissedRune = undefined;
+  showTip(target, left, bottom);
+});
+document.addEventListener("click", e => {
+  const target = e.target.closest?.("[data-rune-tip]");
+  if (target) showTip(target);
+});
+document.addEventListener("focusout", hideTip);
+document.addEventListener("keydown", e => {
+  if (e.key !== "Escape") return;
+  if (tipTarget?.dataset.runeTip) dismissedRune = tipTarget;
+  hideTip();
+});
+document.addEventListener("scroll", e => {
+  if (e.target !== tipEl()) hideTip();
+}, true);
 document.addEventListener("pointerdown", event => {
+  if (tipTarget?.dataset.runeTip && !tipTarget.contains(event.target) && !tipEl().contains(event.target)) hideTip();
   const trigger = document.querySelector('.comp-picker-trigger[aria-expanded="true"]');
   if (trigger && !trigger.parentElement.contains(event.target)) trigger.click();
 });
@@ -113,6 +177,7 @@ function go(id) {
 }
 
 function render(id){
+  hideTip();
   window.frameElement?.dispatchEvent(new CustomEvent("weblol:analytics-clear"));
   document.getElementById("kpis").hidden = !!window.frameElement || id !== "geral";
   if(!validTab(id))id="geral";
@@ -228,7 +293,7 @@ function wireLane(lane){
        <td class="num">${wrPill(c.wins,c.picks)}</td><td class="num" data-tip="Banido em ${c.bans} de ${G} jogos">${c.bans}</td><td class="num" data-tip="${c.picks} picks + ${c.bans} bans em ${G} jogos">${pct(r.pres)}</td>
        <td class="num kda" data-tip="${has?`(${L.k.toFixed(1)} + ${L.a.toFixed(1)}) ÷ ${L.d.toFixed(1)}`:"Sem dados"}">${has?r.kda.toFixed(2):'<span class="na">–</span>'}</td>
        <td class="num">${has?L.k.toFixed(1):'–'}</td><td class="num">${has?L.d.toFixed(1):'–'}</td><td class="num">${has?L.a.toFixed(1):'–'}</td></tr>
-       <tr class="detail" ${open?'':'hidden'}><td colspan="9"><div class="champion-detail">${has?`${buildSample(L)}${buildHtml(c)}`:`<span class="na">Sem detalhes coletados para este campeão (poucos jogos). ${c.picks} jogos no total, ${c.wins} vitórias.</span>`}</div></td></tr>`}).join("");
+       <tr class="detail" ${open?'':'hidden'}><td colspan="9"><div class="champion-detail">${has?`${buildSample(L)}${buildHtml(c, "expanded")}`:`<span class="na">Sem detalhes coletados para este campeão (poucos jogos). ${c.picks} jogos no total, ${c.wins} vitórias.</span>`}</div></td></tr>`}).join("");
   };
   tb.onclick=e=>{
     const tr=e.target.closest('tr.main');if(!tr)return;

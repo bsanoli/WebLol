@@ -16,12 +16,14 @@ const buildOptionNames=(kind: BuildIconKind,name: string)=>kind==="spell"?name.s
 export function buildSample(sample: LaneSample, position?: string) {
   const counts = (entries: LaneSample["players"], showTeamLogo = false) => `<ul class="build-sample-counts">${entries.map(([name, count]) =>
     `<li>${showTeamLogo ? teamLogo(String(name)) : ""}<span>${esc(name)}</span> <strong>${count}</strong></li>`).join("")}</ul>`;
+  const showSampleSize = position || sample.n !== sample.picks;
   return `<div class="build-sample">
-    <div><h4>Resultado na amostra${position ? ` <span class="na">· ${esc(position)}</span>` : ""}</h4>
-      <strong class="build-sample-wins">${sample.w}V</strong>
-      <span class="na">/</span>
-      <strong class="build-sample-losses">${sample.n - sample.w}D</strong>
-      <span class="na">em ${sample.n} jogos${sample.n < sample.picks ? ` (de ${sample.picks})` : ""}</span>
+    <div><h4>${position ? `Resultado na amostra <span class="na">· ${esc(position)}</span>` : "Amostra"}</h4>
+      <span><strong class="build-sample-wins">${sample.w}V</strong>
+        <span class="na">/</span>
+        <strong class="build-sample-losses">${sample.n - sample.w}D</strong>
+        ${showSampleSize ? `<span class="na">em ${sample.n} jogos${sample.n < sample.picks ? ` (de ${sample.picks})` : ""}</span>` : ""}
+      </span>
     </div>
     <div><h4>Quem jogou</h4>${counts(sample.players)}</div>
     <div><h4>Times</h4>${counts(sample.teams, true)}</div>
@@ -29,30 +31,38 @@ export function buildSample(sample: LaneSample, position?: string) {
 }
 
 function itemsHtml(list: BuildOption[],what: string,kind: BuildIconKind,num=false){
-  return `<ul class="items">${list.map(([n,p,en],i)=>{
+  return `<ul class="items${kind==="rune"?" rune-frequency":""}">${list.map(([n,p,en],i)=>{
     if(typeof n!=="string"||typeof p!=="number")return "";
     const names=buildOptionNames(kind,typeof en==="string"?en:n);
     const icons=names.map(name=>buildIcon(kind,name)).join("");
     const label=kind==="rune"?LOL_DATA.runeNames[lolKey(names[0])]||n:n;
-    return `<li class="item${num?" item-ranked":""}" data-tip="${esc(PTXT(label,p,what)+(en&&en!==label?` · em inglês: ${en}`:""))}">${num?`<span class="n">${i+1}</span>`:""}<span class="item-name">${icons}<span>${esc(label)}</span></span><span class="pb" aria-hidden="true"><i style="width:${p}%"></i></span><span class="p">${p}%</span></li>`;
+    const runeTip=kind==="rune"?` data-rune-tip="${lolKey(names[0])}"`:"";
+    return `<li class="item${num?" item-ranked":""}" data-tip="${esc(PTXT(label,p,what)+(en&&en!==label?` · em inglês: ${en}`:""))}"${runeTip}>${num?`<span class="n">${i+1}</span>`:""}<span class="item-name">${icons}<span>${esc(label)}</span></span><span class="pb" aria-hidden="true"><i style="width:${p}%"></i></span><span class="p">${p}%</span></li>`;
   }).join("")}</ul>`;
 }
-export function buildHtml(c: Champion){const b=c.build;if(!b)return `<span class="na">Build não disponível no site para ${esc(c.name)}.</span>`;
+export function buildHtml(c: Champion, layout: "page" | "expanded" = "page"){const b=c.build;if(!b)return `<span class="na">Build não disponível no site para ${esc(c.name)}.</span>`;
   const w=`de ${c.name}`;
   const section=(title: string,content: string)=>`<div class="build-section"><h5>${title}</h5>${content}</div>`;
-  const column=(title: string,...sections: (string | undefined)[])=>{
+  const column=(title: string,sections: (string | undefined)[],className = "")=>{
     const content=sections.filter(Boolean).join("");
-    return content ? `<section class="build-column"><h4>${title}</h4>${content}</section>` : "";
+    return content ? `<section class="build-column${className ? ` ${className}` : ""}"><h4>${title}</h4>${content}</section>` : "";
   };
   const equipment=[
-    b.items && section("Itens por frequência de uso",itemsHtml(b.items,w,"item",true)),
+    b.items && section(layout === "expanded" ? "Por frequência de uso" : "Itens por frequência de uso",itemsHtml(b.items,w,"item",true)),
     b.support && section("Item de suporte",itemsHtml(b.support,w,"item"))
   ].filter(Boolean).join("");
   const keyRunes=b.keys && section("Frequência da runa principal",itemsHtml(b.keys,w,"rune"));
   const runeDetails=b.runes && section("Página de runas mais usada",runePage(b.runes,b.runes_en||[]));
   const boots=b.boots && section("Botas",itemsHtml(b.boots,w,"item"));
   const spells=b.spells && section("Feitiços",itemsHtml(b.spells,w,"spell"));
-  return `<div class="build">${column("Build e feitiços",equipment,boots,spells)}${column("Runas",runeDetails,keyRunes)}</div>`;
+  if (layout === "expanded") {
+    return `<div class="build build-expanded">
+      ${column("Itens",[equipment])}
+      ${column("Botas e feitiços",[boots,spells],"build-utility")}
+      ${column("Runas",[runeDetails,keyRunes],"build-runes")}
+    </div>`;
+  }
+  return `<div class="build">${column("Build e feitiços",[equipment,boots,spells])}${column("Runas",[runeDetails,keyRunes])}</div>`;
 }
 
 const missingBuildOption='<span class="na" aria-label="Sem dados">—</span>';
