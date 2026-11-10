@@ -257,9 +257,10 @@ for (const frame of frames) {
   });
 }
 
-function openRoute(fallback = "worlds") {
+function openRoute() {
   const { screen } = readRoute();
-  show(screen || fallback);
+  if (!screen) writeRoute(routeRoots.worlds, true);
+  show(screen || "worlds");
   for (const frame of frames) applyFrameRoute(frame);
   if (!user() && currentScreen === "camp" && !$("#modal").open) stepId();
   if (!user() && currentScreen === "worlds" && $("#modal").open) closeModal();
@@ -333,8 +334,7 @@ document.querySelectorAll("#top .tab").forEach(button => {
 (async function init(){
   KEYS=user()?.admin?await idbGet("adminKeys"):null;
   updateStatus();
-  const saved=lsGet("lol-aba-principal","worlds");
-  openRoute(Object.hasOwn(routeRoots,saved)?saved:"worlds");
+  openRoute();
   if(user()&&ONLINE){
     setSync("Sincronizando com o time…","");
     await sync();
