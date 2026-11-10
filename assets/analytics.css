@@ -266,7 +266,6 @@
 .comparison-row { display: grid; grid-template-columns: 90px minmax(30px,1fr) 60px; align-items: center; gap: 12px; min-height: 32px; font-size: 13px; }
 .comparison-row strong { text-align: right; font-variant-numeric: tabular-nums; }
 .sample-note { margin: 20px 0 0; padding-top: 16px; border-top: 1px solid var(--line); color: var(--muted); font-size: 12px; }
-.wrap:has(.worlds-compositions) { max-width: 1680px; }
 .comps-intro { margin-bottom: 16px; }
 .comps-intro h2 { margin-bottom: 4px; }
 .comps-intro .hint { margin: 0; }
