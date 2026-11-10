@@ -1,3 +1,28 @@
+@font-face {
+  font-family:"Barlow";
+  src:url("./fonts/barlow/barlow-400.woff2") format("woff2");
+  font-weight:400;
+  font-display:swap;
+}
+@font-face {
+  font-family:"Barlow";
+  src:url("./fonts/barlow/barlow-600.woff2") format("woff2");
+  font-weight:600;
+  font-display:swap;
+}
+@font-face {
+  font-family:"Barlow";
+  src:url("./fonts/barlow/barlow-700.woff2") format("woff2");
+  font-weight:700;
+  font-display:swap;
+}
+@font-face {
+  font-family:"Barlow Condensed";
+  src:url("./fonts/barlow/barlow-condensed-700.woff2") format("woff2");
+  font-weight:700;
+  font-display:swap;
+}
+
 :root {
   color-scheme: dark;
   --wl-bg: #0d1118;
@@ -10,10 +35,48 @@
   --wl-on-accent: #20190d;
   --wl-danger: #ff9393;
   --wl-success: #79d9a9;
-  --wl-font: "Segoe UI", system-ui, sans-serif;
+  --wl-info: #9cc4ff;
+  --wl-warning: #f0d38a;
+  --wl-accent-soft: color-mix(in srgb, var(--wl-accent) 16%, var(--wl-surface));
+  --wl-success-soft: color-mix(in srgb, var(--wl-success) 15%, var(--wl-surface));
+  --wl-danger-soft: color-mix(in srgb, var(--wl-danger) 15%, var(--wl-surface));
+  --wl-warning-soft: color-mix(in srgb, var(--wl-warning) 16%, var(--wl-surface));
+  --wl-lane-top: #e8a452;
+  --wl-lane-jungle: #85ce90;
+  --wl-lane-mid: #83b8fa;
+  --wl-lane-adc: #e694ba;
+  --wl-lane-support: #c2a7ef;
+  --wl-side-blue: #3e7bfa;
+  --wl-side-blue-text: var(--wl-info);
+  --wl-side-blue-surface: #2458ad;
+  --wl-side-red: #ff6262;
+  --wl-side-red-text: #ffb0b0;
+  --wl-side-red-surface: #9d313e;
+  --wl-font: "Barlow", "Segoe UI", system-ui, sans-serif;
+  --wl-font-display: "Barlow Condensed", var(--wl-font);
+  --wl-title-size: clamp(28px, 3.5vw, 40px);
+  --wl-section-size: 22px;
+  --wl-control-radius: 4px;
+  --wl-card-radius: 6px;
+  --wl-panel-radius: 8px;
+  --wl-backdrop: rgb(4 8 14 / 78%);
+  --wl-button-height: 40px;
+  --wl-button-height-sm: 32px;
   --wl-gutter: clamp(12px, 2.5vw, 32px);
 }
-body { font-family: var(--wl-font); }
+body { font: 15px/1.5 var(--wl-font); background: var(--wl-bg); color: var(--wl-text); }
+:where(h1, h2, h3) { font-family: var(--wl-font-display); font-weight: 700; line-height: 1.15; }
+:where(h1) { font-size: var(--wl-title-size); }
+:where(h2) { font-size: var(--wl-section-size); }
+:where(input, select, textarea, button) { font: inherit; color: inherit; }
+:where(input:not([type=checkbox],[type=radio],[type=range],[type=file]), select, textarea) {
+  padding: 7px 10px;
+  background: var(--wl-bg);
+  border: 1px solid var(--wl-line);
+  border-radius: var(--wl-control-radius);
+}
+:where(input, textarea)::placeholder { color: var(--wl-muted); }
+:where(input[type=checkbox], input[type=radio], input[type=range]) { accent-color: var(--wl-accent); }
 [hidden] { display: none !important; }
 :where(button, input, textarea, select, a, summary, [tabindex]):focus-visible {
   outline: 2px solid var(--wl-accent);
@@ -26,7 +89,86 @@ body { font-family: var(--wl-font); }
   vertical-align: -.15em;
   flex: none;
 }
-td, .kpi, .bar { font-variant-numeric: tabular-nums; }
+td, .kpi, .bar, .wr, .kda, .lane-games { font-variant-numeric: tabular-nums; }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { transition: none !important; scroll-behavior: auto !important; }
+}
+
+/* The shadcn component and the standalone pages use the same button attributes. */
+[data-slot=button] {
+  --button-height: var(--wl-button-height);
+  box-sizing: border-box;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  gap: 6px;
+  min-height: var(--button-height);
+  max-width: 100%;
+  padding: 5px 12px;
+  border: 1px solid var(--wl-line);
+  border-radius: var(--wl-control-radius);
+  background: var(--wl-raised);
+  color: var(--wl-text);
+  font: 600 14px/1.25 var(--wl-font);
+  text-align: center;
+  text-decoration: none;
+  cursor: pointer;
+  transition: background-color .15s, border-color .15s, color .15s;
+}
+[data-slot=button] svg { width: 16px; height: 16px; flex: none; pointer-events: none; }
+[data-slot=button]:where(:hover:not(:disabled,[aria-disabled=true])) { border-color: var(--wl-accent); }
+[data-slot=button]:focus-visible { outline: 2px solid var(--wl-accent); outline-offset: 2px; }
+[data-slot=button]:where(:disabled,[aria-disabled=true]) { opacity: .55; cursor: default; }
+[data-slot=button]:where([data-variant=default]) {
+  background: var(--wl-accent);
+  border-color: var(--wl-accent);
+  color: var(--wl-on-accent);
+}
+[data-slot=button]:where([data-variant=default]:hover:not(:disabled,[aria-disabled=true])) {
+  background: color-mix(in srgb, var(--wl-accent) 88%, white);
+}
+[data-slot=button]:where([data-variant=secondary]) { border-color: transparent; }
+[data-slot=button]:where([data-variant=ghost],[data-variant=link]) {
+  background: transparent;
+  border-color: transparent;
+  color: var(--wl-muted);
+}
+[data-slot=button]:where([data-variant=ghost]:hover:not(:disabled,[aria-disabled=true])) {
+  background: var(--wl-raised);
+  color: var(--wl-text);
+}
+[data-slot=button]:where([data-variant=link]) { color: var(--wl-accent); }
+[data-slot=button]:where([data-variant=link]:hover:not(:disabled,[aria-disabled=true])) { text-decoration: underline; }
+[data-slot=button]:where([data-variant=destructive]) {
+  color: var(--wl-danger);
+  border-color: color-mix(in srgb, var(--wl-danger) 45%, var(--wl-line));
+  background: color-mix(in srgb, var(--wl-danger) 8%, var(--wl-raised));
+}
+[data-slot=button]:where([data-variant=destructive]:hover:not(:disabled,[aria-disabled=true])) {
+  border-color: var(--wl-danger);
+  background: color-mix(in srgb, var(--wl-danger) 16%, var(--wl-raised));
+}
+[data-slot=button]:where([aria-current=page],[aria-pressed=true],[aria-selected=true]) {
+  background: color-mix(in srgb, var(--wl-accent) 13%, var(--wl-raised));
+  border-color: var(--wl-accent);
+  color: var(--wl-accent);
+}
+
+[data-slot=button]:where([data-size=sm],[data-size=icon-sm]) {
+  --button-height: var(--wl-button-height-sm);
+  padding-inline: 8px;
+  font-size: 13px;
+}
+[data-slot=button]:where([data-size=xs],[data-size=icon-xs]) {
+  --button-height: 28px;
+  padding-inline: 6px;
+  font-size: 12px;
+}
+[data-slot=button]:where([data-size=lg],[data-size=icon-lg]) { --button-height: 48px; }
+[data-slot=button]:where([data-size^=icon]) { width: var(--button-height); padding: 0; }
+@media (max-width: 650px) {
+  :root { --wl-button-height: 44px; --wl-button-height-sm: 36px; }
+  [data-slot=button] { padding-inline: 8px; }
+  [data-slot=button]:where([data-size^=icon]) { padding-inline: 0; }
 }

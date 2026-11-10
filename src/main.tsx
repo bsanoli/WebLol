@@ -42,7 +42,7 @@ function App() {
           <Button id="copy-link" variant="outline" hidden>
             <Icon name="link" /> Copiar link
           </Button>
-          <Button id="sync" variant="outline" className="chip">
+          <Button id="sync" variant="outline">
             <Icon name="reset" />
             <span id="sync-label" aria-live="polite">Verificando sincronização…</span>
           </Button>
@@ -60,7 +60,7 @@ function App() {
           <div className="wrap">
             <Card>
               <CardHeader>
-                <CardTitle><h1 className="text-2xl font-bold">Administração</h1></CardTitle>
+                <CardTitle><h1 className="font-display text-[length:var(--wl-title-size)] font-bold">Administração</h1></CardTitle>
                 <CardDescription>Revise as alterações enviadas e publique a versão oficial do time.</CardDescription>
               </CardHeader>
               <CardContent id="admin" />

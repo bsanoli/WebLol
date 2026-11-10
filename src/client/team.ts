@@ -92,7 +92,7 @@ function renderList(){
   $("#clist").innerHTML=matches
    .map(c=>{const firsts=["top","jg","mid","adc","sup"].map(l=>c.lanes[l][0]).filter(Boolean);
      return `<div class="composition-item"><button class="ci${c.id===S.cur?" on":""}" aria-pressed="${c.id===S.cur}" data-id="${c.id}"><b>${esc(c.name)}</b>
-      <span class="mini">${firsts.map(img).join("")||'<small style="color:var(--mut)">vazia</small>'}</span></button><details class="composition-menu"><summary aria-label="Ações de ${esc(c.name)}">⋯</summary><div><button data-comp-action="duplicate" data-id="${c.id}">${iconMarkup("duplicate")} Duplicar</button><button data-comp-action="delete" data-id="${c.id}" class="dng">${iconMarkup("trash")} Excluir</button></div></details></div>`}).join("")||'<div style="color:var(--mut);padding:10px;font-size:12px">Nenhuma comp.</div>';
+      <span class="mini">${firsts.map(img).join("")||'<small style="color:var(--mut)">vazia</small>'}</span></button><details class="composition-menu"><summary aria-label="Ações de ${esc(c.name)}">⋯</summary><div><button data-slot="button" data-variant="ghost" data-size="sm" data-comp-action="duplicate" data-id="${c.id}">${iconMarkup("duplicate")} Duplicar</button><button data-slot="button" data-variant="destructive" data-size="sm" data-comp-action="delete" data-id="${c.id}">${iconMarkup("trash")} Excluir</button></div></details></div>`}).join("")||'<div style="color:var(--mut);padding:10px;font-size:12px">Nenhuma comp.</div>';
 }
 function selectComp(id){S.cur=id;save(false);renderAll();publishTeamRoute("comps")}
 $("#clist").onclick=e=>{const action=e.target.closest("[data-comp-action]");if(action){if(action.dataset.compAction==="duplicate")duplicateComp(action.dataset.id);else deleteComp(action.dataset.id);return}const it=e.target.closest(".ci");if(it)selectComp(it.dataset.id)};
@@ -116,7 +116,7 @@ function deleteComp(id){const c=S.comps.find(c=>c.id===id);if(!confirm(`Excluir 
 function optionHTML(n,l,i){
   return `<div class="chip ${i===0?"primary":"alternative"}" draggable="true" data-n="${esc(n)}" data-from="${l}">
     <button class="champ-priority" data-priority="${esc(n)}" data-lane="${l}" aria-label="Priorizar ${esc(n)} em ${LN[l].n}" title="${i+1}ª opção · tornar principal">${img(n)}${i===0?`<span><small>Principal</small><b>${esc(n)}</b></span>`:""}</button>
-    <details class="option-menu" name="champion-editor-menu"><summary aria-label="Opções de ${esc(n)}">⋯</summary><div><span>${i+1}ª opção · ${esc(n)}</span><button data-move="-1" data-n="${esc(n)}" data-lane="${l}" ${i===0?"disabled":""}>Mover antes</button><button data-move="1" data-n="${esc(n)}" data-lane="${l}" ${i===cur().lanes[l].length-1?"disabled":""}>Mover depois</button><button data-rm="${esc(n)}">Remover ${esc(n)}</button></div></details>
+    <details class="option-menu" name="champion-editor-menu"><summary aria-label="Opções de ${esc(n)}">⋯</summary><div><span>${i+1}ª opção · ${esc(n)}</span><button data-slot="button" data-variant="ghost" data-size="sm" data-move="-1" data-n="${esc(n)}" data-lane="${l}" ${i===0?"disabled":""}>Mover antes</button><button data-slot="button" data-variant="ghost" data-size="sm" data-move="1" data-n="${esc(n)}" data-lane="${l}" ${i===cur().lanes[l].length-1?"disabled":""}>Mover depois</button><button data-slot="button" data-variant="destructive" data-size="sm" data-rm="${esc(n)}">Remover ${esc(n)}</button></div></details>
   </div>`;
 }
 function pickArt(name){
@@ -147,8 +147,8 @@ function renderEditor(){
   $("#v-comps").classList.toggle("draft-view",dv);
   $("#draft-comp").hidden=true;
   const notes=`<details id="composition-notes" ${notesOpen?"open":""}><summary>Anotações da composição</summary><label class="control-label" for="notes">Plano geral</label><textarea id="notes" placeholder="Plano de jogo, condição de vitória…">${esc(c.notes)}</textarea>${dv?`<label class="control-label" for="dnote">Plano do draft · ${DRAFT_SIDE[draftOf(c).side]}</label><textarea id="dnote">${esc(draftOf(c).note[draftOf(c).side])}</textarea><ul id="notes-lanes" class="draft-lane-notes" aria-label="Observações por posição" hidden></ul>`:""}</details>`;
-  $("#editor").innerHTML=`<div class="editor-controls"><input id="cname" aria-label="Nome da composição" value="${esc(c.name)}" placeholder="Nome da composição"><div class="vtog"><button data-view="lanes" aria-pressed="${!dv}" class="${dv?"":"on"}">Opções por posição</button><button data-view="draft" aria-pressed="${dv}" class="${dv?"on":""}">Ordem do draft</button></div></div>
-  ${notes}<button type="button" class="jump-picker" data-picker>${iconMarkup("plus")} Adicionar campeão</button>
+  $("#editor").innerHTML=`<div class="editor-controls"><input id="cname" aria-label="Nome da composição" value="${esc(c.name)}" placeholder="Nome da composição"><div class="vtog"><button data-slot="button" data-variant="ghost" data-view="lanes" aria-pressed="${!dv}" class="${dv?"":"on"}">Opções por posição</button><button data-slot="button" data-variant="ghost" data-view="draft" aria-pressed="${dv}" class="${dv?"on":""}">Ordem do draft</button></div></div>
+  ${notes}<button data-slot="button" data-variant="default" type="button" class="jump-picker" data-picker>${iconMarkup("plus")} Adicionar campeão</button>
   ${dv?draftHTML(c):LANES.map(l=>`<div class="lane${active===l.k?" act":""}${l.k==="ban"?" ban-strip":""}" data-l="${l.k}" style="--lc:var(${l.c})">
   ${l.k==="ban"?"":pickArt(c.lanes[l.k][0])}
   <button class="ln" data-draft-target="${l.k}" aria-pressed="${active===l.k}">${l.n}${active===l.k?'<span class="selection-mark">●</span>':""}</button>
@@ -236,7 +236,7 @@ function draftHTML(c){
   const PHN=["Bans 1","Picks 1","Bans 2","Picks 2"];
   // faixa da sequência
   let h=`<div class="draft-toolbar"><div class="dside" role="group" aria-label="Lado da equipe"><span>Nossa equipe</span>
-    ${Object.entries(DRAFT_SIDE).map(([key,label])=>`<button data-side="${key}" aria-pressed="${d.side===key}" class="${d.side===key?`on ${key[0]}`:""}">${label}</button>`).join("")}</div></div>
+    ${Object.entries(DRAFT_SIDE).map(([key,label])=>`<button data-slot="button" data-variant="outline" data-size="sm" data-side="${key}" aria-pressed="${d.side===key}" class="${d.side===key?`on ${key[0]}`:""}">${label}</button>`).join("")}</div></div>
   <div class="dseq-row"><div class="dseq" role="group" aria-label="Sequência de picks e bans">${PHN.map((p,pi)=>`<div class="dsg"><div class="dsl">${p}</div><div class="dsc">${seq.filter(s=>s.ph===pi).map(s=>`<span class="sq ${s.t==="B"?"b":"r"} ${s.k}${s.t===us?" us":""}" title="${s.n}º ${s.k==="ban"?"ban":"pick"}: ${s.t==="B"?"Azul":"Vermelho"} ${s.k==="ban"?"bane":"escolhe"}">${s.k==="ban"?"":s.n}</span>`).join("")}</div></div>`).join("")}</div></div>`;
   const team=t=>{
     const mine=t===us,side=t==="B"?"b":"r";
@@ -280,7 +280,7 @@ function draftHTML(c){
 /* ===== Grade de campeões ===== */
 let role="all";
 const ROLEBTN=[["all","Todos"],["top","Top"],["jg","Jungle"],["mid","Mid"],["adc","ADC"],["sup","Suporte"]];
-$("#roles").innerHTML=ROLEBTN.map(([k,n])=>`<button data-r="${k}" aria-pressed="${k==="all"}" class="${k==="all"?"on":""}">${n}</button>`).join("");
+$("#roles").innerHTML=ROLEBTN.map(([k,n])=>`<button data-slot="button" data-variant="ghost" data-size="sm" data-r="${k}" aria-pressed="${k==="all"}" class="${k==="all"?"on":""}">${n}</button>`).join("");
 $("#roles").onclick=e=>{const b=e.target.closest("button");if(!b)return;role=b.dataset.r;document.querySelectorAll("#roles button").forEach(x=>{x.classList.toggle("on",x===b);x.setAttribute("aria-pressed",String(x===b))});resetGrid()};
 const resetGrid=()=>{renderGrid();$("#grid").scrollTop=0};$("#search").oninput=resetGrid;$("#sort").onchange=resetGrid;$("#worlds-only").onchange=resetGrid;
 function renderTarget(){
@@ -534,7 +534,7 @@ const WAVE_HTML=`
 
 function renderKnow(){
   const kt=S.kTab||"obj";
-  $("#know").innerHTML=`<div class="ktabs"><button data-kt="obj" class="${kt==="obj"?"on":""}">${iconMarkup("clock")} Objetivos e tempos</button><button data-kt="wave" class="${kt==="wave"?"on":""}">${iconMarkup("wave")} Controle de wave</button></div>
+  $("#know").innerHTML=`<div class="ktabs"><button data-slot="button" data-variant="ghost" data-kt="obj" aria-pressed="${kt==="obj"}" class="${kt==="obj"?"on":""}">${iconMarkup("clock")} Objetivos e tempos</button><button data-slot="button" data-variant="ghost" data-kt="wave" aria-pressed="${kt==="wave"}" class="${kt==="wave"?"on":""}">${iconMarkup("wave")} Controle de wave</button></div>
   <div id="k-wave" style="display:${kt==="wave"?"block":"none"}">${WAVE_HTML}</div>
   <div id="k-obj" style="display:${kt==="obj"?"block":"none"}">
   <div class="warn">${iconMarkup("warning")} Tempos da temporada 2026 (patch 26.1 em diante, jogo atual 16.x). As mudanças vieram do preview oficial da Riot e de guias de 2026; os primeiros spawns da selva são das notas do patch 26.1; os tempos de volta dos campos pequenos são os de sempre. Confirmem no jogo se algum patch novo mexer nisso. Os tempos são do relógio do jogo.</div>
@@ -680,7 +680,7 @@ function renderPlays(){
   $("#psel").innerHTML=plays().map(x=>`<option value="${x.id}"${x.id===p.id?" selected":""}>${esc(x.name)} (${x.steps.length} passos)</option>`).join("");
   const opts=`<option value="">Só a função (TOP, JG...)</option>`+S.comps.map(c=>`<option value="${c.id}">${esc(c.name)}</option>`).join("");
   $("#cb").innerHTML=opts;$("#cr").innerHTML=opts;$("#cb").value=p.cb||"";$("#cr").value=p.cr||"";
-  $("#steps").innerHTML=p.steps.map((s,i)=>`<li data-i="${i}" class="${i===M.sel?"on":""}"><input data-lab="${i}" value="${esc(s.label||"Passo "+(i+1))}" aria-label="Nome do passo ${i+1}" title="Clique para renomear"><button data-sdel="${i}" aria-label="Apagar passo ${i+1}">${iconMarkup("close")}</button></li>`).join("")||'<li class="none">Nenhum passo ainda.</li>';
+  $("#steps").innerHTML=p.steps.map((s,i)=>`<li data-i="${i}" class="${i===M.sel?"on":""}"><input data-lab="${i}" value="${esc(s.label||"Passo "+(i+1))}" aria-label="Nome do passo ${i+1}" title="Clique para renomear"><button data-slot="button" data-variant="destructive" data-size="icon-sm" data-sdel="${i}" aria-label="Apagar passo ${i+1}">${iconMarkup("close")}</button></li>`).join("")||'<li class="none">Nenhum passo ainda.</li>';
   renderStat();
   renderTokens();drawLines(p.live.lines);
 }

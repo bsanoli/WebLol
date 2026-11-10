@@ -1,3 +1,4 @@
+import { Button } from "@/components/ui/button"
 import { useState } from "react"
 
 export interface ChampionSummary {
@@ -54,7 +55,7 @@ export function RankedBars({ title, description, rows, maximum, legends }: {
         <span className="chart-track" aria-hidden="true">{row.segments.map(({ value, kind }) => <i key={kind} className={`series-${kind}`} style={{ width: `${maximum > 0 ? Math.min(100, Math.max(0, value / maximum * 100)) : 0}%` }} />)}</span>
         <strong className="chart-value">{row.value}</strong>
       </li>)}</ol>
-    <div className="chart-footer"><span>Escala: 0–{maximum} jogos</span>{rows.length > 8 && <button type="button" onClick={() => setExpanded(!expanded)} aria-expanded={expanded}>{expanded ? "Mostrar 8" : "Mostrar 15"}</button>}</div>
+    <div className="chart-footer"><span>Escala: 0–{maximum} jogos</span>{rows.length > 8 && <Button variant="outline" size="sm" onClick={() => setExpanded(!expanded)} aria-expanded={expanded}>{expanded ? "Mostrar 8" : "Mostrar 15"}</Button>}</div>
   </section>
 }
 

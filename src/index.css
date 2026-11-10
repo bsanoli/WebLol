@@ -17,7 +17,11 @@
   --color-input: var(--wl-line);
   --color-ring: var(--wl-accent);
   --color-destructive: var(--wl-danger);
-  --radius-lg: 12px;
+  --font-sans: var(--wl-font);
+  --font-display: var(--wl-font-display);
+  --radius-sm: var(--wl-control-radius);
+  --radius-md: var(--wl-card-radius);
+  --radius-lg: var(--wl-panel-radius);
 }
 
 .screen-message { @apply fixed left-1/2 top-1/2 z-10 w-max max-w-[90vw] -translate-x-1/2 -translate-y-1/2 rounded-lg border border-border bg-card p-5 text-sm text-foreground shadow-lg; }

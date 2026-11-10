@@ -57,7 +57,7 @@ function modal(html) {
   $("#mbox h3").id = "modal-title";
   $("#mbox .err")?.setAttribute("role", "alert");
   if (!dialog.open) dialog.showModal();
-  $("#mbox input, #mbox .pri")?.focus();
+  $("#mbox input, #mbox [data-variant=default]")?.focus();
 }
 $("#modal").addEventListener("cancel", event => event.preventDefault());
 const closeModal = () => $("#modal").close();
@@ -68,7 +68,7 @@ function stepId(){
 
    <div class="rid"><div><label for="rname">Nome no LoL</label><input id="rname" placeholder="Nome (ex: brunoltz)" maxlength="16" autocomplete="off" spellcheck="false"></div><div><label for="rtag">Tag depois do #</label><input id="rtag" placeholder="TAG" maxlength="5" autocomplete="off" spellcheck="false"></div></div>
    <div class="err"></div>
-   <div class="row"><button class="pri" id="ok">Continuar</button></div>`);
+   <div class="row"><button data-slot="button" data-variant="default" id="ok">Continuar</button></div>`);
   const nm=$("#rname"),tg=$("#rtag");
   const go=()=>{const n=nm.value.trim(),tag=tg.value.replace(/[#\s]/g,"").toUpperCase();
     if(n.length<3)return merr("Digite o nome (mínimo 3 letras)."),nm.focus();
@@ -84,7 +84,7 @@ function stepId(){
 async function afterId(){
   merr("Conectando ao banco do time...");
   let r;try{await fb();r=await readOfficial()}catch(e){r={err:"net"}}
-  if(r.err==="fp")return modal(`<h3>Banco adulterado</h3><p>A chave do admin guardada no banco do time não é a original. Por segurança o app não vai usar esses dados. Avise o admin.</p><div class="row"><button class="pri" onclick="stepId()">Voltar</button></div>`);
+  if(r.err==="fp")return modal(`<h3>Banco adulterado</h3><p>A chave do admin guardada no banco do time não é a original. Por segurança o app não vai usar esses dados. Avise o admin.</p><div class="row"><button data-slot="button" data-variant="default" onclick="stepId()">Voltar</button></div>`);
   if(isAdminId(pendingId)){if(!ONLINE)return merr("O banco online ainda não foi configurado neste app.");if(r.err==="net")return merr("Não consegui conectar ao banco do time. Verifique a internet.");if(!ADMIN)return stepImport();if(!slotOf(ADMIN,pendingId))return merr("Este Riot ID ainda não foi liberado como admin. Peça ao Bruno para adicionar você na aba Administração.");return stepAdminPw()}
   if(r.err==="net"||r.err==="noadmin")toast("O banco do time ainda não está disponível. Você pode usar normalmente e enviar depois.",5000);
   finishLogin(false);
@@ -92,7 +92,7 @@ async function afterId(){
 function stepAdminPw(){
   modal(`<h3>Login do admin</h3><p>Este Riot ID é o administrador. Digite a senha de admin.</p>
    <label for="pw">Senha</label><input type="password" id="pw"><div id="fbw" style="display:none"><label for="fpw">Senha do Firebase (do e-mail ${esc(adminEmail(pendingId))})</label><input type="password" id="fpw"></div><div class="err"></div>
-   <div class="row"><button id="back">Voltar</button><button class="pri" id="ok">Entrar</button></div>`);
+   <div class="row"><button data-slot="button" data-variant="outline" id="back">Voltar</button><button data-slot="button" data-variant="default" id="ok">Entrar</button></div>`);
   const go=async()=>{$("#ok").disabled=true;merr("Verificando...");
     try{const pw=$("#pw").value;KEYS=await adminUnlock(pw,$("#fpw").value);if(slotOf(ADMIN,pendingId).temp)return stepNewPw(pw);finishLogin(true)}
     catch(e){$("#ok").disabled=false;if(e.message==="fb"){$("#fbw").style.display="";merr($("#fpw").value?"Senha do Firebase incorreta.":"A senha do Firebase é diferente da senha de admin. Digite a do Firebase também.");$("#fpw").focus()}else merr("Senha incorreta.")}};
@@ -102,7 +102,7 @@ function stepAdminPw(){
 function stepNewPw(tmp){
   modal(`<h3>Crie a sua senha de admin</h3><p>Você entrou com a senha provisória. Agora crie a sua senha. Só você vai saber, e ela também vira a sua senha do banco do time.</p>
    <label for="np">Nova senha (mínimo 8 caracteres)</label><input type="password" id="np"><label for="np2">Repita a senha</label><input type="password" id="np2"><div class="err"></div>
-   <div class="row"><button class="pri" id="ok">Salvar senha</button></div>`);
+   <div class="row"><button data-slot="button" data-variant="default" id="ok">Salvar senha</button></div>`);
   const go=async()=>{const a=$("#np").value,b=$("#np2").value;if(a.length<8)return merr("Use pelo menos 8 caracteres.");if(a!==b)return merr("As senhas não são iguais.");if(a===tmp)return merr("Escolha uma senha diferente da provisória.");
     $("#ok").disabled=true;merr("Salvando...");
     try{await setSlot(meId(),await makeSlot(await slotRaw(ADMIN,meId(),tmp),a,false));await FB.au.updatePassword(FB.auth.currentUser,a);finishLogin(true)}
@@ -118,14 +118,14 @@ async function setSlot(id,slot){
 }
 function stepImport(){
   modal(`<h3>Importar os dados do time</h3><p>O banco online do time ainda está vazio. Escolha a pasta antiga do OneDrive (<b>Time</b>, ou a pasta de backup em <b>Admin</b>) para copiar a chave do admin, a versão oficial e os envios para o banco. Isso só é feito uma vez.</p>
-   <div class="err"></div><div class="row"><button id="back">Voltar</button><button class="pri" id="pick">Escolher a pasta</button></div>`);
+   <div class="err"></div><div class="row"><button data-slot="button" data-variant="outline" id="back">Voltar</button><button data-slot="button" data-variant="default" id="pick">Escolher a pasta</button></div>`);
   $("#back").onclick=stepId;
   $("#pick").onclick=async()=>{const root=await pickOldFolder();if(!root)return merr("Nenhuma pasta escolhida.");
     const fa=await findAdmin(root);if(!fa)return merr(`A pasta ${root.name} não tem o admin.json. Escolha a pasta Time ou a pasta backup do Admin.`);const adm=fa.adm;
     if(ADMIN_FP&&await fingerprint(adm)!==ADMIN_FP)return merr("O admin.json desta pasta não é o original.");
     ADMIN=adm;modal(`<h3>Senha de admin</h3><p>Digite a senha de admin para entrar no banco e copiar os dados da pasta <b>${esc(root.name)}</b>.</p>
      <label for="pw">Senha</label><input type="password" id="pw"><div id="fbw" style="display:none"><label for="fpw">Senha do Firebase (do e-mail ${esc(adminEmail(pendingId))})</label><input type="password" id="fpw"></div><div class="err"></div>
-     <div class="row"><button class="pri" id="ok">Importar</button></div>`);
+     <div class="row"><button data-slot="button" data-variant="default" id="ok">Importar</button></div>`);
     const go=async()=>{$("#ok").disabled=true;merr("Verificando...");
       try{KEYS=await adminUnlock($("#pw").value,$("#fpw").value)}
       catch(e){$("#ok").disabled=false;if(e.message==="fb"){$("#fbw").style.display="";merr("Digite também a senha do Firebase.")}else merr("Senha incorreta.");return}
@@ -158,9 +158,9 @@ $("#logout").onclick=async()=>{
 async function renderAdmin(){
   const el=$("#admin");if(!user()?.admin)return;
   if(!ONLINE){el.innerHTML=`<h2>Administração</h2><div class="card">O banco online ainda não foi configurado neste app.</div>`;return}
-  if(!ADMIN){el.innerHTML=`<h2>Administração</h2><div class="card">O banco do time está vazio ou sem conexão. <button class="pri" id="imp">Importar da pasta</button> <button id="refresh">Tentar de novo</button></div>`;$("#imp").onclick=importFlow;$("#refresh").onclick=async()=>{await sync();renderAdmin()};return}
+  if(!ADMIN){el.innerHTML=`<h2>Administração</h2><div class="card">O banco do time está vazio ou sem conexão. <button data-slot="button" data-variant="default" id="imp">Importar da pasta</button> <button data-slot="button" data-variant="outline" id="refresh">Tentar de novo</button></div>`;$("#imp").onclick=importFlow;$("#refresh").onclick=async()=>{await sync();renderAdmin()};return}
   try{await fb()}catch(e){}
-  if(!KEYS||!fbIsAdmin()){el.innerHTML=`<h2>Administração</h2><div class="card"><p>Digite a senha de admin para desbloquear neste aparelho.</p><input type="password" id="apw" aria-label="Senha de administrador" style="max-width:300px"> <span id="afw" style="display:none"><input type="password" id="afpw" aria-label="Senha do Firebase" placeholder="Senha do Firebase" style="max-width:220px"></span> <button class="pri" id="aok">Desbloquear</button> <span class="bad" id="aerr"></span></div>`;
+  if(!KEYS||!fbIsAdmin()){el.innerHTML=`<h2>Administração</h2><div class="card"><p>Digite a senha de admin para desbloquear neste aparelho.</p><input type="password" id="apw" aria-label="Senha de administrador" style="max-width:300px"> <span id="afw" style="display:none"><input type="password" id="afpw" aria-label="Senha do Firebase" placeholder="Senha do Firebase" style="max-width:220px"></span> <button data-slot="button" data-variant="default" id="aok">Desbloquear</button> <span class="bad" id="aerr"></span></div>`;
     const go=async()=>{try{KEYS=await adminUnlock($("#apw").value,$("#afpw").value);renderAdmin()}catch(e){if(e.message==="fb"){$("#afw").style.display="";$("#aerr").textContent="Digite também a senha do Firebase"}else $("#aerr").textContent="Senha incorreta"}};
     $("#aok").onclick=go;el.querySelectorAll("input").forEach(i=>i.addEventListener("keydown",e=>{if(e.key==="Enter")go()}));return}
   el.innerHTML=`<h2>Administração</h2><p class="mut">Carregando envios...</p>`;
@@ -175,27 +175,27 @@ async function renderAdmin(){
   subs.sort((a,b)=>(a.at||0)-(b.at||0));
   const mine=pending();
   el.innerHTML=`<h2>Envios aguardando aprovação (${subs.length})</h2>
-   ${subs.length?subs.map((s,si)=>s.err?`<div class="card"><span class="bad">Não consegui abrir o envio ${esc(s.id)} de ${esc(s.from)} (corrompido ou de outra chave).</span> <button data-delf="${si}" class="dng">Apagar envio</button></div>`:`
+   ${subs.length?subs.map((s,si)=>s.err?`<div class="card"><span class="bad">Não consegui abrir o envio ${esc(s.id)} de ${esc(s.from)} (corrompido ou de outra chave).</span> <button data-slot="button" data-variant="destructive" data-delf="${si}">Apagar envio</button></div>`:`
     <div class="card"><div class="hd"><b>${esc(s.from)}</b><span class="mut">${fmtD(s.at)} · baseado na v${s.baseVersion}${OFF&&s.baseVersion<OFF.version?` <span style="color:var(--gold)">(versão oficial agora é v${OFF.version})</span>`:""}</span></div>
      ${s.changes.map((c,ci)=>`<label class="chg"><input type="checkbox" data-s="${si}" data-c="${ci}" checked><div><span class="op ${c.op}">${OPN[c.op]}</span> ${KN[c.kind]} <b>${esc(itemName(c))}</b><div class="det">${describe(c)}</div></div></label>`).join("")}
-     <div class="btns"><button class="pri" data-ap="${si}">✓ Aprovar marcadas</button><button class="dng" data-rj="${si}">✕ Recusar tudo</button></div></div>`).join(""):`<div class="card mut">Nenhum envio pendente. 🎉</div>`}
+     <div class="btns"><button data-slot="button" data-variant="default" data-ap="${si}">✓ Aprovar marcadas</button><button data-slot="button" data-variant="destructive" data-rj="${si}">✕ Recusar tudo</button></div></div>`).join(""):`<div class="card mut">Nenhum envio pendente. 🎉</div>`}
    <h2>Minhas alterações (admin)</h2>
-   <div class="card">${mine.length?mine.map(c=>`<div class="chg"><div><span class="op ${c.op}">${OPN[c.op]}</span> ${KN[c.kind]} <b>${esc(itemName(c))}</b><div class="det">${describe(c)}</div></div></div>`).join("")+`<div class="btns"><button class="pri" id="pubmine">Publicar como nova versão</button></div>`:'<span class="mut">Você não tem alterações locais além da versão oficial.</span>'}</div>
+   <div class="card">${mine.length?mine.map(c=>`<div class="chg"><div><span class="op ${c.op}">${OPN[c.op]}</span> ${KN[c.kind]} <b>${esc(itemName(c))}</b><div class="det">${describe(c)}</div></div></div>`).join("")+`<div class="btns"><button data-slot="button" data-variant="default" id="pubmine">Publicar como nova versão</button></div>`:'<span class="mut">Você não tem alterações locais além da versão oficial.</span>'}</div>
    <h2>Histórico (versão oficial v${OFF?.version||"-"})</h2>
    <div class="card"><table><tr><th>Versão</th><th>Data</th><th>De</th><th>O quê</th><th>Status</th></tr>
     ${(OFF?.log||[]).slice().reverse().slice(0,150).map(l=>`<tr><td>v${l.v}</td><td>${fmtD(l.at)}</td><td>${esc(l.from)}</td><td><span class="op ${l.op}">${OPN[l.op]}</span> ${KN[l.kind]} ${esc(l.name)}</td><td class="${l.status==="approved"?"ok":"bad"}">${l.status==="approved"?"aprovada":"recusada"}</td></tr>`).join("")||'<tr><td colspan="5" class="mut">Ainda sem histórico.</td></tr>'}</table></div>
    <h2>Usuários</h2>
    <div class="card"><table><tr><th>Usuário</th><th>Aparelhos</th><th>Última cópia (backup)</th><th></th></tr>
-    ${ulist.map((u,i)=>`<tr><td>${esc(u.name)}</td><td>${u.n}</td><td>${u.bk?fmtD(u.bk.at):'<span class="mut">—</span>'}</td><td>${u.bk?`<button data-bk="${i}">Baixar backup</button>`:""}</td></tr>`).join("")||'<tr><td colspan="4" class="mut">Nenhum usuário ainda.</td></tr>'}</table></div>
+    ${ulist.map((u,i)=>`<tr><td>${esc(u.name)}</td><td>${u.n}</td><td>${u.bk?fmtD(u.bk.at):'<span class="mut">—</span>'}</td><td>${u.bk?`<button data-slot="button" data-variant="outline" data-bk="${i}">Baixar backup</button>`:""}</td></tr>`).join("")||'<tr><td colspan="4" class="mut">Nenhum usuário ainda.</td></tr>'}</table></div>
    <h2>Admins</h2>
    <div class="card"><table><tr><th>Riot ID</th><th>E-mail no banco</th><th>Situação</th><th></th></tr>
     ${Object.entries(ADMINS).map(([id,em])=>{const sl=slotOf(ADMIN,id),main=normId(id)===normId(ADMIN.id),me=normId(id)===normId(user().id);
       const st=main?"principal":!sl?'<span class="mut">não liberado</span>':sl.temp?'<span style="color:var(--gold)">aguardando o 1º acesso</span>':'<span class="ok">ativo</span>';
-      return`<tr><td>${esc(dispId(id))}</td><td>${em?esc(em):'<span class="bad">falta o e-mail no app</span>'}</td><td>${st}</td><td>${main||me||!em?"":`<button data-adm="${esc(id)}">${sl?"Nova senha provisória":"Liberar admin"}</button>`}${sl&&!main&&!me?` <button class="dng" data-rmadm="${esc(id)}">Remover</button>`:""}</td></tr>`}).join("")}</table>
+      return`<tr><td>${esc(dispId(id))}</td><td>${em?esc(em):'<span class="bad">falta o e-mail no app</span>'}</td><td>${st}</td><td>${main||me||!em?"":`<button data-slot="button" data-variant="outline" data-adm="${esc(id)}">${sl?"Nova senha provisória":"Liberar admin"}</button>`}${sl&&!main&&!me?` <button data-slot="button" data-variant="destructive" data-rmadm="${esc(id)}">Remover</button>`:""}</td></tr>`}).join("")}</table>
     <div id="admform" style="display:none;margin-top:10px"><p>Liberar <b id="admwho"></b>. Primeiro cadastre o e-mail dele no Firebase (Authentication › Usuários) com uma senha provisória. Depois digite aqui a mesma senha provisória e passe para ele. No primeiro acesso ele cria a senha dele.</p>
-     <input type="password" id="admmy" placeholder="Sua senha de admin" style="max-width:220px"> <input type="password" id="admtmp" placeholder="Senha provisória dele" style="max-width:220px"> <button class="pri" id="admok">Liberar</button> <span class="bad" id="admerr"></span></div></div>
+     <input type="password" id="admmy" placeholder="Sua senha de admin" style="max-width:220px"> <input type="password" id="admtmp" placeholder="Senha provisória dele" style="max-width:220px"> <button data-slot="button" data-variant="default" id="admok">Liberar</button> <span class="bad" id="admerr"></span></div></div>
    <h2>Banco e backup</h2><div class="card"><span class="mut">Chave do admin: ${esc(KEYS.fp)}</span>
-    <div class="btns"><button id="exp">Baixar backup completo</button><button id="imp">Importar da pasta</button><button id="lock">Bloquear admin neste aparelho</button><button id="refresh">Atualizar</button></div>
+    <div class="btns"><button data-slot="button" data-variant="outline" id="exp">Baixar backup completo</button><button data-slot="button" data-variant="outline" id="imp">Importar da pasta</button><button data-slot="button" data-variant="outline" id="lock">Bloquear admin neste aparelho</button><button data-slot="button" data-variant="outline" id="refresh">Atualizar</button></div>
     <p class="mut">Guarde o backup completo na pasta Admin do OneDrive de tempos em tempos.</p></div>
    <details class="card" id="uiver"><summary>Versões da interface${(window.UI_VERSIONS||[])[0]?` <span class="mut">(atual: v${esc(window.UI_VERSIONS[0].version)})</span>`:""}</summary>
     ${(window.UI_VERSIONS||[]).map(v=>`<div style="margin-top:10px"><b>v${esc(v.version)}</b> <span class="mut">${esc(v.date.split("-").reverse().join("/"))}</span><ul style="margin:4px 0 0;padding-left:20px">${v.changes.map(c=>`<li>${esc(c)}</li>`).join("")}</ul></div>`).join("")||'<span class="mut">Sem histórico.</span>'}</details>`;

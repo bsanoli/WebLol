@@ -72,7 +72,7 @@ export function buildsTable(champions: (Champion & { build: ChampionBuild })[]){
       <td>${buildPreviewOption(build.boots?.[0],"item")}</td>
       <td>${buildPreviewOption(build.keys?.[0],"rune",secondaryRuneTree(build))}</td>
       <td>${buildPreviewOption(build.spells?.[0],"spell")}</td>
-      <td><button type="button" class="build-route" data-build="${championSlug(c.name)}" aria-label="Abrir build de ${esc(c.name)}">Ver build</button></td>
+      <td><button data-slot="button" data-variant="outline" data-size="sm" type="button" class="build-route" data-build="${championSlug(c.name)}" aria-label="Abrir build de ${esc(c.name)}">Ver build</button></td>
     </tr>`;
   }).join("");
   return `<div class="tablewrap builds-table-wrap" role="region" aria-label="Comparação de builds" tabindex="0">

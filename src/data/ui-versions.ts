@@ -8,6 +8,21 @@ export interface UiVersion {
 
 export const UI_VERSIONS: UiVersion[] = [
   {
+    version: "1.11",
+    date: "2026-11-10",
+    changes: [
+      "O visual de Composições serviu de base para a tipografia, as cores, as bordas e os raios compartilhados no painel.",
+    ],
+  },
+  {
+    version: "1.10",
+    date: "2026-11-10",
+    changes: [
+      "Botões padronizados no cabeçalho, Worlds, Área do time e Administração, com o mesmo tratamento para ações principais, secundárias, seleções e exclusões.",
+      "Mapa tático: as amostras de cor das setas ficam visíveis nos botões.",
+    ],
+  },
+  {
     version: "1.9",
     date: "2026-11-09",
     changes: [

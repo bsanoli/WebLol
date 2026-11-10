@@ -35,6 +35,23 @@ Para atualizar essas imagens, instale o Pillow no Python e rode `python scripts/
 
 O GitHub Pages serve a raiz da branch `main`. Rode `npm run pages:prepare` para gerar o build e atualizar `index.html`, `camp.html`, `worlds.html` e `assets/` na raiz. Inclua esses arquivos no commit que vai para a `main`. Edite os arquivos fonte em `src/` e `public/`.
 
+## Sistema visual
+
+O CSS compartilhado em `public/assets/base.css` define a paleta escura do WebLol, Barlow para texto, Barlow Condensed para títulos e os raios de 4 px para controles, 6 px para cartões compactos e 8 px para painéis. Use os tokens `--wl-*` e seus equivalentes no Tailwind em `src/index.css`. A borda estrutural é de 1 px e usa `--wl-line`. Cores de lados, posições e estados têm papéis próprios.
+
+Os temas alternativos são aplicados ao editor e ao catálogo de Composições, que compartilham a mesma tipografia e os mesmos raios do restante do painel.
+
+## Botões da interface
+
+Use o `Button` de `src/components/ui/button.tsx` nas telas React. Nos trechos HTML legados, use `data-slot="button"` com o mesmo `data-variant`. Ambos usam os estilos de `public/assets/base.css`.
+
+- `default` para a ação principal da seção, como criar ou salvar.
+- `outline` para ações secundárias, como importar ou copiar.
+- `ghost` para navegação e ações discretas. Em seleções, informe o estado com `aria-current` ou `aria-pressed`.
+- `destructive` para excluir ou descartar dados.
+
+Use `size="sm"` (ou `data-size="sm"` no HTML) para controles compactos. Os botões só com ícone precisam de um nome acessível, como `aria-label`.
+
 ## Versões da interface
 
 A aba Administração tem um item recolhível "Versões da interface". A cada mudança visível na interface, acrescente uma versão no topo de `src/data/ui-versions.ts`, dizendo o que mudou.

@@ -82,7 +82,7 @@ window.applyWebLolRoute = ([page, first, second], params) => {
 };
 const validTab = id => TABS.some(tab => tab[0] === id) || laneById.has(id);
 tabsEl.innerHTML = TABS.map(([id, label, icon]) =>
-  `<button data-id="${id}">${iconMarkup(icon)}${label}</button>`
+  `<button data-slot="button" data-variant="ghost" data-id="${id}">${iconMarkup(icon)}${label}</button>`
 ).join("");
 laneSelect.innerHTML = [...laneById].map(([id, lane]) => `<option value="${id}">${lane}</option>`).join("");
 laneSelect.onchange = () => go(laneSelect.value);
@@ -237,7 +237,7 @@ function wireBuilds(){
     const content=champion
       ? `<article class="bcard"><h3>${ico(champion.name,champion.main)}${esc(champion.name)} <span class="build-meta">${champion.main} · ${champion.picks} jogos</span><span class="build-winrate">${wrPill(champion.wins,champion.picks)} <small>de vitórias</small></span></h3>${buildHtml(champion)}</article>`
       : matches.length ? buildsTable(matches) : "";
-    const back=buildChampion ? '<div class="build-back"><button class="build-route" data-build="">Voltar à lista de builds</button></div>' : '';
+    const back=buildChampion ? '<div class="build-back"><button data-slot="button" data-variant="outline" data-size="sm" class="build-route" data-build="">Voltar à lista de builds</button></div>' : '';
     bc.classList.toggle("build-detail", !!buildChampion);
     bc.innerHTML=back+(content||'<div class="empty-state" role="status"><h3>Nenhuma build encontrada</h3><p>Tente outro campeão ou item, ou selecione todas as posições.</p></div>');
     enhanceAnalyticsUI();
@@ -287,7 +287,7 @@ function wirePlayers(){
 let muLane="Mid", muChamp=null;
 function muView(){
   return `<section class="matchups-view"><h2>Confrontos por posição</h2><p class="hint">Como cada campeão foi contra o adversário direto da mesma lane. Base: ${DATA.mgames} jogos com draft completo. Escolha a lane e o campeão.</p>
-  <nav id="mulanes" style="margin:0 0 12px">${LANES.map(([l])=>`<button data-l="${l}" aria-selected="${l===muLane}">${dot(l)}${l}</button>`).join("")}</nav>
+  <nav id="mulanes" style="margin:0 0 12px">${LANES.map(([l])=>`<button data-slot="button" data-variant="ghost" data-l="${l}" aria-selected="${l===muLane}">${dot(l)}${l}</button>`).join("")}</nav>
   <div class="matchups-grid">
    <div class="panel mu-picker"><div style="padding:14px 16px 6px"><h2 style="font-size:18px">Escolha o campeão</h2></div><div id="mulist" class="mulist"></div></div>
    <div class="panel" id="mudetail"></div>
