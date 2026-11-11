@@ -651,7 +651,27 @@ function wireMu(){
   document.getElementById('mulanes').onclick=e=>{const b=e.target.closest('button');if(!b)return;muLane=b.dataset.l;muChamp=null;render("matchups");publishWorlds("matchups",[muLane.toLowerCase()])};
   const list=document.getElementById('mulist');
   list.innerHTML=champs.map(x=>`<button class="murow" aria-pressed="${x.c===muChamp}" data-c="${esc(x.c)}"><span class="nmi">${ico(x.c)}${esc(x.c)}</span><span class="na">${x.n} jogos</span>${wrPill(x.w,x.n)}</button>`).join("");
-  list.onclick=e=>{const b=e.target.closest('button');if(!b)return;muChamp=b.dataset.c;wireMu();publishWorlds("matchups",[muLane.toLowerCase(),championSlug(muChamp)])};
+  list.onclick=e=>{
+    const button=e.target.closest('button');
+    if(!button || button.dataset.c===muChamp)return;
+    list.querySelector('[aria-pressed="true"]')?.setAttribute('aria-pressed','false');
+    button.setAttribute('aria-pressed','true');
+    muChamp=button.dataset.c;
+    drawMuDetail();
+    enhanceAnalyticsUI();
+    publishWorlds("matchups",[muLane.toLowerCase(),championSlug(muChamp)]);
+  };
+  drawMuDetail();
+  // most repeated duels in lane
+  const seen=new Set(), pairs=[];
+  for(const [c,ops2] of Object.entries(M))for(const o of ops2){const key=[c,o[0]].sort().join("|");if(seen.has(key))continue;seen.add(key);pairs.push({a:c,b:o[0],n:o[1],w:o[2]})}
+  pairs.sort((x,y)=>y.n-x.n);
+  const top=pairs.slice(0,10), mx=top.length?top[0].n:1;
+  document.getElementById('mutop').innerHTML=top.map(p=>`<div class="duel"><span class="nmi">${ico(p.a)}${esc(p.a)}</span>
+    <span class="track"><i style="width:${p.w/p.n*100}%;background:var(${LC[muLane]})"></i><i style="width:${(p.n-p.w)/p.n*100}%;background:var(--line)"></i></span>
+    <span class="nmi" style="justify-content:flex-end">${esc(p.b)}${ico(p.b)}</span><span class="val">${p.w}-${p.n-p.w}</span></div>`).join("");
+}
+function drawMuDetail(){
   const ops=orderedMatchups(muLane,muChamp);
   const tot=ops.reduce((s,o)=>s+o[1],0), tw=ops.reduce((s,o)=>s+o[2],0);
   const good=ops.filter(o=>o[1]>=2&&o[2]/o[1]>=.6), bad=ops.filter(o=>o[1]>=2&&o[2]/o[1]<=.4);
@@ -666,14 +686,6 @@ function wireMu(){
      <td class="num kda" style="color:var(${my>=their?'--good':'--bad'})" data-tip="KDA de ${esc(muChamp)} nesses jogos: (${k} + ${a}) ÷ ${d}">${my.toFixed(2)}</td><td class="num" data-tip="KDA de ${esc(op)} nesses jogos: (${ok} + ${oa}) ÷ ${od}">${their.toFixed(2)}</td>
      <td class="num">${(k/n).toFixed(1)} / ${(d/n).toFixed(1)} / ${(a/n).toFixed(1)}</td></tr>`}).join("")}</tbody></table></div>
    <p class="hint" style="margin:10px 0 0">Com 1 ou 2 jogos o resultado é só um indício. Os destaques consideram duelos com pelo menos 2 jogos.</p>`;
-  // most repeated duels in lane
-  const seen=new Set(), pairs=[];
-  for(const [c,ops2] of Object.entries(M))for(const o of ops2){const key=[c,o[0]].sort().join("|");if(seen.has(key))continue;seen.add(key);pairs.push({a:c,b:o[0],n:o[1],w:o[2]})}
-  pairs.sort((x,y)=>y.n-x.n);
-  const top=pairs.slice(0,10), mx=top.length?top[0].n:1;
-  document.getElementById('mutop').innerHTML=top.map(p=>`<div class="duel"><span class="nmi">${ico(p.a)}${esc(p.a)}</span>
-    <span class="track"><i style="width:${p.w/p.n*100}%;background:var(${LC[muLane]})"></i><i style="width:${(p.n-p.w)/p.n*100}%;background:var(--line)"></i></span>
-    <span class="nmi" style="justify-content:flex-end">${esc(p.b)}${ico(p.b)}</span><span class="val">${p.w}-${p.n-p.w}</span></div>`).join("");
 }
 const compChampionLanes = new Map();
 for (const game of DATA.comps) {
@@ -928,7 +940,9 @@ if (!window.frameElement) {
 function enhanceAnalyticsUI() {
   document.querySelectorAll(".tablewrap:not(.builds-table-wrap)").forEach(el => {
     el.tabIndex = 0; el.setAttribute("role", "region");
-    el.setAttribute("aria-label", "Tabela de estatísticas. Role horizontalmente para ver todas as colunas.");
+    el.setAttribute("aria-label", el.classList.contains("mu-table")
+      ? "Tabela de confrontos. Role para ver todas as linhas e colunas."
+      : "Tabela de estatísticas. Role horizontalmente para ver todas as colunas.");
   });
   document.querySelectorAll("tr.main").forEach(el => el.setAttribute("aria-expanded", String(el.classList.contains("open"))));
   document.querySelectorAll("[data-tip]").forEach(el => {

@@ -68,6 +68,7 @@ tr.detail td{background:var(--mid-bg);padding:var(--wl-panel-padding)}
   gap: var(--worlds-card-gap);
 }
 .matchups-grid > #mudetail, .mu-repeated { padding: var(--worlds-card-padding); }
+.matchups-grid > #mudetail { min-width: 0; }
 .mu-picker-heading { padding: var(--worlds-card-padding); }
 .mu-picker-heading h2 { margin: 0; font-size: 18px; }
 .mu-repeated { margin-top: var(--worlds-section-gap); }
@@ -85,9 +86,15 @@ tr.detail td{background:var(--mid-bg);padding:var(--wl-panel-padding)}
 .duel .val{font-family:var(--wl-font);font-size:13px;text-align:right}
 @container (min-width:1060px){
   .matchups-grid{grid-template-columns:repeat(3,minmax(0,1fr))}
-  #mudetail{grid-column:span 2}
-  .mu-picker{contain:size;display:grid;grid-template-rows:auto minmax(0,1fr)}
-  .mulist{max-height:none}
+  #mudetail {
+    grid-column: span 2;
+    display: grid;
+    grid-template-rows: auto auto minmax(0, 1fr) auto;
+    height: clamp(calc(var(--wl-space-12) * 8), 55dvh, calc(var(--wl-space-12) * 11));
+  }
+  .mu-table thead th { z-index: 2; }
+  .mu-picker{display:grid;grid-template-rows:auto minmax(0,1fr)}
+  .mulist{contain:size;max-height:none}
 }
 #tip{position:fixed;z-index:50;pointer-events:none;background:var(--ink);color:var(--bg);font-size:12.5px;line-height:1.4;padding:6px 9px;border-radius:var(--wl-card-radius);max-width:260px;box-shadow:0 4px 14px rgba(0,0,0,.25)}
 [data-tip]{cursor:help}
