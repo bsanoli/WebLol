@@ -651,10 +651,10 @@ function muView(){
   return `<section class="matchups-view"><h2>Confrontos por posição</h2><p class="hint">Como cada campeão foi contra o adversário direto da mesma lane. Base: ${DATA.mgames} jogos com draft completo. Escolha a lane e o campeão.</p>
   <nav id="mulanes" style="margin:0 0 12px">${LANES.map(([l])=>`<button data-slot="button" data-variant="ghost" data-l="${l}" aria-selected="${l===muLane}"><span class="lane-label">${laneIconMarkup(l)}${l}</span></button>`).join("")}</nav>
   <div class="matchups-grid">
-   <div class="wl-panel panel mu-picker"><div style="padding:14px 16px 6px"><h2 style="font-size:18px">Escolha o campeão</h2></div><div id="mulist" class="mulist"></div></div>
+   <div class="wl-panel panel mu-picker"><div class="mu-picker-heading"><h2>Escolha o campeão</h2></div><div id="mulist" class="mulist"></div></div>
    <div class="wl-panel panel" id="mudetail"></div>
   </div>
-  <section class="wl-panel panel" style="margin-top:20px"><h2>Confrontos mais repetidos</h2><p class="hint">Duelos que mais aconteceram nesta lane. A barra mostra quem venceu mais.</p><div id="mutop" class="bars"></div></section></section>`;
+  <section class="wl-panel panel mu-repeated"><h2>Confrontos mais repetidos</h2><p class="hint">Duelos que mais aconteceram nesta lane. A barra mostra quem venceu mais.</p><div id="mutop" class="bars"></div></section></section>`;
 }
 function wireMu(){
   const M=DATA.matchups[muLane]||{};
@@ -671,7 +671,7 @@ function wireMu(){
     <div class="hint" style="margin:0">${tot} jogos · ${tw}V ${tot-tw}D · ${ops.length} adversários diferentes</div></div></div>
    <div class="chips" style="margin:12px 0">${good.length?`<span class="na" style="font-size:12px;align-self:center">Maior taxa de vitória:</span>`+good.map(o=>`<span class="chip good">${ico(o[0])}${esc(o[0])} ${o[2]}-${o[1]-o[2]}</span>`).join(""):""}
    ${bad.length?`<span class="na" style="font-size:12px;align-self:center;margin-left:8px">Menor taxa de vitória:</span>`+bad.map(o=>`<span class="chip bad">${ico(o[0])}${esc(o[0])} ${o[2]}-${o[1]-o[2]}</span>`).join(""):""}</div>
-   <div class="wl-panel tablewrap" style="border:none"><table><thead><tr><th style="padding:10px">Contra</th><th style="padding:10px;text-align:right">Jogos</th><th style="padding:10px">Resultado</th><th style="padding:10px;text-align:right">KDA ${esc(muChamp)}</th><th style="padding:10px;text-align:right">KDA adversário</th><th style="padding:10px;text-align:right">K / D / A médio</th></tr></thead>
+   <div class="tablewrap mu-table"><table><thead><tr><th>Contra</th><th>Jogos</th><th>Resultado</th><th>KDA ${esc(muChamp)}</th><th>KDA adversário</th><th>K / D / A médio</th></tr></thead>
    <tbody>${ops.map(o=>{const[op,n,w,k,d,a,ok,od,oa]=o;const my=kdaOf(k,d,a),their=kdaOf(ok,od,oa);
      return `<tr><td class="champ"><span class="nmi">${ico(op)}${esc(op)}</span></td><td class="num">${n}</td>
      <td><span class="mini"><span class="wl" data-tip="${w} vitórias e ${n-w} derrotas contra ${esc(op)}">${'<i class="w"></i>'.repeat(w)}${'<i class="l"></i>'.repeat(n-w)}</span>${wrPill(w,n)}</span></td>

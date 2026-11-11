@@ -33,17 +33,17 @@ function App() {
   return (
     <>
       <header id="top">
-        <a href="#/worlds" aria-label="WebLol, página inicial" className="flex min-h-[var(--wl-button-height)] shrink-0 items-center rounded-sm hover:brightness-110 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-ring">
+        <a href="#/worlds" aria-label="WebLol, página inicial" className="brand-link flex min-h-[var(--wl-button-height)] shrink-0 items-center rounded-sm hover:brightness-110 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-ring">
           <img src="./assets/brand/weblol-logo-horizontal-transparent.png" alt="" width="1200" height="185" className="h-auto w-[120px]" />
         </a>
-        <nav aria-label="Áreas do painel" className="flex flex-wrap gap-1">
+        <nav aria-label="Áreas do painel" className="top-nav">
           {sections.map(({ id, label, icon }) => (
             <Button key={id} variant="ghost" className="tab" data-t={id}>
               <Icon name={icon} /> {label}
             </Button>
           ))}
         </nav>
-        <div className="toolbar flex flex-wrap items-center gap-2" aria-label="Preferências, conta e sincronização">
+        <div className="toolbar" aria-label="Preferências, conta e sincronização">
           <ThemePicker initialPalette={initialPalette} />
           <Button id="copy-link" variant="outline" hidden>
             <Icon name="link" /> Copiar link
