@@ -42,6 +42,42 @@ section.view.on, #v-admin.on > .wrap {
     width var(--wl-motion-panel) var(--wl-motion-ease);
 }
 
+.wl-motion-pill {
+  --wl-pill-inset: 2px;
+  --wl-pill-fill: color-mix(in srgb, var(--wl-accent) 18%, var(--wl-raised));
+  isolation: isolate;
+}
+.wl-motion-pill > [data-slot="button"][aria-pressed="true"] {
+  border-color: transparent;
+  background: transparent;
+}
+.wl-motion-pill.wl-motion-nav::after {
+  top: var(--wl-pill-inset);
+  left: var(--wl-pill-inset);
+  width: max(0px, calc(var(--wl-nav-width, 0px) - 2 * var(--wl-pill-inset)));
+  height: max(0px, calc(var(--wl-nav-height, 0px) - 2 * var(--wl-pill-inset)));
+  border-radius: var(--wl-control-radius);
+  background: var(--wl-pill-fill);
+  transform: translate(var(--wl-nav-x, 0px), calc(var(--wl-nav-y, 0px) - var(--wl-nav-height, 0px) + 2px));
+  z-index: -1;
+}
+.wl-motion-pill.wl-motion-nav[data-motion-ready]::after {
+  transition: transform var(--wl-motion-panel) var(--wl-motion-ease),
+    width var(--wl-motion-panel) var(--wl-motion-ease),
+    height var(--wl-motion-panel) var(--wl-motion-ease);
+}
+.wl-motion-pill.wl-motion-nav:not([data-motion-ready]) > [aria-pressed="true"] {
+  background: var(--wl-pill-fill);
+}
+
+#steps [data-step-highlight] {
+  animation: wl-step-highlight var(--wl-motion-panel) var(--wl-motion-ease);
+}
+@keyframes wl-step-highlight {
+  from { background-color: color-mix(in srgb, var(--wl-accent) 24%, var(--panel2)); }
+  to { background-color: var(--panel2); }
+}
+
 /* Native discrete transitions retain the top layer until the exit finishes.
    Browsers without support still open and close normally. */
 dialog {

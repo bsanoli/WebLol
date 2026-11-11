@@ -450,24 +450,19 @@ const buildLaneIcon = lane => lane ? laneIconMarkup(lane) : iconMarkup("layers")
 function buildsView(){
   return `<section class="builds-page" aria-label="Builds">
   <div class="wl-panel tools"><input id="bq" type="search" placeholder="Buscar campeão ou item…" aria-label="Buscar campeão ou item">
-  <div class="build-lane-picker">
-    <button id="bl" type="button" data-slot="button" data-variant="outline" data-floating-picker aria-expanded="false" aria-controls="bl-menu">
-      <span class="build-lane-value"></span>${iconMarkup("descending")}
-    </button>
-    <div id="bl-menu" class="build-lane-menu" role="group" aria-label="Filtrar por posição" hidden>
-      ${["", ...LANES.map(([lane]) => lane)].map(lane => {
-        const label = esc(lane || "Todas as posições");
-        return `<button type="button" data-slot="button" data-variant="ghost" data-lane="${esc(lane)}" aria-label="${label}" title="${label}" aria-pressed="${lane === bLane}">${buildLaneIcon(lane)}</button>`;
-      }).join("")}
-    </div>
+  <div class="build-lane-tabs" role="group" aria-label="Filtrar por posição">
+    ${["", ...LANES.map(([lane]) => lane)].map(lane => {
+      const label = esc(lane || "Todas as posições");
+      return `<button type="button" data-slot="button" data-variant="ghost" data-lane="${esc(lane)}" aria-label="${label}" title="${label}" aria-pressed="${lane === bLane}">${buildLaneIcon(lane)}</button>`;
+    }).join("")}
   </div>
   <label class="build-min-games" for="bmin">Mínimo de jogos <input id="bmin" type="number" min="0" step="1" inputmode="numeric" value="${buildMinGames}"></label>
   <button id="build-clear-all" type="button" data-slot="button" data-variant="outline">${iconMarkup("reset")} Limpar filtros</button></div>
   <div class="bcards" id="bc"></div></section>`}
 function wireBuilds(){
   const q=document.getElementById('bq'),bc=document.getElementById('bc');
-  const laneTrigger = document.getElementById("bl");
-  const laneMenu = document.getElementById("bl-menu");
+  const laneTabs = document.querySelector<HTMLElement>(".build-lane-tabs");
+  const laneButtons = [...laneTabs.querySelectorAll<HTMLButtonElement>("button")];
   const minimum = document.getElementById("bmin");
   const clearAll = document.getElementById("build-clear-all");
   const hasFilters = () => Boolean(buildQuery || bLane || buildMinGames);
@@ -573,26 +568,19 @@ function wireBuilds(){
   };
   q.oninput=()=>{buildQuery=q.value;buildChampion="";draw();publish(true)};
   const syncLane = () => {
-    const label = bLane || "Todas as posições";
-    laneTrigger.setAttribute("aria-label", `Filtrar por posição. ${label}`);
-    laneTrigger.title = label;
-    laneTrigger.querySelector(".build-lane-value").innerHTML = buildLaneIcon(bLane);
-    for (const option of laneMenu.querySelectorAll("button")) {
-      option.setAttribute("aria-pressed", String(option.dataset.lane === bLane));
-    }
+    laneButtons.forEach(option => {
+      const selected = option.dataset.lane === bLane;
+      option.setAttribute("aria-pressed", String(selected));
+    });
   };
-  const closeLane = wireFloatingPicker(laneTrigger, laneMenu, () => laneMenu.querySelector('[aria-pressed="true"]'));
-  laneMenu.onclick = e => {
+  laneTabs.onclick = e => {
     const option = e.target.closest("button[data-lane]");
-    if (!option) return;
-    const lane = option.dataset.lane;
-    if (lane !== bLane) {
-      bLane = lane;
-      buildChampion = "";
-      syncLane();
-      draw();publish();
-    }
-    closeLane();
+    if (!option || option.dataset.lane === bLane) return;
+    bLane = option.dataset.lane;
+    buildChampion = "";
+    syncLane();
+    draw();
+    publish();
   };
   syncLane();
   minimum.oninput = () => {

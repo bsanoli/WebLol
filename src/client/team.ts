@@ -147,25 +147,39 @@ function renderDraftLaneNotes(c){
 }
 
 function renderEditor(){
-  const previousMode=$("#editor").dataset.motionMode;
+  const previousComposition = $("#editor").dataset.motionComposition;
   const c=cur(),dv=S.view==="draft";
   const notesOpen=$("#composition-notes")?.open;
   $("#v-comps").classList.toggle("draft-view",dv);
   $("#draft-comp").hidden=true;
   const notes=`<details id="composition-notes" ${notesOpen?"open":""}><summary>Anotações da composição</summary><label class="control-label" for="notes">Plano geral</label><textarea id="notes" placeholder="Plano de jogo, condição de vitória…">${esc(c.notes)}</textarea>${dv?`<label class="control-label" for="dnote">Plano do draft · ${DRAFT_SIDE[draftOf(c).side]}</label><textarea id="dnote">${esc(draftOf(c).note[draftOf(c).side])}</textarea><ul id="notes-lanes" class="draft-lane-notes" aria-label="Observações por posição" hidden></ul>`:""}</details>`;
-  $("#editor").innerHTML=`<div class="editor-controls"><input id="cname" aria-label="Nome da composição" value="${esc(c.name)}" placeholder="Nome da composição"><div class="vtog"><button data-slot="button" data-variant="ghost" data-view="lanes" aria-pressed="${!dv}" class="${dv?"":"on"}">Opções por posição</button><button data-slot="button" data-variant="ghost" data-view="draft" aria-pressed="${dv}" class="${dv?"on":""}">Ordem do draft</button></div></div>
+  const editor = $("#editor");
+  if (!editor.firstElementChild) {
+    editor.innerHTML = `<div class="editor-controls"><input id="cname" aria-label="Nome da composição" placeholder="Nome da composição"><div class="vtog wl-motion-pill" role="group" aria-label="Modo da composição"><button data-slot="button" data-variant="ghost" data-view="lanes">Opções por posição</button><button data-slot="button" data-variant="ghost" data-view="draft">Ordem do draft</button></div></div>`;
+    initializeMotionNav("#editor .vtog");
+  }
+  $("#cname").value = c.name;
+  for (const button of editor.querySelectorAll("[data-view]")) {
+    const selected = button.dataset.view === S.view;
+    button.setAttribute("aria-pressed", String(selected));
+    button.classList.toggle("on", selected);
+  }
+  const content = document.createRange();
+  content.setStartAfter(editor.firstElementChild);
+  content.setEnd(editor, editor.childNodes.length);
+  content.deleteContents();
+  editor.insertAdjacentHTML("beforeend", `
   ${notes}<button data-slot="button" data-variant="default" type="button" class="jump-picker" data-picker>${iconMarkup("plus")} Adicionar campeão</button>
   ${dv?draftHTML(c):LANES.map(l=>`<div class="lane${active===l.k?" act":""}${l.k==="ban"?" ban-strip":""}" data-l="${l.k}" style="--lc:var(${l.c})">
   ${l.k==="ban"?"":pickArt(c.lanes[l.k][0])}
   <button class="ln lane-label" data-draft-target="${l.k}" aria-pressed="${active===l.k}">${laneIconMarkup(l.k)}${l.n}</button>
   <div class="chips">${c.lanes[l.k].map((n,i)=>optionHTML(n,l.k,i)).join("")||'<span class="empty">Adicionar campeão</span>'}</div>
 ${laneNoteHTML(c,l)}</div>`).join("")}
-  <p class="help">Clique no retrato para priorizar. Arraste para reordenar ou use o menu ⋯ de cada campeão.</p>`;
+  <p class="help">Clique no retrato para priorizar. Arraste para reordenar ou use o menu ⋯ de cada campeão.</p>`);
   renderDraftLaneNotes(c);
   renderTarget();
-  const motionMode=c.id+":"+S.view;
-  $("#editor").dataset.motionMode=motionMode;
-  if(previousMode!==motionMode)revealContent($("#editor"));
+  editor.dataset.motionComposition = c.id;
+  if (previousComposition !== c.id) revealContent(editor);
 }
 const touch=()=>{cur().updated=Date.now()};
 $("#v-comps").addEventListener("input",e=>{
@@ -521,9 +535,12 @@ const WAVE_HTML=`
 
 function renderKnow(){
   const kt=S.kTab||"obj";
-  $("#know").innerHTML=`<div class="ktabs"><button data-slot="button" data-variant="ghost" data-kt="obj" aria-pressed="${kt==="obj"}" class="${kt==="obj"?"on":""}">${iconMarkup("clock")} Objetivos e tempos</button><button data-slot="button" data-variant="ghost" data-kt="wave" aria-pressed="${kt==="wave"}" class="${kt==="wave"?"on":""}">${gameIconMarkup("bluemelee_circle_classic")} Controle de wave</button></div>
-  <div id="k-wave" style="display:${kt==="wave"?"block":"none"}">${WAVE_HTML}</div>
-  <div id="k-obj" style="display:${kt==="obj"?"block":"none"}">
+  const know = $("#know");
+  const previousTab = know.dataset.activeTab;
+  if (!know.firstElementChild) {
+    know.innerHTML = `<div class="ktabs wl-motion-pill" role="group" aria-label="Seção de conhecimento"><button data-slot="button" data-variant="ghost" data-kt="obj">${iconMarkup("clock")} Objetivos e tempos</button><button data-slot="button" data-variant="ghost" data-kt="wave">${gameIconMarkup("bluemelee_circle_classic")} Controle de wave</button></div>
+  <div id="k-wave">${WAVE_HTML}</div>
+  <div id="k-obj">
   <div class="warn">${iconMarkup("warning")} Tempos da temporada 2026 (patch 26.1 em diante, jogo atual 16.x). As mudanças vieram do preview oficial da Riot e de guias de 2026; os primeiros spawns da selva são das notas do patch 26.1; os tempos de volta dos campos pequenos são os de sempre. Confirmem no jogo se algum patch novo mexer nisso. Os tempos são do relógio do jogo.</div>
   <div class="kgrid">${OBJ.map((o,i)=>`<div class="wl-panel obj"><h3>${gameIconMarkup(o.icon)}<span>${o.n}</span></h3>
      <div class="kv"><span>Primeiro spawn</span><span>${o.first}</span></div>
@@ -549,8 +566,19 @@ function renderKnow(){
   <table><tr><th>Tempo</th><th>Evento</th></tr>
   ${[["0:30","1ª onda de minions"],["0:55","Buffs e campos da selva"],["1:07","Gromp e Krugs"],["2:55","Scuttles"],["5:00","1º dragão"],["8:00","Vastilarvas (única onda)"],["15:00","Arauto do Vale"],["19:45","Arauto some se ninguém pegou"],["20:00","Barão Na'Shor"]].map(r=>`<tr><td style="width:100px;font-weight:700">${r[0]}</td><td>${r[1]}</td></tr>`).join("")}</table>
   <p style="color:var(--mut);font-size:12px;margin-top:18px">Fontes: <a style="color:var(--acc)" href="https://www.leagueoflegends.com/news/dev/dev-2026-season-one-gameplay-preview/" target="_blank">Riot — /dev 2026 Season One</a> · <a style="color:var(--acc)" href="https://www.nerfplz.com/2026/08/every-summoners-rift-objective.html" target="_blank">nerfplz — Every Summoner's Rift objective</a> · <a style="color:var(--acc)" href="https://www.riftpatchnotes.com/lol/unit/void-grubs" target="_blank">riftpatchnotes — Voidgrubs</a> · <a style="color:var(--acc)" href="https://www.leagueoflegends.com/en-sg/news/game-updates/patch-26-1-notes/" target="_blank">Riot — Notas do patch 26.1</a></p></div>`;
+    initializeMotionNav("#know .ktabs");
+  }
+  know.dataset.activeTab = kt;
+  for (const button of know.querySelectorAll("[data-kt]")) {
+    const selected = button.dataset.kt === kt;
+    button.setAttribute("aria-pressed", String(selected));
+    button.classList.toggle("on", selected);
+  }
+  $("#k-wave").hidden = kt !== "wave";
+  $("#k-obj").hidden = kt !== "obj";
+  if (previousTab && previousTab !== kt) revealContent($("#k-" + kt));
 }
-$("#know").addEventListener("click",e=>{const b=e.target.closest("[data-kt]");if(!b||S.kTab===b.dataset.kt)return;S.kTab=b.dataset.kt;save(false);renderKnow();revealContent($("#know"));$("#know [aria-pressed=true]")?.focus({preventScroll:true});publishTeamRoute("know")});
+$("#know").addEventListener("click",e=>{const b=e.target.closest("[data-kt]");if(!b||S.kTab===b.dataset.kt)return;S.kTab=b.dataset.kt;save(false);renderKnow();$("#know [aria-pressed=true]")?.focus({preventScroll:true});publishTeamRoute("know")});
 $("#know").addEventListener("input",e=>{const inp=e.target.closest("[data-o]");if(!inp)return;const s=toS(inp.value);const out=inp.parentElement.querySelector(".r");out.textContent=s==null?"—":fmt(s+ +inp.dataset.o)});
 
 /* ===== Mapa tático ===== */
@@ -662,12 +690,12 @@ function hitLine(p){const ls=play().live.lines;let best=-1,bd=2;
   return best}
 
 // jogadas
-function renderPlays(){
+function renderPlays(highlightStep = false){
   const p=play();
   $("#psel").innerHTML=plays().map(x=>`<option value="${x.id}"${x.id===p.id?" selected":""}>${esc(x.name)} (${x.steps.length} passos)</option>`).join("");
   const opts=`<option value="">Só a função (TOP, JG...)</option>`+S.comps.map(c=>`<option value="${c.id}">${esc(c.name)}</option>`).join("");
   $("#cb").innerHTML=opts;$("#cr").innerHTML=opts;$("#cb").value=p.cb||"";$("#cr").value=p.cr||"";
-  $("#steps").innerHTML=p.steps.map((s,i)=>`<li data-i="${i}" class="${i===M.sel?"on":""}"><input data-lab="${i}" value="${esc(s.label||"Passo "+(i+1))}" aria-label="Nome do passo ${i+1}" title="Clique para renomear"><button data-slot="button" data-variant="destructive" data-size="icon-sm" data-sdel="${i}" aria-label="Apagar passo ${i+1}">${iconMarkup("close")}</button></li>`).join("")||'<li class="none">Nenhum passo ainda.</li>';
+  $("#steps").innerHTML=p.steps.map((s,i)=>`<li data-i="${i}" class="${i===M.sel?"on":""}"${i===M.sel?` aria-current="step"${highlightStep?" data-step-highlight":""}`:""}><input data-lab="${i}" value="${esc(s.label||"Passo "+(i+1))}" aria-label="Nome do passo ${i+1}" title="Clique para renomear"><button data-slot="button" data-variant="destructive" data-size="icon-sm" data-sdel="${i}" aria-label="Apagar passo ${i+1}">${iconMarkup("close")}</button></li>`).join("")||'<li class="none">Nenhum passo ainda.</li>';
   renderStat();
   renderTokens();drawLines(p.live.lines);
 }
@@ -691,7 +719,7 @@ $("#steps").addEventListener("input",e=>{const i=e.target.dataset.lab;if(i==null
 $("#steps").onclick=e=>{const d=e.target.closest("[data-sdel]");const p=play();
   if(d){const i=+d.dataset.sdel;if(!confirm(`Apagar o passo ${i+1}?`))return;p.steps.splice(i,1);if(M.sel===i)M.sel=-1;else if(M.sel>i)M.sel--;save();renderPlays();return}
   const li=e.target.closest("li[data-i]");if(!li||M.playing)return;const i=+li.dataset.i;if(i!==M.sel)goStep(i)};
-function goStep(i){const p=play();if(i<0||i>=p.steps.length)return;M.sel=i;const s=p.steps[i];renderPlays();return animateTo(s.pos,s.lines)}
+function goStep(i){const p=play();if(i<0||i>=p.steps.length)return;M.sel=i;const s=p.steps[i];renderPlays(true);return animateTo(s.pos,s.lines)}
 $("#sprev").onclick=()=>!M.playing&&goStep(M.sel-1);
 $("#snext").onclick=()=>!M.playing&&goStep(M.sel+1);
 $("#spd").oninput=()=>$("#spdv").textContent=$("#spd").value+"s";
@@ -710,8 +738,8 @@ $("#splay").onclick=async()=>{
   const p=play();if(M.playing){M.playing=false;return}
   if(!p.steps.length)return toast("Salve pelo menos 2 passos para reproduzir");
   M.playing=true;$("#splay").innerHTML=iconMarkup("stop")+" Parar";renderStat();
-  p.live.pos=clone(p.steps[0].pos);M.sel=0;renderPlays();
-  for(let i=1;i<p.steps.length&&M.playing;i++){await new Promise(r=>setTimeout(r,450));if(!M.playing)break;M.sel=i;renderPlays();placeTokens(p.steps[i-1].pos);p.live.pos=clone(p.steps[i-1].pos);await animateTo(p.steps[i].pos,p.steps[i].lines)}
+  p.live.pos=clone(p.steps[0].pos);M.sel=0;renderPlays(true);
+  for(let i=1;i<p.steps.length&&M.playing;i++){await new Promise(r=>setTimeout(r,450));if(!M.playing)break;M.sel=i;renderPlays(true);placeTokens(p.steps[i-1].pos);p.live.pos=clone(p.steps[i-1].pos);await animateTo(p.steps[i].pos,p.steps[i].lines)}
   M.playing=false;$("#splay").innerHTML=iconMarkup("play")+" Reproduzir";renderStat();
 };
 

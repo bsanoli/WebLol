@@ -40,8 +40,9 @@ export function initializeMotionNav(selector: string) {
         const parent = nav.getBoundingClientRect()
         const rect = active.getBoundingClientRect()
         nav.style.setProperty("--wl-nav-width", `${rect.width}px`)
-        nav.style.setProperty("--wl-nav-x", `${rect.left - parent.left + nav.scrollLeft}px`)
-        nav.style.setProperty("--wl-nav-y", `${rect.bottom - parent.top + nav.scrollTop - 2}px`)
+        nav.style.setProperty("--wl-nav-height", `${rect.height}px`)
+        nav.style.setProperty("--wl-nav-x", `${rect.left - parent.left - nav.clientLeft + nav.scrollLeft}px`)
+        nav.style.setProperty("--wl-nav-y", `${rect.bottom - parent.top - nav.clientTop + nav.scrollTop - 2}px`)
         requestAnimationFrame(() => { nav.dataset.motionReady = "" })
       })
     }

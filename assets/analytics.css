@@ -187,7 +187,7 @@
 .tools #lane-select { margin: 0; min-width: 100px; }
 .build-min-games { display: flex; align-items: center; gap: 8px; font-size: 13px; }
 .tools .build-min-games input { width: 76px; flex: none; }
-.builds-page > .tools :is(#bq, #bl, #bmin, #build-clear-all) {
+.builds-page > .tools :is(#bq, #bmin, #build-clear-all) {
   height: var(--wl-button-height);
   min-height: var(--wl-button-height);
 }
@@ -575,7 +575,7 @@
 .comp-picker-value { display: flex; align-items: center; gap: 6px; min-width: 0; overflow-wrap: anywhere; }
 .comp-picker-value .team-logo { width: 20px; height: 20px; }
 .comp-team-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.comp-picker, .build-lane-menu {
+.comp-picker {
   position: absolute;
   z-index: 3;
   inset-block-start: calc(100% + var(--wl-menu-gap));
@@ -587,19 +587,21 @@
   box-shadow: 0 8px 24px color-mix(in srgb, var(--bg) 75%, transparent);
 }
 .comp-picker { container-type: inline-size; }
-.build-lane-picker { position: relative; }
-#bl { padding-inline: 10px; }
-#bl[aria-expanded="true"] > .icon { transform: rotate(180deg); }
-.build-lane-value { display: flex; }
-.build-lane-menu {
-  inset-inline-end: auto;
-  inline-size: max-content;
+.build-lane-tabs {
+  position: relative;
   display: grid;
-  grid-template-columns: repeat(3, var(--wl-button-height));
-  gap: var(--wl-menu-gap);
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  inline-size: min(100%, calc(6 * var(--wl-button-height)));
 }
-.build-lane-menu button { min-height: var(--wl-button-height); padding: 0; }
-.build-lane-menu :is(.lane-icon, .icon) { width: var(--wl-icon-size-lg); height: var(--wl-icon-size-lg); }
+.build-lane-tabs button {
+  min-width: 0;
+  height: var(--wl-button-height);
+  padding: 0;
+}
+.build-lane-tabs :is(.lane-icon, .icon) {
+  width: var(--wl-icon-size-lg);
+  height: var(--wl-icon-size-lg);
+}
 .comp-picker-search { margin-bottom: 8px; }
 .comp-picker-categories { display: grid; gap: 4px; margin-bottom: 8px; }
 .comp-picker-categories button { min-width: 0; min-height: 32px; height: auto; padding-inline: 4px; font-size: 12px; }
