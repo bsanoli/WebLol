@@ -257,6 +257,8 @@ function draftOf(c){
   return d;
 }
 const PICKTIP={B1:"First pick",B2:"dupla",B3:"dupla",R1:"dupla",R2:"dupla",R3:"fecha fase 1",R4:"abre fase 2",B4:"dupla",B5:"dupla",R5:"Last pick"};
+// Nome de cada pick pela ordem do draft (no lugar de B1, R1...)
+const PICKNAME={B1:"First Pick",B2:"Dupla B2/B3",B3:"Dupla B2/B3",B4:"Dupla B4/B5",B5:"Dupla B4/B5",R1:"Dupla R1/R2",R2:"Dupla R1/R2",R3:"Solo R3",R4:"Solo R4",R5:"Last Pick"};
 const DRAFT_SIDE = {blue:"Lado azul", red:"Lado vermelho"} as const;
 function draftHTML(c){
   const d=draftOf(c),us=d.side==="blue"?"B":"R";
@@ -277,13 +279,13 @@ function draftHTML(c){
       return `<div class="bsq${n?" has":""}${mine?" mine":""}${mine&&active==="ban"?" act":""}" ${mine?`data-l="ban" data-bi="${i}"`:""} title="${s.n}º ban">
         ${n?`<span class="dm" draggable="true" data-n="${esc(n)}" data-from="ban">${img(n)}<button class="x" data-rm="${esc(n)}" aria-label="Remover ${esc(n)}">${iconMarkup("close")}</button></span>`:`<span class="bn">${s.n}</span>`}</div>`};
     const pick=i=>{const s=find(t,"pick",i),tip=PICKTIP[s.code]||"";
-      const meta=`<span class="pkh"><b>${s.code}</b><span title="${s.n}º pick">${s.n}º pick</span>${tip?`<i>${tip}</i>`:""}</span>`;
+      const meta=`<span class="pkh"><b title="${s.code} · ${s.n}º pick">${PICKNAME[s.code]}</b></span>`;
       if(!mine)return `<div class="pk ${side} them">${meta}<div class="pkn">${iconMarkup("champion")} A definir</div></div>`;
       const l=d.order[d.side][i],L=LN[l],ch=c.lanes[l],m=ch[0];
       const editing=active===l;
       return `<div class="pk ${side} mine${editing?" act":""}" data-l="${l}" style="--lc:var(${L.c})">
         ${pickArt(m)}
-        <button type="button" class="pk-target" data-draft-target="${l}" aria-pressed="${editing}" aria-label="${s.code} · ${L.n}${m?" · "+esc(m):" · Escolher campeão"}">
+        <button type="button" class="pk-target" data-draft-target="${l}" aria-pressed="${editing}" aria-label="${PICKNAME[s.code]} · ${L.n}${m?" · "+esc(m):" · Escolher campeão"}">
           ${meta}${m?img(m):iconMarkup("champion-add")}
           <span class="pkn${m?"":" pk-empty"}">${m?esc(m):"Escolher campeão"}</span>
         </button>
@@ -301,7 +303,8 @@ function draftHTML(c){
       <div class="draft-phase">Picks · Fase 2</div>
       ${[3,4].map(pick).join("")}</section>`;
   };
-  const sideName=t=>{const side=t==="B"?"b":"r",mine=t===us;return `<h3 class="tmh" id="draft-side-${side}">${DRAFT_SIDE[t==="B"?"blue":"red"]}<span>${mine?"Nossa equipe":"Adversário"}</span></h3>`};
+  // Clicar no nome de um lado coloca o time nesse lado.
+  const sideName=t=>{const side=t==="B"?"b":"r",key=t==="B"?"blue":"red",mine=t===us;return `<h3 class="tmh" id="draft-side-${side}"><button type="button" class="side-pick${mine?" on":""}" data-side="${key}" aria-pressed="${mine}" title="${mine?"Nosso time está neste lado":"Clique para colocar nosso time neste lado"}">${DRAFT_SIDE[key]}<span>${mine?"Nossa equipe":"Adversário"}</span></button></h3>`};
   const tabs=S.comps.map(x=>{const firsts=PLANES.map(l=>x.lanes[l][0]).filter(Boolean);
     return `<button type="button" class="dz-tab${x.id===c.id?" on":""}" data-comp-tab="${esc(x.id)}" aria-pressed="${x.id===c.id}" title="${esc(x.name)}"><b>${esc(x.name)}</b><span class="mini">${firsts.map(img).join("")||'<small>vazia</small>'}</span></button>`}).join("");
   h+=`<div class="dz">${team("B")}
@@ -328,7 +331,7 @@ function renderTarget(){
   $("#grid").querySelectorAll(".ch").forEach(button => button.setAttribute("aria-pressed", c.lanes[active].includes(button.dataset.n)));
   // A lane de destino fica ao lado de "Ordenar por"; o quadro de destino acima saiu.
   const draft=S.view==="draft",d=draftOf(c),us=d.side[0].toUpperCase();
-  const label=pos=>draft&&pos.k!=="ban"?`${us}${d.order[d.side].indexOf(pos.k)+1} · ${pos.n}`:pos.n;
+  const label=pos=>draft&&pos.k!=="ban"?`${PICKNAME[us+(d.order[d.side].indexOf(pos.k)+1)]} · ${pos.n}`:pos.n;
   $("#target").replaceChildren();$("#target").hidden=true;
   $("#lane-target-slot").innerHTML=`<select id="pick-target" title="Lane que recebe o campeão clicado">${LANES.map(pos=>`<option value="${pos.k}" ${pos.k===active?"selected":""}>${label(pos)}</option>`).join("")}</select>`;
 }

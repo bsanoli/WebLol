@@ -8,6 +8,14 @@ export interface UiVersion {
 
 export const UI_VERSIONS: UiVersion[] = [
   {
+    version: "1.16",
+    date: "2026-11-12",
+    changes: [
+      "Ordem do draft: os picks têm nome pela ordem do draft (First Pick, Dupla B2/B3, Dupla B4/B5, Dupla R1/R2, Solo R3, Solo R4, Last Pick) no lugar de B1, R1...",
+      "Ordem do draft: para escolher o lado do time, clique em Lado azul ou Lado vermelho acima das comps. Em telas menores continuam os botões Nossa equipe.",
+    ],
+  },
+  {
     version: "1.15",
     date: "2026-11-12",
     changes: [
