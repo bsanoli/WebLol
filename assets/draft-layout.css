@@ -97,7 +97,7 @@
 .chip-context-menu button { display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; }
 
 /* Nome dos lados vira o seletor do lado do time */
-.side-pick { display: flex; flex-direction: column; align-items: inherit; gap: 2px; padding: 4px 8px; margin: -4px -8px; border: 1px solid transparent; border-radius: var(--wl-control-radius, 8px); background: none; color: inherit; font: inherit; text-align: inherit; cursor: pointer; }
+.side-pick { display: flex; flex-direction: column; align-items: inherit; gap: 2px; padding: 4px 8px; margin-block: calc(-1 * var(--wl-space-1)); border: 1px solid transparent; border-radius: var(--wl-control-radius, 8px); background: none; color: inherit; font: inherit; text-align: inherit; cursor: pointer; }
 .side-pick:hover { border-color: currentColor; }
 .side-pick.on { border-color: color-mix(in srgb, currentColor 55%, transparent); background: color-mix(in srgb, currentColor 10%, transparent); }
 .side-pick span { font-size: 12px; font-weight: 500; color: var(--mut); }
