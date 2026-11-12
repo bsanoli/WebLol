@@ -35,15 +35,17 @@ function App() {
   const [current, setCurrent] = useState("worlds")
   const [isAdmin, setIsAdmin] = useState(false)
   const [user, setUser] = useState("")
+  const [role, setRole] = useState("")
 
   useEffect(() => {
     function updateNavigation() {
       setCurrent(document.body.dataset.currentScreen ?? "worlds")
       setIsAdmin(document.body.classList.contains("isadmin"))
       setUser(document.body.dataset.accountName ?? "")
+      setRole(document.body.dataset.accountRole ?? "")
     }
     const observer = new MutationObserver(updateNavigation)
-    observer.observe(document.body, { attributes: true, attributeFilter: ["class", "data-current-screen", "data-account-name"] })
+    observer.observe(document.body, { attributes: true, attributeFilter: ["class", "data-current-screen", "data-account-name", "data-account-role"] })
     updateNavigation()
     return () => observer.disconnect()
   }, [])
@@ -75,7 +77,7 @@ function App() {
             <div id="header-tools" className="toolbar" popover="auto" role="group" aria-label="Conta e sincronização">
               {user && <div className="account-details">
                 <strong>{user}</strong>
-                {isAdmin && <small>Admin</small>}
+                {role && <small>{role}</small>}
               </div>}
               <Button id="sync" variant="outline">
                 <Icon name="reset" />

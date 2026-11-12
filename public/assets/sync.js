@@ -7,7 +7,7 @@ const lsGet=(k,d=null)=>{try{const v=localStorage.getItem(k);return v==null?d:JS
 const lsSet=(k,v)=>{try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}};
 const fmtD=t=>new Date(t).toLocaleString("pt-BR",{dateStyle:"short",timeStyle:"short"});
 function toast(m,ms=3200){const t=$("#toast");t.textContent=m;t.classList.add("on");clearTimeout(toast.t);toast.t=setTimeout(()=>t.classList.remove("on"),ms)}
-const KEY="lol-comps-time-v1",UKEY="lol-user",BKEY="lol-base",SKEY="lol-sent",FPKEY="lol-admin-fp";
+const KEY="lol-comps-time-v1",UKEY="lol-user",BKEY="lol-base",SKEY="lol-sent",FPKEY="lol-admin-fp",TKEY="lol-team";
 // admins do app (Riot ID → e-mail no Firebase). Todos usam a mesma chave de admin, cada um com a sua senha.
 const ADMINS={"brunoltz#ltz":"brunoltzinv@gmail.com","panda#zada":"fabiano.rong@gmail.com"};
 const ADMIN_FP="fdb898843944d55e"; // impressão digital da chave do admin (fixa no app: um admin.json falso é recusado)
@@ -64,7 +64,8 @@ async function verifyObj(admin,o){try{const pub=await C.importKey("jwk",admin.si
 // Configuração pública do projeto Firebase (não é segredo: quem protege os dados são as regras do banco).
 const FB_CONFIG={apiKey:"AIzaSyB5J_tjV5a6XTqZTjI09zeIgMiilcaQ5u4",authDomain:"weblol-42ef7.firebaseapp.com",projectId:"weblol-42ef7",storageBucket:"weblol-42ef7.firebasestorage.app",messagingSenderId:"214350102733",appId:"1:214350102733:web:3cb8d6f4137435f7e62984"};
 const FBV="10.12.2";
-let ADMIN=null,KEYS=null,OFF=null; // OFF = versão oficial {version,at,data,log}
+let ADMIN=null,KEYS=null,OFF=null; // OFF = versão oficial do time {version,at,data,log}
+let TEAM=null,MEMB=null; // TEAM = time ativo {id,name,captain}; MEMB = registro em membros/{chave}
 const ONLINE=!!FB_CONFIG;
 let FB=null;
 async function fb(){
@@ -76,12 +77,15 @@ async function fb(){
   return FB={db:fs.getFirestore(a),auth,au,fs};
 }
 const fbIsAdmin=()=>!!FB&&!!FB.auth.currentUser&&Object.values(ADMINS).includes(FB.auth.currentUser.email);
-async function fbUser(){const{auth,au}=await fb();if(!auth.currentUser)await au.signInAnonymously(auth);return auth.currentUser}
 const meId=()=>pendingId||user()?.id||"";
+const meKey=()=>safeName(meId());
+const playerEmail=id=>safeName(id)+"@weblol.app"; // conta do jogador no Firebase (Riot ID + senha)
+const fbEmail=()=>FB?.auth.currentUser?.email||"";
+const signedAs=id=>!!fbEmail()&&fbEmail()===(isAdminId(id)?adminEmail(id):playerEmail(id));
 async function fbAdminLogin(pw){const{auth,au}=await fb(),em=adminEmail(meId());if(!em)throw new Error("sem e-mail");if(auth.currentUser?.email===em)return;await au.signInWithEmailAndPassword(auth,em,pw)}
 async function dbGet(col,id){const{db,fs}=await fb();const s=await fs.getDoc(fs.doc(db,col,id));return s.exists()?s.data():null}
 async function dbSet(col,id,data,merge){const{db,fs}=await fb();await fs.setDoc(fs.doc(db,col,id),data,merge?{merge:true}:{})}
-async function dbList(col){const{db,fs}=await fb();return(await fs.getDocs(fs.collection(db,col))).docs.map(d=>({id:d.id,...d.data()}))}
+async function dbList(col,field,value){const{db,fs}=await fb();const c=fs.collection(db,col);return(await fs.getDocs(field?fs.query(c,fs.where(field,"==",value)):c)).docs.map(d=>({id:d.id,...d.data()}))}
 async function dbDel(col,id){const{db,fs}=await fb();await fs.deleteDoc(fs.doc(db,col,id))}
 const getJ=async(col,id)=>{const d=await dbGet(col,id);if(!d)return null;try{return JSON.parse(d.json)}catch(e){return null}};
 const putJ=(col,id,obj)=>dbSet(col,id,{json:JSON.stringify(obj),at:Date.now()});
@@ -137,31 +141,50 @@ const local=()=>lsGet(KEY);
 function pending(){const b=lsGet(BKEY);if(!b)return[];return diff(shared(local()),b.data)}
 function isSampleOnly(S){return!S||(S.comps||[]).length<=1&&(!S.comps?.length||/do comps\.xlsx/.test(S.comps[0].name))&&!(S.plays||[]).some(p=>p.steps?.length)}
 
+/* ================= times ================= */
+const isCaptain=()=>!!TEAM&&TEAM.captain===meKey();
+const canPublish=()=>isCaptain()||(!!user()?.admin&&fbIsAdmin());
+const teamPath=sub=>`times/${TEAM.id}/${sub}`;
+// lê em que time o usuário está; TEAM só fica preenchido quando ele já foi aceito
+async function loadMembership(){
+  MEMB=await dbGet("membros",meKey());
+  const t=MEMB?await dbGet("times",MEMB.team):null;
+  if(MEMB&&t)MEMB.teamName=t.name;
+  TEAM=MEMB?.status==="ativo"&&t?{id:MEMB.team,...t}:null;
+  if(TEAM&&user()?.solo)lsSet(UKEY,{...user(),solo:false});
+  guardTeam();
+}
+// comps de um time não podem vazar para outro: ao trocar de time (ou de usuário) apaga a cópia local
+function guardTeam(){
+  const want=user()?.solo?"__solo__":TEAM?.id||null;
+  if(lsGet(TKEY)===want)return false;
+  for(const k of[KEY,BKEY,SKEY])localStorage.removeItem(k);
+  lsSet(TKEY,want);OFF=null;reloadCamp();return true;
+}
+function clearTeamData(){for(const k of[KEY,BKEY,SKEY,TKEY])localStorage.removeItem(k);OFF=null;TEAM=null;MEMB=null}
+
 /* ================= sincronização ================= */
 let reloadCamp=()=>{};
 async function readOfficial(){
-  ADMIN=await getJ("oficial","admin");if(!ADMIN)return{err:"noadmin"};
-  const fp=await fingerprint(ADMIN),pin=lsGet(FPKEY);
-  if(ADMIN_FP&&fp!==ADMIN_FP){ADMIN=null;return{err:"fp"}}
-  if(pin&&pin!==fp)return{err:"fp"};lsSet(FPKEY,fp);
-  const raw=await getJ("oficial","dados");if(!raw)return{err:"nodata"};
-  const d=await verifyObj(ADMIN,raw);if(!d)return{err:"sig"};
-  return{off:d};
+  if(!TEAM)return{err:"noteam"};
+  const d=await dbGet(teamPath("dados"),"oficial");
+  if(!d)return{off:{version:0,at:0,data:{comps:[],plays:[]},log:[]}};
+  try{return{off:JSON.parse(d.json)}}catch(e){return{err:"bad"}}
 }
 let NET=false; // última leitura do banco funcionou
 async function sync(opts={}){
   if(!ONLINE)return setSync("Banco online não configurado","warn");
+  if(!user()||user().solo||!TEAM){updateStatus();return}
   let r;try{await fb();r=await readOfficial()}catch(e){r={err:"net"}}
   NET=!r.err;
-  if(r.err){const m={net:"Sem conexão com o banco do time",noadmin:"Banco do time ainda vazio (o admin precisa importar)",nodata:"Sem versão oficial ainda",fp:"Chave do admin mudou! Não sincronizado",sig:"Versão oficial com assinatura inválida"}[r.err];setSync(m,r.err==="noadmin"||r.err==="nodata"?"warn":"bad");updateStatus(true);return}
+  if(r.err){const m={net:"Sem conexão com o banco do time",bad:"Versão oficial do time ilegível",noteam:"Sem time"}[r.err];setSync(m,"bad");updateStatus(true);return}
   OFF=r.off;const base=lsGet(BKEY),S=local()||{};
   let changed=false,notes=[];
   if(!base){
-    const keep=isSampleOnly(S)?[]:diff(shared(S),OFF.data).filter(c=>c.op==="add");
-    write(applyChanges(OFF.data,keep));changed=true;
+    write(OFF.data);changed=true;
   }else if(base.version!==OFF.version){
     const me=normId(user()?.id||""),rej=new Set(OFF.log.filter(l=>l.status==="rejected"&&normId(l.from)===me).map(l=>l.h));
-    const mine=diff(shared(S),base.data).filter(c=>{if(rej.has(c.h)){notes.push(`${KN[c.kind]} "${itemName(c)}" foi recusada pelo admin`);return false}return true});
+    const mine=diff(shared(S),base.data).filter(c=>{if(rej.has(c.h)){notes.push(`${KN[c.kind]} "${itemName(c)}" foi recusada pelo capitão`);return false}return true});
     write(applyChanges(OFF.data,mine));changed=true;
   }
   function write(data){const S2=local()||{};const live=new Map((S2.plays||[]).map(p=>[p.id,p.live]));
@@ -181,38 +204,40 @@ function setSync(t,c){
 function updateStatus(keepChip){
   const u=user();
   document.body.dataset.accountName = u?.id ?? "";
-  document.body.classList.toggle("isadmin",!!u?.admin);
+  document.body.dataset.accountRole = u?.admin?"Admin":isCaptain()?"Capitão":"";
+  document.body.classList.toggle("isadmin",!!u?.admin||isCaptain());
   $("#logout").hidden=!u;
-  if(!u){setSync("Identificar-se para o time","warn");$("#sync").onclick=stepId;$("#send").hidden=true;return}
-  $("#sync").onclick=refreshTeam;
   const b=$("#send");
+  if(!u){setSync("Identificar-se para o time","warn");$("#sync").onclick=stepId;b.hidden=true;return}
+  if(u.solo||!TEAM){
+    setSync(u.solo?"Sem time: as comps não são salvas":MEMB?.status==="pendente"?`Aguardando o capitão do ${MEMB.teamName||"time"}`:"Sem time","warn");
+    $("#sync").onclick=stepTeam;b.hidden=true;return;
+  }
+  $("#sync").onclick=refreshTeam;
   if(!ONLINE||!NET||!OFF){
     if(!keepChip)setSync(ONLINE?"Sincronizar com o time":"Banco online não configurado","warn");
     b.hidden=true;
     return;
   }
-  if(!keepChip)setSync(`Versão oficial v${OFF.version}`,"ok");
+  if(!keepChip)setSync(`${TEAM.name} · versão oficial v${OFF.version}`,"ok");
   const p=pending(),sent=new Set(lsGet(SKEY,[])),uns=p.filter(c=>!sent.has(c.h)),wait=p.length-uns.length;
-  if(u?.admin){b.hidden=!p.length;b.dataset.variant="default";b.disabled=false;b.textContent=`Publicar minhas alterações (${p.length})`;b.onclick=()=>publish(p.map(c=>({...c,sid:"admin",from:u.id})),[],"Alterações do admin")}
+  if(canPublish()){b.hidden=!p.length;b.dataset.variant="default";b.disabled=false;b.textContent=`Publicar minhas alterações (${p.length})`;b.onclick=()=>publish(p.map(c=>({...c,sid:"capitao",from:u.id})),[],"Alterações do capitão")}
   else{b.hidden=!p.length;b.dataset.variant=uns.length?"default":"secondary";b.textContent=uns.length?`Enviar para aprovação (${uns.length})`:`${wait} aguardando aprovação`;b.disabled=!uns.length;b.onclick=sendChanges}
 }
 async function refreshTeam(){
   setSync("Sincronizando com o time…","");
+  try{await loadMembership()}catch(e){}
   await sync();
   if(currentScreen==="admin")renderAdmin();
   if(NET&&OFF)toast("Sincronizado");
 }
-const devId=async u=>safeName(u.id)+"~"+(await fbUser()).uid; // um registro por pessoa e aparelho
 async function sendChanges(){
-  const u=user(),base=lsGet(BKEY);if(!ADMIN||!base)return toast("Sem conexão com o banco do time");
+  const u=user(),base=lsGet(BKEY);if(!TEAM||!base)return toast("Sem conexão com o banco do time");
   const sent=lsGet(SKEY,[]),ch=pending().filter(c=>!sent.includes(c.h));if(!ch.length)return;
   const sub={id:uid(),from:u.id,at:Date.now(),baseVersion:base.version,changes:ch};
-  try{const me=await fbUser();await dbSet("envios",sub.id,{uid:me.uid,from:safeName(u.id),at:sub.at,enc:JSON.stringify(await seal(ADMIN,sub))});
-    lsSet(SKEY,[...sent,...ch.map(c=>c.h)].slice(-500));toast(`${ch.length} alteração(ões) enviada(s) para o admin aprovar`);backupNow()}
+  try{await dbSet(teamPath("envios"),sub.id,{from:meKey(),at:sub.at,json:JSON.stringify(sub)});
+    lsSet(SKEY,[...sent,...ch.map(c=>c.h)].slice(-500));toast(`${ch.length} alteração(ões) enviada(s) para o capitão aprovar`)}
   catch(e){toast("Não consegui enviar para o banco do time: "+e.message)}
   updateStatus();
 }
-let tBk;function scheduleBackup(){clearTimeout(tBk);tBk=setTimeout(backupNow,8000)}
-async function backupNow(){const u=user();if(!ONLINE||!ADMIN||!u||u.admin)return;
-  try{const me=await fbUser();await dbSet("usuarios",await devId(u),{uid:me.uid,user:u.id,at:Date.now(),ua:navigator.userAgent,backup:JSON.stringify(await seal(ADMIN,{user:u.id,at:Date.now(),data:local()}))},true)}catch(e){}}
-addEventListener("storage",e=>{if(e.key===KEY){updateStatus();scheduleBackup()}});
+addEventListener("storage",e=>{if(e.key===KEY)updateStatus()});

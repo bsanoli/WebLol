@@ -2,9 +2,11 @@
 
 Painel do time: estatísticas do Worlds 2026, planejador de comps e draft, mapa tático e conhecimento (objetivos e controle de wave).
 
-**Como usar:** abra o link do GitHub Pages, entre com seu Riot ID (nome#TAG) e pronto. Não precisa escolher pasta.
+**Como usar:** abra o link do GitHub Pages, entre com seu Riot ID (nome#TAG) e a sua senha (criada no primeiro acesso).
 
-Os dados do time (comps, jogadas, envios) ficam num banco online grátis (Firebase Firestore):
+Cada jogador entra com Riot ID e senha e fica em um time. O capitão aceita quem pede para entrar e aprova os envios do time. Cada time só vê as próprias comps (garantido pelas regras do banco em `firestore.rules`).
+
+Os dados dos times (comps, jogadas, envios) ficam num banco online grátis (Firebase Firestore):
 
 - a versão oficial é assinada pelo admin, então ninguém consegue falsificar;
 - os envios e backups dos jogadores são criptografados no navegador para o admin, e só a senha do admin abre;

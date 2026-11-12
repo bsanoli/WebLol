@@ -1,38 +1,71 @@
 rules_version = '2';
 // Regras do banco do time. Cole no Firebase em Firestore Database > Regras e clique em Publicar.
-// Os e-mails abaixo são os dos admins cadastrados em Authentication (um por admin).
+// Jogadores entram com Riot ID + senha (conta <nome_tag>@weblol.app). Admins entram com o e-mail deles.
 service cloud.firestore {
   match /databases/{database}/documents {
-    function isAdmin() { return request.auth != null && request.auth.token.email in ['brunoltzinv@gmail.com', 'fabiano.rong@gmail.com']; }
-    function signedIn() { return request.auth != null; }
-
-    // Versão oficial (assinada pelo admin) e chave pública do admin: todos leem, só o admin grava.
-    match /oficial/{doc} {
-      allow read: if true;
-      allow write: if isAdmin();
+    function signedIn() { return request.auth != null && request.auth.token.email != null; }
+    function em() { return request.auth.token.email; }
+    function isAdmin() { return signedIn() && em() in ['brunoltzinv@gmail.com', 'fabiano.rong@gmail.com']; }
+    // chave do usuário logado (o mesmo formato do id dos documentos: nome_tag)
+    function me() {
+      return !signedIn() ? '' :
+        em() == 'brunoltzinv@gmail.com' ? 'brunoltz_ltz' :
+        em() == 'fabiano.rong@gmail.com' ? 'panda_zada' :
+        em().matches('^[a-z0-9_-]+@weblol[.]app$') ? em().split('@')[0] : '';
     }
-    match /versoes/{doc} {
-      allow read: if true;
-      allow write: if isAdmin();
+    function membroDoc() { return /databases/$(database)/documents/membros/$(me()); }
+    function membroAtivo(t) {
+      return me() != '' && exists(membroDoc()) && get(membroDoc()).data.team == t && get(membroDoc()).data.status == 'ativo';
     }
-
-    // Envios criptografados para o admin: qualquer um do time cria, só o admin lê e apaga.
-    match /envios/{id} {
-      allow create: if signedIn()
-        && request.resource.data.uid == request.auth.uid
-        && request.resource.data.enc is string
-        && request.resource.data.enc.size() < 800000;
-      allow read, update, delete: if isAdmin();
+    function capitao(t) {
+      return me() != '' && exists(/databases/$(database)/documents/times/$(t))
+        && get(/databases/$(database)/documents/times/$(t)).data.captain == me();
     }
 
-    // Um registro por pessoa e aparelho (perfil + backup criptografado).
-    // Cada aparelho só mexe no seu próprio registro.
-    match /usuarios/{id} {
-      allow create, update: if signedIn()
-        && request.resource.data.uid == request.auth.uid
-        && id.matches('.*~' + request.auth.uid)
-        && (resource == null || resource.data.uid == request.auth.uid);
-      allow read, write: if isAdmin();
+    // Chave pública do admin: todos leem (usada no login do admin). Dados antigos: só admin.
+    match /oficial/admin { allow read: if true; allow write: if isAdmin(); }
+    match /oficial/{doc} { allow read, write: if isAdmin(); }
+    match /versoes/{doc} { allow read, write: if isAdmin(); }
+    match /envios/{id} { allow read, write: if isAdmin(); }
+    match /usuarios/{id} { allow read, write: if isAdmin(); }
+
+    // Conta de cada jogador (só o Riot ID). Saber se existe é público, para o login pedir "criar" ou "entrar".
+    match /contas/{k} {
+      allow get: if true;
+      allow list: if isAdmin();
+      allow create, update: if k == me() && request.resource.data.key == k;
+      allow delete: if k == me() || isAdmin();
+    }
+
+    // Times: o nome é visível para quem está logado (para pedir para entrar). Quem cria vira o capitão.
+    match /times/{t} {
+      allow read: if signedIn();
+      allow create: if signedIn() && me() != '' && request.resource.data.captain == me();
+      allow update: if isAdmin() || (capitao(t) && request.resource.data.captain == resource.data.captain);
+      allow delete: if isAdmin();
+
+      // Comps e jogadas do time: só membros ativos leem; só o capitão (ou admin) publica.
+      match /dados/{d} {
+        allow read: if isAdmin() || membroAtivo(t);
+        allow write: if isAdmin() || capitao(t);
+      }
+      // Envios dos membros para o capitão aprovar.
+      match /envios/{id} {
+        allow create: if isAdmin() || (membroAtivo(t) && request.resource.data.from == me());
+        allow read, delete: if isAdmin() || capitao(t);
+      }
+    }
+
+    // Em que time cada jogador está. O jogador pede (pendente), o capitão aceita (ativo).
+    match /membros/{k} {
+      allow get: if k == me() || isAdmin() || capitao(resource.data.team);
+      allow list: if isAdmin() || capitao(resource.data.team);
+      allow create: if isAdmin()
+        || (k == me() && request.resource.data.status == 'pendente')
+        || (k == me() && request.resource.data.status == 'ativo' && capitao(request.resource.data.team));
+      allow update: if isAdmin()
+        || (capitao(resource.data.team) && request.resource.data.team == resource.data.team);
+      allow delete: if isAdmin() || k == me() || capitao(resource.data.team);
     }
   }
 }

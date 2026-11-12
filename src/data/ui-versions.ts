@@ -8,6 +8,18 @@ export interface UiVersion {
 
 export const UI_VERSIONS: UiVersion[] = [
   {
+    version: "1.13",
+    date: "2026-11-12",
+    changes: [
+      "Login: cada jogador entra com Riot ID e senha. No primeiro acesso ele cria a senha.",
+      "Times: cada jogador fica em um time com capitão. Quem não tem time vê uma tela para criar um time, pedir para entrar em um time ou usar sem time (sem salvar as comps).",
+      "Área do time: cada time só vê as próprias comps e jogadas. O botão no topo mostra o time e a versão oficial.",
+      "Administração: o capitão aceita ou recusa pedidos para entrar no time e aprova os envios do time.",
+      "Administração: membros, histórico da versão oficial, usuários, times e versões da interface ficam em itens recolhíveis.",
+      "Administração: o admin pode excluir usuários e escolher ou trocar o time de cada um.",
+    ],
+  },
+  {
     version: "1.12",
     date: "2026-11-10",
     changes: [
