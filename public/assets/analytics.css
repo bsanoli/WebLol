@@ -35,16 +35,7 @@
 .tournament-scope dt { color: var(--muted); font-size: 12px; }
 .tournament-scope dd { margin: var(--wl-space-1) 0 0; font-weight: 600; font-variant-numeric: tabular-nums; }
 .wrap > header .kpis { width: 100%; }
-#tabs {
-  display: flex;
-  flex-wrap: nowrap;
-  gap: var(--wl-space-2);
-  margin: 0 0 var(--worlds-card-gap);
-  padding-block: var(--wl-space-2);
-  background: var(--bg);
-  border-bottom: 1px solid var(--line);
-}
-#tabs button { flex: 1 1 0; min-width: 0; padding-inline: var(--wl-space-1); }
+#tabs { margin-bottom: var(--worlds-card-gap); }
 .hint { line-height: 1.6; max-width: 90ch; }
 .analytics-dashboard, .draft-overview { display: grid; gap: var(--worlds-card-gap); }
 .draft-summary {
@@ -776,13 +767,6 @@
   .metric-grid { grid-template-columns: repeat(2,minmax(0,1fr)); }
   .metric-card { padding: var(--wl-space-3) var(--worlds-card-padding); }
   .metric-card strong { font-size: 22px; }
-  #tabs { flex-wrap: wrap; }
-  #tabs button {
-    flex-basis: calc((100% - 2 * var(--wl-space-2)) / 3);
-    min-height: var(--wl-space-12);
-    gap: var(--wl-space-1);
-    font-size: 13px;
-  }
   .chart-footer [data-slot=button], .lane-card-link { min-height: var(--wl-space-12); }
   .comparison-metrics, .comparison-selectors { grid-template-columns: 1fr; }
   .tools input, .tools select { width: 100%; flex: 1 1 100%; min-width: 0; }
@@ -795,9 +779,6 @@
   .match-champion .av { width: 26px; height: 26px; }
 }
 
-@media (max-width: 359px) {
-  #tabs .icon { display: none; }
-}
 .build-data-sample { display: block; margin: 0 0 var(--wl-space-2); color: var(--muted); font-size: 13px; }
 .build-section .build-data-sample { margin: var(--wl-space-1) 0 0; }
 .build-frequency .item {
