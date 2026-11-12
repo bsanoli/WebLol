@@ -110,8 +110,6 @@ tr.detail td{background:var(--mid-bg);padding:var(--wl-panel-padding)}
 .bcards{display:grid;grid-template-columns:minmax(0,1fr);gap:var(--wl-panel-gap)}
 .bcard .build-route{margin-bottom:var(--wl-space-3)}
 .bcard{padding:var(--wl-panel-padding)}
-.bcard h3{display:flex;align-items:center;margin:0 0 10px;font-size:20px}
-.bcard h3 .av{width:34px;height:34px;margin-right:10px}
 .foot{color:var(--muted);font-size:12.5px;margin-top:22px;max-width:75ch}
 @media (max-width:520px){.bar{grid-template-columns:18px 92px 1fr 44px}.kpis{gap:16px}}
 :root {
@@ -130,7 +128,6 @@ header { display: block; border-bottom: 1px solid var(--line); padding-bottom: 1
 .kpi { padding: 12px; }
 .kpi .v { font-size: clamp(17px, 2.3vw, 24px); line-height: 1.2; }
 .kpi .l { font-size: 12px; text-transform: none; letter-spacing: 0; }
-#lane-filter { margin-bottom: 16px; color: var(--muted); font-weight: 600; }
 #lane-select { margin-inline-start: 6px; }
 #view { min-width: 0; }
 .bar { min-width: 0; }

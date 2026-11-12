@@ -1,7 +1,7 @@
 import { iconMarkup, laneIconMarkup } from "./icon"
 import DATA from "../data/worlds.json"
 import { LOL_DATA, lolImage, lolKey, type RuneTree } from "./lol-media"
-import { championSlug, esc, ico, sortIcons, teamLogo, wrPill } from "./worlds-display"
+import { championSlug, esc, ico, kdaOf, sortIcons, teamLogo, wrPill } from "./worlds-display"
 import { readRunePage, runePage } from "./worlds-runes"
 
 type Champion = (typeof DATA.champs)[number]
@@ -21,21 +21,30 @@ function buildIcon(kind: BuildIconKind, name: string, interactive = true, usage 
 const buildOptionNames=(kind: BuildIconKind,name: string)=>kind==="spell"?name.split(" and "):[name];
 const gameCount = (games: number) => games === 1 ? "1 jogo" : `${games} jogos`;
 
-export function buildSample(sample: LaneSample, position?: string) {
+function buildSample(sample: LaneSample, position?: string, action = "") {
   const counts = (entries: LaneSample["players"], showTeamLogo = false) => `<ul class="build-sample-counts">${entries.map(([name, count]) =>
-    `<li>${showTeamLogo ? teamLogo(String(name)) : ""}<span>${esc(name)}</span> <strong>${count}</strong></li>`).join("")}</ul>`;
-  const showSampleSize = position || sample.n !== sample.picks;
-  return `<div class="build-sample">
-    <div><h4>${position ? `Resultado na amostra <span class="na">· ${esc(position)}</span>` : "Amostra"}</h4>
-      <span><strong class="build-sample-wins">${sample.w}V</strong>
-        <span class="na">/</span>
-        <strong class="build-sample-losses">${sample.n - sample.w}D</strong>
-        ${showSampleSize ? `<span class="na">em ${gameCount(sample.n)}${sample.n < sample.picks ? ` (de ${sample.picks})` : ""}</span>` : ""}
-      </span>
+    `<li><span class="build-sample-person">${showTeamLogo ? teamLogo(String(name)) : ""}${esc(name)}</span><strong>${count}</strong></li>`).join("")}</ul>`;
+  const metrics = [
+    ["KDA", kdaOf(sample.k, sample.d, sample.a).toFixed(2)],
+    ["Abates", sample.k.toFixed(1)],
+    ["Mortes", sample.d.toFixed(1)],
+    ["Assistências", sample.a.toFixed(1)],
+  ];
+  return `<section class="build-sample" aria-label="Amostra${position ? ` de ${esc(position)}` : ""}">
+    <header class="build-sample-heading">
+      <h4>${position ? laneIconMarkup(position) + esc(position) : "Amostra"}</h4>
+      <span>${gameCount(sample.n)} na amostra${sample.n < sample.picks ? ` de ${sample.picks} jogos` : ""}</span>
+      ${action}
+    </header>
+    <div class="build-sample-grid">
+      <div class="build-sample-performance">
+        <div class="build-sample-record"><strong class="build-sample-wins">${sample.w}V</strong><span>/</span><strong class="build-sample-losses">${sample.n - sample.w}D</strong></div>
+        <dl class="build-sample-metrics">${metrics.map(([label, value]) => `<div><dt>${label}</dt><dd>${value}</dd></div>`).join("")}</dl>
+      </div>
+      <div><div class="build-sample-list-heading"><h5>Quem jogou</h5><span>· jogos</span></div>${counts(sample.players)}</div>
+      <div><div class="build-sample-list-heading"><h5>Times</h5><span>· jogos</span></div>${counts(sample.teams, true)}</div>
     </div>
-    <div><h4>Quem jogou</h4>${counts(sample.players)}</div>
-    <div><h4>Times</h4>${counts(sample.teams, true)}</div>
-  </div>`;
+  </section>`;
 }
 
 function itemsHtml(list: BuildOption[],what: string,kind: BuildIconKind,num=false){
@@ -48,7 +57,7 @@ function itemsHtml(list: BuildOption[],what: string,kind: BuildIconKind,num=fals
     return `<li class="item${num?" item-ranked":""}" data-tip="${esc(PTXT(label,p,what)+(en&&en!==label?` · em inglês: ${en}`:""))}"${runeTip}>${num?`<span class="n">${i+1}</span>`:""}<span class="item-name">${icons}<span>${esc(label)}</span></span><span class="pb" aria-hidden="true"><i style="width:${p}%"></i></span><span class="p">${p}%</span></li>`;
   }).join("")}</ul>`;
 }
-export function buildHtml(c: Champion, layout: "page" | "expanded" = "page"){const b=c.build;if(!b)return `<span class="na">Build não disponível no site para ${esc(c.name)}.</span>`;
+function buildHtml(c: Champion){const b=c.build;if(!b)return `<span class="na">Sem build coletada para ${esc(c.name)}.</span>`;
   const w=`de ${c.name}`;
   const section=(title: string,content: string)=>`<div class="build-section"><h5>${title}</h5>${content}</div>`;
   const column=(title: string,sections: (string | undefined)[],className = "")=>{
@@ -56,28 +65,22 @@ export function buildHtml(c: Champion, layout: "page" | "expanded" = "page"){con
     return content ? `<section class="build-column${className ? ` ${className}` : ""}"><h4>${title}</h4>${content}</section>` : "";
   };
   const equipment=[
-    b.items && section(layout === "expanded" ? "Por frequência de uso" : "Itens por frequência de uso",itemsHtml(b.items,w,"item",true)),
+    b.items && section("Itens por frequência de uso",itemsHtml(b.items,w,"item",true)),
     b.support && section("Item de suporte",itemsHtml(b.support,w,"item"))
   ].filter(Boolean).join("");
   const keyRunes=b.keys && section("Frequência da runa principal",itemsHtml(b.keys,w,"rune"));
   const runeDetails=b.runes && section("Página de runas mais usada",runePage(b.runes,b.runes_en||[]));
   const boots=b.boots && section("Botas",itemsHtml(b.boots,w,"item"));
   const spells=b.spells && section("Feitiços",itemsHtml(b.spells,w,"spell"));
-  if (layout === "expanded") {
-    return `<div class="build build-expanded">
-      ${column("Itens",[equipment])}
-      ${column("Botas e feitiços",[boots,spells],"build-utility")}
-      ${column("Runas",[runeDetails,keyRunes],"build-runes")}
-    </div>`;
-  }
   return `<div class="build">${column("Build e feitiços",[equipment,boots,spells])}${column("Runas",[runeDetails,keyRunes],"build-runes")}</div>`;
 }
 
-export function buildDetails(champion: Champion, layout: "page" | "expanded" = "page") {
+export function buildDetails(champion: Champion, lane: string, action = "") {
   const samples = Object.entries(champion.lanes)
-    .filter(([, sample]) => sample.n)
-    .map(([position, sample]) => buildSample(sample, position)).join("");
-  return samples + buildHtml(champion, layout);
+    .filter(([position, sample]) => (!lane || position === lane) && sample.n)
+    .map(([position, sample], index) => buildSample(sample, position, index === 0 ? action : "")).join("");
+  const missingSample = lane ? `<p class="hint">Sem estatísticas de desempenho coletadas em ${esc(lane)}.</p>` : "";
+  return (samples || `<div class="build-sample-heading">${missingSample}${action}</div>`) + buildHtml(champion);
 }
 
 type Matchup = [opponent: string, games: number, wins: number, ...stats: number[]]
@@ -132,7 +135,7 @@ export function buildLaneHighlights(champions: Champion[], position: keyof Champ
 
 const missingBuildOption='<span class="na" aria-label="Sem dados">—</span>';
 function secondaryRuneTree(build: ChampionBuild){
-  const mainRune=build.keys?.[0];
+  const mainRune=build?.keys?.[0];
   if(!mainRune)return;
   const {primary, secondaryTree}=readRunePage(build.runes_en||[]);
   if(primary[0]===lolKey(String(mainRune[2]||mainRune[0])))return secondaryTree;
@@ -156,33 +159,39 @@ function buildPreviewOption(entry: BuildOption | undefined,kind: BuildIconKind,s
   return `<div class="build-option-icons${kind==="rune"?" build-option-runes":""}">${icons}${secondaryIcon}</div>`;
 }
 
+export function buildGameCount(champion: Champion, lane: keyof Champion["lanes"] | "") {
+  return lane ? champion.lanes[lane]?.picks ?? 0 : champion.picks;
+}
+
 const buildStats = [
   ["games", "picks", "Jogos"],
   ["win", "wr", "Win rate"],
   ["ban", "bans", "Ban rate"],
 ];
 
-export function buildsTable(champions: (Champion & { build: ChampionBuild })[]){
+export function buildsTable(champions: Champion[], lane: keyof Champion["lanes"] | ""){
   const rows=champions.map(c=>{
     const {build}=c;
-    const items=(build.items?.length ? build.items : build.support ?? []).slice(0,3);
+    const items = (build?.items?.length ? build.items : build?.support ?? []).slice(0, 3);
+    const games = buildGameCount(c, lane);
     const slug=championSlug(c.name);
     const banRate = Math.round(c.bans / DATA.games * 100);
     const banLevel = banRate >= 30 ? "high" : banRate >= 10 ? "medium" : "low";
     return `<tr class="build-summary-row">
-      <th scope="row" class="build-col-champion"><button type="button" class="build-champion build-toggle" data-build-toggle="${slug}" aria-expanded="false" aria-controls="build-detail-${slug}">${iconMarkup("next")}${ico(c.name)}<span>${esc(c.name)}<small>${esc(c.main)}</small></span></button></th>
-      <td class="build-col-games build-stat">${c.picks}</td>
+      <th scope="row" class="build-col-champion"><button type="button" class="build-champion build-toggle" data-build-toggle="${slug}" aria-expanded="false" aria-controls="build-detail-${slug}">${iconMarkup("next")}${ico(c.name)}<span>${esc(c.name)}<small>${esc(lane || c.main)}<span class="build-mobile-games"> · ${gameCount(games)}</span></small></span></button></th>
+      <td class="build-col-games build-stat">${games}</td>
       <td class="build-col-win build-stat">${wrPill(c.wins,c.picks)}</td>
       <td class="build-col-ban build-stat"><span class="wr" data-ban-level="${banLevel}" data-tip="Banido em ${c.bans} de ${DATA.games} jogos do torneio">${banRate}%</span></td>
-      <td class="build-col-items"><div class="build-option-icons">${items.map(entry=>buildPreviewIcons(entry,"item")).join("")||missingBuildOption}</div></td>
-      <td class="build-col-boots">${buildPreviewOption(build.boots?.[0],"item")}</td>
-      <td class="build-col-runes">${buildPreviewOption(build.keys?.[0],"rune",secondaryRuneTree(build))}</td>
-      <td class="build-col-spells">${buildPreviewOption(build.spells?.[0],"spell")}</td>
+      <td class="build-col-items"><div class="build-option-icons">${build ? items.map(entry=>buildPreviewIcons(entry,"item")).join("") || missingBuildOption : '<span class="na">Sem build</span>'}</div></td>
+      <td class="build-col-boots">${buildPreviewOption(build?.boots?.[0],"item")}</td>
+      <td class="build-col-runes">${buildPreviewOption(build?.keys?.[0],"rune",build ? secondaryRuneTree(build) : undefined)}</td>
+      <td class="build-col-spells">${buildPreviewOption(build?.spells?.[0],"spell")}</td>
     </tr>
     <tr class="detail build-inline-detail" id="build-detail-${slug}" hidden><td colspan="8"></td></tr>`;
   }).join("");
   return `<div class="wl-panel tablewrap builds-table-wrap" role="region" aria-label="Comparação de builds">
     <table class="builds-table" aria-label="Builds por campeão">
+      <caption>Win rate e ban rate consideram o torneio inteiro.</caption>
       <thead><tr><th scope="col" class="build-col-champion">Campeão</th>
       ${buildStats.map(([column, key, label]) => `<th scope="col" class="build-col-${column} build-stat"><button type="button" data-k="${key}">${label}${sortIcons}</button></th>`).join("")}
       <th scope="col" class="build-col-items">Itens</th><th scope="col" class="build-col-boots">Botas</th><th scope="col" class="build-col-runes">Runas</th>

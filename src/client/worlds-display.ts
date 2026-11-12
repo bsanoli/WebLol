@@ -47,3 +47,5 @@ export const ico=(n: string)=>`<span class="av" data-i="${ini(n)}">${lolImage(lo
 export const esc=(s: unknown)=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c] ?? c));
 export const championSlug = (name: string) => name.normalize("NFD").replace(/\p{M}/gu, "").toLowerCase()
   .replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+
+export const kdaOf = (kills: number, deaths: number, assists: number) => deaths ? (kills + assists) / deaths : kills + assists;
