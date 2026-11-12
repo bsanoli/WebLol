@@ -8,12 +8,14 @@
 <link rel="icon" href="./assets/brand/favicon.svg?v=f454a496" type="image/svg+xml">
 <link rel="stylesheet" href="./assets/base.css?v=8b7d9004">
 <link rel="stylesheet" href="./assets/team.css?v=3922eddb">
-<link rel="stylesheet" href="./assets/compositions.css?v=d0519d50">
-<link rel="stylesheet" href="./assets/motion.css?v=0e0032b9">
+<link rel="stylesheet" href="./assets/compositions.css?v=6ec20d34">
+<link rel="stylesheet" href="./assets/motion.css?v=a9ff0ef4">
 <link rel="stylesheet" href="./assets/draft-layout.css?v=d7ca1e4f">
-  <script type="module" crossorigin src="./assets/camp-tchii8te.js?v=14c3d0f3"></script>
-  <link rel="modulepreload" crossorigin href="./assets/icon-DPX0AmBM.js?v=0405f40a">
-  <link rel="modulepreload" crossorigin href="./assets/motion-BB-9TZcq.js?v=83d468cb">
+<link rel="stylesheet" href="./assets/team-controls.css?v=98e3bf57">
+  <script type="module" crossorigin src="./assets/camp-CqKQPYLJ.js?v=0ea1de77"></script>
+  <link rel="modulepreload" crossorigin href="./assets/icon-BW6NQhLy.js?v=034f23c5">
+  <link rel="modulepreload" crossorigin href="./assets/motion-DFALJ3QP.js?v=9adc1852">
+  <link rel="modulepreload" crossorigin href="./assets/utils-Cthl8SYP.js?v=54430254">
 </head>
 <body>
 <header>
@@ -55,12 +57,12 @@
     <div id="target"></div>
     <div class="gtools">
       <label>Buscar campeão<input data-slot="input" id="search" placeholder="Nome do campeão"></label>
-      <label>Ordenar por<select id="sort">
+      <div class="team-select-field"><label id="sort-label" for="sort-trigger">Ordenar por</label><select id="sort" aria-labelledby="sort-label">
         <option value="az">A → Z</option>
         <option value="ws">Mais jogados no Worlds 2026</option>
         <option value="wsb">Mais banidos no Worlds 2026</option>
-      </select></label>
-      <label id="lane-target-tool">Lane do time<span id="lane-target-slot"></span></label>
+      </select></div>
+      <div class="team-select-field" id="lane-target-tool"><label id="lane-target-label" for="pick-target-trigger">Lane do time</label><span id="lane-target-slot"></span></div>
     </div>
     <div class="filter-heading">Filtrar catálogo por posição</div><div class="roles" id="roles"></div><label class="worlds-filter"><input type="checkbox" id="worlds-only"> Participaram do Worlds</label>
     <div id="grid"></div>
@@ -97,8 +99,8 @@
     <div class="map-group">
      <h3>Composição de cada lado</h3>
      <div class="map-sides">
-      <label for="cb" class="map-blue">Azul</label><select id="cb"></select>
-      <label for="cr" class="map-red">Vermelho</label><select id="cr"></select>
+      <label id="cb-label" for="cb-trigger" class="map-blue">Azul</label><select id="cb" aria-labelledby="cb-label"></select>
+      <label id="cr-label" for="cr-trigger" class="map-red">Vermelho</label><select id="cr" aria-labelledby="cr-label"></select>
      </div>
     </div>
     <label class="map-check"><input type="checkbox" id="useimg" checked> Usar imagem oficial do mapa</label>

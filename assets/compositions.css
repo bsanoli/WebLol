@@ -30,13 +30,7 @@ body:has(#v-comps.on) { display:block; height:auto; }
 #v-comps #new { width:100%; }
 .composition-menu { position:absolute; right:var(--wl-space-2); top:var(--wl-space-2); }
 summary { cursor:pointer; }
-.composition-menu summary,.option-menu summary,.lane-note summary { list-style:none; min-width:28px; min-height:28px; display:flex; align-items:center; justify-content:center; border-radius:var(--wl-control-radius); }
 summary::-webkit-details-marker { display:none; }
-.composition-menu[open],.option-menu[open],.lane-note[open] { z-index:12; }
-.composition-menu > div,.option-menu > div,.lane-note > label { position:absolute; right:0; top:100%; min-width:180px; padding:var(--wl-menu-padding); display:grid; gap:var(--wl-menu-gap); background:var(--panel2); border:1px solid var(--line); border-radius:var(--wl-card-radius); box-shadow:0 8px 24px #0008; z-index:12; }
-.option-menu > div > span { font-size:12px; color:var(--mut); }
-.composition-menu summary:hover,.option-menu summary:hover,.lane-note summary:hover { background:var(--panel2); }
-.option-menu button,.composition-menu button { justify-content:flex-start; text-align:left; }
 #v-comps .comp-editor { display:flex; flex-direction:column; position:relative; }
 .editor-status { display:flex; align-items:center; justify-content:space-between; gap:8px; padding:var(--wl-space-3) var(--wl-panel-padding) 0; }
 #v-comps .saved { font-size:11px; color:var(--green); }
@@ -63,11 +57,6 @@ summary::-webkit-details-marker { display:none; }
 #v-comps .chip.primary .av { width:44px; height:44px; }
 #v-comps.draft-view .chip.primary .av { border:1px solid var(--line); }
 #v-comps .chip.primary { margin-right:12px; }
-.option-menu { position:relative; align-self:center; }
-.option-menu summary { min-width:18px; width:18px; font-size:12px; color:var(--mut); }
-.lane-note { position:relative; }
-.lane-note summary { color:var(--wl-accent); font-size:10px; flex-direction:column; }
-.lane-note input { width:100%; min-width:0; }
 #v-comps .ban-strip { margin-top:12px; min-height:52px; }
 #v-comps .ban-strip .primary .av { width:32px; height:32px; }
 #v-comps .ban-strip .champ-priority > span:not(.av) { display:none; }
@@ -99,7 +88,6 @@ summary::-webkit-details-marker { display:none; }
 #v-comps .pkh > :not(b) { display:none; }
 #v-comps .pkn { font-size:12px; margin:0; }
 #v-comps .pkf { display:flex; flex:1; max-width:none; flex-wrap:wrap; gap:4px; margin:0; justify-content:start; }
-#v-comps .pkf select { color:var(--txt); font-size:11px; min-height:var(--wl-button-height-sm); max-width:88px; padding:var(--wl-space-1); }
 #v-comps .pk .alts { display:flex; gap:var(--wl-space-1); margin:0; justify-content:start; }
 #v-comps .pk .chip.primary .champ-priority { display:none; }
 #v-comps .pk .chip.primary { margin:0; }
@@ -160,18 +148,10 @@ summary::-webkit-details-marker { display:none; }
  #v-comps .jump-picker { width:100%; margin:0 0 10px; }
  #v-comps #clist { display:grid; grid-template-columns:repeat(auto-fill,minmax(180px,1fr)); }
  #v-comps #clist ~ .cbtns { margin:0; padding-top:0; }
-
- /* Anchor popups to the row so they fit even when a trigger is near an edge. */
- #v-comps #editor :is(.chip,.option-menu,.lane-note) { position:static; }
- #v-comps #editor .alts[data-l=ban] { position:relative; }
- #v-comps #editor :is(.option-menu > div,.lane-note > label) {
-   inset-inline:8px;
-   min-width:0;
- }
 }
 @media (max-width:600px) {
  #v-comps #comps { padding:8px 8px 12px; }
- #v-comps .lane { grid-template-columns:66px minmax(0,1fr) 28px; gap:4px; padding:6px 4px; }
+ #v-comps .lane { grid-template-columns:66px minmax(0,1fr) var(--wl-button-height-sm); gap:4px; padding:6px 4px; }
  #v-comps .ln { font-size:10px; padding-inline:2px; }
  #v-comps .ln .lane-icon { width:14px; height:14px; }
  #v-comps .chip.primary { margin-right:0; }
@@ -184,11 +164,9 @@ summary::-webkit-details-marker { display:none; }
  #v-comps .tm:not(.mine) { margin-top:12px; }
  #v-comps .pk { min-height:60px; }
  #v-comps .pk-target { min-height:44px; }
- #v-comps .pkf select { min-height:var(--wl-button-height-sm); }
  #v-comps .dseq { gap:6px; }
  #v-comps .sq { width:19px; }
  #v-comps .editor-status { align-items:start; }
- .option-menu summary,.lane-note summary { min-height:36px; }
 }
 /* Keep shared legacy draft rules from changing the library or editor geometry. */
 #v-comps #comps .comp-library { align-items:stretch; }
@@ -218,7 +196,6 @@ summary::-webkit-details-marker { display:none; }
 #v-comps .editor-status { flex-direction:column-reverse; align-items:flex-end; gap:2px; }
 #v-comps .editor-status .saved { display:block; font-size:10px; }
 #v-comps .local-save-actions { display:flex; align-items:center; justify-content:flex-end; flex-wrap:wrap; gap:8px; }
-#v-comps .option-menu[open] { z-index:15; }
 @media (max-width:600px) {
  #v-comps .editor-status { display:grid; grid-template-columns:auto minmax(0,1fr); align-items:stretch; gap:6px; }
  #v-comps .local-save-actions { display:contents; }
@@ -272,8 +249,6 @@ summary::-webkit-details-marker { display:none; }
 #v-comps .lane-note .pick-note-preview { display:none; }
 #v-comps .pkf { align-items:center; }
 #v-comps .draft-alternatives-label { display:none; }
-#v-comps .pkf .lane-note summary { min-width:26px; }
-#v-comps .pkf select { border-color:color-mix(in srgb,var(--lc) 46%,var(--line)); }
 #v-comps .ch:hover:not([aria-pressed=true]) { background:var(--panel2); border-color:var(--mut); }
 
 @media (min-width:1100px) {
@@ -313,11 +288,11 @@ summary::-webkit-details-marker { display:none; }
   #v-comps .ban-strip { min-height:64px; }
   #v-comps .ban-strip .chip.primary .av { width:40px; height:40px; }
   #v-comps .ban-strip .chip.primary { margin-right:0; }
-  #v-comps .lane-note summary {
+  #v-comps .lane-note [data-team-trigger] {
     flex-direction:row;
     justify-content:flex-start;
-    gap:6px;
-    padding:4px 7px;
+    gap:var(--wl-space-1);
+    padding:var(--wl-space-1) var(--wl-space-2);
     background:var(--bg);
     border:1px solid var(--line);
     font-size:12px;
@@ -350,12 +325,10 @@ summary::-webkit-details-marker { display:none; }
     gap:var(--wl-space-1) var(--wl-space-2);
     max-width:none;
   }
-  #v-comps .pkf select { font-size:12px; }
   #v-comps .pkf > .chip.primary { margin:0; }
   #v-comps .pkf .draft-alternatives { grid-column:1/-1; max-width:none; }
   #v-comps .draft-alternatives-label { display:inline; margin-right:var(--wl-space-1); color:var(--txt); font-size:11px; }
   #v-comps .pk .draft-alternatives .av { width:27px; height:27px; }
-  #v-comps .pkf .option-menu summary { background:var(--bg); }
   #v-comps .picker-heading { padding:16px 14px 9px; }
   #v-comps #target { margin-inline:14px; }
   #v-comps #grid {

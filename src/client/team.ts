@@ -1,6 +1,7 @@
 // @ts-nocheck -- O editor legado ainda depende de estado dinâmico vindo do armazenamento local.
 import { iconMarkup, laneIconMarkup } from "./icon"
 import { LOL_DATA, lolAsset, lolChampion, lolImage } from "./lol-media"
+import { clearTeamControls, mountChampionMenu, mountCompositionMenu, mountLaneNote, mountTeamSelect } from "./team-controls"
 import { initializeTheme } from "./theme"
 import { initializeMotionNav, revealContent } from "./motion"
 
@@ -94,34 +95,35 @@ function renderList(){
   const selected=cur();
   $("#draft-comp").innerHTML=[selected,...matches.filter(c=>c!==selected)]
     .map(c=>`<option value="${esc(c.id)}">${esc(c.name)}</option>`).join("");
-  $("#clist").innerHTML=matches
+  const list=$("#clist");
+  clearTeamControls(list);
+  list.innerHTML=matches
    .map(c=>{const firsts=["top","jg","mid","adc","sup"].map(l=>c.lanes[l][0]).filter(Boolean);
      return `<div class="composition-item"><button class="ci${c.id===S.cur?" on":""}" aria-pressed="${c.id===S.cur}" data-id="${c.id}"><b>${esc(c.name)}</b>
-      <span class="mini">${firsts.map(img).join("")||'<small style="color:var(--mut)">vazia</small>'}</span></button><details class="composition-menu"><summary aria-label="Ações de ${esc(c.name)}">⋯</summary><div><button data-slot="button" data-variant="ghost" data-size="sm" data-comp-action="duplicate" data-id="${c.id}">${iconMarkup("duplicate")} Duplicar</button><button data-slot="button" data-variant="destructive" data-size="sm" data-comp-action="delete" data-id="${c.id}">${iconMarkup("trash")} Excluir</button></div></details></div>`}).join("")||'<div style="color:var(--mut);padding:10px;font-size:12px">Nenhuma comp.</div>';
-}
-function selectComp(id){S.cur=id;save(false);renderAll();publishTeamRoute("comps")}
-$("#clist").onclick=e=>{const action=e.target.closest("[data-comp-action]");if(action){if(action.dataset.compAction==="duplicate")duplicateComp(action.dataset.id);else deleteComp(action.dataset.id);return}const it=e.target.closest(".ci");if(it)selectComp(it.dataset.id)};
-function closeCompositionMenus(target?: EventTarget | null){
-  const openMenus=document.querySelectorAll<HTMLDetailsElement>(
-    "#v-comps details[open]:is(.composition-menu,.option-menu,.lane-note)"
-  );
-  openMenus.forEach(menu=>{
-    if(!(target instanceof Node && menu.contains(target)))menu.open=false;
+      <span class="mini">${firsts.map(img).join("")||'<small style="color:var(--mut)">vazia</small>'}</span></button><span class="composition-menu" data-team-control></span></div>`}).join("")||'<div style="color:var(--mut);padding:10px;font-size:12px">Nenhuma comp.</div>';
+  list.querySelectorAll(".composition-menu").forEach((host,index)=>{
+    const {id,name}=matches[index];
+    mountCompositionMenu(host,name,()=>{
+      duplicateComp(id);
+      $("#clist .ci.on")?.focus({preventScroll:true});
+    },()=>{
+      if(deleteComp(id)) ($("#clist .ci.on")||$("#clist .ci")||$("#new")).focus({preventScroll:true});
+    });
   });
 }
-document.addEventListener("click", e=>closeCompositionMenus(e.target));
-window.addEventListener("blur", ()=>closeCompositionMenus());
+function selectComp(id){S.cur=id;save(false);renderAll();publishTeamRoute("comps")}
+$("#clist").onclick=e=>{const it=e.target.closest(".ci");if(it)selectComp(it.dataset.id)};
 $("#draft-comp").onchange=e=>selectComp(e.target.value);
 $("#csearch").oninput=renderList;
 $("#new").onclick=()=>{const c=blank("Comp "+(S.comps.length+1));S.comps.unshift(c);S.cur=c.id;active="top";save();renderAll();publishTeamRoute("comps");setTimeout(()=>{$("#cname").focus();$("#cname").select()},0)};
 function duplicateComp(id){const c=JSON.parse(JSON.stringify(S.comps.find(c=>c.id===id)));c.id=uid();c.name+=" (cópia)";c.updated=Date.now();S.comps.unshift(c);S.cur=c.id;save();renderAll();publishTeamRoute("comps")};
-function deleteComp(id){const c=S.comps.find(c=>c.id===id);if(!confirm(`Excluir a comp "${c.name}"?`))return;S.comps=S.comps.filter(x=>x.id!==c.id);if(!S.comps.length)S.comps.push(blank());if(!S.comps.some(x=>x.id===S.cur))S.cur=S.comps[0].id;save();renderAll();publishTeamRoute("comps")};
+function deleteComp(id){const c=S.comps.find(c=>c.id===id);if(!confirm(`Excluir a comp "${c.name}"?`))return false;S.comps=S.comps.filter(x=>x.id!==c.id);if(!S.comps.length)S.comps.push(blank());if(!S.comps.some(x=>x.id===S.cur))S.cur=S.comps[0].id;save();renderAll();publishTeamRoute("comps");return true};
 
 /* ===== Editor ===== */
 function optionHTML(n,l,i){
   return `<div class="chip ${i===0?"primary":"alternative"}" draggable="true" data-n="${esc(n)}" data-from="${l}">
     <button class="champ-priority" data-priority="${esc(n)}" data-lane="${l}" aria-label="Priorizar ${esc(n)} em ${LN[l].n}" title="${i+1}ª opção · tornar principal">${img(n)}${i===0?`<span><small>Principal</small><b>${esc(n)}</b></span>`:""}</button>
-    <details class="option-menu" name="champion-editor-menu"><summary aria-label="Opções de ${esc(n)}">⋯</summary><div><span>${i+1}ª opção · ${esc(n)}</span><button data-slot="button" data-variant="ghost" data-size="sm" data-move="-1" data-n="${esc(n)}" data-lane="${l}" ${i===0?"disabled":""}>Mover antes</button><button data-slot="button" data-variant="ghost" data-size="sm" data-move="1" data-n="${esc(n)}" data-lane="${l}" ${i===cur().lanes[l].length-1?"disabled":""}>Mover depois</button><button data-slot="button" data-variant="destructive" data-size="sm" data-rm="${esc(n)}">Remover ${esc(n)}</button></div></details>
+    <span class="option-menu" data-team-control data-option-index="${i}"></span>
   </div>`;
 }
 // Arte em alta (1215×717) direto do Data Dragon; se não carregar, usa a cópia local menor.
@@ -131,16 +133,6 @@ function pickArt(name){
   const id=local.match(/splash\/(.+)\.webp$/)?.[1];
   if(!id)return lolImage(local,"pick-splash");
   return `<img alt="" class="pick-splash" loading="lazy" src="https://ddragon.leagueoflegends.com/cdn/img/champion/splash/${id}_0.jpg" onerror="this.onerror=()=>this.remove();this.src='assets/${local}'">`;
-}
-
-function laneNoteHTML(c, lane){
-  const note=c.laneNotes[lane.k]||"";
-  return `<details class="lane-note" name="champion-editor-menu">
-    <summary aria-label="Observação de ${lane.n}" title="${esc(note||"Adicionar observação")}">
-      ${iconMarkup("edit")}<span class="pick-note-preview">${esc(note||"Nota")}</span>
-    </summary>
-    <label>Observação de ${lane.n}<input data-slot="input" data-ln="${lane.k}" value="${esc(note)}" placeholder="Plano para esta posição"></label>
-  </details>`;
 }
 
 function renderDraftLaneNotes(c){
@@ -171,6 +163,7 @@ function renderEditor(){
   }
   const catalog=$("#champ-picker"),gridScroll=$("#grid").scrollTop;
   if (editor.contains(catalog)) $("#comps").append(catalog);
+  clearTeamControls(editor);
   const content = document.createRange();
   content.setStartAfter(editor.firstElementChild);
   content.setEnd(editor, editor.childNodes.length);
@@ -181,8 +174,22 @@ function renderEditor(){
   ${l.k==="ban"?"":pickArt(c.lanes[l.k][0])}
   <button class="ln lane-label" data-draft-target="${l.k}" aria-pressed="${active===l.k}">${laneIconMarkup(l.k)}${l.n}</button>
   <div class="chips">${c.lanes[l.k].map((n,i)=>optionHTML(n,l.k,i)).join("")||'<span class="empty">Adicionar campeão</span>'}</div>
-${laneNoteHTML(c,l)}</div>`).join("")}
+<span class="lane-note" data-team-control data-note-lane="${l.k}"></span></div>`).join("")}
   <p class="help">${dv?"Clique no retrato para torná-lo principal, arraste para reordenar e use o botão direito para excluir.":"Clique no retrato para priorizar. Arraste para reordenar ou use o menu ⋯ de cada campeão."}</p>`);
+  editor.querySelectorAll(".option-menu").forEach(host=>{
+    const {n,from}=host.closest(".chip").dataset;
+    mountChampionMenu(host,n,Number(host.dataset.optionIndex),c.lanes[from].length,
+      direction=>reorderChampion(n,from,direction),()=>removeChampion(n,from));
+  });
+  editor.querySelectorAll(".lane-note").forEach(host=>{
+    const lane=LN[host.dataset.noteLane];
+    mountLaneNote(host,`Observação de ${lane.n}`,c.laneNotes[lane.k]||"",value=>{
+      c.laneNotes[lane.k]=value;
+      renderDraftLaneNotes(c);
+      touch();save();
+    });
+  });
+  editor.querySelectorAll("select[data-pick-position]").forEach(mountTeamSelect);
   renderDraftLaneNotes(c);
   placePicker();
   $("#grid").scrollTop=gridScroll;
@@ -195,24 +202,45 @@ $("#v-comps").addEventListener("input",e=>{
   const c=cur();
   if(e.target.id==="cname"){c.name=e.target.value;touch();save();renderList()}
   else if(e.target.id==="notes"){c.notes=e.target.value;touch();save()}
-  else if(e.target.dataset.ln){
-    const value=e.target.value;
-    c.laneNotes[e.target.dataset.ln]=value;
-    const note=e.target.closest(".lane-note");
-    note.querySelector(".pick-note-preview").textContent=value||"Nota";
-    note.querySelector("summary").title=value||"Adicionar observação";
-    renderDraftLaneNotes(c);
-    touch();save();
-  }
   else if(e.target.id==="dnote"){const d=draftOf(c);d.note[d.side]=e.target.value;touch();save()}
-  else if(e.target.dataset.slot!=null){const d=draftOf(c),o=d.order[d.side],i=+e.target.dataset.slot,v=e.target.value,j=o.indexOf(v);[o[i],o[j]]=[v,o[i]];active=v;touch();save();renderEditor();$(`[data-slot="${i}"]`).focus({preventScroll:true})}
 });
+$("#editor").addEventListener("change",e=>{
+  if(!e.target.matches("select[data-pick-position]"))return;
+  const d=draftOf(cur()),order=d.order[d.side],i=Number(e.target.dataset.pickPosition);
+  const lane=e.target.value,j=order.indexOf(lane);
+  [order[i],order[j]]=[lane,order[i]];
+  active=lane;touch();save();renderEditor();
+  requestAnimationFrame(()=>$(`[data-pick-position="${i}"] + .team-select button`)?.focus({preventScroll:true}));
+});
+function reorderChampion(name,lane,direction){
+  const champions=cur().lanes[lane],index=champions.indexOf(name);
+  if(direction===undefined){
+    champions.splice(index,1);
+    champions.unshift(name);
+  }else{
+    const next=index+direction;
+    [champions[index],champions[next]]=[champions[next],champions[index]];
+  }
+  active=lane;touch();save();renderEditor();renderList();renderGrid();
+  if(S.view==="draft"){
+    $(`[data-draft-target="${lane}"]`)?.focus({preventScroll:true});
+  }else{
+    const button=[...document.querySelectorAll("[data-priority]")].find(b=>b.dataset.priority===name&&b.dataset.lane===lane);
+    button?.focus({preventScroll:true});
+  }
+}
+function removeChampion(name,lane){
+  const c=cur();
+  c.lanes[lane]=c.lanes[lane].filter(champion=>champion!==name);
+  touch();save();renderEditor();renderList();renderGrid();
+  $(`[data-draft-target="${lane}"]`)?.focus({preventScroll:true});
+}
 $("#editor").addEventListener("click",e=>{
   if(e.target.closest("[data-picker]")){ openPicker(); return }
-  const priority=e.target.closest("[data-priority]"),move=e.target.closest("[data-move]");
-  if(priority||move){const b=priority||move,l=b.dataset.lane,a=cur().lanes[l],n=b.dataset.priority||b.dataset.n,i=a.indexOf(n);if(priority){a.splice(i,1);a.unshift(n)}else{const j=i+Number(b.dataset.move);if(j>=0&&j<a.length)[a[i],a[j]]=[a[j],a[i]]}active=l;touch();save();renderEditor();renderList();renderGrid();(S.view==="draft"?$(`[data-draft-target="${l}"]`):[...document.querySelectorAll("[data-priority]")].find(b=>b.dataset.priority===n&&b.dataset.lane===l))?.focus({preventScroll:true});return}
+  const priority=e.target.closest("[data-priority]");
+  if(priority){reorderChampion(priority.dataset.priority,priority.dataset.lane);return}
   const rm=e.target.closest("[data-rm]");
-  if(rm){const l=rm.closest("[data-l]").dataset.l;const c=cur();c.lanes[l]=c.lanes[l].filter(n=>n!==rm.dataset.rm);touch();save();renderEditor();renderList();renderGrid();$(`[data-draft-target="${l}"]`)?.focus({preventScroll:true});return}
+  if(rm){removeChampion(rm.dataset.rm,rm.closest("[data-l]").dataset.l);return}
 
   const vb=e.target.closest("[data-view]");if(vb){S.view=vb.dataset.view;save(false);renderEditor();$(`[data-view="${S.view}"]`).focus({preventScroll:true});publishTeamRoute("comps");return}
   const sb=e.target.closest("[data-side]");if(sb){draftOf(cur()).side=sb.dataset.side;touch();save();renderEditor();$(`[data-side="${sb.dataset.side}"]`).focus({preventScroll:true});return}
@@ -223,7 +251,7 @@ $("#editor").addEventListener("click",e=>{
     $(`[data-draft-target="${active}"]`).focus({preventScroll:true});
     return;
   }
-  if(e.target.closest("details")||["INPUT","TEXTAREA","SELECT","OPTION"].includes(e.target.tagName))return;
+  if(e.target.closest("details,[data-team-control]")||["INPUT","TEXTAREA","SELECT","OPTION"].includes(e.target.tagName))return;
   const ln=e.target.closest("[data-l]");if(ln&&ln.dataset.l!==active){active=ln.dataset.l;renderEditor()}
 });
 // arrastar e soltar
@@ -289,7 +317,7 @@ function draftHTML(c){
           ${meta}${m?img(m):iconMarkup("champion-add")}
           <span class="pkn${m?"":" pk-empty"}">${m?esc(m):"Escolher campeão"}</span>
         </button>
-        <div class="pkf"><span class="lane-label">${laneIconMarkup(l)}<select data-slot="${i}" aria-label="Posição do pick ${t}${i+1}" title="Lane deste pick">${PLANES.map(x=>`<option value="${x}"${x===l?" selected":""}>${LN[x].n}</option>`).join("")}</select></span>
+        <div class="pkf"><span class="lane-label"><select data-team-select="lane" data-pick-position="${i}" aria-label="Posição do pick ${t}${i+1}">${PLANES.map(x=>`<option value="${x}"${x===l?" selected":""}>${LN[x].n}</option>`).join("")}</select></span>
         ${m?mini(m,l,0):""}
         ${ch.length>1?`<div class="alts draft-alternatives" role="group" aria-label="Alternativas de ${L.n}"><span class="draft-alternatives-label" aria-hidden="true">Alternativas</span>${ch.slice(1).map((n,j)=>mini(n,l,j+1)).join("")}</div>`:""}
         </div></div>`};
@@ -333,9 +361,12 @@ function renderTarget(){
   const draft=S.view==="draft",d=draftOf(c),us=d.side[0].toUpperCase();
   const label=pos=>draft&&pos.k!=="ban"?`${PICKNAME[us+(d.order[d.side].indexOf(pos.k)+1)]} · ${pos.n}`:pos.n;
   $("#target").replaceChildren();$("#target").hidden=true;
-  $("#lane-target-slot").innerHTML=`<select id="pick-target" title="Lane que recebe o campeão clicado">${LANES.map(pos=>`<option value="${pos.k}" ${pos.k===active?"selected":""}>${label(pos)}</option>`).join("")}</select>`;
+  const slot=$("#lane-target-slot");
+  clearTeamControls(slot);
+  slot.innerHTML=`<select id="pick-target" data-team-select="lane" aria-labelledby="lane-target-label">${LANES.map(pos=>`<option value="${pos.k}" ${pos.k===active?"selected":""}>${label(pos)}</option>`).join("")}</select>`;
+  mountTeamSelect($("#pick-target"));
 }
-$("#lane-target-slot").addEventListener("change",e=>{if(e.target.id!=="pick-target")return;active=e.target.value;renderEditor();$("#pick-target").focus({preventScroll:true})});
+$("#lane-target-slot").addEventListener("change",e=>{if(e.target.id!=="pick-target")return;active=e.target.value;renderEditor();requestAnimationFrame(()=>$("#pick-target-trigger")?.focus({preventScroll:true}))});
 function renderGrid(){
   const q=$("#search").value.toLowerCase().replace(/[^a-z]/g,""),c=cur(),srt=$("#sort").value;
   const where={};for(const l of LANES)for(const n of c.lanes[l.k])(where[n]=where[n]||[]).push(l);
@@ -747,9 +778,10 @@ function hitLine(p){const ls=play().live.lines;let best=-1,bd=2;
 // jogadas
 function renderPlays(highlightStep = false){
   const p=play();
-  $("#psel").innerHTML=plays().map(x=>`<option value="${x.id}"${x.id===p.id?" selected":""}>${esc(x.name)} (${x.steps.length} passos)</option>`).join("");
+  $("#psel").innerHTML=plays().map(x=>`<option value="${x.id}"${x.id===p.id?" selected":""} data-description="${x.steps.length} ${x.steps.length===1?"passo":"passos"}">${esc(x.name)}</option>`).join("");
   const opts=`<option value="">Só a função (TOP, JG...)</option>`+S.comps.map(c=>`<option value="${c.id}">${esc(c.name)}</option>`).join("");
   $("#cb").innerHTML=opts;$("#cr").innerHTML=opts;$("#cb").value=p.cb||"";$("#cr").value=p.cr||"";
+  ["#psel","#cb","#cr"].forEach(selector=>mountTeamSelect($(selector)));
   $("#steps").innerHTML=p.steps.map((s,i)=>`<li data-i="${i}" class="${i===M.sel?"on":""}"${i===M.sel?` aria-current="step"${highlightStep?" data-step-highlight":""}`:""}><input data-slot="input" data-lab="${i}" value="${esc(s.label||"Passo "+(i+1))}" aria-label="Nome do passo ${i+1}" title="Clique para renomear"><button data-slot="button" data-variant="destructive" data-size="icon-sm" data-sdel="${i}" aria-label="Apagar passo ${i+1}">${iconMarkup("close")}</button></li>`).join("")||'<li class="none">Nenhum passo ainda.</li>';
   renderStat();
   renderTokens();drawLines(p.live.lines);
@@ -800,4 +832,5 @@ $("#splay").onclick=async()=>{
 
 /* ===== Início ===== */
 function renderAll(){renderList();renderEditor();renderGrid()}
+mountTeamSelect($("#sort"));
 load();plays();renderAll();renderKnow();$("#useimg").checked=S.useImg!==false;setMapImg();renderPlays();

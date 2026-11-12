@@ -111,19 +111,19 @@ details::details-content {
     content-visibility var(--wl-motion-normal) allow-discrete;
 }
 details[open]::details-content { opacity: 1; }
-:is(.palette, .composition-menu, .option-menu, .lane-note)::details-content {
+.palette::details-content {
   translate: 0 calc(-1 * var(--wl-motion-distance));
   transition: opacity var(--wl-motion-normal) var(--wl-motion-ease),
     translate var(--wl-motion-normal) var(--wl-motion-ease),
     content-visibility var(--wl-motion-normal) allow-discrete;
 }
-:is(.palette, .composition-menu, .option-menu, .lane-note)[open]::details-content { translate: 0 0; }
+.palette[open]::details-content { translate: 0 0; }
 /* Outgoing menu content stays visible briefly, but cannot receive a click. */
 details:not([open])::details-content { pointer-events: none; }
 .palette > summary::after { transition: transform var(--wl-motion-normal) var(--wl-motion-ease); }
 .palette[open] > summary::after { transform: rotate(225deg); }
 @supports (interpolate-size: allow-keywords) {
-  details:not(.palette,.composition-menu,.option-menu,.lane-note)::details-content {
+  details:not(.palette)::details-content {
     interpolate-size: allow-keywords;
     block-size: 0;
     overflow: clip;
@@ -131,7 +131,7 @@ details:not([open])::details-content { pointer-events: none; }
       opacity var(--wl-motion-normal) var(--wl-motion-ease),
       content-visibility var(--wl-motion-panel) allow-discrete;
   }
-  details:not(.palette,.composition-menu,.option-menu,.lane-note)[open]::details-content { block-size: auto; }
+  details:not(.palette)[open]::details-content { block-size: auto; }
 }
 
 #tip {
