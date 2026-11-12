@@ -339,6 +339,7 @@ function applyFrameRoute(frame) {
 }
 
 for (const frame of frames) {
+  frame.addEventListener("weblol:route-ready", () => applyFrameRoute(frame));
   frame.addEventListener("load", () => {
     if (!frame.hasAttribute("srcdoc")) return;
     frame.dataset.ready = "true";
@@ -353,6 +354,8 @@ for (const frame of frames) {
 }
 
 function openRoute() {
+  const shortChampionRoute = location.hash.match(/^#\/?((?:builds|campeoes)(?:\/[a-z0-9-]+)?(?:\?.*)?)$/);
+  if (shortChampionRoute) writeRoute("/worlds/" + shortChampionRoute[1], true);
   const { screen } = readRoute();
   if (!screen) writeRoute(routeRoots.worlds, true);
   show(screen || "worlds");

@@ -974,14 +974,23 @@ if (!window.frameElement) {
   const applyStandaloneRoute = () => {
     const [path, query] = location.hash.slice(1).split("?", 2);
     const params = new URLSearchParams(query);
+    const shortChampionRoute = path.match(/^\/?(builds|campeoes)(?:\/([a-z0-9-]+))?$/);
     if (path.startsWith("/worlds/")) window.applyWebLolRoute(path.split("/").slice(2), params);
-    else if (path === "jogadores") window.applyWebLolRoute([path], params);
+    else if (shortChampionRoute) {
+      const [, page, champion] = shortChampionRoute;
+      const canonicalPath = "/worlds/" + page + (champion ? "/" + champion : "") + (query ? "?" + query : "");
+      history.replaceState(null, "", "#" + canonicalPath);
+      window.applyWebLolRoute([page, champion], params);
+    } else if (path === "jogadores") window.applyWebLolRoute([path], params);
     else if (laneById.has(path)) window.applyWebLolRoute(["builds"], new URLSearchParams({posicao:path}));
     else window.applyWebLolRoute([worldsPaths[path]?.slice(1) || ""], params);
   };
   addEventListener("hashchange", applyStandaloneRoute);
   applyStandaloneRoute();
-} else render("geral");
+} else {
+  render("geral");
+  window.frameElement.dispatchEvent(new CustomEvent("weblol:route-ready"));
+}
 
 function enhanceAnalyticsUI() {
   document.querySelectorAll(".tablewrap:not(.builds-table-wrap)").forEach(el => {
