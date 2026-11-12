@@ -33,7 +33,7 @@
  <div id="comps">
   <div class="wl-panel box comp-library">
     <h2>Composições salvas</h2>
-    <div class="library-search"><label class="control-label" for="csearch">Filtrar composições</label><input id="csearch" placeholder="Nome ou campeão"></div>
+    <div class="library-search"><label class="control-label" for="csearch">Filtrar composições</label><input data-slot="input" id="csearch" placeholder="Nome ou campeão"></div>
     <div id="clist"></div>
     <select id="draft-comp" aria-label="Escolher composição" hidden></select>
     <div class="cbtns">
@@ -51,7 +51,7 @@
     <div class="picker-heading"><h2 id="picker-title">Campeões</h2><button data-slot="button" data-variant="outline" id="close-picker" aria-label="Fechar catálogo">Fechar</button></div>
     <div id="target"></div>
     <div class="gtools">
-      <label>Buscar campeão<input id="search" placeholder="Nome do campeão"></label>
+      <label>Buscar campeão<input data-slot="input" id="search" placeholder="Nome do campeão"></label>
       <label>Ordenar por<select id="sort">
         <option value="az">A → Z</option>
         <option value="ws">Mais jogados no Worlds 2026</option>

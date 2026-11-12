@@ -42,7 +42,7 @@ summary::-webkit-details-marker { display:none; }
 #v-comps .saved { font-size:11px; color:var(--green); }
 #v-comps #editor { display:block; padding:var(--wl-space-2) var(--wl-panel-padding) var(--wl-panel-padding); }
 #v-comps .editor-controls { display:block; margin:0; }
-#v-comps #cname { font-size:24px; border:1px solid transparent; background:transparent; min-height:40px; width:100%; margin:0 0 8px; padding:0 4px; }
+#v-comps #cname { font-size:24px; min-height:var(--wl-button-height); width:100%; margin:0 0 8px; padding:0 4px; }
 #v-comps #cname:hover { border-color:var(--line); }
 #v-comps .vtog { gap:0; margin:0 0 8px; width:fit-content; max-width:100%; border:1px solid var(--line); border-radius:var(--wl-card-radius); overflow:hidden; }
 #composition-notes { margin:0 0 12px; border-bottom:1px solid var(--line); padding-bottom:8px; }
@@ -151,7 +151,7 @@ summary::-webkit-details-marker { display:none; }
 #picker-dialog .champ-picker { border:0; }
 #picker-dialog #close-picker { display:block; min-height:var(--wl-space-12); }
 #picker-dialog #grid { max-height:45dvh; }
-#v-comps :is(button,summary,input,select,textarea):focus-visible,#picker-dialog :is(button,summary,input,select):focus-visible { outline:2px solid var(--wl-accent); outline-offset:2px; }
+#v-comps :is(button,summary,input:not([data-slot="input"]),select,textarea):focus-visible,#picker-dialog :is(button,summary,input:not([data-slot="input"]),select):focus-visible { outline:2px solid var(--wl-accent); outline-offset:2px; }
 @media (max-width:1099px) {
  #v-comps #comps { grid-template-columns:minmax(0,1fr); }
  #v-comps .comp-editor { order:0; }
@@ -227,7 +227,7 @@ summary::-webkit-details-marker { display:none; }
 }
 #v-comps .dside button[aria-pressed=true].b { background:var(--wl-side-blue-surface); border-color:#5a91ef; color:#fff; }
 #v-comps .dside button[aria-pressed=true].r { background:var(--wl-side-red-surface); border-color:#e97583; color:#fff; }
-#v-comps #cname { min-height:34px; margin-bottom:4px; }
+#v-comps #cname { min-height:var(--wl-button-height-sm); margin-bottom:var(--wl-space-1); }
 #v-comps .vtog { margin-bottom:4px; }
 #composition-notes { margin-bottom:8px; padding-bottom:4px; }
 #composition-notes > summary { padding:3px 0; }

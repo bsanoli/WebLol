@@ -150,7 +150,7 @@ body { font: var(--wl-body-size)/1.5 var(--wl-font); background: var(--wl-bg); c
 }
 .wl-card-title { font: 700 var(--wl-card-title-size)/1.25 var(--wl-font); }
 :where(input, select, textarea, button) { font: inherit; color: inherit; }
-:where(input:not([type=checkbox],[type=radio],[type=range],[type=file]), select, textarea) {
+:where(select, textarea) {
   box-sizing: border-box;
   padding: var(--wl-space-2) var(--wl-space-3);
   background: var(--wl-bg);
@@ -158,8 +158,8 @@ body { font: var(--wl-body-size)/1.5 var(--wl-font); background: var(--wl-bg); c
   border-radius: var(--wl-control-radius);
   font-size: var(--wl-detail-size);
 }
-:where(input:not([type=checkbox],[type=radio],[type=range],[type=file]), select) { min-height: var(--wl-button-height); }
-:where(input:not([type=checkbox],[type=radio],[type=range],[type=file]), textarea):where(:hover:not(:disabled,[readonly])),
+:where(select) { min-height: var(--wl-button-height); }
+:where(textarea):where(:hover:not(:disabled,[readonly])),
 :where(select:hover:not(:disabled)) { border-color: var(--wl-muted); }
 :where(input, textarea)::placeholder { color: var(--wl-muted); }
 :where(input[type=checkbox], input[type=radio], input[type=range]) { accent-color: var(--wl-accent); }
@@ -168,6 +168,39 @@ body { font: var(--wl-body-size)/1.5 var(--wl-font); background: var(--wl-bg); c
 :where(button, input, textarea, select, a, summary, [tabindex]):focus-visible {
   outline: 2px solid var(--wl-accent);
   outline-offset: 2px;
+}
+
+:where(input[data-slot="input"]) {
+  box-sizing: border-box;
+  width: 100%;
+  min-width: 0;
+  min-height: var(--wl-button-height);
+  padding: var(--wl-space-1) var(--wl-space-3);
+  border: 1px solid var(--wl-line);
+  border-radius: var(--wl-control-radius);
+  background: color-mix(in srgb, var(--wl-line) 30%, transparent);
+  box-shadow: 0 1px 2px rgb(0 0 0 / 8%);
+  font-size: var(--wl-detail-size);
+}
+input[data-slot="input"]::selection {
+  background: var(--wl-accent);
+  color: var(--wl-on-accent);
+}
+input[data-slot="input"]:disabled {
+  cursor: not-allowed;
+  opacity: .5;
+}
+input[data-slot="input"]:focus-visible {
+  border-color: var(--wl-accent);
+  outline: 2px solid color-mix(in srgb, var(--wl-accent) 65%, transparent);
+  outline-offset: 0;
+}
+input[data-slot="input"][aria-invalid="true"] {
+  border-color: var(--wl-danger);
+  outline-color: var(--wl-danger);
+}
+@media (forced-colors: active) {
+  input[data-slot="input"]:focus-visible { outline-color: Highlight; }
 }
 .icon {
   display: inline-block;

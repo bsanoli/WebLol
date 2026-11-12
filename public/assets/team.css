@@ -69,7 +69,7 @@ nav{display:flex;gap:6px}
 .kv span:last-child{font-weight:600;text-align:right;font-variant-numeric:tabular-nums}
 .obj p{margin:8px 0 0;font-size:12px;color:var(--mut)}
 .calc{display:flex;align-items:center;gap:var(--wl-space-2);margin-top:var(--wl-space-3);font-size:12px;flex-wrap:wrap}
-.calc input{width:70px;min-height:var(--wl-button-height-sm);padding:4px 6px}
+.calc input{width:calc(var(--wl-space-8) * 2 + var(--wl-space-2));min-height:var(--wl-button-height-sm);padding:var(--wl-space-1) var(--wl-space-2)}
 .calc .r{color:var(--gold);font-weight:700}
 .warn{background:var(--wl-warning-soft);border:1px solid var(--line);color:var(--wl-warning);border-radius:var(--wl-card-radius);padding:var(--wl-space-3) var(--wl-panel-padding);margin:0 0 var(--wl-panel-gap);font-size:13px}
 #know table{background:var(--panel);border:1px solid var(--line)}
@@ -94,7 +94,7 @@ nav{display:flex;gap:6px}
 #steps li.none{border-style:dashed;color:var(--mut);cursor:default}
 #steps li.none::before{content:none}
 #steps li.on{border-color:var(--gold);background:var(--panel2)}
-#steps li input{flex:1;min-width:0;min-height:36px;background:transparent;border:1px solid transparent;padding:4px 6px}
+#steps li input{flex:1;min-width:0;min-height:calc(var(--wl-button-height-sm) + var(--wl-space-1));padding:var(--wl-space-1) var(--wl-space-2)}
 #steps li input:hover,#steps li input:focus{border-color:var(--line);background:var(--bg)}
 .sstat{font-size:13px;line-height:1.5;padding:8px 10px;border-radius:var(--wl-control-radius);background:var(--bg);border:1px solid var(--line);color:var(--mut)}
 .sstat.ed{border-color:var(--gold);color:var(--txt);background:var(--wl-accent-soft)}
@@ -214,7 +214,7 @@ header nav { flex-wrap: wrap; gap: var(--wl-space-1); }
 .lh input { min-width: 96px; }
 .lh .hint { font-weight: 600; color: var(--gold); }
 .dm:focus-within .x, .dm .x:focus-visible { display: block; }
-:is(button,input,select,textarea):focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
+:is(button,input:not([data-slot="input"]),select,textarea):focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
 /* Composições: biblioteca, editor e catálogo de campeões */
 .jump-picker[data-slot=button] { display: none; margin: 0 0 12px; }
 #pick-target { scroll-margin-top: 90px; }

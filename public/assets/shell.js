@@ -73,7 +73,7 @@ let pendingId=null;
 function stepId(){
   modal(`<span class="eyebrow">Entrar</span><h3>Identifique-se com seu Riot ID</h3><p>Use o nome e a tag do League of Legends. No próximo passo você entra com a sua senha, ou cria uma no primeiro acesso.</p>
 
-   <div class="rid"><div><label for="rname">Nome no LoL</label><input id="rname" placeholder="Nome (ex: brunoltz)" maxlength="16" autocomplete="username" spellcheck="false"></div><div><label for="rtag">Tag depois do #</label><input id="rtag" placeholder="TAG" maxlength="5" autocomplete="off" spellcheck="false"></div></div>
+   <div class="rid"><div><label for="rname">Nome no LoL</label><input data-slot="input" id="rname" placeholder="Nome (ex: brunoltz)" maxlength="16" autocomplete="username" spellcheck="false"></div><div><label for="rtag">Tag depois do #</label><input data-slot="input" id="rtag" placeholder="TAG" maxlength="5" autocomplete="off" spellcheck="false"></div></div>
    <div class="err"></div>
    <div class="row"><button data-slot="button" data-variant="default" id="ok">Continuar</button></div>`);
   const nm=$("#rname"),tg=$("#rtag");
@@ -107,10 +107,10 @@ async function afterId(){
 function stepPw(exists){
   const id=dispId(pendingId);
   modal(exists?`<span class="eyebrow">${esc(id)}</span><h3>Digite sua senha</h3><p>Use a senha que você criou no primeiro acesso.</p>
-   <label for="pw">Senha</label><input type="password" id="pw" autocomplete="current-password"><div class="err"></div>
+   <label for="pw">Senha</label><input data-slot="input" type="password" id="pw" autocomplete="current-password"><div class="err"></div>
    <div class="row"><button data-slot="button" data-variant="outline" id="back">Voltar</button><button data-slot="button" data-variant="default" id="ok">Entrar</button></div>`
   :`<span class="eyebrow">${esc(id)}</span><h3>Crie a sua senha</h3><p>É o seu primeiro acesso com este Riot ID. Crie uma senha para entrar de qualquer aparelho. Se esquecer a senha, peça ao admin para liberar de novo.</p>
-   <label for="pw">Senha (mínimo 6 caracteres)</label><input type="password" id="pw" autocomplete="new-password"><label for="pw2">Repita a senha</label><input type="password" id="pw2" autocomplete="new-password"><div class="err"></div>
+   <label for="pw">Senha (mínimo 6 caracteres)</label><input data-slot="input" type="password" id="pw" autocomplete="new-password"><label for="pw2">Repita a senha</label><input data-slot="input" type="password" id="pw2" autocomplete="new-password"><div class="err"></div>
    <div class="row"><button data-slot="button" data-variant="outline" id="back">Voltar</button><button data-slot="button" data-variant="default" id="ok">Criar e entrar</button></div>`);
   $("#back").onclick=stepId;
   const go=async()=>{const pw=$("#pw").value,{auth,au}=FB,email=playerEmail(pendingId);
@@ -127,7 +127,7 @@ function stepPw(exists){
 }
 function stepAdminPw(){
   modal(`<h3>Login do admin</h3><p>Este Riot ID é administrador. Digite a senha de admin.</p>
-   <label for="pw">Senha</label><input type="password" id="pw"><div id="fbw" style="display:none"><label for="fpw">Senha do Firebase (do e-mail ${esc(adminEmail(pendingId))})</label><input type="password" id="fpw"></div><div class="err"></div>
+   <label for="pw">Senha</label><input data-slot="input" type="password" id="pw"><div id="fbw" style="display:none"><label for="fpw">Senha do Firebase (do e-mail ${esc(adminEmail(pendingId))})</label><input data-slot="input" type="password" id="fpw"></div><div class="err"></div>
    <div class="row"><button data-slot="button" data-variant="outline" id="back">Voltar</button><button data-slot="button" data-variant="default" id="ok">Entrar</button></div>`);
   const go=async()=>{$("#ok").disabled=true;merr("Verificando...");
     try{const pw=$("#pw").value;KEYS=await adminUnlock(pw,$("#fpw").value);if(slotOf(ADMIN,pendingId).temp)return stepNewPw(pw);finishLogin(true)}
@@ -137,7 +137,7 @@ function stepAdminPw(){
 // primeiro acesso de um admin novo: troca a senha provisória pela senha dele
 function stepNewPw(tmp){
   modal(`<h3>Crie a sua senha de admin</h3><p>Você entrou com a senha provisória. Agora crie a sua senha. Só você vai saber, e ela também vira a sua senha do banco do time.</p>
-   <label for="np">Nova senha (mínimo 8 caracteres)</label><input type="password" id="np"><label for="np2">Repita a senha</label><input type="password" id="np2"><div class="err"></div>
+   <label for="np">Nova senha (mínimo 8 caracteres)</label><input data-slot="input" type="password" id="np"><label for="np2">Repita a senha</label><input data-slot="input" type="password" id="np2"><div class="err"></div>
    <div class="row"><button data-slot="button" data-variant="default" id="ok">Salvar senha</button></div>`);
   const go=async()=>{const a=$("#np").value,b=$("#np2").value;if(a.length<8)return merr("Use pelo menos 8 caracteres.");if(a!==b)return merr("As senhas não são iguais.");if(a===tmp)return merr("Escolha uma senha diferente da provisória.");
     $("#ok").disabled=true;merr("Salvando...");
@@ -180,7 +180,7 @@ async function stepTeam(){
   }
   let times=[];try{times=await dbList("times")}catch(e){}
   modal(`<span class="eyebrow">${esc(u.id)}</span><h3>Você ainda não está em um time</h3><p>Crie um time (você vira o capitão) ou peça para entrar em um time. Sem time, você pode montar comps, mas elas não são salvas.</p>
-   <label for="tname">Criar um time</label><div class="rid"><input id="tname" placeholder="Nome do time" maxlength="24" autocomplete="off"><button data-slot="button" data-variant="default" id="create">Criar time</button></div>
+   <label for="tname">Criar um time</label><div class="rid"><input data-slot="input" id="tname" placeholder="Nome do time" maxlength="24" autocomplete="off"><button data-slot="button" data-variant="default" id="create">Criar time</button></div>
    ${times.length?`<label for="tjoin">Pedir para entrar em um time</label><div class="rid"><select id="tjoin" data-slot="select">${times.sort((a,b)=>a.name.localeCompare(b.name)).map(t=>`<option value="${esc(t.id)}">${esc(t.name)} (capitão ${esc(t.captainId||t.captain)})</option>`).join("")}</select><button data-slot="button" data-variant="outline" id="join">Pedir para entrar</button></div>`:""}
    <div class="err"></div>
    <div class="row"><button data-slot="button" data-variant="outline" id="solo">Usar sem time</button></div>`);
@@ -232,7 +232,7 @@ async function renderAdmin(){
   if(u.admin){
     if(!ADMIN){try{await loadAdminKey()}catch(e){}}
     if(!ADMIN){el.innerHTML=`<h2>Administração</h2><div class="wl-panel card">Sem conexão com o banco do time. <button data-slot="button" data-variant="outline" id="refresh">Tentar de novo</button></div>`;$("#refresh").onclick=renderAdmin;return}
-    if(!KEYS||!fbIsAdmin()){el.innerHTML=`<h2>Administração</h2><div class="wl-panel card"><p>Digite a senha de admin para desbloquear neste aparelho.</p><input type="password" id="apw" aria-label="Senha de administrador" style="max-width:300px"> <span id="afw" style="display:none"><input type="password" id="afpw" aria-label="Senha do Firebase" placeholder="Senha do Firebase" style="max-width:220px"></span> <button data-slot="button" data-variant="default" id="aok">Desbloquear</button> <span class="bad" id="aerr"></span></div>`;
+    if(!KEYS||!fbIsAdmin()){el.innerHTML=`<h2>Administração</h2><div class="wl-panel card"><p>Digite a senha de admin para desbloquear neste aparelho.</p><input data-slot="input" type="password" id="apw" aria-label="Senha de administrador" style="max-width:300px"> <span id="afw" style="display:none"><input data-slot="input" type="password" id="afpw" aria-label="Senha do Firebase" placeholder="Senha do Firebase" style="max-width:220px"></span> <button data-slot="button" data-variant="default" id="aok">Desbloquear</button> <span class="bad" id="aerr"></span></div>`;
       const go=async()=>{try{KEYS=await adminUnlock($("#apw").value,$("#afpw").value);await enterTeam();renderAdmin()}catch(e){if(e.message==="fb"){$("#afw").style.display="";$("#aerr").textContent="Digite também a senha do Firebase"}else $("#aerr").textContent="Senha incorreta"}};
       $("#aok").onclick=go;el.querySelectorAll("input").forEach(i=>i.addEventListener("keydown",e=>{if(e.key==="Enter")go()}));return}
   }
@@ -280,7 +280,7 @@ async function renderAdmin(){
       const st=main?"principal":!sl?'<span class="mut">não liberado</span>':sl.temp?'<span style="color:var(--gold)">aguardando o 1º acesso</span>':'<span class="ok">ativo</span>';
       return`<tr><td>${esc(dispId(id))}</td><td>${em?esc(em):'<span class="bad">falta o e-mail no app</span>'}</td><td>${st}</td><td>${main||me||!em?"":`<button data-slot="button" data-variant="outline" data-adm="${esc(id)}">${sl?"Nova senha provisória":"Liberar admin"}</button>`}${sl&&!main&&!me?` <button data-slot="button" data-variant="destructive" data-rmadm="${esc(id)}">Remover</button>`:""}</td></tr>`}).join("")}</table>
     <div id="admform" style="display:none;margin-top:10px"><p>Liberar <b id="admwho"></b>. Primeiro cadastre o e-mail dele no Firebase (Authentication › Usuários) com uma senha provisória. Depois digite aqui a mesma senha provisória e passe para ele. No primeiro acesso ele cria a senha dele.</p>
-     <input type="password" id="admmy" placeholder="Sua senha de admin" style="max-width:220px"> <input type="password" id="admtmp" placeholder="Senha provisória dele" style="max-width:220px"> <button data-slot="button" data-variant="default" id="admok">Liberar</button> <span class="bad" id="admerr"></span></div></div>
+     <input data-slot="input" type="password" id="admmy" placeholder="Sua senha de admin" style="max-width:220px"> <input data-slot="input" type="password" id="admtmp" placeholder="Senha provisória dele" style="max-width:220px"> <button data-slot="button" data-variant="default" id="admok">Liberar</button> <span class="bad" id="admerr"></span></div></div>
    <h2>Banco e backup</h2><div class="wl-panel card"><span class="mut">Chave do admin: ${esc(KEYS.fp)}</span>
     <div class="btns"><button data-slot="button" data-variant="outline" id="exp">Baixar backup completo</button><button data-slot="button" data-variant="outline" id="lock">Bloquear admin neste aparelho</button><button data-slot="button" data-variant="outline" id="refresh">Atualizar</button></div>
     <p class="mut">Guarde o backup completo na pasta Admin do OneDrive de tempos em tempos.</p></div>

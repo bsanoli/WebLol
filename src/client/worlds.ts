@@ -403,14 +403,14 @@ compactBuilds.addEventListener("change", syncBuildDetailSpan);
 const buildLaneIcon = lane => lane ? laneIconMarkup(lane) : iconMarkup("layers");
 function buildsView(){
   return `<section class="builds-page" aria-label="Builds">
-  <div class="wl-panel tools"><input id="bq" type="search" placeholder="Buscar campeão ou item…" aria-label="Buscar campeão ou item">
+  <div class="wl-panel tools"><input data-slot="input" id="bq" type="search" placeholder="Buscar campeão ou item…" aria-label="Buscar campeão ou item">
   <div class="build-lane-tabs" role="group" aria-label="Filtrar por posição">
     ${["", ...LANES.map(([lane]) => lane)].map(lane => {
       const label = esc(lane || "Todas as posições");
       return `<button type="button" data-slot="button" data-variant="ghost" data-lane="${esc(lane)}" aria-label="${label}" title="${label}" aria-pressed="${lane === bLane}">${buildLaneIcon(lane)}</button>`;
     }).join("")}
   </div>
-  <label class="build-min-games" for="bmin">Mínimo de jogos <input id="bmin" type="number" min="0" step="1" inputmode="numeric" value="${buildMinGames}"></label>
+  <label class="build-min-games" for="bmin">Mínimo de jogos <input data-slot="input" id="bmin" type="number" min="0" step="1" inputmode="numeric" value="${buildMinGames}"></label>
   <button id="build-clear-all" type="button" data-slot="button" data-variant="outline">${iconMarkup("reset")} Limpar filtros</button></div>
   <div class="bcards" id="bc"></div></section>`}
 function wireBuilds(){
@@ -747,7 +747,7 @@ function compPicker({id, label, value, hint, options, image, search, empty, clea
       <span class="comp-picker-value">${value}</span>${iconMarkup("descending")}
     </button>
     <div id="${id}-picker" class="comp-picker" role="group" aria-label="Filtro de ${label.toLowerCase()}" hidden>
-      <input class="comp-picker-search" type="search" aria-label="${search}" placeholder="${search}">
+      <input data-slot="input" class="comp-picker-search" type="search" aria-label="${search}" placeholder="${search}">
       <div class="comp-picker-categories" role="group" aria-label="${category.label}">
         <button type="button" data-category="" data-slot="button" data-variant="outline" aria-pressed="true">${category.all}</button>
         ${category.values.map(name => `<button type="button" data-category="${esc(name)}" data-slot="button" data-variant="outline" aria-label="${esc(name)}" title="${esc(name)}" aria-pressed="false">${category.icon ? category.icon(name) : esc(name)}</button>`).join("")}
@@ -771,7 +771,7 @@ function compsView(){
       <p class="hint">Compare campeões, jogadores e KDA nas cinco rotas de cada partida. A base reúne ${DATA.mgames} jogos com draft completo.</p>
     </div>
     <div class="wl-panel comp-filters" role="group" aria-label="Filtrar jogos">
-      <label for="cq">Buscar<input id="cq" type="search" placeholder="Campeão ou jogador" value="${esc(cQ||"")}"></label>
+      <label for="cq">Buscar<input data-slot="input" id="cq" type="search" placeholder="Campeão ou jogador" value="${esc(cQ||"")}"></label>
       ${compPicker({id:"cc", label:"Campeões", value:`${iconMarkup("champion-add")} Escolher campeões`, hint:"cc-hint",
         options:compChampions, image:ico, search:"Buscar campeão", empty:"Nenhum campeão encontrado.", clear:"Limpar seleções",
         category:{label:"Rota jogada no Worlds", all:"Todas", values:LANES.map(([lane]) => lane), icon:laneIconMarkup, forName:name => [...compChampionLanes.get(name)]}})}
