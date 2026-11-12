@@ -210,7 +210,7 @@ function buildSkills(champion: string, order: BuildData["skillOrder"], games: nu
   </section>`;
 }
 
-function buildHtml(champion: Champion, lane: string) {
+function buildHtml(champion: Champion, lane: string, withTimeline: boolean) {
   const build = championBuild(champion, lane);
   if (!build) return `<span class="na">Sem build coletada para ${esc(champion.name)}.</span>`;
   const { games } = build;
@@ -240,9 +240,9 @@ function buildHtml(champion: Champion, lane: string) {
         ${buildSkills(champion.name, build.skillOrder, games)}
       </div>
     </div>
-    <section class="build-timeline" data-build-timeline="${esc(champion.name)}" data-lane="${esc(lane)}" aria-label="Compras jogo a jogo">
+    ${withTimeline ? `<section class="build-timeline" data-build-timeline="${esc(champion.name)}" data-lane="${esc(lane)}" aria-label="Compras jogo a jogo">
       <p class="build-data-sample">Carregando compras jogo a jogo…</p>
-    </section>`;
+    </section>` : ""}`;
 }
 
 /** Preenche as seções "Compras jogo a jogo" de `root`; os dados por jogo ficam num arquivo separado. */
@@ -256,12 +256,13 @@ export async function hydrateBuildTimelines(root: ParentNode) {
   }
 }
 
-export function buildDetails(champion: Champion, lane: string, action = "") {
+/** `withTimeline`: mostra "Compras jogo a jogo" (só na página do campeão). */
+export function buildDetails(champion: Champion, lane: string, action = "", withTimeline = false) {
   const samples = Object.entries(champion.lanes)
     .filter(([position, sample]) => (!lane || position === lane) && sample.n)
     .map(([position, sample], index) => buildSample(sample, position, index === 0 ? action : "")).join("");
   const missingSample = lane ? `<p class="hint">Sem estatísticas de desempenho coletadas em ${esc(lane)}.</p>` : "";
-  return (samples || `<div class="build-sample-heading">${missingSample}${action}</div>`) + buildHtml(champion, lane);
+  return (samples || `<div class="build-sample-heading">${missingSample}${action}</div>`) + buildHtml(champion, lane, withTimeline);
 }
 
 type Matchup = [opponent: string, games: number, wins: number, ...stats: number[]]

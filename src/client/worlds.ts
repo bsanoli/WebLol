@@ -456,7 +456,7 @@ function wireBuilds(){
       : "";
     return `<article class="bcard${pageSlug ? "" : " wl-panel"}">
       ${heading}
-      ${buildDetails(champion, position, action)}
+      ${buildDetails(champion, position, action, !pageSlug)}
       ${inlineContext}
     </article>`;
   };
@@ -503,7 +503,6 @@ function wireBuilds(){
     revealContent(cell.firstElementChild, true);
     side.innerHTML=context;
     enhanceAnalyticsUI();
-    void hydrateBuildTimelines(cell).then(enhanceAnalyticsUI);
   };
   bc.onclick=e=>{
     const view = e.target.closest("[data-timeline-view]") as HTMLButtonElement | null;
