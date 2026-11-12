@@ -14,7 +14,8 @@
     grid-template-rows: none;
     gap: 14px;
     align-items: stretch;
-    height: max(600px, calc(100dvh - 230px));
+    flex: 1;
+    min-height: 600px;
   }
   #v-comps.draft-view .tm { display: flex; flex-direction: column; gap: 6px; grid-row: auto; min-width: 0; margin: 0; order: 0; }
   #v-comps.draft-view .tm > .draft-phase { display: none; }
@@ -52,7 +53,7 @@
   #v-comps.draft-view .dz-names .tmh:first-child { color: #6ea2ff; align-items: flex-start; }
   #v-comps.draft-view .dz-names .tmh:last-child { color: #ff6b7d; align-items: flex-end; text-align: right; }
   #v-comps.draft-view .dz-names .tmh span { font-size: 12px; font-weight: 500; color: var(--mut); opacity: 1; }
-  #v-comps.draft-view .dz-tabs { display: flex; flex-wrap: wrap; gap: 6px; padding: 6px; border: 1px solid var(--line); border-radius: var(--wl-card-radius); background: var(--panel2, var(--bg)); }
+  #v-comps.draft-view .dz-tabs { display: flex; flex-wrap: wrap; gap: 6px; padding: 6px; border: 1px solid var(--line); border-radius: var(--wl-card-radius); background: var(--panel2, var(--bg)); max-height: 192px; overflow: auto; overscroll-behavior: contain; }
   .dz-tab { display: flex; flex-direction: column; align-items: flex-start; gap: 4px; min-width: 0; max-width: 190px; padding: 6px 9px; border: 1px solid transparent; border-radius: var(--wl-control-radius); background: transparent; color: var(--txt); text-align: left; cursor: pointer; }
   .dz-tab:hover { background: var(--wl-accent-soft); }
   .dz-tab.on { border-color: var(--wl-accent); background: var(--wl-accent-soft); }
@@ -75,7 +76,7 @@
   #v-comps.draft-view .tm.r > .pk.them .pkh { justify-content: flex-end; }
   #v-comps.draft-view .dz-slot .champ-picker > * { flex: none; }
   #v-comps.draft-view .dz-slot .champ-picker > #grid { flex: 1 1 0; }
-  #v-comps.draft-view .dz-slot #grid { flex: 1 1 0; max-height: none; min-height: 220px; overflow: auto; }
+  #v-comps.draft-view .dz-slot #grid { flex: 1 1 0; max-height: none; min-height: 160px; overflow: auto; }
   #v-comps.draft-view > .comp-workspace ~ * .draft-help, #v-comps.draft-view .draft-help { text-align: center; }
 }
 

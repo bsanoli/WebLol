@@ -252,8 +252,21 @@ summary::-webkit-details-marker { display:none; }
 #v-comps .ch:hover:not([aria-pressed=true]) { background:var(--panel2); border-color:var(--mut); }
 
 @media (min-width:1100px) {
-  #v-comps:not(.draft-view) #editor { display:flex; flex:1 0 auto; flex-direction:column; }
+  body:has(#v-comps.on) { display:flex; flex-direction:column; min-height:100dvh; }
+  #v-comps.on, #v-comps .comp-workspace { display:flex; flex:1; flex-direction:column; }
+  #v-comps #comps { flex:1; }
+  #v-comps #editor { display:flex; flex:1 0 auto; flex-direction:column; }
   #v-comps:not(.draft-view) .lane:not(.ban-strip) { flex:1 0 auto; }
+
+  /* Keep long lists inside their panels. */
+  #v-comps:not(.draft-view) #clist,
+  #v-comps:not(.draft-view) #comps > .champ-picker #grid {
+    flex:1 1 0;
+    max-height:none;
+    overflow:auto;
+    overscroll-behavior:contain;
+  }
+  #v-comps #clist > .composition-item { flex:none; }
 }
 
 @media (min-width:1600px) {
