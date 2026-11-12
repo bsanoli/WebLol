@@ -62,7 +62,7 @@ tr.detail td{background:var(--mid-bg);padding:var(--wl-panel-padding)}
 .chips{display:flex;flex-wrap:wrap;gap:5px}
 .chip{background:var(--surface);border:1px solid var(--line);border-radius:var(--wl-control-radius);padding:1px 9px;font-size:13px}
 .na{color:var(--muted)}
-.matchups-view{container-type:inline-size}
+.matchups-view{container:matchups / inline-size}
 .matchups-grid {
   display: grid;
   gap: var(--worlds-card-gap);
@@ -73,10 +73,46 @@ tr.detail td{background:var(--mid-bg);padding:var(--wl-panel-padding)}
 .mu-picker-heading h2 { margin: 0; font-size: 18px; }
 .mu-repeated { margin-top: var(--worlds-section-gap); }
 .mu-table th:not(:first-child, :nth-child(3)) { text-align: right; }
-.mu-picker{padding:0;overflow:hidden}
-.mulist{--row-height:var(--wl-space-12);display:grid;align-content:start;max-height:calc(var(--row-height) * 5 + 1px);overflow-y:auto;border-top:1px solid var(--line)}
-.murow{all:unset;box-sizing:border-box;min-height:var(--row-height);cursor:pointer;display:grid;grid-template-columns:minmax(0,1fr) auto auto;gap:var(--wl-space-2);align-items:center;padding:var(--wl-space-2) var(--worlds-card-padding);border-bottom:1px solid var(--line);font-size:14px;font-weight:600}
-.murow:hover{background:var(--mid-bg)}.murow[aria-pressed="true"]{background:var(--gold-soft);box-shadow:inset 3px 0 0 var(--gold)}
+.mu-picker{container-type:inline-size;padding:0;overflow:hidden}
+.mulist {
+  --mu-card-gap: var(--wl-space-2);
+  --mu-card-height: calc(var(--wl-space-12) + var(--wl-space-2));
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  align-content: start;
+  gap: var(--mu-card-gap);
+  padding: var(--mu-card-gap);
+  max-height: calc(var(--mu-card-height) * 4 + var(--mu-card-gap) * 5 + 1px);
+  overflow-y: auto;
+  border-top: 1px solid var(--line);
+}
+@container (min-width: 328px) {
+  .mulist { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+.murow {
+  min-height: var(--mu-card-height);
+  min-width: 0;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: center;
+  gap: var(--wl-space-2);
+  padding: var(--wl-space-2);
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--wl-control-radius);
+  color: inherit;
+  font: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1.2;
+  text-align: left;
+  cursor: pointer;
+}
+.murow .av { width: var(--wl-space-6); height: var(--wl-space-6); margin: 0; }
+.murow-name { display: block; overflow-wrap: anywhere; }
+.murow-stats { display: block; margin-top: var(--wl-space-1); font-size: 12px; }
+.murow:hover { background: var(--mid-bg); }
+.murow[aria-pressed="true"] { background: var(--gold-soft); border-color: var(--gold); }
 .murow:focus-visible{outline:2px solid var(--gold);outline-offset:-2px}
 .muhead { display: flex; align-items: center; gap: var(--wl-space-3); }
 .muhead .av { width: var(--wl-space-12); height: var(--wl-space-12); margin: 0; font-size: 14px; }
@@ -84,7 +120,7 @@ tr.detail td{background:var(--mid-bg);padding:var(--wl-panel-padding)}
 .wl{display:inline-flex;gap:2px}.wl i{width:8px;height:14px;border-radius:2px;display:block}.wl .w{background:var(--good)}.wl .l{background:var(--bad);opacity:.7}
 .duel{display:grid;grid-template-columns:minmax(0,1fr) minmax(80px,2fr) minmax(0,1fr) 40px;gap:var(--wl-space-2);align-items:center;font-size:14px;font-weight:600}
 .duel .val{font-family:var(--wl-font);font-size:13px;text-align:right}
-@container (min-width:1060px){
+@container matchups (min-width:1060px){
   .matchups-grid{grid-template-columns:repeat(3,minmax(0,1fr))}
   #mudetail {
     grid-column: span 2;

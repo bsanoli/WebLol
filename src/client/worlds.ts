@@ -633,7 +633,9 @@ function wireMu(){
   if(!muChamp||!M[muChamp])muChamp=champs[0]&&champs[0].c;
   document.getElementById('mulanes').onclick=e=>{const b=e.target.closest('button');if(!b)return;muLane=b.dataset.l;muChamp=null;render("matchups");publishWorlds("matchups",[muLane.toLowerCase()])};
   const list=document.getElementById('mulist');
-  list.innerHTML=champs.map(x=>`<button class="murow" aria-pressed="${x.c===muChamp}" data-c="${esc(x.c)}"><span class="nmi">${ico(x.c)}${esc(x.c)}</span><span class="na">${x.n} jogos</span>${wrPill(x.w,x.n)}</button>`).join("");
+  list.innerHTML=champs.map(({c,n,w})=>`<button type="button" class="murow" aria-pressed="${c===muChamp}" data-c="${esc(c)}">
+    ${ico(c)}<span><span class="murow-name">${esc(c)}</span><span class="murow-stats"><span class="na">${n} ${n===1?'jogo':'jogos'} · </span>${wrPill(w,n)}</span></span>
+  </button>`).join("");
   list.onclick=e=>{
     const button=e.target.closest('button');
     if(!button || button.dataset.c===muChamp)return;
