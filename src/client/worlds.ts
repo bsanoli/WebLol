@@ -2,7 +2,7 @@
 import { iconMarkup, laneIconMarkup } from "./icon"
 import DATA from "../data/worlds.json"
 import { LOL_DATA, lolAsset, lolChampion, lolKey } from "./lol-media"
-import { abilityDetail, buildDetails, buildGameCount, buildLaneHighlights, buildMatchesQuery, buildMatchups, buildsTable, orderedMatchups } from "./worlds-builds"
+import { abilityDetail, buildDetails, buildGameCount, buildLaneHighlights, buildMatchesQuery, buildMatchups, buildsTable, hydrateBuildTimelines, orderedMatchups } from "./worlds-builds"
 import { effectText } from "./worlds-effect-text"
 import { LANES, LC, kdaOf, pct, wrPill, ico, esc, championSlug, sortIcons, teamLogo, teamRegion } from "./worlds-display"
 import { initializeTheme } from "./theme"
@@ -479,6 +479,7 @@ function wireBuilds(){
       : '<div class="empty-state" role="status"><h3>Nenhum campeão encontrado</h3><p>Ajuste a busca, a posição ou o mínimo de jogos.</p></div>');
     sortBuildRows();
     enhanceAnalyticsUI();
+    void hydrateBuildTimelines(bc).then(enhanceAnalyticsUI);
   };
   const setExpanded = (button, expanded) => {
     button.setAttribute("aria-expanded", String(expanded));
@@ -502,8 +503,18 @@ function wireBuilds(){
     revealContent(cell.firstElementChild, true);
     side.innerHTML=context;
     enhanceAnalyticsUI();
+    void hydrateBuildTimelines(cell).then(enhanceAnalyticsUI);
   };
   bc.onclick=e=>{
+    const view = e.target.closest("[data-timeline-view]") as HTMLButtonElement | null;
+    if (view) {
+      const section = view.closest(".build-timeline")!;
+      section.querySelectorAll<HTMLButtonElement>("[data-timeline-view]").forEach(button => {
+        button.setAttribute("aria-pressed", String(button === view));
+      });
+      section.querySelector<HTMLElement>(".build-timeline-games")!.dataset.view = view.dataset.timelineView;
+      return;
+    }
     const sequence = e.target.closest("[data-skill-sequence]") as HTMLButtonElement | null;
     if (sequence) {
       const skills = sequence.closest(".build-skills")!;

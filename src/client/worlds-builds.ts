@@ -48,14 +48,25 @@ function buildIcon(kind: BuildIconKind, key: string | undefined, label: string, 
     : `<span class="build-icon-static" role="img" aria-label="${text}" title="${text}">${image}</span>`;
 }
 
+/** Ícone de item com tooltip; usado também pela linha do tempo de compras. */
+export function itemIcon(item: number, usage: string) {
+  const label = itemLabels[item] ?? String(item);
+  const fallback = `https://ddragon.leagueoflegends.com/cdn/16.20.1/img/item/${item}.png`;
+  return buildIcon("item", itemKeys.get(item), label, usage, fallback);
+}
+
+export const itemName = (item: number) => itemLabels[item] ?? String(item);
+export const isCompletedItem = (item: number) => completedItems.has(item);
+export const bootItems = new Set<number>(Object.values(buildData).flatMap(lanes =>
+  Object.values(lanes ?? {}).flatMap(build => build?.boots.map(entry => entry.value) ?? [])));
+bootItems.delete(1001); // Botas básicas não contam como botas completas
+
 function usageOf(entry: Pick<Frequency<unknown>, "count" | "percent">, games: number) {
   return `${entry.count} de ${games} · ${percent.format(entry.percent)}%`;
 }
 
 function itemOption(entry: Frequency<number>, games: number): Option {
-  const label = itemLabels[entry.value] ?? String(entry.value);
-  const fallback = `https://ddragon.leagueoflegends.com/cdn/16.20.1/img/item/${entry.value}.png`;
-  return { ...entry, label, icons: [buildIcon("item", itemKeys.get(entry.value), label, usageOf(entry, games), fallback)] };
+  return { ...entry, label: itemName(entry.value), icons: [itemIcon(entry.value, usageOf(entry, games))] };
 }
 
 function starterOption(entry: Frequency<number[]>, games: number): Option {
@@ -228,7 +239,21 @@ function buildHtml(champion: Champion, lane: string) {
         </section>
         ${buildSkills(champion.name, build.skillOrder, games)}
       </div>
-    </div>`;
+    </div>
+    <section class="build-timeline" data-build-timeline="${esc(champion.name)}" data-lane="${esc(lane)}" aria-label="Compras jogo a jogo">
+      <p class="build-data-sample">Carregando compras jogo a jogo…</p>
+    </section>`;
+}
+
+/** Preenche as seções "Compras jogo a jogo" de `root`; os dados por jogo ficam num arquivo separado. */
+export async function hydrateBuildTimelines(root: ParentNode) {
+  const sections = [...root.querySelectorAll<HTMLElement>("[data-build-timeline]:not([data-ready])")];
+  if (!sections.length) return;
+  const { buildTimeline } = await import("./worlds-build-timeline");
+  for (const section of sections) {
+    section.dataset.ready = "";
+    section.innerHTML = buildTimeline(section.dataset.buildTimeline ?? "", section.dataset.lane ?? "");
+  }
 }
 
 export function buildDetails(champion: Champion, lane: string, action = "") {
