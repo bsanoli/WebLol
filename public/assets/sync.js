@@ -179,7 +179,8 @@ function setSync(t,c){
   $("#sync use").setAttribute("href","assets/icons.svg#"+icon);
 }
 function updateStatus(keepChip){
-  const u=user();$("#user").innerHTML=u?`${esc(u.id)}${u.admin?" <small>ADMIN</small>":""}`:"";
+  const u=user();
+  document.body.dataset.accountName = u?.id ?? "";
   document.body.classList.toggle("isadmin",!!u?.admin);
   $("#logout").hidden=!u;
   if(!u){setSync("Identificar-se para o time","warn");$("#sync").onclick=stepId;$("#send").hidden=true;return}

@@ -1,7 +1,9 @@
+import { useEffect, useState } from "react"
+import { SiteHeader } from "@/components/arc/blocks/site-header/site-header"
 import { flushSync } from "react-dom"
 import { createRoot } from "react-dom/client"
 import { Button } from "@/components/ui/button"
-import { Badge } from "@/components/ui/badge"
+import { AccountAvatar } from "@/components/account-avatar"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { ThemePicker } from "@/components/theme-picker"
 import "./index.css"
@@ -9,17 +11,17 @@ import { connectAnalytics } from "./analytics-bridge"
 import { iconMarkup } from "./client/icon"
 import { initializeTheme } from "./client/theme"
 import { UI_VERSIONS } from "./data/ui-versions"
-import { initializeMotionNav } from "./client/motion"
 
 const sections = [
-  { id: "worlds", label: "Worlds", icon: "worlds" },
-  { id: "camp", label: "Área do time", icon: "team" },
-  { id: "admin", label: "Administração", icon: "admin" },
-] as const
+  { value: "worlds", label: "Worlds", href: "#/worlds" },
+  { value: "camp", label: "Área do time", href: "#/time" },
+  { value: "admin", label: "Administração", href: "#/admin" },
+]
+const publicSections = sections.filter(({ value }) => value !== "admin")
 
 const initialPalette = initializeTheme()
 
-type IconName = (typeof sections)[number]["icon"] | "link" | "reset" | "exit"
+type IconName = "reset" | "exit"
 
 function Icon({ name }: { name: IconName }) {
   return (
@@ -30,35 +32,63 @@ function Icon({ name }: { name: IconName }) {
 }
 
 function App() {
+  const [current, setCurrent] = useState("worlds")
+  const [isAdmin, setIsAdmin] = useState(false)
+  const [user, setUser] = useState("")
+
+  useEffect(() => {
+    function updateNavigation() {
+      setCurrent(document.body.dataset.currentScreen ?? "worlds")
+      setIsAdmin(document.body.classList.contains("isadmin"))
+      setUser(document.body.dataset.accountName ?? "")
+    }
+    const observer = new MutationObserver(updateNavigation)
+    observer.observe(document.body, { attributes: true, attributeFilter: ["class", "data-current-screen", "data-account-name"] })
+    updateNavigation()
+    return () => observer.disconnect()
+  }, [])
+
   return (
     <>
-      <header id="top">
-        <a href="#/worlds" aria-label="WebLol, página inicial" className="brand-link flex min-h-[var(--wl-button-height)] shrink-0 items-center rounded-sm hover:brightness-110 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-ring">
-          <img src="./assets/brand/weblol-logo-horizontal-transparent.png" alt="" width="1200" height="185" className="h-auto w-[120px]" />
-        </a>
-        <nav aria-label="Áreas do painel" className="top-nav">
-          {sections.map(({ id, label, icon }) => (
-            <Button key={id} variant="ghost" className="tab" data-t={id}>
-              <Icon name={icon} /> {label}
+      <SiteHeader
+        id="top"
+        variant="simple"
+        sticky={false}
+        label="Áreas do painel"
+        brand={{
+          name: "WebLol, página inicial",
+          href: "#/worlds",
+          mark: <img src="./assets/brand/weblol-logo-horizontal-transparent.png" alt="" width="1200" height="185" className="h-auto w-[120px]" />,
+        }}
+        items={isAdmin ? sections : publicSections}
+        current={current}
+        primaryAction={null}
+        secondaryAction={null}
+        toolbar={
+          <div className="header-actions">
+            <ThemePicker initialPalette={initialPalette} />
+            <Button variant="ghost" className="account-trigger" popoverTarget="header-tools"
+              aria-label={user ? `Conta de ${user}` : "Conta"} title={user || "Conta"}>
+              <AccountAvatar user={user} />
+              {user && <span className="account-name">{user}</span>}
             </Button>
-          ))}
-        </nav>
-        <div className="toolbar" aria-label="Preferências, conta e sincronização">
-          <ThemePicker initialPalette={initialPalette} />
-          <Button id="copy-link" variant="outline" hidden>
-            <Icon name="link" /> Copiar link
-          </Button>
-          <Button id="sync" variant="outline">
-            <Icon name="reset" />
-            <span id="sync-label" aria-live="polite">Verificando sincronização…</span>
-          </Button>
-          <Button id="send" hidden />
-          <Badge id="user" variant="secondary" />
-          <Button id="logout" variant="ghost" title="Sair ou trocar usuário">
-            <Icon name="exit" /> Sair
-          </Button>
-        </div>
-      </header>
+            <div id="header-tools" className="toolbar" popover="auto" role="group" aria-label="Conta e sincronização">
+              {user && <div className="account-details">
+                <strong>{user}</strong>
+                {isAdmin && <small>Admin</small>}
+              </div>}
+              <Button id="sync" variant="outline">
+                <Icon name="reset" />
+                <span id="sync-label" aria-live="polite">Verificando sincronização…</span>
+              </Button>
+              <Button id="send" hidden />
+              <Button id="logout" variant="ghost" title="Sair ou trocar usuário">
+                <Icon name="exit" /> Sair
+              </Button>
+            </div>
+          </div>
+        }
+      />
       <main id="screens" aria-label="Painel WebLol">
         <iframe id="v-worlds" className="view" title="Estatísticas do Worlds" />
         <iframe id="v-camp" className="view" title="Área do time" />
@@ -94,7 +124,6 @@ function loadClassicScript(path: string): Promise<void> {
 
 const root = createRoot(document.getElementById("app")!)
 flushSync(() => root.render(<App />))
-initializeMotionNav("#top nav")
 
 connectAnalytics(document.getElementById("v-worlds") as HTMLIFrameElement)
 

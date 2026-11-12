@@ -277,7 +277,6 @@ async function copyCurrentLink() {
     prompt("Copie o endereço desta tela", url.href);
   }
 }
-$("#copy-link").onclick = copyCurrentLink;
 
 async function loadScreen(name) {
   if (!loaded.has(name)) {
@@ -303,15 +302,10 @@ async function loadScreen(name) {
 function show(t) {
   if(t==="admin"&&!user()?.admin)t="camp";
   currentScreen = t;
-  $("#copy-link").hidden = t === "admin";
+  $("#header-tools").hidePopover();
   $("#screen-error").hidden = true;
   $("#screen-loading").hidden = t === "admin" || $("#v-" + t).dataset.ready === "true";
-  document.querySelectorAll("#top .tab").forEach(button => {
-    const active = button.dataset.t === t;
-    button.classList.toggle("on", active);
-    if (active) button.setAttribute("aria-current", "page");
-    else button.removeAttribute("aria-current");
-  });
+  document.body.dataset.currentScreen = t;
   document.querySelectorAll(".view").forEach(view => view.classList.toggle("on", view.id === "v-" + t));
   if (t === "admin") renderAdmin();
   else void loadScreen(t);
@@ -322,12 +316,15 @@ reloadCamp = () => {
   const source = loaded.get("camp");
   if (source) source.then(html => { $("#v-camp").srcdoc = html; }, () => {});
 };
-document.querySelectorAll("#top .tab").forEach(button => {
-  button.onclick = () => {
-    if (button.dataset.t === currentScreen && readRoute().screen === currentScreen) return;
-    writeRoute(routeRoots[button.dataset.t]);
-    openRoute();
-  };
+$("#top").addEventListener("click", event => {
+  if (event.defaultPrevented || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+  const link = event.target.closest("a[data-section]");
+  if (!link) return;
+  event.preventDefault();
+  const section = link.dataset.section;
+  if (section === currentScreen && readRoute().screen === currentScreen) return;
+  writeRoute(routeRoots[section]);
+  openRoute();
 });
 
 /* ================= início ================= */

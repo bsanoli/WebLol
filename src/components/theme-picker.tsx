@@ -38,7 +38,6 @@ export function ThemePicker({ initialPalette }: { initialPalette: PaletteId }) {
     >
       <summary ref={trigger} aria-label={`Tema: ${selected.label}`}>
         <span className="palette-preview" aria-hidden="true" />
-        <span>Tema</span>
       </summary>
       <div className="palette-options" role="group" aria-label="Temas do WebLol">
         {palettes.map(option => (
