@@ -124,8 +124,13 @@ function optionHTML(n,l,i){
     <details class="option-menu" name="champion-editor-menu"><summary aria-label="Opções de ${esc(n)}">⋯</summary><div><span>${i+1}ª opção · ${esc(n)}</span><button data-slot="button" data-variant="ghost" data-size="sm" data-move="-1" data-n="${esc(n)}" data-lane="${l}" ${i===0?"disabled":""}>Mover antes</button><button data-slot="button" data-variant="ghost" data-size="sm" data-move="1" data-n="${esc(n)}" data-lane="${l}" ${i===cur().lanes[l].length-1?"disabled":""}>Mover depois</button><button data-slot="button" data-variant="destructive" data-size="sm" data-rm="${esc(n)}">Remover ${esc(n)}</button></div></details>
   </div>`;
 }
+// Arte em alta (1215×717) direto do Data Dragon; se não carregar, usa a cópia local menor.
 function pickArt(name){
-  return name ? lolImage(champArt(name)?.splash, "pick-splash") : "";
+  const local=name?champArt(name)?.splash:"";
+  if(!local)return "";
+  const id=local.match(/splash\/(.+)\.webp$/)?.[1];
+  if(!id)return lolImage(local,"pick-splash");
+  return `<img alt="" class="pick-splash" loading="lazy" src="https://ddragon.leagueoflegends.com/cdn/img/champion/splash/${id}_0.jpg" onerror="this.onerror=()=>this.remove();this.src='assets/${local}'">`;
 }
 
 function laneNoteHTML(c, lane){
@@ -177,7 +182,7 @@ function renderEditor(){
   <button class="ln lane-label" data-draft-target="${l.k}" aria-pressed="${active===l.k}">${laneIconMarkup(l.k)}${l.n}</button>
   <div class="chips">${c.lanes[l.k].map((n,i)=>optionHTML(n,l.k,i)).join("")||'<span class="empty">Adicionar campeão</span>'}</div>
 ${laneNoteHTML(c,l)}</div>`).join("")}
-  <p class="help">Clique no retrato para priorizar. Arraste para reordenar ou use o menu ⋯ de cada campeão.</p>`);
+  <p class="help">${dv?"Clique no retrato para torná-lo principal, arraste para reordenar e use o botão direito para excluir.":"Clique no retrato para priorizar. Arraste para reordenar ou use o menu ⋯ de cada campeão."}</p>`);
   renderDraftLaneNotes(c);
   placePicker();
   $("#grid").scrollTop=gridScroll;
@@ -259,12 +264,12 @@ function draftHTML(c){
   const seq=[],cnt={B:{pick:0,ban:0},R:{pick:0,ban:0}},kc={pick:0,ban:0};
   DORDER.forEach(([ph,slots],pi)=>slots.forEach(s=>{const[t,k]=s.split(":");const i=cnt[t][k]++;seq.push({t,k,i,code:t+(k==="ban"?"B":"")+(i+1),ph:pi,n:++kc[k]})}));
   const find=(t,k,i)=>seq.find(s=>s.t===t&&s.k===k&&s.i===i);
-  const mini=(n,l,j)=>optionHTML(n,l,j);
+  // No draft: clique esquerdo torna principal, arrastar reordena e o botão direito abre "Excluir".
+  const mini=(n,l,j)=>`<div class="chip dchip ${j===0?"primary":"alternative"}" draggable="true" data-n="${esc(n)}" data-from="${l}"><button class="champ-priority" data-priority="${esc(n)}" data-lane="${l}" aria-label="${j===0?"Principal":"Tornar principal"}: ${esc(n)} em ${LN[l].n}" title="${esc(n)} · ${j+1}ª opção · clique para tornar principal, botão direito para excluir">${img(n)}</button></div>`;
   const PHN=["Bans 1","Picks 1","Bans 2","Picks 2"];
   // faixa da sequência
   let h=`<div class="draft-toolbar draft-toolbar-top"><div class="dside" role="group" aria-label="Lado da equipe"><span>Nossa equipe</span>
-    ${Object.entries(DRAFT_SIDE).map(([key,label])=>`<button data-slot="button" data-variant="outline" data-size="sm" data-side="${key}" aria-pressed="${d.side===key}" class="${d.side===key?`on ${key[0]}`:""}">${label}</button>`).join("")}</div></div>
-  <div class="dseq-row"><div class="dseq" role="group" aria-label="Sequência de picks e bans">${PHN.map((p,pi)=>`<div class="dsg"><div class="dsl">${p}</div><div class="dsc">${seq.filter(s=>s.ph===pi).map(s=>`<span class="sq ${s.t==="B"?"b":"r"} ${s.k}${s.t===us?" us":""}" title="${s.n}º ${s.k==="ban"?"ban":"pick"}: ${s.t==="B"?"Azul":"Vermelho"} ${s.k==="ban"?"bane":"escolhe"}">${s.k==="ban"?"":s.n}</span>`).join("")}</div></div>`).join("")}</div></div>`;
+    ${Object.entries(DRAFT_SIDE).map(([key,label])=>`<button data-slot="button" data-variant="outline" data-size="sm" data-side="${key}" aria-pressed="${d.side===key}" class="${d.side===key?`on ${key[0]}`:""}">${label}</button>`).join("")}</div></div>`;
   const head=h;h="";
   const team=t=>{
     const mine=t===us,side=t==="B"?"b":"r";
@@ -283,7 +288,6 @@ function draftHTML(c){
           <span class="pkn${m?"":" pk-empty"}">${m?esc(m):"Escolher campeão"}</span>
         </button>
         <div class="pkf"><span class="lane-label">${laneIconMarkup(l)}<select data-slot="${i}" aria-label="Posição do pick ${t}${i+1}" title="Lane deste pick">${PLANES.map(x=>`<option value="${x}"${x===l?" selected":""}>${LN[x].n}</option>`).join("")}</select></span>
-        ${laneNoteHTML(c,L)}
         ${m?mini(m,l,0):""}
         ${ch.length>1?`<div class="alts draft-alternatives" role="group" aria-label="Alternativas de ${L.n}"><span class="draft-alternatives-label" aria-hidden="true">Alternativas</span>${ch.slice(1).map((n,j)=>mini(n,l,j+1)).join("")}</div>`:""}
         </div></div>`};
@@ -310,7 +314,6 @@ function draftHTML(c){
     ${team("R")}</div>`;
   const extra=c.lanes.ban.slice(5);
   if(extra.length)h+=`<div class="lbl">Bans alternativos</div><div class="alts" data-l="ban">${extra.map((n,j)=>mini(n,"ban",j+5)).join("")}</div>`;
-  h+=`<div class="help draft-help">Retrato em destaque: opção principal. Clique em uma opção para priorizá-la ou arraste para reordenar.</div>`;
   return h;
 }
 
@@ -323,11 +326,13 @@ const resetGrid=()=>{renderGrid();$("#grid").scrollTop=0};$("#search").oninput=r
 function renderTarget(){
   const c=cur();
   $("#grid").querySelectorAll(".ch").forEach(button => button.setAttribute("aria-pressed", c.lanes[active].includes(button.dataset.n)));
-  let context=LN[active].n;
-  if(S.view==="draft"&&active!=="ban"){const d=draftOf(c);context=d.side[0].toUpperCase()+(d.order[d.side].indexOf(active)+1)+" · "+context}
-  $("#target").innerHTML=`<strong class="draft-target-context">Adicionando em ${context}</strong><label for="pick-target">Destino da edição</label><select id="pick-target">${LANES.map(pos=>`<option value="${pos.k}" ${pos.k===active?"selected":""}>${pos.n}</option>`).join("")}</select><small>Clique para adicionar ou remover do destino.</small>`;
+  // A lane de destino fica ao lado de "Ordenar por"; o quadro de destino acima saiu.
+  const draft=S.view==="draft",d=draftOf(c),us=d.side[0].toUpperCase();
+  const label=pos=>draft&&pos.k!=="ban"?`${us}${d.order[d.side].indexOf(pos.k)+1} · ${pos.n}`:pos.n;
+  $("#target").replaceChildren();$("#target").hidden=true;
+  $("#lane-target-slot").innerHTML=`<select id="pick-target" title="Lane que recebe o campeão clicado">${LANES.map(pos=>`<option value="${pos.k}" ${pos.k===active?"selected":""}>${label(pos)}</option>`).join("")}</select>`;
 }
-$("#target").addEventListener("change",e=>{if(e.target.id!=="pick-target")return;active=e.target.value;renderEditor();$("#pick-target").focus({preventScroll:true})});
+$("#lane-target-slot").addEventListener("change",e=>{if(e.target.id!=="pick-target")return;active=e.target.value;renderEditor();$("#pick-target").focus({preventScroll:true})});
 function renderGrid(){
   const q=$("#search").value.toLowerCase().replace(/[^a-z]/g,""),c=cur(),srt=$("#sort").value;
   const where={};for(const l of LANES)for(const n of c.lanes[l.k])(where[n]=where[n]||[]).push(l);
@@ -370,6 +375,25 @@ function placePicker(){
   else if(catalog.parentElement!==$("#comps"))$("#comps").append(catalog);
 }
 window.matchMedia("(min-width: 1100px)").addEventListener("change",()=>placePicker());
+const chipMenu=document.createElement("div");
+chipMenu.className="chip-context-menu";chipMenu.hidden=true;chipMenu.setAttribute("role","menu");
+document.body.append(chipMenu);
+const closeChipMenu=()=>{chipMenu.hidden=true};
+$("#editor").addEventListener("contextmenu",e=>{
+  const chip=e.target.closest(".dchip");if(!chip)return;
+  e.preventDefault();
+  const n=chip.dataset.n,l=chip.dataset.from;
+  chipMenu.innerHTML=`<button type="button" role="menuitem" data-slot="button" data-variant="destructive" data-size="sm">${iconMarkup("trash")} Excluir ${esc(n)}</button>`;
+  chipMenu.firstElementChild.onclick=()=>{const c=cur();c.lanes[l]=c.lanes[l].filter(x=>x!==n);closeChipMenu();touch();save();renderEditor();renderList();renderGrid()};
+  chipMenu.hidden=false;
+  const r=chipMenu.getBoundingClientRect();
+  chipMenu.style.left=Math.min(e.clientX,innerWidth-r.width-8)+"px";
+  chipMenu.style.top=Math.min(e.clientY,innerHeight-r.height-8)+"px";
+  chipMenu.firstElementChild.focus();
+});
+document.addEventListener("pointerdown",e=>{if(!chipMenu.hidden&&!chipMenu.contains(e.target))closeChipMenu()});
+document.addEventListener("keydown",e=>{if(e.key==="Escape")closeChipMenu()});
+addEventListener("scroll",closeChipMenu,true);
 $("#editor").addEventListener("click",e=>{
   const tab=e.target.closest("[data-comp-tab]");
   if(tab){if(tab.dataset.compTab!==S.cur)selectComp(tab.dataset.compTab);return}

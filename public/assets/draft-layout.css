@@ -78,3 +78,19 @@
   #v-comps.draft-view .dz-slot #grid { flex: 1 1 0; max-height: none; min-height: 220px; overflow: auto; }
   #v-comps.draft-view > .comp-workspace ~ * .draft-help, #v-comps.draft-view .draft-help { text-align: center; }
 }
+
+/* Lane do time ao lado de "Ordenar por" (substitui o quadro de destino) */
+#target[hidden] { display: none !important; }
+#champ-picker .gtools { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 6px 8px; }
+#champ-picker .gtools > label:first-child { grid-column: 1 / -1; }
+#champ-picker .gtools select, #champ-picker .gtools input { width: 100%; }
+#lane-target-tool select { color: var(--wl-accent); font-weight: 700; }
+
+/* Opções do pick: só o retrato (sem nota e sem ⋯) */
+#v-comps .pk .dchip { position: relative; margin: 0; }
+#v-comps .pk .dchip .champ-priority { display: inline-flex; padding: 0; min-height: 0; border: 0; background: none; cursor: pointer; }
+#v-comps .pk .dchip .av { width: 34px; height: 34px; border-radius: 6px; border: 1px solid #fff4; }
+#v-comps .pk .dchip.primary .av { border: 2px solid var(--wl-accent); }
+#v-comps .pk .draft-alternatives-label { display: none; }
+.chip-context-menu { position: fixed; z-index: 1000; padding: 4px; border: 1px solid var(--line); border-radius: var(--wl-control-radius, 8px); background: var(--panel, #111827); box-shadow: 0 8px 24px #0008; }
+.chip-context-menu button { display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; }

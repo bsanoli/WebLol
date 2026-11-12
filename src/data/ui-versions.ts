@@ -8,6 +8,16 @@ export interface UiVersion {
 
 export const UI_VERSIONS: UiVersion[] = [
   {
+    version: "1.15",
+    date: "2026-11-12",
+    changes: [
+      "Ordem do draft: os picks não têm mais nota nem menu ⋯. Clique no retrato para torná-lo principal, arraste para reordenar e use o botão direito para excluir.",
+      "Ordem do draft: saiu a faixa com a ordem de bans e picks acima do catálogo de campeões.",
+      "Catálogo de campeões: a lane de destino fica ao lado de Ordenar por, no lugar do quadro de destino que ficava acima.",
+      "Picks e opções por posição: a arte do campeão agora vem em alta resolução do Data Dragon, com a cópia local como reserva.",
+    ],
+  },
+  {
     version: "1.14",
     date: "2026-11-12",
     changes: [
