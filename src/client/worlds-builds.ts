@@ -177,7 +177,9 @@ function skillSequence(champion: string, value: string) {
 }
 
 function buildSkills(champion: string, order: BuildData["skillOrder"], games: number) {
-  const sequence = order.observedSequences[0];
+  const [mostCommon, ...alternatives] = order.observedSequences;
+  const sequences = mostCommon ? [mostCommon, ...alternatives.filter(sequence =>
+    !sequence.value.startsWith(mostCommon.value)).slice(0, 2)] : [];
   const priority = order.priority?.firstAndSecond[0] ?? order.priority?.first[0];
   return `<section class="build-skills">
     <header class="build-skill-header">
@@ -186,8 +188,14 @@ function buildSkills(champion: string, order: BuildData["skillOrder"], games: nu
         ${priority.value.split(">").map(slot => `<span class="build-skill-key" data-slot-key="${esc(slot)}">${esc(slot)}</span>`).join('<span aria-hidden="true">→</span>')}
       </div>` : ""}
     </header>
-    ${sequence ? `${skillSequence(champion, sequence.value)}
-      <p class="build-data-sample build-skill-sample">Sequência mais comum · ${usageOf(sequence, games)}</p>` : '<span class="na">Sem sequência de habilidades registrada.</span>'}
+    ${sequences.length > 1 ? `<div class="build-skill-options" role="group" aria-label="Sequências mais frequentes">
+      ${sequences.map((sequence, index) => `<button type="button" data-slot="button" data-variant="outline" data-size="sm"
+        data-skill-sequence="${index}" aria-pressed="${index === 0}">${index === 0 ? "Mais comum" : `Alternativa ${index}`} · ${gameCount(sequence.count)}</button>`).join("")}
+    </div>` : ""}
+    ${sequences.length ? sequences.map((sequence, index) => `<div data-skill-panel="${index}"${index ? " hidden" : ""}>
+      ${skillSequence(champion, sequence.value)}
+      <p class="build-data-sample build-skill-sample">${index === 0 ? "Sequência mais comum" : `Alternativa ${index}`} · ${usageOf(sequence, games)}</p>
+    </div>`).join("") : '<span class="na">Sem sequência de habilidades registrada.</span>'}
   </section>`;
 }
 

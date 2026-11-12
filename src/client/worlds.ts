@@ -504,6 +504,17 @@ function wireBuilds(){
     enhanceAnalyticsUI();
   };
   bc.onclick=e=>{
+    const sequence = e.target.closest("[data-skill-sequence]") as HTMLButtonElement | null;
+    if (sequence) {
+      const skills = sequence.closest(".build-skills")!;
+      skills.querySelectorAll<HTMLButtonElement>("[data-skill-sequence]").forEach(button => {
+        button.setAttribute("aria-pressed", String(button === sequence));
+      });
+      skills.querySelectorAll<HTMLElement>("[data-skill-panel]").forEach(panel => {
+        panel.hidden = panel.dataset.skillPanel !== sequence.dataset.skillSequence;
+      });
+      return;
+    }
     const sort = e.target.closest(".builds-table thead button[data-k]");
     if (sort) {
       const k = sort.dataset.k;
