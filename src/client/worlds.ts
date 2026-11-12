@@ -2,7 +2,7 @@
 import { iconMarkup, laneIconMarkup } from "./icon"
 import DATA from "../data/worlds.json"
 import { LOL_DATA, lolAsset, lolChampion, lolKey } from "./lol-media"
-import { buildDetails, buildGameCount, buildLaneHighlights, buildMatchups, buildsTable, orderedMatchups } from "./worlds-builds"
+import { abilityDetail, buildDetails, buildGameCount, buildLaneHighlights, buildMatchesQuery, buildMatchups, buildsTable, orderedMatchups } from "./worlds-builds"
 import { effectText } from "./worlds-effect-text"
 import { LANES, LC, kdaOf, pct, wrPill, ico, esc, championSlug, sortIcons, teamLogo, teamRegion } from "./worlds-display"
 import { initializeTheme } from "./theme"
@@ -14,6 +14,17 @@ initializeMotionNav("#tabs")
 const G=DATA.games, C=DATA.champs;
 const tipEl=()=>document.getElementById('tip');
 const tipSelector = "[data-game-tip], [data-tip]";
+document.addEventListener("click", event => {
+  const button = event.target.closest?.("[data-rune-tree-option]");
+  if (!button) return;
+  const tree = button.closest(".rune-tree");
+  tree.querySelectorAll("[data-rune-tree-option]").forEach(option => {
+    option.setAttribute("aria-pressed", String(option === button));
+  });
+  tree.querySelectorAll("[data-rune-view]").forEach(view => {
+    view.hidden = view.dataset.runeView !== button.dataset.runeTreeOption;
+  });
+});
 let tipTarget, dismissedGameTip;
 let definitionTerm;
 function hideDefinition() {
@@ -57,29 +68,36 @@ function showTip(target, x, y) {
   hideDefinition();
   if (tipTarget?.dataset.gameTip) tipTarget.removeAttribute("aria-describedby");
   el.classList.toggle("game-tip", Boolean(gameTip));
+  el.classList.toggle("ability-tip", gameTip?.startsWith("ability:") ?? false);
   el.setAttribute("role", gameTip ? "region" : "tooltip");
   el.removeAttribute("aria-labelledby");
   el.style.maxHeight = "";
   el.textContent = tip ?? "";
   if (gameTip) {
-    const [kind, key] = gameTip.split(":");
+    const [kind, key, slot] = gameTip.split(":");
     const detail = kind === "rune"
       ? { name: LOL_DATA.runeNames[key], description: LOL_DATA.runeDescriptions[key] }
-      : LOL_DATA[`${kind}Details`][key];
+      : kind === "ability" ? abilityDetail(key, slot) : LOL_DATA[`${kind}Details`][key];
     const heading = document.createElement("strong");
     heading.id = "game-tip-title";
     heading.className = "game-tip-title";
     el.setAttribute("aria-labelledby", heading.id);
-    const icon = LOL_DATA[kind][key];
+    const asset = LOL_DATA[kind]?.[key];
+    const icon = detail?.icon ?? (asset ? lolAsset(asset) : target.querySelector("img")?.src);
     if (icon) {
       const img = document.createElement("img");
       img.alt = "";
-      img.src = lolAsset(icon);
+      img.src = icon;
       heading.append(img);
     }
-    heading.append(detail?.name ?? key);
-    const description = effectText(detail?.description ?? "Descrição indisponível no patch 26.20.", detail?.effects);
-    el.prepend(heading, description);
+    if (kind === "ability") {
+      const shortcut = document.createElement("kbd");
+      shortcut.textContent = slot;
+      heading.append(shortcut);
+    }
+    heading.append(target.dataset.tipName ?? detail?.name ?? key);
+    if (detail?.description) el.prepend(heading, effectText(detail.description, detail.effects));
+    else el.prepend(heading);
   }
   el.hidden = false;
   tipTarget = target;
@@ -446,7 +464,7 @@ function wireBuilds(){
     clearAll.setAttribute("aria-disabled", String(!hasFilters()));
     const matches=list.filter(c=>buildChampion ? championSlug(c.name)===buildChampion :
       games(c) > 0 && games(c) >= buildMinGames &&
-      (c.name.toLowerCase().includes(f) || (c.build && JSON.stringify(c.build).toLowerCase().includes(f))));
+      buildMatchesQuery(c, bLane, f));
     const champion=buildChampion && matches[0];
     const position = champion && champion.lanes[bLane] ? bLane : "";
     const context = champion ? buildMatchups(champion, position) : buildLaneHighlights(matches, bLane);

@@ -1,25 +1,99 @@
 import { iconMarkup, laneIconMarkup } from "./icon"
 import DATA from "../data/worlds.json"
-import { LOL_DATA, lolImage, lolKey, type RuneTree } from "./lol-media"
+import { champions, itemNames, runeNames } from "../data/worlds-2026-builds.json"
+import buildAssets from "../data/worlds-2026-build-assets.json"
+import { LOL_DATA, lolAsset, lolImage, lolKey } from "./lol-media"
 import { championSlug, esc, ico, kdaOf, sortIcons, teamLogo, wrPill } from "./worlds-display"
-import { readRunePage, runePage } from "./worlds-runes"
+import { runePage } from "./worlds-runes"
 
 type Champion = (typeof DATA.champs)[number]
-type ChampionBuild = NonNullable<Champion["build"]>
 type LaneSample = Extract<Champion["lanes"][keyof Champion["lanes"]], { n: number }>
-type BuildOption = (string | number)[]
-type BuildIconKind = "item" | "rune" | "spell"
-
-const PTXT=(n: string,p: number,what: string)=>`${n}: usado em ${p}% dos jogos ${what}`;
-function buildIcon(kind: BuildIconKind, name: string, interactive = true, usage = "") {
-  const key = lolKey(name);
-  const icon = lolImage(LOL_DATA[kind][key], `build-icon build-icon-${kind}`);
-  if (!icon || !interactive) return icon;
-  const label = kind === "rune" ? LOL_DATA.runeNames[key] : LOL_DATA[`${kind}Details`][key]?.name;
-  return `<button type="button" class="build-icon-trigger" data-game-tip="${kind}:${key}" aria-label="${esc(label ?? name)}"${usage ? ` data-tip="${esc(usage)}"` : ""}>${icon}</button>`;
+type Frequency<T> = { value: T; count: number; percent: number }
+type SampleBuild = (typeof champions.Ezreal)["all"]
+type BuildData = Omit<SampleBuild, "skillOrder" | "starterItems"> & {
+  starterItems?: Frequency<number[]>[]
+  skillOrder: Omit<SampleBuild["skillOrder"], "priority"> & {
+    priority: Pick<NonNullable<SampleBuild["skillOrder"]["priority"]>, "firstSample" | "first" | "secondSample" | "firstAndSecond"> | null
+  }
 }
-const buildOptionNames=(kind: BuildIconKind,name: string)=>kind==="spell"?name.split(" and "):[name];
-const gameCount = (games: number) => games === 1 ? "1 jogo" : `${games} jogos`;
+type BuildIconKind = "item" | "rune" | "spell"
+type Option = { label: string; icons: string[]; percent: number }
+const buildData: Partial<Record<string, Partial<Record<string, BuildData>>>> = champions
+const itemLabels: Partial<Record<number, string>> = itemNames
+const runeLabels: Partial<Record<number, string>> = runeNames
+const runeAssets: Partial<Record<number, (string | null)[]>> = buildAssets.runes
+const runeTreeIcons = new Map(Object.values(LOL_DATA.runeTrees).flatMap(tree =>
+  tree ? [[tree.name, lolAsset(tree.icon)] as const] : []))
+const abilities: Partial<Record<string, Partial<Record<string, { name: string; description: string; icon: string }>>>> = buildAssets.abilities
+const itemKeys = new Map(Object.entries(LOL_DATA.item).map(([key, path]) => [Number(path?.match(/(\d+)\.png$/)?.[1]), key]))
+const spellKeys = new Map(Object.entries(LOL_DATA.spell).map(([key, path]) => [path?.split("/").at(-1)?.replace(".png", ""), key]))
+const completedItems = new Set(buildAssets.completedItems)
+const percent = new Intl.NumberFormat("pt-BR", { maximumFractionDigits: 1 })
+const gameCount = (games: number) => games === 1 ? "1 jogo" : `${games} jogos`
+
+function championBuild(champion: Champion, lane: string) {
+  return buildData[champion.name]?.[lane || "all"]
+}
+
+function buildIcon(kind: BuildIconKind, key: string | undefined, label: string, usage: string, fallback?: string) {
+  const local = key && LOL_DATA[kind][key];
+  const className = `build-icon build-icon-${kind}`;
+  const image = local ? lolImage(local, className) : fallback
+    ? `<img alt="" class="${className}" loading="lazy" src="${esc(fallback)}">`
+    : "";
+  if (!image) return "";
+  const text = esc(`${label} · ${usage}`);
+  return local
+    ? `<button type="button" class="build-icon-trigger" data-game-tip="${kind}:${key}" aria-label="${text}" data-tip="${text}">${image}</button>`
+    : `<span class="build-icon-static" role="img" aria-label="${text}" title="${text}">${image}</span>`;
+}
+
+function usageOf(entry: Pick<Frequency<unknown>, "count" | "percent">, games: number) {
+  return `${entry.count} de ${games} · ${percent.format(entry.percent)}%`;
+}
+
+function itemOption(entry: Frequency<number>, games: number): Option {
+  const label = itemLabels[entry.value] ?? String(entry.value);
+  const fallback = `https://ddragon.leagueoflegends.com/cdn/16.20.1/img/item/${entry.value}.png`;
+  return { ...entry, label, icons: [buildIcon("item", itemKeys.get(entry.value), label, usageOf(entry, games), fallback)] };
+}
+
+function starterOption(entry: Frequency<number[]>, games: number): Option {
+  const quantities = new Map<number, number>();
+  for (const item of entry.value) quantities.set(item, (quantities.get(item) ?? 0) + 1);
+  const items = [...quantities].map(([value, quantity]) => {
+    const item = itemOption({ ...entry, value }, games);
+    return { ...item, label: quantity > 1 ? `${quantity}× ${item.label}` : item.label };
+  });
+  return { ...entry, label: items.map(item => item.label).join(" + "), icons: items.flatMap(item => item.icons) };
+}
+
+function runeIcon(entry: Frequency<number>, games: number) {
+  const label = runeLabels[entry.value] ?? String(entry.value);
+  const [key, path] = runeAssets[entry.value] ?? [];
+  const fallback = runeTreeIcons.get(label) ??
+    (path ? `https://ddragon.leagueoflegends.com/cdn/img/${path}` : undefined);
+  return buildIcon("rune", key ?? undefined, label, usageOf(entry, games), fallback);
+}
+
+function spellOption(entry: Frequency<string>): Option {
+  const keys = entry.value.split("+").map(name => spellKeys.get(name) ?? lolKey(name));
+  const labels = keys.map(key => LOL_DATA.spellDetails[key]?.name ?? key);
+  return {
+    ...entry,
+    label: labels.join(" + "),
+    icons: keys.map((key, index) => buildIcon("spell", key, labels[index], `${percent.format(entry.percent)}%`)),
+  };
+}
+
+export function buildMatchesQuery(champion: Champion, lane: string, query: string) {
+  const term = query.normalize("NFD").replace(/\p{M}/gu, "").toLowerCase();
+  const matches = (value: string) => value.normalize("NFD").replace(/\p{M}/gu, "").toLowerCase().includes(term);
+  if (matches(champion.name)) return true;
+  const build = championBuild(champion, lane);
+  return build?.finalItems.some(({ value }) => matches(itemLabels[value] ?? "") ||
+    matches(itemKeys.get(value) ?? ""));
+}
 
 function buildSample(sample: LaneSample, position?: string, action = "") {
   const counts = (entries: LaneSample["players"], showTeamLogo = false) => `<ul class="build-sample-counts">${entries.map(([name, count]) =>
@@ -47,32 +121,104 @@ function buildSample(sample: LaneSample, position?: string, action = "") {
   </section>`;
 }
 
-function itemsHtml(list: BuildOption[],what: string,kind: BuildIconKind,num=false){
-  return `<ul class="items${kind==="rune"?" rune-frequency":""}">${list.map(([n,p,en],i)=>{
-    if(typeof n!=="string"||typeof p!=="number")return "";
-    const names=buildOptionNames(kind,typeof en==="string"?en:n);
-    const icons=names.map(name=>buildIcon(kind,name,kind!=="rune")).join("");
-    const label=kind==="rune"?LOL_DATA.runeNames[lolKey(names[0])]||n:n;
-    const runeTip=kind==="rune"?` data-game-tip="rune:${lolKey(names[0])}"`:"";
-    return `<li class="item${num?" item-ranked":""}" data-tip="${esc(PTXT(label,p,what)+(en&&en!==label?` · em inglês: ${en}`:""))}"${runeTip}>${num?`<span class="n">${i+1}</span>`:""}<span class="item-name">${icons}<span>${esc(label)}</span></span><span class="pb" aria-hidden="true"><i style="width:${p}%"></i></span><span class="p">${p}%</span></li>`;
-  }).join("")}</ul>`;
+function frequencyList(options: Option[]) {
+  return `<ul class="items build-frequency">${options.map(option =>
+    `<li class="item"><span class="item-name">${option.icons.join("")}<span>${esc(option.label)}</span></span><span class="pb" aria-hidden="true"><i style="width:${option.percent}%"></i></span><span class="p">${percent.format(option.percent)}%</span></li>`
+  ).join("")}</ul>`;
 }
-function buildHtml(c: Champion){const b=c.build;if(!b)return `<span class="na">Sem build coletada para ${esc(c.name)}.</span>`;
-  const w=`de ${c.name}`;
-  const section=(title: string,content: string)=>`<div class="build-section"><h5>${title}</h5>${content}</div>`;
-  const column=(title: string,sections: (string | undefined)[],className = "")=>{
-    const content=sections.filter(Boolean).join("");
-    return content ? `<section class="build-column${className ? ` ${className}` : ""}"><h4>${title}</h4>${content}</section>` : "";
-  };
-  const equipment=[
-    b.items && section("Itens por frequência de uso",itemsHtml(b.items,w,"item",true)),
-    b.support && section("Item de suporte",itemsHtml(b.support,w,"item"))
-  ].filter(Boolean).join("");
-  const keyRunes=b.keys && section("Frequência da runa principal",itemsHtml(b.keys,w,"rune"));
-  const runeDetails=b.runes && section("Página de runas mais usada",runePage(b.runes,b.runes_en||[]));
-  const boots=b.boots && section("Botas",itemsHtml(b.boots,w,"item"));
-  const spells=b.spells && section("Feitiços",itemsHtml(b.spells,w,"spell"));
-  return `<div class="build">${column("Build e feitiços",[equipment,boots,spells])}${column("Runas",[runeDetails,keyRunes],"build-runes")}</div>`;
+
+export function abilityDetail(champion: string, slot: string) {
+  const detail = abilities[champion]?.[slot];
+  return detail && { ...detail, icon: `https://ddragon.leagueoflegends.com/cdn/16.20.1/img/spell/${detail.icon}` };
+}
+
+function skillIcon(champion: string, slot: string) {
+  const detail = abilityDetail(champion, slot);
+  return detail ? `<button type="button" class="build-icon-trigger build-ability" data-game-tip="ability:${esc(champion)}:${slot}"
+    aria-label="${esc(`${slot} · ${detail.name}`)}"><img alt="" class="build-icon" loading="lazy" src="${esc(detail.icon)}"><b aria-hidden="true">${slot}</b></button>`
+    : `<strong>${esc(slot)}</strong>`;
+}
+
+function skillSequence(champion: string, value: string) {
+  const slots = ["Q", "W", "E", "R"];
+  const points = [...value];
+  const levelCount = 18;
+  const groupSize = levelCount / 2;
+  const hasExtraPoints = points.length > levelCount;
+  const icons = slots.map(slot => skillIcon(champion, slot)).join("");
+  const cells = Array.from({ length: Math.max(levelCount, points.length) }, (_, index) => {
+    const number = index + 1;
+    const slot = points[index];
+    const extra = number > levelCount;
+    const point = hasExtraPoints ? `Ponto registrado ${number}` : `Nível ${number}`;
+    const numberLabel = extra ? `+${number - levelCount}` : number;
+    if (!slot) return `<li class="build-skill-level" aria-label="${point} · Sem registro">
+      <span aria-hidden="true">${numberLabel}</span><span class="build-skill-key" aria-hidden="true">–</span></li>`;
+    const detail = abilityDetail(champion, slot);
+    const label = `${point} · ${slot}${detail ? ` · ${detail.name}` : ""}`;
+    const row = slots.indexOf(slot) + 2;
+    return `<li class="build-skill-level"><span aria-hidden="true">${numberLabel}</span>
+      <span class="build-skill-connector" style="grid-row:2 / ${row + 1}" aria-hidden="true"></span>
+      <button type="button" class="build-skill-key build-skill-marker" data-slot-key="${esc(slot)}" aria-label="${esc(label)}"
+        style="grid-row:${row}"
+        ${detail ? `data-game-tip="ability:${esc(champion)}:${esc(slot)}" data-tip="${point}"` : `data-tip="${esc(label)}"`}>${esc(slot)}</button></li>`;
+  });
+  const legend = (repeat = false) => `<li class="build-skill-icons${repeat ? " build-skill-icons-repeat" : ""}">${icons}</li>`;
+  return `${hasExtraPoints ? '<p class="build-skill-sequence-label">Ordem dos pontos registrados</p>' : ""}
+    <ol class="build-skill-grid" role="list" aria-label="Sequência de pontos de habilidade">
+      ${legend()}${cells.slice(0, groupSize).join("")}
+      ${legend(true)}${cells.slice(groupSize, levelCount).join("")}
+    </ol>
+    ${hasExtraPoints ? `<div class="build-skill-extras">
+      <span>Registros adicionais</span><ol class="build-skill-grid" role="list" aria-label="Registros adicionais">${legend()}${cells.slice(levelCount).join("")}</ol>
+    </div>` : ""}`;
+}
+
+function buildSkills(champion: string, order: BuildData["skillOrder"], games: number) {
+  const sequence = order.observedSequences[0];
+  const priority = order.priority?.firstAndSecond[0] ?? order.priority?.first[0];
+  return `<section class="build-skills">
+    <header class="build-skill-header">
+      <h4>Ordem de habilidades</h4>
+      ${priority ? `<div class="build-skill-priority">Prioridade
+        ${priority.value.split(">").map(slot => `<span class="build-skill-key" data-slot-key="${esc(slot)}">${esc(slot)}</span>`).join('<span aria-hidden="true">→</span>')}
+      </div>` : ""}
+    </header>
+    ${sequence ? `${skillSequence(champion, sequence.value)}
+      <p class="build-data-sample build-skill-sample">Sequência mais comum · ${usageOf(sequence, games)}</p>` : '<span class="na">Sem sequência de habilidades registrada.</span>'}
+  </section>`;
+}
+
+function buildHtml(champion: Champion, lane: string) {
+  const build = championBuild(champion, lane);
+  if (!build) return `<span class="na">Sem build coletada para ${esc(champion.name)}.</span>`;
+  const { games } = build;
+  const section = (title: string, content: string) => `<div class="build-section"><h5>${title}</h5>${content}</div>`;
+  const items = (entries: Frequency<number>[]) => frequencyList(entries.map(entry => itemOption(entry, games)));
+  const boots = new Set(build.boots.map(entry => entry.value));
+  const equipment = build.finalItems.filter(entry => !boots.has(entry.value));
+  const featured = equipment.filter(entry => completedItems.has(entry.value)).slice(0, 6);
+  const topItems = featured.length ? featured : equipment.slice(0, 6);
+  return `<div class="build">
+      <section class="build-column">
+        <h4>Build e feitiços</h4>
+        ${section("Itens iniciais", build.starterItems?.length
+          ? frequencyList(build.starterItems.map(entry => starterOption(entry, games)))
+          : '<span class="na">Sem compras iniciais registradas.</span>')}
+        ${section("Itens no inventário final", items(topItems))}
+        ${section("Botas", build.boots.length
+          ? items(build.boots) + (build.gamesWithoutFinalBoots ? `<small class="build-data-sample">${gameCount(build.gamesWithoutFinalBoots)} sem botas no inventário final</small>` : "")
+          : '<span class="na">Nenhuma bota no inventário final.</span>')}
+        ${section("Feitiços", frequencyList(build.spells.map(spellOption)))}
+      </section>
+      <div class="build-column build-progression">
+        <section>
+          <h4>Runas</h4>
+          ${runePage(build)}
+        </section>
+        ${buildSkills(champion.name, build.skillOrder, games)}
+      </div>
+    </div>`;
 }
 
 export function buildDetails(champion: Champion, lane: string, action = "") {
@@ -80,7 +226,7 @@ export function buildDetails(champion: Champion, lane: string, action = "") {
     .filter(([position, sample]) => (!lane || position === lane) && sample.n)
     .map(([position, sample], index) => buildSample(sample, position, index === 0 ? action : "")).join("");
   const missingSample = lane ? `<p class="hint">Sem estatísticas de desempenho coletadas em ${esc(lane)}.</p>` : "";
-  return (samples || `<div class="build-sample-heading">${missingSample}${action}</div>`) + buildHtml(champion);
+  return (samples || `<div class="build-sample-heading">${missingSample}${action}</div>`) + buildHtml(champion, lane);
 }
 
 type Matchup = [opponent: string, games: number, wins: number, ...stats: number[]]
@@ -134,29 +280,18 @@ export function buildLaneHighlights(champions: Champion[], position: keyof Champ
 }
 
 const missingBuildOption='<span class="na" aria-label="Sem dados">—</span>';
-function secondaryRuneTree(build: ChampionBuild){
-  const mainRune=build?.keys?.[0];
-  if(!mainRune)return;
-  const {primary, secondaryTree}=readRunePage(build.runes_en||[]);
-  if(primary[0]===lolKey(String(mainRune[2]||mainRune[0])))return secondaryTree;
+function buildPreview(...options: Option[]) {
+  const icons = options.flatMap(option => option.icons).filter(Boolean).join("");
+  return icons ? `<div class="build-option-icons">${icons}</div>` : missingBuildOption;
 }
 
-function buildPreviewIcons(entry: BuildOption, kind: BuildIconKind) {
-  const [name,frequency,english]=entry;
-  if(typeof name!=="string"||typeof frequency!=="number")return "";
-  const names=buildOptionNames(kind,typeof english==="string"?english:name);
-  const usage=kind==="spell"
-    ? `${name} · combinação usada em ${frequency}% dos jogos`
-    : `Usado em ${frequency}% dos jogos`;
-  return names.map(value=>buildIcon(kind,value,true,usage)).join("");
-}
-
-function buildPreviewOption(entry: BuildOption | undefined,kind: BuildIconKind,secondaryTree?: RuneTree){
-  const icons=entry ? buildPreviewIcons(entry,kind) : "";
-  if(!icons)return missingBuildOption;
-  const secondaryLabel=secondaryTree?`Árvore secundária da página de runas mais usada: ${secondaryTree.name}`:"";
-  const secondaryIcon=secondaryTree?`<span class="build-option-secondary" role="img" aria-label="${esc(secondaryLabel)}" title="${esc(secondaryLabel)}">${lolImage(secondaryTree.icon,"build-icon")}</span>`:"";
-  return `<div class="build-option-icons${kind==="rune"?" build-option-runes":""}">${icons}${secondaryIcon}</div>`;
+function buildRunePreview(primary: Frequency<number>, secondary: Frequency<number>, games: number) {
+  const primaryIcon = runeIcon(primary, games);
+  const secondaryIcon = runeIcon(secondary, games);
+  if (!primaryIcon && !secondaryIcon) return missingBuildOption;
+  return `<div class="build-option-icons build-option-runes">${primaryIcon}${
+    secondaryIcon ? `<span class="build-option-secondary">${secondaryIcon}</span>` : ""
+  }</div>`;
 }
 
 export function buildGameCount(champion: Champion, lane: keyof Champion["lanes"] | "") {
@@ -171,9 +306,14 @@ const buildStats = [
 
 export function buildsTable(champions: Champion[], lane: keyof Champion["lanes"] | ""){
   const rows=champions.map(c=>{
-    const {build}=c;
-    const items = (build?.items?.length ? build.items : build?.support ?? []).slice(0, 3);
+    const build = championBuild(c, lane);
     const games = buildGameCount(c, lane);
+    const equipment = build?.finalItems.filter(entry => completedItems.has(entry.value)) ?? [];
+    const items = equipment.slice(0, 3).map(entry => itemOption(entry, games));
+    const boots = build?.boots[0];
+    const keystone = build?.primaryRunes[0]?.[0];
+    const secondaryTree = build?.secondaryTrees[0];
+    const spells = build?.spells[0];
     const slug=championSlug(c.name);
     const banRate = Math.round(c.bans / DATA.games * 100);
     const banLevel = banRate >= 30 ? "high" : banRate >= 10 ? "medium" : "low";
@@ -182,10 +322,10 @@ export function buildsTable(champions: Champion[], lane: keyof Champion["lanes"]
       <td class="build-col-games build-stat">${games}</td>
       <td class="build-col-win build-stat">${wrPill(c.wins,c.picks)}</td>
       <td class="build-col-ban build-stat"><span class="wr" data-ban-level="${banLevel}" data-tip="Banido em ${c.bans} de ${DATA.games} jogos do torneio">${banRate}%</span></td>
-      <td class="build-col-items"><div class="build-option-icons">${build ? items.map(entry=>buildPreviewIcons(entry,"item")).join("") || missingBuildOption : '<span class="na">Sem build</span>'}</div></td>
-      <td class="build-col-boots">${buildPreviewOption(build?.boots?.[0],"item")}</td>
-      <td class="build-col-runes">${buildPreviewOption(build?.keys?.[0],"rune",build ? secondaryRuneTree(build) : undefined)}</td>
-      <td class="build-col-spells">${buildPreviewOption(build?.spells?.[0],"spell")}</td>
+      <td class="build-col-items">${buildPreview(...items)}</td>
+      <td class="build-col-boots">${boots ? buildPreview(itemOption(boots, games)) : missingBuildOption}</td>
+      <td class="build-col-runes">${keystone && secondaryTree ? buildRunePreview(keystone, secondaryTree, games) : missingBuildOption}</td>
+      <td class="build-col-spells">${spells ? buildPreview(spellOption(spells)) : missingBuildOption}</td>
     </tr>
     <tr class="detail build-inline-detail" id="build-detail-${slug}" hidden><td colspan="8"></td></tr>`;
   }).join("");

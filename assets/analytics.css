@@ -235,9 +235,18 @@
 .builds-table .build-icon-trigger:hover { box-shadow: 0 0 0 1px var(--gold); }
 .builds-table .build-summary-row > :is(th, td) { transition: background-color 150ms ease; }
 .builds-table .build-icon-trigger { transition: box-shadow 150ms ease; }
-.build-option-runes { align-items: flex-end; gap: 0; }
-.build-option-secondary { display: flex; margin-left: -3px; }
-.build-option-secondary .build-icon { width: 21px; height: 21px; border-radius: 50%; background: var(--mid-bg); }
+.build-option-icons.build-option-runes { align-items: flex-end; gap: 0; }
+.build-option-runes .build-icon-trigger { border-radius: 50%; }
+.build-option-secondary { display: flex; }
+.build-option-secondary:not(:first-child) { margin-inline-start: calc(-1 * var(--wl-space-2)); }
+.build-option-secondary .build-icon {
+  --build-secondary-size: max(var(--wl-space-6), calc(var(--build-preview-size) - var(--wl-space-3)));
+  width: var(--build-secondary-size);
+  height: var(--build-secondary-size);
+  border-radius: 50%;
+  background: var(--mid-bg);
+  box-shadow: 0 0 0 1px var(--surface);
+}
 .builds-table .build-toggle:focus-visible { outline-offset: 2px; }
 .build-toggle .icon { flex: none; width: 14px; height: 14px; color: var(--muted); transition: transform 150ms ease; }
 .build-summary-row:has(.build-toggle[aria-expanded="true"]) > :is(th, td) { background: var(--mid-bg); }
@@ -288,7 +297,6 @@
 @media (768px <= width < 1024px) {
   .builds-table-wrap > .builds-table { --build-preview-size: 32px; }
   .build-option-icons { gap: 4px; }
-  .build-option-runes { gap: 0; }
 }
 @media (max-width: 767px) {
   .builds-table-wrap > .builds-table { --build-preview-size: clamp(24px, 7.5vw, 32px); }
@@ -360,20 +368,24 @@
 .builds-page:has(.build-detail) > .tools { display: none; }
 .build-winrate { display: inline-flex; align-items: center; gap: 4px; font-size: 13px; }
 .build-winrate small { color: var(--muted); font-weight: 500; }
-.build { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--wl-panel-gap); }
+.build { display: grid; grid-template-columns: minmax(0, 1fr); align-items: start; gap: var(--wl-space-4); }
 .build-column { min-width: 0; }
-.build-column + .build-column { padding-top: var(--wl-panel-gap); border-top: 1px solid var(--build-divider); }
+.build-progression { padding-top: var(--wl-space-4); border-top: 1px solid var(--build-divider); }
 @container (min-width: 680px) {
-  .build:has(> :nth-child(2)) { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-  .build > .build-column + .build-column {
-    padding: 0 0 0 var(--wl-space-4);
-    border: 0;
-    border-left: 1px solid var(--build-divider);
+  .build { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .build-progression {
+    padding: 0;
+    padding-inline-start: var(--wl-space-4);
+    border-top: 0;
+    border-inline-start: 1px solid var(--build-divider);
   }
 }
-.build-column h4 { margin: 0 0 8px; font-size: 16px; font-weight: 700; line-height: 1.25; }
-.build-section + .build-section { margin-top: var(--wl-space-3); padding-top: var(--wl-space-3); border-top: 1px solid var(--build-divider); }
-.build-section h5 { margin: 0 0 4px; color: var(--muted); font-size: 13px; font-weight: 600; line-height: 1.35; }
+@container (min-width: 960px) {
+  .build { grid-template-columns: minmax(0, 55fr) minmax(0, 45fr); }
+}
+.build-column h4 { margin: 0 0 var(--wl-space-2); font-size: 16px; font-weight: 700; line-height: 1.25; }
+.build-section + .build-section { margin-top: var(--wl-space-2); padding-top: var(--wl-space-2); border-top: 1px solid var(--build-divider); }
+.build-section h5 { margin: 0 0 var(--wl-space-1); color: var(--muted); font-size: 13px; font-weight: 600; line-height: 1.35; }
 .items { margin: 0; padding: 0; list-style: none; }
 .item {
   display: grid;
@@ -400,101 +412,103 @@
   cursor: pointer;
 }
 .build-icon-trigger:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
-.build .build-icon { width: 26px; height: 26px; }
-.rune-frequency .item { padding-block: 6px; }
-.build .build-icon-rune { width: 28px; height: 28px; }
-.build .runes, .build .rune-group { row-gap: 8px; }
+.build .build-icon { width: var(--wl-space-6); height: var(--wl-space-6); }
+.rune-frequency .item { padding-block: var(--wl-space-2); }
+.build .build-icon-rune { width: var(--wl-space-8); height: var(--wl-space-8); }
+.build .runes, .build .rune-group { row-gap: var(--wl-space-2); }
 .rune-page { container-type: inline-size; }
 .rune-trees {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 148px));
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   align-items: start;
-  gap: var(--wl-space-2) var(--wl-space-3);
-  padding-block: var(--wl-space-2);
-  --rune-size: clamp(24px, 8cqi, 30px);
-  --rune-gap: clamp(4px, 1.8cqi, 7px);
-  --rune-row-gap: 8px;
+  gap: var(--wl-space-2);
+  --rune-tree-size: calc(var(--wl-space-6) + var(--wl-space-1));
+  --rune-size: var(--rune-tree-size);
+  --rune-rate-height: var(--wl-space-3);
+  --rune-gap: var(--wl-space-1);
 }
 .rune-tree { min-width: 0; }
-.rune-tree:first-child { grid-row: span 2; }
-.rune-tree[data-rune-tree="Dominação"] { --rune-accent: #e36d82; }
-.rune-tree[data-rune-tree="Inspiração"] { --rune-accent: #52c6c7; }
-.rune-tree[data-rune-tree="Precisão"] { --rune-accent: #d9a955; }
-.rune-tree[data-rune-tree="Determinação"] { --rune-accent: #70bf65; }
-.rune-tree[data-rune-tree="Feitiçaria"] { --rune-accent: #9d93ea; }
+[data-rune-tree="Dominação"] { --rune-accent: #e36d82; }
+[data-rune-tree="Inspiração"] { --rune-accent: #52c6c7; }
+[data-rune-tree="Precisão"] { --rune-accent: #d9a955; }
+[data-rune-tree="Determinação"] { --rune-accent: #70bf65; }
+[data-rune-tree="Feitiçaria"] { --rune-accent: #9d93ea; }
 .rune-tree-heading {
   display: flex;
   align-items: center;
   justify-content: center;
-  min-height: 26px;
-  gap: 6px;
-  margin-bottom: var(--rune-row-gap);
+  min-height: var(--wl-space-6);
+  gap: var(--wl-space-2);
+  margin-bottom: var(--wl-space-2);
 }
-.build .rune-tree-heading .build-icon { width: 22px; height: 22px; }
+.build .rune-tree-heading .build-icon { width: var(--wl-space-6); height: var(--wl-space-6); }
 .rune-tree-heading h6 { margin: 0; font-size: 13px; font-weight: 600; overflow-wrap: anywhere; }
-.rune-slots { display: grid; gap: var(--rune-row-gap); }
+.rune-tree [data-rune-view][hidden] { display: none; }
+.rune-tree-options { display: flex; flex-wrap: wrap; justify-content: center; gap: var(--wl-space-1); }
+.rune-tree-option {
+  display: grid;
+  justify-items: center;
+  align-content: center;
+  min-width: var(--wl-space-8);
+  min-height: calc(var(--wl-space-8) + var(--wl-space-2));
+  padding: var(--wl-space-1);
+  border: 1px solid var(--line);
+  border-radius: var(--wl-control-radius);
+  background: var(--surface);
+  color: var(--text);
+  cursor: pointer;
+}
+.rune-tree-option:hover, .rune-tree-option[aria-pressed="true"] { border-color: var(--gold); }
+.rune-tree-option[aria-pressed="true"] small { color: var(--text); }
+.rune-tree-option:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
+.rune-trees:has(.rune-tree-options) .rune-tree-heading { min-height: calc(var(--wl-space-8) + var(--wl-space-2)); }
+.rune-slots { display: grid; gap: var(--wl-space-1); }
 .rune-options { display: flex; justify-content: center; flex-wrap: wrap; gap: var(--rune-gap); }
 .rune-choice {
   display: grid;
   place-items: center;
   flex: none;
-  width: var(--rune-size, 28px);
-  height: var(--rune-size, 28px);
+  width: var(--rune-size);
+  height: var(--rune-size);
   padding: 0;
   border: 1px solid var(--line);
   border-radius: 50%;
   background: var(--mid-bg);
-  cursor: help;
+  cursor: pointer;
 }
 .build .rune-choice .build-icon { width: 88%; height: 88%; border-radius: 50%; }
 .rune-choice:not(.is-selected) .build-icon { filter: grayscale(1); opacity: .44; }
 .rune-choice.is-selected, .rune-choice:hover { border-color: var(--rune-accent, var(--gold)); }
 .rune-choice:hover .build-icon, .rune-choice:focus-visible .build-icon { filter: none; opacity: 1; }
 .rune-choice:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
-.rune-shards { --rune-accent: var(--gold); --rune-size: 22px; }
+.rune-shards {
+  grid-column: 1 / -1;
+  --rune-accent: var(--gold);
+  --rune-size: var(--wl-space-6);
+  --rune-shard-group-gap: var(--wl-space-1);
+}
+.rune-shards .rune-slots { display: flex; flex-wrap: wrap; justify-content: center; gap: var(--wl-space-1) var(--rune-shard-group-gap); }
 .rune-shards .rune-tree-heading h6 { color: var(--muted); }
 .build .rune-shards .rune-choice .build-icon { width: 65%; height: 65%; }
-.rune-shards .na { margin: 0; font-size: 12px; text-align: center; }
-@container (min-width: 400px) {
-  .rune-trees { grid-template-columns: 148px 120px 104px; column-gap: 14px; }
-  .rune-tree:first-child { grid-row: auto; }
-  .rune-shards .rune-options { min-height: 30px; align-items: center; }
+@container (min-width: 256px) {
+  .rune-shards { --rune-shard-group-gap: var(--wl-space-2); }
 }
-@media (min-width: 960px) {
-  .bcard .build-runes:has(.rune-page),
-  .bcard .build-runes .build-section:has(.rune-page) {
-    display: flex;
-    flex-direction: column;
-  }
-  .bcard .build-runes .build-section:has(.rune-page),
-  .bcard .rune-page { flex: 1; }
-  .bcard .rune-page { display: grid; }
-  @container (min-width: 400px) {
-    .bcard .rune-trees {
-      width: min(100%, 560px);
-      margin-inline: auto;
-      grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr) minmax(0, .75fr);
-      grid-template-rows: auto repeat(4, minmax(var(--rune-size), 1fr));
-      align-items: stretch;
-      column-gap: var(--wl-space-3);
-      --rune-size: clamp(32px, 8.4cqi, 40px);
-      --rune-gap: var(--wl-space-2);
-    }
-    .bcard .rune-trees > :is(.rune-tree, .rune-shards) {
-      display: grid;
-      grid-row: span 5;
-      grid-template-rows: subgrid;
-    }
-    .bcard .rune-tree-heading { margin-bottom: 0; }
-    .bcard .rune-slots { grid-row: span 4; grid-template-rows: subgrid; }
-    .bcard .rune-options { align-items: center; }
-    .bcard .rune-shards { --rune-size: 26px; }
-  }
+@container (min-width: 272px) {
+  .rune-shards { --rune-shard-group-gap: var(--wl-space-4); }
 }
-.build-section:has(.rune-page, .runes) + .build-section {
-  margin-top: 16px;
-  padding-top: 12px;
-  border-top: 1px solid var(--build-divider);
+@container (min-width: 384px) {
+  .rune-trees {
+    max-width: 480px;
+    margin-inline: auto;
+    grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr) minmax(0, .75fr);
+    --rune-tree-size: var(--wl-space-8);
+  }
+  .rune-shards { grid-column: auto; }
+  .rune-shards .rune-slots { display: grid; }
+  .rune-shards .rune-options {
+    min-height: calc(var(--rune-tree-size) + var(--rune-rate-height));
+    align-content: end;
+  }
 }
 #tip.game-tip {
   box-sizing: border-box;
@@ -513,6 +527,10 @@
 #tip .game-tip-title { display: flex; align-items: center; gap: 8px; color: var(--gold); font-size: 15px; }
 #tip.game-tip img { width: 30px; height: 30px; object-fit: contain; }
 #tip .game-tip-description p { margin: 8px 0; color: var(--ink); overflow-wrap: anywhere; }
+#tip.ability-tip .game-tip-title { font-weight: 700; }
+#tip.ability-tip kbd { color: var(--muted); font: inherit; font-size: 12px; font-weight: 500; }
+#tip.ability-tip .game-tip-description p { font-weight: 400; }
+#tip.ability-tip .game-tip-description b { font-weight: 600; }
 #tip .effect-heading {
   display: flex;
   flex-wrap: wrap;
@@ -718,4 +736,115 @@
 
 @media (max-width: 359px) {
   #tabs .icon { display: none; }
+}
+.build-data-sample { display: block; margin: 0 0 var(--wl-space-2); color: var(--muted); font-size: 13px; }
+.build-section .build-data-sample { margin: var(--wl-space-1) 0 0; }
+.build-frequency .item {
+  grid-template-columns: minmax(0, 1fr) clamp(var(--wl-space-6), 16%, 96px) var(--wl-space-12);
+  gap: var(--wl-space-2);
+  padding-block: var(--wl-space-1);
+}
+.build-frequency .item .item-name { grid-column: auto; min-width: 0; gap: var(--wl-space-1); }
+.build-frequency .item-name > span:last-child { min-width: 0; }
+.build-frequency .build-icon-trigger:hover { box-shadow: 0 0 0 1px var(--gold); }
+.build-icon-static { display: inline-flex; flex: none; }
+.rune-frequency-choice { display: grid; justify-items: center; }
+.rune-frequency-choice small, .rune-tree-heading small {
+  min-height: var(--rune-rate-height); color: var(--muted); font-size: 10px; line-height: var(--rune-rate-height); font-variant-numeric: tabular-nums;
+}
+.rune-frequency-choice .is-selected + small { color: var(--text); }
+.build-section h5 small { color: var(--muted); font-weight: 400; }
+.build-more summary { width: fit-content; color: var(--text); cursor: pointer; font-size: 13px; font-weight: 600; }
+.build-more summary:hover { color: var(--gold); }
+.build-more summary:focus-visible { outline: 2px solid var(--gold); outline-offset: 4px; }
+.build-more[open] summary { margin-bottom: var(--wl-space-2); }
+.build-skills { container-type: inline-size; margin-top: var(--wl-space-4); padding-top: var(--wl-space-2); border-top: 1px solid var(--build-divider); }
+.build-skill-header { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--wl-space-1) var(--wl-space-2); }
+.build-skill-header { margin-bottom: var(--wl-space-2); padding: 0; border: 0; }
+.build-skills h4 { margin: 0; font-size: 16px; font-weight: 700; }
+.build-skill-priority { display: flex; align-items: center; gap: var(--wl-space-1); color: var(--muted); font-size: 13px; }
+.build-skill-grid {
+  --skill-cell: var(--wl-space-6);
+  --skill-level-height: var(--wl-space-4);
+  --skill-row-gap: var(--wl-space-1);
+  --skill-column-gap: 0px;
+  display: grid;
+  grid-template-columns: repeat(10, min(var(--skill-cell), 10%));
+  gap: var(--wl-space-2) var(--skill-column-gap);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+@container (min-width: 280px) {
+  .build-skill-grid { --skill-column-gap: var(--wl-space-1); }
+}
+@container (min-width: 312px) {
+  .build-skill-grid { --skill-column-gap: var(--wl-space-2); }
+}
+@container (min-width: 456px) {
+  .build-skill-grid {
+    --skill-column-gap: 0px;
+    grid-template-columns: repeat(19, var(--skill-cell));
+  }
+  .build-skill-icons.build-skill-icons-repeat { display: none; }
+}
+@container (min-width: 528px) {
+  .build-skill-grid { --skill-column-gap: var(--wl-space-1); }
+}
+@container (min-width: 600px) {
+  .build-skill-grid { --skill-column-gap: var(--wl-space-2); }
+}
+.build-skill-level, .build-skill-icons {
+  display: grid;
+  grid-template: var(--skill-level-height) repeat(4, var(--skill-cell)) / minmax(0, 1fr);
+  row-gap: var(--skill-row-gap);
+  justify-items: center;
+  align-items: center;
+}
+.build-skill-level > * { grid-column: 1; }
+.build-skill-level {
+  color: var(--muted);
+  font-size: 12px;
+  line-height: var(--wl-space-4);
+  font-variant-numeric: tabular-nums;
+}
+.build-skill-icons {
+  padding-top: calc(var(--skill-level-height) + var(--skill-row-gap));
+  grid-template-rows: repeat(4, var(--skill-cell));
+}
+.build-skill-connector {
+  align-self: stretch;
+  width: 1px;
+  margin-bottom: var(--wl-space-3);
+  background: var(--build-divider);
+  pointer-events: none;
+}
+.build-skill-key { display: inline-grid; place-items: center; min-height: var(--wl-space-6); font-size: 13px; font-weight: 700; }
+.build-skill-marker {
+  width: min(100%, var(--skill-cell));
+  height: var(--skill-cell);
+  padding: 0;
+  border: 1px solid transparent;
+  border-radius: var(--wl-space-1);
+  background: color-mix(in srgb, currentColor 12%, transparent);
+  cursor: pointer;
+}
+.build-skill-level > .build-skill-key { font-size: 12px; }
+.build-skill-marker[data-slot-key="R"] { border-color: currentColor; background: color-mix(in srgb, currentColor 18%, transparent); }
+.build-skill-marker:is(:hover, :focus-visible) { background: color-mix(in srgb, currentColor 22%, transparent); }
+.build-skill-marker:focus-visible { outline: 1px solid currentColor; }
+.build-skill-key[data-slot-key="Q"] { color: var(--gold); }
+.build-skill-key[data-slot-key="W"] { color: var(--wl-info); }
+.build-skill-key[data-slot-key="E"] { color: var(--wl-success); }
+.build-skill-key[data-slot-key="R"] { color: var(--wl-danger); }
+.build-skill-extras { margin-top: var(--wl-space-2); }
+.build-skill-sample { margin: var(--wl-space-2) 0 0; line-height: var(--wl-space-4); }
+.build-skill-extras, .build-skill-sequence-label { color: var(--muted); font-size: 12px; }
+.build-skill-sequence-label { margin: 0 0 var(--wl-space-1); }
+.build-skills .build-ability { position: relative; width: min(100%, var(--skill-cell)); height: var(--skill-cell); }
+.build-skills .build-ability:hover { box-shadow: 0 0 0 1px var(--gold); }
+.build-skills .build-ability .build-icon { width: 100%; height: 100%; border-radius: var(--wl-space-1); }
+.build-ability b {
+  position: absolute; right: 0; bottom: 0; min-width: var(--wl-space-3); border-radius: var(--wl-space-1) 0 var(--wl-space-1) 0;
+  background: #101017; color: #fff; font-size: 10px; line-height: var(--wl-space-3); text-align: center;
 }
