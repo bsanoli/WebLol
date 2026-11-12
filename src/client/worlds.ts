@@ -1,4 +1,7 @@
 // @ts-nocheck -- A tela legada ainda usa estado e eventos DOM sem tipos explícitos.
+import { createElement } from "react"
+import { createRoot } from "react-dom/client"
+import { TournamentOverview } from "@/components/analytics"
 import { iconMarkup, laneIconMarkup } from "./icon"
 import DATA from "../data/worlds.json"
 import { LOL_DATA, lolAsset, lolChampion, lolKey } from "./lol-media"
@@ -300,9 +303,13 @@ function go(id) {
   publishWorlds(tab, [], filters);
 }
 
+let standaloneOverview;
+
 function render(id){
   const previousPage=document.body.dataset.page;
   hideTip();
+  standaloneOverview?.unmount();
+  standaloneOverview = undefined;
   window.frameElement?.dispatchEvent(new CustomEvent("weblol:analytics-clear"));
   document.getElementById("kpis").hidden = !!window.frameElement || id !== "geral";
   if(!validTab(id))id="geral";
@@ -319,31 +326,25 @@ function render(id){
   else if(id==="builds"){v.innerHTML=buildsView();wireBuilds()}
   document.body.dataset.page = id;
   if(previousPage!==document.body.dataset.page)revealContent(v);
+  if (id === "geral" && !window.frameElement) {
+    standaloneOverview = createRoot(v.querySelector("#analytics-root"));
+    standaloneOverview.render(createElement(TournamentOverview, { champions: championSummaries(), games: G, showSummary: false }));
+  }
   if(id === "geral" || id === "jogadores") window.frameElement?.dispatchEvent(new CustomEvent("weblol:analytics", { detail: {
     kind: id === "geral" ? "overview" : "players", games: G, players: DATA.players,
-    champions: C.map(c => ({name:c.name,picks:c.picks,wins:c.wins,bans:c.bans,portrait:lolChampion(c.name)?.portrait ? lolAsset(lolChampion(c.name).portrait) : undefined}))
+    champions: championSummaries()
   }}));
   enhanceAnalyticsUI();
 }
 
-function rankedChampion(champion){
-  const name=esc(champion.name);
-  return `<span class="nm">${ico(champion.name)}${laneIconMarkup(champion.main,true)}<span class="ranked-name" title="${name}">${name}</span></span>`;
+function championSummaries() {
+  return C.map(({ name, picks, wins, bans }) => {
+    const portrait = lolChampion(name)?.portrait;
+    return { name, picks, wins, bans, portrait: portrait ? lolAsset(portrait) : undefined };
+  });
 }
 
-function barList(list,valFn,max,segs,vw=52,tipFn=null){
-  return `<div class="bars">${list.map((c,i)=>{
-    const s=segs(c).map(([w,col,tip])=>`<i style="width:${w/max*100}%;background:var(${col})" data-tip="${esc(tip||"")}"></i>`).join("");
-    return `<div class="bar" style="grid-template-columns:22px minmax(110px,150px) 1fr ${vw}px"><span class="rk">${i+1}</span>${rankedChampion(c)}<span class="track">${s}</span><span class="val" data-tip="${esc(tipFn?tipFn(c):"")}">${valFn(c)}</span></div>`}).join("")}</div>`;
-}
 function overview(){
-  const picks=[...C].sort((a,b)=>b.picks-a.picks||b.wins-a.wins).slice(0,15);
-  const bans=[...C].sort((a,b)=>b.bans-a.bans||b.picks-a.picks).slice(0,15);
-  const pres=[...C].sort((a,b)=>(b.picks+b.bans)-(a.picks+a.bans)).slice(0,15);
-  const mp=picks[0].picks, mb=bans[0].bans;
-  const pickRows=`<div class="bars">${picks.map((c,i)=>`<div class="bar" style="grid-template-columns:22px minmax(110px,150px) 1fr 34px 52px"><span class="rk">${i+1}</span>${rankedChampion(c)}<span class="track" data-tip="${esc(c.name)}: ${c.wins} vitórias e ${c.picks-c.wins} derrotas em ${c.picks} jogos"><i style="width:${c.wins/mp*100}%;background:var(--good)" data-tip="${esc(c.name)}: ${c.wins} vitórias"></i><i style="width:${(c.picks-c.wins)/mp*100}%;background:var(--bad);opacity:.55" data-tip="${esc(c.name)}: ${c.picks-c.wins} derrotas"></i></span><span class="val" data-tip="Jogos com ${esc(c.name)}: ${c.wins} vitórias, ${c.picks-c.wins} derrotas">${c.picks}</span><span>${wrPill(c.wins,c.picks)}</span></div>`).join("")}</div>`;
-  const banRows=barList(bans,c=>`${c.bans} <span class="na">· ${pct(c.bans/G)}</span>`,mb,c=>[[c.bans,'--ban',`${c.name}: banido em ${c.bans} de ${G} jogos (${pct(c.bans/G)})`]],82,c=>`Bans de ${c.name} e % dos ${G} jogos`);
-  const presRows=barList(pres,c=>pct((c.picks+c.bans)/G),G,c=>[[c.picks,'--pick',`${c.name}: ${c.picks} picks (${c.wins}V ${c.picks-c.wins}D)`],[c.bans,'--ban',`${c.name}: ${c.bans} bans`]],52,c=>`Presença: ${c.picks} picks + ${c.bans} bans = ${c.picks+c.bans} de ${G} jogos`);
   const lanes = LANES.map(([lane]) => {
     const id = lane.toLowerCase();
     const champions = C.filter(c => c.lanes[lane]).sort((a,b) => b.lanes[lane].picks - a.lanes[lane].picks).slice(0, 5);
@@ -366,13 +367,7 @@ function overview(){
       <a class="lane-card-link" href="${href}" aria-label="Ver todos os campeões de ${lane}">Ver todos os campeões ${iconMarkup("next")}</a>
     </article>`;
   }).join("");
-  return `<div id="analytics-root"><div class="grid2">
-   <section class="wl-panel panel"><h2>Mais pickados</h2><p class="hint">Barra = jogos (verde vitórias, vermelho derrotas). À direita, a taxa de vitória.</p>${pickRows}</section>
-   <section class="wl-panel panel"><h2>Mais banidos</h2><p class="hint">Bans e % dos ${G} jogos em que o campeão foi banido.</p>${banRows}</section>
-  </div>
-  <section class="wl-panel panel" style="margin-top:20px"><h2>Prioridade no draft</h2><p class="hint">Presença = % dos jogos em que o campeão foi pickado ou banido.</p>
-   <div class="legend"><span><i class="dot" style="background:var(--pick)"></i>Picks</span><span><i class="dot" style="background:var(--ban)"></i>Bans</span></div>${presRows}</section>
-  </div><section class="lane-overview"><h2>Explore por posição</h2><p class="hint">Mais escolhidos em cada posição. A taxa de vitória considera todos os jogos do campeão.</p><div class="lane-grid">${lanes}</div></section>`;
+  return `<div id="analytics-root"></div><section class="lane-overview"><h2>Explore por posição</h2><p class="hint">Mais escolhidos em cada posição. A taxa de vitória considera todos os jogos do campeão.</p><div class="lane-grid">${lanes}</div></section>`;
 }
 
 function wireLaneOverview(view) {
