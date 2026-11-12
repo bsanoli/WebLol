@@ -1,10 +1,10 @@
 import { games } from "../data/worlds-2026-build-timeline.json"
 import { bootItems, isCompletedItem, itemIcon, itemName } from "./worlds-builds"
-import { esc, teamLogo } from "./worlds-display"
+import { esc, ico } from "./worlds-display"
 
 type Game = (typeof games)[number]
 type Player = Game["players"][number]
-type Entry = { game: Game; player: Player; team: string; opponent: string; won: boolean }
+type Entry = { game: Game; player: Player; opponent?: Player; won: boolean }
 
 const minutes = new Intl.NumberFormat("pt-BR", { maximumFractionDigits: 1 })
 const percent = new Intl.NumberFormat("pt-BR", { maximumFractionDigits: 0 })
@@ -27,8 +27,7 @@ function entriesFor(champion: string, lane: string): Entry[] {
       const side = player.side as "blue" | "red";
       return {
         game, player,
-        team: game[side],
-        opponent: game[side === "blue" ? "red" : "blue"],
+        opponent: game.players.find(other => other.role === player.role && other.side !== side),
         won: game.winner === side,
       };
     }))
@@ -97,12 +96,13 @@ function timeline(player: Player) {
     }).join("")}</ol>`;
 }
 
-function gameRow({ game, player, team, opponent, won }: Entry) {
+function gameRow({ game, player, opponent, won }: Entry) {
   const [k, d, a] = player.kda;
   return `<li class="build-timeline-game">
     <div class="build-timeline-who">
-      <span class="build-timeline-player">${teamLogo(team)}<strong>${esc(player.player)}</strong>
-        <span class="build-timeline-vs">vs ${teamLogo(opponent)}${esc(opponent)}</span></span>
+      <span class="build-timeline-player" aria-label="${esc(`${player.champion} contra ${opponent?.champion ?? "adversário desconhecido"}`)}">
+        ${ico(player.champion)}<span class="build-timeline-vs" aria-hidden="true">vs</span>
+        ${opponent ? `${ico(opponent.champion)}<strong>${esc(opponent.champion)}</strong>` : '<span class="na">—</span>'}</span>
       <span class="build-timeline-meta">
         <strong class="${won ? "build-sample-wins" : "build-sample-losses"}">${won ? "V" : "D"}</strong>
         <span>${k}/${d}/${a}</span>

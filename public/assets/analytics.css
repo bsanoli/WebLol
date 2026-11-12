@@ -902,7 +902,7 @@
 @container (min-width: 680px) { .build-timeline-game { grid-template-columns: 232px minmax(0, 1fr); gap: var(--wl-space-4); align-items: center; } }
 .build-timeline-who { display: grid; gap: var(--wl-space-1); min-width: 0; font-size: 13px; }
 .build-timeline-player { display: flex; flex-wrap: wrap; align-items: center; gap: var(--wl-space-1) var(--wl-space-2); }
-.build-timeline-player .team-logo { width: 16px; height: 16px; }
+.build-timeline-player .av { width: 32px; height: 32px; margin: 0; flex: none; }
 .build-timeline-vs { display: inline-flex; align-items: center; gap: var(--wl-space-1); color: var(--muted); }
 .build-timeline-meta { display: flex; flex-wrap: wrap; align-items: center; gap: var(--wl-space-1) var(--wl-space-2); color: var(--muted); font-size: 12px; }
 .build-timeline-meta a { color: var(--muted); text-decoration: underline; text-underline-offset: 2px; }
