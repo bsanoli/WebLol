@@ -129,13 +129,15 @@ function frequencyList(options: Option[]) {
 
 export function abilityDetail(champion: string, slot: string) {
   const detail = abilities[champion]?.[slot];
-  return detail && { ...detail, icon: `https://ddragon.leagueoflegends.com/cdn/16.20.1/img/spell/${detail.icon}` };
+  const folder = slot === "P" ? "passive" : "spell";
+  return detail && { ...detail, icon: `https://ddragon.leagueoflegends.com/cdn/16.20.1/img/${folder}/${detail.icon}` };
 }
 
 function skillIcon(champion: string, slot: string) {
   const detail = abilityDetail(champion, slot);
+  const label = slot === "P" ? "Passiva" : slot;
   return detail ? `<button type="button" class="build-icon-trigger build-ability" data-game-tip="ability:${esc(champion)}:${slot}"
-    aria-label="${esc(`${slot} · ${detail.name}`)}"><img alt="" class="build-icon" loading="lazy" src="${esc(detail.icon)}"><b aria-hidden="true">${slot}</b></button>`
+    aria-label="${esc(`${label} · ${detail.name}`)}"><img alt="" class="build-icon" loading="lazy" src="${esc(detail.icon)}"><b aria-hidden="true">${slot}</b></button>`
     : `<strong>${esc(slot)}</strong>`;
 }
 
@@ -143,7 +145,6 @@ function skillSequence(champion: string, value: string) {
   const slots = ["Q", "W", "E", "R"];
   const points = [...value];
   const levelCount = 18;
-  const groupSize = levelCount / 2;
   const hasExtraPoints = points.length > levelCount;
   const icons = slots.map(slot => skillIcon(champion, slot)).join("");
   const cells = Array.from({ length: Math.max(levelCount, points.length) }, (_, index) => {
@@ -163,15 +164,16 @@ function skillSequence(champion: string, value: string) {
         style="grid-row:${row}"
         ${detail ? `data-game-tip="ability:${esc(champion)}:${esc(slot)}" data-tip="${point}"` : `data-tip="${esc(label)}"`}>${esc(slot)}</button></li>`;
   });
-  const legend = (repeat = false) => `<li class="build-skill-icons${repeat ? " build-skill-icons-repeat" : ""}">${icons}</li>`;
+  const legend = (header = '<span aria-hidden="true"></span>') =>
+    `<li class="build-skill-icons">${header}${icons}</li>`;
   return `${hasExtraPoints ? '<p class="build-skill-sequence-label">Ordem dos pontos registrados</p>' : ""}
+    <div class="build-skill-scroll" tabindex="0" role="region" aria-label="Ordem de habilidades por nível">
     <ol class="build-skill-grid" role="list" aria-label="Sequência de pontos de habilidade">
-      ${legend()}${cells.slice(0, groupSize).join("")}
-      ${legend(true)}${cells.slice(groupSize, levelCount).join("")}
+      ${legend(skillIcon(champion, "P"))}${cells.slice(0, levelCount).join("")}
     </ol>
     ${hasExtraPoints ? `<div class="build-skill-extras">
       <span>Registros adicionais</span><ol class="build-skill-grid" role="list" aria-label="Registros adicionais">${legend()}${cells.slice(levelCount).join("")}</ol>
-    </div>` : ""}`;
+    </div>` : ""}</div>`;
 }
 
 function buildSkills(champion: string, order: BuildData["skillOrder"], games: number) {

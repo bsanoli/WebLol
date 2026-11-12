@@ -533,6 +533,11 @@
   ],
   "abilities": {
     "Aatrox": {
+      "P": {
+        "name": "Postura do Arauto da Morte",
+        "description": "Periodicamente, o próximo ataque básico de Aatrox causa <magicDamage>Dano Mágico</magicDamage> adicional e o cura com base na Vida máxima do alvo. ",
+        "icon": "Aatrox_Passive.png"
+      },
       "Q": {
         "name": "A Espada Darkin",
         "description": "Aatrox bate sua espada no chão, causando Dano Físico. Ele pode bater até três vezes, cada vez em uma área de ação diferente.",
@@ -555,6 +560,11 @@
       }
     },
     "Ahri": {
+      "P": {
+        "name": "Furto de Essência",
+        "description": "Depois de abater 9 tropas ou monstros, Ahri se cura.<br>Depois de eliminar um Campeão inimigo, Ahri se cura em uma quantidade ainda maior.",
+        "icon": "Ahri_SoulEater2.png"
+      },
       "Q": {
         "name": "Orbe da Ilusão",
         "description": "Ahri lança e puxa de volta seu orbe, causando Dano Mágico na ida e Dano Verdadeiro na volta. ",
@@ -577,6 +587,11 @@
       }
     },
     "Akali": {
+      "P": {
+        "name": "Marca do Assassino",
+        "description": "Causar dano a Campeões com habilidades cria um círculo de energia em volta deles. Sair desse círculo fortalece o próximo Ataque de Akali com alcance e dano adicionais.",
+        "icon": "Akali_P.png"
+      },
       "Q": {
         "name": "Golpe dos Cinco Pontos",
         "description": "Akali atira cinco kunais, causando redução de velocidade e dano com base em seu Dano de Ataque adicional e Poder de Habilidade.",
@@ -599,6 +614,11 @@
       }
     },
     "Alistar": {
+      "P": {
+        "name": "Urro Triunfante",
+        "description": "Alistar carrega seu urro ao atordoar, deslocar a posição de Campeões inimigos ou quando inimigos próximos morrem. Quando estiver com o máximo de cargas, ele cura a si mesmo e aos Campeões aliados próximos.",
+        "icon": "Alistar_E.png"
+      },
       "Q": {
         "name": "Pulverizar",
         "description": "Alistar golpeia o chão, causando dano a inimigos próximos e arremessando-os ao ar.",
@@ -621,6 +641,11 @@
       }
     },
     "Ambessa": {
+      "P": {
+        "name": "Passo do Cão-dragão",
+        "description": "Utilizar um comando de ataque ou de movimento enquanto conjura uma habilidade fará com que Ambessa avance a uma curta distância assim que a habilidade for conjurada, recebendo alcance, dano e Velocidade de Ataque adicionais em seu próximo ataque e recuperando energia.",
+        "icon": "Icon_Ambessa_Passive.png"
+      },
       "Q": {
         "name": "Golpe Ardiloso / Pancada Cortante",
         "description": "Ambessa golpeia com seus cães-dragão em um semicírculo à frente, causando dano adicional aos inimigos atingidos pelas lâminas. Atingir um inimigo transformará a próxima conjuração desta Habilidade por um curto período, fazendo com que ela golpeie em linha reta com seus cães-dragão, causando dano adicional ao primeiro inimigo atingido.",
@@ -643,6 +668,11 @@
       }
     },
     "Anivia": {
+      "P": {
+        "name": "Renascimento",
+        "description": "Ao receber dano letal, Anivia volta à forma de ovo e renasce com a Vida completa.",
+        "icon": "Anivia_P.png"
+      },
       "Q": {
         "name": "Lampejo Gelado",
         "description": "Anivia junta suas asas e invoca uma esfera de gelo que voa em direção ao oponente, congelando e causando dano a qualquer um em seu caminho. Ao explodir, ela causa dano moderado em um raio, atordoando qualquer um dentro da área.",
@@ -665,6 +695,11 @@
       }
     },
     "Annie": {
+      "P": {
+        "name": "Piromania",
+        "description": "Após conjurar 4 Habilidades, a próxima Habilidade ofensiva de Annie atordoará o alvo.<br><br>Annie começa a partida e ressurge com Piromania disponível.",
+        "icon": "Annie_Passive.png"
+      },
       "Q": {
         "name": "Desintegrar",
         "description": "Annie arremessa uma bola de fogo infundida em Mana, causando dano e recuperando o custo de Mana caso o alvo seja destruído.",
@@ -687,6 +722,11 @@
       }
     },
     "Aphelios": {
+      "P": {
+        "name": "O Assassino e a Profetisa",
+        "description": "Aphelios empunha 5 Armas Lunari criadas por sua irmã, Alune. Ele tem acesso a duas ao mesmo tempo: uma principal e uma secundária. Cada arma tem um ataque básico e uma Habilidade únicos. Ataques e habilidades consomem uma munição da arma. Quando fica sem munição, Aphelios descarta a arma e Alune invoca a próxima. ",
+        "icon": "ApheliosP.png"
+      },
       "Q": {
         "name": "Habilidades da arma",
         "description": "Aphelios tem 5 habilidades diferentes que são ativadas com base em sua arma principal:\n\nCalibrum (Rifle): Tiro de longo alcance que marca seu alvo para um disparo de longo alcance subsequente.\nSeverum (Pistola-Foice): Corre rapidamente enquanto ataca inimigos próximos com ambas as armas.\nGravitum (Canhão): Enraíza todos os inimigos afetados pela redução de velocidade desta arma.\nInfernum (Lança-chamas): Explode inimigos em área de cone e os ataca com sua arma secundária.\nCrescendum (Chakram): Posiciona uma atalaia que dispara com sua arma secundária.\n",
@@ -709,6 +749,11 @@
       }
     },
     "Ashe": {
+      "P": {
+        "name": "Tiro Congelado",
+        "description": "Os ataques de Ashe reduzem a velocidade do alvo e fazem com que ela cause mais dano a ele.<br><br>Os Acertos Críticos de Ashe não causam dano adicional, mas reduzem ainda mais a velocidade do alvo.",
+        "icon": "Ashe_P.png"
+      },
       "Q": {
         "name": "Concentração",
         "description": "Ashe acumula Foco ao atacar. Quando o Foco chega ao máximo, Ashe pode conjurar Concentração para consumir todos os acúmulos de Foco, aumentando temporariamente sua Velocidade de Ataque e transformando seu ataque básico em uma poderosa rajada de ataques pela duração do efeito.",
@@ -731,6 +776,11 @@
       }
     },
     "Aurora": {
+      "P": {
+        "name": "Abjuração Espiritual",
+        "description": "As Habilidades e Ataques da Aurora exorcizam espíritos dos inimigos aos quais ela causar dano. Espíritos exorcizados seguem e curam Aurora.",
+        "icon": "AuroraPassive.png"
+      },
       "Q": {
         "name": "Feitiço Dúplice",
         "description": "Aurora envia um projétil que amaldiçoa qualquer inimigo que atingir. Ela pode reconjurar a Habilidade para puxar de volta as maldições ativas na direção dela, causando dano a inimigos atingidos no caminho.",
@@ -753,6 +803,11 @@
       }
     },
     "Bard": {
+      "P": {
+        "name": "Chamado do Viajante",
+        "description": "<font color='#FF9900'>Mipes:</font> Bardo atrai pequenos espíritos que ajudam em seus ataques básicos e causam Dano Mágico adicional. Quando Bardo coleta <font color='#cccc00'>sinos</font> o suficiente, os mipes também causam dano em uma área e reduzem a velocidade de inimigos atingidos.<br><br><font color='#FF9900'>Sinos:</font> <font color='#cccc00'>sinos</font> ancestrais aparecem aleatoriamente para Bardo coletar. Eles concedem experiência, Velocidade de Movimento fora de combate e restauram Mana.",
+        "icon": "Bard_Passive.png"
+      },
       "Q": {
         "name": "Prisão Cósmica",
         "description": "Bardo dispara um projétil que causa Lentidão ao primeiro inimigo atingido, mantendo seu trajeto em seguida. Caso atinja uma parede, atordoará o alvo inicial; caso atinja outro inimigo, ambos serão atordoados.",
@@ -775,6 +830,11 @@
       }
     },
     "Caitlyn": {
+      "P": {
+        "name": "Bem na Mira",
+        "description": "A cada poucos ataques básicos, ou contra um alvo preso em uma armadilha ou rede, Caitlyn fará um disparo Bem na Mira causando dano adicional que escala com sua Chance de Acerto Crítico. Em alvos presos por armadilhas ou pela rede, o alcance de Bem na Mira de Caitlyn é dobrado.",
+        "icon": "Caitlyn_Headshot.png"
+      },
       "Q": {
         "name": "Pacificadora de Piltover",
         "description": "Caitlyn prepara seu rifle por 1s para fazer um disparo penetrante que causa Dano Físico (causa menos dano a alvos subsequentes).",
@@ -797,6 +857,11 @@
       }
     },
     "Camille": {
+      "P": {
+        "name": "Defesa Adaptativa",
+        "description": "Ataques básicos contra Campeões concedem um Escudo equivalente a uma porcentagem da Vida máxima de Camille contra o tipo de dano deles (Físico ou Mágico) por um breve período.",
+        "icon": "Camille_Passive.png"
+      },
       "Q": {
         "name": "Protocolo de Precisão",
         "description": "O próximo ataque de Camille causa dano adicional e concede Velocidade de Movimento adicional. Esta habilidade pode ser conjurada novamente por um curto período de tempo, causando dano adicional consideravelmente aumentado se Camille criar um intervalo entre os dois ataques.",
@@ -819,6 +884,11 @@
       }
     },
     "Cassiopeia": {
+      "P": {
+        "name": "Graça Serpentina",
+        "description": "Todos os efeitos de Velocidade de Movimento são mais eficazes em Cassiopeia.",
+        "icon": "Cassiopeia_Passive.png"
+      },
       "Q": {
         "name": "Explosão Venenosa",
         "description": "Cassiopeia atinge uma área com veneno após um breve intervalo, recebendo Velocidade de Movimento caso atinja um Campeão inimigo.",
@@ -841,6 +911,11 @@
       }
     },
     "Cho'Gath": {
+      "P": {
+        "name": "Carnívoro",
+        "description": "Sempre que Cho'Gath abate uma unidade, ele recupera Vida e Mana. Os valores restaurados aumentam com o nível de Cho'Gath.",
+        "icon": "GreenTerror_TailSpike.png"
+      },
       "Q": {
         "name": "Ruptura",
         "description": "Rompe o chão num local-alvo, lançando unidades inimigas ao ar e causando dano e redução de velocidade.",
@@ -863,6 +938,11 @@
       }
     },
     "Corki": {
+      "P": {
+        "name": "Munição Hextec",
+        "description": "Uma porcentagem do Dano de Ataque Básico de Corki é causada como <trueDamage>Dano Verdadeiro</trueDamage> adicional.",
+        "icon": "Corki_RapidReload.png"
+      },
       "Q": {
         "name": "Bomba de Fósforo",
         "description": "Corki dispara uma bomba luminosa em um local alvo, causando Dano Mágico a inimigos na área. Este ataque também revela unidades na área por uma curta duração.",
@@ -885,6 +965,11 @@
       }
     },
     "Diana": {
+      "P": {
+        "name": "Espada de Prata Lunar",
+        "description": "Cada terceiro Ataque atinge os inimigos próximos, causando Dano Mágico adicional. Depois de conjurar uma Habilidade, Diana recebe Velocidade de Ataque por 5s.",
+        "icon": "Diana_Passive_LunarBlade.png"
+      },
       "Q": {
         "name": "Golpe Crescente",
         "description": "Faz um disparo de energia lunar em forma de arco, causando Dano Mágico.\n\nAfeta os inimigos atingidos com Plenilúnio, revelando-os por 3s se não estiverem furtivos.",
@@ -907,6 +992,11 @@
       }
     },
     "Draven": {
+      "P": {
+        "name": "League of Draven",
+        "description": "Draven ganha Adoração de seus fãs quando apanha uma Revolução do Machado ou abate uma tropa, monstro ou torre. Abater Campeões inimigos concede ouro adicional a Draven, com base em quanta Adoração ele tem.",
+        "icon": "Draven_passive.png"
+      },
       "Q": {
         "name": "Revolução do Machado",
         "description": "O próximo ataque de Draven causará Dano Físico adicional. O machado ricocheteará do alvo em direção ao ar. Se Draven o apanhar, ele automaticamente irá preparar outra Revolução do Machado. Draven pode ter duas Revoluções do Machado simultaneamente em ação.",
@@ -929,6 +1019,11 @@
       }
     },
     "Elise": {
+      "P": {
+        "name": "Aranha Rainha",
+        "description": "Forma Humana: Quando as habilidades de Elise atingem um inimigo, ela recebe uma Cria dormente.<br><br>Forma de Aranha: Ataques básicos causam Dano Mágico adicional e restauram a Vida de Elise.",
+        "icon": "ElisePassive.png"
+      },
       "Q": {
         "name": "Neurotoxina / Mordida Venenosa",
         "description": "Forma Humana: Causa dano com base em quão alta está a Vida do alvo.\n\nForma de Aranha: Avança até um inimigo e causa dano com base em quão baixa está a Vida do alvo.",
@@ -951,6 +1046,11 @@
       }
     },
     "Ezreal": {
+      "P": {
+        "name": "Feitiço do Poder Crescente",
+        "description": "Ezreal recebe Velocidade de Ataque crescente a cada vez que acerta uma habilidade, acumulando-se até 5 vezes.",
+        "icon": "Ezreal_RisingSpellForce.png"
+      },
       "Q": {
         "name": "Disparo Místico",
         "description": "Ezreal faz um disparo de energia que reduz um pouco o Tempo de Recarga de todas as suas habilidades caso atinja uma unidade inimiga.",
@@ -973,6 +1073,11 @@
       }
     },
     "Galio": {
+      "P": {
+        "name": "Esmagada Colossal",
+        "description": "A cada poucos segundos, o próximo ataque básico de Galio causa Dano Mágico adicional em área.",
+        "icon": "Galio_Passive.png"
+      },
       "Q": {
         "name": "Ventos de Guerra",
         "description": "Galio dispara duas rajadas de vento que convergem em um grande tornado e causam dano ao longo do tempo.",
@@ -995,6 +1100,11 @@
       }
     },
     "Gangplank": {
+      "P": {
+        "name": "Julgamento de Fogo",
+        "description": "Periodicamente, o ataque corpo a corpo de Gangplank deixará seu inimigo em chamas.",
+        "icon": "Gangplank_Passive.png"
+      },
       "Q": {
         "name": "Negociarrr",
         "description": "Dispara no alvo, saqueando ouro para cada abate de unidade.",
@@ -1017,6 +1127,11 @@
       }
     },
     "Gnar": {
+      "P": {
+        "name": "Fúria Genética",
+        "description": "Enquanto está em combate, Gnar gera Fúria. Quando atinge o máximo de Fúria, sua próxima habilidade o transformará em Mega-Gnar, concedendo mais condições de sobrevivência e acesso a novas habilidades.",
+        "icon": "Gnar_Passive.png"
+      },
       "Q": {
         "name": "Bumerangue / Pedregulho",
         "description": "Gnar lança um bumerangue que causa dano e Lentidão a inimigos que atinge antes de retornar a ele. Caso apanhe o bumerangue, seu Tempo de Recarga é reduzido.\n\nMega Gnar arremessa um pedregulho que para na primeira unidade atingida, causando dano e Lentidão a tudo o que estiver próximo. Em seguida, ele pode ser apanhado para reduzir o Tempo de Recarga.",
@@ -1039,6 +1154,11 @@
       }
     },
     "Gwen": {
+      "P": {
+        "name": "Mil Retalhos",
+        "description": "Os Ataques de Gwen causam Dano Mágico adicional com base na Vida do alvo. Ela se cura em parte do dano causado a Campeões com esse efeito. ",
+        "icon": "Gwen_Passive.png"
+      },
       "Q": {
         "name": "Corte e Recorte",
         "description": "Gwen corta uma área em cone até seis vezes com a tesoura, causando Dano Mágico. Ela causa Dano Verdadeiro às unidades atingidas no centro e aplica a Passiva a cada corte.",
@@ -1061,6 +1181,11 @@
       }
     },
     "Hwei": {
+      "P": {
+        "name": "Assinatura do Visionário",
+        "description": "Hwei prepara os Campeões inimigos que sofrerem dano de suas Habilidades para deixar sua inconfundível assinatura.<br><br>Atingir um inimigo com uma segunda Habilidade de dano conclui a assinatura, que fica sob ele. A assinatura detona após um breve intervalo, causando Dano Mágico a todos os inimigos dentro do alcance.",
+        "icon": "HweiPassive.png"
+      },
       "Q": {
         "name": "Tema: Desastre",
         "description": "Hwei vislumbra uma série de desastres, o que lhe permite pintar um golpe devastador.\n\nSubstitui as Habilidades de Hwei por Habilidades de dano: Fogo Devastador, Raio Cortante e Fissura Derretida.",
@@ -1083,6 +1208,11 @@
       }
     },
     "Irelia": {
+      "P": {
+        "name": "Fervor Ioniano",
+        "description": "Quando Irelia acerta inimigos com suas habilidades, ela ganha acúmulo de Velocidade de Ataque adicional. Ao atingir o máximo de acúmulos, Irelia também ganha dano adicional ao contato.",
+        "icon": "Irelia_Passive.png"
+      },
       "Q": {
         "name": "Surto da Lâmina",
         "description": "Irelia avança para atingir o seu alvo e cura a si mesma. Se ele estiver marcado ou for abatido com Surto da Lâmina, o Tempo de Recarga será restaurado.",
@@ -1105,6 +1235,11 @@
       }
     },
     "Jarvan IV": {
+      "P": {
+        "name": "Cadência Marcial",
+        "description": "O primeiro ataque básico de Jarvan a um inimigo causa Dano Físico adicional com base na Vida atual dele. Este efeito não ocorrerá no mesmo inimigo novamente por alguns segundos.",
+        "icon": "JarvanIVP.png"
+      },
       "Q": {
         "name": "Ataque do Dragão",
         "description": "Jarvan IV estende sua lança, causando Dano Físico e reduzindo a Armadura de inimigos atingidos. Além disto, ela puxará Jarvan na direção de seu Estandarte Demaciano, arremessando inimigos em seu trajeto ao ar.",
@@ -1127,6 +1262,11 @@
       }
     },
     "Jax": {
+      "P": {
+        "name": "Investida Implacável",
+        "description": "Os ataques básicos consecutivos de Jax continuamente aumentam sua Velocidade de Ataque.",
+        "icon": "Armsmaster_MasterOfArms.png"
+      },
       "Q": {
         "name": "Salto Atacante",
         "description": "Jax salta em direção a uma unidade. Caso seja um inimigo, ele o atingirá com sua arma.",
@@ -1149,6 +1289,11 @@
       }
     },
     "Jayce": {
+      "P": {
+        "name": "Capacitor Hextec",
+        "description": "Quando Jayce troca de arma, ele recebe Velocidade de Movimento por um curto período.",
+        "icon": "Jayce_Passive.png"
+      },
       "Q": {
         "name": "Aos Céus! / Disparo Chocante",
         "description": "Empunhadura de Martelo: Salta na direção de um inimigo, causando Dano Físico e Lentidão.\n\nEmpunhadura de Canhão: Dispara um orbe de eletricidade que detona ao atingir um inimigo (ou ao alcançar o fim de seu trajeto), causando Dano Físico a todos os inimigos atingidos.",
@@ -1171,6 +1316,11 @@
       }
     },
     "Jhin": {
+      "P": {
+        "name": "Sussurro",
+        "description": "Sussurro, o canhão de mão de Jhin, é um instrumento preciso que foi projetado para causar muito dano. Ele dispara com frequência fixa e carrega apenas quatro projéteis. Jhin encanta o projétil final com magia sombria para causar Acerto Crítico e dano de execução adicional. Sempre que causa um Acerto Crítico, Sussurro inspira Jhin com um impulso de Velocidade de Movimento.",
+        "icon": "Jhin_P.png"
+      },
       "Q": {
         "name": "Granada Dançante",
         "description": "Jhin lança um cartucho mágico em um inimigo. Ele pode atingir até quatro alvos e acumula dano a cada vez que causa um abate.",
@@ -1193,6 +1343,11 @@
       }
     },
     "Jinx": {
+      "P": {
+        "name": "Anime-se!",
+        "description": "Jinx recebe um aumento drástico de Velocidade de Movimento e de Velocidade de Ataque sempre que ajuda a destruir uma estrutura ou a abater um Campeão inimigo ou monstro épico da selva.",
+        "icon": "Jinx_Passive.png"
+      },
       "Q": {
         "name": "Trocando!",
         "description": "Jinx modifica seus ataques básicos ao trocar entre Pow-Pow, sua metralhadora, e Fishbones, seu lança-mísseis. Ataques com Pow-Pow concedem Velocidade de Ataque, enquanto ataques com Fishbones causam dano em área de ação e recebem aumento de alcance, mas drenam Mana e reduzem a Velocidade de Ataque.",
@@ -1215,6 +1370,11 @@
       }
     },
     "K'Sante": {
+      "P": {
+        "name": "Instinto Valente",
+        "description": "As habilidades de K'Sante marcam os alvos para que sofram mais dano do próximo ataque dele.<br><br>Na Forma Irrestrita, K'Sante causa mais dano com todos os ataques e habilidades.",
+        "icon": "Icons_KSante_P.png"
+      },
       "Q": {
         "name": "Golpes de Ntofo",
         "description": "K'Sante executa um golpe, causando dano e Lentidão aos inimigos em uma linha curta à frente.\n\nAo contato, concede um acúmulo de Golpes de Ntofo. Com 2 acúmulos, ele dispara uma onda de choque que puxa os inimigos.\n\nNa Forma Irrestrita, o Tempo de Recarga é reduzido.",
@@ -1237,6 +1397,11 @@
       }
     },
     "Kai'Sa": {
+      "P": {
+        "name": "Segunda Pele",
+        "description": "Os ataques básicos de Kai'Sa acumulam Plasma, causando Dano Mágico adicional crescente. Efeitos imobilizadores de aliados ajudam a acumular Plasma. Além disso, as aquisições de itens de Kai'Sa aprimoram suas habilidades básicas, deixando-as mais poderosas.",
+        "icon": "Kaisa_Passive.png"
+      },
       "Q": {
         "name": "Chuva Icathiana",
         "description": "Kai'Sa dispara uma chuva de projéteis que correm atrás de alvos próximos.\n\nArma Viva: Chuva Icathiana é aprimorada e lança mais mísseis.",
@@ -1259,6 +1424,11 @@
       }
     },
     "Kalista": {
+      "P": {
+        "name": "Aprumo Marcial",
+        "description": "Realize um comando de movimentação enquanto Kalista carrega seu ataque básico ou Perfurar para saltar em uma curta distância quando ela lançar o ataque.",
+        "icon": "Kalista_Passive.png"
+      },
       "Q": {
         "name": "Perfurar",
         "description": "Arremessa uma lança de movimento rápido que atravessa os inimigos que abate.",
@@ -1281,6 +1451,11 @@
       }
     },
     "Karma": {
+      "P": {
+        "name": "Ímpeto Ardente",
+        "description": "As habilidades de dano de Karma reduzem o Tempo de Recarga de Mantra.",
+        "icon": "Karma_Passive.png"
+      },
       "Q": {
         "name": "Chama Interior",
         "description": "Karma dispara uma esfera de energia espiritual que explode e causa dano ao atingir uma unidade inimiga.\n\nEfeito de Mantra: Além da explosão, Mantra aumenta o poder destrutivo de sua Chama Interior, criando um cataclisma que causa dano depois de um breve intervalo.",
@@ -1303,6 +1478,11 @@
       }
     },
     "Kennen": {
+      "P": {
+        "name": "Marca da Tormenta",
+        "description": "Kennen atordoa os inimigos que atingir 3 vezes com suas habilidades.",
+        "icon": "Kennen_Passive.png"
+      },
       "Q": {
         "name": "Shuriken Trovejante",
         "description": "Kennen arremessa um shuriken de alta velocidade em um local, causando dano e adicionando uma Marca da Tormenta a qualquer oponente atingido.",
@@ -1325,6 +1505,11 @@
       }
     },
     "Kled": {
+      "P": {
+        "name": "Skaarl, a Lagarto Covarde",
+        "description": "Kled fica em sua possante montaria, Skaarl, que toma dano por ele. Quando a Vida dela acaba, Kled desmonta.<br><br>Enquanto desmontado, as habilidades de Kled mudam e ele causa menos dano a Campeões. Kled pode restaurar a coragem de Skaarl ao enfrentar inimigos. Quando a coragem chega ao máximo, Kled volta a montar em Skaarl com uma parte de sua Vida.",
+        "icon": "Kled_P.png"
+      },
       "Q": {
         "name": "Armadilha na Corda",
         "description": "Kled arremessa uma armadilha de urso que causa dano e se prende a um Campeão inimigo. Caso fique preso por um curto período, o alvo recebe Dano Físico adicional e é puxado em direção a Kled.\n\nQuando desmontado, esta habilidade é substituída por Pistola de Bolso, um disparo a distância que empurra Kled para trás e restaura coragem.",
@@ -1347,6 +1532,11 @@
       }
     },
     "Kog'Maw": {
+      "P": {
+        "name": "Surpresa Icathiana",
+        "description": "Ao morrer, Kog'Maw explode depois de 4s, causando Dano Verdadeiro a inimigos próximos.",
+        "icon": "KogMaw_IcathianSurprise.png"
+      },
       "Q": {
         "name": "Cusparada Cáustica",
         "description": "Kog'Maw dispara um projétil corrosivo que causa Dano Mágico, corroendo a Armadura e Resistência Mágica do alvo por um curto período de tempo. Kog'Maw também recebe Velocidade de Ataque adicional.",
@@ -1369,6 +1559,11 @@
       }
     },
     "LeBlanc": {
+      "P": {
+        "name": "Imagem-Espelho",
+        "description": "Quando a Vida de LeBlanc está abaixo de 40%, ela fica invisível por 1s e cria uma Imagem-Espelho que não causa dano e dura até 8s.",
+        "icon": "LeblancP.png"
+      },
       "Q": {
         "name": "Sigilo de Malícia",
         "description": "LeBlanc projeta um Sigilo, causando dano e marcando o alvo por 3,5s. Causar dano ao alvo marcado com qualquer Habilidade detona o Sigilo, causando dano adicional. Se qualquer parte dessa combinação abater o alvo, LeBlanc restitui o custo de Mana e parte do Tempo de Recarga restante desta Habilidade.",
@@ -1391,6 +1586,11 @@
       }
     },
     "Lee Sin": {
+      "P": {
+        "name": "Agitação",
+        "description": "Após Lee Sin usar uma habilidade, seus próximos 2 ataques básicos recebem Velocidade de Ataque e recuperam Energia.",
+        "icon": "LeeSinPassive.png"
+      },
       "Q": {
         "name": "Onda Sônica / Ataque Ressonante",
         "description": "Onda Sônica: Lee Sin projeta uma onda sonora para localizar seus inimigos, causando Dano Físico ao primeiro que encontrar. Se Onda Sônica atingir um inimigo, Lee Sin pode conjurar Ataque Ressonante nos próximos 3 segundos.\nAtaque Ressonante: Lee Sin avança no inimigo atingido por Onda Sônica, causando Dano Físico baseado na Vida perdida do alvo.",
@@ -1413,6 +1613,11 @@
       }
     },
     "Leona": {
+      "P": {
+        "name": "Luz do Sol",
+        "description": "Habilidades que causam dano atingem os inimigos com Luz do Sol por 1,5s. Quando Campeões aliados causam dano a esses alvos, a Luz do Sol é consumida para causar Dano Mágico adicional.",
+        "icon": "LeonaSunlight.png"
+      },
       "Q": {
         "name": "Proteção da Aurora",
         "description": "Leona usa seu escudo para fazer seu próximo ataque básico, causando Dano Mágico adicional e atordoando o alvo.",
@@ -1435,6 +1640,11 @@
       }
     },
     "Lillia": {
+      "P": {
+        "name": "Ramo Onírico",
+        "description": "Atingir um Campeão ou monstro com uma habilidade causa dano adicional com base na Vida máxima do alvo ao longo do tempo.",
+        "icon": "Lillia_Icon_Passive.png"
+      },
       "Q": {
         "name": "Golpes Florescentes",
         "description": "Lillia ganha acúmulos de Velocidade de Movimento passivamente ao atingir inimigos com habilidades. Ela pode ativar esta habilidade para causar Dano Mágico aos inimigos próximos e Dano Verdadeiro adicional na porção externa do círculo.",
@@ -1457,6 +1667,11 @@
       }
     },
     "Lissandra": {
+      "P": {
+        "name": "Submissão Glacinata",
+        "description": "Quando um Campeão inimigo morre próximo a Lissandra, ele vira um Servo Congelado. Servos Congelados reduzem a velocidade de inimigos próximos e, depois de um intervalo, estilhaçam devido ao frio intenso, causando Dano Mágico a alvos próximos.",
+        "icon": "Lissandra_Passive.png"
+      },
       "Q": {
         "name": "Estilhaço de Gelo",
         "description": "Arremessa uma lança de gelo que se estilhaça ao atingir um inimigo, causando Dano Mágico e reduzindo sua Velocidade de Movimento. Os estilhaços atravessam o alvo, causando o mesmo dano a outros inimigos atingidos.",
@@ -1479,6 +1694,11 @@
       }
     },
     "Locke": {
+      "P": {
+        "name": "Estaca de Prata",
+        "description": "Os Ataques de Locke causam Dano Mágico adicional ao contato, aumentado com base na Vida perdida do inimigo.",
+        "icon": "Locke_Passive.png"
+      },
       "Q": {
         "name": "Pregos Ritualísticos",
         "description": "Locke prepara um conjunto de Pregos Anímicos para arremessar, causando dano e marcando os inimigos atingidos. Ele pode consumir as marcas para causar dano adicional com seus Ataques.",
@@ -1501,6 +1721,11 @@
       }
     },
     "Lucian": {
+      "P": {
+        "name": "Disparo Iluminado",
+        "description": "Sempre que Lucian usa uma Habilidade, seu próximo Ataque se transforma em um disparo duplo. Quando Lucian é curado ou protegido por um aliado, ou quando um Campeão inimigo próximo é imobilizado, os próximos dois Ataques básicos dele causam Dano Mágico adicional.",
+        "icon": "Lucian_Passive.png"
+      },
       "Q": {
         "name": "Luz Perfurante",
         "description": "Lucian faz um disparo de luz perfurante através de um alvo.",
@@ -1523,6 +1748,11 @@
       }
     },
     "Lulu": {
+      "P": {
+        "name": "Pix, o Silfo Companheiro",
+        "description": "Pix faz disparos de energia mágica sempre que o Campeão que estiver seguindo atacar outra unidade inimiga. Os disparos seguem o inimigo, mas podem ser interceptados por outras unidades.",
+        "icon": "Lulu_PixFaerieCompanion.png"
+      },
       "Q": {
         "name": "Lança-Purpurina",
         "description": "Pix e Lulu disparam um raio de energia mágica que causa dano e muita Lentidão aos inimigos atingidos.",
@@ -1545,6 +1775,11 @@
       }
     },
     "Lux": {
+      "P": {
+        "name": "Iluminação",
+        "description": "As habilidades de dano de Lux carregam o alvo com energia por alguns segundos. O próximo ataque de Lux incendeia a energia, causando Dano Mágico adicional (com base no nível de Lux) ao alvo.",
+        "icon": "LuxIlluminatingFraulein.png"
+      },
       "Q": {
         "name": "Ligação da Luz",
         "description": "Lux atira uma esfera de luz que se prende e causa dano em até duas unidades inimigas.",
@@ -1567,6 +1802,11 @@
       }
     },
     "Malphite": {
+      "P": {
+        "name": "Escudo de Granito",
+        "description": "Malphite está protegido por uma camada de rocha que absorve dano equivalente a até 10% de sua Vida máxima. Se Malphite não for atingido por alguns segundos, o efeito é recarregado.",
+        "icon": "Malphite_GraniteShield.png"
+      },
       "Q": {
         "name": "Fragmento Sísmico",
         "description": "Malphite arremessa um fragmento de terra no inimigo através do chão, causando dano ao impacto e roubando Velocidade de Movimento por 3s.",
@@ -1589,6 +1829,11 @@
       }
     },
     "Maokai": {
+      "P": {
+        "name": "Seiva Mágica",
+        "description": "O ataque básico de Maokai também concede cura a ele e causa dano adicional com um Tempo de Recarga moderado. Sempre que ele conjurar uma habilidade ou for atingido por uma habilidade inimiga, o Tempo de Recarga da cura é reduzido.",
+        "icon": "Maokai_Passive.png"
+      },
       "Q": {
         "name": "Esmagamento Espinhoso",
         "description": "Maokai empurra inimigos próximos para trás com uma onda de choque, causando Dano Mágico e redução de velocidade.",
@@ -1611,6 +1856,11 @@
       }
     },
     "Mel": {
+      "P": {
+        "name": "Esplendor Calcinante",
+        "description": "Sempre que Mel usa uma habilidade, ela recebe três projéteis adicionais (até um máximo de nove) para o próximo ataque.<br><br>Quando Mel causa dano com uma habilidade ou um ataque, ela aplica Deslumbrar, que pode acumular infinitamente. Se o inimigo for atingido por Mel com dano suficiente de Deslumbrar, os acúmulos serão consumidos para executar o alvo.",
+        "icon": "Mel_Passive.png"
+      },
       "Q": {
         "name": "Rajada Radiante",
         "description": "Mel dispara uma saraivada de projéteis que explodem ao redor de um local-alvo, causando dano repetidamente aos inimigos dentro da área.",
@@ -1633,6 +1883,11 @@
       }
     },
     "Milio": {
+      "P": {
+        "name": "A Todo Vapor!",
+        "description": "As habilidades de Milio encantam aliados ao toque, fazendo com que o próximo ataque deles cause uma explosão de dano adicional e queime o alvo.",
+        "icon": "Milio_P.png"
+      },
       "Q": {
         "name": "Ultramega Chute Flamejante",
         "description": "Milio chuta uma bola que empurra um inimigo. A bola é lançada para cima ao contato e cai na direção do alvo, causando dano e Lentidão aos inimigos que estiverem na área atingida.",
@@ -1655,6 +1910,11 @@
       }
     },
     "Miss Fortune": {
+      "P": {
+        "name": "Batida do Amor",
+        "description": "Miss Fortune causa Dano Físico adicional sempre que usar um ataque básico em um novo alvo.",
+        "icon": "MissFortune_W.png"
+      },
       "Q": {
         "name": "Dois por Um",
         "description": "Miss Fortune dispara contra um inimigo, causando dano a ele e a um alvo atrás dele. Ambos os acertos também podem aplicar Batida do Amor.",
@@ -1677,6 +1937,11 @@
       }
     },
     "Naafiri": {
+      "P": {
+        "name": "Em Maior Número",
+        "description": "Uma matilha surge e ataca os alvos dos ataques e habilidades de Naafiri.",
+        "icon": "Icons_Naafiri_P.png"
+      },
       "Q": {
         "name": "Adagas Darkin",
         "description": "Naafiri arremessa até duas adagas; cada uma causa dano de sangramento ou, caso o alvo já esteja sangrando, dano adicional.\n\nA matilha avança para atacar o primeiro Campeão ou monstro atingido pela Habilidade.\n",
@@ -1699,6 +1964,11 @@
       }
     },
     "Nami": {
+      "P": {
+        "name": "Maré Oscilante",
+        "description": "Quando as Habilidades de Nami atingem Campeões aliados, eles recebem Velocidade de Movimento por um curto período.",
+        "icon": "NamiPassive.png"
+      },
       "Q": {
         "name": "Prisão Aquática",
         "description": "Lança uma bolha na área-alvo, causando dano e atordoando todos os inimigos ao impacto.",
@@ -1721,6 +1991,11 @@
       }
     },
     "Nasus": {
+      "P": {
+        "name": "Devorador de Almas",
+        "description": "Nasus drena a energia espiritual de seu inimigo, acumulando Roubo de Vida adicional.",
+        "icon": "Nasus_Passive.png"
+      },
       "Q": {
         "name": "Ataque Sifão",
         "description": "Nasus ataca seu inimigo, causando dano e aumentando o poder do próximo Ataque Sifão se o alvo for abatido.",
@@ -1743,6 +2018,11 @@
       }
     },
     "Nautilus": {
+      "P": {
+        "name": "Âncora Impactante",
+        "description": "O primeiro Ataque de Nautilus a um alvo causa Dano Físico aumentado e Enraíza-o brevemente.",
+        "icon": "Nautilus_StaggeringBlow.png"
+      },
       "Q": {
         "name": "Lançar Âncora",
         "description": "Nautilus arremessa sua âncora à frente.  Se acertar um inimigo, ele puxa a si mesmo e ao alvo para perto um do outro, causando Dano Mágico.  Se acertar um terreno, Nautilus avança em direção a ele.",
@@ -1765,6 +2045,11 @@
       }
     },
     "Neeko": {
+      "P": {
+        "name": "Encanto Inerente",
+        "description": "Neeko pode imitar um Campeão aliado ou outras unidades no mapa. O disfarce será quebrado ao sofrer efeitos de Controle de Grupo imobilizantes, conjurar habilidades de dano, causar dano a torres inimigas como um não Campeão ou sofrer dano equivalente à barra de Vida do disfarce.",
+        "icon": "Neeko_P.png"
+      },
       "Q": {
         "name": "Explosão Florescente",
         "description": "Neeko arremessa uma semente, causando Dano Mágico. A semente floresce novamente ao atingir Campeões ou abater unidades.",
@@ -1787,6 +2072,11 @@
       }
     },
     "Nocturne": {
+      "P": {
+        "name": "Lâminas Sombrias",
+        "description": "A cada poucos segundos, o próximo ataque de Nocturne atinge os inimigos ao seu redor para causar Dano Físico adicional e curá-lo. <br><br>Os ataques básicos de Nocturne reduzem esse Tempo de Recarga.",
+        "icon": "Nocturne_UmbraBlades.png"
+      },
       "Q": {
         "name": "Portador do Anoitecer",
         "description": "Nocturne lança uma lâmina de sombras que causa dano, deixa um Rastro do Crepúsculo e faz com que os Campeões deixem um Rastro do Crepúsculo. Enquanto estiver no rastro, Nocturne ignora colisões com unidades e ganha aumento de Velocidade de Movimento e de Dano de Ataque.",
@@ -1809,6 +2099,11 @@
       }
     },
     "Olaf": {
+      "P": {
+        "name": "Fúria Berserker",
+        "description": "Olaf recebe Velocidade de Ataque e Roubo de Vida com base na sua Vida perdida.",
+        "icon": "Olaf_Passive.png"
+      },
       "Q": {
         "name": "Ressaca",
         "description": "Olaf arremessa um machado no local-alvo, causando dano e reduzindo a Armadura e a Velocidade de Movimento dos inimigos que atravessar. Se Olaf apanhar o machado, o Tempo de Recarga da habilidade é redefinido.",
@@ -1831,6 +2126,11 @@
       }
     },
     "Orianna": {
+      "P": {
+        "name": "Dando Corda",
+        "description": "Os Ataques de Orianna causam Dano Mágico adicional. O dano aumenta a cada vez que ela Ataca o mesmo alvo.",
+        "icon": "OriannaPassive.png"
+      },
       "Q": {
         "name": "Comando: Atacar",
         "description": "Orianna comanda sua Esfera para avançar no local-alvo, causando Dano Mágico ao longo do caminho (causa menos dano a alvos subsequentes). A Esfera permanece no mesmo lugar após o comando.",
@@ -1853,6 +2153,11 @@
       }
     },
     "Ornn": {
+      "P": {
+        "name": "Forja Viva",
+        "description": "Ornn recebe Armadura e Resistência Mágica adicionais de todas as origens.<br><br>Ele pode gastar ouro para forjar itens não consumíveis em qualquer lugar.<br><br>Além disso, ele pode criar itens magistrais para si e para aliados.",
+        "icon": "OrnnP.png"
+      },
       "Q": {
         "name": "Ruptura Vulcânica",
         "description": "Ornn bate no chão, dispersando uma fissura que causa dano e reduz a velocidade dos inimigos atingidos. Após um breve intervalo, um pilar de magma se forma no ponto final.",
@@ -1875,6 +2180,11 @@
       }
     },
     "Pantheon": {
+      "P": {
+        "name": "Determinação Mortal",
+        "description": "Após algumas habilidades ou ataques, a próxima habilidade de Pantheon será fortalecida.",
+        "icon": "Pantheon_Passive.png"
+      },
       "Q": {
         "name": "Lança Meteórica",
         "description": "Pantheon pode fazer uma investida com sua lança ou arremessá-la na direção escolhida.",
@@ -1897,6 +2207,11 @@
       }
     },
     "Poppy": {
+      "P": {
+        "name": "Embaixadora de Ferro",
+        "description": "Poppy arremessa seu broquel, que bate no alvo e cai no chão. Ela pode apanhá-lo para receber um escudo temporário.",
+        "icon": "Poppy_Passive.png"
+      },
       "Q": {
         "name": "Choque do Martelo",
         "description": "Poppy golpeia com o martelo, causando dano e criando uma área que reduz a velocidade de inimigos e explode após um intervalo.",
@@ -1919,6 +2234,11 @@
       }
     },
     "Pyke": {
+      "P": {
+        "name": "Dádiva dos Afogados",
+        "description": "Quando Pyke está escondido dos inimigos, ele regenera o dano recebido recentemente de Campeões. Pyke também não ganha Vida máxima adicional de nenhuma fonte, mas ganha DdA adicional.",
+        "icon": "PykePassive.png"
+      },
       "Q": {
         "name": "Espeto de Osso",
         "description": "Pyke esfaqueia um inimigo à sua frente ou puxa um inimigo em direção a si mesmo.",
@@ -1941,6 +2261,11 @@
       }
     },
     "Qiyana": {
+      "P": {
+        "name": "Privilégio da Realeza",
+        "description": "O primeiro ataque básico ou habilidade de Qiyana contra cada inimigo causa dano adicional.",
+        "icon": "Qiyana_Passive.png"
+      },
       "Q": {
         "name": "Cólera Elemental / Lâmina de Ixtal",
         "description": "Qiyana brande sua arma, causando dano com um efeito adicional baseado no seu elemento.",
@@ -1963,6 +2288,11 @@
       }
     },
     "Rakan": {
+      "P": {
+        "name": "Plumas Mágicas",
+        "description": "Rakan recebe um escudo periodicamente.",
+        "icon": "Rakan_P.png"
+      },
       "Q": {
         "name": "Pena Reluzente",
         "description": "Lança uma pluma mágica que causa Dano Mágico. Ao atingir um Campeão ou um monstro épico, Rakan pode curar seus aliados.",
@@ -1985,6 +2315,11 @@
       }
     },
     "Rell": {
+      "P": {
+        "name": "A Ferro e Fogo",
+        "description": "Os Ataques e Habilidades de Rell causam Dano Mágico adicional e roubam Armadura e Resistência Mágica ao contato.",
+        "icon": "RellP.png"
+      },
       "Q": {
         "name": "Golpe Estilhaçador",
         "description": "Rell causa Dano Mágico às unidades em linha reta, destruindo o Escudo delas e atordoando-as. ",
@@ -2007,6 +2342,11 @@
       }
     },
     "Renata Glasc": {
+      "P": {
+        "name": "Financiamento",
+        "description": "Os Ataques de Renata causam dano adicional e marcam inimigos. Os aliados de Renata podem atacar inimigos marcados para causar dano adicional.",
+        "icon": "Renata_P.png"
+      },
       "Q": {
         "name": "Negócio Fechado",
         "description": "Renata envia um foguete que enraíza o primeiro inimigo atingido. Ela pode reconjurar a habilidade para arremessar a unidade em uma direção.",
@@ -2029,6 +2369,11 @@
       }
     },
     "Renekton": {
+      "P": {
+        "name": "Domínio da Ira",
+        "description": "Os ataques de Renekton geram Fúria, que aumenta quando ele estiver com a Vida baixa. Essa Fúria pode fortalecer suas habilidades com efeitos adicionais.",
+        "icon": "Renekton_Passive.png"
+      },
       "Q": {
         "name": "Abater os Indefesos",
         "description": "Renekton brande sua lâmina, causando Dano Físico moderado em todos os alvos ao seu redor e curando-o em uma pequena quantia do dano causado. Caso tenha mais que 50 pontos de Fúria, seu dano e cura aumentam.",
@@ -2051,6 +2396,11 @@
       }
     },
     "Rumble": {
+      "P": {
+        "name": "Titã do Ferro-Velho",
+        "description": "Cada habilidade que Rumble conjura lhe concede Aquecimento. Ao chegar em 50% de Aquecimento, ele entra na Zona de Perigo, concedendo efeitos adicionais a todas as suas habilidades. Ao chegar a 100% de Aquecimento, ele começa a superaquecer, recebendo Velocidade de Ataque adicional e dano adicional em seus ataques básicos, mas fica incapaz de conjurar habilidades por alguns segundos.",
+        "icon": "Rumble_JunkyardTitan1.png"
+      },
       "Q": {
         "name": "Cospe-Fogo",
         "description": "Rumble incinera os inimigos à sua frente, causando Dano Mágico em área de cone por 3 segundos. O dano aumenta enquanto ele estiver na Zona de Perigo.",
@@ -2073,6 +2423,11 @@
       }
     },
     "Ryze": {
+      "P": {
+        "name": "Maestria Arcana",
+        "description": "<mainText>As habilidades de Ryze causam dano adicional com base em seu Mana adicional. Ele recebe um percentual de aumento de Mana máximo com base em seu Poder de Habilidade.</mainText>",
+        "icon": "Ryze_P.png"
+      },
       "Q": {
         "name": "Sobrecarregar",
         "description": "Passivamente, as outras habilidades básicas de Ryze redefinem o Tempo de Recarga de Sobrecarregar e carregam uma runa. Quando Ryze conjura Sobrecarregar com 2 runas carregadas, ele recebe um breve surto de Velocidade de Movimento.\n\nAo conjurar, Ryze arremessa uma carga de energia pura em linha reta, causando dano ao primeiro inimigo atingido. Se o alvo estiver afetado por Fluxo, Sobrecarregar causa dano adicional e rebate para inimigos próximos atingidos por Fluxo.",
@@ -2095,6 +2450,11 @@
       }
     },
     "Sejuani": {
+      "P": {
+        "name": "Fúria do Norte",
+        "description": "Após ficar fora de combate, Sejuani recebe Armadura Congelada, que concede Armadura, Resistência Mágica e imunidade a reduções de velocidade. Armadura Congelada persiste por um curto período após Sejuani sofrer dano e  Sejuani pode causar dano a um inimigo atordoado para estilhaçá-la, causando muito Dano Mágico.",
+        "icon": "Sejuani_passive.png"
+      },
       "Q": {
         "name": "Ataque do Ártico",
         "description": "Sejuani avança em investida, lançando os inimigos pelos ares. A investida cessa após acertar um Campeão inimigo.",
@@ -2117,6 +2477,11 @@
       }
     },
     "Seraphine": {
+      "P": {
+        "name": "Presença de Palco",
+        "description": "Cada terceira habilidade básica será conjurada duas vezes por Seraphine. Conjurar habilidades próximas a aliados também concede dano e alcance adicionais a ela no próximo ataque básico.",
+        "icon": "Seraphine_Passive.png"
+      },
       "Q": {
         "name": "Nota Aguda",
         "description": "Seraphine causa dano em uma área.",
@@ -2139,6 +2504,11 @@
       }
     },
     "Shen": {
+      "P": {
+        "name": "Barreira de Ki",
+        "description": "Após conjurar uma habilidade, Shen recebe um escudo. Afetar outros Campeões reduz o Tempo de Recarga desse efeito.",
+        "icon": "Shen_Passive.png"
+      },
       "Q": {
         "name": "Ataque Crepúsculo",
         "description": "Shen chama sua espada espiritual para atacar com ela, causando dano com base na Vida máxima do alvo. Os ataques são fortalecidos drasticamente caso ela colida com um Campeão inimigo. Todos os Campeões com quem ela colide têm a velocidade reduzida enquanto fogem de Shen.",
@@ -2161,6 +2531,11 @@
       }
     },
     "Sion": {
+      "P": {
+        "name": "In Gloria Mori",
+        "description": "Após ser abatido, Sion será reanimado temporariamente, mas sua Vida decairá rapidamente. Seus ataques ficarão muito rápidos, curando e causando dano adicional com base na Vida máxima do alvo.",
+        "icon": "Sion_Passive1.png"
+      },
       "Q": {
         "name": "Golpe Demolidor",
         "description": "Sion carrega um poderoso golpe em uma área à sua frente que causará dano a inimigos quando lançado. Caso carregue por tempo suficiente, também arremessará ao ar e atordoará os inimigos atingidos.",
@@ -2183,6 +2558,11 @@
       }
     },
     "Sivir": {
+      "P": {
+        "name": "Pés Ligeiros",
+        "description": "Sivir ganha um pequeno impulso de Velocidade de Movimento quando ela ataca um campeão inimigo.",
+        "icon": "Sivir_Passive.png"
+      },
       "Q": {
         "name": "Lâmina Bumerangue",
         "description": "Sivir arremessa sua lâmina como um bumerangue, causando dano tanto na ida quanto na volta.",
@@ -2205,6 +2585,11 @@
       }
     },
     "Skarner": {
+      "P": {
+        "name": "Linhas de Vibração",
+        "description": "Os Ataques do Skarner, Terra Arrasada, Sublevação e Empalar, aplicam Tremor. Com o máximo de acúmulos de Tremor, os inimigos sofrem Dano Mágico com base na Vida máxima ao longo da duração.",
+        "icon": "Skarner_Passive.png"
+      },
       "Q": {
         "name": "Terra Arrasada/Sublevação",
         "description": "Skarner arranca um pedregulho do chão que fortalece seus Ataques e pode ser arremessado como um projétil poderoso.",
@@ -2227,6 +2612,11 @@
       }
     },
     "Swain": {
+      "P": {
+        "name": "Bando Voraz",
+        "description": "Os corvos de Swain coletam <i>Fragmentos de Alma</i> que o curam e aumentam permanentemente a Vida máxima dele.",
+        "icon": "Swain_P.png"
+      },
       "Q": {
         "name": "Mão da Morte",
         "description": "Swain dispara vários raios de poder sombrio que perfuram os inimigos. Inimigos atingidos sofrem mais dano para cada raio que os atingir.",
@@ -2249,6 +2639,11 @@
       }
     },
     "Sylas": {
+      "P": {
+        "name": "Explosão de Petricita",
+        "description": "Após conjurar uma habilidade, Sylas armazena uma carga de Explosão de Petricita. Seus ataques básicos gastam uma carga e agitam as correntes energizadas ao redor dele, causando Dano Mágico adicional a inimigos atingidos. Enquanto Sylas tiver pelo menos uma carga de Explosão de Petricita, ele recebe Velocidade de Ataque. ",
+        "icon": "SylasP.png"
+      },
       "Q": {
         "name": "Correntes-Chicote",
         "description": "Sylas chicoteia com suas correntes, que se intersectam no local-alvo, causando dano e reduzindo a velocidade dos inimigos. \n\nApós um intervalo, há uma explosão de energia mágica no ponto da intersecção, causando dano.",
@@ -2271,6 +2666,11 @@
       }
     },
     "Syndra": {
+      "P": {
+        "name": "Transcender",
+        "description": "Syndra coleta Farpas de Ira ao subir de nível ou causar dano a inimigos, aprimorando as próprias habilidades.<br><br><font color='#FF9900'>Esfera Negra</font>: Syndra pode segurar uma carga adicional.<br><font color='#FF9900'>Força de Vontade</font>: Dano Verdadeiro adicional.<br><font color='#FF9900'>Dispersar os Fracos</font>: largura aumentada e causa Lentidão a todos os alvos.<br><font color='#FF9900'>Poder Irrestrito</font>: executa alvos com a Vida baixa.",
+        "icon": "SyndraPassive.png"
+      },
       "Q": {
         "name": "Esfera Negra",
         "description": "Syndra conjura uma Esfera Negra, causando Dano Mágico. A esfera permanece em seu lugar e pode ser manipulada por seus outros poderes.",
@@ -2293,6 +2693,11 @@
       }
     },
     "Tahm Kench": {
+      "P": {
+        "name": "Um Gosto Adquirido",
+        "description": "Tahm Kench usa o próprio corpo para impulsionar os Ataques, causando dano adicional com base na Vida total dele. Causar dano a Campeões inimigos aumenta os acúmulos de <spellName>Um Gosto Adquirido</spellName>. Com três acúmulos, ele pode usar <spellName>Devorar</spellName> em um Campeão inimigo.",
+        "icon": "TahmKenchP.png"
+      },
       "Q": {
         "name": "Língua-chicote",
         "description": "Tahm Kench ataca com a língua, causando dano e Lentidão à primeira unidade atingida, além de se curar se a unidade for um Campeão inimigo.\n\nAplica um acúmulo de Um Gosto Adquirido a Campeões inimigos. Se o Campeão já tiver 3 acúmulos de Um Gosto Adquirido, ele será Atordoado e os acúmulos serão consumidos.",
@@ -2315,6 +2720,11 @@
       }
     },
     "Taliyah": {
+      "P": {
+        "name": "Deslizar em Pedras",
+        "description": "Taliyah recebe Velocidade de Movimento próxima a paredes.",
+        "icon": "Taliyah_Passive.png"
+      },
       "Q": {
         "name": "Voleio Entrelaçado",
         "description": "Taliyah arremessa uma rajada de pedras na direção-alvo, movimentando-se livremente durante a conjuração. Isso cria um Terreno Manipulado sob ela. Se Taliyah conjurar Voleio Entrelaçado em Terreno Manipulado, ela consome o terreno para arremessar um pedregulho fortalecido que causa Lentidão a inimigos.",
@@ -2337,6 +2747,11 @@
       }
     },
     "Thresh": {
+      "P": {
+        "name": "Condenação",
+        "description": "Thresh pode colher a alma de inimigos que morrerem perto dele, recebendo Armadura e Poder de Habilidade permanentemente.",
+        "icon": "Thresh_Passive.png"
+      },
       "Q": {
         "name": "Sentença",
         "description": "Thresh prende um inimigo em suas correntes e puxa em sua direção. Ativar essa habilidade uma segunda vez puxa Thresh em direção ao inimigo.",
@@ -2359,6 +2774,11 @@
       }
     },
     "Tristana": {
+      "P": {
+        "name": "Tiro Certeiro",
+        "description": "Aumenta o Alcance de Ataque de Tristana conforme ela sobe de nível.",
+        "icon": "Tristana_Passive.png"
+      },
       "Q": {
         "name": "Tiro Rápido",
         "description": "Tristana dispara rapidamente com seu canhão, aumentando sua Velocidade de Ataque por um curto período de tempo.",
@@ -2381,6 +2801,11 @@
       }
     },
     "Trundle": {
+      "P": {
+        "name": "Tributo do Rei",
+        "description": "Quando uma unidade inimiga morre perto de Trundle, ele é curado em um percentual da Vida máxima desta unidade.",
+        "icon": "Trundle_Passive.png"
+      },
       "Q": {
         "name": "Mordida",
         "description": "Trundle morde seu oponente, causando dano, brevemente reduzindo sua Velocidade de Movimento e drenando parte de seu Dano de Ataque.",
@@ -2403,6 +2828,11 @@
       }
     },
     "Twisted Fate": {
+      "P": {
+        "name": "Dados Viciados",
+        "description": "Ao abater uma unidade, Twisted Fate rola seu dado da ''sorte'' e recebe de 1 a 6 de ouro adicional.",
+        "icon": "Cardmaster_SealFate.png"
+      },
       "Q": {
         "name": "Curingas",
         "description": "Twisted Fate arremessa três cartas, causando dano a cada inimigo que elas atravessam.",
@@ -2425,6 +2855,11 @@
       }
     },
     "Twitch": {
+      "P": {
+        "name": "Veneno Mortal",
+        "description": "Os ataques básicos de Twitch infectam o alvo %i:OnHit% <OnHit>ao contato</OnHit>, causando Dano Verdadeiro a cada segundo.",
+        "icon": "Twitch_Passive.png"
+      },
       "Q": {
         "name": "Emboscada",
         "description": "Twitch fica Camuflado por um curto período e recebe Velocidade de Movimento. Ao sair da Camuflagem, Twitch recebe Velocidade de Ataque por um curto período.\n\nQuando um Campeão inimigo com Veneno Mortal é abatido, o Tempo de Recarga de Emboscada é reiniciado.",
@@ -2447,6 +2882,11 @@
       }
     },
     "Varus": {
+      "P": {
+        "name": "Vingança Viva",
+        "description": "Ao conseguir um abate ou assistência, Varus recebe Dano de Ataque e Poder de Habilidade temporariamente. O efeito é maior se o inimigo for um Campeão.",
+        "icon": "VarusPassive.png"
+      },
       "Q": {
         "name": "Flecha Perfurante",
         "description": "Varus prepara um poderoso disparo, que ganha alcance e dano extra quanto mais demorar para ser lançado.",
@@ -2469,6 +2909,11 @@
       }
     },
     "Vayne": {
+      "P": {
+        "name": "Caçadora Noturna",
+        "description": "Vayne caça implacavelmente os malfeitores, ganhando Velocidade de Movimento ao se deslocar em direção a Campeões inimigos próximos.",
+        "icon": "Vayne_NightHunter.png"
+      },
       "Q": {
         "name": "Rolamento",
         "description": "Vayne dá uma cambalhota, equilibrando-se para efetuar seu próximo disparo. Seu próximo ataque causará dano adicional.",
@@ -2491,6 +2936,11 @@
       }
     },
     "Vel'Koz": {
+      "P": {
+        "name": "Desconstrução Orgânica",
+        "description": "As habilidades de Vel'Koz aplicam <keywordName>Desconstrução Orgânica</keywordName> nos inimigos ao contato. Ao chegar a 3 acúmulos, o inimigo receberá uma rajada de Dano Verdadeiro.",
+        "icon": "VelKoz_Passive.png"
+      },
       "Q": {
         "name": "Fissão Plasmática",
         "description": "Vel'Koz dispara um projétil de plasma que se divide em dois ao ser reativado ou ao atingir um inimigo. O projétil causa dano e redução de velocidade a inimigos ao contato.",
@@ -2513,6 +2963,11 @@
       }
     },
     "Vi": {
+      "P": {
+        "name": "Blindagem",
+        "description": "Vi carrega um escudo ao longo do tempo que pode ser ativado ao atingir um inimigo com uma habilidade.",
+        "icon": "ViPassive.png"
+      },
       "Q": {
         "name": "Quebra-Cofres",
         "description": "Vi carrega suas manoplas e desfere um soco capaz de quebrar cofres, empurrando-a para frente. Os inimigos que ela atingir são empurrados para trás e recebem um acúmulo de Pancada Certeira.",
@@ -2535,6 +2990,11 @@
       }
     },
     "Viktor": {
+      "P": {
+        "name": "Gloriosa Evolução",
+        "description": "Viktor receberá Fragmentos Hex sempre que abater um inimigo. Com 100 Fragmentos Hex obtidos, ele receberá permanentemente o Aprimoramento de uma habilidade ativa. Depois de aprimorar todas as habilidades básicas, ele pode obter 100 Fragmentos Hex para aprimorar a ultimate.",
+        "icon": "Viktor_Passive.png"
+      },
       "Q": {
         "name": "Poder do Sifão",
         "description": "Viktor explode uma unidade inimiga com Dano Mágico, recebendo um Escudo e fortalecendo seu próximo ataque básico.\n\nAprimoramento: o Escudo de Poder do Sifão aumenta em 60% e Viktor recebe Velocidade de Movimento adicional depois de conjurar a habilidade.\n",
@@ -2557,6 +3017,11 @@
       }
     },
     "Volibear": {
+      "P": {
+        "name": "A Tempestade Implacável",
+        "description": "Os Ataques e habilidades de Volibear concedem Velocidade de Ataque e, às vezes, fazem com que seus Ataques causem Dano Mágico adicional a inimigos próximos.",
+        "icon": "Volibear_Icon_P.png"
+      },
       "Q": {
         "name": "Esmagamento Trovejante",
         "description": "Volibear ganha velocidade ao correr na direção dos inimigos, Atordoando e causando dano ao primeiro que Atacar.",
@@ -2579,6 +3044,11 @@
       }
     },
     "Wukong": {
+      "P": {
+        "name": "Pele de Pedra",
+        "description": "Wukong recebe Armadura e Regeneração de Vida máxima cumulativas quando luta contra Campeões e monstros.",
+        "icon": "MonkeyKingStoneSkin.png"
+      },
       "Q": {
         "name": "Golpe Destruidor",
         "description": "O próximo ataque de Wukong recebe Alcance de Ataque, causa dano adicional e reduz a Armadura do alvo por alguns segundos.",
@@ -2601,6 +3071,11 @@
       }
     },
     "Xayah": {
+      "P": {
+        "name": "Cortes Certeiros",
+        "description": "Depois de usar uma habilidade, os próximos ataques básicos de Xayah acertam todos os alvos pelo caminho e deixam uma <font color='#C200E1'>Pluma</font>.",
+        "icon": "XayahPassive.png"
+      },
       "Q": {
         "name": "Punhais Duplos",
         "description": "Xayah arremessa dois punhais que causam dano e deixam cair Plumas que podem retornar para ela.",
@@ -2623,6 +3098,11 @@
       }
     },
     "Xin Zhao": {
+      "P": {
+        "name": "Determinação",
+        "description": "Cada terceiro ataque básico causa dano adicional e cura Xin Zhao.",
+        "icon": "XinZhaoReworkP.png"
+      },
       "Q": {
         "name": "Golpe de Três Garras",
         "description": "O próximos 3 ataques normais de Xin Zhao causam mais dano. O último arremessa o oponente ao ar.",
@@ -2645,6 +3125,11 @@
       }
     },
     "Yone": {
+      "P": {
+        "name": "Estilo do Caçador",
+        "description": "Yone causa Dano Mágico a cada segundo Ataque. Além disso, sua Chance de Acerto Crítico é aumentada.",
+        "icon": "YonePassive.png"
+      },
       "Q": {
         "name": "Aço Mortal",
         "description": "Golpeia à frente, causando dano a todos os inimigos em linha reta.\n\nAo contato, ganha um acúmulo de Tempestade Crescente por alguns segundos. Com dois acúmulos, Aço Mortal faz Yone avançar com o vento, Arremessando ao ar os inimigos.",
@@ -2667,6 +3152,11 @@
       }
     },
     "Yorick": {
+      "P": {
+        "name": "Pastor de Almas",
+        "description": "<font color='#FF9900'>A Horda Maldita:</font> Yorick pode invocar Andarilhos da Névoa e atacar inimigos próximos.",
+        "icon": "Yorick_P.png"
+      },
       "Q": {
         "name": "Extrema-Unção",
         "description": "Yorick causa dano adicional em seu próximo Ataque e se cura. Se o alvo for um Campeão/monstro grande ou se ele for abatido, uma cova será aberta.",
@@ -2689,6 +3179,11 @@
       }
     },
     "Yunara": {
+      "P": {
+        "name": "Voto às Primeiras Terras",
+        "description": "Os Acertos Críticos de Yunara causam Dano Mágico adicional.",
+        "icon": "Yunara_Passive.png"
+      },
       "Q": {
         "name": "Cultivação do Espírito",
         "description": "Yunara recebe Velocidade de Ataque, dano adicional ao contato, e os ataques dela atingem inimigos próximos.",
@@ -2711,6 +3206,11 @@
       }
     },
     "Yuumi": {
+      "P": {
+        "name": "Amizade Felina",
+        "description": "Periodicamente, quando Yuumi atinge um Campeão com um Ataque ou Habilidade, ela restaura Vida para si e para o próximo aliado a quem ela se Conectar.<br><br>Enquanto Conectada, Yuumi cria um laço especial com os aliados. O aliado com o laço mais forte aprimora as Habilidades de Yuumi enquanto ela estiver Conectada a ele.",
+        "icon": "YuumiP2.png"
+      },
       "Q": {
         "name": "Projétil Errante",
         "description": "Yuumi dispara um projétil, causando dano e Lentidão ao primeiro alvo que atingir. O projétil causa dano adicional e a Lentidão é fortalecida se demorar pelo menos 1,35s para chegar até o alvo. Enquanto Yuumi estiver com o Melhor Amigo, a Lentidão sempre será fortalecida e a Campeã concederá dano adicional ao contato para o aliado.\n\nEnquanto ela estiver Conectada, o projétil poderá ser controlado pelo cursor do mouse por um breve período.",
@@ -2733,6 +3233,11 @@
       }
     },
     "Zaahen": {
+      "P": {
+        "name": "Cultivação da Guerra",
+        "description": "Os ataques e as habilidades de Zaahen contra Campeões inimigos concedem a ele acúmulos de Determinação, que proporcionam Dano de Ataque adicional por acúmulo. Enquanto está com Determinação, Zaahen ganha mais Dano de Ataque e é capaz de ressuscitar.",
+        "icon": "ZaahenP.png"
+      },
       "Q": {
         "name": "A Glaive Darkin",
         "description": "Zaahen desfere dois cortes no próximo ataque, causando dano adicional e curando-se. Zaahen pode reconjurar a próxima habilidade para fazer o próximo ataque causar dano adicional e arremessar o alvo ao ar.\n",
@@ -2755,6 +3260,11 @@
       }
     },
     "Zeri": {
+      "P": {
+        "name": "Bateria Viva",
+        "description": "Os Ataques de Zeri causam Dano Mágico e são considerados Habilidades. Mover-se e conjurar Rajada Reluzente armazena energia na Eletrobolsa. Quando estiver totalmente carregada, o próximo Ataque da Campeã causará dano adicional.",
+        "icon": "ZeriP.png"
+      },
       "Q": {
         "name": "Rajada Reluzente",
         "description": "Rajada Reluzente dispara 7 projéteis que causam Dano de Ataque ao primeiro inimigo atingido. Esta Habilidade é considerada um Ataque.",
@@ -2777,6 +3287,11 @@
       }
     },
     "Ziggs": {
+      "P": {
+        "name": "Pavio Curto",
+        "description": "Periodicamente, o próximo ataque básico de Ziggs causa Dano Mágico adicional. Esse Tempo de Recarga é reduzido sempre que Ziggs usa uma habilidade.",
+        "icon": "ZiggsPassiveReady.png"
+      },
       "Q": {
         "name": "Bomba Saltitante",
         "description": "Ziggs arremessa uma bomba que causa Dano Mágico.",
