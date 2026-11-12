@@ -363,7 +363,7 @@ export function buildsTable(champions: Champion[], lane: keyof Champion["lanes"]
       <td class="build-col-runes">${keystone && secondaryTree ? buildRunePreview(keystone, secondaryTree, games) : missingBuildOption}</td>
       <td class="build-col-spells">${spells ? buildPreview(spellOption(spells)) : missingBuildOption}</td>
     </tr>
-    <tr class="detail build-inline-detail" id="build-detail-${slug}" hidden><td colspan="8"></td></tr>`;
+    <tr class="detail build-inline-detail" id="build-detail-${slug}" hidden><td colspan="8"><div></div></td></tr>`;
   }).join("");
   return `<div class="wl-panel tablewrap builds-table-wrap" role="region" aria-label="Comparação de builds">
     <table class="builds-table" aria-label="Builds por campeão">

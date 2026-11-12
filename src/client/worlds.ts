@@ -1,6 +1,7 @@
 // @ts-nocheck -- A tela legada ainda usa estado e eventos DOM sem tipos explícitos.
 import { createElement } from "react"
 import { createRoot } from "react-dom/client"
+import { animate } from "motion"
 import { TournamentOverview } from "@/components/analytics"
 import { iconMarkup, laneIconMarkup } from "./icon"
 import DATA from "../data/worlds.json"
@@ -389,9 +390,11 @@ function readBuildMinGames(value) {
   return Number.isSafeInteger(count) && count > 0 ? count : 0;
 }
 const compactBuilds = matchMedia("(max-width: 767px)");
+const reduceBuildMotion = matchMedia("(prefers-reduced-motion: reduce)");
 function syncBuildDetailSpan() {
-  const cell = document.querySelector(".build-inline-detail:not([hidden]) > td");
-  if (cell) cell.colSpan = compactBuilds.matches ? 4 : 8;
+  document.querySelectorAll<HTMLTableCellElement>(".build-inline-detail:not([hidden]) > td").forEach(cell => {
+    cell.colSpan = compactBuilds.matches ? 4 : 8;
+  });
 }
 compactBuilds.addEventListener("change", syncBuildDetailSpan);
 const buildLaneIcon = lane => lane ? laneIconMarkup(lane) : iconMarkup("layers");
@@ -417,6 +420,8 @@ function wireBuilds(){
   const list = C.filter(champion => champion.picks > 0);
   const games = champion => buildGameCount(champion, bLane);
   const bySlug = new Map(list.map(champion => [championSlug(champion.name), champion]));
+  const detailAnimations = new WeakMap<HTMLElement, ReturnType<typeof animate>>();
+  let contextAnimation: ReturnType<typeof animate> | undefined;
   let highlights = "";
   const sortBuildRows = () => {
     const body = bc.querySelector(".builds-table tbody");
@@ -456,6 +461,8 @@ function wireBuilds(){
     </article>`;
   };
   const draw=()=>{const f=q.value.trim().toLowerCase();
+    contextAnimation?.stop();
+    contextAnimation = undefined;
     clearAll.setAttribute("aria-disabled", String(!hasFilters()));
     const matches=list.filter(c=>buildChampion ? championSlug(c.name)===buildChampion :
       games(c) > 0 && games(c) >= buildMinGames &&
@@ -470,33 +477,101 @@ function wireBuilds(){
     const back=buildChampion ? '<div class="build-back"><button data-slot="button" data-variant="outline" data-size="sm" class="build-route" data-build="">Voltar à lista de builds</button></div>' : '';
     bc.classList.toggle("build-detail", !!buildChampion);
     bc.innerHTML=back+(content
-      ? `<div class="builds-workspace">${content}<aside class="wl-panel build-context build-context-side" aria-label="Contexto da build" aria-live="polite">${context}</aside></div>`
+      ? `<div class="builds-workspace">${content}<aside class="wl-panel build-context build-context-side" aria-label="Contexto da build" aria-live="polite"><div class="build-context-transition"><div class="build-context-content">${context}</div></div></aside></div>`
       : '<div class="empty-state" role="status"><h3>Nenhum campeão encontrado</h3><p>Ajuste a busca, a posição ou o mínimo de jogos.</p></div>');
     sortBuildRows();
     enhanceAnalyticsUI();
     void hydrateBuildTimelines(bc).then(enhanceAnalyticsUI);
   };
-  const setExpanded = (button, expanded) => {
+  const setExpanded = (button: HTMLButtonElement, expanded: boolean) => {
+    const detail = document.getElementById(button.getAttribute("aria-controls")) as HTMLTableRowElement;
+    const cell = detail.cells[0];
+    const panel = cell.firstElementChild as HTMLElement;
+    const startHeight = detail.hidden ? 0 : panel.getBoundingClientRect().height;
+    detailAnimations.get(panel)?.stop();
+    detailAnimations.delete(panel);
+
+    if (!expanded && detail.contains(document.activeElement)) button.focus({ preventScroll: true });
     button.setAttribute("aria-expanded", String(expanded));
-    const detail = document.getElementById(button.getAttribute("aria-controls"));
-    detail.hidden = !expanded;
-    return detail.cells[0];
+    detail.inert = !expanded;
+    detail.hidden = false;
+    cell.colSpan = compactBuilds.matches ? 4 : 8;
+    panel.style.height = "";
+    const endHeight = expanded ? panel.getBoundingClientRect().height : 0;
+    const settle = () => {
+      detail.hidden = !expanded;
+      panel.style.height = "";
+      panel.style.overflow = "";
+      detailAnimations.delete(panel);
+    };
+    if (reduceBuildMotion.matches || startHeight === endHeight) {
+      settle();
+      return;
+    }
+    panel.style.overflow = "clip";
+    panel.style.height = `${startHeight}px`;
+    const animation = animate(panel, { height: [`${startHeight}px`, `${endHeight}px`] }, {
+      duration: 0.24,
+      ease: [0.2, 0.7, 0.25, 1],
+      onComplete: settle,
+    });
+    detailAnimations.set(panel, animation);
+  };
+  const updateBuildContext = (html: string, trigger: HTMLButtonElement) => {
+    const viewport = bc.querySelector<HTMLElement>(".build-context-transition");
+    const outgoing = viewport.lastElementChild as HTMLElement;
+    const startHeight = viewport.getBoundingClientRect().height;
+    const startOpacity = getComputedStyle(outgoing).opacity;
+    contextAnimation?.stop();
+    contextAnimation = undefined;
+    viewport.querySelector(".build-context-outgoing")?.remove();
+    viewport.style.height = "";
+    viewport.style.overflow = "";
+
+    if (outgoing.contains(document.activeElement)) trigger.focus({ preventScroll: true });
+    if (!startHeight || reduceBuildMotion.matches) {
+      outgoing.innerHTML = html;
+      outgoing.style.opacity = "";
+      return;
+    }
+
+    const incoming = document.createElement("div");
+    incoming.className = "build-context-content";
+    incoming.innerHTML = html;
+    outgoing.inert = true;
+    outgoing.setAttribute("aria-hidden", "true");
+    outgoing.classList.add("build-context-outgoing");
+    viewport.append(incoming);
+    const endHeight = viewport.getBoundingClientRect().height;
+    viewport.style.overflow = "clip";
+    const animation = animate([
+      [viewport, { height: [`${startHeight}px`, `${endHeight}px`] }],
+      [outgoing, { opacity: [Number(startOpacity), 0] }, { at: 0 }],
+      [incoming, { opacity: [0, 1] }, { at: 0 }],
+    ], { defaultTransition: { duration: 0.24, ease: [0.2, 0.7, 0.25, 1] } });
+    contextAnimation = animation;
+    void animation.then(() => {
+      if (contextAnimation !== animation) return;
+      outgoing.remove();
+      incoming.style.opacity = "";
+      viewport.style.height = "";
+      viewport.style.overflow = "";
+      contextAnimation = undefined;
+    });
   };
   const toggleBuild = toggle => {
     const previous=bc.querySelector('.build-toggle[aria-expanded="true"]');
     if(previous)setExpanded(previous,false);
-    const side = bc.querySelector(".build-context-side");
     if(previous===toggle){
-      side.innerHTML=highlights;
+      updateBuildContext(highlights, toggle);
       return;
     }
     const champion=bySlug.get(toggle.dataset.buildToggle);
     const context=buildMatchups(champion,bLane);
-    const cell=setExpanded(toggle,true);
-    syncBuildDetailSpan();
-    if (!cell.firstElementChild) cell.innerHTML = championCard(champion, bLane, toggle.dataset.buildToggle);
-    revealContent(cell.firstElementChild, true);
-    side.innerHTML=context;
+    const panel = document.getElementById(toggle.getAttribute("aria-controls")).cells[0].firstElementChild;
+    if (!panel.firstElementChild) panel.innerHTML = championCard(champion, bLane, toggle.dataset.buildToggle);
+    setExpanded(toggle,true);
+    updateBuildContext(context, toggle);
     enhanceAnalyticsUI();
   };
   bc.onclick=e=>{

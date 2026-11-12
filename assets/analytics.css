@@ -318,6 +318,9 @@
 .build-context-rank:hover { border-color: var(--wl-line); }
 .build-context-link { margin-top: 10px; min-height: 44px; }
 .build-context-inline { margin-top: var(--wl-space-4); padding: var(--wl-space-4) 0 0; border-top: 1px solid var(--build-divider); }
+.build-context-transition { position: relative; }
+.build-context-content { display: flow-root; }
+.build-context-outgoing { position: absolute; inset: 0 0 auto; }
 .builds-page:not(:has(.build-detail)) .build-context-side { display: none; }
 @media (min-width: 1240px) {
   .builds-workspace { grid-template-columns: minmax(0, 1fr) 284px; }
