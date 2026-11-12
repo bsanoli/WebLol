@@ -8,6 +8,15 @@ export interface UiVersion {
 
 export const UI_VERSIONS: UiVersion[] = [
   {
+    version: "1.14",
+    date: "2026-11-12",
+    changes: [
+      "Ordem do draft (tela larga): layout no estilo drafter.lol, com os picks em faixas largas nas laterais (azul à esquerda, vermelho à direita) e os bans acima dos picks.",
+      "Ordem do draft: o catálogo de campeões fica no centro, entre os dois lados, com os nomes Lado azul e Lado vermelho no topo.",
+      "Ordem do draft: as comps do time aparecem como abas no centro, mostrando o primeiro campeão de cada lane, com botão + para criar uma nova.",
+    ],
+  },
+  {
     version: "1.13",
     date: "2026-11-12",
     changes: [

@@ -1,0 +1,80 @@
+/* Ordem do draft no estilo drafter.lol (tela larga):
+   picks em faixas nas laterais, bans acima dos picks e, no centro,
+   os nomes dos lados, as comps do time e o catálogo de campeões. */
+.dz-center, .dz-names, .dz-tabs { display: none; }
+@media (min-width: 1100px) {
+  #v-comps.draft-view #comps { grid-template-columns: minmax(0, 1fr); }
+  #v-comps.draft-view #comps .comp-library { display: none; }
+  #v-comps.draft-view .comp-editor { grid-column: 1 / -1; grid-row: auto; }
+  #v-comps.draft-view .draft-toolbar-top, #v-comps.draft-view .dseq-row { display: flex; justify-content: center; margin: 0; }
+
+  #v-comps.draft-view .dz {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(420px, 1.15fr) minmax(0, 1fr);
+    grid-template-rows: none;
+    gap: 14px;
+    align-items: stretch;
+    height: max(600px, calc(100dvh - 230px));
+  }
+  #v-comps.draft-view .tm { display: flex; flex-direction: column; gap: 6px; grid-row: auto; min-width: 0; margin: 0; order: 0; }
+  #v-comps.draft-view .tm > .draft-phase { display: none; }
+  #v-comps.draft-view .tm > .draft-phase + .pk + .pk + .pk { margin-bottom: 4px; }
+  #v-comps.draft-view .draft-bans { display: flex; align-items: center; gap: 6px; min-height: 52px; }
+  #v-comps.draft-view .tm.r .draft-bans { flex-direction: row-reverse; }
+  #v-comps.draft-view .draft-bans .bsq { width: 44px; height: 44px; flex: none; }
+  #v-comps.draft-view .draft-bans .bans { gap: 5px; }
+
+  /* Faixas dos picks */
+  #v-comps.draft-view .tm > .pk {
+    flex: 1 1 0; min-height: 92px; position: relative; overflow: hidden;
+    display: flex; flex-direction: column; justify-content: space-between; align-items: flex-start;
+    gap: 6px; padding: 8px 10px; border-radius: var(--wl-card-radius);
+  }
+  #v-comps.draft-view .tm.r > .pk { align-items: flex-end; text-align: right; border-left-width: 1px; border-right: 5px solid var(--wl-side-red); }
+  #v-comps.draft-view .tm > .pk.mine .pick-splash { inset: 0; width: 100%; opacity: 1; object-position: center 22%; }
+  #v-comps.draft-view .tm > .pk.mine:has(.pick-splash)::before {
+    background: linear-gradient(to top, color-mix(in srgb, var(--bg) 88%, transparent) 0%, transparent 45%),
+                linear-gradient(to bottom, color-mix(in srgb, var(--bg) 70%, transparent) 0%, transparent 38%);
+  }
+  #v-comps.draft-view .tm > .pk.mine .pkf { order: -1; flex: none; flex-direction: row; align-items: center; max-width: 100%; width: auto; flex-wrap: wrap; gap: 4px; }
+  #v-comps.draft-view .tm.r > .pk.mine .pkf { justify-content: flex-end; }
+  #v-comps.draft-view .tm > .pk.mine .pk-target { flex: none; width: 100%; min-height: 0; gap: 8px; }
+  #v-comps.draft-view .tm.r > .pk.mine .pk-target { flex-direction: row-reverse; text-align: right; }
+  #v-comps.draft-view .tm > .pk.mine:has(.pick-splash) .pk-target > .av { display: none; }
+  #v-comps.draft-view .tm > .pk.mine .pkn:not(.pk-empty) { font-size: 20px; text-shadow: 0 1px 4px #000; }
+  #v-comps.draft-view .tm > .pk.them { justify-content: space-between; }
+  #v-comps.draft-view .tm > .pk { min-height: 0; }
+
+  /* Centro */
+  #v-comps.draft-view .dz-center { overflow: auto; display: flex; flex-direction: column; gap: 10px; min-width: 0; }
+  #v-comps.draft-view .dz-names { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; }
+  #v-comps.draft-view .dz-names .tmh { display: flex; flex-direction: column; gap: 2px; padding: 0; margin: 0; background: none; font-size: 22px; line-height: 1.1; }
+  #v-comps.draft-view .dz-names .tmh:first-child { color: #6ea2ff; align-items: flex-start; }
+  #v-comps.draft-view .dz-names .tmh:last-child { color: #ff6b7d; align-items: flex-end; text-align: right; }
+  #v-comps.draft-view .dz-names .tmh span { font-size: 12px; font-weight: 500; color: var(--mut); opacity: 1; }
+  #v-comps.draft-view .dz-tabs { display: flex; flex-wrap: wrap; gap: 6px; padding: 6px; border: 1px solid var(--line); border-radius: var(--wl-card-radius); background: var(--panel2, var(--bg)); }
+  .dz-tab { display: flex; flex-direction: column; align-items: flex-start; gap: 4px; min-width: 0; max-width: 190px; padding: 6px 9px; border: 1px solid transparent; border-radius: var(--wl-control-radius); background: transparent; color: var(--txt); text-align: left; cursor: pointer; }
+  .dz-tab:hover { background: var(--wl-accent-soft); }
+  .dz-tab.on { border-color: var(--wl-accent); background: var(--wl-accent-soft); }
+  .dz-tab b { font-size: 12px; max-width: 100%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  #v-comps .dz-tab .mini { display: flex; flex-wrap: nowrap; gap: 3px; margin: 0; }
+  #v-comps .dz-tab .mini .av { width: 26px; height: 26px; flex: none; border-radius: 4px; }
+  .dz-tab .mini small { color: var(--mut); font-size: 11px; }
+  .dz-tab.dz-new { align-self: stretch; justify-content: center; align-items: center; min-width: 40px; border: 1px dashed var(--line); }
+  #v-comps.draft-view .dz-slot { flex: 1 1 auto; display: flex; min-height: 0; }
+  #v-comps.draft-view .dz-slot .champ-picker { flex: 1; display: flex; flex-direction: column; min-width: 0; min-height: 0; margin: 0; position: static; }
+  #v-comps.draft-view .dz-slot .picker-heading { display: none; }
+  #v-comps.draft-view .dz-slot #target { margin-top: 0; }
+  #v-comps.draft-view .dz-slot #target small, #v-comps.draft-view .dz-slot #target label, #v-comps.draft-view .dz-slot .filter-heading { display: none; }
+  #v-comps.draft-view .dz-slot #target { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 6px 10px; }
+  #v-comps.draft-view .dz-slot .gtools { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; padding-block: 4px; }
+  #v-comps.draft-view .dz-slot .gtools label { margin: 0; font-size: 12px; }
+  #v-comps.draft-view .dz-slot .roles { padding-block: 2px; gap: 2px; }
+  #v-comps.draft-view .dz-slot .worlds-filter { padding-block: 2px; }
+  #v-comps.draft-view .tm > .pk.them .pkh { width: 100%; justify-content: flex-start; }
+  #v-comps.draft-view .tm.r > .pk.them .pkh { justify-content: flex-end; }
+  #v-comps.draft-view .dz-slot .champ-picker > * { flex: none; }
+  #v-comps.draft-view .dz-slot .champ-picker > #grid { flex: 1 1 0; }
+  #v-comps.draft-view .dz-slot #grid { flex: 1 1 0; max-height: none; min-height: 220px; overflow: auto; }
+  #v-comps.draft-view > .comp-workspace ~ * .draft-help, #v-comps.draft-view .draft-help { text-align: center; }
+}

@@ -164,6 +164,8 @@ function renderEditor(){
     button.setAttribute("aria-pressed", String(selected));
     button.classList.toggle("on", selected);
   }
+  const catalog=$("#champ-picker"),gridScroll=$("#grid").scrollTop;
+  if (editor.contains(catalog)) $("#comps").append(catalog);
   const content = document.createRange();
   content.setStartAfter(editor.firstElementChild);
   content.setEnd(editor, editor.childNodes.length);
@@ -177,6 +179,8 @@ function renderEditor(){
 ${laneNoteHTML(c,l)}</div>`).join("")}
   <p class="help">Clique no retrato para priorizar. Arraste para reordenar ou use o menu ⋯ de cada campeão.</p>`);
   renderDraftLaneNotes(c);
+  placePicker();
+  $("#grid").scrollTop=gridScroll;
   renderTarget();
   editor.dataset.motionComposition = c.id;
   if (previousComposition !== c.id) revealContent(editor);
@@ -258,9 +262,10 @@ function draftHTML(c){
   const mini=(n,l,j)=>optionHTML(n,l,j);
   const PHN=["Bans 1","Picks 1","Bans 2","Picks 2"];
   // faixa da sequência
-  let h=`<div class="draft-toolbar"><div class="dside" role="group" aria-label="Lado da equipe"><span>Nossa equipe</span>
+  let h=`<div class="draft-toolbar draft-toolbar-top"><div class="dside" role="group" aria-label="Lado da equipe"><span>Nossa equipe</span>
     ${Object.entries(DRAFT_SIDE).map(([key,label])=>`<button data-slot="button" data-variant="outline" data-size="sm" data-side="${key}" aria-pressed="${d.side===key}" class="${d.side===key?`on ${key[0]}`:""}">${label}</button>`).join("")}</div></div>
   <div class="dseq-row"><div class="dseq" role="group" aria-label="Sequência de picks e bans">${PHN.map((p,pi)=>`<div class="dsg"><div class="dsl">${p}</div><div class="dsc">${seq.filter(s=>s.ph===pi).map(s=>`<span class="sq ${s.t==="B"?"b":"r"} ${s.k}${s.t===us?" us":""}" title="${s.n}º ${s.k==="ban"?"ban":"pick"}: ${s.t==="B"?"Azul":"Vermelho"} ${s.k==="ban"?"bane":"escolhe"}">${s.k==="ban"?"":s.n}</span>`).join("")}</div></div>`).join("")}</div></div>`;
+  const head=h;h="";
   const team=t=>{
     const mine=t===us,side=t==="B"?"b":"r";
     const banSq=i=>{const s=find(t,"ban",i),n=mine?c.lanes.ban[i]:null;
@@ -286,14 +291,23 @@ function draftHTML(c){
       <div class="draft-bans">
         ${mine?`<button type="button" class="draft-ban-target" data-draft-target="ban" aria-pressed="${active==="ban"}">Bans ${active==="ban"?'<span class="draft-editing">Editando</span>':""}</button>`:'<div class="draft-phase">Bans</div>'}
         <div class="bans" role="group" aria-label="Bans da primeira e da segunda fase">${[0,1,2].map(banSq).join("")}<span class="bgap"></span>${[3,4].map(banSq).join("")}</div>
-        <h3 class="tmh" id="draft-side-${side}">${DRAFT_SIDE[t==="B"?"blue":"red"]}<span>${mine?"Nossa equipe":"Adversário"}</span></h3>
       </div>
       <div class="draft-phase">Picks · Fase 1</div>
       ${[0,1,2].map(pick).join("")}
       <div class="draft-phase">Picks · Fase 2</div>
       ${[3,4].map(pick).join("")}</section>`;
   };
-  h+=`<div class="dz">${team("B")}${team("R")}</div>`;
+  const sideName=t=>{const side=t==="B"?"b":"r",mine=t===us;return `<h3 class="tmh" id="draft-side-${side}">${DRAFT_SIDE[t==="B"?"blue":"red"]}<span>${mine?"Nossa equipe":"Adversário"}</span></h3>`};
+  const tabs=S.comps.map(x=>{const firsts=PLANES.map(l=>x.lanes[l][0]).filter(Boolean);
+    return `<button type="button" class="dz-tab${x.id===c.id?" on":""}" data-comp-tab="${esc(x.id)}" aria-pressed="${x.id===c.id}" title="${esc(x.name)}"><b>${esc(x.name)}</b><span class="mini">${firsts.map(img).join("")||'<small>vazia</small>'}</span></button>`}).join("");
+  h+=`<div class="dz">${team("B")}
+    <div class="dz-center">
+      <div class="dz-names">${sideName("B")}${sideName("R")}</div>
+      <div class="dz-tabs" role="group" aria-label="Composições do time">${tabs}<button type="button" class="dz-tab dz-new" data-comp-new aria-label="Nova composição" title="Nova composição">${iconMarkup("plus")}</button></div>
+      ${head}
+      <div class="dz-slot"></div>
+    </div>
+    ${team("R")}</div>`;
   const extra=c.lanes.ban.slice(5);
   if(extra.length)h+=`<div class="lbl">Bans alternativos</div><div class="alts" data-l="ban">${extra.map((n,j)=>mini(n,"ban",j+5)).join("")}</div>`;
   h+=`<div class="help draft-help">Retrato em destaque: opção principal. Clique em uma opção para priorizá-la ou arraste para reordenar.</div>`;
@@ -344,9 +358,23 @@ pickerDialog.addEventListener("close",()=>{
   (document.querySelector("[data-picker]")||pickerTrigger)?.focus();
   // Keep the content in place through the native dialog exit transition.
   void Promise.allSettled(pickerDialog.getAnimations().map(animation=>animation.finished))
-    .then(()=>{if(!pickerDialog.open)$("#comps").append(picker)});
+    .then(()=>{if(!pickerDialog.open){$("#comps").append(picker);placePicker()}});
 });
 $("#close-picker").onclick=()=>pickerDialog.close();
+// Na ordem do draft em tela larga, o catálogo fica no centro, entre os dois lados.
+function placePicker(){
+  const dialog=$("#picker-dialog"),catalog=$("#champ-picker");
+  if(dialog.open)return;
+  const slot=document.querySelector("#editor .dz-slot");
+  if(slot&&window.matchMedia("(min-width: 1100px)").matches){if(catalog.parentElement!==slot)slot.append(catalog)}
+  else if(catalog.parentElement!==$("#comps"))$("#comps").append(catalog);
+}
+window.matchMedia("(min-width: 1100px)").addEventListener("change",()=>placePicker());
+$("#editor").addEventListener("click",e=>{
+  const tab=e.target.closest("[data-comp-tab]");
+  if(tab){if(tab.dataset.compTab!==S.cur)selectComp(tab.dataset.compTab);return}
+  if(e.target.closest("[data-comp-new]"))$("#new").click();
+});
 window.matchMedia("(min-width: 1100px)").addEventListener("change",e=>{if(e.matches&&pickerDialog.open)pickerDialog.close()});
 
 /* ===== Exportar / Importar ===== */
