@@ -33,19 +33,26 @@ async function exportBackup(){ // cópia completa de todos os times, para guarda
 const FIRST_TEAM={id:"fraldinha",name:"Fraldinha",captainId:"brunoltz#LTZ"};
 const legacyId=s=>String(s).includes("#")?s:String(s).replace(/_([^_]*)$/,"#$1");
 async function migrateToTeams(){
-  if(await dbGet("times",FIRST_TEAM.id))return false;
+  if(await dbGet("oficial","migracao"))return false; // já foi feita
+  if(!ADMIN)await loadAdminKey();
   const raw=await getJ("oficial","dados"),old=raw&&ADMIN?await verifyObj(ADMIN,raw):null;
-  await dbSet("times",FIRST_TEAM.id,{name:FIRST_TEAM.name,captain:safeName(FIRST_TEAM.captainId),captainId:FIRST_TEAM.captainId,created:Date.now()});
+  // usa o Fraldinha do capitão se ele já existir (ex.: criado à mão), senão cria
+  const cap=safeName(FIRST_TEAM.captainId),own=(await dbList("times")).find(t=>t.captain===cap&&t.name.trim().toLowerCase()===FIRST_TEAM.name.toLowerCase());
+  const tid=own?.id||FIRST_TEAM.id;
+  if(!own)await dbSet("times",tid,{name:FIRST_TEAM.name,captain:cap,captainId:FIRST_TEAM.captainId,created:Date.now()});
   const ids=new Map();
   for(const id of Object.keys(ADMINS))ids.set(safeName(id),dispId(id));
   for(const r of await dbList("usuarios").catch(()=>[]))if(r.user){const id=dispId(legacyId(r.user));ids.set(safeName(id),id)}
-  for(const[k,id]of ids)if(!await dbGet("membros",k))await dbSet("membros",k,{team:FIRST_TEAM.id,status:"ativo",riotId:id,at:Date.now()});
+  for(const[k,id]of ids)if(!await dbGet("membros",k))await dbSet("membros",k,{team:tid,status:"ativo",riotId:id,at:Date.now()});
   const off=old||{version:0,at:0,data:{comps:[],plays:[]},log:[]};
-  await dbSet(`times/${FIRST_TEAM.id}/dados`,"oficial",{json:JSON.stringify({...off,label:off.label||"Versão inicial do time"}),at:Date.now()});
+  const cur=await dbGet(`times/${tid}/dados`,"oficial"),curData=cur?JSON.parse(cur.json).data:null;
+  if(!curData||(!curData.comps.length&&!curData.plays.length))
+    await dbSet(`times/${tid}/dados`,"oficial",{json:JSON.stringify({...off,label:off.label||"Versão inicial do time"}),at:Date.now()});
   // envios antigos (criptografados para o admin) passam para a fila do capitão do Fraldinha
   if(KEYS){const done=new Set((off.log||[]).map(l=>l.sid));
     for(const d of await dbList("envios").catch(()=>[])){try{const s=await unseal(KEYS,JSON.parse(d.enc));
-      if(!done.has(s.id))await dbSet(`times/${FIRST_TEAM.id}/envios`,s.id,{from:safeName(s.from),at:s.at,json:JSON.stringify(s)});await dbDel("envios",d.id)}catch(e){}}}
+      if(!done.has(s.id))await dbSet(`times/${tid}/envios`,s.id,{from:safeName(s.from),at:s.at,json:JSON.stringify(s)});await dbDel("envios",d.id)}catch(e){}}}
+  await dbSet("oficial","migracao",{team:tid,at:Date.now()});
   return true;
 }
 
@@ -147,12 +154,12 @@ async function setSlot(id,slot){
 }
 async function finishLogin(admin){
   lsSet(UKEY,{id:dispId(pendingId),admin,created:Date.now()});
-  if(admin&&KEYS){try{if(await migrateToTeams())toast("Time Fraldinha criado com todos os usuários",5000)}catch(e){toast("Não consegui criar o time Fraldinha: "+e.message,6000)}}
   await enterTeam();
   if(TEAM)toast(`Bem-vindo, ${dispId(pendingId)}!`);
 }
 // depois do login: entra no time, ou mostra a tela de time
 async function enterTeam(){
+  if(user()?.admin&&fbIsAdmin()){try{if(await migrateToTeams())toast("Time Fraldinha montado com todos os usuários e as comps salvas",5000)}catch(e){toast("Não consegui montar o time Fraldinha: "+e.message,6000)}}
   try{await loadMembership()}catch(e){TEAM=null}
   updateStatus();
   if(TEAM){closeModal();await sync();if(currentScreen==="admin")renderAdmin();return}
