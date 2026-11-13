@@ -1,10 +1,11 @@
 import { iconMarkup, laneIconMarkup } from "./icon"
-import DATA from "../data/worlds.json"
-import { champions, games as buildGames, itemNames, runeNames } from "../data/worlds-2026-builds.json"
-import buildAssets from "../data/worlds-2026-build-assets.json"
+import DATA from "@dataset/summary"
+import { champions, games as buildGames, itemNames, runeNames } from "@dataset/builds"
+import buildAssets from "@dataset/build-assets"
 import { LOL_DATA, lolAsset, lolImage, lolKey } from "./lol-media"
 import { championSlug, esc, ico, kdaOf, sortIcons, teamLogo, wrPill } from "./worlds-display"
 import { runePage } from "./worlds-runes"
+import { DATASET, isReference } from "./dataset"
 
 type Champion = (typeof DATA.champs)[number]
 type LaneSample = Extract<Champion["lanes"][keyof Champion["lanes"]], { n: number }>
@@ -41,7 +42,7 @@ export function directOpponent<Player extends MatchPlayer>(players: Player[], pl
   return players.find(other => other.role === player.role && other.side !== player.side);
 }
 
-const buildEncounters = buildGames.flatMap(game => game.players.flatMap(player => {
+const buildEncounters = buildGames.flatMap(game => game.players.filter(player => !isReference(player)).flatMap(player => {
   const opponent = directOpponent(game.players, player);
   return opponent ? [{ player, opponent: opponent.champion, slug: championSlug(opponent.champion) }] : [];
 }));
@@ -360,7 +361,7 @@ export function buildMatchups(champion: Champion, position: string) {
   return `<h3>Confrontos mais frequentes</h3>
     <div class="build-context-champion">${ico(champion.name)}<div>
       <strong>${esc(champion.name)}</strong>
-      <span class="lane-label">${laneIconMarkup(lane, true)}${esc(lane)}${games ? ` · ${gameCount(games)} com draft completo` : ""}</span>
+      <span class="lane-label">${laneIconMarkup(lane, true)}${esc(lane)}${games ? ` · ${gameCount(games)} ${DATASET.matchupGames}` : ""}</span>
     </div></div>
     ${opponents.length ? `<ul class="build-context-list" aria-label="Adversários por número de jogos">
       ${opponents.slice(0, 5).map(([opponent, count, wins]) => `<li>
@@ -383,9 +384,9 @@ export function buildLaneHighlights(champions: Champion[], position: keyof Champ
   })).filter(entry => entry.count > 0).sort((a, b) => b.count - a.count).slice(0, 5);
   const lists = [
     { title: "Mais escolhidos", entries: top(c => position ? c.lanes[position]?.picks ?? 0 : c.picks) },
-    { title: "Mais banidos no torneio", entries: top(c => c.bans) },
+    { title: DATASET.mostBanned, entries: top(c => c.bans) },
   ];
-  return `<h3>${position ? `Destaques · ${esc(position)}` : "Destaques do Worlds"}</h3>
+  return `<h3>${position ? `Destaques · ${esc(position)}` : DATASET.highlights}</h3>
     ${lists.filter(({ entries }) => entries.length).map(({ title, entries }) => `<h4>${title}</h4>
       <ul class="build-context-list build-context-ranking">${entries.map(({ champion, count }) => `<li>
         <button type="button" data-slot="button" data-variant="ghost" class="build-context-rank" data-highlight-build="${championSlug(champion.name)}">
@@ -430,13 +431,13 @@ export function buildsTable(champions: Champion[], lane: keyof Champion["lanes"]
     const secondaryTree = build?.secondaryTrees[0];
     const spells = build?.spells[0];
     const slug=championSlug(c.name);
-    const banRate = Math.round(c.bans / DATA.games * 100);
+    const banRate = DATA.games ? Math.round(c.bans / DATA.games * 100) : 0;
     const banLevel = banRate >= 30 ? "high" : banRate >= 10 ? "medium" : "low";
     return `<tr class="build-summary-row">
       <th scope="row" class="build-col-champion"><button type="button" class="build-champion build-toggle" data-build-toggle="${slug}" aria-expanded="false" aria-controls="build-detail-${slug}">${iconMarkup("next")}${ico(c.name)}<span>${esc(c.name)}<small>${esc(lane || c.main)}<span class="build-mobile-games"> · ${gameCount(games)}</span></small></span></button></th>
       <td class="build-col-games build-stat">${games}</td>
       <td class="build-col-win build-stat">${wrPill(c.wins,c.picks)}</td>
-      <td class="build-col-ban build-stat"><span class="wr" data-ban-level="${banLevel}" data-tip="Banido em ${c.bans} de ${DATA.games} jogos do torneio">${banRate}%</span></td>
+      <td class="build-col-ban build-stat"><span class="wr" data-ban-level="${banLevel}" data-tip="Banido em ${c.bans} de ${DATA.games} jogos ${DATASET.scope}">${banRate}%</span></td>
       <td class="build-col-items">${buildPreview(...items)}</td>
       <td class="build-col-boots">${boots ? buildPreview(itemOption(boots, games)) : missingBuildOption}</td>
       <td class="build-col-runes">${keystone && secondaryTree ? buildRunePreview(keystone, secondaryTree, games) : missingBuildOption}</td>
@@ -446,7 +447,7 @@ export function buildsTable(champions: Champion[], lane: keyof Champion["lanes"]
   }).join("");
   return `<div class="wl-panel tablewrap builds-table-wrap" role="region" aria-label="Comparação de builds">
     <table class="builds-table" aria-label="Builds por campeão">
-      <caption>Win rate e ban rate consideram o torneio inteiro.</caption>
+      <caption>${DATASET.scopeLong}</caption>
       <thead><tr><th scope="col" class="build-col-champion">Campeão</th>
       ${buildStats.map(([column, key, label]) => `<th scope="col" class="build-col-${column} build-stat"><button type="button" data-k="${key}">${label}${sortIcons}</button></th>`).join("")}
       <th scope="col" class="build-col-items">Itens</th><th scope="col" class="build-col-boots">Botas</th><th scope="col" class="build-col-runes">Runas</th>

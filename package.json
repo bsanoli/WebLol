@@ -5,11 +5,12 @@
   "scripts": {
     "dev": "vite --host 127.0.0.1",
     "predev": "node scripts/build-icons.mjs",
-    "build": "tsc --noEmit && vite build",
+    "build": "tsc --noEmit && vite build && vite build --mode soloq",
     "prebuild": "node scripts/build-icons.mjs",
     "pages:prepare": "npm run build && node scripts/prepare-pages.mjs",
     "preview": "vite preview --host 127.0.0.1",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "dev:soloq": "vite --host 127.0.0.1 --mode soloq"
   },
   "repository": {
     "type": "git",

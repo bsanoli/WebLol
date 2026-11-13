@@ -8,7 +8,28 @@
     "strict": true,
     "skipLibCheck": true,
     "noEmit": true,
-    "paths": { "@/*": ["./src/*"] }
+    "paths": {
+      "@/*": [
+        "./src/*"
+      ],
+      "@dataset/summary": [
+        "./src/data/worlds.json"
+      ],
+      "@dataset/drafts": [
+        "./src/data/worlds-2026-drafts.json"
+      ],
+      "@dataset/builds": [
+        "./src/data/worlds-2026-builds.json"
+      ],
+      "@dataset/build-assets": [
+        "./src/data/worlds-2026-build-assets.json"
+      ],
+      "@dataset/build-timeline": [
+        "./src/data/worlds-2026-build-timeline.json"
+      ]
+    }
   },
-  "include": ["src"]
+  "include": [
+    "src"
+  ]
 }

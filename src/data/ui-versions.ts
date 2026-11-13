@@ -8,6 +8,14 @@ export interface UiVersion {
 
 export const UI_VERSIONS: UiVersion[] = [
   {
+    version: "1.18",
+    date: "2026-11-13",
+    changes: [
+      "Nova área SoloQ no menu do topo, com a aba Builds: builds de jogadores profissionais nas ranqueadas solo/duo (KR, EUW, NA e BR), no mesmo formato das Builds do Worlds.",
+      "SoloQ: os dados vêm da API oficial da Riot e são atualizados automaticamente uma vez por dia. Em Compras jogo a jogo aparecem o pro, o servidor e a data de cada partida.",
+    ],
+  },
+  {
     version: "1.17",
     date: "2026-11-13",
     changes: [

@@ -3,25 +3,51 @@ import { defineConfig } from "vite"
 import react from "@vitejs/plugin-react"
 import tailwindcss from "@tailwindcss/vite"
 
-export default defineConfig({
-  root: fileURLToPath(new URL("./src", import.meta.url)),
-  publicDir: fileURLToPath(new URL("./public", import.meta.url)),
-  base: "./",
-  plugins: [react(), tailwindcss()],
-  server: {
-    port: 5173,
-    strictPort: true,
+const src = (path: string) => fileURLToPath(new URL(`./src/${path}`, import.meta.url))
+
+// As abas do Worlds e da SoloQ usam o mesmo código; cada uma tem seus arquivos de dados.
+// `vite build --mode soloq` gera só soloq.html, com os dados de src/data/soloq/.
+const datasets = {
+  worlds: {
+    summary: "data/worlds.json",
+    drafts: "data/worlds-2026-drafts.json",
+    builds: "data/worlds-2026-builds.json",
+    "build-assets": "data/worlds-2026-build-assets.json",
+    "build-timeline": "data/worlds-2026-build-timeline.json",
   },
-  build: {
-    rolldownOptions: {
-      input: ["index.html", "worlds.html", "camp.html"].map(page =>
-        fileURLToPath(new URL(`./src/${page}`, import.meta.url)),
-      ),
+  soloq: {
+    summary: "data/soloq/summary.json",
+    drafts: "data/soloq/drafts.json",
+    builds: "data/soloq/builds.json",
+    "build-assets": "data/soloq/build-assets.json",
+    "build-timeline": "data/soloq/build-timeline.json",
+  },
+}
+
+export default defineConfig(({ mode }) => {
+  const soloq = mode === "soloq"
+  const dataset = soloq ? datasets.soloq : datasets.worlds
+  return {
+    root: src(""),
+    publicDir: fileURLToPath(new URL("./public", import.meta.url)),
+    base: "./",
+    plugins: [react(), tailwindcss()],
+    server: {
+      port: soloq ? 5174 : 5173,
+      strictPort: true,
     },
-    outDir: fileURLToPath(new URL("./dist", import.meta.url)),
-    emptyOutDir: true,
-  },
-  resolve: {
-    alias: { "@": fileURLToPath(new URL("./src", import.meta.url)) },
-  },
+    build: {
+      rolldownOptions: {
+        input: (soloq ? ["soloq.html"] : ["index.html", "worlds.html", "camp.html"]).map(src),
+      },
+      outDir: fileURLToPath(new URL(soloq ? "./dist-soloq" : "./dist", import.meta.url)),
+      emptyOutDir: true,
+    },
+    resolve: {
+      alias: [
+        ...Object.entries(dataset).map(([name, path]) => ({ find: `@dataset/${name}`, replacement: src(path) })),
+        { find: "@", replacement: src("") },
+      ],
+    },
+  }
 })

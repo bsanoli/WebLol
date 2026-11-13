@@ -1,0 +1,55 @@
+# Coleta diária das partidas de SoloQ dos pros (aba SoloQ do WebLol).
+# Precisa do segredo RIOT_API_KEY (Settings › Secrets and variables › Actions).
+# A lista de pros fica em scripts/soloq-pros.json.
+name: Coleta SoloQ
+
+on:
+  schedule:
+    - cron: "0 9 * * *" # 6h em Brasília
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: soloq
+  cancel-in-progress: false
+
+jobs:
+  coleta:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+      - name: Coletar partidas na API da Riot
+        env:
+          RIOT_API_KEY: ${{ secrets.RIOT_API_KEY }}
+        run: python3 scripts/soloq.py
+      - name: Gerar o site e publicar
+        run: |
+          npm ci --no-audit --no-fund
+          cp -r src/data/soloq "$RUNNER_TEMP/soloq"
+          git config user.name "weblol-soloq[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          # Outras pessoas também publicam na main: refaz o build sobre a versão mais recente.
+          for attempt in 1 2 3; do
+            git fetch origin main
+            git reset --hard origin/main
+            rm -rf src/data/soloq && cp -r "$RUNNER_TEMP/soloq" src/data/soloq
+            npm run pages:prepare
+            git add -A src/data/soloq index.html worlds.html camp.html soloq.html assets
+            if git diff --cached --quiet; then echo "Nada novo"; exit 0; fi
+            git commit -m "Atualiza partidas da SoloQ dos pros"
+            git push origin HEAD:main && exit 0
+            sleep 15
+          done
+          exit 1

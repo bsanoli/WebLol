@@ -1,0 +1,362 @@
+{
+  "_leia": "Lista de pros cujas partidas ranqueadas solo/duo entram na aba SoloQ. Contas tiradas do trackingthepros.com e lolpros.gg em 2026-11-13; Riot IDs mudam, então confira de vez em quando. platform: kr, euw1, na1, br1, eun1, jp1, la1, la2, oc1, tr1, vn2, tw2, sg2. role usa os nomes do app: Top, Jungle, Mid, ADC, Suporte.",
+  "days": 14,
+  "maxGamesPerAccount": 20,
+  "pros": [
+    {
+      "name": "Faker",
+      "team": "T1",
+      "role": "Mid",
+      "accounts": [
+        {
+          "riotId": "Hide on bush#KR1",
+          "platform": "kr"
+        },
+        {
+          "riotId": "Hide in bush#NYKR",
+          "platform": "na1"
+        }
+      ]
+    },
+    {
+      "name": "Oner",
+      "team": "T1",
+      "role": "Jungle",
+      "accounts": [
+        {
+          "riotId": "오 너#111",
+          "platform": "kr"
+        },
+        {
+          "riotId": "worlds#111",
+          "platform": "na1"
+        }
+      ]
+    },
+    {
+      "name": "Peyz",
+      "team": "T1",
+      "role": "ADC",
+      "accounts": [
+        {
+          "riotId": "Peyz#KR11",
+          "platform": "kr"
+        },
+        {
+          "riotId": "gaesalbuger#aaaa",
+          "platform": "na1"
+        }
+      ]
+    },
+    {
+      "name": "Keria",
+      "team": "T1",
+      "role": "Suporte",
+      "accounts": [
+        {
+          "riotId": "Keria#zxcv",
+          "platform": "kr"
+        },
+        {
+          "riotId": "doryunnim#Frank",
+          "platform": "na1"
+        }
+      ]
+    },
+    {
+      "name": "Doran",
+      "team": "T1",
+      "role": "Top",
+      "accounts": [
+        {
+          "riotId": "어리고싶다#KR1",
+          "platform": "kr"
+        },
+        {
+          "riotId": "buriburii#1234",
+          "platform": "na1"
+        }
+      ]
+    },
+    {
+      "name": "Kiin",
+      "team": "Gen.G",
+      "role": "Top",
+      "accounts": [
+        {
+          "riotId": "kiin#KR1",
+          "platform": "kr"
+        },
+        {
+          "riotId": "asdzxcvqwe#123",
+          "platform": "na1"
+        }
+      ]
+    },
+    {
+      "name": "Canyon",
+      "team": "Gen.G",
+      "role": "Jungle",
+      "accounts": [
+        {
+          "riotId": "HUANG TONG DAYE#KR1",
+          "platform": "kr"
+        },
+        {
+          "riotId": "JUGKlNG#kr",
+          "platform": "kr"
+        },
+        {
+          "riotId": "Concrete jungle#USA",
+          "platform": "na1"
+        }
+      ]
+    },
+    {
+      "name": "Chovy",
+      "team": "Gen.G",
+      "role": "Mid",
+      "accounts": [
+        {
+          "riotId": "맞짱깔류민석#KR1",
+          "platform": "kr"
+        },
+        {
+          "riotId": "허거덩#0303",
+          "platform": "kr"
+        },
+        {
+          "riotId": "calm down#can",
+          "platform": "na1"
+        }
+      ]
+    },
+    {
+      "name": "Ruler",
+      "team": "Gen.G",
+      "role": "ADC",
+      "accounts": [
+        {
+          "riotId": "황금고블린1#KR1",
+          "platform": "kr"
+        },
+        {
+          "riotId": "강 철#샤 넬",
+          "platform": "kr"
+        },
+        {
+          "riotId": "proteinmonster#thief",
+          "platform": "na1"
+        }
+      ]
+    },
+    {
+      "name": "Zeus",
+      "team": "Hanwha Life Esports",
+      "role": "Top",
+      "accounts": [
+        {
+          "riotId": "Athene#lll",
+          "platform": "kr"
+        },
+        {
+          "riotId": "Austin#lll",
+          "platform": "na1"
+        }
+      ]
+    },
+    {
+      "name": "Kanavi",
+      "team": "Hanwha Life Esports",
+      "role": "Jungle",
+      "accounts": [
+        {
+          "riotId": "vinaka#KR1",
+          "platform": "kr"
+        }
+      ]
+    },
+    {
+      "name": "Zeka",
+      "team": "Hanwha Life Esports",
+      "role": "Mid",
+      "accounts": [
+        {
+          "riotId": "95190213del#KR1",
+          "platform": "kr"
+        },
+        {
+          "riotId": "suis#kr7",
+          "platform": "kr"
+        },
+        {
+          "riotId": "DAZBEEE#777",
+          "platform": "na1"
+        }
+      ]
+    },
+    {
+      "name": "Gumayusi",
+      "team": "Hanwha Life Esports",
+      "role": "ADC",
+      "accounts": [
+        {
+          "riotId": "HLE Gumayusi#0298",
+          "platform": "kr"
+        },
+        {
+          "riotId": "JXN1MVc6dAdqVY1I#KR1",
+          "platform": "kr"
+        },
+        {
+          "riotId": "Know my name#9999",
+          "platform": "na1"
+        }
+      ]
+    },
+    {
+      "name": "Delight",
+      "team": "Hanwha Life Esports",
+      "role": "Suporte",
+      "accounts": [
+        {
+          "riotId": "플레이리스트겨울#KR1",
+          "platform": "kr"
+        }
+      ]
+    },
+    {
+      "name": "Siwoo",
+      "team": "Dplus Kia",
+      "role": "Top",
+      "accounts": [
+        {
+          "riotId": "TOPKING#asd",
+          "platform": "kr"
+        }
+      ]
+    },
+    {
+      "name": "Lucid",
+      "team": "Dplus Kia",
+      "role": "Jungle",
+      "accounts": [
+        {
+          "riotId": "DK Lucid#KR1",
+          "platform": "kr"
+        }
+      ]
+    },
+    {
+      "name": "ShowMaker",
+      "team": "Dplus Kia",
+      "role": "Mid",
+      "accounts": [
+        {
+          "riotId": "DK ShowMaker#KR1",
+          "platform": "kr"
+        },
+        {
+          "riotId": "MIDKING#asd",
+          "platform": "kr"
+        }
+      ]
+    },
+    {
+      "name": "Smash",
+      "team": "Dplus Kia",
+      "role": "ADC",
+      "accounts": [
+        {
+          "riotId": "DK Smash#KR7",
+          "platform": "kr"
+        }
+      ]
+    },
+    {
+      "name": "Career",
+      "team": "Dplus Kia",
+      "role": "Suporte",
+      "accounts": [
+        {
+          "riotId": "팽도리#1015",
+          "platform": "kr"
+        },
+        {
+          "riotId": "하이용#1015",
+          "platform": "na1"
+        }
+      ]
+    },
+    {
+      "name": "BrokenBlade",
+      "team": "G2 Esports",
+      "role": "Top",
+      "accounts": [
+        {
+          "riotId": "BrokenBlade#12345",
+          "platform": "na1"
+        },
+        {
+          "riotId": "G2 BrokenBlade#1918",
+          "platform": "euw1"
+        }
+      ]
+    },
+    {
+      "name": "Caps",
+      "team": "G2 Esports",
+      "role": "Mid",
+      "accounts": [
+        {
+          "riotId": "G2 Caps#1323",
+          "platform": "euw1"
+        }
+      ]
+    },
+    {
+      "name": "Guigo",
+      "team": "FURIA",
+      "role": "Top",
+      "accounts": [
+        {
+          "riotId": "EL GATO ASESINO#blox",
+          "platform": "br1"
+        }
+      ]
+    },
+    {
+      "name": "Tatu",
+      "team": "FURIA",
+      "role": "Jungle",
+      "accounts": [
+        {
+          "riotId": "FURIA Tatu#10y",
+          "platform": "br1"
+        }
+      ]
+    },
+    {
+      "name": "Tutsz",
+      "team": "FURIA",
+      "role": "Mid",
+      "accounts": [
+        {
+          "riotId": "Tutsz#1612",
+          "platform": "br1"
+        }
+      ]
+    },
+    {
+      "name": "JoJo",
+      "team": "FURIA",
+      "role": "Suporte",
+      "accounts": [
+        {
+          "riotId": "Jojos#8306",
+          "platform": "br1"
+        }
+      ]
+    }
+  ]
+}
