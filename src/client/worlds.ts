@@ -6,10 +6,11 @@ import { Tabs, TabsList, TabsTrigger } from "@/components/arc/tabs/tabs"
 import { TournamentOverview } from "@/components/analytics"
 import { iconMarkup, laneIconMarkup } from "./icon"
 import DATA from "../data/worlds.json"
+import DRAFTS from "../data/worlds-2026-drafts.json"
 import { LOL_DATA, lolAsset, lolChampion, lolKey } from "./lol-media"
 import { abilityDetail, buildDetails, buildGameCount, buildLaneHighlights, buildMatchesQuery, buildMatchups, buildsTable, hydrateBuildTimelines, orderedMatchups } from "./worlds-builds"
 import { effectText } from "./worlds-effect-text"
-import { LANES, LC, kdaOf, pct, wrPill, ico, esc, championSlug, teamLogo, teamRegion } from "./worlds-display"
+import { LANES, LC, kdaOf, pct, wrPill, ico, esc, championSlug, teamLogo, teamRegion, teamCode } from "./worlds-display"
 import { initializeTheme } from "./theme"
 import { revealContent } from "./motion"
 
@@ -785,6 +786,7 @@ function compsView(){
     </div>
     <p class="comp-count" id="cn" role="status"></p>
     <div class="cgrid" id="cl"></div>
+    <dialog class="match-dialog" id="match-dialog" aria-label="Detalhes da partida e draft"></dialog>
   </section>`;
 }
 function wireCompPicker(id, {isSelected, onSelect, onClear}) {
@@ -844,7 +846,79 @@ function wireCompPicker(id, {isSelected, onSelect, onClear}) {
     clear.setAttribute("aria-disabled", String(!hasSelection));
   }};
 }
-function compCard(g, q, champions){
+type DraftSide = "blue" | "red";
+type Draft = {
+  firstPick: DraftSide;
+  blue: { bans: string[]; picks: string[] };
+  red: { bans: string[]; picks: string[] };
+};
+// Champion order per team comes from Rift Graphs. First pick is checked separately
+// against Games of Legends, ChainCC or Liquipedia because it can start on either side.
+const drafts: Partial<Record<string, Draft>> = DRAFTS;
+
+function compDraft(game: (typeof DATA.comps)[number], panelId: string) {
+  const draft = drafts[`${game.s}:${game.g}`];
+  if (!draft) return "";
+
+  const teams = { blue: game.b, red: game.r };
+  const codes = { blue: teamCode(game.b), red: teamCode(game.r) };
+  const first = draft.firstPick;
+  const second = first === "blue" ? "red" : "blue";
+  const phases = [
+    { label: "Bans · Fase 1", kind: "bans", offset: 0, turns: [0, 1, 0, 1, 0, 1] },
+    { label: "Picks · Fase 1", kind: "picks", offset: 0, turns: [0, 1, 1, 0, 0, 1] },
+    { label: "Bans · Fase 2", kind: "bans", offset: 3, turns: [1, 0, 1, 0] },
+    { label: "Picks · Fase 2", kind: "picks", offset: 3, turns: [1, 0, 0, 1] },
+  ] as const;
+  const team = (side: DraftSide) => `<div class="match-draft-team" data-side="${side}">
+    ${teamLogo(teams[side])}<span><strong>${esc(codes[side])}</strong><small>${esc(teams[side])}</small></span>
+  </div>`;
+  const entry = (side: DraftSide, name: string, number: number, phase: string, highlight = "") => {
+    const step = String(number).padStart(2, "0");
+    return `<li class="match-draft-action" data-side="${side}" value="${number}" tabindex="0"${highlight ? " data-highlight" : ""}
+      data-tip="${esc(`${step} · ${name} · ${teams[side]} · ${phase}`)}">
+      <span class="match-draft-number">${step}</span><span aria-hidden="true">${ico(name)}</span>
+      <span class="match-draft-action-info"><strong>${esc(name)}</strong><small aria-label="${esc(teams[side])}">${esc(codes[side])}</small>${highlight ? `<span class="match-draft-highlight">${highlight}</span>` : ""}</span>
+    </li>`;
+  };
+  let number = 0;
+  return `<section class="match-draft" id="${panelId}" aria-labelledby="${panelId}-title" hidden>
+    <h3 class="match-draft-title" id="${panelId}-title">Ordem de picks e bans</h3>
+    <div class="match-draft-content">
+    <div class="match-draft-header">
+      ${team("blue")}
+      <p class="match-draft-first" data-side="${first}">Primeiro pick <strong>${esc(codes[first])}</strong></p>
+      ${team("red")}
+    </div>
+    ${phases.map(({ label, kind, offset, turns }) => {
+      const next = { blue: offset, red: offset };
+      const actions = turns.map(turn => {
+        const side = turn === 0 ? first : second;
+        number++;
+        const highlight = number === 7 ? "First pick" : number === 20 ? "Last pick" : "";
+        return { side, markup: entry(side, draft[side][kind][next[side]++], number, label, highlight) };
+      });
+      const startingSide = actions[0].side;
+      const otherSide = startingSide === "blue" ? "red" : "blue";
+      const sides = kind === "picks" && offset === 3
+        ? [otherSide, startingSide]
+        : [startingSide, otherSide];
+      const groups = sides.map(side => ({
+        side,
+        actions: actions.filter(action => action.side === side),
+      }));
+      return `<section class="match-draft-phase" data-kind="${kind}">
+        <h4>${label}</h4>
+        ${groups.map(group => `<ol class="match-draft-actions" role="list" aria-label="${esc(teams[group.side])}">${group.actions.map(action => action.markup).join("")}</ol>`).join("")}
+      </section>`;
+    }).join("")}
+    </div>
+  </section>`;
+}
+
+function compCard(g, q, champions, index: number){
+  const panelId = `match-draft-${index}`;
+  const draft = compDraft(g, panelId);
   const hl=(text, selected=false)=>selected || (q && text.toLowerCase().includes(q)) ? `<mark>${esc(text)}</mark>` : esc(text);
   const team=(name, color, won)=>`<div class="match-team" data-side="${color}">
     ${teamLogo(name)}
@@ -858,7 +932,11 @@ function compCard(g, q, champions){
     return right ? score+pick : pick+score;
   };
   return `<article class="wl-panel cg">
-    <h3 class="match-game">${esc(g.st)} <span aria-hidden="true">·</span> Jogo ${g.g}</h3>
+    <div class="match-card-header">
+      <h3 class="match-game">${esc(g.st)} <span aria-hidden="true">·</span> Jogo ${g.g}</h3>
+      ${draft ? `<button type="button" class="match-draft-toggle" data-slot="button" data-variant="outline"
+        aria-haspopup="dialog" aria-controls="match-dialog"><span>Ver draft</span>${iconMarkup("descending")}</button>` : ""}
+    </div>
     <div class="match-details">
       <div class="match-scoreboard">${team(g.b,"azul",g.bw)}<span class="vs">VS</span>${team(g.r,"vermelho",!g.bw)}</div>
       <table class="match-lanes" aria-label="Duelos por rota entre ${esc(g.b)} e ${esc(g.r)}">
@@ -873,11 +951,48 @@ function compCard(g, q, champions){
         <tbody>${g.p.map(([l,cb,pb,kb,cr,pr,kr])=>`<tr>${side(cb,pb,kb,false)}<td class="match-lane">${laneIconMarkup(l,true)}</td>${side(cr,pr,kr,true)}</tr>`).join("")}</tbody>
       </table>
     </div>
+    ${draft}
   </article>`;
 }
 function wireComps(){
   const order=g=>{const m=g.s.match(/(\d+)/g)||[];const base=g.s.startsWith('play')?0:g.s.includes('quarter')?200:g.s.includes('semi')?300:g.s.includes('final')?400:100;return base+(+m[0]||0)*10+(+m[1]||0)/100};
   const all=DATA.comps.slice().sort((a,b)=>order(b)-order(a)||a.g-b.g);
+  const matchGrid = document.getElementById("cl");
+  const draftDialog = document.getElementById("match-dialog") as HTMLDialogElement;
+  matchGrid.onclick = (event) => {
+    if (!(event.target instanceof Element)) return;
+    const button = event.target.closest<HTMLButtonElement>(".match-draft-toggle");
+    if (!button) return;
+    const card = button.closest(".cg").cloneNode(true) as HTMLElement;
+    const panel = card.querySelector<HTMLElement>(".match-draft");
+    const title = panel.querySelector<HTMLElement>(".match-draft-title");
+    panel.id = "active-match-draft";
+    title.id = "active-match-draft-title";
+    panel.setAttribute("aria-labelledby", title.id);
+    panel.hidden = false;
+    const closeButton = card.querySelector<HTMLButtonElement>(".match-draft-toggle");
+    closeButton.removeAttribute("aria-haspopup");
+    closeButton.removeAttribute("aria-controls");
+    closeButton.classList.replace("match-draft-toggle", "match-dialog-close");
+    closeButton.dataset.variant = "ghost";
+    closeButton.dataset.size = "icon-lg";
+    closeButton.setAttribute("aria-label", "Fechar draft");
+    closeButton.innerHTML = iconMarkup("close");
+    closeButton.onclick = () => draftDialog.close();
+    const controls = document.createElement("div");
+    controls.className = "match-dialog-controls";
+    controls.append(closeButton);
+    draftDialog.replaceChildren(controls, card);
+    draftDialog.showModal();
+    draftDialog.scrollTop = 0;
+  };
+  draftDialog.onclick = (event) => {
+    if (event.target !== draftDialog) return;
+    const bounds = draftDialog.getBoundingClientRect();
+    if (event.clientX < bounds.left || event.clientX > bounds.right ||
+        event.clientY < bounds.top || event.clientY > bounds.bottom) draftDialog.close();
+  };
+  draftDialog.onclose = () => draftDialog.replaceChildren();
   const activeChampions = document.getElementById("cc-active");
   const search = document.getElementById("cq");
   const stage = document.getElementById("cs");
@@ -905,7 +1020,7 @@ function wireComps(){
     if(cTeam){const w=L.filter(g=>(g.b===cTeam)===g.bw).length;extra=`<span>${esc(cTeam)} · ${w} vitórias · ${L.length-w} derrotas</span>`}
     document.getElementById('cn').innerHTML=`<strong>${L.length} jogo${L.length===1?'':'s'}</strong>${extra}`;
     const highlightedChampions = new Set(champions);
-    document.getElementById('cl').innerHTML=L.map(g=>compCard(g,q,highlightedChampions)).join("")||'<div class="empty-state"><h3>Nenhum jogo encontrado</h3><p>Remova um campeão ou ajuste os outros filtros para ver mais partidas.</p></div>';
+    matchGrid.innerHTML=L.map((g,index)=>compCard(g,q,highlightedChampions,index)).join("")||'<div class="empty-state"><h3>Nenhum jogo encontrado</h3><p>Remova um campeão ou ajuste os outros filtros para ver mais partidas.</p></div>';
   };
   const publish = (replace = false) => publishWorlds("comps", [], {time:cTeam, fase:cSt, busca:cQ, campeoes:[...cChamps].join(",")}, replace);
   const updateResults = () => {

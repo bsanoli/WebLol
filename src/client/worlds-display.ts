@@ -34,6 +34,7 @@ const teamByName = new Map(teams.flatMap(([name, code, region]) => {
   return [[name.toLowerCase(), team], [code, team]] as const;
 }));
 export const teamRegion = (name: string) => teamByName.get(name.toLowerCase())?.region;
+export const teamCode = (name: string) => teamByName.get(name.toLowerCase())?.code.toUpperCase() ?? name;
 
 export function teamLogo(team: string) {
   const code = teamByName.get(team.toLowerCase())?.code;

@@ -719,10 +719,81 @@
 .comp-filter-chips .icon { width: 14px; height: 14px; }
 .comp-count { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 12px; margin: 14px 0 10px; color: var(--muted); font-size: 13px; }
 .comp-count strong { color: var(--ink); font-size: 14px; }
-.cgrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 420px), 1fr)); gap: var(--wl-panel-gap); }
+.cgrid {
+  --match-card-min: 420px;
+  container: worlds-matches / inline-size;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, var(--match-card-min)), 1fr));
+  align-items: start;
+  gap: var(--wl-panel-gap);
+}
 .cgrid > .empty-state { grid-column: 1/-1; }
 .cg { --lane-column: var(--wl-space-8); padding: var(--wl-panel-padding); }
-.match-game { margin: 0 0 var(--wl-space-2); color: var(--muted); font: 600 13px/1.25 var(--wl-font); }
+@media (min-width: 960px) {
+  .cg:has(> .match-draft:not([hidden])) {
+    grid-column: 1 / -1;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-rows: auto 1fr;
+    align-items: start;
+    gap: 0 var(--wl-panel-gap);
+  }
+  .cg:has(> .match-draft:not([hidden])) > .match-card-header { grid-column: 1; }
+  .match-dialog .match-draft-title { padding-inline-end: calc(var(--wl-space-12) + var(--wl-space-2)); }
+  .cg:has(> .match-draft:not([hidden])) > .match-details { grid-column: 1; grid-row: 2; }
+  .match-draft-toggle .icon { transform: rotate(-90deg); }
+  .cg > .match-draft:not([hidden]) {
+    grid-column: 2;
+    grid-row: 1 / span 2;
+    margin-top: 0;
+    padding-inline-start: var(--wl-panel-gap);
+    border-inline-start: 1px solid var(--wl-divider);
+  }
+}
+.match-dialog {
+  width: min(1200px, calc(100vw - var(--wl-space-8)));
+  max-width: none;
+  max-height: calc(100dvh - var(--wl-space-8));
+  margin: auto;
+  padding: 0;
+  border: 1px solid var(--wl-divider);
+  border-radius: var(--wl-panel-radius);
+  color: var(--ink);
+  background: var(--surface);
+  overflow: auto;
+}
+.match-dialog::backdrop { background: rgb(0 0 0 / .65); }
+.match-dialog > .cg { border: 0; }
+.match-dialog-controls {
+  position: sticky;
+  top: var(--wl-space-2);
+  z-index: 2;
+  height: 0;
+}
+.match-dialog-close[data-slot="button"] {
+  position: absolute;
+  inset-inline-end: var(--wl-space-2);
+  cursor: pointer;
+  background: var(--surface);
+}
+.match-dialog-close[data-slot="button"]:hover { background: var(--wl-raised); }
+html:has(.match-dialog[open]) { overflow: hidden; }
+.match-draft-toggle .icon { transform: rotate(-90deg); }
+@media (max-width: 959px) {
+  .match-dialog { width: calc(100vw - var(--wl-space-4)); max-height: calc(100dvh - var(--wl-space-4)); }
+  .match-dialog .match-card-header {
+    min-height: var(--wl-space-12);
+    padding-inline-end: calc(var(--wl-space-12) + var(--wl-space-2));
+  }
+}
+.match-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--wl-space-2);
+  margin-bottom: var(--wl-space-2);
+}
+.match-game { margin: 0; color: var(--muted); font: 600 13px/1.25 var(--wl-font); }
 .match-scoreboard {
   display: grid;
   grid-template-columns: minmax(0, 1fr) var(--lane-column) minmax(0, 1fr);
@@ -752,6 +823,112 @@
 .match-champion small { display: block; margin-top: 2px; color: var(--muted); font-size: 12px; }
 .match-kda { color: var(--muted); font-size: 12px; font-variant-numeric: tabular-nums; white-space: nowrap; }
 .cg mark { background: var(--gold-soft); color: inherit; border-radius: var(--wl-control-radius); }
+.match-draft { margin-top: var(--wl-space-4); }
+.match-draft-toggle[data-slot="button"] {
+  min-height: calc(var(--wl-space-12) - var(--wl-space-1));
+  flex: none;
+  cursor: pointer;
+}
+.match-draft-title {
+  display: flex;
+  align-items: center;
+  min-height: calc(var(--wl-space-12) - var(--wl-space-1));
+  margin: 0;
+  font: 700 16px/1.25 var(--wl-font-display);
+}
+.match-draft-content {
+  container: match-draft / inline-size;
+  padding-top: var(--wl-space-2);
+}
+.match-draft-header {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  align-items: center;
+  gap: var(--wl-space-2);
+  padding-bottom: var(--wl-space-2);
+}
+.match-draft [data-side="blue"] {
+  --draft-side: var(--wl-side-blue);
+  --draft-side-text: var(--wl-side-blue-text);
+}
+.match-draft [data-side="red"] {
+  --draft-side: var(--wl-side-red);
+  --draft-side-text: var(--wl-side-red-text);
+}
+.match-draft-team { display: flex; align-items: center; gap: var(--wl-space-1); min-width: 0; }
+.match-draft-team[data-side="red"] { flex-direction: row-reverse; text-align: right; }
+.match-draft-team .team-logo { width: var(--wl-space-6); height: var(--wl-space-6); flex: none; }
+.match-draft-team strong, .match-draft-first strong { color: var(--draft-side-text); font-size: 12px; }
+.match-draft-team small, .match-draft-first { color: var(--muted); font-size: 11px; line-height: 1.2; }
+.match-draft-team small { display: block; overflow-wrap: anywhere; }
+.match-draft-first { margin: 0; text-align: center; }
+.match-draft-first strong { display: block; }
+.match-draft-phase { border-top: 1px solid var(--wl-divider); padding-block: var(--wl-space-1); }
+.match-draft-phase h4 {
+  margin: 0 0 var(--wl-space-1);
+  font-size: 12px;
+  line-height: 1.25;
+}
+.match-draft-actions {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--wl-space-1);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.match-draft-actions + .match-draft-actions { margin-top: var(--wl-space-1); }
+.match-draft-action {
+  --draft-portrait: calc(var(--wl-space-6) + var(--wl-space-1));
+  display: grid;
+  grid-template-columns: var(--wl-space-4) var(--draft-portrait) minmax(0, 1fr);
+  align-items: center;
+  gap: var(--wl-space-1);
+  padding: var(--wl-space-2);
+  border-radius: var(--wl-control-radius);
+  background: var(--surface);
+  font-size: 12px;
+  line-height: 1.15;
+}
+.match-draft-action:is(:hover, :focus-visible) { background: var(--wl-raised); }
+.match-draft-action:focus-visible { outline: 2px solid var(--wl-accent); outline-offset: -2px; }
+.match-draft-action .av {
+  display: block;
+  width: var(--draft-portrait);
+  height: var(--draft-portrait);
+  margin: 0;
+  border-inline-start: var(--wl-space-1) solid var(--draft-side);
+  border-radius: 0;
+}
+.match-draft-action .av img { object-fit: cover; }
+.match-draft-phase[data-kind="bans"] .av img { filter: saturate(.45); opacity: .85; }
+.match-draft-action[data-highlight] {
+  box-shadow: inset 0 0 0 1px var(--wl-accent);
+}
+.match-draft-highlight {
+  display: block;
+  margin-top: var(--wl-space-1);
+  color: var(--wl-accent);
+  font-size: 11px;
+  font-weight: 700;
+}
+.match-draft-number { color: var(--muted); font-variant-numeric: tabular-nums; }
+.match-draft-action-info { min-width: 0; }
+.match-draft-action-info :is(strong, small) {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.match-draft-action-info small { color: var(--draft-side-text); font-size: 11px; }
+@container match-draft (min-width: 248px) {
+  .match-draft-actions { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (min-width: 1024px) {
+  @container match-draft (min-width: 384px) {
+    .match-draft-actions:has(> :nth-child(3)) { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  }
+}
 .foot { margin-top: var(--worlds-section-gap); padding-top: var(--wl-space-4); border-top: 1px solid var(--line); max-width: none; line-height: 1.7; }
 @media (max-width: 1100px) { .analytics-columns { grid-template-columns: 1fr; } }
 @media (max-width: 1023px) {
@@ -771,8 +948,8 @@
   .comparison-metrics, .comparison-selectors { grid-template-columns: 1fr; }
   .tools input, .tools select { width: 100%; flex: 1 1 100%; min-width: 0; }
   .tablewrap td.champ { position: sticky; left: 0; background: var(--surface); z-index: 1; }
-  .cg { overflow-x: auto; padding-inline: var(--wl-space-3); }
-  .match-details { min-width: 320px; }
+  .cg { padding-inline: var(--wl-space-3); }
+  .match-details { min-width: 0; }
   .match-team .team-logo { width: 26px; height: 26px; }
   .match-lanes .kda-column { width: 43px; }
   .match-champion { gap: 6px; }
