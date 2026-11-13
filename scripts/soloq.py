@@ -20,7 +20,9 @@ import argparse
 import json
 import os
 import sys
+import threading
 import time
+from concurrent.futures import ThreadPoolExecutor
 import urllib.error
 import urllib.parse
 import urllib.request
@@ -61,6 +63,7 @@ class Riot:
     def __init__(self, key):
         self.key = key
         self.last = defaultdict(float)
+        self.locks = defaultdict(threading.Lock)
         self.calls = 0
 
     def get(self, host, path, params=None):
@@ -68,10 +71,11 @@ class Riot:
         if params:
             url += "?" + urllib.parse.urlencode(params)
         for attempt in range(6):
-            wait = self.last[host] + 1.25 - time.monotonic()  # 100 chamadas / 2 min por região
-            if wait > 0:
-                time.sleep(wait)
-            self.last[host] = time.monotonic()
+            with self.locks[host]:  # 100 chamadas / 2 min por região de roteamento
+                wait = self.last[host] + 1.25 - time.monotonic()
+                if wait > 0:
+                    time.sleep(wait)
+                self.last[host] = time.monotonic()
             self.calls += 1
             request = urllib.request.Request(url, headers={"X-Riot-Token": self.key, "User-Agent": "weblol-soloq"})
             try:
@@ -187,44 +191,65 @@ def normalize(match, timeline, pros_by_puuid, champions_by_key, platform):
 
 
 def collect(config, cache, ddragon, key):
+    """Cada região de roteamento (asia, americas, europe...) tem seu próprio limite, então roda em paralelo.
+    SOLOQ_MINUTES limita o tempo de download; o que faltar entra na próxima execução."""
     riot = Riot(key)
+    deadline = time.monotonic() + float(os.environ.get("SOLOQ_MINUTES", "100")) * 60
     champions_by_key = {int(c["key"]): c["name"] for c in ddragon["champions"].values()}
     days = config.get("days", 14)
     per_account = config.get("maxGamesPerAccount", 20)
     since = datetime.now(timezone.utc) - timedelta(days=days)
     pros_by_puuid, wanted, missing = {}, {}, []
-    for pro in config["pros"]:
-        for account in pro["accounts"]:
-            platform = account["platform"]
-            match_region, account_region, _ = ROUTING[platform]
-            name, tag = account["riotId"].rsplit("#", 1)
-            found = riot.get(account_region, f"/riot/account/v1/accounts/by-riot-id/{urllib.parse.quote(name)}/{urllib.parse.quote(tag)}")
-            if not found:
-                missing.append(f'{pro["name"]}: {account["riotId"]}')
-                continue
-            pros_by_puuid[found["puuid"]] = pro
-            match_ids = riot.get(match_region, f'/lol/match/v5/matches/by-puuid/{found["puuid"]}/ids',
-                                 {"queue": SOLO_QUEUE, "startTime": int(since.timestamp()), "count": per_account}) or []
-            for match_id in match_ids:
-                wanted[match_id] = (platform, match_region)
-    added = 0
+
+    def lookup(entry):
+        pro, account = entry
+        platform = account["platform"]
+        match_region, account_region, _ = ROUTING[platform]
+        name, tag = account["riotId"].rsplit("#", 1)
+        found = riot.get(account_region, f"/riot/account/v1/accounts/by-riot-id/{urllib.parse.quote(name)}/{urllib.parse.quote(tag)}")
+        if not found:
+            missing.append(f'{pro["name"]}: {account["riotId"]}')
+            return
+        pros_by_puuid[found["puuid"]] = pro
+        ids = riot.get(match_region, f'/lol/match/v5/matches/by-puuid/{found["puuid"]}/ids',
+                       {"queue": SOLO_QUEUE, "startTime": int(since.timestamp()), "count": min(per_account, 100)}) or []
+        for match_id in ids:
+            wanted[match_id] = (platform, match_region)
+
+    accounts = [(pro, account) for pro in config["pros"] for account in pro["accounts"]]
+    with ThreadPoolExecutor(max_workers=8) as pool:
+        list(pool.map(lookup, accounts))
+
+    by_region = defaultdict(list)
     for match_id, (platform, region) in wanted.items():
-        if match_id in cache:
-            continue
-        match = riot.get(region, f"/lol/match/v5/matches/{match_id}")
-        timeline = riot.get(region, f"/lol/match/v5/matches/{match_id}/timeline")
-        if not match or not timeline or match["info"].get("queueId") != SOLO_QUEUE:
-            continue
-        if match["info"]["gameDuration"] < 300:  # remake
-            continue
-        cache[match_id] = normalize(match, timeline, pros_by_puuid, champions_by_key, platform)
-        added += 1
+        if match_id not in cache:
+            by_region[region].append((match_id, platform))
+    added, pending = Counter(), Counter()
+
+    def download(region):
+        for index, (match_id, platform) in enumerate(by_region[region]):
+            if time.monotonic() > deadline:
+                pending[region] = len(by_region[region]) - index
+                return
+            match = riot.get(region, f"/lol/match/v5/matches/{match_id}")
+            timeline = riot.get(region, f"/lol/match/v5/matches/{match_id}/timeline")
+            if not match or not timeline or match["info"].get("queueId") != SOLO_QUEUE:
+                continue
+            if match["info"]["gameDuration"] < 300:  # remake
+                continue
+            cache[match_id] = normalize(match, timeline, pros_by_puuid, champions_by_key, platform)
+            added[region] += 1
+
+    with ThreadPoolExecutor(max_workers=len(by_region) or 1) as pool:
+        list(pool.map(download, list(by_region)))
     cutoff = int(since.timestamp() * 1000)
     for match_id in [m for m, game in cache.items() if game["created"] < cutoff]:
         del cache[match_id]
-    print(f"{riot.calls} chamadas à API · {added} partidas novas · {len(cache)} no cache")
+    print(f"{riot.calls} chamadas à API · {sum(added.values())} partidas novas {dict(added)} · {len(cache)} no cache")
+    if pending:
+        print(f"Ficaram para a próxima execução: {dict(pending)}")
     if missing:
-        print("Contas não encontradas (confira o Riot ID em scripts/soloq-pros.json):\n  " + "\n  ".join(missing))
+        print("Contas não encontradas (confira o Riot ID em scripts/soloq-pros.json):\n  " + "\n  ".join(sorted(missing)))
 
 
 # ---------------------------------------------------------------- dados da aba
