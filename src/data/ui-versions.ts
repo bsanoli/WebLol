@@ -8,6 +8,13 @@ export interface UiVersion {
 
 export const UI_VERSIONS: UiVersion[] = [
   {
+    version: "1.27",
+    date: "2026-11-13",
+    changes: [
+      "Composições: cada comp mostra uma bolinha azul ou vermelha ao lado do nome, indicando o lado escolhido para ela.",
+    ],
+  },
+  {
     version: "1.26",
     date: "2026-11-13",
     changes: [

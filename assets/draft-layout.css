@@ -154,3 +154,8 @@
   #v-comps.draft-view .tm > .pk.mine .pk-target { order: 2; }
   #v-comps.draft-view .dz { height: auto; min-height: max(600px, calc(100dvh - 230px)); }
 }
+
+/* Lado da comp ao lado do nome */
+.side-dot { display: inline-block; flex: none; width: 8px; height: 8px; margin-right: 6px; border-radius: 50%; vertical-align: 1px; }
+.side-dot.blue { background: var(--wl-side-blue, #3b82f6); box-shadow: 0 0 0 2px color-mix(in srgb, var(--wl-side-blue, #3b82f6) 30%, transparent); }
+.side-dot.red { background: var(--wl-side-red, #ef4444); box-shadow: 0 0 0 2px color-mix(in srgb, var(--wl-side-red, #ef4444) 30%, transparent); }

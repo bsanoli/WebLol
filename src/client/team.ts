@@ -99,7 +99,7 @@ function renderList(){
   clearTeamControls(list);
   list.innerHTML=matches
    .map(c=>{const firsts=(S.view==="draft"?pickOrderLanes(c):["top","jg","mid","adc","sup"]).map(l=>c.lanes[l][0]).filter(Boolean);
-     return `<div class="composition-item"><button class="ci${c.id===S.cur?" on":""}" aria-pressed="${c.id===S.cur}" data-id="${c.id}"><b>${esc(c.name)}</b>
+     return `<div class="composition-item"><button class="ci${c.id===S.cur?" on":""}" aria-pressed="${c.id===S.cur}" data-id="${c.id}"><b>${sideDot(c)}${esc(c.name)}</b>
       <span class="mini">${firsts.map(img).join("")||'<small style="color:var(--mut)">vazia</small>'}</span></button><span class="composition-menu" data-team-control></span></div>`}).join("")||'<div style="color:var(--mut);padding:10px;font-size:12px">Nenhuma comp.</div>';
   list.querySelectorAll(".composition-menu").forEach((host,index)=>{
     const {id,name}=matches[index];
@@ -281,6 +281,8 @@ const DORDER=[
  ["Fase de picks 2",["R:pick","B:pick","B:pick","R:pick"]]];
 const PLANES=["top","jg","mid","adc","sup"];
 // Lanes na ordem de pick da comp, do lado escolhido (para mostrar os campeões nessa ordem)
+// Bolinha azul/vermelha com o lado da comp
+const sideDot=c=>{const side=draftOf(c).side;return `<span class="side-dot ${side}" role="img" aria-label="${DRAFT_SIDE[side]}" title="${DRAFT_SIDE[side]}"></span>`};
 function pickOrderLanes(c){const d=draftOf(c);return d.order[d.side]}
 function draftOf(c){
   if(!c.draft)c.draft={};const d=c.draft;
@@ -339,7 +341,7 @@ function draftHTML(c){
   // Clicar no nome de um lado coloca o time nesse lado.
   const sideName=t=>{const side=t==="B"?"b":"r",key=t==="B"?"blue":"red",mine=t===us;return `<h3 class="tmh" id="draft-side-${side}"><button type="button" class="side-pick${mine?" on":""}" data-side="${key}" aria-pressed="${mine}" title="${mine?"Nosso time está neste lado":"Clique para colocar nosso time neste lado"}">${DRAFT_SIDE[key]}<span>${mine?"Nossa equipe":"Adversário"}</span></button></h3>`};
   const tabs=S.comps.map(x=>{const firsts=pickOrderLanes(x).map(l=>x.lanes[l][0]).filter(Boolean);
-    return `<button type="button" class="dz-tab${x.id===c.id?" on":""}" data-comp-tab="${esc(x.id)}" aria-pressed="${x.id===c.id}" title="${esc(x.name)}"><b>${esc(x.name)}</b><span class="mini">${firsts.map(img).join("")||'<small>vazia</small>'}</span></button>`}).join("");
+    return `<button type="button" class="dz-tab${x.id===c.id?" on":""}" data-comp-tab="${esc(x.id)}" aria-pressed="${x.id===c.id}" title="${esc(x.name)}"><b>${sideDot(x)}${esc(x.name)}</b><span class="mini">${firsts.map(img).join("")||'<small>vazia</small>'}</span></button>`}).join("");
   h+=`<div class="dz">${team("B")}
     <div class="dz-center">
       <div class="dz-names">${sideName("B")}${sideName("R")}</div>
