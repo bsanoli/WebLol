@@ -143,13 +143,16 @@ function renderDraftLaneNotes(c){
   list.hidden=!list.childElementCount;
 }
 
+// Destaca o "Anotações da composição" recolhido quando há algo escrito
+function hasCompNotes(c,dv){const d=draftOf(c);return !!((c.notes||"").trim()||(dv&&(d.note[d.side]||"").trim()))}
+const markCompNotes=()=>$("#composition-notes")?.classList.toggle("has-notes",hasCompNotes(cur(),S.view==="draft"));
 function renderEditor(){
   const previousComposition = $("#editor").dataset.motionComposition;
   const c=cur(),dv=S.view==="draft";
   const notesOpen=$("#composition-notes")?.open;
   $("#v-comps").classList.toggle("draft-view",dv);
   $("#draft-comp").hidden=true;
-  const notes=`<details id="composition-notes" ${notesOpen?"open":""}><summary>Anotações da composição</summary><label class="control-label" for="notes">Plano geral</label><textarea id="notes" placeholder="Plano de jogo, condição de vitória…">${esc(c.notes)}</textarea>${dv?`<label class="control-label" for="dnote">Plano do draft · ${DRAFT_SIDE[draftOf(c).side]}</label><textarea id="dnote">${esc(draftOf(c).note[draftOf(c).side])}</textarea><ul id="notes-lanes" class="draft-lane-notes" aria-label="Observações por posição" hidden></ul>`:""}</details>`;
+  const notes=`<details id="composition-notes" ${notesOpen?"open":""} class="${hasCompNotes(c,dv)?"has-notes":""}"><summary>Anotações da composição<span class="notes-flag" aria-label="tem anotação" title="Esta comp tem anotação">${iconMarkup("edit")}</span></summary><label class="control-label" for="notes">Plano geral</label><textarea id="notes" placeholder="Plano de jogo, condição de vitória…">${esc(c.notes)}</textarea>${dv?`<label class="control-label" for="dnote">Plano do draft · ${DRAFT_SIDE[draftOf(c).side]}</label><textarea id="dnote">${esc(draftOf(c).note[draftOf(c).side])}</textarea><ul id="notes-lanes" class="draft-lane-notes" aria-label="Observações por posição" hidden></ul>`:""}</details>`;
   const editor = $("#editor");
   if (!editor.firstElementChild) {
     editor.innerHTML = `<div class="editor-controls"><input data-slot="input" id="cname" aria-label="Nome da composição" placeholder="Nome da composição"><div class="vtog wl-motion-pill" role="group" aria-label="Modo da composição"><button data-slot="button" data-variant="ghost" data-view="lanes">Opções por posição</button><button data-slot="button" data-variant="ghost" data-view="draft">Ordem do draft</button></div></div>`;
@@ -201,8 +204,8 @@ const touch=()=>{cur().updated=Date.now()};
 $("#v-comps").addEventListener("input",e=>{
   const c=cur();
   if(e.target.id==="cname"){c.name=e.target.value;touch();save();renderList()}
-  else if(e.target.id==="notes"){c.notes=e.target.value;touch();save()}
-  else if(e.target.id==="dnote"){const d=draftOf(c);d.note[d.side]=e.target.value;touch();save()}
+  else if(e.target.id==="notes"){c.notes=e.target.value;touch();save();markCompNotes()}
+  else if(e.target.id==="dnote"){const d=draftOf(c);d.note[d.side]=e.target.value;touch();save();markCompNotes()}
 });
 $("#editor").addEventListener("change",e=>{
   if(!e.target.matches("select[data-pick-position]"))return;

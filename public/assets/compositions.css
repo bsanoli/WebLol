@@ -354,3 +354,9 @@ summary::-webkit-details-marker { display:none; }
   #v-comps .ch .av { width:54px; height:54px; }
   #v-comps .ch .nm { font-size:12px; }
 }
+
+/* Anotações recolhidas: destaque discreto quando a comp tem anotação */
+#composition-notes .notes-flag { display: none; }
+#composition-notes.has-notes > summary { color: var(--wl-accent); font-weight: 600; }
+#composition-notes.has-notes:not([open]) .notes-flag { display: inline-flex; align-items: center; justify-content: center; width: 18px; height: 18px; margin-left: 6px; border-radius: 50%; background: var(--wl-accent-soft); color: var(--wl-accent); vertical-align: middle; }
+#composition-notes .notes-flag .icon { width: 11px; height: 11px; }

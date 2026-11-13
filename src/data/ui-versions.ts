@@ -8,6 +8,13 @@ export interface UiVersion {
 
 export const UI_VERSIONS: UiVersion[] = [
   {
+    version: "1.20",
+    date: "2026-11-13",
+    changes: [
+      "Composições: quando a comp tem anotação, o item Anotações da composição recolhido fica em destaque, com um ícone de lápis, para o time saber que há algo escrito.",
+    ],
+  },
+  {
     version: "1.19",
     date: "2026-11-13",
     changes: [
