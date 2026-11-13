@@ -1,7 +1,7 @@
 import { LOL_DATA, lolImage } from "./lol-media"
 import { esc } from "./worlds-display"
-import { runeNames } from "../data/worlds-2026-builds.json"
-import assets from "../data/worlds-2026-build-assets.json"
+import { runeNames } from "@dataset/builds"
+import assets from "@dataset/build-assets"
 
 type Frequency = { value: number; count: number; percent: number }
 type RuneBuild = {

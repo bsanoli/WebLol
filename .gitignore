@@ -1,3 +1,5 @@
 node_modules/
 dist/
+dist-soloq/
 /public/assets/icons.svg
+__pycache__/

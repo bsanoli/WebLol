@@ -5,7 +5,13 @@ import { fileURLToPath } from "node:url"
 
 const root = fileURLToPath(new URL("../", import.meta.url))
 const dist = join(root, "dist")
-const pages = ["assets", "camp.html", "worlds.html", "index.html"]
+const distSoloq = join(root, "dist-soloq")
+const pages = ["assets", "camp.html", "worlds.html", "index.html", "soloq.html"]
+
+// A aba SoloQ sai de um segundo build (vite build --mode soloq); junta tudo em dist/.
+statSync(join(distSoloq, "soloq.html"))
+cpSync(join(distSoloq, "assets"), join(dist, "assets"), { recursive: true })
+cpSync(join(distSoloq, "soloq.html"), join(dist, "soloq.html"))
 
 // The GitHub Pages source is the repository root. These paths are generated.
 // Check the build before replacing any of the files served by Pages.

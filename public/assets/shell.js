@@ -313,10 +313,10 @@ async function renderAdmin(){
 }
 
 /* ================= abas ================= */
-const screens = { worlds: "./worlds.html", camp: "./camp.html" };
+const screens = { worlds: "./worlds.html", soloq: "./soloq.html", camp: "./camp.html" };
 const loaded = new Map();
 let currentScreen;
-const routeRoots = { worlds: "/worlds", camp: "/time", admin: "/admin" };
+const routeRoots = { worlds: "/worlds", soloq: "/soloq", camp: "/time", admin: "/admin" };
 const frames = [...document.querySelectorAll("#screens iframe")];
 
 function readRoute() {

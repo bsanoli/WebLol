@@ -8,8 +8,8 @@ import { TournamentOverview } from "@/components/analytics"
 import { Button } from "@/components/ui/button"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { iconMarkup, laneIconMarkup } from "./icon"
-import DATA from "../data/worlds.json"
-import DRAFTS from "../data/worlds-2026-drafts.json"
+import DATA from "@dataset/summary"
+import DRAFTS from "@dataset/drafts"
 import { LOL_DATA, lolAsset, lolChampion, lolKey } from "./lol-media"
 import { abilityDetail, buildDetails, buildGameCount, buildLaneHighlights, buildMatchesQuery, buildMatchups, buildOpponentOptions, buildsTable, hydrateBuildTimelines, orderedMatchups } from "./worlds-builds"
 import { effectText } from "./worlds-effect-text"
@@ -17,6 +17,7 @@ import { WorldsOpponentSelect } from "./worlds-opponent-select"
 import { LANES, LC, kdaOf, pct, wrPill, ico, esc, championSlug, teamLogo, teamRegion, teamCode } from "./worlds-display"
 import { initializeTheme } from "./theme"
 import { revealContent } from "./motion"
+import { DATASET } from "./dataset"
 
 initializeTheme()
 
@@ -240,7 +241,7 @@ function showSort(sort) {
 
 // KPIs
 const topBan=[...C].sort((a,b)=>b.bans-a.bans)[0], topPick=[...C].sort((a,b)=>b.picks-a.picks)[0];
-document.getElementById('kpis').innerHTML=[[G,"jogos"],[C.length,"campeões usados"],[topBan.name,`mais banido · ${pct(topBan.bans/G)}`],[topPick.name,`mais pickado · ${topPick.picks}`]]
+if (topBan && topPick) document.getElementById('kpis').innerHTML=[[G,"jogos"],[C.length,"campeões usados"],[topBan.name,`mais banido · ${pct(topBan.bans/G)}`],[topPick.name,`mais pickado · ${topPick.picks}`]]
  .map(([v,l],i)=>`<div class="wl-panel kpi" data-tip="${["Total de jogos do Play-In até as Semifinais","Campeões que foram pickados ou banidos pelo menos uma vez",`${topBan.name} foi banido em ${topBan.bans} de ${G} jogos`,`${topPick.name} foi escolhido em ${topPick.picks} jogos (${topPick.wins} vitórias)`][i]}"><div class="v">${esc(v)}</div><div class="l">${l}</div></div>`).join("");
 
 const TABS = [
@@ -248,7 +249,8 @@ const TABS = [
   ["builds", "Builds", "inventory"],
   ["matchups", "Confrontos", "matchups"],
   ["comps", "Composições", "composition"],
-];
+].filter(([id]) => DATASET.tabs.includes(id));
+const defaultTab = TABS[0][0];
 const tabsRoot = createRoot(document.getElementById("tabs"));
 const laneById = new Map(LANES.map(([lane]) => [lane.toLowerCase(), lane]));
 let buildChampion = "", buildQuery = "", buildOpponent = "";
@@ -257,7 +259,7 @@ const laneFromParam = value => laneById.get(value) || "";
 
 function publishWorlds(id, parts = [], filters = {}, replace = false) {
   const query = new URLSearchParams(Object.entries(filters).filter(([, value]) => value)).toString();
-  const path = "/worlds" + worldsPaths[id] + parts.map(part => "/" + part).join("") + (query ? "?" + query : "");
+  const path = DATASET.root + worldsPaths[id] + parts.map(part => "/" + part).join("") + (query ? "?" + query : "");
   if (window.frameElement) window.frameElement.dispatchEvent(new CustomEvent("weblol:navigate", {detail:{path, replace}}));
   else if (location.hash !== "#" + path) history[replace ? "replaceState" : "pushState"](null, "", "#" + path);
 }
@@ -269,7 +271,7 @@ window.applyWebLolRoute = ([page, first, second], params) => {
     return;
   }
   const legacyChampions = page === "campeoes";
-  const id = legacyChampions ? "builds" : Object.keys(worldsPaths).find(key => worldsPaths[key] === "/" + page) || "geral";
+  const id = legacyChampions ? "builds" : Object.keys(worldsPaths).find(key => worldsPaths[key] === "/" + page) || defaultTab;
   const query = params.get("busca") || "";
   const lane = laneFromParam(params.get("posicao"));
   if (id === "builds") {
@@ -303,7 +305,7 @@ function renderTabs(active) {
       go(id);
       window.scrollTo(0, 0);
     },
-  }, createElement(TabsList, { "aria-label": "Análises do Worlds" },
+  }, createElement(TabsList, { "aria-label": DATASET.tabsLabel },
     TABS.map(([id, label, icon]) => createElement(TabsTrigger, {
       key: id, value: id, id: `worlds-tab-${id}`, "aria-controls": "view",
     }, createElement("svg", { className: "icon", "aria-hidden": true, focusable: false },
@@ -312,7 +314,7 @@ function renderTabs(active) {
 }
 function go(id) {
   const lane = laneById.get(id);
-  const tab = lane ? "builds" : validTab(id) ? id : "geral";
+  const tab = lane ? "builds" : validTab(id) ? id : defaultTab;
   const filters = lane ? {posicao:id} : {};
   window.applyWebLolRoute([worldsPaths[tab].slice(1)], new URLSearchParams(filters));
   publishWorlds(tab, [], filters);
@@ -336,7 +338,7 @@ function render(id){
   compStageRoot = undefined;
   window.frameElement?.dispatchEvent(new CustomEvent("weblol:analytics-clear"));
   document.getElementById("kpis").hidden = !!window.frameElement || id !== "geral";
-  if(!validTab(id))id="geral";
+  if(!validTab(id))id=defaultTab;
   if (previousPage !== id) renderTabs(id);
   const v = document.getElementById("view");
   v.setAttribute("aria-labelledby", `worlds-tab-${id}`);
@@ -470,7 +472,7 @@ function wireBuilds(){
           <h3>${ico(champion.name)}${esc(champion.name)}</h3>
           <div class="build-card-meta">
             <span>${esc(positionLabel)} · ${gameCount} ${gameCount === 1 ? "jogo" : "jogos"}</span>
-            ${selectedOpponent ? "" : `<span class="build-winrate">${wrPill(champion.wins,champion.picks)} <small>de vitórias no torneio</small></span>`}
+            ${selectedOpponent ? "" : `<span class="build-winrate">${wrPill(champion.wins,champion.picks)} <small>de vitórias ${DATASET.scope}</small></span>`}
           </div>
         </div>
         ${opponents.length ? `<div class="build-opponent-filter">
@@ -508,7 +510,8 @@ function wireBuilds(){
     bc.classList.toggle("build-detail", !!buildChampion);
     bc.innerHTML=back+(content
       ? `<div class="builds-workspace">${content}<aside class="wl-panel build-context build-context-side" aria-label="Contexto da build" aria-live="polite"><div class="build-context-transition"><div class="build-context-content">${context}</div></div></aside></div>`
-      : '<div class="empty-state" role="status"><h3>Nenhum campeão encontrado</h3><p>Ajuste a busca, a posição ou o mínimo de jogos.</p></div>');
+      : list.length ? '<div class="empty-state" role="status"><h3>Nenhum campeão encontrado</h3><p>Ajuste a busca, a posição ou o mínimo de jogos.</p></div>'
+      : '<div class="empty-state" role="status"><h3>Ainda não há partidas coletadas</h3><p>As builds aparecem aqui depois da primeira coleta diária.</p></div>');
     sortBuildRows();
     const opponentSelect = bc.querySelector("[data-build-opponent]");
     if (opponentSelect) {
@@ -1233,10 +1236,10 @@ if (!window.frameElement) {
     const [path, query] = location.hash.slice(1).split("?", 2);
     const params = new URLSearchParams(query);
     const shortChampionRoute = path.match(/^\/?(builds|campeoes)(?:\/([a-z0-9-]+))?$/);
-    if (path.startsWith("/worlds/")) window.applyWebLolRoute(path.split("/").slice(2), params);
+    if (path.startsWith(DATASET.root + "/")) window.applyWebLolRoute(path.split("/").slice(2), params);
     else if (shortChampionRoute) {
       const [, page, champion] = shortChampionRoute;
-      const canonicalPath = "/worlds/" + page + (champion ? "/" + champion : "") + (query ? "?" + query : "");
+      const canonicalPath = DATASET.root + "/" + page + (champion ? "/" + champion : "") + (query ? "?" + query : "");
       history.replaceState(null, "", "#" + canonicalPath);
       window.applyWebLolRoute([page, champion], params);
     } else if (path === "jogadores") window.applyWebLolRoute([path], params);
@@ -1246,7 +1249,7 @@ if (!window.frameElement) {
   addEventListener("hashchange", applyStandaloneRoute);
   applyStandaloneRoute();
 } else {
-  render("geral");
+  render(defaultTab);
   window.frameElement.dispatchEvent(new CustomEvent("weblol:route-ready"));
 }
 

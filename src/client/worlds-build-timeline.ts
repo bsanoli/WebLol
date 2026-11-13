@@ -1,6 +1,7 @@
-import { games } from "../data/worlds-2026-build-timeline.json"
+import { games } from "@dataset/build-timeline"
 import { bootItems, directOpponent, isCompletedItem, itemIcon, itemName } from "./worlds-builds"
 import { championSlug, esc, ico } from "./worlds-display"
+import { DATASET, isReference } from "./dataset"
 
 type Game = (typeof games)[number]
 type Player = Game["players"][number]
@@ -12,7 +13,8 @@ const rounds: Record<string, string> = {
   QUARTERFINALS: "Quartas", SEMIFINALS: "Semifinal", FINAL: "Final", FINALS: "Final",
 }
 
-function stageLabel(game: Game) {
+function stageLabel(game: Game, player: Player) {
+  if (game.stage === "soloq") return `${player.player} · ${game.round} · ${new Date(game.date + "T12:00:00").toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit" })}`;
   const round = rounds[game.round] ?? `Rodada ${game.round.replace(/\D/g, "")}`;
   return `${game.stage === "playin" ? "Play-in · " : ""}${round} · Jogo ${game.number}`;
 }
@@ -22,7 +24,7 @@ const isMajor = (item: number) => isCompletedItem(item) || bootItems.has(item);
 
 function entriesFor(champion: string, lane: string, opponent: string): Entry[] {
   return games.flatMap(game => game.players
-    .filter(player => player.champion === champion && (!lane || player.role === lane))
+    .filter(player => !isReference(player) && player.champion === champion && (!lane || player.role === lane))
     .map(player => {
       const side = player.side as "blue" | "red";
       return {
@@ -107,8 +109,8 @@ function gameRow({ game, player, opponent, won }: Entry) {
       <span class="build-timeline-meta">
         <strong class="${won ? "build-sample-wins" : "build-sample-losses"}">${won ? "V" : "D"}</strong>
         <span>${k}/${d}/${a}</span>
-        <span>${esc(stageLabel(game))}</span>
-        <a href="${esc(game.buildsSource)}" target="_blank" rel="noopener" aria-label="Ver jogo no gol.gg">gol.gg</a>
+        <span>${esc(stageLabel(game, player))}</span>
+        <a href="${esc(game.buildsSource)}" target="_blank" rel="noopener" aria-label="Ver jogo no ${DATASET.sourceName}">${DATASET.sourceName}</a>
       </span>
     </div>
     ${timeline(player)}
@@ -126,6 +128,6 @@ export function buildTimeline(champion: string, lane: string, opponent = "") {
       </div>
     </header>
     ${summary(entries)}
-    <p class="build-data-sample">Minuto médio da primeira compra de cada item completo, em ${entries.length === 1 ? "1 jogo" : `${entries.length} jogos`}. Compras na mesma ida à base aparecem no mesmo minuto. Fonte: gol.gg.</p>
+    <p class="build-data-sample">Minuto médio da primeira compra de cada item completo, em ${entries.length === 1 ? "1 jogo" : `${entries.length} jogos`}. Compras na mesma ida à base aparecem no mesmo minuto. ${DATASET.sourceNote}</p>
     <ol class="build-timeline-games" data-view="core">${entries.map(gameRow).join("")}</ol>`;
 }

@@ -14,6 +14,7 @@ import { UI_VERSIONS } from "./data/ui-versions"
 
 const sections = [
   { value: "worlds", label: "Worlds", href: "#/worlds" },
+  { value: "soloq", label: "SoloQ", href: "#/soloq" },
   { value: "camp", label: "Área do time", href: "#/time" },
   { value: "admin", label: "Administração", href: "#/admin" },
 ]
@@ -93,6 +94,7 @@ function App() {
       />
       <main id="screens" aria-label="Painel WebLol">
         <iframe id="v-worlds" className="view" title="Estatísticas do Worlds" />
+        <iframe id="v-soloq" className="view" title="Builds de SoloQ dos pros" />
         <iframe id="v-camp" className="view" title="Área do time" />
         <section id="v-admin" className="view" aria-label="Administração">
           <div className="wrap">
