@@ -7,6 +7,7 @@ const lsGet=(k,d=null)=>{try{const v=localStorage.getItem(k);return v==null?d:JS
 const lsSet=(k,v)=>{try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}};
 const fmtD=t=>new Date(t).toLocaleString("pt-BR",{dateStyle:"short",timeStyle:"short"});
 function toast(m,ms=3200){const t=$("#toast");t.textContent=m;t.classList.add("on");clearTimeout(toast.t);toast.t=setTimeout(()=>t.classList.remove("on"),ms)}
+const GKEY="lol-guest"; // Área do time sem usuário: alterações só temporárias
 const KEY="lol-comps-time-v1",UKEY="lol-user",BKEY="lol-base",SKEY="lol-sent",FPKEY="lol-admin-fp",TKEY="lol-team";
 // admins do app (Riot ID → e-mail no Firebase). Todos usam a mesma chave de admin, cada um com a sua senha.
 const ADMINS={"brunoltz#ltz":"brunoltzinv@gmail.com","panda#zada":"fabiano.rong@gmail.com"};
@@ -242,7 +243,7 @@ function updateStatus(keepChip){
   document.body.classList.toggle("isadmin",!!u?.admin||isCaptain());
   $("#logout").hidden=!u;
   const b=$("#send");
-  if(!u){setSync("Identificar-se para o time","warn");$("#sync").onclick=stepId;b.hidden=true;return}
+  if(!u){setSync(lsGet(GKEY)?"Sem usuário: alterações temporárias":"Entrar na Área do time","warn");$("#sync").onclick=stepId;b.hidden=true;return}
   if(u.solo||!TEAM){
     setSync(u.solo?"Sem time: as comps não são salvas":MEMB?.status==="pendente"?`Aguardando o capitão do ${MEMB.teamName||"time"}`:"Sem time","warn");
     $("#sync").onclick=stepTeam;b.hidden=true;return;

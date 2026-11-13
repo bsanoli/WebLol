@@ -8,6 +8,15 @@ export interface UiVersion {
 
 export const UI_VERSIONS: UiVersion[] = [
   {
+    version: "1.19",
+    date: "2026-11-13",
+    changes: [
+      "Worlds e SoloQ abrem sem usuário nem time. O login e a escolha de time só aparecem ao entrar na Área do time.",
+      "Área do time: novo botão \"Entrar sem usuário\" no login. As comps e alterações feitas ficam só até recarregar a página.",
+      "Administração > Times: coluna \"Versão das comps\" com a versão atual de cada time, quantas comps tem, quando e por quem foi publicada.",
+    ],
+  },
+  {
     version: "1.18",
     date: "2026-11-13",
     changes: [

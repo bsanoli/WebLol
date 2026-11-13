@@ -75,7 +75,8 @@ function stepId(){
 
    <div class="rid"><div><label for="rname">Nome no LoL</label><input data-slot="input" id="rname" placeholder="Nome (ex: brunoltz)" maxlength="16" autocomplete="username" spellcheck="false"></div><div><label for="rtag">Tag depois do #</label><input data-slot="input" id="rtag" placeholder="TAG" maxlength="5" autocomplete="off" spellcheck="false"></div></div>
    <div class="err"></div>
-   <div class="row"><button data-slot="button" data-variant="default" id="ok">Continuar</button></div>`);
+   <div class="row"><button data-slot="button" data-variant="outline" id="guest" title="As comps e alterações não são salvas">Entrar sem usuário</button><button data-slot="button" data-variant="default" id="ok">Continuar</button></div>`);
+  $("#guest").onclick=useGuest;
   const nm=$("#rname"),tg=$("#rtag");
   if(pendingId){const[a,b]=dispId(pendingId).split("#");nm.value=a;tg.value=b||""}
   const go=()=>{const n=nm.value.trim(),tag=tg.value.replace(/[#\s]/g,"").toUpperCase();
@@ -153,18 +154,31 @@ async function setSlot(id,slot){
   await putJ("oficial","admin",cur);ADMIN=cur;
 }
 async function finishLogin(admin){
+  localStorage.removeItem(GKEY);
   lsSet(UKEY,{id:dispId(pendingId),admin,created:Date.now()});
   await enterTeam();
   if(TEAM)toast(`Bem-vindo, ${dispId(pendingId)}!`);
 }
 // depois do login: entra no time, ou mostra a tela de time
+// Área do time sem usuário: dá para montar comps, mas nada é salvo (apaga ao recarregar)
+function useGuest(){
+  lsSet(GKEY,true);for(const k of[KEY,BKEY,SKEY])localStorage.removeItem(k);lsSet(TKEY,"__guest__");
+  closeModal();reloadCamp();updateStatus();
+  toast("Sem usuário: as comps e alterações feitas não são salvas.",5000);
+}
+// login e escolha de time só aparecem na Área do time
+function askOnCamp(){
+  if(currentScreen!=="camp"||$("#modal").open)return;
+  if(!user()){if(!lsGet(GKEY))stepId();return}
+  if(FB&&signedAs(user().id)&&!TEAM&&!user().solo)stepTeam();
+}
 async function enterTeam(){
   if(user()?.admin&&fbIsAdmin()){try{if(await migrateToTeams())toast("Time Fraldinha montado com todos os usuários e as comps salvas",5000)}catch(e){toast("Não consegui montar o time Fraldinha: "+e.message,6000)}}
   try{await loadMembership()}catch(e){TEAM=null}
   updateStatus();
   if(TEAM){closeModal();await sync();if(currentScreen==="admin")renderAdmin();return}
   if(user()?.solo){closeModal();return}
-  stepTeam();
+  if(currentScreen==="camp")stepTeam();else closeModal();
 }
 
 /* ================= tela de time (sem time / pedido pendente) ================= */
@@ -240,7 +254,9 @@ async function renderAdmin(){
   let envs=[],pedidos=[],membros=[],contas=[],times=[],todos=[];
   try{
     if(TEAM)[envs,membros]=await Promise.all([dbList(teamPath("envios")),dbList("membros","team",TEAM.id)]);
-    if(u.admin)[contas,times,todos]=await Promise.all([dbList("contas"),dbList("times"),dbList("membros")]);
+    if(u.admin){[contas,times,todos]=await Promise.all([dbList("contas"),dbList("times"),dbList("membros")]);
+      // versão atual das comps de cada time
+      await Promise.all(times.map(async t=>{try{const d=await dbGet(`times/${t.id}/dados`,"oficial");t.off=d?JSON.parse(d.json):null}catch(e){t.off=null}}));}
   }catch(e){el.innerHTML=`<h2>Administração</h2><div class="wl-panel card bad">Não consegui ler o banco: ${esc(e.message)}</div>`;return}
   pedidos=membros.filter(m=>m.status==="pendente");const ativos=membros.filter(m=>m.status==="ativo");
   const done=new Set((OFF?.log||[]).map(l=>l.sid)),subs=[];
@@ -273,7 +289,7 @@ async function renderAdmin(){
       const st=!x.conta?'<span class="mut">ainda não criou a senha</span>':x.m?.status==="pendente"?'<span style="color:var(--gold)">pedido pendente</span>':cap?"capitão":x.m?"membro":'<span class="mut">sem time</span>';
       return`<tr><td>${esc(x.riotId)}${x.admin?' <small class="mut">admin</small>':""}</td><td><select data-slot="select" data-team="${esc(x.key)}" aria-label="Time de ${esc(x.riotId)}"${cap?' disabled title="Capitão: troque o capitão do time antes"':""}>${teamOpts(x.m?.team||"")}</select></td><td>${st}</td><td>${x.admin||x.key===meKey()?"":`<button data-slot="button" data-variant="destructive" data-delu="${esc(x.key)}">Excluir</button>`}</td></tr>`}).join("")||'<tr><td colspan="4" class="mut">Nenhum usuário ainda.</td></tr>'}</table>
     <p class="mut">Excluir tira o usuário do time e apaga o cadastro dele. Se ele entrar de novo, volta sem time e precisa ser aceito outra vez.</p>`)}
-   ${details(`Times (${times.length})`,`<table><tr><th>Time</th><th>Capitão</th><th>Membros</th></tr>${times.map(t=>`<tr><td>${esc(t.name)}</td><td>${esc(t.captainId||t.captain)}</td><td>${todos.filter(m=>m.team===t.id&&m.status==="ativo").length}</td></tr>`).join("")}</table>`)}
+   ${details(`Times (${times.length})`,`<table><tr><th>Time</th><th>Capitão</th><th>Membros</th><th>Versão das comps</th></tr>${times.map(t=>{const o=t.off,n=o?.data?.comps?.length||0;return`<tr><td>${esc(t.name)}</td><td>${esc(t.captainId||t.captain)}</td><td>${todos.filter(m=>m.team===t.id&&m.status==="ativo").length}</td><td>${o?`<b>v${o.version}</b> <span class="mut">· ${n} comp${n===1?"":"s"}${o.at?` · ${fmtD(o.at)}`:""}${o.by?` · por ${esc(o.by)}`:""}</span>`:'<span class="mut">sem versão ainda</span>'}</td></tr>`}).join("")}</table>`)}
    <h2>Admins</h2>
    <div class="wl-panel card"><table><tr><th>Riot ID</th><th>E-mail no banco</th><th>Situação</th><th></th></tr>
     ${Object.entries(ADMINS).map(([id,em])=>{const sl=slotOf(ADMIN,id),main=normId(id)===normId(ADMIN.id),me=normId(id)===normId(u.id);
@@ -360,8 +376,9 @@ function openRoute() {
   if (!screen) writeRoute(routeRoots.worlds, true);
   show(screen || "worlds");
   for (const frame of frames) applyFrameRoute(frame);
-  if (!user() && currentScreen === "camp" && !$("#modal").open) stepId();
-  if (!user() && currentScreen === "worlds" && $("#modal").open) closeModal();
+  // Worlds e SoloQ não pedem usuário nem time
+  if (currentScreen !== "camp" && currentScreen !== "admin" && $("#modal").open) closeModal();
+  askOnCamp();
 }
 
 addEventListener("hashchange", () => openRoute());
@@ -427,7 +444,7 @@ $("#top").addEventListener("click", event => {
 
 /* ================= início ================= */
 (async function init(){
-  if(user()?.solo)localStorage.removeItem(KEY); // sem time: nada fica salvo entre uma visita e outra
+  if(user()?.solo||(!user()&&lsGet(GKEY)))localStorage.removeItem(KEY); // sem time ou sem usuário: nada fica salvo entre uma visita e outra
   KEYS=user()?.admin?await idbGet("adminKeys"):null;
   updateStatus();
   openRoute();
@@ -438,8 +455,7 @@ $("#top").addEventListener("click", event => {
       // login antigo (sem senha) ou sessão expirada: pede para entrar de novo com a senha
       pendingId=user().id;localStorage.removeItem(UKEY);clearTeamData();KEYS=null;reloadCamp();updateStatus();
       if(currentScreen==="admin"){writeRoute(routeRoots.camp);openRoute()}
-      if(!$("#modal").open)stepId();
-      toast("Agora cada jogador entra com Riot ID e senha. Crie a sua senha para continuar.",7000);
+      if(currentScreen==="camp"&&!$("#modal").open){stepId();toast("Agora cada jogador entra com Riot ID e senha. Crie a sua senha para continuar.",7000)}
     }else if(FB){
       if(user().admin)try{await loadAdminKey()}catch(e){}
       await enterTeam();
