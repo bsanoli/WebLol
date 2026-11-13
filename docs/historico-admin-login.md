@@ -8,6 +8,16 @@ Formato de cada entrada: data, pedido (palavras do Bruno), decisão (quem escolh
 
 ---
 
+## 13/11/2026: comp de exemplo para quem não tem cadastro e botão Cadastrar
+
+- **Pedido:** "para a pessoa sem cadastro, coloque uma comp genérica para aparecer na área do time e não a do xlsx. Também coloque um botão à esquerda da escolha do tema para poder cadastrar."
+- **Decisão:** pedido direto do Bruno, sem escolha extra.
+  - A comp inicial que vinha do comps.xlsx do time saiu do código. Agora quem não tem as comps de um time (sem usuário, sem time) vê a "Comp de exemplo: luta em time": Ornn/Sion, Sejuani/Vi, Orianna/Azir, Jinx/Aphelios e Braum/Rell.
+  - Quem está num time continua vendo a versão oficial do time.
+  - O botão "Cadastrar" aparece no topo, à esquerda do tema, só para quem não entrou com usuário. Ele abre a Área do time com a tela do Riot ID, que serve tanto para criar a conta quanto para entrar. No "Ver como" sem conta, o botão aparece, mas só avisa que é uma visualização.
+- **Regras do Firestore:** nenhuma mudança.
+- Versão da interface 1.32.
+
 ## 13/11/2026: Gestão do time para todo o time e "Ver como" capitão e membro
 
 - **Pedido:** "todos do time devem ter a aba de gestão do time com os jogadores que estão no time e o histórico de comps. Mas só o capitão pode aceitar a entrada no time ou excluir alguém do time. No histórico do time na gestão do time, faça um dropdown para o histórico inteiro para não ficar muito grande a tela. Com acesso de admin, faça algumas visões com essa variação da pessoa ser capitão ou não do time para eu ver como está ficando".

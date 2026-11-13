@@ -8,6 +8,14 @@ export interface UiVersion {
 
 export const UI_VERSIONS: UiVersion[] = [
   {
+    version: "1.32",
+    date: "2026-11-13",
+    changes: [
+      "Topo: botão Cadastrar à esquerda do seletor de tema para quem não entrou com usuário.",
+      "Área do time: quem entra sem usuário vê uma comp de exemplo genérica, e não mais a comp do time.",
+    ],
+  },
+  {
     version: "1.31",
     date: "2026-11-13",
     changes: [

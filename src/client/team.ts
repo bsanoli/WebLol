@@ -41,12 +41,12 @@ let S;
 function load(){
   try{S=JSON.parse(localStorage.getItem(KEY))}catch(e){S=null}
   if(!S||!Array.isArray(S.comps)){
-    // Comp inicial tirada do comps.xlsx da pasta
-    const c=blank("Comp 1 (do comps.xlsx)");
-    c.lanes.mid=["Akali"];c.lanes.jg=["Vi","Jarvan IV","Wukong"];
-    c.lanes.adc=["Kai'Sa","Ezreal","Xayah"];c.lanes.sup=["Nautilus","Leona","Karma","Rakan"];
-    c.laneNotes={top:"Counter pick",mid:"FP (first pick)",sup:"Leona/Karma"};
-    c.notes="Importada da planilha comps.xlsx.\nNa planilha tinha também uma coluna extra com Locke e Rakan (opções extras?).";
+    // Comp de exemplo (genérica) para quem ainda não tem as comps de um time
+    const c=blank("Comp de exemplo: luta em time");
+    c.lanes.top=["Ornn","Sion"];c.lanes.jg=["Sejuani","Vi"];c.lanes.mid=["Orianna","Azir"];
+    c.lanes.adc=["Jinx","Aphelios"];c.lanes.sup=["Braum","Rell"];
+    c.laneNotes={top:"Linha de frente",mid:"Controle e dano em área",adc:"Dano contínuo protegido"};
+    c.notes="Comp de exemplo. Entre com seu usuário e escolha um time para ver e editar as comps do seu time.";
     S={comps:[c],cur:c.id};
   }
   if(!S.comps.length){const c=blank();S.comps.push(c);S.cur=c.id}

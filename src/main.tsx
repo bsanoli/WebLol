@@ -69,6 +69,8 @@ function App() {
         secondaryAction={null}
         toolbar={
           <div className="header-actions">
+            {!user && <Button variant="default" className="signup-trigger" title="Criar conta ou entrar com seu Riot ID"
+              onClick={() => (window as unknown as { startSignup?: () => void }).startSignup?.()}>Cadastrar</Button>}
             <ThemePicker initialPalette={initialPalette} />
             <Button variant="ghost" className="account-trigger" popoverTarget="header-tools"
               aria-label={user ? `Conta de ${user}` : "Conta"} title={user || "Conta"}>

@@ -161,6 +161,11 @@ async function finishLogin(admin){
 }
 // depois do login: entra no time, ou mostra a tela de time
 // Área do time sem usuário: dá para montar comps, mas nada é salvo (apaga ao recarregar)
+// botão "Cadastrar" do topo: abre o login na Área do time
+window.startSignup=()=>{
+  if(preview())return toast("Você está vendo como quem não tem conta. Volte para a visão de admin no menu da conta.",5000);
+  localStorage.removeItem(GKEY);writeRoute(routeRoots.camp);openRoute();stepId();
+};
 function useGuest(){
   lsSet(GKEY,true);for(const k of[KEY,BKEY,SKEY])localStorage.removeItem(k);lsSet(TKEY,"__guest__");
   closeModal();reloadCamp();updateStatus();
