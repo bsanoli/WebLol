@@ -691,21 +691,64 @@ button.build-context-name:focus-visible { outline: 2px solid var(--wl-accent); o
 .comps-intro h2 { margin-bottom: 4px; }
 .comps-intro .hint { margin: 0; }
 .comp-filters {
+  --comp-control-height: var(--wl-button-height-sm);
   display: grid;
   grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr) repeat(2, minmax(0, .8fr)) auto;
   align-items: end;
-  gap: var(--wl-space-3);
-  padding: var(--wl-panel-padding);
+  gap: var(--wl-space-2);
+  padding: var(--wl-space-3);
 }
-.comp-filters :is(label, .comp-picker-field) { display: grid; gap: 4px; min-width: 0; color: var(--muted); font-size: var(--wl-label-size); }
-.comp-filters :is(input, select) { width: 100%; min-width: 0; min-height: var(--wl-button-height); color: var(--ink); }
+.comp-filters :is(label, .comp-picker-field) { display: grid; gap: var(--wl-space-1); min-width: 0; color: var(--muted); font-size: var(--wl-label-size); }
+.comp-filters input { width: 100%; min-width: 0; min-height: var(--wl-button-height); color: var(--ink); }
+.comp-filters > label input,
+.comp-filters .comp-picker-trigger { height: var(--comp-control-height); min-height: var(--comp-control-height); }
+.comp-stage-trigger { width: 100%; }
+.comp-stage-trigger [data-slot=select-value] { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.comp-stage-trigger[data-state=open] > svg { transform: rotate(180deg); }
 .comp-filter-hint { grid-column: 1/-1; margin: 0; color: var(--muted); font-size: 13px; }
-#comp-clear-all { min-height: var(--wl-button-height); justify-self: end; }
+.comp-filter-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--wl-space-2);
+}
+#comp-clear-all { --button-height: var(--comp-control-height); }
+.comp-filters .comp-wins-label {
+  display: flex;
+  align-items: center;
+  gap: var(--wl-space-2);
+  min-height: var(--comp-control-height);
+  color: var(--ink);
+  cursor: pointer;
+}
+.comp-wins-switch {
+  display: inline-flex;
+  align-items: center;
+  width: var(--wl-space-8);
+  height: calc(var(--wl-space-4) + var(--wl-space-1));
+  padding: 0;
+  border: 1px solid var(--muted);
+  border-radius: 999px;
+  background: var(--surface);
+  color: var(--ink);
+  cursor: pointer;
+}
+.comp-wins-label:hover .comp-wins-switch { border-color: var(--ink); }
+.comp-wins-switch[data-state=checked] { background: var(--ink); color: var(--surface); }
+.comp-wins-thumb {
+  width: var(--wl-space-3);
+  height: var(--wl-space-3);
+  border-radius: 50%;
+  background: currentColor;
+  transform: translateX(3px);
+}
+.comp-wins-thumb[data-state=checked] { transform: translateX(15px); }
 .comp-picker-field { position: relative; }
 .comp-picker-trigger { min-width: 0; min-height: var(--wl-button-height); height: auto; justify-content: space-between; padding-inline: var(--wl-space-2); text-align: left; white-space: normal; }
 .comp-picker-trigger .icon { flex: none; }
 .comp-picker-trigger[aria-expanded=true] > .icon { transform: rotate(180deg); }
 .comp-picker-value { display: flex; align-items: center; gap: 6px; min-width: 0; overflow-wrap: anywhere; }
+.comp-filters .comp-picker-value { overflow: hidden; white-space: nowrap; }
 .comp-picker-value .team-logo { width: 20px; height: 20px; }
 .comp-team-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .comp-picker {
@@ -761,7 +804,7 @@ button.build-context-name:focus-visible { outline: 2px solid var(--wl-accent); o
 .comp-picker-actions button { min-width: 0; min-height: 44px; height: auto; padding-inline: 6px; white-space: normal; }
 .comp-filter-chips { grid-column: 1/-1; display: flex; flex-wrap: wrap; gap: 8px; }
 .comp-filter-chips[hidden] { display: none; }
-.comp-filter-chips button { min-height: 44px; max-width: 100%; white-space: normal; }
+.comp-filter-chips button { min-height: var(--comp-control-height); max-width: 100%; white-space: normal; }
 .comp-filter-chips .av { width: 22px; height: 22px; margin: 0; }
 .comp-filter-chips .icon { width: 14px; height: 14px; }
 .comp-count { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 12px; margin: 14px 0 10px; color: var(--muted); font-size: 13px; }
@@ -1012,13 +1055,15 @@ html:has(.match-dialog[open]) { overflow: hidden; }
 .foot { margin-top: var(--worlds-section-gap); padding-top: var(--wl-space-4); border-top: 1px solid var(--line); max-width: none; line-height: 1.7; }
 @media (max-width: 1100px) { .analytics-columns { grid-template-columns: 1fr; } }
 @media (max-width: 1023px) {
-  .comp-filters { grid-template-columns: minmax(0, .9fr) minmax(0, 1fr) minmax(0, 1.1fr) minmax(0, 1fr) auto; gap: 8px; }
   .comp-picker-trigger { gap: 4px; padding-inline: 8px; font-size: 13px; }
   .comp-picker-value .icon { display: none; }
 }
 @media (max-width: 859px) {
   .comp-filters { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-  #comp-clear-all { grid-column: 1/-1; }
+  .comp-filter-actions { grid-column: 1/-1; justify-content: space-between; }
+}
+@media (pointer: coarse) {
+  .comp-filters { --comp-control-height: var(--wl-button-height); }
 }
 @media (max-width: 759px) {
   .metric-grid { grid-template-columns: repeat(2,minmax(0,1fr)); }

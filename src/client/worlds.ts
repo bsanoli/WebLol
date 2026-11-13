@@ -1,9 +1,12 @@
 // @ts-nocheck -- A tela legada ainda usa estado e eventos DOM sem tipos explícitos.
 import { createElement } from "react"
 import { createRoot } from "react-dom/client"
+import { Switch } from "radix-ui"
 import { animate } from "motion"
 import { Tabs, TabsList, TabsTrigger } from "@/components/arc/tabs/tabs"
 import { TournamentOverview } from "@/components/analytics"
+import { Button } from "@/components/ui/button"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { iconMarkup, laneIconMarkup } from "./icon"
 import DATA from "../data/worlds.json"
 import DRAFTS from "../data/worlds-2026-drafts.json"
@@ -281,6 +284,7 @@ window.applyWebLolRoute = ([page, first, second], params) => {
   } else if (id === "comps") {
     cQ = query;
     cTeam = params.get("time") || "";
+    cWinsOnly = params.get("vitorias") === "1";
     cSt = params.get("fase") || "";
     cChamps = new Set((params.get("campeoes") || "").split(",").filter(slug => compChampions.has(slug)));
     if (!DATA.comps.some(game => game.b === cTeam || game.r === cTeam)) cTeam = "";
@@ -316,6 +320,8 @@ function go(id) {
 
 let standaloneOverview;
 let opponentSelectRoot;
+let compActionsRoot;
+let compStageRoot;
 
 function render(id){
   const previousPage=document.body.dataset.page;
@@ -324,6 +330,10 @@ function render(id){
   standaloneOverview = undefined;
   opponentSelectRoot?.unmount();
   opponentSelectRoot = undefined;
+  compActionsRoot?.unmount();
+  compActionsRoot = undefined;
+  compStageRoot?.unmount();
+  compStageRoot = undefined;
   window.frameElement?.dispatchEvent(new CustomEvent("weblol:analytics-clear"));
   document.getElementById("kpis").hidden = !!window.frameElement || id !== "geral";
   if(!validTab(id))id="geral";
@@ -774,6 +784,7 @@ const compChampions = new Map(
     .map(name => [championSlug(name), name]),
 );
 let cTeam="",cQ="",cSt="",cChamps=new Set();
+let cWinsOnly = false;
 const teamFilterLabel = () => cTeam ? `${teamLogo(cTeam)}<span class="comp-team-name" title="${esc(cTeam)}">${esc(cTeam)}</span>` : "Todos os times";
 function compPicker({id, label, value, hint, options, image, search, empty, clear, category}) {
   return `<div class="comp-picker-field"><span>${label}</span>
@@ -798,7 +809,6 @@ function compPicker({id, label, value, hint, options, image, search, empty, clea
 }
 function compsView(){
   const teams=[...new Set(DATA.comps.flatMap(g=>[g.b,g.r]))].sort();
-  const sts=[...new Set(DATA.comps.map(g=>g.st))];
   return `<section class="worlds-compositions" aria-labelledby="comps-title">
     <div class="comps-intro">
       <h2 id="comps-title">Composições do Worlds</h2>
@@ -812,9 +822,9 @@ function compsView(){
       ${compPicker({id:"ct", label:"Times", value:teamFilterLabel(),
         options:teams.map(team => [team, team]), image:teamLogo, search:"Buscar time", empty:"Nenhum time encontrado.", clear:"Todos os times",
         category:{label:"Região", all:"Todas", values:[...new Set(teams.map(teamRegion).filter(Boolean))].sort(), forName:name => [teamRegion(name)]}})}
-      <label for="cs">Fase<select id="cs"><option value="">Todas as fases</option>${sts.map(t=>`<option${t===cSt?' selected':''}>${esc(t)}</option>`).join("")}</select></label>
-      <button id="comp-clear-all" type="button" data-slot="button" data-variant="outline">${iconMarkup("reset")} Limpar todos os filtros</button>
-      <p id="cc-hint" class="comp-filter-hint">A partida precisa ter todos os campeões selecionados, em qualquer lado.</p>
+      <div class="comp-picker-field"><span id="comp-stage-label">Fase</span><div id="comp-stage"></div></div>
+      <div id="comp-filter-actions" class="comp-filter-actions"></div>
+      <p id="cc-hint" hidden>A partida precisa ter todos os campeões selecionados, em qualquer lado.</p>
       <div id="cc-active" class="comp-filter-chips" role="group" aria-label="Campeões selecionados" hidden></div>
     </div>
     <p class="comp-count" id="cn" role="status"></p>
@@ -1065,9 +1075,63 @@ function wireComps(){
   };
   const activeChampions = document.getElementById("cc-active");
   const search = document.getElementById("cq");
-  const stage = document.getElementById("cs");
-  const clearAll = document.getElementById("comp-clear-all");
-  const hasFilters = () => Boolean(cQ || cTeam || cSt || cChamps.size);
+  const stages = [...new Set(all.map(game => game.st))];
+  compStageRoot = createRoot(document.getElementById("comp-stage"));
+  const drawStage = () => {
+    compStageRoot.render(createElement(Select, {
+      value: cSt || "all",
+      onValueChange: value => {
+        cSt = value === "all" ? "" : value;
+        drawStage();
+        updateResults();
+      },
+    },
+    createElement(SelectTrigger, {
+      id: "cs",
+      className: "comp-picker-trigger comp-stage-trigger",
+      "data-slot": "button",
+      "data-variant": "outline",
+      "aria-labelledby": "comp-stage-label cs",
+    }, createElement(SelectValue)),
+    createElement(SelectContent, {
+      className: "team-select-panel",
+      position: "popper",
+      align: "start",
+      collisionPadding: 8,
+    },
+    createElement(SelectItem, { value: "all" }, "Todas as fases"),
+    ...stages.map(stage => createElement(SelectItem, { key: stage, value: stage }, stage)))));
+  };
+  const hasFilters = () => Boolean(cQ || cTeam || cSt || cChamps.size || cWinsOnly);
+  compActionsRoot = createRoot(document.getElementById("comp-filter-actions"));
+  const drawActions = () => {
+    compActionsRoot.render([
+      createElement("label", { key: "wins", className: "comp-wins-label" },
+      createElement(Switch.Root, {
+        className: "comp-wins-switch",
+        checked: cWinsOnly,
+        "aria-describedby": "cc-hint",
+        onCheckedChange: checked => {
+          cWinsOnly = checked;
+          updateResults();
+        },
+      }, createElement(Switch.Thumb, { className: "comp-wins-thumb" })),
+      "Só vitórias",
+      ),
+      createElement(Button, {
+        key: "clear",
+        id: "comp-clear-all",
+        variant: "ghost",
+        size: "sm",
+        "aria-label": "Limpar todos os filtros",
+        "aria-disabled": !hasFilters(),
+        onClick: clearFilters,
+      },
+      createElement("svg", { className: "icon", "aria-hidden": true },
+        createElement("use", { href: "assets/icons.svg#reset" })),
+      "Limpar"),
+    ]);
+  };
   const drawChampions = () => {
     championPicker.sync();
     activeChampions.hidden = cChamps.size === 0;
@@ -1077,22 +1141,29 @@ function wireComps(){
     }).join("");
   };
   const draw=()=>{
-    clearAll.setAttribute("aria-disabled", String(!hasFilters()));
+    drawActions();
     const q=(cQ||"").trim().toLowerCase();
     const champions = [...cChamps].map(slug => compChampions.get(slug));
-    const L = all.filter(g =>
-      (!cTeam || g.b === cTeam || g.r === cTeam) &&
-      (!cSt || g.st === cSt) &&
-      champions.every(name => g.p.some(([, blue, , , red]) => blue === name || red === name)) &&
-      (!q || g.p.some(r => [r[1], r[2], r[4], r[5]].some(t => t.toLowerCase().includes(q))))
-    );
+    document.getElementById("cc-hint").textContent = cWinsOnly
+      ? "Os campeões selecionados, o time e a busca precisam corresponder ao lado vencedor."
+      : "A partida precisa ter todos os campeões selecionados, em qualquer lado.";
+    const L = all.filter(g => {
+      const championColumns = cWinsOnly ? [g.bw ? 1 : 4] : [1, 4];
+      const teamMatches = cWinsOnly ? (g.bw ? g.b : g.r) === cTeam : g.b === cTeam || g.r === cTeam;
+      return (!cTeam || teamMatches) &&
+        (!cSt || g.st === cSt) &&
+        champions.every(name => g.p.some(row => championColumns.some(column => row[column] === name))) &&
+        (!q || g.p.some(row => championColumns.some(column =>
+          row[column].toLowerCase().includes(q) || row[column + 1].toLowerCase().includes(q)
+        )));
+    });
     let extra="";
     if(cTeam){const w=L.filter(g=>(g.b===cTeam)===g.bw).length;extra=`<span>${esc(cTeam)} · ${w} vitórias · ${L.length-w} derrotas</span>`}
     document.getElementById('cn').innerHTML=`<strong>${L.length} jogo${L.length===1?'':'s'}</strong>${extra}`;
     const highlightedChampions = new Set(champions);
     matchGrid.innerHTML=L.map((g,index)=>compCard(g,q,highlightedChampions,index)).join("")||'<div class="empty-state"><h3>Nenhum jogo encontrado</h3><p>Remova um campeão ou ajuste os outros filtros para ver mais partidas.</p></div>';
   };
-  const publish = (replace = false) => publishWorlds("comps", [], {time:cTeam, fase:cSt, busca:cQ, campeoes:[...cChamps].join(",")}, replace);
+  const publish = (replace = false) => publishWorlds("comps", [], {time:cTeam, fase:cSt, busca:cQ, campeoes:[...cChamps].join(","), vitorias:cWinsOnly ? "1" : ""}, replace);
   const updateResults = () => {
     draw();
     enhanceAnalyticsUI();
@@ -1137,20 +1208,22 @@ function wireComps(){
     championPicker.trigger.focus();
   };
   search.oninput = () => { cQ=search.value; draw(); enhanceAnalyticsUI(); publish(true); };
-  stage.onchange = () => { cSt=stage.value; updateResults(); };
-  clearAll.onclick = () => {
+  function clearFilters() {
     if (!hasFilters()) return;
     search.value = cQ = "";
-    stage.value = cSt = "";
+    cSt = "";
+    drawStage();
     cTeam = "";
+    cWinsOnly = false;
     cChamps.clear();
     championPicker.resetBrowseFilters();
     teamPicker.resetBrowseFilters();
     drawTeam();
     updateChampions();
-  };
+  }
   teamPicker.sync();
   drawChampions();
+  drawStage();
   draw();
   enhanceAnalyticsUI();
 }
