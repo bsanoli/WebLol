@@ -8,6 +8,13 @@ export interface UiVersion {
 
 export const UI_VERSIONS: UiVersion[] = [
   {
+    version: "1.29",
+    date: "2026-11-13",
+    changes: [
+      "Builds (Worlds e SoloQ): Compras jogo a jogo abre em Todas as compras, que agora é a primeira opção; Itens completos e botas fica como alternativa.",
+    ],
+  },
+  {
     version: "1.28",
     date: "2026-11-13",
     changes: [

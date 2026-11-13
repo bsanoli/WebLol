@@ -123,11 +123,11 @@ export function buildTimeline(champion: string, lane: string, opponent = "") {
   return `<header class="build-timeline-header">
       <h4>Compras jogo a jogo</h4>
       <div class="build-skill-options build-timeline-view" role="group" aria-label="Quais compras mostrar">
-        <button type="button" data-slot="button" data-variant="outline" data-size="sm" data-timeline-view="core" aria-pressed="true">Itens completos e botas</button>
-        <button type="button" data-slot="button" data-variant="outline" data-size="sm" data-timeline-view="all" aria-pressed="false">Todas as compras</button>
+        <button type="button" data-slot="button" data-variant="outline" data-size="sm" data-timeline-view="all" aria-pressed="true">Todas as compras</button>
+        <button type="button" data-slot="button" data-variant="outline" data-size="sm" data-timeline-view="core" aria-pressed="false">Itens completos e botas</button>
       </div>
     </header>
     ${summary(entries)}
     <p class="build-data-sample">Minuto médio da primeira compra de cada item completo, em ${entries.length === 1 ? "1 jogo" : `${entries.length} jogos`}. Compras na mesma ida à base aparecem no mesmo minuto. ${DATASET.sourceNote}</p>
-    <ol class="build-timeline-games" data-view="core">${entries.map(gameRow).join("")}</ol>`;
+    <ol class="build-timeline-games" data-view="all">${entries.map(gameRow).join("")}</ol>`;
 }
