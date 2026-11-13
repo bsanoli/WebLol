@@ -8,6 +8,13 @@ export interface UiVersion {
 
 export const UI_VERSIONS: UiVersion[] = [
   {
+    version: "1.28",
+    date: "2026-11-13",
+    changes: [
+      "Menu da conta (só admin): novo campo \"Ver como\" para ver o site como um usuário sem admin ou como quem não tem conta. É só uma simulação: nada é enviado, e as comps do admin voltam ao sair dessa visão.",
+    ],
+  },
+  {
     version: "1.27",
     date: "2026-11-13",
     changes: [

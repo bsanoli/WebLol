@@ -169,8 +169,8 @@ function useGuest(){
 // login e escolha de time só aparecem na Área do time
 function askOnCamp(){
   if(currentScreen!=="camp"||$("#modal").open)return;
-  if(!user()){if(!lsGet(GKEY))stepId();return}
-  if(FB&&signedAs(user().id)&&!TEAM&&!user().solo)stepTeam();
+  if(!user()){if(!lsGet(GKEY)&&!preview())stepId();return}
+  if(FB&&signedAs(user().id)&&!TEAM&&!user().solo&&!preview())stepTeam();
 }
 async function enterTeam(){
   if(user()?.admin&&fbIsAdmin()){try{if(await migrateToTeams())toast("Time Fraldinha montado com todos os usuários e as comps salvas",5000)}catch(e){toast("Não consegui montar o time Fraldinha: "+e.message,6000)}}
@@ -178,7 +178,7 @@ async function enterTeam(){
   updateStatus();
   if(TEAM){closeModal();await sync();if(currentScreen==="admin")renderAdmin();return}
   if(user()?.solo){closeModal();return}
-  if(currentScreen==="camp")stepTeam();else closeModal();
+  if(currentScreen==="camp"&&!preview())stepTeam();else closeModal();
 }
 
 /* ================= tela de time (sem time / pedido pendente) ================= */
@@ -206,16 +206,16 @@ async function stepTeam(){
     try{await dbSet("times",id,{name,captain:meKey(),captainId:u.id,created:Date.now()});
       await dbSet("membros",meKey(),{team:id,status:"ativo",riotId:u.id,at:Date.now()});
       await dbSet(`times/${id}/dados`,"oficial",{json:JSON.stringify({version:1,at:Date.now(),label:"Time criado",by:u.id,data:{comps:[],plays:[]},log:[]}),at:Date.now()});
-      lsSet(UKEY,{...u,solo:false});await enterTeam();toast(`Time ${name} criado. Você é o capitão.`,5000)}
+      lsSet(UKEY,{...realUser(),solo:false});await enterTeam();toast(`Time ${name} criado. Você é o capitão.`,5000)}
     catch(e){merr("Erro: "+e.message);$("#create").disabled=false}};
   const j=$("#join");if(j)j.onclick=async()=>{const t=$("#tjoin").value;j.disabled=true;
-    try{await dbSet("membros",meKey(),{team:t,status:"pendente",riotId:u.id,at:Date.now()});lsSet(UKEY,{...u,solo:false});await enterTeam()}
+    try{await dbSet("membros",meKey(),{team:t,status:"pendente",riotId:u.id,at:Date.now()});lsSet(UKEY,{...realUser(),solo:false});await enterTeam()}
     catch(e){merr("Erro: "+e.message);j.disabled=false}};
   $("#tname").addEventListener("keydown",e=>{if(e.key==="Enter")$("#create").click()});
 }
 // sem time: pode montar comps, mas nada é salvo (a cópia local é apagada ao recarregar)
 function useSolo(){
-  const u=user();lsSet(UKEY,{...u,solo:true});guardTeam();closeModal();updateStatus();
+  const u=realUser();lsSet(UKEY,{...u,solo:true});guardTeam();closeModal();updateStatus();
   toast("Usando sem time: as comps feitas não são salvas.",5000);
 }
 
@@ -444,7 +444,7 @@ $("#top").addEventListener("click", event => {
 
 /* ================= início ================= */
 (async function init(){
-  if(user()?.solo||(!user()&&lsGet(GKEY)))localStorage.removeItem(KEY); // sem time ou sem usuário: nada fica salvo entre uma visita e outra
+  if(user()?.solo||(!user()&&(lsGet(GKEY)||preview()==="guest")))localStorage.removeItem(KEY); // sem time ou sem usuário: nada fica salvo entre uma visita e outra
   KEYS=user()?.admin?await idbGet("adminKeys"):null;
   updateStatus();
   openRoute();
