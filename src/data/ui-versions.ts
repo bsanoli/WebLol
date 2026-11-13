@@ -8,6 +8,14 @@ export interface UiVersion {
 
 export const UI_VERSIONS: UiVersion[] = [
   {
+    version: "1.23",
+    date: "2026-11-13",
+    changes: [
+      "Catálogo de campeões: Ordenar por e Lane do time ficaram mais compactos.",
+      "Catálogo de campeões: saíram o rodapé com a contagem de campeões e a dica com os números do Worlds ao passar o mouse.",
+    ],
+  },
+  {
     version: "1.22",
     date: "2026-11-13",
     changes: [

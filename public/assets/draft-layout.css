@@ -113,3 +113,11 @@
   #v-comps .dz-tab .mini .av { width: 100%; height: auto; aspect-ratio: 1; }
   #v-comps .dz-tab.dz-new { min-height: 56px; }
 }
+
+/* Catálogo: Ordenar por e Lane do time compactos */
+#champ-picker .gtools .team-select [data-team-trigger="select"],
+#champ-picker .gtools select,
+#champ-picker .gtools input { min-height: 30px; height: 30px; padding-block: 2px; padding-inline: 8px; font-size: 12px; }
+#champ-picker .gtools .team-select { margin-top: 2px; }
+#champ-picker .gtools .team-select [data-team-trigger="select"] .lane-icon { width: 14px; height: 14px; }
+#champ-picker #gfoot[hidden] { display: none; }

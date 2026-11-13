@@ -380,12 +380,11 @@ function renderGrid(){
   else if(srt==="wsb")L.sort((a,b)=>((WS.c[b.n]||[0,0,0])[2]-(WS.c[a.n]||[0,0,0])[2])||a.n.localeCompare(b.n));
   else L.sort((a,b)=>a.n.localeCompare(b.n));
   $("#grid").innerHTML=L.map(ch=>{const w=WS.c[ch.n],wh=where[ch.n];
-    const tip=ch.n+(w?`\nWorlds 2026: ${w[0]} picks (${w[0]?Math.round(w[1]/w[0]*100):0}% vitórias), ${w[2]} bans em ${WS.g} jogos · lane: ${w[3]}`:"\nNão foi jogado no Worlds 2026");
-    return `<button class="ch${wh?" in":""}" aria-pressed="${c.lanes[active].includes(ch.n)}" draggable="true" data-n="${esc(ch.n)}" title="${esc(tip)}">${img(ch.n)}
+    return `<button class="ch${wh?" in":""}" aria-pressed="${c.lanes[active].includes(ch.n)}" draggable="true" data-n="${esc(ch.n)}" aria-label="${esc(ch.n)}">${img(ch.n)}
       ${wh?`<span class="tag" style="--lc:var(${wh[0].c})">${wh.map(l=>l.n.slice(0,3).toUpperCase()).join("/")}</span>`:""}
       ${srt!=="az"&&w?`<span class="ws">${srt==="ws"?w[0]:w[2]}</span>`:""}
       <span class="nm">${esc(ch.n)}</span></button>`}).join("")||'<div style="color:var(--mut)">Nenhum campeão encontrado.</div>';
-  $("#gfoot").textContent=`${L.length} de ${CH.length} campeões · imagens: Riot Data Dragon · passe o mouse para ver os números do Worlds 2026`;
+  $("#gfoot").textContent="";
 }
 $("#grid").onclick=e=>{
   const ch=e.target.closest(".ch");if(!ch)return;const n=ch.dataset.n,c=cur(),a=c.lanes[active];
