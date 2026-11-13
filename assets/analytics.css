@@ -356,8 +356,8 @@
 }
 .builds-table .build-inline-detail > td { padding: 0; }
 .build-inline-detail .bcard { padding-top: var(--wl-space-2); }
-.build-page-link {
-  margin-left: auto;
+.worlds-detail-action {
+  margin-inline-start: auto;
   gap: var(--wl-space-1);
   font-size: 12px;
 }
@@ -742,7 +742,6 @@
   .cg:has(> .match-draft:not([hidden])) > .match-card-header { grid-column: 1; }
   .match-dialog .match-draft-title { padding-inline-end: calc(var(--wl-space-12) + var(--wl-space-2)); }
   .cg:has(> .match-draft:not([hidden])) > .match-details { grid-column: 1; grid-row: 2; }
-  .match-draft-toggle .icon { transform: rotate(-90deg); }
   .cg > .match-draft:not([hidden]) {
     grid-column: 2;
     grid-row: 1 / span 2;
@@ -779,7 +778,6 @@
 }
 .match-dialog-close[data-slot="button"]:hover { background: var(--wl-raised); }
 html:has(.match-dialog[open]) { overflow: hidden; }
-.match-draft-toggle .icon { transform: rotate(-90deg); }
 @media (max-width: 959px) {
   .match-dialog { width: calc(100vw - var(--wl-space-4)); max-height: calc(100dvh - var(--wl-space-4)); }
   .match-dialog .match-card-header {
@@ -826,9 +824,7 @@ html:has(.match-dialog[open]) { overflow: hidden; }
 .cg mark { background: var(--gold-soft); color: inherit; border-radius: var(--wl-control-radius); }
 .match-draft { margin-top: var(--wl-space-4); }
 .match-draft-toggle[data-slot="button"] {
-  min-height: calc(var(--wl-space-12) - var(--wl-space-1));
   flex: none;
-  cursor: pointer;
 }
 .match-draft-title {
   display: flex;

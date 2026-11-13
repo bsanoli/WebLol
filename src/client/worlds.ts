@@ -456,7 +456,7 @@ function wireBuilds(){
         </div>
       </header>`;
     const action = pageSlug
-      ? `<button class="build-page-link" data-slot="button" data-variant="ghost" data-size="sm" type="button" data-build="${pageSlug}" aria-label="Abrir página da build de ${esc(champion.name)}">Ver página ${iconMarkup("next")}</button>`
+      ? `<button class="worlds-detail-action" data-slot="button" data-variant="ghost" data-size="sm" type="button" data-build="${pageSlug}" aria-label="Abrir página da build de ${esc(champion.name)}">Ver página ${iconMarkup("next")}</button>`
       : "";
     return `<article class="bcard${pageSlug ? "" : " wl-panel"}">
       ${heading}
@@ -959,8 +959,8 @@ function compCard(g, q, champions, index: number){
   return `<article class="wl-panel cg">
     <div class="match-card-header">
       <h3 class="match-game">${esc(g.st)} <span aria-hidden="true">·</span> Jogo ${g.g}</h3>
-      ${draft ? `<button type="button" class="match-draft-toggle" data-slot="button" data-variant="outline"
-        aria-haspopup="dialog" aria-controls="match-dialog"><span>Ver draft</span>${iconMarkup("descending")}</button>` : ""}
+      ${draft ? `<button type="button" class="worlds-detail-action match-draft-toggle" data-slot="button" data-variant="ghost" data-size="sm"
+        aria-haspopup="dialog" aria-controls="match-dialog">Ver draft ${iconMarkup("next")}</button>` : ""}
     </div>
     <div class="match-details">
       <div class="match-scoreboard">${team(g.b,"azul",g.bw)}<span class="vs">VS</span>${team(g.r,"vermelho",!g.bw)}</div>
@@ -998,6 +998,7 @@ function wireComps(){
     const closeButton = card.querySelector<HTMLButtonElement>(".match-draft-toggle");
     closeButton.removeAttribute("aria-haspopup");
     closeButton.removeAttribute("aria-controls");
+    closeButton.classList.remove("worlds-detail-action");
     closeButton.classList.replace("match-draft-toggle", "match-dialog-close");
     closeButton.dataset.variant = "ghost";
     closeButton.dataset.size = "icon-lg";
