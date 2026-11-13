@@ -9,6 +9,8 @@ type Entry = { game: Game; player: Player; opponent?: Player; won: boolean }
 
 const minutes = new Intl.NumberFormat("pt-BR", { maximumFractionDigits: 1 })
 const percent = new Intl.NumberFormat("pt-BR", { maximumFractionDigits: 0 })
+const number = new Intl.NumberFormat("pt-BR")
+const gamesPerPage = 5
 const rounds: Record<string, string> = {
   QUARTERFINALS: "Quartas", SEMIFINALS: "Semifinal", FINAL: "Final", FINALS: "Final",
 }
@@ -117,17 +119,44 @@ function gameRow({ game, player, opponent, won }: Entry) {
   </li>`;
 }
 
-export function buildTimeline(champion: string, lane: string, opponent = "") {
+export function renderBuildTimeline(section: HTMLElement) {
+  const { buildTimeline: champion = "", lane = "", opponent = "" } = section.dataset;
   const entries = entriesFor(champion, lane, opponent);
-  if (!entries.length) return '<p class="na">Sem compras registradas.</p>';
-  return `<header class="build-timeline-header">
+  if (!entries.length) {
+    section.innerHTML = '<p class="na">Sem compras registradas.</p>';
+    return;
+  }
+  let visible = Math.min(gamesPerPage, entries.length);
+  const status = () => `Mostrando ${number.format(visible)} de ${number.format(entries.length)} ${entries.length === 1 ? "partida" : "partidas"}`;
+  const loadLabel = () => {
+    const next = Math.min(gamesPerPage, entries.length - visible);
+    return next === 1 ? "Carregar mais 1 partida" : `Carregar mais ${next} partidas`;
+  };
+  section.innerHTML = `<header class="build-timeline-header">
       <h4>Compras jogo a jogo</h4>
       <div class="build-skill-options build-timeline-view" role="group" aria-label="Quais compras mostrar">
-        <button type="button" data-slot="button" data-variant="outline" data-size="sm" data-timeline-view="all" aria-pressed="true">Todas as compras</button>
-        <button type="button" data-slot="button" data-variant="outline" data-size="sm" data-timeline-view="core" aria-pressed="false">Itens completos e botas</button>
+        <button type="button" data-slot="button" data-variant="outline" data-size="sm" data-timeline-view="core" aria-pressed="true">Itens completos e botas</button>
+        <button type="button" data-slot="button" data-variant="outline" data-size="sm" data-timeline-view="all" aria-pressed="false">Todas as compras</button>
       </div>
     </header>
     ${summary(entries)}
     <p class="build-data-sample">Minuto médio da primeira compra de cada item completo, em ${entries.length === 1 ? "1 jogo" : `${entries.length} jogos`}. Compras na mesma ida à base aparecem no mesmo minuto. ${DATASET.sourceNote}</p>
-    <ol class="build-timeline-games" data-view="all">${entries.map(gameRow).join("")}</ol>`;
+    <p class="build-timeline-count build-data-sample" role="status">${status()}</p>
+    <ol class="build-timeline-games" data-view="core">${entries.slice(0, visible).map(gameRow).join("")}</ol>
+    ${visible < entries.length ? `<button type="button" data-slot="button" data-variant="outline" data-size="sm" class="build-timeline-more">${loadLabel()}</button>` : ""}`;
+
+  const list = section.querySelector<HTMLOListElement>(".build-timeline-games")!;
+  const count = section.querySelector<HTMLElement>(".build-timeline-count")!;
+  const more = section.querySelector<HTMLButtonElement>(".build-timeline-more");
+  more?.addEventListener("click", () => {
+    const start = visible;
+    visible = Math.min(start + gamesPerPage, entries.length);
+    list.insertAdjacentHTML("beforeend", entries.slice(start, visible).map(gameRow).join(""));
+    count.textContent = status();
+    const firstAdded = list.children[start] as HTMLElement;
+    firstAdded.tabIndex = -1;
+    firstAdded.focus();
+    if (visible === entries.length) more.remove();
+    else more.textContent = loadLabel();
+  });
 }

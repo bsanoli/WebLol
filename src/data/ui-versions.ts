@@ -8,6 +8,15 @@ export interface UiVersion {
 
 export const UI_VERSIONS: UiVersion[] = [
   {
+    version: "1.33",
+    date: "2026-11-13",
+    changes: [
+      "Builds reúne Worlds e SoloQ, com filtros por posição e adversário na página do campeão.",
+      "As frequências das runas usam a amostra da árvore selecionada.",
+      "Compras jogo a jogo mostra cinco partidas por vez e abre com itens completos e botas.",
+    ],
+  },
+  {
     version: "1.32",
     date: "2026-11-13",
     changes: [

@@ -1,9 +1,13 @@
 // O mesmo código das abas do Worlds monta a aba SoloQ. O build com `--mode soloq`
 // troca os arquivos de `@dataset/*` (ver vite.config.ts) e estes textos.
-export const SOLOQ = import.meta.env.MODE === "soloq"
+export const SOLOQ = import.meta.env.DEV
+  ? document.body.dataset.dataset === "soloq"
+  : import.meta.env.MODE === "soloq"
 
 export const DATASET = SOLOQ ? {
   root: "/soloq",
+  source: "soloq",
+  label: "SoloQ dos pros",
   tabs: ["builds"],
   tabsLabel: "Análises da SoloQ",
   scope: "na amostra",
@@ -15,7 +19,9 @@ export const DATASET = SOLOQ ? {
   matchupGames: "com adversário direto",
 } : {
   root: "/worlds",
-  tabs: ["geral", "builds", "matchups", "comps"],
+  source: "worlds",
+  label: "Worlds",
+  tabs: ["geral", "matchups", "comps"],
   tabsLabel: "Análises do Worlds",
   scope: "no torneio",
   scopeLong: "Win rate e ban rate consideram o torneio inteiro.",

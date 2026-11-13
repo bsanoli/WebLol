@@ -1,5 +1,5 @@
 import { fileURLToPath, URL } from "node:url"
-import { defineConfig } from "vite"
+import { defineConfig, type Plugin } from "vite"
 import react from "@vitejs/plugin-react"
 import tailwindcss from "@tailwindcss/vite"
 
@@ -24,14 +24,42 @@ const datasets = {
   },
 }
 
-export default defineConfig(({ mode }) => {
+function developmentDatasets(): Plugin {
+  const prefix = "weblol-dataset:"
+  return {
+    name: "weblol-development-datasets",
+    apply: "serve",
+    resolveId(id) {
+      if (id.startsWith("@dataset/")) return "\0" + prefix + id.slice("@dataset/".length)
+    },
+    load(id) {
+      if (!id.startsWith("\0" + prefix)) return
+      const name = id.slice(prefix.length + 1) as keyof typeof datasets.worlds
+      const worlds = datasets.worlds[name]
+      const soloq = datasets.soloq[name]
+      if (!worlds || !soloq) return
+      const exports = name === "builds"
+        ? "export const { champions, games, itemNames, runeNames } = data;"
+        : name === "build-timeline" ? "export const { games } = data;" : ""
+      return `
+        const data = (await (document.body.dataset.dataset === "soloq"
+          ? import("/${soloq}")
+          : import("/${worlds}"))).default;
+        export default data;
+        ${exports}
+      `
+    },
+  }
+}
+
+export default defineConfig(({ command, mode }) => {
   const soloq = mode === "soloq"
   const dataset = soloq ? datasets.soloq : datasets.worlds
   return {
     root: src(""),
     publicDir: fileURLToPath(new URL("./public", import.meta.url)),
     base: "./",
-    plugins: [react(), tailwindcss()],
+    plugins: [developmentDatasets(), react(), tailwindcss()],
     server: {
       port: soloq ? 5174 : 5173,
       strictPort: true,
@@ -45,7 +73,9 @@ export default defineConfig(({ mode }) => {
     },
     resolve: {
       alias: [
-        ...Object.entries(dataset).map(([name, path]) => ({ find: `@dataset/${name}`, replacement: src(path) })),
+        ...(command === "build"
+          ? Object.entries(dataset).map(([name, path]) => ({ find: `@dataset/${name}`, replacement: src(path) }))
+          : []),
         { find: "@", replacement: src("") },
       ],
     },

@@ -20,6 +20,7 @@ type BuildData = Omit<SampleBuild, "skillOrder" | "starterItems" | "runePage"> &
 type BuildIconKind = "item" | "rune" | "spell"
 type Option = { label: string; icons: string[]; percent: number }
 const buildData: Partial<Record<string, Partial<Record<string, BuildData>>>> = champions
+const finalBootIds = new Set(Object.values(champions).flatMap(({ all }) => all.boots.map(entry => entry.value)))
 const itemLabels: Partial<Record<number, string>> = itemNames
 const runeLabels: Partial<Record<number, string>> = runeNames
 const runeAssets: Partial<Record<number, (string | null)[]>> = buildAssets.runes
@@ -94,12 +95,13 @@ function opponentBuild(champion: Champion, lane: string, opponent: string): Buil
   const starters = players.map(player => (player.itemEventsByMinute as [number, number[]][])
     .filter(([minute]) => minute === 0).flatMap(([, items]) => items)
     .filter(item => item > 0 && !startingTrinkets.has(item)).sort((a, b) => a - b).join(",")).filter(Boolean);
+  const playerBoots = players.map(player => player.boots ?? player.finalItems.filter(id => finalBootIds.has(id)));
   return {
     games,
     starterItems: frequencies(starters, games).map(entry => ({ ...entry, value: entry.value.split(",").map(Number) })),
     finalItems: frequencies(players.flatMap(player => [...new Set(player.finalItems)]), games),
-    boots: frequencies(players.flatMap(player => [...new Set(player.boots)]), games),
-    gamesWithoutFinalBoots: players.filter(player => !player.boots.length).length,
+    boots: frequencies(playerBoots.flatMap(boots => [...new Set(boots)]), games),
+    gamesWithoutFinalBoots: playerBoots.filter(boots => !boots.length).length,
     spells: frequencies(players.map(player => [...player.spells].sort().join("+")), games),
     primaryTrees: frequencies(players.map(player => player.primaryTree), games),
     secondaryTrees: frequencies(players.map(player => player.secondaryTree), games),
@@ -327,10 +329,11 @@ function buildHtml(champion: Champion, lane: string, withTimeline: boolean, oppo
 export async function hydrateBuildTimelines(root: ParentNode) {
   const sections = [...root.querySelectorAll<HTMLElement>("[data-build-timeline]:not([data-ready])")];
   if (!sections.length) return;
-  const { buildTimeline } = await import("./worlds-build-timeline");
+  const { renderBuildTimeline } = await import("./worlds-build-timeline");
   for (const section of sections) {
+    if (!section.isConnected || section.hasAttribute("data-ready")) continue;
     section.dataset.ready = "";
-    section.innerHTML = buildTimeline(section.dataset.buildTimeline ?? "", section.dataset.lane ?? "", section.dataset.opponent);
+    renderBuildTimeline(section);
   }
 }
 

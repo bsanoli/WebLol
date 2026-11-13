@@ -382,14 +382,18 @@ async function renderAdmin(){
 const screens = { worlds: "./worlds.html", soloq: "./soloq.html", camp: "./camp.html" };
 const loaded = new Map();
 let currentScreen;
-const routeRoots = { worlds: "/worlds", soloq: "/soloq", camp: "/time", admin: "/admin" };
+let currentFrame;
+let focusBuildSource = false;
+const routeRoots = { worlds: "/worlds", builds: "/builds", camp: "/time", admin: "/admin" };
 const frames = [...document.querySelectorAll("#screens iframe")];
 
 function readRoute() {
   const [path, query] = location.hash.slice(1).split("?", 2);
   const [, root, ...parts] = path.split("/");
   const screen = Object.keys(routeRoots).find(name => routeRoots[name] === "/" + root);
-  return { screen, parts, params: new URLSearchParams(query) };
+  const params = new URLSearchParams(query);
+  const frame = screen === "builds" ? params.get("fonte") === "soloq" ? "soloq" : "worlds" : screen;
+  return { screen, frame, parts: screen === "builds" ? ["builds", ...parts] : parts, params };
 }
 
 function writeRoute(path, replace = false) {
@@ -399,8 +403,14 @@ function writeRoute(path, replace = false) {
 
 function applyFrameRoute(frame) {
   const route = readRoute();
-  if (frame.id === "v-" + route.screen && route.screen === currentScreen) {
-    frame.contentWindow.applyWebLolRoute?.(route.parts, route.params);
+  if (frame.id === "v-" + route.frame && route.screen === currentScreen) {
+    const apply = frame.contentWindow.applyWebLolRoute;
+    if (!apply) return;
+    apply(route.parts, route.params);
+    if (route.screen === "builds" && focusBuildSource) {
+      frame.contentDocument.querySelector('[data-build-source][aria-pressed="true"]')?.focus();
+      if (frame.dataset.ready === "true") focusBuildSource = false;
+    }
   }
 }
 
@@ -409,22 +419,36 @@ for (const frame of frames) {
   frame.addEventListener("load", () => {
     if (!frame.hasAttribute("srcdoc")) return;
     frame.dataset.ready = "true";
-    if (frame.id === "v-" + currentScreen) $("#screen-loading").hidden = true;
+    if (frame.id === "v-" + currentFrame) $("#screen-loading").hidden = true;
     applyFrameRoute(frame);
   });
   frame.addEventListener("weblol:navigate", ({ detail }) => {
-    if (frame.id !== "v-" + currentScreen) return;
+    if (frame.id !== "v-" + currentFrame) return;
+    if (detail.focusSource) focusBuildSource = true;
     writeRoute(detail.path, detail.replace);
+    const route = readRoute();
+    if (route.screen !== currentScreen || route.frame !== currentFrame) openRoute();
     if (detail.copy) void copyCurrentLink();
   });
 }
 
 function openRoute() {
-  const shortChampionRoute = location.hash.match(/^#\/?((?:builds|campeoes)(?:\/[a-z0-9-]+)?(?:\?.*)?)$/);
-  if (shortChampionRoute) writeRoute("/worlds/" + shortChampionRoute[1], true);
-  const { screen } = readRoute();
+  const [rawPath, query] = location.hash.slice(1).split("?", 2);
+  const path = rawPath.startsWith("/") ? rawPath : "/" + rawPath;
+  const builds = path.match(/^\/(?:(worlds)\/)?(builds|campeoes)(\/[^/]+)?\/?$/);
+  const soloq = path.match(/^\/soloq(?:\/builds(\/[^/]+)?)?\/?$/);
+  if (builds || soloq) {
+    const params = new URLSearchParams(query);
+    const useSoloq = Boolean(soloq) || (builds?.[2] === "builds" && !builds[1] && params.get("fonte") === "soloq");
+    const source = useSoloq ? "soloq" : "worlds";
+    params.set("fonte", source);
+    if (builds?.[2] === "campeoes" && !params.has("posicao")) params.set("posicao", "top");
+    writeRoute(routeRoots.builds + (soloq?.[1] || builds?.[3] || "") + "?" + params, true);
+  }
+  const { screen, frame } = readRoute();
+  if (screen !== "builds") focusBuildSource = false;
   if (!screen) writeRoute(routeRoots.worlds, true);
-  show(screen || "worlds");
+  show(screen || "worlds", frame || "worlds");
   for (const frame of frames) applyFrameRoute(frame);
   // Worlds e SoloQ não pedem usuário nem time
   if (currentScreen !== "camp" && currentScreen !== "admin" && $("#modal").open) closeModal();
@@ -454,7 +478,8 @@ async function loadScreen(name) {
       $("#v-" + name).srcdoc = await source;
     } catch {
       loaded.delete(name);
-      if (currentScreen === name) {
+      if (currentFrame === name) {
+        focusBuildSource = false;
         $("#screen-loading").hidden = true;
         const error = $("#screen-error");
         error.textContent = "Não foi possível carregar esta área. Selecione a aba para tentar novamente.";
@@ -464,16 +489,17 @@ async function loadScreen(name) {
   }
 }
 
-function show(t) {
-  if(t==="admin"&&!user()?.admin&&!isCaptain())t="camp";
+function show(t, frame) {
+  if(t==="admin"&&!user()?.admin&&!isCaptain())t=frame="camp";
   currentScreen = t;
+  currentFrame = frame;
   $("#header-tools").hidePopover();
   $("#screen-error").hidden = true;
-  $("#screen-loading").hidden = t === "admin" || $("#v-" + t).dataset.ready === "true";
+  $("#screen-loading").hidden = t === "admin" || $("#v-" + frame).dataset.ready === "true";
   document.body.dataset.currentScreen = t;
-  document.querySelectorAll(".view").forEach(view => view.classList.toggle("on", view.id === "v-" + t));
+  document.querySelectorAll(".view").forEach(view => view.classList.toggle("on", view.id === "v-" + frame));
   if (t === "admin") renderAdmin();
-  else void loadScreen(t);
+  else void loadScreen(frame);
 }
 
 reloadCamp = () => {
@@ -486,8 +512,8 @@ $("#top").addEventListener("click", event => {
   if (!link) return;
   event.preventDefault();
   const section = link.dataset.section;
-  if (section === currentScreen && readRoute().screen === currentScreen) return;
-  writeRoute(routeRoots[section]);
+  if (section === currentScreen && readRoute().screen === currentScreen && $("#screen-error").hidden) return;
+  writeRoute(link.hash.slice(1));
   openRoute();
 });
 

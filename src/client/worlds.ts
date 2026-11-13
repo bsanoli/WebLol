@@ -251,17 +251,28 @@ const TABS = [
   ["comps", "Composições", "composition"],
 ].filter(([id]) => DATASET.tabs.includes(id));
 const defaultTab = TABS[0][0];
-const tabsRoot = createRoot(document.getElementById("tabs"));
+const tabsHost = document.getElementById("tabs");
+const tabsRoot = tabsHost ? createRoot(tabsHost) : null;
 const laneById = new Map(LANES.map(([lane]) => [lane.toLowerCase(), lane]));
 let buildChampion = "", buildQuery = "", buildOpponent = "";
 const worldsPaths = { geral: "", builds: "/builds", matchups: "/confrontos", comps: "/composicoes" };
 const laneFromParam = value => laneById.get(value) || "";
 
 function publishWorlds(id, parts = [], filters = {}, replace = false) {
-  const query = new URLSearchParams(Object.entries(filters).filter(([, value]) => value)).toString();
-  const path = DATASET.root + worldsPaths[id] + parts.map(part => "/" + part).join("") + (query ? "?" + query : "");
+  const path = id === "builds" && window.frameElement
+    ? buildsPath(DATASET.source, parts, filters)
+    : DATASET.root + worldsPaths[id] + parts.map(part => "/" + part).join("") + routeQuery(filters);
   if (window.frameElement) window.frameElement.dispatchEvent(new CustomEvent("weblol:navigate", {detail:{path, replace}}));
   else if (location.hash !== "#" + path) history[replace ? "replaceState" : "pushState"](null, "", "#" + path);
+}
+
+function routeQuery(filters) {
+  const query = new URLSearchParams(Object.entries(filters).filter(([, value]) => value)).toString();
+  return query ? "?" + query : "";
+}
+
+function buildsPath(source, parts, filters) {
+  return "/builds" + parts.map(part => "/" + part).join("") + routeQuery({fonte:source, ...filters});
 }
 
 window.applyWebLolRoute = ([page, first, second], params) => {
@@ -297,7 +308,7 @@ window.applyWebLolRoute = ([page, first, second], params) => {
 };
 const validTab = id => TABS.some(tab => tab[0] === id);
 function renderTabs(active) {
-  tabsRoot.render(createElement(Tabs, {
+  tabsRoot?.render(createElement(Tabs, {
     value: active,
     activationMode: "manual",
     "data-variant": "underline",
@@ -338,10 +349,20 @@ function render(id){
   compStageRoot = undefined;
   window.frameElement?.dispatchEvent(new CustomEvent("weblol:analytics-clear"));
   document.getElementById("kpis").hidden = !!window.frameElement || id !== "geral";
-  if(!validTab(id))id=defaultTab;
+  if(id !== "builds" && !validTab(id))id=defaultTab;
+  const builds = id === "builds";
+  document.querySelector(".wrap > header").hidden = builds;
+  document.querySelector(".wrap > .foot").hidden = builds && DATASET.source === "worlds";
+  if (tabsHost) tabsHost.hidden = builds;
   if (previousPage !== id) renderTabs(id);
   const v = document.getElementById("view");
-  v.setAttribute("aria-labelledby", `worlds-tab-${id}`);
+  if (tabsRoot && !builds) {
+    v.setAttribute("role", "tabpanel");
+    v.setAttribute("aria-labelledby", `worlds-tab-${id}`);
+  } else {
+    v.removeAttribute("role");
+    v.removeAttribute("aria-labelledby");
+  }
   if(id==="geral"){v.innerHTML=overview();wireLaneOverview(v)}
   else if(id==="matchups"){v.innerHTML=muView();wireMu()}
   else if(id==="comps"){v.innerHTML=compsView();wireComps()}
@@ -379,7 +400,7 @@ function overview(){
         <td>${wrPill(c.wins, c.picks)}</td>
       </tr>`;
     }).join("");
-    const href = `${window.frameElement ? "./" : ""}#/worlds/builds?posicao=${id}`;
+    const href = `./#/builds?fonte=worlds&posicao=${id}`;
     return `<article class="wl-panel lane-card" data-go="${id}">
       <h3 class="wl-card-title" id="lane-title-${id}"><span class="lane-label">${laneIconMarkup(lane)}${lane}</span></h3>
       <table aria-labelledby="lane-title-${id}">
@@ -419,15 +440,27 @@ function syncBuildDetailSpan() {
 }
 compactBuilds.addEventListener("change", syncBuildDetailSpan);
 const buildLaneIcon = lane => lane ? laneIconMarkup(lane) : iconMarkup("layers");
+function buildLaneOptions(lanes, detail = false) {
+  return `<div class="build-lane-tabs${detail ? " build-detail-lanes" : ""}" role="group" aria-label="${detail ? "Posição do campeão" : "Filtrar por posição"}">
+    ${["", ...lanes].map(lane => {
+      const label = esc(lane || "Todas as posições");
+      return `<button type="button" data-slot="button" data-variant="ghost" data-lane="${esc(lane)}" aria-label="${label}" title="${label}" aria-pressed="${lane === bLane}">${buildLaneIcon(lane)}${detail ? esc(lane || "Todas") : ""}</button>`;
+    }).join("")}
+  </div>`;
+}
+
 function buildsView(){
   return `<section class="builds-page" aria-label="Builds">
+  <header class="builds-heading">
+    <div><h1>Builds</h1><p class="hint">${DATASET.label} · ${G.toLocaleString("pt-BR")} jogos na base</p></div>
+    <div class="build-source-options" role="group" aria-label="Fonte das builds">
+      ${[["worlds", "Worlds"], ["soloq", "SoloQ"]].map(([source, label]) =>
+        `<button type="button" data-slot="button" data-variant="${source === DATASET.source ? "default" : "ghost"}" data-build-source="${source}" aria-pressed="${source === DATASET.source}">${label}</button>`
+      ).join("")}
+    </div>
+  </header>
   <div class="wl-panel tools"><input data-slot="input" id="bq" type="search" placeholder="Buscar campeão ou item…" aria-label="Buscar campeão ou item">
-  <div class="build-lane-tabs" role="group" aria-label="Filtrar por posição">
-    ${["", ...LANES.map(([lane]) => lane)].map(lane => {
-      const label = esc(lane || "Todas as posições");
-      return `<button type="button" data-slot="button" data-variant="ghost" data-lane="${esc(lane)}" aria-label="${label}" title="${label}" aria-pressed="${lane === bLane}">${buildLaneIcon(lane)}</button>`;
-    }).join("")}
-  </div>
+  ${buildLaneOptions(LANES.map(([lane]) => lane))}
   <label class="build-min-games" for="bmin">Mínimo de jogos <input data-slot="input" id="bmin" type="number" min="0" step="1" inputmode="numeric" value="${buildMinGames}"></label>
   <button id="build-clear-all" type="button" data-slot="button" data-variant="outline">${iconMarkup("reset")} Limpar filtros</button></div>
   <div class="bcards" id="bc"></div></section>`}
@@ -458,7 +491,17 @@ function wireBuilds(){
     showSort(buildSort);
   };
   q.value=buildQuery;
-  const publish = (replace = false) => publishWorlds("builds", buildChampion ? [buildChampion] : [], {posicao:bLane.toLowerCase(), busca:buildQuery, minJogos:buildMinGames, adversario:buildChampion && buildOpponent}, replace);
+  const parts = () => buildChampion ? [buildChampion] : [];
+  const filters = () => ({posicao:bLane.toLowerCase(), busca:buildQuery, minJogos:buildMinGames, adversario:buildChampion && buildOpponent});
+  const publish = (replace = false) => publishWorlds("builds", parts(), filters(), replace);
+  document.querySelector(".build-source-options").onclick = event => {
+    const source = event.target.closest("[data-build-source]")?.dataset.buildSource;
+    if (!source || source === DATASET.source) return;
+    const expanded = bc.querySelector('.build-toggle[aria-expanded="true"]')?.dataset.buildToggle;
+    const path = buildsPath(source, expanded ? [expanded] : parts(), filters());
+    if (window.frameElement) window.frameElement.dispatchEvent(new CustomEvent("weblol:navigate", {detail:{path, focusSource:true}}));
+    else location.assign("./#" + path);
+  };
   const championCard = (champion: typeof C[number], position: string, pageSlug?: string, opponents = []) => {
     const inlineContext = pageSlug
       ? `<section class="build-context build-context-inline" aria-label="Confrontos da build">${buildMatchups(champion, position)}</section>`
@@ -471,7 +514,7 @@ function wireBuilds(){
         <div>
           <h3>${ico(champion.name)}${esc(champion.name)}</h3>
           <div class="build-card-meta">
-            <span>${esc(positionLabel)} · ${gameCount} ${gameCount === 1 ? "jogo" : "jogos"}</span>
+            <span>${DATASET.label} · ${gameCount} ${gameCount === 1 ? "jogo" : "jogos"} · ${esc(positionLabel)}</span>
             ${selectedOpponent ? "" : `<span class="build-winrate">${wrPill(champion.wins,champion.picks)} <small>de vitórias ${DATASET.scope}</small></span>`}
           </div>
         </div>
@@ -489,27 +532,39 @@ function wireBuilds(){
       ${inlineContext}
     </article>`;
   };
-  const draw=(restoreOpponentFocus = false)=>{const f=q.value.trim().toLowerCase();
+  const draw=(restoreOpponentFocus = false, normalizeRoute = false)=>{const f=q.value.trim().toLowerCase();
     opponentSelectRoot?.unmount();
     opponentSelectRoot = undefined;
     contextAnimation?.stop();
     contextAnimation = undefined;
     clearAll.setAttribute("aria-disabled", String(!hasFilters()));
-    const matches=list.filter(c=>buildChampion ? championSlug(c.name)===buildChampion :
+    const matches=buildChampion ? [] : list.filter(c=>
       games(c) > 0 && games(c) >= buildMinGames &&
       buildMatchesQuery(c, bLane, f));
-    const champion=buildChampion && matches[0];
-    const position = champion && champion.lanes[bLane] ? bLane : "";
+    const selectedChampion = buildChampion ? bySlug.get(buildChampion) : undefined;
+    const champion = selectedChampion && games(selectedChampion) > 0 ? selectedChampion : undefined;
+    const position = bLane;
     const opponents = champion ? buildOpponentOptions(champion, position) : [];
+    if (buildOpponent && !opponents.some(opponent => opponent.slug === buildOpponent)) {
+      buildOpponent = "";
+      if (normalizeRoute) publish(true);
+    }
     const context = champion ? buildMatchups(champion, position) : buildLaneHighlights(matches, bLane);
     highlights = champion ? "" : context;
     const content=champion
       ? championCard(champion, position, undefined, opponents)
       : matches.length ? buildsTable(matches, bLane) : "";
-    const back=buildChampion ? '<div class="build-back"><button data-slot="button" data-variant="outline" data-size="sm" class="build-route" data-build="">Voltar à lista de builds</button></div>' : '';
+    const availableLanes = selectedChampion
+      ? LANES.map(([lane]) => lane).filter(lane => buildGameCount(selectedChampion, lane) > 0)
+      : [];
+    const back = buildChampion ? `<div class="build-back">
+      <button data-slot="button" data-variant="outline" data-size="sm" class="build-route" data-build="">Voltar à lista de builds</button>
+      ${selectedChampion ? buildLaneOptions(availableLanes, true) : ""}
+    </div>` : "";
     bc.classList.toggle("build-detail", !!buildChampion);
     bc.innerHTML=back+(content
       ? `<div class="builds-workspace">${content}<aside class="wl-panel build-context build-context-side" aria-label="Contexto da build" aria-live="polite"><div class="build-context-transition"><div class="build-context-content">${context}</div></div></aside></div>`
+      : buildChampion ? `<div class="empty-state" role="status"><h3>Sem partidas para esta build</h3><p>A base ${DATASET.label} ainda não tem partidas para este campeão${bLane ? ` na posição ${esc(bLane)}` : ""}.</p></div>`
       : list.length ? '<div class="empty-state" role="status"><h3>Nenhum campeão encontrado</h3><p>Ajuste a busca, a posição ou o mínimo de jogos.</p></div>'
       : '<div class="empty-state" role="status"><h3>Ainda não há partidas coletadas</h3><p>As builds aparecem aqui depois da primeira coleta diária.</p></div>');
     sortBuildRows();
@@ -620,6 +675,17 @@ function wireBuilds(){
     enhanceAnalyticsUI();
   };
   bc.onclick=e=>{
+    const laneOption = e.target.closest(".build-detail-lanes button[data-lane]");
+    if (laneOption) {
+      const lane = laneOption.dataset.lane;
+      if (lane === bLane) return;
+      bLane = lane;
+      syncLane();
+      draw();
+      publish();
+      bc.querySelector('.build-detail-lanes [aria-pressed="true"]')?.focus({preventScroll:true});
+      return;
+    }
     const view = e.target.closest("[data-timeline-view]") as HTMLButtonElement | null;
     if (view) {
       const section = view.closest(".build-timeline")!;
@@ -713,7 +779,7 @@ function wireBuilds(){
     syncLane();
     draw();publish();
   };
-  draw();
+  draw(false, true);
 }
 
 // Matchups

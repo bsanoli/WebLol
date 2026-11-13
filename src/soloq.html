@@ -10,7 +10,7 @@
 <link rel="stylesheet" href="/assets/team-controls.css">
 <link rel="stylesheet" href="/assets/analytics.css">
 <link rel="stylesheet" href="/assets/motion.css">
-</head><body>
+</head><body data-dataset="soloq">
 <div class="wrap">
   <header>
     <div>
@@ -19,8 +19,7 @@
     </div>
     <div class="kpis" id="kpis" hidden></div>
   </header>
-  <div id="tabs"></div>
-  <main><div id="view" role="tabpanel" tabindex="0"></div></main>
+  <main class="soloq-main"><div id="view"></div></main>
   <div id="tip" role="tooltip" hidden></div>
   <p class="foot" id="soloq-foot">Fonte: API oficial da Riot (match-v5), com as partidas ranqueadas solo/duo das contas dos pros listadas em scripts/soloq-pros.json. Coleta automática uma vez por dia. Win rate = vitórias ÷ jogos do campeão na amostra. Ban rate = partidas em que o campeão foi banido ÷ partidas coletadas. Campeões com menos de 5 jogos têm amostra pequena.</p>
 </div>

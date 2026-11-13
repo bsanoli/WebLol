@@ -4,6 +4,8 @@ Painel do time: estatísticas do Worlds 2026, planejador de comps e draft, mapa 
 
 **Como usar:** abra o link do GitHub Pages, entre com seu Riot ID (nome#TAG) e a sua senha (criada no primeiro acesso).
 
+O WebLol é destinado ao acesso pelo navegador no desktop. O acesso pelo celular está fora do escopo de suporte.
+
 Cada jogador entra com Riot ID e senha e fica em um time. O capitão aceita quem pede para entrar e aprova os envios do time. Cada time só vê as próprias comps (garantido pelas regras do banco em `firestore.rules`).
 
 Os dados dos times (comps, jogadas, envios) ficam num banco online grátis (Firebase Firestore):
@@ -13,6 +15,15 @@ Os dados dos times (comps, jogadas, envios) ficam num banco online grátis (Fire
 - as regras do banco estão em `firestore.rules` (só o admin publica, aprova ou recusa).
 
 O admin pode baixar um backup completo na aba Administração e guardar na pasta Admin do OneDrive.
+
+## Dados de Builds
+
+| Tela | Partidas analisadas | Arquivos de dados |
+| --- | --- | --- |
+| **Builds · Worlds** (`#/builds?fonte=worlds`) | Partidas oficiais do Campeonato Mundial de League of Legends de 2026, com dados do gol.gg. | `src/data/worlds*.json` |
+| **Builds · SoloQ** (`#/builds?fonte=soloq`) | Partidas ranqueadas Solo/Duo das contas de jogadores profissionais listadas em `scripts/soloq-pros.json`, coletadas pela API da Riot. | `src/data/soloq/` |
+
+O seletor de fonte mantém o campeão, a posição, a busca e o mínimo de jogos. Cada fonte calcula as estatísticas das builds com as partidas da sua base. Links antigos de Builds abrem a fonte correspondente.
 
 ## Desenvolvimento local
 

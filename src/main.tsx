@@ -14,7 +14,7 @@ import { UI_VERSIONS } from "./data/ui-versions"
 
 const sections = [
   { value: "worlds", label: "Worlds", href: "#/worlds" },
-  { value: "soloq", label: "SoloQ", href: "#/soloq" },
+  { value: "builds", label: "Builds", href: "#/builds?fonte=worlds" },
   { value: "camp", label: "Área do time", href: "#/time" },
   { value: "admin", label: "Administração", href: "#/admin" },
 ]
