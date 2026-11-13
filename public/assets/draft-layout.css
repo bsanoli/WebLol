@@ -104,3 +104,12 @@
 .side-pick.on span { color: var(--wl-accent); }
 @media (min-width: 1100px) { #v-comps.draft-view .draft-toolbar-top { display: none; } }
 #v-comps .pkh b { white-space: nowrap; }
+
+/* Comps do centro: colunas esticam e ocupam toda a largura do campo */
+@media (min-width: 1100px) {
+  #v-comps.draft-view .dz-tabs { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); align-content: start; }
+  #v-comps .dz-tab { max-width: none; width: 100%; }
+  #v-comps .dz-tab .mini { display: grid; grid-template-columns: repeat(5, minmax(0, 36px)); gap: 4px; width: 100%; }
+  #v-comps .dz-tab .mini .av { width: 100%; height: auto; aspect-ratio: 1; }
+  #v-comps .dz-tab.dz-new { min-height: 56px; }
+}
