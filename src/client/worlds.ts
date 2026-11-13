@@ -878,7 +878,13 @@ function compDraft(game: (typeof DATA.comps)[number], panelId: string) {
     return `<li class="match-draft-action" data-side="${side}" value="${number}" tabindex="0"${highlight ? " data-highlight" : ""}
       data-tip="${esc(`${step} · ${name} · ${teams[side]} · ${phase}`)}">
       <span class="match-draft-number">${step}</span><span aria-hidden="true">${ico(name)}</span>
-      <span class="match-draft-action-info"><strong>${esc(name)}</strong><small aria-label="${esc(teams[side])}">${esc(codes[side])}</small>${highlight ? `<span class="match-draft-highlight">${highlight}</span>` : ""}</span>
+      <span class="match-draft-action-info">
+        <strong>${esc(name)}</strong>
+        <span class="match-draft-action-meta">
+          <small aria-label="${esc(teams[side])}">${esc(codes[side])}</small>
+          ${highlight ? `<span class="match-draft-highlight">${highlight}</span>` : ""}
+        </span>
+      </span>
     </li>`;
   };
   let number = 0;
@@ -889,6 +895,10 @@ function compDraft(game: (typeof DATA.comps)[number], panelId: string) {
       ${team("blue")}
       <p class="match-draft-first" data-side="${first}">Primeiro pick <strong>${esc(codes[first])}</strong></p>
       ${team("red")}
+    </div>
+    <div class="match-draft-modes" role="group" aria-label="Visualização do draft">
+      <button type="button" data-slot="button" data-variant="outline" data-draft-mode="order" aria-pressed="true">Em ordem</button>
+      <button type="button" data-slot="button" data-variant="outline" data-draft-mode="teams" aria-pressed="false">Por equipe</button>
     </div>
     ${phases.map(({ label, kind, offset, turns }) => {
       const next = { blue: offset, red: offset };
@@ -907,9 +917,24 @@ function compDraft(game: (typeof DATA.comps)[number], panelId: string) {
         side,
         actions: actions.filter(action => action.side === side),
       }));
-      return `<section class="match-draft-phase" data-kind="${kind}">
+      const orderedRows: (typeof actions)[] = [];
+      if (kind === "picks") {
+        for (const action of actions) {
+          const row = orderedRows.at(-1);
+          if (row && row[0].side === action.side) row.push(action);
+          else orderedRows.push([action]);
+        }
+      } else {
+        orderedRows.push(actions);
+      }
+      return `<section class="match-draft-phase" data-kind="${kind}" data-phase="${offset === 0 ? 1 : 2}">
         <h4>${label}</h4>
+        <div class="match-draft-team-view" hidden>
         ${groups.map(group => `<ol class="match-draft-actions" role="list" aria-label="${esc(teams[group.side])}">${group.actions.map(action => action.markup).join("")}</ol>`).join("")}
+        </div>
+        <div class="match-draft-order-view">
+          ${orderedRows.map(row => `<ol class="match-draft-actions" role="list"${kind === "picks" ? ` aria-label="${esc(teams[row[0].side])}"` : ""}>${row.map(action => action.markup).join("")}</ol>`).join("")}
+        </div>
       </section>`;
     }).join("")}
     </div>
@@ -985,6 +1010,15 @@ function wireComps(){
     draftDialog.replaceChildren(controls, card);
     draftDialog.showModal();
     draftDialog.scrollTop = 0;
+    const modeButtons = panel.querySelectorAll<HTMLButtonElement>("[data-draft-mode]");
+    for (const mode of modeButtons) {
+      mode.onclick = () => {
+        const chronological = mode.dataset.draftMode === "order";
+        for (const button of modeButtons) button.setAttribute("aria-pressed", String(button === mode));
+        for (const view of panel.querySelectorAll<HTMLElement>(".match-draft-team-view")) view.hidden = chronological;
+        for (const view of panel.querySelectorAll<HTMLElement>(".match-draft-order-view")) view.hidden = !chronological;
+      };
+    }
   };
   draftDialog.onclick = (event) => {
     if (event.target !== draftDialog) return;
@@ -992,7 +1026,9 @@ function wireComps(){
     if (event.clientX < bounds.left || event.clientX > bounds.right ||
         event.clientY < bounds.top || event.clientY > bounds.bottom) draftDialog.close();
   };
-  draftDialog.onclose = () => draftDialog.replaceChildren();
+  draftDialog.onclose = () => {
+    draftDialog.replaceChildren();
+  };
   const activeChampions = document.getElementById("cc-active");
   const search = document.getElementById("cq");
   const stage = document.getElementById("cs");
