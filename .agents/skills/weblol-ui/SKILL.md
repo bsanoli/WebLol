@@ -23,6 +23,9 @@ description: Implemente ou ajuste a interface do WebLol, incluindo tabelas, card
 
 ## Ações de detalhe em cards e linhas
 
+- Em grades de cards equivalentes, alinhe título, ícone e métrica pelo topo das respectivas linhas. Deixe informações opcionais abaixo do conteúdo principal e confira a grade com nomes que quebram linha e cards com e sem nota.
+- Em listas repetidas, dê ao link de histórico uma posição própria e consistente. Em **Compras jogo a jogo**, use o ícone de link externo em uma coluna fixa à direita do confronto, com nome acessível e indicação do destino.
+
 - Use o “Ver página” da build expandida como referência para ações secundárias que abrem detalhes, ou que ocupam a mesma posição no fim do cabeçalho com função equivalente. Reutilize o botão `ghost` pequeno, alinhado à direita, com rótulo curto, ícone à direita, hover visível e foco por teclado.
 - Use chevron para a direita quando a ação abre uma página ou modal de detalhes. Em expansões no próprio card, use um chevron vertical que indique o estado aberto ou fechado. Mantenha a hierarquia das ações primárias.
 

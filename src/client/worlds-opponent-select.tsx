@@ -1,6 +1,9 @@
 import { useEffect, useRef, useState } from "react"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { ChevronDownIcon } from "lucide-react"
+import { Input } from "@/components/ui/input"
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { lolAsset, lolChampion } from "./lol-media"
+import { championSlug } from "./worlds-display"
 
 type Opponent = { name: string; slug: string; games: number }
 
@@ -20,8 +23,13 @@ export function WorldsOpponentSelect({ opponents, value, onChange, restoreFocus 
   restoreFocus: boolean
 }) {
   const [open, setOpen] = useState(false)
+  const [query, setQuery] = useState("")
   const trigger = useRef<HTMLButtonElement>(null)
+  const search = useRef<HTMLInputElement>(null)
+  const results = useRef<HTMLDivElement>(null)
   const selected = opponents.find(opponent => opponent.slug === value)
+  const term = championSlug(query).replace(/-/g, "")
+  const matches = opponents.filter(opponent => opponent.slug.replace(/-/g, "").includes(term))
 
   useEffect(() => {
     if (restoreFocus) trigger.current?.focus({ preventScroll: true })
@@ -36,23 +44,56 @@ export function WorldsOpponentSelect({ opponents, value, onChange, restoreFocus 
     return () => window.removeEventListener("blur", close)
   }, [open])
 
-  return <Select open={open} onOpenChange={setOpen} value={selected?.slug ?? "all"}
-    onValueChange={next => {
-      setOpen(false)
-      window.setTimeout(() => onChange(next === "all" ? "" : next), 0)
-    }}>
-    <SelectTrigger ref={trigger} id="build-opponent-trigger" data-team-trigger="select"
+  const choose = (next: string) => {
+    setOpen(false)
+    if (next !== value) window.setTimeout(() => onChange(next), 0)
+  }
+
+  const option = (opponent?: Opponent) => {
+    const slug = opponent?.slug ?? ""
+    return <button key={slug} type="button" className="build-opponent-option" aria-pressed={value === slug}
+      onClick={() => choose(slug)}>
+      <span className="team-select-option"><OpponentLabel opponent={opponent} /></span>
+      {opponent && <small className="build-opponent-count">{opponent.games} {opponent.games === 1 ? "jogo" : "jogos"}</small>}
+    </button>
+  }
+
+  return <Popover open={open} onOpenChange={next => {
+    if (next) setQuery("")
+    setOpen(next)
+  }}>
+    <PopoverTrigger ref={trigger} id="build-opponent-trigger" data-team-trigger="select" data-slot="button" data-variant="outline"
       aria-labelledby="build-opponent-label build-opponent-trigger">
-      <SelectValue><OpponentLabel opponent={selected} /></SelectValue>
-    </SelectTrigger>
-    <SelectContent className="team-select-panel build-opponent-options" position="popper" align="start"
-      sideOffset={4} collisionPadding={8}
+      <span data-slot="select-value"><OpponentLabel opponent={selected} /></span>
+      <ChevronDownIcon aria-hidden="true" />
+    </PopoverTrigger>
+    <PopoverContent className="team-note-popover build-opponent-options" align="end"
+      collisionPadding={8} aria-label="Adversário direto"
+      onOpenAutoFocus={event => {
+        event.preventDefault()
+        search.current?.focus()
+      }}
+      onKeyDown={event => {
+        if (event.key !== "ArrowDown" && event.key !== "ArrowUp") return
+        const buttons = [...event.currentTarget.querySelectorAll<HTMLButtonElement>(".build-opponent-option")]
+        const index = buttons.indexOf(event.target as HTMLButtonElement)
+        const next = event.key === "ArrowDown" ? buttons[index + 1] : buttons[index - 1] ?? search.current
+        event.preventDefault()
+        next?.focus()
+      }}
       onCloseAutoFocus={event => { if (!document.hasFocus()) event.preventDefault() }}>
-      <SelectItem value="all">Todos os adversários</SelectItem>
-      {opponents.map(opponent => <SelectItem key={opponent.slug} value={opponent.slug} textValue={opponent.name}>
-        <OpponentLabel opponent={opponent} />
-        <small className="build-opponent-count">{opponent.games} {opponent.games === 1 ? "jogo" : "jogos"}</small>
-      </SelectItem>)}
-    </SelectContent>
-  </Select>
+      <Input ref={search} type="search" aria-label="Buscar adversário" placeholder="Buscar adversário…" value={query}
+        onChange={event => {
+          setQuery(event.target.value)
+          if (results.current) results.current.scrollTop = 0
+        }}
+        onKeyDown={event => {
+          if (event.key === "Enter" && !event.nativeEvent.isComposing && matches.length) choose(matches[0].slug)
+        }} />
+      {option()}
+      <div ref={results} className="build-opponent-results">
+        {matches.length ? matches.map(option) : <p role="status" className="build-opponent-empty">Nenhum adversário encontrado.</p>}
+      </div>
+    </PopoverContent>
+  </Popover>
 }

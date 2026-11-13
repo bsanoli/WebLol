@@ -62,7 +62,6 @@ function firstBoots(player: Player) {
 }
 
 function summary(entries: Entry[]) {
-  const total = entries.length;
   const slot = (title: string, picks: (readonly [number, number] | undefined)[]) => {
     const bought = picks.filter((pick): pick is readonly [number, number] => !!pick);
     if (!bought.length) return "";
@@ -76,7 +75,6 @@ function summary(entries: Entry[]) {
       <span class="build-timeline-stat-item">${itemIcon(item, share)}<span>${esc(itemName(item))}
         <small>${percent.format(count / bought.length * 100)}% · ${share}</small></span></span>
       <strong class="build-timeline-stat-minute" aria-label="Minuto médio ${minutes.format(average)}">${minutes.format(average)}'</strong>
-      ${bought.length < total ? `<small class="build-timeline-stat-note">chegou em ${bought.length} de ${total}</small>` : ""}
     </li>`;
   };
   const cores = entries.map(entry => coreItems(entry.player));
@@ -112,8 +110,14 @@ function gameRow({ game, player, opponent, won }: Entry) {
         <strong class="${won ? "build-sample-wins" : "build-sample-losses"}">${won ? "V" : "D"}</strong>
         <span>${k}/${d}/${a}</span>
         <span>${esc(stageLabel(game, player))}</span>
-        <a href="${esc(game.buildsSource)}" target="_blank" rel="noopener" aria-label="Ver jogo no ${DATASET.sourceName}">${DATASET.sourceName}</a>
       </span>
+      <a class="build-timeline-source" data-slot="button" data-variant="ghost" data-size="icon-sm"
+        href="${esc(game.buildsSource)}" target="_blank" rel="noopener"
+        aria-label="Abrir histórico da partida no ${DATASET.sourceName} em nova aba" title="Ver histórico no ${DATASET.sourceName}">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M15 3h6v6m0-6-9 9m6 1v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/>
+        </svg>
+      </a>
     </div>
     ${timeline(player)}
   </li>`;
