@@ -8,20 +8,9 @@ export interface ChampionSummary {
   bans: number
   portrait?: string
 }
-export interface PlayerSummary {
-  name: string
-  team: string
-  lane: string
-  n: number
-  w: number
-  k: number
-  d: number
-  a: number
-}
-const number = new Intl.NumberFormat("pt-BR", { maximumFractionDigits: 2 })
 const percent = (value: number) => `${Math.round(value * 100)}%`
 
-export function MetricCard({ label, value, note, portrait }: {
+function MetricCard({ label, value, note, portrait }: {
   label: string; value: string | number; note: string; portrait?: string
 }) {
   return <div className="metric-card">
@@ -116,35 +105,4 @@ export function TournamentOverview({ champions, games, showSummary = true }: {
           segments: [{ label: "bans", kind: "ban", count: c.bans }] }))} />
     </div>
   </div>
-}
-
-export function PlayerComparison({ players }: { players: PlayerSummary[] }) {
-  const [firstName, setFirst] = useState(players[0]?.name ?? "")
-  const first = players.find(p => p.name === firstName) ?? players[0]
-  const peers = players.filter(p => p.lane === first?.lane && p.name !== first?.name)
-  const [secondName, setSecond] = useState("")
-  const second = peers.find(p => p.name === secondName) ?? peers[0]
-  if (!first || !second) return <div className="empty-state">A comparação precisa de dois jogadores da mesma posição com dados coletados.</div>
-  const metrics = [
-    { label: "Taxa de vitória", unit: "%", read: (p: PlayerSummary) => p.n ? p.w / p.n * 100 : 0, limit: 100 },
-    { label: "KDA", unit: "", read: (p: PlayerSummary) => p.d ? (p.k + p.a) / p.d : p.k + p.a },
-    { label: "Abates / jogo", unit: "", read: (p: PlayerSummary) => p.n ? p.k / p.n : 0 },
-    { label: "Mortes / jogo", unit: "", read: (p: PlayerSummary) => p.n ? p.d / p.n : 0 },
-    { label: "Assistências / jogo", unit: "", read: (p: PlayerSummary) => p.n ? p.a / p.n : 0 },
-  ]
-  return <section className="wl-panel analytics-panel player-comparison">
-    <div className="analytics-heading"><h3>Comparar jogadores</h3><p>Mesma posição, apenas jogos coletados. As barras usam a mesma escala por métrica; não representam uma nota geral.</p></div>
-    <div className="comparison-selectors">
-      <label>Jogador A<select value={first.name} onChange={e => setFirst(e.target.value)}>{players.map(p => <option key={p.name} value={p.name}>{p.name} · {p.team} · {p.lane}</option>)}</select><small>{first.n} jogos · {first.w} vitórias · {first.n - first.w} derrotas</small></label>
-      <label>Jogador B<select value={second.name} onChange={e => setSecond(e.target.value)}>{peers.map(p => <option key={p.name} value={p.name}>{p.name} · {p.team}</option>)}</select><small>{second.n} jogos · {second.w} vitórias · {second.n - second.w} derrotas</small></label>
-    </div>
-    <div className="comparison-metrics">{metrics.map(metric => {
-      const values = [metric.read(first), metric.read(second)]
-      const maximum = metric.limit ?? Math.max(...values, 1)
-      return <div className="comparison-metric" key={metric.label}><h4>{metric.label}</h4>{[first, second].map((p, i) => <div className="comparison-row" key={p.name}>
-        <span>{p.name}</span><span className="chart-track" aria-hidden="true"><i className={i ? "series-peer" : "series-pick"} style={{ width: `${values[i] / maximum * 100}%` }} /></span><strong>{number.format(values[i])}{metric.unit}</strong>
-      </div>)}<small>Escala: 0–{number.format(maximum)}{metric.unit}{metric.label === "Mortes / jogo" ? " · Menor é melhor" : ""}</small></div>
-    })}</div>
-    <p className="sample-note">KDA = (abates + assistências) ÷ mortes. Sem mortes, usa a soma de abates e assistências. Jogos e campeões cobertos podem variar entre jogadores.</p>
-  </section>
 }

@@ -8,10 +8,10 @@ import { ArrowRight, ChevronDown, Menu, X } from "lucide-react";
 import { motionTokens } from "../../motion-tokens";
 import styles from "./site-header.module.css";
 
-export type SiteHeaderVariant = "simple" | "centered" | "mega";
+type SiteHeaderVariant = "simple" | "centered" | "mega";
 
 /** One destination inside a mega menu panel. */
-export interface SiteHeaderLink {
+interface SiteHeaderLink {
   label: string;
   /** One short line under the label. */
   description?: string;
@@ -21,7 +21,7 @@ export interface SiteHeaderLink {
 }
 
 /** A card beside the links in a mega menu panel. */
-export interface SiteHeaderFeature {
+interface SiteHeaderFeature {
   title: string;
   description?: string;
   href?: string;
@@ -29,7 +29,7 @@ export interface SiteHeaderFeature {
 }
 
 /** A top level destination. With `links` and the mega variant it opens a panel; otherwise it is a plain link. */
-export interface SiteHeaderItem {
+interface SiteHeaderItem {
   /** Stable value, also used for `current`. */
   value: string;
   label: string;
@@ -103,7 +103,7 @@ const faceVariants: Variants = {
 };
 const fadeVariants: Variants = { hidden: { opacity: 0 }, shown: { opacity: 1, transition: { duration: motionTokens.duration.fast } }, gone: { opacity: 0, transition: { duration: motionTokens.duration.instant } } };
 
-export function ArcMark(props: { className?: string }) {
+function ArcMark(props: { className?: string }) {
   return <svg className={props.className} viewBox="0 0 64 64" fill="none" stroke="currentColor" strokeWidth="5.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
     <path d="M9 48V29C9 15 19 7 32 7s23 8 23 22v19" />
     <path d="M20 48V31c0-8 5-13 12-13s12 5 12 13v17" />

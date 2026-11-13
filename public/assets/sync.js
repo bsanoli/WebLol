@@ -18,7 +18,7 @@ const safeName=id=>normId(id).replace("#","_").replace(/[^a-z0-9_\-]/g,"_");
 const isAdminId=id=>Object.prototype.hasOwnProperty.call(ADMINS,normId(id));
 const adminEmail=id=>ADMINS[normId(id)]||"";
 
-/* ===== IndexedDB (guarda a pasta escolhida e as chaves do admin neste PC) ===== */
+/* ===== IndexedDB (guarda as chaves do admin neste PC) ===== */
 const idb=new Promise((res,rej)=>{const r=indexedDB.open("lol-time",1);r.onupgradeneeded=()=>r.result.createObjectStore("kv");r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error)});
 const idbOp=(mode,fn)=>idb.then(db=>new Promise((res,rej)=>{const tx=db.transaction("kv",mode),st=tx.objectStore("kv"),rq=fn(st);tx.oncomplete=()=>res(rq&&rq.result);tx.onerror=()=>rej(tx.error)}));
 const idbGet=k=>idbOp("readonly",s=>s.get(k)).catch(()=>null);
@@ -29,18 +29,12 @@ const idbDel=k=>idbOp("readwrite",s=>s.delete(k));
 const TE=new TextEncoder(),TD=new TextDecoder(),C=crypto.subtle;
 function b64(buf){const u=new Uint8Array(buf);let s="";for(let i=0;i<u.length;i+=0x8000)s+=String.fromCharCode.apply(null,u.subarray(i,i+0x8000));return btoa(s)}
 const ub64=s=>Uint8Array.from(atob(s),c=>c.charCodeAt(0));
-const RSA_GEN={name:"RSA-OAEP",modulusLength:2048,publicExponent:new Uint8Array([1,0,1]),hash:"SHA-256"},RSA_IMP={name:"RSA-OAEP",hash:"SHA-256"};
+const RSA_IMP={name:"RSA-OAEP",hash:"SHA-256"};
 const ECD={name:"ECDSA",namedCurve:"P-256"},ECS={name:"ECDSA",hash:"SHA-256"};
 async function pwKey(pw,salt){const b=await C.importKey("raw",TE.encode(pw),"PBKDF2",false,["deriveKey"]);return C.deriveKey({name:"PBKDF2",salt,iterations:250000,hash:"SHA-256"},b,{name:"AES-GCM",length:256},false,["encrypt","decrypt"])}
 async function aesEnc(key,bytes){const iv=crypto.getRandomValues(new Uint8Array(12));return{iv:b64(iv),ct:b64(await C.encrypt({name:"AES-GCM",iv},key,bytes))}}
 const aesDec=(key,o)=>C.decrypt({name:"AES-GCM",iv:ub64(o.iv)},key,ub64(o.ct));
 async function fingerprint(admin){const h=await C.digest("SHA-256",TE.encode(admin.encPub.n+admin.sigPub.x+admin.sigPub.y));return[...new Uint8Array(h)].slice(0,8).map(b=>b.toString(16).padStart(2,"0")).join("")}
-async function createAdmin(pw){
-  const ek=await C.generateKey(RSA_GEN,true,["encrypt","decrypt"]),sk=await C.generateKey(ECD,true,["sign","verify"]);
-  const salt=crypto.getRandomValues(new Uint8Array(16)),k=await pwKey(pw,salt);
-  return{id:"brunoltz#LTZ",created:Date.now(),salt:b64(salt),encPub:await C.exportKey("jwk",ek.publicKey),sigPub:await C.exportKey("jwk",sk.publicKey),
-    encPriv:await aesEnc(k,await C.exportKey("pkcs8",ek.privateKey)),sigPriv:await aesEnc(k,await C.exportKey("pkcs8",sk.privateKey))};
-}
 // cada admin tem a sua "fechadura": as mesmas chaves privadas, trancadas com a senha dele
 const slotOf=(admin,id)=>admin&&(normId(id)===normId(admin.id)?admin:admin.slots?.[normId(id)]);
 async function slotRaw(admin,id,pw){const s=slotOf(admin,id);if(!s)throw new Error("noslot");const k=await pwKey(pw,ub64(s.salt));return{enc:await aesDec(k,s.encPriv),sig:await aesDec(k,s.sigPriv)}}
@@ -51,14 +45,7 @@ async function unlockAdmin(admin,pw,id=admin.id){ // lança erro se a senha esti
   const sigPriv=await C.importKey("pkcs8",raw.sig,ECD,false,["sign"]);
   const keys={encPriv,sigPriv,fp:await fingerprint(admin)};await idbSet("adminKeys",keys);return keys;
 }
-async function seal(admin,obj){ // criptografa para o admin (só a chave privada dele abre)
-  const pub=await C.importKey("jwk",admin.encPub,RSA_IMP,false,["encrypt"]);
-  const ak=await C.generateKey({name:"AES-GCM",length:256},true,["encrypt"]);
-  const body=await aesEnc(ak,TE.encode(JSON.stringify(obj)));
-  return{fmt:"lol-time-enc",v:1,wk:b64(await C.encrypt({name:"RSA-OAEP"},pub,await C.exportKey("raw",ak))),...body};
-}
 async function unseal(keys,o){const raw=await C.decrypt({name:"RSA-OAEP"},keys.encPriv,ub64(o.wk));const ak=await C.importKey("raw",raw,"AES-GCM",false,["decrypt"]);return JSON.parse(TD.decode(await aesDec(ak,o)))}
-async function signObj(keys,obj){const body=JSON.stringify(obj);return{body,sig:b64(await C.sign(ECS,keys.sigPriv,TE.encode(body)))}}
 async function verifyObj(admin,o){try{const pub=await C.importKey("jwk",admin.sigPub,ECD,false,["verify"]);return await C.verify(ECS,pub,ub64(o.sig),TE.encode(o.body))?JSON.parse(o.body):null}catch(e){return null}}
 
 /* ================= banco online (Firebase / Firestore) ================= */
@@ -90,17 +77,6 @@ async function dbList(col,field,value){const{db,fs}=await fb();const c=fs.collec
 async function dbDel(col,id){const{db,fs}=await fb();await fs.deleteDoc(fs.doc(db,col,id))}
 const getJ=async(col,id)=>{const d=await dbGet(col,id);if(!d)return null;try{return JSON.parse(d.json)}catch(e){return null}};
 const putJ=(col,id,obj)=>dbSet(col,id,{json:JSON.stringify(obj),at:Date.now()});
-
-/* ===== pasta antiga do OneDrive (só para importar uma vez para o banco) ===== */
-async function fDir(root,path){let d=root;for(const p of path)d=await d.getDirectoryHandle(p);return d}
-async function fRead(root,path){try{const d=await fDir(root,path.slice(0,-1));return JSON.parse(await (await (await d.getFileHandle(path.at(-1))).getFile()).text())}catch(e){return null}}
-async function fList(root,path){try{const d=await fDir(root,path),out=[];for await(const[n,h]of d.entries())out.push([n,h]);return out}catch(e){return[]}}
-// acha o admin.json na pasta escolhida: Time (oficial/), pasta de backup do admin, ou a pasta Admin (backup/)
-async function findAdmin(root){for(const pre of[["oficial"],[],["backup"],["Time","oficial"]]){const adm=await fRead(root,[...pre,"admin.json"]);if(adm)return{pre,adm}}return null}
-async function pickOldFolder(){
-  if(!window.showDirectoryPicker){alert("Para importar a pasta use o Google Chrome ou o Microsoft Edge.");return null}
-  try{return await showDirectoryPicker({id:"lol-time",mode:"read"})}catch(e){return null}
-}
 
 /* ================= dados: diferenças e versões ================= */
 const shared=S=>({comps:clone(S?.comps||[]),plays:clone(S?.plays||[])});
@@ -144,7 +120,6 @@ const preview=()=>realUser()?.admin?(lsGet(PKEY)||""):"";
 const user=()=>{const u=realUser(),p=preview();return p==="guest"?null:p==="user"||p==="captain"?{...u,admin:false}:u};
 const local=()=>lsGet(KEY);
 function pending(){const b=lsGet(BKEY);if(!b)return[];return diff(shared(local()),b.data)}
-function isSampleOnly(S){return!S||(S.comps||[]).length<=1&&(!S.comps?.length||/do comps\.xlsx/.test(S.comps[0].name))&&!(S.plays||[]).some(p=>p.steps?.length)}
 
 /* ================= times ================= */
 // no "Ver como" capitão o admin enxerga como capitão do time aberto; no "Ver como" membro, como membro comum

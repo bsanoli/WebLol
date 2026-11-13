@@ -66,7 +66,6 @@
 .series-ban { background: var(--ban); }
 .series-win { background: var(--good); }
 .series-loss { background: var(--wl-danger); }
-.series-peer { background: var(--gold); }
 .champion-ranking { container-type: inline-size; }
 .ranked-bars { list-style: none; padding: 0; margin: 0; }
 .ranked-bars li {
@@ -675,18 +674,6 @@ button.build-context-name:focus-visible { outline: 2px solid var(--wl-accent); o
   color: var(--ink);
   box-shadow: 0 4px 14px rgb(0 0 0 / .3);
 }
-.comparison-disclosure { margin: var(--worlds-card-gap) 0; }
-.comparison-disclosure > summary { color: var(--gold); cursor: pointer; min-height: var(--wl-button-height); padding: var(--wl-space-2) var(--wl-panel-padding); background: var(--surface); border: 1px solid var(--line); border-radius: var(--wl-control-radius); font-weight: 600; }
-.comparison-disclosure[open] > summary { margin-bottom: var(--wl-panel-gap); }
-.comparison-selectors { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--wl-panel-gap); margin-bottom: var(--worlds-card-gap); }
-.comparison-selectors label { display: grid; gap: 8px; min-width: 0; font-size: 13px; font-weight: 600; }
-.comparison-selectors select { width: 100%; }
-.comparison-selectors small, .comparison-metric > small { color: var(--muted); font-weight: 400; font-size: 12px; }
-.comparison-metrics { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: var(--worlds-card-gap); }
-.comparison-metric h4 { margin: 0 0 8px; font-size: 14px; }
-.comparison-row { display: grid; grid-template-columns: minmax(0, 6rem) minmax(0, 1fr) 4rem; align-items: center; gap: var(--wl-space-3); min-height: var(--wl-space-8); overflow-wrap: anywhere; font-size: 13px; }
-.comparison-row strong { text-align: right; font-variant-numeric: tabular-nums; }
-.sample-note { margin: 20px 0 0; padding-top: 16px; border-top: 1px solid var(--line); color: var(--muted); font-size: 12px; }
 .comps-intro { margin-bottom: 16px; }
 .comps-intro h2 { margin-bottom: 4px; }
 .comps-intro .hint { margin: 0; }
@@ -1070,7 +1057,6 @@ html:has(.match-dialog[open]) { overflow: hidden; }
   .metric-card { padding: var(--wl-space-3) var(--worlds-card-padding); }
   .metric-card strong { font-size: 22px; }
   .chart-footer [data-slot=button], .lane-card-link { min-height: var(--wl-space-12); }
-  .comparison-metrics, .comparison-selectors { grid-template-columns: 1fr; }
   .tools input, .tools select { width: 100%; flex: 1 1 100%; min-width: 0; }
   .tablewrap td.champ { position: sticky; left: 0; background: var(--surface); z-index: 1; }
   .cg { padding-inline: var(--wl-space-3); }

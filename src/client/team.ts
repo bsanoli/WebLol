@@ -303,7 +303,6 @@ function draftHTML(c){
   const find=(t,k,i)=>seq.find(s=>s.t===t&&s.k===k&&s.i===i);
   // No draft: clique esquerdo torna principal, arrastar reordena e o botão direito abre "Excluir".
   const mini=(n,l,j)=>`<div class="chip dchip ${j===0?"primary":"alternative"}" draggable="true" data-n="${esc(n)}" data-from="${l}"><button class="champ-priority" data-priority="${esc(n)}" data-lane="${l}" aria-label="${j===0?"Principal":"Tornar principal"}: ${esc(n)} em ${LN[l].n}" title="${esc(n)} · ${j+1}ª opção · clique para tornar principal, botão direito para excluir">${img(n)}</button></div>`;
-  const PHN=["Bans 1","Picks 1","Bans 2","Picks 2"];
   // faixa da sequência
   let h=`<div class="draft-toolbar draft-toolbar-top"><div class="dside" role="group" aria-label="Lado da equipe"><span>Nossa equipe</span>
     ${Object.entries(DRAFT_SIDE).map(([key,label])=>`<button data-slot="button" data-variant="outline" data-size="sm" data-side="${key}" aria-pressed="${d.side===key}" class="${d.side===key?`on ${key[0]}`:""}">${label}</button>`).join("")}</div></div>`;

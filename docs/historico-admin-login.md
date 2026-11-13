@@ -8,6 +8,12 @@ Formato de cada entrada: data, pedido (palavras do Bruno), decisão (quem escolh
 
 ---
 
+## 13/11/2026: limpeza de rotinas sem uso
+
+- **Pedido:** remover código sem uso e publicar a limpeza.
+- **Decisão:** remover os auxiliares sem chamadas no código atual, incluindo a antiga seleção de pasta do OneDrive, a geração de chaves e a assinatura e criptografia legadas sem consumidores. A leitura de dados legados e as rotinas usadas pelo login e pela Administração continuam disponíveis.
+- **Regras do Firestore:** nenhuma mudança.
+
 ## 13/11/2026: comp de exemplo para quem não tem cadastro e botão Cadastrar
 
 - **Pedido:** "para a pessoa sem cadastro, coloque uma comp genérica para aparecer na área do time e não a do xlsx. Também coloque um botão à esquerda da escolha do tema para poder cadastrar."

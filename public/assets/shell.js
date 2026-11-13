@@ -474,7 +474,6 @@ function show(t) {
   document.querySelectorAll(".view").forEach(view => view.classList.toggle("on", view.id === "v-" + t));
   if (t === "admin") renderAdmin();
   else void loadScreen(t);
-  lsSet("lol-aba-principal", t);
 }
 
 reloadCamp = () => {
