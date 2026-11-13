@@ -8,6 +8,14 @@ export interface UiVersion {
 
 export const UI_VERSIONS: UiVersion[] = [
   {
+    version: "1.24",
+    date: "2026-11-13",
+    changes: [
+      "Composições (tela larga): o nome da comp fica na mesma linha, à esquerda de Opções por posição / Ordem do draft.",
+      "Composições (tela larga): Copiar link da composição fica ao lado esquerdo de Limpar alterações, e Salvo neste navegador desce para a linha de Anotações da composição.",
+    ],
+  },
+  {
     version: "1.23",
     date: "2026-11-13",
     changes: [

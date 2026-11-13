@@ -121,3 +121,20 @@
 #champ-picker .gtools .team-select { margin-top: 2px; }
 #champ-picker .gtools .team-select [data-team-trigger="select"] .lane-icon { width: 14px; height: 14px; }
 #champ-picker #gfoot[hidden] { display: none; }
+
+/* Cabeçalho do editor: nome da comp à esquerda das visões; Copiar link ao lado
+   de Limpar alterações; "Salvo neste navegador" embaixo, na linha das anotações */
+@media (min-width: 1100px) {
+  #v-comps .comp-editor { position: relative; }
+  #v-comps .editor-controls { display: flex; align-items: center; gap: 10px; margin: 0 0 4px; padding-right: 360px; min-height: 40px; }
+  #v-comps .editor-controls #cname { flex: 0 1 300px; width: auto; min-width: 140px; margin: 0; padding: 0 10px; min-height: 38px; font-size: 17px; }
+  #v-comps .editor-controls .vtog { flex: none; }
+  #v-comps .editor-status {
+    position: absolute; top: var(--wl-panel-padding, 16px); right: var(--wl-panel-padding, 16px); padding: 0;
+    display: grid; grid-template-columns: auto auto; grid-template-rows: 40px auto; align-items: center; justify-items: end; gap: 0 8px;
+  }
+  #v-comps .local-save-actions { display: contents; }
+  #v-comps #copy-comp { grid-column: 1; grid-row: 1; }
+  #v-comps #clear-local { grid-column: 2; grid-row: 1; }
+  #v-comps .editor-status .saved { display: block; grid-column: 1 / -1; grid-row: 2; font-size: 11px; line-height: 1.6; margin-top: 4px; }
+}
