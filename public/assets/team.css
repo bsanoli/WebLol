@@ -583,3 +583,23 @@ header nav { flex-wrap: wrap; gap: var(--wl-space-1); }
 #v-comps #comps { padding-top: 12px; }
 /* Imagem de fundo do pick maior */
 .pk-art { transform: scale(1.35); transform-origin: 60% 25%; object-position: center 20%; }
+/* gestão do time (capitão) */
+#v-cap .page-head, #cap { max-width: var(--wl-content-width); margin-inline: auto; }
+#cap { padding: var(--wl-space-3) var(--wl-gutter) var(--wl-space-8); }
+#cap h2 { margin: var(--wl-space-6) 0 var(--wl-space-2); font-size: var(--wl-card-title-size); }
+#cap h2:first-child { margin-top: 0; }
+#cap .card { padding: var(--wl-panel-padding); overflow-x: auto; }
+#cap .card > p { margin: 0 0 var(--wl-space-2); }
+#cap .mut { color: var(--mut); font-size: 12px; }
+#cap .ok { color: var(--green); }
+#cap .bad { color: var(--red); }
+#cap tr:hover td { background: var(--panel2); }
+#cap .cap-act { text-align: right; white-space: nowrap; }
+#cap .op { font-size: 10px; font-weight: 800; padding: 2px 6px; border-radius: var(--wl-control-radius); text-transform: uppercase; }
+#cap .op.add { background: var(--wl-success-soft); color: var(--wl-success); }
+#cap .op.edit { background: var(--wl-warning-soft); color: var(--wl-warning); }
+#cap .op.del { background: var(--wl-danger-soft); color: var(--wl-danger); }
+#cap .cap-ver { border-top: 1px solid var(--wl-divider); padding-block: var(--wl-space-2); }
+#cap .cap-ver summary { align-content: center; min-height: var(--wl-button-height); cursor: pointer; }
+#cap .cap-ver[open] > summary { margin-bottom: var(--wl-space-2); }
+@media (max-width: 600px) { #cap .cap-since { display: none; } }

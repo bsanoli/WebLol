@@ -7,12 +7,12 @@
 <link rel="icon" href="./assets/brand/favicon.ico" sizes="any">
 <link rel="icon" href="./assets/brand/favicon.svg?v=f454a496" type="image/svg+xml">
 <link rel="stylesheet" href="./assets/base.css?v=db08ef7b">
-<link rel="stylesheet" href="./assets/team.css?v=0b22e441">
+<link rel="stylesheet" href="./assets/team.css?v=ef8a9645">
 <link rel="stylesheet" href="./assets/compositions.css?v=1fe4b3f3">
 <link rel="stylesheet" href="./assets/motion.css?v=3a38e86a">
 <link rel="stylesheet" href="./assets/draft-layout.css?v=fe436f3d">
 <link rel="stylesheet" href="./assets/team-controls.css?v=cfe71905">
-  <script type="module" crossorigin src="./assets/camp-BoQRgz9Q.js?v=2bba4b10"></script>
+  <script type="module" crossorigin src="./assets/camp-IIIiPNaz.js?v=6307c5d2"></script>
   <link rel="modulepreload" crossorigin href="./assets/icon-Cv9Z2xR-.js?v=454e6d19">
   <link rel="modulepreload" crossorigin href="./assets/motion-DJoq_i97.js?v=c4bad95d">
 </head>
@@ -23,6 +23,7 @@
     <button data-slot="button" data-variant="ghost" data-v="comps" aria-pressed="true" class="on"><svg class="icon" aria-hidden="true" focusable="false"><use href="assets/icons.svg#composition"></use></svg> Composições</button>
     <button data-slot="button" data-variant="ghost" data-v="map" aria-pressed="false"><svg class="icon" aria-hidden="true" focusable="false"><use href="assets/icons.svg#map"></use></svg> Mapa tático</button>
     <button data-slot="button" data-variant="ghost" data-v="know" aria-pressed="false"><svg class="icon" aria-hidden="true" focusable="false"><use href="assets/icons.svg#book"></use></svg> Conhecimento</button>
+    <button data-slot="button" data-variant="ghost" data-v="cap" aria-pressed="false" hidden><svg class="icon" aria-hidden="true" focusable="false"><use href="assets/icons.svg#team"></use></svg> Gestão do time</button>
   </nav>
   <div class="sp"></div>
   <button data-slot="button" data-variant="outline" id="exp" title="Baixa um arquivo .json com todas as comps (backup / mandar pro time)"><svg class="icon" aria-hidden="true" focusable="false"><use href="assets/icons.svg#download"></use></svg> Exportar</button>
@@ -131,6 +132,11 @@
 <section id="v-know" class="view">
  <div class="page-head"><h1>Conhecimento</h1><p>Consulte tempos de objetivos e princípios de controle de wave.</p></div>
  <div id="know"></div>
+</section>
+
+<section id="v-cap" class="view">
+ <div class="page-head"><h1>Gestão do time</h1><p id="cap-sub">Aceite pedidos, gerencie os jogadores e veja o histórico das comps do time.</p></div>
+ <div id="cap"></div>
 </section>
 
 <div class="toast" id="toast" role="status"></div>

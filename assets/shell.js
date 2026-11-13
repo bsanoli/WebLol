@@ -237,6 +237,44 @@ $("#logout").onclick=async()=>{
   if(currentScreen==="camp"&&!$("#modal").open)stepId();
 };
 
+/* ================= aba Gestão do time (dentro da Área do time) ================= */
+// capitão do time (ou admin desbloqueado) e fora do modo "Ver como"
+window.TEAM_NAME=()=>TEAM?.name||"";
+window.captainAccess=()=>!preview()&&!!TEAM&&(isCaptain()||(!!user()?.admin&&fbIsAdmin()));
+window.renderCaptainPanel=async function renderCaptainPanel(el){
+  if(!el)return;
+  if(!captainAccess()){el.innerHTML=`<div class="wl-panel card mut">Só o capitão do time vê esta aba.</div>`;return}
+  const T=TEAM;el.innerHTML=`<p class="mut">Carregando...</p>`;
+  let membros=[],off=OFF;
+  try{const[ms,r]=await Promise.all([dbList("membros","team",T.id),readOfficial().catch(()=>({}))]);membros=ms;if(r?.off)off=r.off}
+  catch(e){el.innerHTML=`<div class="wl-panel card bad">Não consegui ler o banco: ${esc(e.message)}</div>`;return}
+  if(TEAM!==T)return;
+  const pedidos=membros.filter(m=>m.status==="pendente").sort((a,b)=>(a.at||0)-(b.at||0));
+  const ativos=membros.filter(m=>m.status==="ativo").sort((a,b)=>(b.id===T.captain)-(a.id===T.captain)||String(a.riotId||a.id).localeCompare(String(b.riotId||b.id)));
+  const log=off?.log||[],byV=new Map();
+  for(const l of log){if(!byV.has(l.v))byV.set(l.v,[]);byV.get(l.v).push(l)}
+  const vers=[...byV.keys()].sort((a,b)=>b-a);
+  if(off&&!byV.has(off.version))vers.unshift(off.version);
+  const nC=off?.data?.comps?.length||0,nP=off?.data?.plays?.length||0;
+  const row=l=>`<tr><td>${esc(l.from)}</td><td><span class="op ${l.op}">${OPN[l.op]}</span> ${KN[l.kind]} ${esc(l.name)}</td><td class="${l.status==="approved"?"ok":"bad"}">${l.status==="approved"?"aprovada":"recusada"}</td></tr>`;
+  const verHtml=vers.slice(0,60).map((v,i)=>{const ls=byV.get(v)||[],cur=off&&v===off.version,at=cur?off.at:ls[0]?.at;
+    const ok=ls.filter(l=>l.status==="approved").length,no=ls.length-ok;
+    return`<details class="cap-ver"${i===0?" open":""}><summary><b>v${v}</b>${cur?' <span class="ok">atual</span>':""} <span class="mut">${at?fmtD(at):""}${cur&&off.by?` · por ${esc(off.by)}`:""}${cur&&off.label?` · ${esc(off.label)}`:""} · ${ok} aprovada${ok===1?"":"s"}${no?`, ${no} recusada${no===1?"":"s"}`:""}</span></summary>
+     ${ls.length?`<table><tr><th>De</th><th>O quê</th><th>Status</th></tr>${ls.map(row).join("")}</table>`:'<p class="mut">Sem alterações registradas nesta versão.</p>'}</details>`}).join("");
+  el.innerHTML=`
+   <h2>Pedidos para entrar (${pedidos.length})</h2>
+   <div class="wl-panel card">${pedidos.length?`<table><tr><th>Riot ID</th><th>Pedido em</th><th></th></tr>${pedidos.map(m=>`<tr><td>${esc(m.riotId||m.id)}</td><td>${m.at?fmtD(m.at):""}</td><td class="cap-act"><button data-slot="button" data-variant="default" data-acc="${esc(m.id)}">Aceitar</button> <button data-slot="button" data-variant="destructive" data-den="${esc(m.id)}">Recusar</button></td></tr>`).join("")}</table>`:'<span class="mut">Nenhum pedido pendente.</span>'}</div>
+   <h2>Jogadores do time (${ativos.length})</h2>
+   <div class="wl-panel card"><table><tr><th>Riot ID</th><th>Papel</th><th class="cap-since">No time desde</th><th></th></tr>${ativos.map(m=>`<tr><td>${esc(m.riotId||m.id)}</td><td>${m.id===T.captain?"capitão":"membro"}</td><td class="cap-since">${m.at?fmtD(m.at):""}</td><td class="cap-act">${m.id===T.captain?"":`<button data-slot="button" data-variant="destructive" data-rm="${esc(m.id)}">Excluir do time</button>`}</td></tr>`).join("")||'<tr><td colspan="4" class="mut">Nenhum jogador ainda.</td></tr>'}</table></div>
+   <h2>Histórico das comps</h2>
+   <div class="wl-panel card">${off?`<p>Versão oficial atual: <b>v${off.version}</b> <span class="mut">· ${nC} comp${nC===1?"":"s"} · ${nP} jogada${nP===1?"":"s"}${off.at?` · ${fmtD(off.at)}`:""}</span></p>${verHtml}`:'<span class="mut">O time ainda não tem versão oficial.</span>'}</div>`;
+  const again=()=>renderCaptainPanel(el);
+  const who=id=>{const m=membros.find(x=>x.id===id);return m?.riotId||id};
+  el.querySelectorAll("[data-acc]").forEach(b=>b.onclick=async()=>{b.disabled=true;try{await dbSet("membros",b.dataset.acc,{status:"ativo",at:Date.now()},true);toast(`${who(b.dataset.acc)} entrou no ${T.name}`)}catch(e){toast("Erro: "+e.message)}again()});
+  el.querySelectorAll("[data-den]").forEach(b=>b.onclick=async()=>{if(!confirm(`Recusar o pedido de ${who(b.dataset.den)}?`))return;b.disabled=true;try{await dbDel("membros",b.dataset.den);toast("Pedido recusado")}catch(e){toast("Erro: "+e.message)}again()});
+  el.querySelectorAll("[data-rm]").forEach(b=>b.onclick=async()=>{if(!confirm(`Excluir ${who(b.dataset.rm)} do ${T.name}? Ele perde o acesso às comps do time.`))return;b.disabled=true;try{await dbDel("membros",b.dataset.rm);toast(`${who(b.dataset.rm)} saiu do time`)}catch(e){toast("Erro: "+e.message)}again()});
+};
+
 /* ================= aba Administração (admin e capitão) ================= */
 const details=(title,body,open)=>`<details class="wl-panel card"${open?" open":""}><summary>${title}</summary><div style="margin-top:12px">${body}</div></details>`;
 async function renderAdmin(){

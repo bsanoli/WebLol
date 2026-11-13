@@ -269,6 +269,7 @@ function setSync(t,c){
 function updateStatus(keepChip){
   const u=user();
   renderTeamView();renderPreview();
+  try{$("#v-camp")?.contentWindow?.weblolTeamChanged?.()}catch(e){}
   document.body.dataset.accountName = u?.id ?? "";
   document.body.dataset.accountRole = preview()==="user"?"Vendo como usuário":u?.admin?"Admin":isCaptain()?"Capitão":"";
   document.body.dataset.preview = preview();

@@ -460,7 +460,7 @@ $("#imp").onchange=async e=>{
 };
 
 /* ===== Abas ===== */
-const teamPages = {comps:"composicoes", map:"mapa", know:"conhecimento"};
+const teamPages = {comps:"composicoes", map:"mapa", know:"conhecimento", cap:"gestao"};
 const guides = {obj:"objetivos", wave:"wave"};
 const teamNav = [...document.querySelectorAll("header nav [data-v]")];
 function showTeamView(view) {
@@ -471,6 +471,7 @@ function showTeamView(view) {
   });
   document.querySelectorAll(".view").forEach(section=>section.classList.toggle("on",section.id==="v-"+view));
   if(view==="map")renderPlays();
+  if(view==="cap")renderCaptain();
 }
 
 function publishTeamRoute(view, {includeItem = true, copy = false} = {}) {
@@ -482,8 +483,31 @@ function publishTeamRoute(view, {includeItem = true, copy = false} = {}) {
   window.frameElement?.dispatchEvent(new CustomEvent("weblol:navigate",{detail:{path, copy}}));
 }
 
+/* ===== Gestão do time (só capitão e admin; os dados vêm do app principal) ===== */
+const host = window.parent as any;
+const captainTab = $('header nav [data-v="cap"]');
+let wantCaptain = false; // link para a gestão aberto antes de o time carregar
+const hasCaptainAccess = () => { try { return !!host?.captainAccess?.(); } catch { return false; } };
+function renderCaptain() {
+  const name = (() => { try { return host.TEAM_NAME?.() || ""; } catch { return ""; } })();
+  if (name) $("#cap-sub").textContent = `${name}: aceite pedidos, gerencie os jogadores e veja o histórico das comps do time.`;
+  host?.renderCaptainPanel?.($("#cap"));
+}
+(window as any).weblolTeamChanged = () => {
+  const ok = hasCaptainAccess();
+  captainTab.hidden = !ok;
+  if (ok && wantCaptain) { wantCaptain = false; showTeamView("cap"); return; }
+  if ($("#v-cap").classList.contains("on")) {
+    if (ok) renderCaptain();
+    else { showTeamView("comps"); publishTeamRoute("comps", {includeItem:false}); }
+  }
+};
+captainTab.hidden = !hasCaptainAccess();
+
 window.applyWebLolRoute = ([page, item], params) => {
-  const view=Object.keys(teamPages).find(key=>teamPages[key]===page)||"comps";
+  let view=Object.keys(teamPages).find(key=>teamPages[key]===page)||"comps";
+  wantCaptain=false;
+  if(view==="cap"&&!hasCaptainAccess()){view="comps";wantCaptain=true}
   let missing="";
   const matches=entry=>encodeURIComponent(entry.id)===item;
   if(view==="comps"){
