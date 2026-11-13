@@ -137,3 +137,8 @@ input{width:100%}
   .palette-option { min-height: var(--wl-button-height); }
   #top .palette-options { position: fixed; inset: calc(var(--header-height) + var(--wl-space-2)) var(--header-gutter) auto auto; }
 }
+
+/* Admin: escolher o time que está vendo (menu da conta) */
+.team-view { display: grid; gap: 4px; font-size: 12px; color: var(--mut, #9aa3b2); }
+.team-view[hidden] { display: none; }
+.team-view select { width: 100%; min-height: 36px; padding: 4px 8px; font-size: 13px; color: inherit; background: var(--bg, #0b0f17); border: 1px solid var(--line, #2a3242); border-radius: 8px; }

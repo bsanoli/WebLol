@@ -8,6 +8,14 @@ export interface UiVersion {
 
 export const UI_VERSIONS: UiVersion[] = [
   {
+    version: "1.17",
+    date: "2026-11-13",
+    changes: [
+      "Ordem do draft: os campeões mostrados em cada comp seguem a ordem de pick do lado escolhido (First Pick primeiro).",
+      "Admins: no menu da conta, o campo Ver o time troca o time que está sendo visto para conferir as comps e jogadas de outros times.",
+    ],
+  },
+  {
     version: "1.16",
     date: "2026-11-12",
     changes: [

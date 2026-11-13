@@ -151,8 +151,41 @@ async function loadMembership(){
   const t=MEMB?await dbGet("times",MEMB.team):null;
   if(MEMB&&t)MEMB.teamName=t.name;
   TEAM=MEMB?.status==="ativo"&&t?{id:MEMB.team,...t}:null;
+  // admin pode olhar outro time (escolhido no menu da conta)
+  const view=isAdminViewer()?lsGet(VKEY):null;
+  if(view&&view!==TEAM?.id){const v=await dbGet("times",view);if(v)TEAM={id:view,...v,viewing:true};else localStorage.removeItem(VKEY)}
+  else if(!isAdminViewer())localStorage.removeItem(VKEY);
   if(TEAM&&user()?.solo)lsSet(UKEY,{...user(),solo:false});
   guardTeam();
+}
+/* ===== admin: trocar o time que está vendo ===== */
+const VKEY="lol-admin-view-team";
+const isAdminViewer=()=>!!user()?.admin&&fbIsAdmin();
+let TEAMS_CACHE=null;
+async function renderTeamView(){
+  let box=$("#team-view-box");
+  if(!isAdminViewer()){if(box)box.hidden=true;return}
+  if(!box){
+    box=document.createElement("label");box.id="team-view-box";box.className="team-view";
+    box.innerHTML=`<span>Ver o time</span><select id="team-view" data-slot="select"></select>`;
+    $("#sync").before(box);
+    $("#team-view").onchange=e=>switchViewTeam(e.target.value);
+  }
+  box.hidden=false;
+  if(!TEAMS_CACHE){try{TEAMS_CACHE=(await dbList("times")).sort((a,b)=>a.name.localeCompare(b.name))}catch(e){TEAMS_CACHE=[]}}
+  const own=MEMB?.status==="ativo"?MEMB.team:"",cur=TEAM?.id||"";
+  $("#team-view").innerHTML=(own?"":`<option value="">Sem time</option>`)+TEAMS_CACHE.map(t=>`<option value="${esc(t.id)}">${esc(t.name)}${t.id===own?" (meu time)":""}</option>`).join("");
+  $("#team-view").value=cur;
+}
+async function switchViewTeam(id){
+  const own=MEMB?.status==="ativo"?MEMB.team:"";
+  if(pending().length&&!confirm("Você tem alterações não publicadas neste time. Trocar de time descarta essas alterações neste navegador. Continuar?")){renderTeamView();return}
+  if(!id||id===own)localStorage.removeItem(VKEY);else lsSet(VKEY,id);
+  setSync("Trocando de time…","");
+  try{await loadMembership()}catch(e){}
+  await sync();
+  if(currentScreen==="admin")renderAdmin();
+  toast(TEAM?.viewing?`Vendo o time ${TEAM.name}`:`De volta ao ${TEAM?.name||"seu time"}`);
 }
 // comps de um time não podem vazar para outro: ao trocar de time (ou de usuário) apaga a cópia local
 function guardTeam(){
@@ -161,7 +194,7 @@ function guardTeam(){
   for(const k of[KEY,BKEY,SKEY])localStorage.removeItem(k);
   lsSet(TKEY,want);OFF=null;reloadCamp();return true;
 }
-function clearTeamData(){for(const k of[KEY,BKEY,SKEY,TKEY])localStorage.removeItem(k);OFF=null;TEAM=null;MEMB=null}
+function clearTeamData(){for(const k of[KEY,BKEY,SKEY,TKEY,"lol-admin-view-team"])localStorage.removeItem(k);OFF=null;TEAM=null;MEMB=null;TEAMS_CACHE=null}
 
 /* ================= sincronização ================= */
 let reloadCamp=()=>{};
@@ -203,6 +236,7 @@ function setSync(t,c){
 }
 function updateStatus(keepChip){
   const u=user();
+  renderTeamView();
   document.body.dataset.accountName = u?.id ?? "";
   document.body.dataset.accountRole = u?.admin?"Admin":isCaptain()?"Capitão":"";
   document.body.classList.toggle("isadmin",!!u?.admin||isCaptain());
@@ -219,7 +253,7 @@ function updateStatus(keepChip){
     b.hidden=true;
     return;
   }
-  if(!keepChip)setSync(`${TEAM.name} · versão oficial v${OFF.version}`,"ok");
+  if(!keepChip)setSync(`${TEAM.viewing?"Vendo ":""}${TEAM.name} · versão oficial v${OFF.version}`,"ok");
   const p=pending(),sent=new Set(lsGet(SKEY,[])),uns=p.filter(c=>!sent.has(c.h)),wait=p.length-uns.length;
   if(canPublish()){b.hidden=!p.length;b.dataset.variant="default";b.disabled=false;b.textContent=`Publicar minhas alterações (${p.length})`;b.onclick=()=>publish(p.map(c=>({...c,sid:"capitao",from:u.id})),[],"Alterações do capitão")}
   else{b.hidden=!p.length;b.dataset.variant=uns.length?"default":"secondary";b.textContent=uns.length?`Enviar para aprovação (${uns.length})`:`${wait} aguardando aprovação`;b.disabled=!uns.length;b.onclick=sendChanges}

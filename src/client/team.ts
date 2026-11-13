@@ -98,7 +98,7 @@ function renderList(){
   const list=$("#clist");
   clearTeamControls(list);
   list.innerHTML=matches
-   .map(c=>{const firsts=["top","jg","mid","adc","sup"].map(l=>c.lanes[l][0]).filter(Boolean);
+   .map(c=>{const firsts=(S.view==="draft"?pickOrderLanes(c):["top","jg","mid","adc","sup"]).map(l=>c.lanes[l][0]).filter(Boolean);
      return `<div class="composition-item"><button class="ci${c.id===S.cur?" on":""}" aria-pressed="${c.id===S.cur}" data-id="${c.id}"><b>${esc(c.name)}</b>
       <span class="mini">${firsts.map(img).join("")||'<small style="color:var(--mut)">vazia</small>'}</span></button><span class="composition-menu" data-team-control></span></div>`}).join("")||'<div style="color:var(--mut);padding:10px;font-size:12px">Nenhuma comp.</div>';
   list.querySelectorAll(".composition-menu").forEach((host,index)=>{
@@ -209,7 +209,7 @@ $("#editor").addEventListener("change",e=>{
   const d=draftOf(cur()),order=d.order[d.side],i=Number(e.target.dataset.pickPosition);
   const lane=e.target.value,j=order.indexOf(lane);
   [order[i],order[j]]=[lane,order[i]];
-  active=lane;touch();save();renderEditor();
+  active=lane;touch();save();renderEditor();renderList();
   requestAnimationFrame(()=>$(`[data-pick-position="${i}"] + .team-select button`)?.focus({preventScroll:true}));
 });
 function reorderChampion(name,lane,direction){
@@ -242,8 +242,8 @@ $("#editor").addEventListener("click",e=>{
   const rm=e.target.closest("[data-rm]");
   if(rm){removeChampion(rm.dataset.rm,rm.closest("[data-l]").dataset.l);return}
 
-  const vb=e.target.closest("[data-view]");if(vb){S.view=vb.dataset.view;save(false);renderEditor();$(`[data-view="${S.view}"]`).focus({preventScroll:true});publishTeamRoute("comps");return}
-  const sb=e.target.closest("[data-side]");if(sb){draftOf(cur()).side=sb.dataset.side;touch();save();renderEditor();$(`[data-side="${sb.dataset.side}"]`).focus({preventScroll:true});return}
+  const vb=e.target.closest("[data-view]");if(vb){S.view=vb.dataset.view;save(false);renderEditor();renderList();$(`[data-view="${S.view}"]`).focus({preventScroll:true});publishTeamRoute("comps");return}
+  const sb=e.target.closest("[data-side]");if(sb){draftOf(cur()).side=sb.dataset.side;touch();save();renderEditor();renderList();$(`[data-side="${sb.dataset.side}"]`).focus({preventScroll:true});return}
   const target=e.target.closest("[data-draft-target]");
   if(target){
     active=target.dataset.draftTarget;
@@ -277,6 +277,8 @@ const DORDER=[
  ["Fase de bans 2",["R:ban","B:ban","R:ban","B:ban"]],
  ["Fase de picks 2",["R:pick","B:pick","B:pick","R:pick"]]];
 const PLANES=["top","jg","mid","adc","sup"];
+// Lanes na ordem de pick da comp, do lado escolhido (para mostrar os campeões nessa ordem)
+function pickOrderLanes(c){const d=draftOf(c);return d.order[d.side]}
 function draftOf(c){
   if(!c.draft)c.draft={};const d=c.draft;
   if(!d.side)d.side="blue";if(!d.note)d.note={blue:"",red:""};if(!d.order)d.order={};
@@ -333,7 +335,7 @@ function draftHTML(c){
   };
   // Clicar no nome de um lado coloca o time nesse lado.
   const sideName=t=>{const side=t==="B"?"b":"r",key=t==="B"?"blue":"red",mine=t===us;return `<h3 class="tmh" id="draft-side-${side}"><button type="button" class="side-pick${mine?" on":""}" data-side="${key}" aria-pressed="${mine}" title="${mine?"Nosso time está neste lado":"Clique para colocar nosso time neste lado"}">${DRAFT_SIDE[key]}<span>${mine?"Nossa equipe":"Adversário"}</span></button></h3>`};
-  const tabs=S.comps.map(x=>{const firsts=PLANES.map(l=>x.lanes[l][0]).filter(Boolean);
+  const tabs=S.comps.map(x=>{const firsts=pickOrderLanes(x).map(l=>x.lanes[l][0]).filter(Boolean);
     return `<button type="button" class="dz-tab${x.id===c.id?" on":""}" data-comp-tab="${esc(x.id)}" aria-pressed="${x.id===c.id}" title="${esc(x.name)}"><b>${esc(x.name)}</b><span class="mini">${firsts.map(img).join("")||'<small>vazia</small>'}</span></button>`}).join("");
   h+=`<div class="dz">${team("B")}
     <div class="dz-center">

@@ -15,23 +15,23 @@ import{_ as e,b as t,c as n,f as r,g as i,h as a,l as o,o as s,p as c,s as l,u,v
     margin-right: ${s}px ${r};
     `,n===`padding`&&`padding-right: ${s}px ${r};`].filter(Boolean).join(``)}
   }
-
+  
   .${Et} {
     right: ${s}px ${r};
   }
-
+  
   .${Dt} {
     margin-right: ${s}px ${r};
   }
-
+  
   .${Et} .${Et} {
     right: 0 ${r};
   }
-
+  
   .${Dt} .${Dt} {
     margin-right: 0 ${r};
   }
-
+  
   body[${tn}] {
     ${kt}: ${s}px;
   }
