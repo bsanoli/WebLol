@@ -238,16 +238,17 @@ $("#logout").onclick=async()=>{
 };
 
 /* ================= aba Gestão do time (dentro da Área do time) ================= */
-// capitão do time (ou admin desbloqueado) e fora do modo "Ver como"
+// todo membro ativo do time vê a aba; só o capitão (ou admin desbloqueado) aceita pedidos e exclui jogadores
 window.TEAM_NAME=()=>TEAM?.name||"";
-window.captainAccess=()=>!preview()&&!!TEAM&&(isCaptain()||(!!user()?.admin&&fbIsAdmin()));
+window.captainAccess=()=>!!TEAM&&!!user()&&!user().solo;
+window.canManageTeam=()=>!!TEAM&&(isCaptain()||(!preview()&&!!user()?.admin&&fbIsAdmin()));
 window.renderCaptainPanel=async function renderCaptainPanel(el){
   if(!el)return;
-  if(!captainAccess()){el.innerHTML=`<div class="wl-panel card mut">Só o capitão do time vê esta aba.</div>`;return}
-  const T=TEAM;el.innerHTML=`<p class="mut">Carregando...</p>`;
+  if(!captainAccess()){el.innerHTML=`<div class="wl-panel card mut">Entre num time para ver esta aba.</div>`;return}
+  const T=TEAM,manage=window.canManageTeam(),locked=!!preview();el.innerHTML=`<p class="mut">Carregando...</p>`;
   let membros=[],off=OFF;
-  try{const[ms,r]=await Promise.all([dbList("membros","team",T.id),readOfficial().catch(()=>({}))]);membros=ms;if(r?.off)off=r.off}
-  catch(e){el.innerHTML=`<div class="wl-panel card bad">Não consegui ler o banco: ${esc(e.message)}</div>`;return}
+  let memErr="";
+  const[ms,r]=await Promise.all([dbList("membros","team",T.id).catch(e=>{memErr=e.message;return[]}),readOfficial().catch(()=>({}))]);membros=ms;if(r?.off)off=r.off;
   if(TEAM!==T)return;
   const pedidos=membros.filter(m=>m.status==="pendente").sort((a,b)=>(a.at||0)-(b.at||0));
   const ativos=membros.filter(m=>m.status==="ativo").sort((a,b)=>(b.id===T.captain)-(a.id===T.captain)||String(a.riotId||a.id).localeCompare(String(b.riotId||b.id)));
@@ -257,17 +258,22 @@ window.renderCaptainPanel=async function renderCaptainPanel(el){
   if(off&&!byV.has(off.version))vers.unshift(off.version);
   const nC=off?.data?.comps?.length||0,nP=off?.data?.plays?.length||0;
   const row=l=>`<tr><td>${esc(l.from)}</td><td><span class="op ${l.op}">${OPN[l.op]}</span> ${KN[l.kind]} ${esc(l.name)}</td><td class="${l.status==="approved"?"ok":"bad"}">${l.status==="approved"?"aprovada":"recusada"}</td></tr>`;
-  const verHtml=vers.slice(0,60).map((v,i)=>{const ls=byV.get(v)||[],cur=off&&v===off.version,at=cur?off.at:ls[0]?.at;
+  const verHtml=vers.map(v=>{const ls=byV.get(v)||[],cur=off&&v===off.version,at=cur?off.at:ls[0]?.at;
     const ok=ls.filter(l=>l.status==="approved").length,no=ls.length-ok;
-    return`<details class="cap-ver"${i===0?" open":""}><summary><b>v${v}</b>${cur?' <span class="ok">atual</span>':""} <span class="mut">${at?fmtD(at):""}${cur&&off.by?` · por ${esc(off.by)}`:""}${cur&&off.label?` · ${esc(off.label)}`:""} · ${ok} aprovada${ok===1?"":"s"}${no?`, ${no} recusada${no===1?"":"s"}`:""}</span></summary>
+    return`<details class="cap-ver"><summary><b>v${v}</b>${cur?' <span class="ok">atual</span>':""} <span class="mut">${at?fmtD(at):""}${cur&&off.by?` · por ${esc(off.by)}`:""}${cur&&off.label?` · ${esc(off.label)}`:""} · ${ok} aprovada${ok===1?"":"s"}${no?`, ${no} recusada${no===1?"":"s"}`:""}</span></summary>
      ${ls.length?`<table><tr><th>De</th><th>O quê</th><th>Status</th></tr>${ls.map(row).join("")}</table>`:'<p class="mut">Sem alterações registradas nesta versão.</p>'}</details>`}).join("");
+  const capName=ativos.find(m=>m.id===T.captain)?.riotId||T.captainId||T.captain;
   el.innerHTML=`
-   <h2>Pedidos para entrar (${pedidos.length})</h2>
-   <div class="wl-panel card">${pedidos.length?`<table><tr><th>Riot ID</th><th>Pedido em</th><th></th></tr>${pedidos.map(m=>`<tr><td>${esc(m.riotId||m.id)}</td><td>${m.at?fmtD(m.at):""}</td><td class="cap-act"><button data-slot="button" data-variant="default" data-acc="${esc(m.id)}">Aceitar</button> <button data-slot="button" data-variant="destructive" data-den="${esc(m.id)}">Recusar</button></td></tr>`).join("")}</table>`:'<span class="mut">Nenhum pedido pendente.</span>'}</div>
+   ${locked?`<div class="wl-panel card mut cap-note">Você está vendo como ${manage?"capitão":"membro"} do ${esc(T.name)}. ${manage?"Os botões ficam desativados nesta visão.":""}</div>`:""}
+   ${manage?`<h2>Pedidos para entrar (${pedidos.length})</h2>
+   <div class="wl-panel card">${pedidos.length?`<table><tr><th>Riot ID</th><th>Pedido em</th><th></th></tr>${pedidos.map(m=>`<tr><td>${esc(m.riotId||m.id)}</td><td>${m.at?fmtD(m.at):""}</td><td class="cap-act"><button data-slot="button" data-variant="default" data-acc="${esc(m.id)}">Aceitar</button> <button data-slot="button" data-variant="destructive" data-den="${esc(m.id)}">Recusar</button></td></tr>`).join("")}</table>`:'<span class="mut">Nenhum pedido pendente.</span>'}</div>`:""}
    <h2>Jogadores do time (${ativos.length})</h2>
-   <div class="wl-panel card"><table><tr><th>Riot ID</th><th>Papel</th><th class="cap-since">No time desde</th><th></th></tr>${ativos.map(m=>`<tr><td>${esc(m.riotId||m.id)}</td><td>${m.id===T.captain?"capitão":"membro"}</td><td class="cap-since">${m.at?fmtD(m.at):""}</td><td class="cap-act">${m.id===T.captain?"":`<button data-slot="button" data-variant="destructive" data-rm="${esc(m.id)}">Excluir do time</button>`}</td></tr>`).join("")||'<tr><td colspan="4" class="mut">Nenhum jogador ainda.</td></tr>'}</table></div>
+   <div class="wl-panel card">${memErr?`<p class="bad">Não consegui ler os jogadores do time agora. Tente de novo mais tarde.</p>`:""}${manage?"":`<p class="mut">Capitão: ${esc(capName)}. Só o capitão aceita pedidos e tira jogadores do time.</p>`}<table><tr><th>Riot ID</th><th>Papel</th><th class="cap-since">No time desde</th>${manage?"<th></th>":""}</tr>${ativos.map(m=>`<tr><td>${esc(m.riotId||m.id)}</td><td>${m.id===T.captain?"capitão":"membro"}</td><td class="cap-since">${m.at?fmtD(m.at):""}</td>${manage?`<td class="cap-act">${m.id===T.captain?"":`<button data-slot="button" data-variant="destructive" data-rm="${esc(m.id)}">Excluir do time</button>`}</td>`:""}</tr>`).join("")||`<tr><td colspan="${manage?4:3}" class="mut">Nenhum jogador ainda.</td></tr>`}</table></div>
    <h2>Histórico das comps</h2>
-   <div class="wl-panel card">${off?`<p>Versão oficial atual: <b>v${off.version}</b> <span class="mut">· ${nC} comp${nC===1?"":"s"} · ${nP} jogada${nP===1?"":"s"}${off.at?` · ${fmtD(off.at)}`:""}</span></p>${verHtml}`:'<span class="mut">O time ainda não tem versão oficial.</span>'}</div>`;
+   <div class="wl-panel card">${off?`<p>Versão oficial atual: <b>v${off.version}</b> <span class="mut">· ${nC} comp${nC===1?"":"s"} · ${nP} jogada${nP===1?"":"s"}${off.at?` · ${fmtD(off.at)}`:""}${off.by?` · por ${esc(off.by)}`:""}</span></p>
+    <details class="cap-hist"><summary>Ver o histórico inteiro (${vers.length} ${vers.length===1?"versão":"versões"})</summary>${verHtml}</details>`:'<span class="mut">O time ainda não tem versão oficial.</span>'}</div>`;
+  if(locked){el.querySelectorAll("[data-acc],[data-den],[data-rm]").forEach(b=>b.disabled=true);return}
+  if(!manage)return;
   const again=()=>renderCaptainPanel(el);
   const who=id=>{const m=membros.find(x=>x.id===id);return m?.riotId||id};
   el.querySelectorAll("[data-acc]").forEach(b=>b.onclick=async()=>{b.disabled=true;try{await dbSet("membros",b.dataset.acc,{status:"ativo",at:Date.now()},true);toast(`${who(b.dataset.acc)} entrou no ${T.name}`)}catch(e){toast("Erro: "+e.message)}again()});
@@ -340,6 +346,7 @@ async function renderAdmin(){
     <p class="mut">Guarde o backup completo na pasta Admin do OneDrive de tempos em tempos.</p></div>
    ${details(`Versões da interface${(window.UI_VERSIONS||[])[0]?` <span class="mut">(atual: v${esc(window.UI_VERSIONS[0].version)})</span>`:""}`,(window.UI_VERSIONS||[]).map(v=>`<div style="margin-top:10px"><b>v${esc(v.version)}</b> <span class="mut">${esc(v.date.split("-").reverse().join("/"))}</span><ul style="margin:4px 0 0;padding-left:20px">${v.changes.map(c=>`<li>${esc(c)}</li>`).join("")}</ul></div>`).join("")||'<span class="mut">Sem histórico.</span>')}`;
   el.innerHTML=teamHtml+adminHtml;
+  if(preview()){el.insertAdjacentHTML("afterbegin",`<div class="wl-panel card mut">Visualização como capitão: os botões ficam desativados. Volte para a visão de admin no menu da conta para agir.</div>`);el.querySelectorAll("button,input,select").forEach(x=>x.disabled=true);return}
   const again=()=>renderAdmin();
   const pick=si=>{const s=subs[si],ap=[],rj=[];document.querySelectorAll(`[data-s="${si}"]`).forEach(cb=>{const c={...s.changes[+cb.dataset.c],sid:s.id,from:s.from};(cb.checked?ap:rj).push(c)});return{s,ap,rj}};
   el.querySelectorAll("[data-ap]").forEach(b=>b.onclick=async()=>{const{s,ap,rj}=pick(+b.dataset.ap);b.disabled=true;await publish(ap,rj,`Envio de ${s.from}`);await dbDel(teamPath("envios"),s.doc).catch(()=>{});again()});

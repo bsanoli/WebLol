@@ -483,14 +483,15 @@ function publishTeamRoute(view, {includeItem = true, copy = false} = {}) {
   window.frameElement?.dispatchEvent(new CustomEvent("weblol:navigate",{detail:{path, copy}}));
 }
 
-/* ===== Gestão do time (só capitão e admin; os dados vêm do app principal) ===== */
+/* ===== Gestão do time (todo o time vê; só o capitão e admins agem; os dados vêm do app principal) ===== */
 const host = window.parent as any;
 const captainTab = $('header nav [data-v="cap"]');
 let wantCaptain = false; // link para a gestão aberto antes de o time carregar
 const hasCaptainAccess = () => { try { return !!host?.captainAccess?.(); } catch { return false; } };
 function renderCaptain() {
   const name = (() => { try { return host.TEAM_NAME?.() || ""; } catch { return ""; } })();
-  if (name) $("#cap-sub").textContent = `${name}: aceite pedidos, gerencie os jogadores e veja o histórico das comps do time.`;
+  const manage = (() => { try { return !!host.canManageTeam?.(); } catch { return false; } })();
+  if (name) $("#cap-sub").textContent = manage ? `${name}: aceite pedidos, gerencie os jogadores e veja o histórico das comps do time.` : `${name}: jogadores do time e histórico das comps.`;
   host?.renderCaptainPanel?.($("#cap"));
 }
 (window as any).weblolTeamChanged = () => {

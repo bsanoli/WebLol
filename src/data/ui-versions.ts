@@ -8,6 +8,15 @@ export interface UiVersion {
 
 export const UI_VERSIONS: UiVersion[] = [
   {
+    version: "1.31",
+    date: "2026-11-13",
+    changes: [
+      "Gestão do time: todos do time veem a aba, com os jogadores e o histórico das comps; só o capitão aceita pedidos e exclui jogadores.",
+      "Gestão do time: o histórico inteiro fica num item recolhível.",
+      "Ver como (admin): novas visões Capitão do time e Membro do time (não capitão).",
+    ],
+  },
+  {
     version: "1.30",
     date: "2026-11-13",
     changes: [

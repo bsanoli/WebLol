@@ -8,7 +8,20 @@ Formato de cada entrada: data, pedido (palavras do Bruno), decisão (quem escolh
 
 ---
 
-## 13/11/2026: aba Gestão do time (capitão)
+## 13/11/2026: Gestão do time para todo o time e "Ver como" capitão e membro
+
+- **Pedido:** "todos do time devem ter a aba de gestão do time com os jogadores que estão no time e o histórico de comps. Mas só o capitão pode aceitar a entrada no time ou excluir alguém do time. No histórico do time na gestão do time, faça um dropdown para o histórico inteiro para não ficar muito grande a tela. Com acesso de admin, faça algumas visões com essa variação da pessoa ser capitão ou não do time para eu ver como está ficando".
+- **Decisão:** pedido direto do Bruno, sem escolha extra.
+  - Todo membro ativo vê a aba, com os jogadores e o histórico.
+  - Pedidos para entrar e o botão Excluir do time aparecem só para o capitão e para os admins.
+  - O membro vê quem é o capitão.
+  - O histórico inteiro fica num item recolhível ("Ver o histórico inteiro"), fechado por padrão. A versão atual continua visível.
+- **"Ver como" dos admins:** as opções agora são Admin, Capitão do time, Membro do time (não capitão) e Sem conta cadastrada.
+  - Em "Capitão do time" os botões aparecem, mas ficam desativados, também na aba Administração. Nada é gravado.
+- **Regras do Firestore:** membro ativo pode listar os membros do próprio time. Ele não pode aceitar, editar nem excluir ninguém, e não vê os membros de outros times. Testado no emulador. O Bruno publica as regras à mão.
+- Versão da interface 1.31.
+
+
 
 - **Pedido:** "faça uma aba dentro de Área do Time para gestão do capitão do time. O capitão poderá aceitar os pedidos para entrar no time, excluir pessoas do time, ver os players do time dele e ter um histórico das comps e alterações do seu time".
 - **Decisão:** a aba fica ao lado de Composições, Mapa tático e Conhecimento. Só o capitão do time e os admins desbloqueados veem a aba. No "Ver como" ela some. Pedido feito pelo Bruno, então não houve escolha extra.

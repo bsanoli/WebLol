@@ -599,6 +599,10 @@ header nav { flex-wrap: wrap; gap: var(--wl-space-1); }
 #cap .op.add { background: var(--wl-success-soft); color: var(--wl-success); }
 #cap .op.edit { background: var(--wl-warning-soft); color: var(--wl-warning); }
 #cap .op.del { background: var(--wl-danger-soft); color: var(--wl-danger); }
+#cap .cap-hist > summary, #cap .cap-ver summary { align-content: center; min-height: var(--wl-button-height); cursor: pointer; }
+#cap .cap-hist > summary { font-weight: 600; color: var(--gold); }
+#cap .cap-hist[open] > summary { margin-bottom: var(--wl-space-2); }
+#cap .cap-note { margin-bottom: var(--wl-panel-gap); }
 #cap .cap-ver { border-top: 1px solid var(--wl-divider); padding-block: var(--wl-space-2); }
 #cap .cap-ver summary { align-content: center; min-height: var(--wl-button-height); cursor: pointer; }
 #cap .cap-ver[open] > summary { margin-bottom: var(--wl-space-2); }

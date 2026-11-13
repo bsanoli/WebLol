@@ -59,7 +59,8 @@ service cloud.firestore {
     // Em que time cada jogador está. O jogador pede (pendente), o capitão aceita (ativo).
     match /membros/{k} {
       allow get: if k == me() || isAdmin() || capitao(resource.data.team);
-      allow list: if isAdmin() || capitao(resource.data.team);
+      // membros ativos veem os colegas do próprio time (aba Gestão do time)
+      allow list: if isAdmin() || capitao(resource.data.team) || membroAtivo(resource.data.team);
       allow create: if isAdmin()
         || (k == me() && request.resource.data.status == 'pendente')
         || (k == me() && request.resource.data.status == 'ativo' && capitao(request.resource.data.team));

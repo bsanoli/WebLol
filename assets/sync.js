@@ -141,14 +141,15 @@ function describe(c){ // resumo legível do que mudou
 const PKEY="lol-preview",PBKEY="lol-preview-backup";
 const realUser=()=>lsGet(UKEY);
 const preview=()=>realUser()?.admin?(lsGet(PKEY)||""):"";
-const user=()=>{const u=realUser(),p=preview();return p==="guest"?null:p==="user"?{...u,admin:false}:u};
+const user=()=>{const u=realUser(),p=preview();return p==="guest"?null:p==="user"||p==="captain"?{...u,admin:false}:u};
 const local=()=>lsGet(KEY);
 function pending(){const b=lsGet(BKEY);if(!b)return[];return diff(shared(local()),b.data)}
 function isSampleOnly(S){return!S||(S.comps||[]).length<=1&&(!S.comps?.length||/do comps\.xlsx/.test(S.comps[0].name))&&!(S.plays||[]).some(p=>p.steps?.length)}
 
 /* ================= times ================= */
-const isCaptain=()=>!preview()&&!!TEAM&&TEAM.captain===meKey();
-const canPublish=()=>isCaptain()||(!!user()?.admin&&fbIsAdmin());
+// no "Ver como" capitão o admin enxerga como capitão do time aberto; no "Ver como" membro, como membro comum
+const isCaptain=()=>!!TEAM&&(preview()==="captain"||(!preview()&&TEAM.captain===meKey()));
+const canPublish=()=>!preview()&&isCaptain()||!preview()&&(!!user()?.admin&&fbIsAdmin());
 const teamPath=sub=>`times/${TEAM.id}/${sub}`;
 // lê em que time o usuário está; TEAM só fica preenchido quando ele já foi aceito
 async function loadMembership(){
@@ -169,7 +170,7 @@ function renderPreview(){
   if(!realUser()?.admin){if(box)box.hidden=true;return}
   if(!box){
     box=document.createElement("label");box.id="preview-box";box.className="team-view";
-    box.innerHTML=`<span>Ver como</span><select id="preview-as" data-slot="select"><option value="">Admin (minha visão)</option><option value="user">Usuário sem admin</option><option value="guest">Sem conta cadastrada</option></select>`;
+    box.innerHTML=`<span>Ver como</span><select id="preview-as" data-slot="select"><option value="">Admin (minha visão)</option><option value="captain">Capitão do time</option><option value="user">Membro do time (não capitão)</option><option value="guest">Sem conta cadastrada</option></select>`;
     $("#sync").before(box);
     $("#preview-as").onchange=e=>setPreview(e.target.value);
   }
@@ -183,11 +184,11 @@ async function setPreview(p){
   if(p)lsSet(PKEY,p);else localStorage.removeItem(PKEY);
   if($("#modal").open)closeModal();
   reloadCamp();updateStatus();
-  if(currentScreen==="admin"&&p){writeRoute(routeRoots.camp);openRoute()}
+  if(currentScreen==="admin"&&p&&p!=="captain"){writeRoute(routeRoots.camp);openRoute()}
   if(p!=="guest"){try{await fb();await enterTeam()}catch(e){}}
   else updateStatus();
   if(currentScreen==="admin")renderAdmin();
-  toast(p==="user"?"Vendo como usuário sem admin. Nada que você enviar será salvo.":p==="guest"?"Vendo como quem não tem conta. As comps do admin foram guardadas e voltam ao sair desta visão.":"De volta à visão de admin.",5000);
+  toast(p==="user"?"Vendo como membro do time, sem admin. Nada que você enviar será salvo.":p==="captain"?"Vendo como capitão do time. Os botões aparecem, mas ficam desativados nesta visão.":p==="guest"?"Vendo como quem não tem conta. As comps do admin foram guardadas e voltam ao sair desta visão.":"De volta à visão de admin.",5000);
 }
 
 /* ===== admin: trocar o time que está vendo ===== */
@@ -271,7 +272,7 @@ function updateStatus(keepChip){
   renderTeamView();renderPreview();
   try{$("#v-camp")?.contentWindow?.weblolTeamChanged?.()}catch(e){}
   document.body.dataset.accountName = u?.id ?? "";
-  document.body.dataset.accountRole = preview()==="user"?"Vendo como usuário":u?.admin?"Admin":isCaptain()?"Capitão":"";
+  document.body.dataset.accountRole = preview()==="user"?"Vendo como membro":preview()==="captain"?"Vendo como capitão":u?.admin?"Admin":isCaptain()?"Capitão":"";
   document.body.dataset.preview = preview();
   document.body.classList.toggle("isadmin",!!u?.admin||isCaptain());
   $("#logout").hidden=!u;
@@ -300,7 +301,7 @@ async function refreshTeam(){
   if(NET&&OFF)toast("Sincronizado");
 }
 async function sendChanges(){
-  if(preview())return toast("Você está vendo como usuário: nada foi enviado. Volte para a visão de admin no menu da conta.",5000);
+  if(preview())return toast("Você está vendo como outra pessoa: nada foi enviado. Volte para a visão de admin no menu da conta.",5000);
   const u=user(),base=lsGet(BKEY);if(!TEAM||!base)return toast("Sem conexão com o banco do time");
   const sent=lsGet(SKEY,[]),ch=pending().filter(c=>!sent.includes(c.h));if(!ch.length)return;
   const sub={id:uid(),from:u.id,at:Date.now(),baseVersion:base.version,changes:ch};
