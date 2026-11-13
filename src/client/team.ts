@@ -358,7 +358,7 @@ let role="all";
 const ROLEBTN=[{k:"all",n:"Todos"},...LANES.filter(l=>l.k!=="ban")];
 $("#roles").innerHTML=ROLEBTN.map(({k,n})=>`<button data-slot="button" data-variant="ghost" data-size="sm" data-r="${k}" aria-pressed="${k==="all"}" class="${k==="all"?"on":""}"><span class="lane-label">${laneIconMarkup(k)}${n}</span></button>`).join("");
 $("#roles").onclick=e=>{const b=e.target.closest("button");if(!b)return;role=b.dataset.r;document.querySelectorAll("#roles button").forEach(x=>{x.classList.toggle("on",x===b);x.setAttribute("aria-pressed",String(x===b))});resetGrid()};
-const resetGrid=()=>{renderGrid();$("#grid").scrollTop=0};$("#search").oninput=resetGrid;$("#sort").onchange=resetGrid;$("#worlds-only").onchange=resetGrid;
+const resetGrid=()=>{renderGrid();$("#grid").scrollTop=0};$("#search").oninput=resetGrid;$("#sort").onchange=resetGrid;
 function renderTarget(){
   const c=cur();
   $("#grid").querySelectorAll(".ch").forEach(button => button.setAttribute("aria-pressed", c.lanes[active].includes(button.dataset.n)));
@@ -375,7 +375,7 @@ $("#lane-target-slot").addEventListener("change",e=>{if(e.target.id!=="pick-targ
 function renderGrid(){
   const q=$("#search").value.toLowerCase().replace(/[^a-z]/g,""),c=cur(),srt=$("#sort").value;
   const where={};for(const l of LANES)for(const n of c.lanes[l.k])(where[n]=where[n]||[]).push(l);
-  let L=CH.filter(ch=>(!$("#worlds-only").checked||WS.c[ch.n])&&(!q||ch.n.toLowerCase().replace(/[^a-z]/g,"").includes(q))&&(role==="all"||ch.r.includes(role)));
+  let L=CH.filter(ch=>(!q||ch.n.toLowerCase().replace(/[^a-z]/g,"").includes(q))&&(role==="all"||ch.r.includes(role)));
   if(srt==="ws")L.sort((a,b)=>((WS.c[b.n]||[0])[0]-(WS.c[a.n]||[0])[0])||a.n.localeCompare(b.n));
   else if(srt==="wsb")L.sort((a,b)=>((WS.c[b.n]||[0,0,0])[2]-(WS.c[a.n]||[0,0,0])[2])||a.n.localeCompare(b.n));
   else L.sort((a,b)=>a.n.localeCompare(b.n));

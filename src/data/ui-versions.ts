@@ -8,6 +8,13 @@ export interface UiVersion {
 
 export const UI_VERSIONS: UiVersion[] = [
   {
+    version: "1.22",
+    date: "2026-11-13",
+    changes: [
+      "Composições: saiu a opção Participaram do Worlds do catálogo de campeões.",
+    ],
+  },
+  {
     version: "1.21",
     date: "2026-11-13",
     changes: [
