@@ -1,7 +1,7 @@
 {
-  "_leia": "Lista de pros cujas partidas ranqueadas solo/duo entram na aba SoloQ. Contas tiradas do trackingthepros.com e lolpros.gg em 2026-11-13; Riot IDs mudam, então confira de vez em quando. platform: kr, euw1, na1, br1, eun1, jp1, la1, la2, oc1, tr1, vn2, tw2, sg2. role usa os nomes do app: Top, Jungle, Mid, ADC, Suporte.",
-  "days": 14,
-  "maxGamesPerAccount": 20,
+  "_leia": "Lista de pros cujas partidas ranqueadas solo/duo entram na aba SoloQ. Contas tiradas do trackingthepros.com e lolpros.gg em 2026-11-13 (LPL: só contas do servidor coreano/NA, a API não cobre a China); Riot IDs mudam, então confira de vez em quando. platform: kr, euw1, na1, br1, eun1, jp1, la1, la2, oc1, tr1, vn2, tw2, sg2. role usa os nomes do app: Top, Jungle, Mid, ADC, Suporte.",
+  "days": 30,
+  "maxGamesPerAccount": 70,
   "pros": [
     {
       "name": "Faker",
@@ -355,6 +355,605 @@
         {
           "riotId": "Jojos#8306",
           "platform": "br1"
+        }
+      ]
+    },
+    {
+      "name": "SkewMond",
+      "team": "G2 Esports",
+      "role": "Jungle",
+      "accounts": [
+        {
+          "riotId": "G2 Egghead#Bald",
+          "platform": "na1"
+        },
+        {
+          "riotId": "G2 SkewMond#3327",
+          "platform": "euw1"
+        }
+      ]
+    },
+    {
+      "name": "Hans Sama",
+      "team": "G2 Esports",
+      "role": "ADC",
+      "accounts": [
+        {
+          "riotId": "G2 Hans Sama#12838",
+          "platform": "euw1"
+        }
+      ]
+    },
+    {
+      "name": "Labrov",
+      "team": "G2 Esports",
+      "role": "Suporte",
+      "accounts": [
+        {
+          "riotId": "G2 Labrov#8085",
+          "platform": "euw1"
+        },
+        {
+          "riotId": "cheap book key#6767",
+          "platform": "na1"
+        }
+      ]
+    },
+    {
+      "name": "Canna",
+      "team": "Karmine Corp",
+      "role": "Top",
+      "accounts": [
+        {
+          "riotId": "worldspro0073#world",
+          "platform": "na1"
+        },
+        {
+          "riotId": "칸 나#0211",
+          "platform": "kr"
+        }
+      ]
+    },
+    {
+      "name": "Yike",
+      "team": "Karmine Corp",
+      "role": "Jungle",
+      "accounts": [
+        {
+          "riotId": "quentin#dawg",
+          "platform": "na1"
+        },
+        {
+          "riotId": "KC Yiken#1111",
+          "platform": "euw1"
+        }
+      ]
+    },
+    {
+      "name": "Kyeahoo",
+      "team": "Karmine Corp",
+      "role": "Mid",
+      "accounts": [
+        {
+          "riotId": "yeahoo#yaho",
+          "platform": "na1"
+        },
+        {
+          "riotId": "전설의용사김창동#canna",
+          "platform": "kr"
+        }
+      ]
+    },
+    {
+      "name": "Caliste",
+      "team": "Karmine Corp",
+      "role": "ADC",
+      "accounts": [
+        {
+          "riotId": "MASTERMOVE#WORLD",
+          "platform": "na1"
+        },
+        {
+          "riotId": "KC NEXT ADKING#EUW",
+          "platform": "euw1"
+        }
+      ]
+    },
+    {
+      "name": "Busio",
+      "team": "Karmine Corp",
+      "role": "Suporte",
+      "accounts": [
+        {
+          "riotId": "basiil#fan",
+          "platform": "na1"
+        },
+        {
+          "riotId": "yuh#yah",
+          "platform": "kr"
+        }
+      ]
+    },
+    {
+      "name": "Myrwn",
+      "team": "Movistar KOI",
+      "role": "Top",
+      "accounts": [
+        {
+          "riotId": "Shirin#ilmgf",
+          "platform": "na1"
+        },
+        {
+          "riotId": "daemon#mirin",
+          "platform": "euw1"
+        }
+      ]
+    },
+    {
+      "name": "Elyoya",
+      "team": "Movistar KOI",
+      "role": "Jungle",
+      "accounts": [
+        {
+          "riotId": "Yoyadeodo#tuki",
+          "platform": "na1"
+        },
+        {
+          "riotId": "Elyo#Umi",
+          "platform": "euw1"
+        }
+      ]
+    },
+    {
+      "name": "jojopyun",
+      "team": "Movistar KOI",
+      "role": "Mid",
+      "accounts": [
+        {
+          "riotId": "jojooooooooo#9999",
+          "platform": "na1"
+        }
+      ]
+    },
+    {
+      "name": "Supa",
+      "team": "Movistar KOI",
+      "role": "ADC",
+      "accounts": [
+        {
+          "riotId": "Charmander#MKOI",
+          "platform": "na1"
+        },
+        {
+          "riotId": "tukaan#tukan",
+          "platform": "euw1"
+        }
+      ]
+    },
+    {
+      "name": "Alvaro",
+      "team": "Movistar KOI",
+      "role": "Suporte",
+      "accounts": [
+        {
+          "riotId": "alvarooo#000",
+          "platform": "euw1"
+        },
+        {
+          "riotId": "Treecko#MKOI",
+          "platform": "na1"
+        }
+      ]
+    },
+    {
+      "name": "Thanatos",
+      "team": "Cloud9",
+      "role": "Top",
+      "accounts": [
+        {
+          "riotId": "Thanatoes#kr2",
+          "platform": "na1"
+        },
+        {
+          "riotId": "C9 Thanatos#KR2",
+          "platform": "kr"
+        }
+      ]
+    },
+    {
+      "name": "Blaber",
+      "team": "Cloud9",
+      "role": "Jungle",
+      "accounts": [
+        {
+          "riotId": "blaberfish2#NA1",
+          "platform": "na1"
+        },
+        {
+          "riotId": "2574449791993376#KR1",
+          "platform": "kr"
+        }
+      ]
+    },
+    {
+      "name": "Loki",
+      "team": "Cloud9",
+      "role": "Mid",
+      "accounts": [
+        {
+          "riotId": "C9 Loki#kr3",
+          "platform": "na1"
+        },
+        {
+          "riotId": "Loki#zxc",
+          "platform": "kr"
+        }
+      ]
+    },
+    {
+      "name": "Tactical",
+      "team": "Cloud9",
+      "role": "ADC",
+      "accounts": [
+        {
+          "riotId": "Tactical0#NA1",
+          "platform": "na1"
+        },
+        {
+          "riotId": "2582130870715840#KR1",
+          "platform": "kr"
+        }
+      ]
+    },
+    {
+      "name": "Vulcan",
+      "team": "Cloud9",
+      "role": "Suporte",
+      "accounts": [
+        {
+          "riotId": "VULCAN#5125",
+          "platform": "na1"
+        }
+      ]
+    },
+    {
+      "name": "Morgan",
+      "team": "Team Liquid",
+      "role": "Top",
+      "accounts": [
+        {
+          "riotId": "Morgan#5358",
+          "platform": "kr"
+        }
+      ]
+    },
+    {
+      "name": "Josedeodo",
+      "team": "Team Liquid",
+      "role": "Jungle",
+      "accounts": [
+        {
+          "riotId": "Josedeodo#NA12",
+          "platform": "na1"
+        }
+      ]
+    },
+    {
+      "name": "Quid",
+      "team": "Team Liquid",
+      "role": "Mid",
+      "accounts": [
+        {
+          "riotId": "Samuel Broadley#Gday",
+          "platform": "na1"
+        }
+      ]
+    },
+    {
+      "name": "Yeon",
+      "team": "Team Liquid",
+      "role": "ADC",
+      "accounts": [
+        {
+          "riotId": "TL Yeon#7lol",
+          "platform": "na1"
+        }
+      ]
+    },
+    {
+      "name": "CoreJJ",
+      "team": "Team Liquid",
+      "role": "Suporte",
+      "accounts": [
+        {
+          "riotId": "From Iron#1123",
+          "platform": "na1"
+        },
+        {
+          "riotId": "BOL4#EUW",
+          "platform": "euw1"
+        }
+      ]
+    },
+    {
+      "name": "Dhokla",
+      "team": "LYON",
+      "role": "Top",
+      "accounts": [
+        {
+          "riotId": "Dhokla#NA1",
+          "platform": "na1"
+        }
+      ]
+    },
+    {
+      "name": "Inspired",
+      "team": "LYON",
+      "role": "Jungle",
+      "accounts": [
+        {
+          "riotId": "a Special One#1of1",
+          "platform": "na1"
+        }
+      ]
+    },
+    {
+      "name": "Saint",
+      "team": "LYON",
+      "role": "Mid",
+      "accounts": [
+        {
+          "riotId": "Jesse Pinkman#LYON",
+          "platform": "na1"
+        }
+      ]
+    },
+    {
+      "name": "Berserker",
+      "team": "LYON",
+      "role": "ADC",
+      "accounts": [
+        {
+          "riotId": "chud#LYON",
+          "platform": "na1"
+        }
+      ]
+    },
+    {
+      "name": "Isles",
+      "team": "LYON",
+      "role": "Suporte",
+      "accounts": [
+        {
+          "riotId": "Isles#000",
+          "platform": "na1"
+        }
+      ]
+    },
+    {
+      "name": "Robo",
+      "team": "paiN Gaming",
+      "role": "Top",
+      "accounts": [
+        {
+          "riotId": "Robo#ROBS",
+          "platform": "br1"
+        }
+      ]
+    },
+    {
+      "name": "tinowns",
+      "team": "paiN Gaming",
+      "role": "Mid",
+      "accounts": [
+        {
+          "riotId": "tinowns#BR2",
+          "platform": "br1"
+        }
+      ]
+    },
+    {
+      "name": "Duduhh",
+      "team": "LOS",
+      "role": "ADC",
+      "accounts": [
+        {
+          "riotId": "FatYusi#BR18",
+          "platform": "na1"
+        }
+      ]
+    },
+    {
+      "name": "Ackerman",
+      "team": "Isurus Estral",
+      "role": "Suporte",
+      "accounts": [
+        {
+          "riotId": "ÁCK#br01",
+          "platform": "br1"
+        }
+      ]
+    },
+    {
+      "name": "Bin",
+      "team": "Bilibili Gaming",
+      "role": "Top",
+      "accounts": [
+        {
+          "riotId": "빈 스토리#KR1",
+          "platform": "kr"
+        }
+      ]
+    },
+    {
+      "name": "Knight",
+      "team": "Bilibili Gaming",
+      "role": "Mid",
+      "accounts": [
+        {
+          "riotId": "kk9qwq#KR1",
+          "platform": "kr"
+        }
+      ]
+    },
+    {
+      "name": "Viper",
+      "team": "Bilibili Gaming",
+      "role": "ADC",
+      "accounts": [
+        {
+          "riotId": "painn#110",
+          "platform": "na1"
+        },
+        {
+          "riotId": "Blue#KR33",
+          "platform": "kr"
+        },
+        {
+          "riotId": "Bot01#KR1",
+          "platform": "kr"
+        }
+      ]
+    },
+    {
+      "name": "ON",
+      "team": "Bilibili Gaming",
+      "role": "Suporte",
+      "accounts": [
+        {
+          "riotId": "키보드에음료쏟아서고장내는이도윤#KR1",
+          "platform": "kr"
+        },
+        {
+          "riotId": "burgershutiao#zxcvb",
+          "platform": "na1"
+        },
+        {
+          "riotId": "BLG 온#KR1",
+          "platform": "kr"
+        }
+      ]
+    },
+    {
+      "name": "369",
+      "team": "Top Esports",
+      "role": "Top",
+      "accounts": [
+        {
+          "riotId": "Xxqqq#KR1",
+          "platform": "kr"
+        },
+        {
+          "riotId": "qsxmiocmio#KR1",
+          "platform": "kr"
+        }
+      ]
+    },
+    {
+      "name": "Creme",
+      "team": "Top Esports",
+      "role": "Mid",
+      "accounts": [
+        {
+          "riotId": "10502958del#KR1",
+          "platform": "kr"
+        },
+        {
+          "riotId": "tideeee#21314",
+          "platform": "na1"
+        },
+        {
+          "riotId": "livinli#KR1",
+          "platform": "kr"
+        }
+      ]
+    },
+    {
+      "name": "JackeyLove",
+      "team": "Top Esports",
+      "role": "ADC",
+      "accounts": [
+        {
+          "riotId": "qweasdqweasdqw#KR1",
+          "platform": "kr"
+        }
+      ]
+    },
+    {
+      "name": "TheShy",
+      "team": "Invictus Gaming",
+      "role": "Top",
+      "accounts": [
+        {
+          "riotId": "woaini1111111111#123",
+          "platform": "na1"
+        },
+        {
+          "riotId": "The shy#asdf",
+          "platform": "kr"
+        }
+      ]
+    },
+    {
+      "name": "RooKie",
+      "team": "Invictus Gaming",
+      "role": "Mid",
+      "accounts": [
+        {
+          "riotId": "qwerasdfzxcv#0311",
+          "platform": "na1"
+        },
+        {
+          "riotId": "모든일은같이#KR1",
+          "platform": "kr"
+        }
+      ]
+    },
+    {
+      "name": "Tian",
+      "team": "Weibo Gaming",
+      "role": "Jungle",
+      "accounts": [
+        {
+          "riotId": "yiqunsb#KR1",
+          "platform": "kr"
+        }
+      ]
+    },
+    {
+      "name": "Hope",
+      "team": "Anyone's Legend",
+      "role": "ADC",
+      "accounts": [
+        {
+          "riotId": "KennyBB#ruloo",
+          "platform": "kr"
+        }
+      ]
+    },
+    {
+      "name": "Shanks",
+      "team": "Anyone's Legend",
+      "role": "Mid",
+      "accounts": [
+        {
+          "riotId": "98133485del#KR1",
+          "platform": "kr"
+        }
+      ]
+    },
+    {
+      "name": "Kael",
+      "team": "Anyone's Legend",
+      "role": "Suporte",
+      "accounts": [
+        {
+          "riotId": "AL Kael#0211",
+          "platform": "kr"
+        },
+        {
+          "riotId": "봄방학기간#KR1",
+          "platform": "kr"
         }
       ]
     }

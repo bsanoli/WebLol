@@ -18,7 +18,7 @@ concurrency:
 jobs:
   coleta:
     runs-on: ubuntu-latest
-    timeout-minutes: 120
+    timeout-minutes: 150
     steps:
       - uses: actions/checkout@v4
         with:
@@ -33,7 +33,8 @@ jobs:
       - name: Coletar partidas na API da Riot
         env:
           RIOT_API_KEY: ${{ secrets.RIOT_API_KEY }}
-        run: python3 scripts/soloq.py
+          SOLOQ_MINUTES: "110"
+        run: python3 -u scripts/soloq.py
       - name: Gerar o site e publicar
         run: |
           npm ci --no-audit --no-fund
