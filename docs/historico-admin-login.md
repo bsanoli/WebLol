@@ -19,6 +19,7 @@ Formato de cada entrada: data, pedido (palavras do Bruno), decisão (quem escolh
   - Histórico das comps: a versão oficial atual e cada versão com as alterações aprovadas e recusadas, e quem enviou.
   - A Administração continua com as mesmas funções.
   - Jogador excluído perde o acesso às comps do time (as regras já bloqueiam). Na próxima entrada, a cópia local do time é apagada e ele volta para a tela de escolher time.
+  - **Escolha do Bruno (13/11/2026, cartão de decisão):** "Apagar a cópia local (como está)". Quem é excluído não fica com as comps do time.
 - **Regras do Firestore:** nenhuma mudança.
 - **Commit:** dbdce77. Versão da interface 1.30.
 
