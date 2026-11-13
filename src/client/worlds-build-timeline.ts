@@ -1,6 +1,6 @@
 import { games } from "../data/worlds-2026-build-timeline.json"
-import { bootItems, isCompletedItem, itemIcon, itemName } from "./worlds-builds"
-import { esc, ico } from "./worlds-display"
+import { bootItems, directOpponent, isCompletedItem, itemIcon, itemName } from "./worlds-builds"
+import { championSlug, esc, ico } from "./worlds-display"
 
 type Game = (typeof games)[number]
 type Player = Game["players"][number]
@@ -20,17 +20,18 @@ function stageLabel(game: Game) {
 /** Itens que contam como "completos" na visão resumida: itens finais e botas. */
 const isMajor = (item: number) => isCompletedItem(item) || bootItems.has(item);
 
-function entriesFor(champion: string, lane: string): Entry[] {
+function entriesFor(champion: string, lane: string, opponent: string): Entry[] {
   return games.flatMap(game => game.players
     .filter(player => player.champion === champion && (!lane || player.role === lane))
     .map(player => {
       const side = player.side as "blue" | "red";
       return {
         game, player,
-        opponent: game.players.find(other => other.role === player.role && other.side !== side),
+        opponent: directOpponent(game.players, player),
         won: game.winner === side,
       };
     }))
+    .filter(entry => !opponent || (entry.opponent && championSlug(entry.opponent.champion) === opponent))
     .sort((a, b) => b.game.date.localeCompare(a.game.date) || b.game.id - a.game.id);
 }
 
@@ -114,8 +115,8 @@ function gameRow({ game, player, opponent, won }: Entry) {
   </li>`;
 }
 
-export function buildTimeline(champion: string, lane: string) {
-  const entries = entriesFor(champion, lane);
+export function buildTimeline(champion: string, lane: string, opponent = "") {
+  const entries = entriesFor(champion, lane, opponent);
   if (!entries.length) return '<p class="na">Sem compras registradas.</p>';
   return `<header class="build-timeline-header">
       <h4>Compras jogo a jogo</h4>

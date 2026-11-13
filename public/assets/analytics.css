@@ -290,11 +290,32 @@
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto minmax(54px, auto);
   align-items: center;
-  column-gap: 8px;
-  min-height: 42px;
+  column-gap: var(--wl-space-2);
   font-size: 13px;
 }
-.build-context-name { display: flex; align-items: center; gap: 7px; overflow-wrap: anywhere; }
+.build-context-name {
+  display: flex;
+  align-items: center;
+  gap: var(--wl-space-2);
+  overflow-wrap: anywhere;
+}
+button.build-context-name {
+  min-width: 0;
+  min-height: var(--wl-space-12);
+  padding: var(--wl-space-1) 0;
+  border: 0;
+  border-radius: var(--wl-control-radius);
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+button.build-context-name:is(:hover, :focus-visible) {
+  background: var(--wl-raised);
+  color: var(--wl-accent);
+}
+button.build-context-name:focus-visible { outline: 2px solid var(--wl-accent); outline-offset: -2px; }
 .build-context-name .av { flex: none; width: 24px; height: 24px; margin: 0; }
 .build-context-count, .build-context-result { color: var(--muted); text-align: right; font-variant-numeric: tabular-nums; }
 .build-context-rank {
@@ -392,6 +413,32 @@
   color: var(--muted);
   font-size: 13px;
 }
+.build-opponent-filter {
+  display: grid;
+  gap: var(--wl-space-1);
+  flex: 0 1 208px;
+  min-width: 0;
+  max-width: 100%;
+  color: var(--muted);
+  font-size: var(--wl-label-size);
+}
+.build-opponent-filter .team-select [data-team-trigger="select"] {
+  min-height: var(--wl-space-12);
+}
+.build-opponent-portrait {
+  flex: none;
+  width: var(--wl-space-6);
+  height: var(--wl-space-6);
+  border-radius: var(--wl-control-radius);
+}
+.build-opponent-options [data-slot="select-item"] { min-height: var(--wl-space-12); }
+.build-opponent-options [data-slot="select-item"] > span:last-child {
+  display: flex;
+  align-items: center;
+  gap: var(--wl-space-2);
+  min-width: 0;
+}
+.build-opponent-count { color: var(--wl-muted); white-space: nowrap; }
 .builds-page:has(.build-detail) > .tools { display: none; }
 .build-winrate { display: inline-flex; align-items: center; gap: 4px; font-size: 13px; }
 .build-winrate small { color: var(--muted); font-weight: 500; }

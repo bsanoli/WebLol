@@ -8,8 +8,9 @@ import { iconMarkup, laneIconMarkup } from "./icon"
 import DATA from "../data/worlds.json"
 import DRAFTS from "../data/worlds-2026-drafts.json"
 import { LOL_DATA, lolAsset, lolChampion, lolKey } from "./lol-media"
-import { abilityDetail, buildDetails, buildGameCount, buildLaneHighlights, buildMatchesQuery, buildMatchups, buildsTable, hydrateBuildTimelines, orderedMatchups } from "./worlds-builds"
+import { abilityDetail, buildDetails, buildGameCount, buildLaneHighlights, buildMatchesQuery, buildMatchups, buildOpponentOptions, buildsTable, hydrateBuildTimelines, orderedMatchups } from "./worlds-builds"
 import { effectText } from "./worlds-effect-text"
+import { WorldsOpponentSelect } from "./worlds-opponent-select"
 import { LANES, LC, kdaOf, pct, wrPill, ico, esc, championSlug, teamLogo, teamRegion, teamCode } from "./worlds-display"
 import { initializeTheme } from "./theme"
 import { revealContent } from "./motion"
@@ -247,7 +248,7 @@ const TABS = [
 ];
 const tabsRoot = createRoot(document.getElementById("tabs"));
 const laneById = new Map(LANES.map(([lane]) => [lane.toLowerCase(), lane]));
-let buildChampion = "", buildQuery = "";
+let buildChampion = "", buildQuery = "", buildOpponent = "";
 const worldsPaths = { geral: "", builds: "/builds", matchups: "/confrontos", comps: "/composicoes" };
 const laneFromParam = value => laneById.get(value) || "";
 
@@ -270,6 +271,7 @@ window.applyWebLolRoute = ([page, first, second], params) => {
   const lane = laneFromParam(params.get("posicao"));
   if (id === "builds") {
     buildChampion = first || "";
+    buildOpponent = buildChampion ? params.get("adversario") || "" : "";
     buildQuery = query;
     bLane = lane || (legacyChampions ? "Top" : "");
     buildMinGames = readBuildMinGames(params.get("minJogos"));
@@ -313,12 +315,15 @@ function go(id) {
 }
 
 let standaloneOverview;
+let opponentSelectRoot;
 
 function render(id){
   const previousPage=document.body.dataset.page;
   hideTip();
   standaloneOverview?.unmount();
   standaloneOverview = undefined;
+  opponentSelectRoot?.unmount();
+  opponentSelectRoot = undefined;
   window.frameElement?.dispatchEvent(new CustomEvent("weblol:analytics-clear"));
   document.getElementById("kpis").hidden = !!window.frameElement || id !== "geral";
   if(!validTab(id))id="geral";
@@ -441,30 +446,40 @@ function wireBuilds(){
     showSort(buildSort);
   };
   q.value=buildQuery;
-  const publish = (replace = false) => publishWorlds("builds", buildChampion ? [buildChampion] : [], {posicao:bLane.toLowerCase(), busca:buildQuery, minJogos:buildMinGames}, replace);
-  const championCard = (champion: typeof C[number], position: string, pageSlug?: string) => {
+  const publish = (replace = false) => publishWorlds("builds", buildChampion ? [buildChampion] : [], {posicao:bLane.toLowerCase(), busca:buildQuery, minJogos:buildMinGames, adversario:buildChampion && buildOpponent}, replace);
+  const championCard = (champion: typeof C[number], position: string, pageSlug?: string, opponents = []) => {
     const inlineContext = pageSlug
       ? `<section class="build-context build-context-inline" aria-label="Confrontos da build">${buildMatchups(champion, position)}</section>`
       : "";
+    const selectedOpponent = opponents.find(opponent => opponent.slug === buildOpponent);
+    const gameCount = selectedOpponent?.games ?? buildGameCount(champion, position);
+    const multiplePositions = Object.values(champion.lanes).filter(lane => lane.picks).length > 1;
+    const positionLabel = position || (multiplePositions ? "Todas as posições" : champion.main);
     const heading = pageSlug ? "" : `<header class="build-card-heading">
         <div>
           <h3>${ico(champion.name)}${esc(champion.name)}</h3>
           <div class="build-card-meta">
-            <span>${esc(position || champion.main)} · ${buildGameCount(champion, position)} jogos</span>
-            <span class="build-winrate">${wrPill(champion.wins,champion.picks)} <small>de vitórias no torneio</small></span>
+            <span>${esc(positionLabel)} · ${gameCount} ${gameCount === 1 ? "jogo" : "jogos"}</span>
+            ${selectedOpponent ? "" : `<span class="build-winrate">${wrPill(champion.wins,champion.picks)} <small>de vitórias no torneio</small></span>`}
           </div>
         </div>
+        ${opponents.length ? `<div class="build-opponent-filter">
+          <label id="build-opponent-label" for="build-opponent-trigger">Adversário direto</label>
+          <div class="team-select" data-build-opponent></div>
+        </div>` : ""}
       </header>`;
     const action = pageSlug
       ? `<button class="worlds-detail-action" data-slot="button" data-variant="ghost" data-size="sm" type="button" data-build="${pageSlug}" aria-label="Abrir página da build de ${esc(champion.name)}">Ver página ${iconMarkup("next")}</button>`
       : "";
     return `<article class="bcard${pageSlug ? "" : " wl-panel"}">
       ${heading}
-      ${buildDetails(champion, position, action, !pageSlug)}
+      ${buildDetails(champion, position, action, !pageSlug, selectedOpponent?.slug)}
       ${inlineContext}
     </article>`;
   };
-  const draw=()=>{const f=q.value.trim().toLowerCase();
+  const draw=(restoreOpponentFocus = false)=>{const f=q.value.trim().toLowerCase();
+    opponentSelectRoot?.unmount();
+    opponentSelectRoot = undefined;
     contextAnimation?.stop();
     contextAnimation = undefined;
     clearAll.setAttribute("aria-disabled", String(!hasFilters()));
@@ -473,10 +488,11 @@ function wireBuilds(){
       buildMatchesQuery(c, bLane, f));
     const champion=buildChampion && matches[0];
     const position = champion && champion.lanes[bLane] ? bLane : "";
+    const opponents = champion ? buildOpponentOptions(champion, position) : [];
     const context = champion ? buildMatchups(champion, position) : buildLaneHighlights(matches, bLane);
     highlights = champion ? "" : context;
     const content=champion
-      ? championCard(champion, position)
+      ? championCard(champion, position, undefined, opponents)
       : matches.length ? buildsTable(matches, bLane) : "";
     const back=buildChampion ? '<div class="build-back"><button data-slot="button" data-variant="outline" data-size="sm" class="build-route" data-build="">Voltar à lista de builds</button></div>' : '';
     bc.classList.toggle("build-detail", !!buildChampion);
@@ -484,6 +500,18 @@ function wireBuilds(){
       ? `<div class="builds-workspace">${content}<aside class="wl-panel build-context build-context-side" aria-label="Contexto da build" aria-live="polite"><div class="build-context-transition"><div class="build-context-content">${context}</div></div></aside></div>`
       : '<div class="empty-state" role="status"><h3>Nenhum campeão encontrado</h3><p>Ajuste a busca, a posição ou o mínimo de jogos.</p></div>');
     sortBuildRows();
+    const opponentSelect = bc.querySelector("[data-build-opponent]");
+    if (opponentSelect) {
+      opponentSelectRoot = createRoot(opponentSelect);
+      opponentSelectRoot.render(createElement(WorldsOpponentSelect, {
+        opponents, value: buildOpponent, restoreFocus: restoreOpponentFocus,
+        onChange: value => {
+          buildOpponent = value;
+          draw(true);
+          publish();
+        },
+      }));
+    }
     enhanceAnalyticsUI();
     void hydrateBuildTimelines(bc).then(enhanceAnalyticsUI);
   };
@@ -627,6 +655,11 @@ function wireBuilds(){
     }
     const button=e.target.closest("[data-build]");if(!button)return;
     const previous=buildChampion;
+    buildOpponent = "";
+    if (button.dataset.buildLane) {
+      bLane = button.dataset.buildLane;
+      syncLane();
+    }
     buildChampion=button.dataset.build;
     draw();publish();
     const next=buildChampion ? bc.querySelector(".build-back button")
