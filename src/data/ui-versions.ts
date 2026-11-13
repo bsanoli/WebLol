@@ -8,6 +8,13 @@ export interface UiVersion {
 
 export const UI_VERSIONS: UiVersion[] = [
   {
+    version: "1.25",
+    date: "2026-11-13",
+    changes: [
+      "Ordem do draft: a área de comps do centro mostra exatamente duas fileiras; as demais comps aparecem pela rolagem.",
+    ],
+  },
+  {
     version: "1.24",
     date: "2026-11-13",
     changes: [

@@ -138,3 +138,12 @@
   #v-comps #clear-local { grid-column: 2; grid-row: 1; }
   #v-comps .editor-status .saved { display: block; grid-column: 1 / -1; grid-row: 2; font-size: 11px; line-height: 1.6; margin-top: 4px; }
 }
+
+/* Área das comps: exatamente duas fileiras visíveis, o resto pela rolagem */
+@media (min-width: 1100px) {
+  #v-comps.draft-view .dz-tabs { grid-auto-rows: 66px; max-height: calc(66px * 2 + 6px + 12px + 2px); scroll-snap-type: y mandatory; scroll-padding: 6px; }
+  #v-comps .dz-tab { height: 66px; overflow: hidden; scroll-snap-align: start; }
+  #v-comps .dz-tab .mini { grid-template-columns: repeat(5, 30px); }
+  #v-comps .dz-tab .mini .av { width: 30px; height: 30px; }
+  #v-comps .dz-tab.dz-new { min-height: 0; }
+}
