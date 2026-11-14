@@ -6,19 +6,19 @@
 <title>Comps do Time</title>
 <link rel="icon" href="./assets/brand/favicon.ico" sizes="any">
 <link rel="icon" href="./assets/brand/favicon.svg?v=f454a496" type="image/svg+xml">
-<link rel="stylesheet" href="./assets/base.css?v=395728e3">
-<link rel="stylesheet" href="./assets/team.css?v=0228c49c">
-<link rel="stylesheet" href="./assets/compositions.css?v=2cf4d87d">
-<link rel="stylesheet" href="./assets/motion.css?v=4c74e831">
-<link rel="stylesheet" href="./assets/draft-layout.css?v=809b2e6b">
-<link rel="stylesheet" href="./assets/team-controls.css?v=cfe71905">
-  <script type="module" crossorigin src="./assets/camp-CbQe6HL0.js?v=6304e239"></script>
+<link rel="stylesheet" href="./assets/base.css?v=79220fe3">
+<link rel="stylesheet" href="./assets/team.css?v=ba53bed5">
+<link rel="stylesheet" href="./assets/compositions.css?v=9ecc6d93">
+<link rel="stylesheet" href="./assets/motion.css?v=1c9d3596">
+<link rel="stylesheet" href="./assets/draft-layout.css?v=f8250db4">
+<link rel="stylesheet" href="./assets/team-controls.css?v=98e3bf57">
+  <script type="module" crossorigin src="./assets/camp-Dfdenl7q.js?v=5d98fb73"></script>
   <link rel="modulepreload" crossorigin href="./assets/icon-CmBnF0CE.js?v=cfc59808">
   <link rel="modulepreload" crossorigin href="./assets/select-BCvyHF4f.js?v=eb5a5234">
   <link rel="modulepreload" crossorigin href="./assets/dropdown-menu-BkOJNsP6.js?v=d7038c42">
   <link rel="stylesheet" crossorigin href="./assets/icon-C0_tBhsS.css?v=b15fb6e6">
   <link rel="stylesheet" crossorigin href="./assets/dropdown-menu-D4zHrKmI.css?v=85303c4b">
-  <link rel="stylesheet" crossorigin href="./assets/camp-YkaZKc3s.css?v=4cf9bc1a">
+  <link rel="stylesheet" crossorigin href="./assets/camp-Dmc_kLnv.css?v=6fd32b4b">
 </head>
 <body>
 <header>
@@ -40,6 +40,24 @@
  <div class="comp-workspace">
  <div class="page-head"><h1>Composições do time</h1></div>
  <div id="comps">
+  <div class="wl-panel box composition-toolbar">
+    <div class="editor-controls">
+      <input data-slot="input" id="cname" aria-label="Nome da composição" placeholder="Nome da composição">
+      <div class="vtog"></div>
+    </div>
+    <div class="editor-status">
+      <details class="local-save-actions" id="local-save">
+        <summary data-slot="button" data-variant="outline" data-size="sm">
+          <span class="saved" id="saved" role="status">Salvamento automático</span>
+          <span class="local-save-chevron" aria-hidden="true"></span>
+        </summary>
+        <div class="wl-panel local-save-panel">
+          <p id="local-save-description">As edições são salvas automaticamente neste navegador.</p>
+          <button data-slot="button" data-variant="outline" data-size="sm" type="button" id="clear-local">Restaurar dados locais…</button>
+        </div>
+      </details>
+      <button data-slot="button" data-variant="outline" data-size="sm" id="copy-comp"><svg class="icon" aria-hidden="true" focusable="false"><use href="assets/icons.svg#link"></use></svg> Copiar link da composição</button></div>
+  </div>
   <div class="wl-panel box comp-library">
     <h2>Composições salvas</h2>
     <div class="library-search"><label class="control-label" for="csearch">Filtrar composições</label><input data-slot="input" id="csearch" placeholder="Nome ou campeão"></div>
@@ -51,8 +69,6 @@
   </div>
 
   <div class="wl-panel box comp-editor">
-    <div class="editor-status"><div class="local-save-actions"><span class="saved" id="saved" role="status">Salvo neste navegador</span><button data-slot="button" data-variant="destructive" data-size="sm" type="button" id="clear-local">Limpar alterações</button></div>
-      <button data-slot="button" data-variant="outline" data-size="sm" id="copy-comp"><svg class="icon" aria-hidden="true" focusable="false"><use href="assets/icons.svg#link"></use></svg> Copiar link da composição</button></div>
     <div id="editor"></div>
   </div>
 

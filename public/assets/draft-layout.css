@@ -3,7 +3,12 @@
    os nomes dos lados, as comps do time e o catálogo de campeões. */
 .dz-center, .dz-names, .dz-tabs { display: none; }
 @media (min-width: 1100px) {
-  #v-comps.draft-view #comps { grid-template-columns: minmax(0, 1fr); }
+  body:has(#v-comps.draft-view.on) { height: 100dvh; }
+  #v-comps.draft-view.on,
+  #v-comps.draft-view #comps,
+  #v-comps.draft-view #editor { min-height: 0; }
+  #v-comps.draft-view #editor { flex: 1 1 0; }
+  #v-comps.draft-view #comps { grid-template-columns: minmax(0, 1fr); grid-template-rows: auto minmax(0, 1fr); }
   #v-comps.draft-view #comps .comp-library { display: none; }
   #v-comps.draft-view .comp-editor { grid-column: 1 / -1; grid-row: auto; }
   #v-comps.draft-view .draft-toolbar-top, #v-comps.draft-view .dseq-row { display: flex; justify-content: center; margin: 0; }
@@ -15,7 +20,7 @@
     gap: 14px;
     align-items: stretch;
     flex: 1;
-    min-height: 600px;
+    min-height: 0;
   }
   #v-comps.draft-view .tm { display: flex; flex-direction: column; gap: 6px; grid-row: auto; min-width: 0; margin: 0; order: 0; }
   #v-comps.draft-view .tm > .draft-phase { display: none; }
@@ -76,7 +81,7 @@
   #v-comps.draft-view .tm.r > .pk.them .pkh { justify-content: flex-end; }
   #v-comps.draft-view .dz-slot .champ-picker > * { flex: none; }
   #v-comps.draft-view .dz-slot .champ-picker > #grid { flex: 1 1 0; }
-  #v-comps.draft-view .dz-slot #grid { flex: 1 1 0; max-height: none; min-height: 160px; overflow: auto; }
+  #v-comps.draft-view .dz-slot #grid { flex: 1 1 0; max-height: none; min-height: var(--wl-space-8); overflow: auto; overscroll-behavior: contain; }
   #v-comps.draft-view > .comp-workspace ~ * .draft-help, #v-comps.draft-view .draft-help { text-align: center; }
 }
 
@@ -123,23 +128,6 @@
 #champ-picker .gtools .team-select [data-team-trigger="select"] .lane-icon { width: 14px; height: 14px; }
 #champ-picker #gfoot[hidden] { display: none; }
 
-/* Cabeçalho do editor: nome da comp à esquerda das visões; Copiar link ao lado
-   de Limpar alterações; "Salvo neste navegador" embaixo, na linha das anotações */
-@media (min-width: 1100px) {
-  #v-comps .comp-editor { position: relative; }
-  #v-comps .editor-controls { display: flex; align-items: center; gap: 10px; margin: 0 0 4px; padding-right: 360px; min-height: 40px; }
-  #v-comps .editor-controls #cname { flex: 0 1 300px; width: auto; min-width: 140px; margin: 0; padding: 0 10px; min-height: 38px; font-size: 17px; }
-  #v-comps .editor-controls .vtog { flex: none; }
-  #v-comps .editor-status {
-    position: absolute; top: var(--wl-panel-padding, 16px); right: var(--wl-panel-padding, 16px); padding: 0;
-    display: grid; grid-template-columns: auto auto; grid-template-rows: 40px auto; align-items: center; justify-items: end; gap: 0 8px;
-  }
-  #v-comps .local-save-actions { display: contents; }
-  #v-comps #copy-comp { grid-column: 1; grid-row: 1; }
-  #v-comps #clear-local { grid-column: 2; grid-row: 1; }
-  #v-comps .editor-status .saved { display: block; grid-column: 1 / -1; grid-row: 2; font-size: 11px; line-height: 1.6; margin-top: 4px; }
-}
-
 /* Área das comps: exatamente duas fileiras visíveis, o resto pela rolagem */
 @media (min-width: 1100px) {
   #v-comps.draft-view .dz-tabs { grid-auto-rows: 66px; max-height: calc(66px * 2 + 6px + 12px + 2px); scroll-snap-type: y mandatory; scroll-padding: 6px; }
@@ -151,9 +139,21 @@
 
 /* Pick: rótulo + nome sempre abaixo das alternativas (sem quebrar em coluna ao lado) */
 @media (min-width: 1100px) {
-  #v-comps.draft-view .tm > .pk.mine { flex-wrap: nowrap; min-height: max-content; }
+  #v-comps.draft-view .tm > .pk.mine { flex-wrap: nowrap; }
   #v-comps.draft-view .tm > .pk.mine .pk-target { order: 2; }
-  #v-comps.draft-view .dz { height: auto; min-height: max(600px, calc(100dvh - 230px)); }
+  #v-comps.draft-view #composition-notes[open] {
+    max-height: min(25dvh, 160px);
+    overflow: auto;
+  }
+}
+
+@media (min-width: 1100px) and (max-height: 820px) {
+  #v-comps.draft-view .draft-bans { min-height: var(--wl-space-8); }
+  #v-comps.draft-view .draft-bans .bsq { width: var(--wl-space-8); height: var(--wl-space-8); }
+  #v-comps.draft-view .tm > .pk { gap: 0; padding: var(--wl-space-1) var(--wl-space-2); }
+  #v-comps.draft-view .tm > .pk .pkf { flex-wrap: nowrap; }
+  #v-comps.draft-view .pkf .draft-alternatives { min-width: 0; overflow-x: auto; }
+  #v-comps.draft-view .tm > .pk .pkn { font-size: var(--wl-label-size); }
 }
 
 /* Lado da comp ao lado do nome */

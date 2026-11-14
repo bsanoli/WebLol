@@ -33,6 +33,24 @@
  <div class="comp-workspace">
  <div class="page-head"><h1>Composições do time</h1></div>
  <div id="comps">
+  <div class="wl-panel box composition-toolbar">
+    <div class="editor-controls">
+      <input data-slot="input" id="cname" aria-label="Nome da composição" placeholder="Nome da composição">
+      <div class="vtog"></div>
+    </div>
+    <div class="editor-status">
+      <details class="local-save-actions" id="local-save">
+        <summary data-slot="button" data-variant="outline" data-size="sm">
+          <span class="saved" id="saved" role="status">Salvamento automático</span>
+          <span class="local-save-chevron" aria-hidden="true"></span>
+        </summary>
+        <div class="wl-panel local-save-panel">
+          <p id="local-save-description">As edições são salvas automaticamente neste navegador.</p>
+          <button data-slot="button" data-variant="outline" data-size="sm" type="button" id="clear-local">Restaurar dados locais…</button>
+        </div>
+      </details>
+      <button data-slot="button" data-variant="outline" data-size="sm" id="copy-comp"><svg class="icon" aria-hidden="true" focusable="false"><use href="assets/icons.svg#link"></use></svg> Copiar link da composição</button></div>
+  </div>
   <div class="wl-panel box comp-library">
     <h2>Composições salvas</h2>
     <div class="library-search"><label class="control-label" for="csearch">Filtrar composições</label><input data-slot="input" id="csearch" placeholder="Nome ou campeão"></div>
@@ -44,8 +62,6 @@
   </div>
 
   <div class="wl-panel box comp-editor">
-    <div class="editor-status"><div class="local-save-actions"><span class="saved" id="saved" role="status">Salvo neste navegador</span><button data-slot="button" data-variant="destructive" data-size="sm" type="button" id="clear-local">Limpar alterações</button></div>
-      <button data-slot="button" data-variant="outline" data-size="sm" id="copy-comp"><svg class="icon" aria-hidden="true" focusable="false"><use href="assets/icons.svg#link"></use></svg> Copiar link da composição</button></div>
     <div id="editor"></div>
   </div>
 

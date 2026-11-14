@@ -236,9 +236,9 @@ export function mountTeamSelect(field: HTMLSelectElement) {
 type SectionOption = { value: string; label: string; icon?: string; panel?: string }
 
 export function mountSectionTabs(host: Element, label: string, value: string, options: SectionOption[],
-  change: (value: string) => void) {
-  renderControl(host, <Tabs value={value} onValueChange={change} activationMode="manual" data-variant="underline">
-    <TabsList aria-label={label}>
+  change: (value: string) => void, variant: "underline" | "navigation" = "underline") {
+  renderControl(host, <Tabs value={value} onValueChange={change} activationMode="manual" data-variant={variant}>
+    <TabsList aria-label={label} slidingHover={variant === "navigation"}>
       {options.map(option => <TabsTrigger key={option.value} value={option.value}
         id={`tab-${option.value}`} aria-controls={option.panel ?? `panel-${option.value}`}>
         {option.icon && <Icon name={option.icon} />}{option.label}

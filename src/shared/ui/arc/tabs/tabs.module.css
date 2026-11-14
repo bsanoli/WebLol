@@ -61,3 +61,44 @@
 @media (width < 360px) {
   .root[data-variant="underline"] .triggerLabel :global(.icon) { display: none; }
 }
+
+.root[data-variant="navigation"] {
+  --foreground: var(--wl-text);
+  --text-muted: var(--wl-muted);
+  --accent-strong: var(--wl-accent);
+  --control-height-sm: calc(var(--wl-space-8) + var(--wl-space-1));
+  --radius-control: var(--wl-control-radius);
+  --space-1: var(--wl-space-1);
+  --space-3: var(--wl-space-3);
+  --text-sm: var(--wl-label-size);
+  --duration-fast: 160ms;
+  --ease-standard: cubic-bezier(.22, 1, .36, 1);
+}
+.root[data-variant="navigation"] .listShell {
+  border: 0;
+  background: transparent;
+}
+.root[data-variant="navigation"] .list { padding: 0; }
+.root[data-variant="navigation"] .trigger {
+  min-width: 0;
+  border-radius: var(--wl-control-radius);
+}
+.root[data-variant="navigation"] .trigger:focus-visible {
+  outline: none;
+  background: var(--wl-raised);
+}
+@media (forced-colors: active) {
+  .root[data-variant="navigation"] .trigger:focus-visible {
+    outline: 2px solid Highlight;
+    outline-offset: -2px;
+  }
+}
+.root[data-variant="navigation"] .selection {
+  z-index: 0;
+  inset: auto var(--wl-space-3) var(--wl-space-1);
+  height: 2px;
+  border: 0;
+  border-radius: 2px;
+  background: var(--wl-accent);
+  box-shadow: none;
+}

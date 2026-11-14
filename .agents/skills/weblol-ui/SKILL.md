@@ -10,6 +10,10 @@ description: Implemente ou ajuste a interface do WebLol, incluindo tabelas, card
 3. Confira a rota no navegador em desktop, incluindo janelas mais estreitas quando a largura disponível afetar o layout. Compare o alinhamento dos cards equivalentes, a altura dos controles vizinhos e a separação entre grupos. Exercite a ação alterada e, conforme a interação, verifique foco, teclado e ausência de rolagem horizontal acidental. Para listas e filtros, inclua um estado vazio ou com dados escassos quando isso puder mudar o layout.
 4. Rode `npm run build` e `git diff --check`. Informe o que mudou, como verificar localmente e qualquer limitação relevante da validação.
 
+## Área do Time → Composições
+
+- Ao alterar a barra da composição, confira a troca entre **Opções por posição** e **Ordem do draft** nos dois sentidos. Nome, abas, copiar link e status de salvamento devem ficar no mesmo lugar.
+
 ## Regra dos 8
 
 - Use múltiplos de 8 px como padrão para margens, padding, gaps e alturas de controles. Use subdivisões de 4 px para ajustes finos, mantendo todos esses valores na mesma escala. Reutilize os tokens de espaçamento e de componentes de [base.css](../../../public/assets/base.css) ao definir margens, padding, gaps e alturas. Quando o mesmo espaçamento cumprir um papel recorrente na tela e variar por breakpoint, atribua esse papel a um token da tela.

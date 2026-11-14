@@ -9,7 +9,7 @@ import { initializeMotionNav, revealContent } from "@/shared/lib/motion"
 import { CH } from "../model/champion-catalog"
 import WS from "../api/worlds-champion-stats.json"
 import { KEY, uid, blank, loadTeamState } from "../model/local-state"
-import { DRAFT_SIDE, PICKNAME, draftHTML, draftOf, pickOrderLanes, sideDot } from "./draft"
+import { DRAFT_SIDE, PICKNAME, compositionPreview, draftHTML, draftOf, sideDot } from "./draft"
 import { mountKnowledge } from "@/widgets/team-knowledge"
 import { mountTacticalMap } from "@/widgets/tactical-map"
 
@@ -29,36 +29,87 @@ const img=n=>`<span class="av">${esc(ini(n))}${lolImage(champArt(n)?.portrait,"c
 
 /* ===== Estado / armazenamento ===== */
 let S;
-function save(flash=true){
-  try { localStorage.setItem(KEY, JSON.stringify(S)); }
-  catch (e) {
-    $("#saved").textContent = "Falha ao salvar";
-    toast("Não consegui salvar no navegador. Use Exportar.");
-    return;
-  }
-  if (flash || $("#saved").textContent === "Falha ao salvar") $("#saved").textContent = "Salvo neste navegador";
+const savedStatus = $("#saved");
+const localSave = $("#local-save");
+
+function setSaveStatus(message, failed = false) {
+  if (savedStatus.textContent !== message) savedStatus.textContent = message;
+  localSave.toggleAttribute("data-save-error", failed);
+  const description = $("#local-save-description");
+  const help = failed
+    ? "O navegador não conseguiu gravar as edições. Use Exportar para guardar uma cópia."
+    : "As edições são salvas automaticamente neste navegador.";
+  if (description.textContent !== help) description.textContent = help;
 }
-const cur=()=>S.comps.find(c=>c.id===S.cur);
-$("#clear-local").onclick=async()=>{
-  let base;
+
+function save(){
   try {
-    base=JSON.parse(localStorage.getItem("lol-base"));
-    if(base && (!Array.isArray(base.data?.comps)||!Array.isArray(base.data?.plays)))throw new Error("Base inválida");
+    localStorage.setItem(KEY, JSON.stringify(S));
+    setSaveStatus("Salvo neste navegador");
   } catch {
-    toast("Não consegui ler a versão salva do time. Nada foi apagado.");
-    return;
+    setSaveStatus("Falha ao salvar", true);
   }
-  const destination=base?`a última versão oficial sincronizada (v${base.version})`:"os dados iniciais do site";
-  if(!await confirmAction(`Limpar suas alterações neste navegador?\n\nTodas as composições e jogadas locais serão substituídas pela versão selecionada: ${destination}.\nSeu login e tema serão mantidos. Envios já feitos para aprovação não serão cancelados.\n\nSe quiser guardar uma cópia, clique em Cancelar e use Exportar antes de continuar.`, "Limpar alterações"))return;
+}
+
+const cur=()=>S.comps.find(c=>c.id===S.cur);
+document.addEventListener("click", event => {
+  if (!localSave.contains(event.target) && !event.target.closest?.('[role="alertdialog"]')) {
+    localSave.open = false;
+  }
+});
+localSave.addEventListener("keydown", event => {
+  if (event.key !== "Escape" || !localSave.open) return;
+  localSave.open = false;
+  localSave.querySelector("summary").focus();
+});
+
+$("#clear-local").onclick=async()=>{
+  let rawBase, base;
   try {
-    if(base){
-      localStorage.setItem(KEY,JSON.stringify({comps:base.data.comps,plays:base.data.plays,cur:base.data.comps[0]?.id,curPlay:base.data.plays[0]?.id}));
-    }else localStorage.removeItem(KEY);
-  }catch{
-    toast("Não consegui limpar as alterações no navegador. Tente novamente.");
+    rawBase = localStorage.getItem("lol-base");
+    base = JSON.parse(rawBase);
+    if (rawBase !== null && (!Array.isArray(base?.data?.comps) || !Array.isArray(base?.data?.plays))) {
+      throw new Error("Base inválida");
+    }
+  } catch {
+    toast("Não foi possível ler a versão salva do time.");
     return;
   }
-  // Recarregar também descarta animações e históricos de desfazer do mapa.
+
+  const destination = base ? `a versão sincronizada do time (v${base.version})` : "os dados iniciais do site";
+  const choice = await askChoice(
+    "Restaurar dados locais?",
+    `As composições e jogadas deste navegador serão substituídas por ${destination}. Envios para aprovação continuam na fila.`,
+    [
+      { value: "backup", label: "Baixar cópia" },
+      { value: "restore", label: "Restaurar", destructive: true },
+    ],
+  );
+  if (choice === "backup") {
+    downloadTeamBackup();
+    return;
+  }
+  if (choice !== "restore") return;
+
+  try {
+    if (localStorage.getItem("lol-base") !== rawBase) {
+      toast("A versão do time mudou. Abra a restauração novamente.");
+      return;
+    }
+    if (base) {
+      const { comps, plays } = base.data;
+      localStorage.setItem(KEY, JSON.stringify({
+        comps, plays, view: S.view,
+        cur: comps.find(comp => comp.id === S.cur)?.id ?? comps[0]?.id,
+        curPlay: plays.find(play => play.id === S.curPlay)?.id ?? plays[0]?.id,
+      }));
+    } else {
+      localStorage.removeItem(KEY);
+    }
+  } catch {
+    toast("Não foi possível restaurar os dados locais.");
+    return;
+  }
   window.location.reload();
 };
 let active="top";
@@ -75,7 +126,7 @@ function renderList(){
   const list=$("#clist");
   clearTeamControls(list);
   list.innerHTML=matches
-   .map(c=>{const firsts=(S.view==="draft"?pickOrderLanes(c):["top","jg","mid","adc","sup"]).map(l=>c.lanes[l][0]).filter(Boolean);
+   .map(c=>{const firsts=compositionPreview(c);
      return `<div class="composition-item"><button class="ci${c.id===S.cur?" on":""}" aria-pressed="${c.id===S.cur}" data-id="${c.id}"><b>${sideDot(c)}${esc(c.name)}</b>
       <span class="mini">${firsts.map(img).join("")||'<small style="color:var(--mut)">vazia</small>'}</span></button><span class="composition-menu" data-team-control></span></div>`}).join("")||'<div style="color:var(--mut);padding:10px;font-size:12px">Nenhuma comp.</div>';
   list.querySelectorAll(".composition-menu").forEach((host,index)=>{
@@ -131,11 +182,8 @@ function renderEditor(){
   $("#draft-comp").hidden=true;
   const notes=`<details id="composition-notes" ${notesOpen?"open":""} class="${hasCompNotes(c,dv)?"has-notes":""}"><summary>Anotações da composição<span class="notes-flag" aria-label="tem anotação" title="Esta comp tem anotação">${iconMarkup("edit")}</span></summary><label class="control-label" for="notes">Plano geral</label><textarea id="notes" placeholder="Plano de jogo, condição de vitória…">${esc(c.notes)}</textarea>${dv?`<label class="control-label" for="dnote">Plano do draft · ${DRAFT_SIDE[draftOf(c).side]}</label><textarea id="dnote">${esc(draftOf(c).note[draftOf(c).side])}</textarea><ul id="notes-lanes" class="draft-lane-notes" aria-label="Observações por posição" hidden></ul>`:""}</details>`;
   const editor = $("#editor");
-  if (!editor.firstElementChild) {
-    editor.innerHTML = `<div class="editor-controls"><input data-slot="input" id="cname" aria-label="Nome da composição" placeholder="Nome da composição"><div class="vtog"></div></div>`;
-  }
   $("#cname").value = c.name;
-  mountSectionTabs(editor.querySelector(".vtog"), "Modo da composição", S.view || "lanes", [
+  mountSectionTabs($(".editor-controls .vtog"), "Modo da composição", S.view || "lanes", [
     { value: "lanes", label: "Opções por posição", panel: "composition-panel" },
     { value: "draft", label: "Ordem do draft", panel: "composition-panel" },
   ], value => {
@@ -144,14 +192,11 @@ function renderEditor(){
     renderEditor();
     renderList();
     publishTeamRoute("comps");
-  });
+  }, "navigation");
   const catalog=$("#champ-picker"),gridScroll=$("#grid").scrollTop;
   if (editor.contains(catalog)) $("#comps").append(catalog);
   clearTeamControls(editor);
-  const content = document.createRange();
-  content.setStartAfter(editor.firstElementChild);
-  content.setEnd(editor, editor.childNodes.length);
-  content.deleteContents();
+  editor.replaceChildren();
   editor.insertAdjacentHTML("beforeend", `
   <div id="composition-panel" role="tabpanel" aria-labelledby="tab-${dv ? "draft" : "lanes"}">
   ${notes}<button data-slot="button" data-variant="default" type="button" class="jump-picker" data-picker>${iconMarkup("plus")} Adicionar campeão</button>
@@ -333,10 +378,11 @@ $("#editor").addEventListener("click",e=>{
 window.matchMedia("(min-width: 1100px)").addEventListener("change",e=>{if(e.matches)closePicker?.()});
 
 /* ===== Exportar / Importar ===== */
-$("#exp").onclick=()=>{
+function downloadTeamBackup(){
   const blob=new Blob([JSON.stringify({app:"lol-comps-time",version:1,exported:new Date().toISOString(),comps:S.comps,plays:S.plays},null,2)],{type:"application/json"});
   const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download=`comps-time-${new Date().toISOString().slice(0,10)}.json`;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000);
-};
+}
+$("#exp").onclick = downloadTeamBackup;
 $("#impb").onclick=()=>$("#imp").click();
 $("#imp").onchange=async e=>{
   const f=e.target.files[0];if(!f)return;

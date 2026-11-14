@@ -7,10 +7,9 @@ const DORDER=[
  ["Fase de bans 2",["R:ban","B:ban","R:ban","B:ban"]],
  ["Fase de picks 2",["R:pick","B:pick","B:pick","R:pick"]]];
 const PLANES=["top","jg","mid","adc","sup"];
-// Lanes na ordem de pick da comp, do lado escolhido (para mostrar os campeões nessa ordem)
 // Bolinha azul/vermelha com o lado da comp
 export const sideDot=c=>{const side=draftOf(c).side;return `<span class="side-dot ${side}" role="img" aria-label="${DRAFT_SIDE[side]}" title="${DRAFT_SIDE[side]}"></span>`};
-export function pickOrderLanes(c){const d=draftOf(c);return d.order[d.side]}
+export function compositionPreview(c){return PLANES.map(lane=>c.lanes[lane][0]).filter(Boolean)}
 export function draftOf(c){
   if(!c.draft)c.draft={};const d=c.draft;
   if(!d.side)d.side="blue";if(!d.note)d.note={blue:"",red:""};if(!d.order)d.order={};
@@ -66,7 +65,7 @@ export function draftHTML(c, { active, compositions, LN, img, esc, pickArt }){
   };
   // Clicar no nome de um lado coloca o time nesse lado.
   const sideName=t=>{const side=t==="B"?"b":"r",key=t==="B"?"blue":"red",mine=t===us;return `<h3 class="tmh" id="draft-side-${side}"><button type="button" class="side-pick${mine?" on":""}" data-side="${key}" aria-pressed="${mine}" title="${mine?"Nosso time está neste lado":"Clique para colocar nosso time neste lado"}">${DRAFT_SIDE[key]}<span>${mine?"Nossa equipe":"Adversário"}</span></button></h3>`};
-  const tabs=compositions.map(x=>{const firsts=pickOrderLanes(x).map(l=>x.lanes[l][0]).filter(Boolean);
+  const tabs=compositions.map(x=>{const firsts=compositionPreview(x);
     return `<button type="button" class="dz-tab${x.id===c.id?" on":""}" data-comp-tab="${esc(x.id)}" aria-pressed="${x.id===c.id}" title="${esc(x.name)}"><b>${sideDot(x)}${esc(x.name)}</b><span class="mini">${firsts.map(img).join("")||'<small>vazia</small>'}</span></button>`}).join("");
   h+=`<div class="dz">${team("B")}
     <div class="dz-center">
