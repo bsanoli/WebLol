@@ -29,6 +29,8 @@ description: Implemente ou ajuste a interface do WebLol, incluindo tabelas, card
 - Use o “Ver página” da build expandida como referência para ações secundárias que abrem detalhes, ou que ocupam a mesma posição no fim do cabeçalho com função equivalente. Reutilize o botão `ghost` pequeno, alinhado à direita, com rótulo curto, ícone à direita, hover visível e foco por teclado.
 - Use chevron para a direita quando a ação abre uma página ou modal de detalhes. Em expansões no próprio card, use um chevron vertical que indique o estado aberto ou fechado. Mantenha a hierarquia das ações primárias.
 
+- Em páginas de detalhe com retorno à lista, siga o padrão visual de “Ver página”: botão `ghost` pequeno com hover visível e foco por teclado. Para voltar, coloque o chevron à esquerda do rótulo e alinhe a ação ao início da linha.
+
 ## Bordas
 
 - Nos retratos de campeões com indicador de lado no draft, use uma faixa sólida de 4 px na esquerda, reta e com pontas quadradas, cobrindo toda a altura do ícone. Use a cor do lado da equipe com a mesma intensidade em picks e bans.

@@ -217,6 +217,9 @@ input[data-slot="input"][aria-invalid="true"] {
   object-fit: contain;
   vertical-align: middle;
 }
+:is(button[aria-pressed="false"], button[role="radio"][aria-checked="false"], [data-slot="select-item"][data-state="unchecked"]) .lane-icon {
+  filter: grayscale(1);
+}
 .lane-label {
   display: inline-flex;
   align-items: center;

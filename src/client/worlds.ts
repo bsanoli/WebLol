@@ -526,10 +526,13 @@ function wireBuilds(){
             ${selectedOpponent ? "" : `<span class="build-winrate">${wrPill(champion.wins,champion.picks)} <small>de vitórias ${DATASET.scope}</small></span>`}
           </div>
         </div>
-        ${opponents.length ? `<div class="build-opponent-filter">
-          <label id="build-opponent-label" for="build-opponent-trigger">Adversário direto</label>
-          <div class="team-select" data-build-opponent></div>
-        </div>` : ""}
+        <div class="build-card-filters">
+          <div class="build-detail-lanes"></div>
+          ${opponents.length ? `<div class="build-opponent-filter">
+            <label id="build-opponent-label" for="build-opponent-trigger">Adversário direto</label>
+            <div class="team-select" data-build-opponent></div>
+          </div>` : ""}
+        </div>
       </header>`;
     const action = pageSlug
       ? `<button class="worlds-detail-action" data-slot="button" data-variant="ghost" data-size="sm" type="button" data-build="${pageSlug}" aria-label="Abrir página da build de ${esc(champion.name)}">Ver página ${iconMarkup("next")}</button>`
@@ -551,8 +554,13 @@ function wireBuilds(){
       games(c) > 0 && games(c) >= buildMinGames &&
       buildMatchesQuery(c, bLane, f));
     const selectedChampion = buildChampion ? bySlug.get(buildChampion) : undefined;
+    const availableLanes = selectedChampion
+      ? LANES.map(([lane]) => lane).filter(lane => buildGameCount(selectedChampion, lane) > 0)
+      : [];
+    const defaultLane = availableLanes.reduce((best, lane) =>
+      !best || buildGameCount(selectedChampion, lane) > buildGameCount(selectedChampion, best) ? lane : best, "");
     const champion = selectedChampion && games(selectedChampion) > 0 ? selectedChampion : undefined;
-    const position = bLane;
+    const position = bLane || defaultLane;
     const opponents = champion ? buildOpponentOptions(champion, position) : [];
     if (buildOpponent && !opponents.some(opponent => opponent.slug === buildOpponent)) {
       buildOpponent = "";
@@ -563,12 +571,9 @@ function wireBuilds(){
     const content=champion
       ? championCard(champion, position, undefined, opponents)
       : matches.length ? buildsTable(matches, bLane) : "";
-    const availableLanes = selectedChampion
-      ? LANES.map(([lane]) => lane).filter(lane => buildGameCount(selectedChampion, lane) > 0)
-      : [];
     const back = buildChampion ? `<div class="build-back">
-      <button data-slot="button" data-variant="outline" data-size="sm" class="build-route" data-build="">Voltar à lista de builds</button>
-      ${selectedChampion ? '<div class="build-detail-lanes"></div>' : ""}
+      <button data-slot="button" data-variant="outline" data-size="sm" class="build-route" data-build="">${iconMarkup("previous")} Voltar à lista de builds</button>
+      ${selectedChampion && !champion ? '<div class="build-detail-lanes"></div>' : ""}
     </div>` : "";
     bc.classList.toggle("build-detail", !!buildChampion);
     bc.innerHTML=back+(content
@@ -577,10 +582,10 @@ function wireBuilds(){
       : list.length ? '<div class="empty-state" role="status"><h3>Nenhum campeão encontrado</h3><p>Ajuste a busca, a posição ou o mínimo de jogos.</p></div>'
       : '<div class="empty-state" role="status"><h3>Ainda não há partidas coletadas</h3><p>As builds aparecem aqui depois da primeira coleta diária.</p></div>');
     const detailLanes = bc.querySelector(".build-detail-lanes");
-    if (detailLanes) {
+    if (detailLanes && availableLanes.length > (champion ? 1 : 0)) {
       const root = createRoot(detailLanes);
       buildControlRoots.set(detailLanes, root);
-      root.render(positionFilter(["", ...availableLanes], bLane, "Posição do campeão", true, lane => {
+      root.render(positionFilter(availableLanes, position, "Posição do campeão", false, lane => {
         bLane = lane;
         syncLane();
         draw();

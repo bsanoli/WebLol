@@ -456,17 +456,25 @@
   color: var(--muted);
   font-size: 13px;
 }
+.build-card-filters {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: end;
+  gap: var(--wl-space-2) var(--wl-space-3);
+  max-width: 100%;
+}
 .build-opponent-filter {
   display: grid;
   gap: var(--wl-space-1);
-  flex: 0 1 208px;
+  width: 208px;
   min-width: 0;
   max-width: 100%;
   color: var(--muted);
   font-size: var(--wl-label-size);
 }
 .build-opponent-filter .team-select [data-team-trigger="select"] {
-  min-height: var(--wl-space-12);
+  min-height: var(--wl-button-height-sm);
+  padding-block: 0;
 }
 .build-opponent-portrait {
   flex: none;
@@ -475,14 +483,23 @@
   border-radius: var(--wl-control-radius);
 }
 .build-opponent-filter [data-team-trigger="select"] { cursor: pointer; }
-.build-opponent-options [data-slot="select-item"] { min-height: var(--wl-space-12); }
-.build-opponent-options [data-slot="select-item"] > span:last-child {
+.build-opponent-options {
   display: flex;
-  align-items: center;
+  flex-direction: column;
   gap: var(--wl-space-2);
-  min-width: 0;
+  width: max(var(--radix-popover-trigger-width), 240px);
+  max-height: min(320px, var(--radix-popover-content-available-height));
+  padding: var(--wl-space-2);
 }
-.build-opponent-count { color: var(--wl-muted); white-space: nowrap; }
+.build-opponent-options input { width: 100%; }
+.build-opponent-results { min-height: 0; overflow: auto; padding: var(--wl-space-1); }
+.build-opponent-results p { margin: var(--wl-space-2); color: var(--wl-muted); }
+.build-opponent-results button {
+  display: flex;
+  justify-content: flex-start;
+  width: 100%;
+}
+.build-opponent-count { margin-inline-start: auto; color: var(--wl-muted); white-space: nowrap; }
 .builds-page:has(.build-detail) > .tools { display: none; }
 .build-winrate { display: inline-flex; align-items: center; gap: 4px; font-size: 13px; }
 .build-winrate small { color: var(--muted); font-weight: 500; }
@@ -788,7 +805,11 @@
   gap: var(--wl-space-1);
   inline-size: auto;
 }
-.build-detail-lanes button { width: auto; padding-inline: var(--wl-space-2); cursor: pointer; }
+.build-detail-lanes button {
+  width: var(--wl-button-height-sm);
+  height: var(--wl-button-height-sm);
+  cursor: pointer;
+}
 .comp-picker-search { margin-bottom: 8px; }
 .comp-picker-categories { display: grid; gap: 4px; margin-bottom: 8px; }
 .comp-picker-categories button { min-width: 0; min-height: 32px; height: auto; padding-inline: 4px; font-size: 12px; }
@@ -1249,7 +1270,11 @@
 #mulanes { margin-block-end: var(--wl-space-3); }
 #mu-search { margin-block-end: var(--wl-space-4); max-width: 320px; }
 .murow[hidden] { display: none; }
-.build-lane-tabs [data-state=on] { background: var(--wl-accent-soft); color: var(--wl-accent); }
+.build-lane-tabs button[data-state="on"] {
+  background: color-mix(in srgb, var(--wl-accent) 30%, var(--wl-surface));
+  border-color: var(--wl-accent);
+  color: var(--wl-accent);
+}
 
 .wl-composition-popover { width: min(400px, calc(100vw - var(--wl-space-8))); padding: 0; }
 .wl-composition-popover .comp-picker {
