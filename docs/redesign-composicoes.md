@@ -4,7 +4,7 @@ Implementado na rota existente `/#/time/composicoes`.
 
 ## Fontes e decisões
 
-- Editor, catálogo, estado local, importação/exportação e links: `src/client/team.ts`.
+- Editor, catálogo, estado local, importação/exportação e links: `src/pages/team/ui/team-page.ts`.
 - Estrutura da área do time: `src/camp.html`; estilos compartilhados: `public/assets/team.css` e `base.css`.
 - Estilos específicos novos: `public/assets/compositions.css`, sem alterar a aparência do mapa ou do conhecimento.
 - Shell, Riot ID e sincronização continuam em `public/assets/shell.js` e `sync.js`, sem alterações.

@@ -54,13 +54,13 @@ O GitHub Pages serve a raiz da branch `main`. Rode `npm run pages:prepare` para 
 
 ## Sistema visual
 
-O CSS compartilhado em `public/assets/base.css` define a paleta escura do WebLol, Barlow para texto, Barlow Condensed para títulos e os raios de 4 px para controles, 6 px para cartões compactos e 8 px para painéis. Use os tokens `--wl-*` e seus equivalentes no Tailwind em `src/index.css`. A borda estrutural é de 1 px e usa `--wl-line`. Cores de lados, posições e estados têm papéis próprios.
+O CSS compartilhado em `public/assets/base.css` define a paleta escura do WebLol, Barlow para texto, Barlow Condensed para títulos e os raios de 4 px para controles, 6 px para cartões compactos e 8 px para painéis. Use os tokens `--wl-*` e seus equivalentes no Tailwind em `src/app/styles/index.css`. A borda estrutural é de 1 px e usa `--wl-line`. Cores de lados, posições e estados têm papéis próprios.
 
 Os temas alternativos são aplicados ao editor e ao catálogo de Composições, que compartilham a mesma tipografia e os mesmos raios do restante do painel.
 
 ## Botões da interface
 
-Use o `Button` de `src/components/ui/button.tsx` nas telas React. Nos trechos HTML legados, use `data-slot="button"` com o mesmo `data-variant`. Ambos usam os estilos de `public/assets/base.css`.
+Use o `Button` de `src/shared/ui/button.tsx` nas telas React. Nos trechos HTML legados, use `data-slot="button"` com o mesmo `data-variant`. Ambos usam os estilos de `public/assets/base.css`.
 
 - `default` para a ação principal da seção, como criar ou salvar.
 - `outline` para ações secundárias, como importar ou copiar.

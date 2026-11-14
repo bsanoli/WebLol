@@ -1,0 +1,27 @@
+.foot { margin-top: var(--worlds-section-gap); padding-top: var(--wl-space-4); border-top: 1px solid var(--line); max-width: none; line-height: 1.7; }
+@media (max-width: 1100px) { .analytics-columns { grid-template-columns: 1fr; } }
+@media (max-width: 1023px) {
+  .comp-picker-trigger { gap: 4px; padding-inline: 8px; font-size: 13px; }
+  .comp-picker-value .icon { display: none; }
+}
+@media (max-width: 859px) {
+  .comp-filters { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .comp-filter-actions { grid-column: 1/-1; justify-content: space-between; }
+}
+@media (pointer: coarse) {
+  .comp-filters { --comp-control-height: var(--wl-button-height); }
+}
+@media (max-width: 759px) {
+  .metric-grid { grid-template-columns: repeat(2,minmax(0,1fr)); }
+  .metric-card { padding: var(--wl-space-3) var(--worlds-card-padding); }
+  .metric-card strong { font-size: 22px; }
+  .chart-footer [data-slot=button], .lane-card-link { min-height: var(--wl-space-12); }
+  .tools input, .tools select { width: 100%; flex: 1 1 100%; min-width: 0; }
+  .tablewrap td.champ { position: sticky; left: 0; background: var(--surface); z-index: 1; }
+  .cg { padding-inline: var(--wl-space-3); }
+  .match-details { min-width: 0; }
+  .match-team .team-logo { width: 26px; height: 26px; }
+  .match-lanes .kda-column { width: 43px; }
+  .match-champion { gap: 6px; }
+  .match-champion .av { width: 26px; height: 26px; }
+}

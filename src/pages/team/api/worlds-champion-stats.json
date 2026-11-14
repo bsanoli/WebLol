@@ -1,0 +1,641 @@
+{
+  "g": 90,
+  "c": {
+    "Nocturne": [
+      15,
+      9,
+      67,
+      "Jungle"
+    ],
+    "Vi": [
+      16,
+      10,
+      52,
+      "Jungle"
+    ],
+    "Renata Glasc": [
+      16,
+      8,
+      50,
+      "Suporte"
+    ],
+    "Cassiopeia": [
+      17,
+      11,
+      40,
+      "Mid"
+    ],
+    "Olaf": [
+      17,
+      11,
+      38,
+      "Top"
+    ],
+    "Syndra": [
+      22,
+      12,
+      31,
+      "Mid"
+    ],
+    "Qiyana": [
+      21,
+      11,
+      32,
+      "Jungle"
+    ],
+    "Lee Sin": [
+      28,
+      14,
+      20,
+      "Jungle"
+    ],
+    "Ezreal": [
+      27,
+      11,
+      21,
+      "ADC"
+    ],
+    "Jarvan IV": [
+      24,
+      14,
+      24,
+      "Jungle"
+    ],
+    "Akali": [
+      13,
+      3,
+      34,
+      "Mid"
+    ],
+    "Rumble": [
+      25,
+      6,
+      21,
+      "Top"
+    ],
+    "Orianna": [
+      22,
+      15,
+      24,
+      "Mid"
+    ],
+    "Locke": [
+      12,
+      6,
+      33,
+      "Mid"
+    ],
+    "Jayce": [
+      15,
+      8,
+      28,
+      "Top"
+    ],
+    "K'Sante": [
+      21,
+      8,
+      19,
+      "Top"
+    ],
+    "Nautilus": [
+      24,
+      16,
+      15,
+      "Suporte"
+    ],
+    "Lulu": [
+      22,
+      12,
+      14,
+      "Suporte"
+    ],
+    "Seraphine": [
+      16,
+      11,
+      20,
+      "Suporte"
+    ],
+    "Jhin": [
+      19,
+      11,
+      13,
+      "ADC"
+    ],
+    "Galio": [
+      14,
+      10,
+      18,
+      "Mid"
+    ],
+    "Wukong": [
+      14,
+      6,
+      18,
+      "Jungle"
+    ],
+    "Ambessa": [
+      22,
+      10,
+      9,
+      "Top"
+    ],
+    "Pantheon": [
+      15,
+      7,
+      15,
+      "Jungle"
+    ],
+    "Viktor": [
+      18,
+      10,
+      9,
+      "Mid"
+    ],
+    "Alistar": [
+      23,
+      7,
+      3,
+      "Suporte"
+    ],
+    "Lucian": [
+      17,
+      8,
+      7,
+      "ADC"
+    ],
+    "Camille": [
+      12,
+      7,
+      11,
+      "Top"
+    ],
+    "Caitlyn": [
+      8,
+      2,
+      15,
+      "ADC"
+    ],
+    "Renekton": [
+      8,
+      5,
+      14,
+      "Top"
+    ],
+    "Yunara": [
+      18,
+      10,
+      3,
+      "ADC"
+    ],
+    "Karma": [
+      14,
+      5,
+      6,
+      "Suporte"
+    ],
+    "Gnar": [
+      12,
+      8,
+      8,
+      "Top"
+    ],
+    "Kalista": [
+      16,
+      8,
+      2,
+      "ADC"
+    ],
+    "Trundle": [
+      11,
+      7,
+      7,
+      "Jungle"
+    ],
+    "Ashe": [
+      14,
+      10,
+      3,
+      "ADC"
+    ],
+    "Kai'Sa": [
+      11,
+      6,
+      6,
+      "ADC"
+    ],
+    "Sylas": [
+      6,
+      1,
+      11,
+      "Mid"
+    ],
+    "Jax": [
+      7,
+      3,
+      9,
+      "Top"
+    ],
+    "Rakan": [
+      12,
+      5,
+      3,
+      "Suporte"
+    ],
+    "Skarner": [
+      4,
+      1,
+      11,
+      "Jungle"
+    ],
+    "Milio": [
+      14,
+      6,
+      0,
+      "Suporte"
+    ],
+    "Taliyah": [
+      9,
+      6,
+      4,
+      "Mid"
+    ],
+    "Ryze": [
+      8,
+      2,
+      5,
+      "Mid"
+    ],
+    "Xin Zhao": [
+      7,
+      5,
+      6,
+      "Jungle"
+    ],
+    "Maokai": [
+      4,
+      0,
+      9,
+      "Jungle"
+    ],
+    "Xayah": [
+      10,
+      5,
+      2,
+      "ADC"
+    ],
+    "Anivia": [
+      8,
+      2,
+      4,
+      "Mid"
+    ],
+    "Ahri": [
+      7,
+      5,
+      5,
+      "Mid"
+    ],
+    "Naafiri": [
+      7,
+      3,
+      5,
+      "Jungle"
+    ],
+    "Yone": [
+      4,
+      0,
+      7,
+      "Mid"
+    ],
+    "Vayne": [
+      1,
+      0,
+      10,
+      "Top"
+    ],
+    "Ornn": [
+      9,
+      6,
+      1,
+      "Top"
+    ],
+    "Corki": [
+      7,
+      4,
+      3,
+      "ADC"
+    ],
+    "Leona": [
+      8,
+      5,
+      1,
+      "Suporte"
+    ],
+    "Annie": [
+      6,
+      4,
+      3,
+      "Mid"
+    ],
+    "LeBlanc": [
+      4,
+      1,
+      5,
+      "Mid"
+    ],
+    "Tristana": [
+      8,
+      3,
+      0,
+      "ADC"
+    ],
+    "Shen": [
+      7,
+      2,
+      1,
+      "Top"
+    ],
+    "Aurora": [
+      5,
+      3,
+      3,
+      "Mid"
+    ],
+    "Twisted Fate": [
+      3,
+      2,
+      5,
+      "Mid"
+    ],
+    "Zeri": [
+      4,
+      2,
+      3,
+      "ADC"
+    ],
+    "Sivir": [
+      3,
+      2,
+      4,
+      "ADC"
+    ],
+    "Miss Fortune": [
+      6,
+      3,
+      0,
+      "ADC"
+    ],
+    "Sejuani": [
+      6,
+      1,
+      0,
+      "Jungle"
+    ],
+    "Ziggs": [
+      5,
+      1,
+      1,
+      "ADC"
+    ],
+    "Draven": [
+      1,
+      1,
+      5,
+      "ADC"
+    ],
+    "Poppy": [
+      1,
+      1,
+      5,
+      "Suporte"
+    ],
+    "Rell": [
+      5,
+      2,
+      0,
+      "Suporte"
+    ],
+    "Zaahen": [
+      5,
+      3,
+      0,
+      "Top"
+    ],
+    "Kled": [
+      4,
+      2,
+      1,
+      "Top"
+    ],
+    "Bard": [
+      3,
+      2,
+      2,
+      "Suporte"
+    ],
+    "Pyke": [
+      2,
+      0,
+      3,
+      "Suporte"
+    ],
+    "Aatrox": [
+      4,
+      1,
+      0,
+      "Top"
+    ],
+    "Yuumi": [
+      4,
+      2,
+      0,
+      "Suporte"
+    ],
+    "Kog'Maw": [
+      3,
+      2,
+      1,
+      "Mid"
+    ],
+    "Neeko": [
+      3,
+      1,
+      1,
+      "Suporte"
+    ],
+    "Aphelios": [
+      2,
+      1,
+      2,
+      "ADC"
+    ],
+    "Gwen": [
+      2,
+      2,
+      2,
+      "Top"
+    ],
+    "Kennen": [
+      3,
+      2,
+      0,
+      "Top"
+    ],
+    "Nami": [
+      3,
+      2,
+      0,
+      "Suporte"
+    ],
+    "Lissandra": [
+      2,
+      1,
+      1,
+      "Mid"
+    ],
+    "Varus": [
+      2,
+      2,
+      1,
+      "ADC"
+    ],
+    "Cho'Gath": [
+      2,
+      1,
+      0,
+      "Jungle"
+    ],
+    "Mel": [
+      2,
+      0,
+      0,
+      "Mid"
+    ],
+    "Yorick": [
+      2,
+      0,
+      0,
+      "Top"
+    ],
+    "Volibear": [
+      1,
+      1,
+      1,
+      "Top"
+    ],
+    "Kha'Zix": [
+      0,
+      0,
+      2,
+      ""
+    ],
+    "Diana": [
+      1,
+      0,
+      0,
+      "Mid"
+    ],
+    "Elise": [
+      1,
+      0,
+      0,
+      "Suporte"
+    ],
+    "Gangplank": [
+      1,
+      0,
+      0,
+      "Top"
+    ],
+    "Hwei": [
+      1,
+      0,
+      0,
+      "Mid"
+    ],
+    "Irelia": [
+      1,
+      1,
+      0,
+      "Top"
+    ],
+    "Jinx": [
+      1,
+      0,
+      0,
+      "ADC"
+    ],
+    "Lillia": [
+      1,
+      0,
+      0,
+      "Jungle"
+    ],
+    "Lux": [
+      1,
+      1,
+      0,
+      "Suporte"
+    ],
+    "Malphite": [
+      1,
+      0,
+      0,
+      "Jungle"
+    ],
+    "Nasus": [
+      1,
+      0,
+      0,
+      "Jungle"
+    ],
+    "Sion": [
+      1,
+      1,
+      0,
+      "Top"
+    ],
+    "Swain": [
+      1,
+      1,
+      0,
+      "Mid"
+    ],
+    "Tahm Kench": [
+      1,
+      0,
+      0,
+      "Suporte"
+    ],
+    "Thresh": [
+      1,
+      0,
+      0,
+      "Suporte"
+    ],
+    "Twitch": [
+      1,
+      0,
+      0,
+      "ADC"
+    ],
+    "Vel'Koz": [
+      1,
+      1,
+      0,
+      "Suporte"
+    ],
+    "Kindred": [
+      0,
+      0,
+      1,
+      ""
+    ],
+    "Zyra": [
+      0,
+      0,
+      1,
+      ""
+    ]
+  }
+}

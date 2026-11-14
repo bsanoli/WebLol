@@ -1,5 +1,7 @@
 node_modules/
 dist/
 dist-soloq/
+test-results/
+playwright-report/
 /public/assets/icons.svg
 __pycache__/

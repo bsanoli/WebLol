@@ -6,6 +6,7 @@
 - Em cards e linhas equivalentes, mantenha títulos, ícones, métricas e ações nas mesmas posições relativas. Valide o alinhamento com textos longos, quebra de linha e campos opcionais.
 - Em páginas de detalhe, use o estilo compacto e sem borda de “Ver página” para voltar à lista, com o chevron à esquerda do rótulo.
 - Trabalhe nos arquivos fonte em `src/` e `public/`. Os HTMLs e `assets/` da raiz são gerados para o GitHub Pages.
+- Toda implementação no WebLol deve seguir a arquitetura Feature-Sliced Design. Use a skill [feature-sliced-design](.agents/skills/feature-sliced-design/SKILL.md) ao criar, alterar ou refatorar código. Respeite as responsabilidades das camadas, a direção dos imports e as APIs públicas dos slices, inclusive em correções pontuais.
 - Faça commit ou push quando o usuário pedir a respectiva ação. Para publicar no GitHub Pages, use a skill [weblol-publicar](.agents/skills/weblol-publicar/SKILL.md).
 
 ## Admin e login

@@ -12,7 +12,7 @@ controles, avisos, tooltips, diálogos e disclosures nativos. Diálogos usam
 Em navegadores sem esses recursos, abrir e fechar continua funcionando, com
 menos animação. Não adie mudanças de estado ou foco para esperar uma animação.
 
-`src/client/motion.ts` oferece:
+`src/shared/lib/motion.ts` oferece:
 
 - `initializeMotionNav(selector)` para navegações persistentes. O indicador
   acompanha `aria-current="page"` ou `aria-pressed="true"`, inclusive ao quebrar
