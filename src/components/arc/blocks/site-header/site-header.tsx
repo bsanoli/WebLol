@@ -6,6 +6,7 @@ import { AnimatePresence, LayoutGroup, motion, useIsPresent, useReducedMotion } 
 import type { Transition, Variants } from "motion/react";
 import { ArrowRight, ChevronDown, Menu, X } from "lucide-react";
 import { motionTokens } from "../../motion-tokens";
+import { NavigationHover, useNavigationHover } from "../../navigation-hover";
 import styles from "./site-header.module.css";
 
 type SiteHeaderVariant = "simple" | "centered" | "mega";
@@ -90,7 +91,7 @@ const physical = (visualDuration: number, bounce: number): Transition => {
   const root = 2 * Math.PI / (visualDuration * 1.2);
   return { type: "spring", stiffness: root * root, damping: 2 * (1 - bounce) * root, mass: 1 };
 };
-const GROW = physical(.44, 0), SHRINK = physical(.34, 0), GLIDE = physical(.3, 0), SLIDE = physical(.4, 0);
+const GROW = physical(.44, 0), SHRINK = physical(.34, 0), SLIDE = physical(.4, 0);
 const HOVER_INTENT = 70, LEAVE_GRACE = 180, TRAVEL = 36;
 /** Matches the container query in site-header.module.css. */
 const COLLAPSE_BELOW = 760;
@@ -180,7 +181,7 @@ export const SiteHeader = forwardRef<HTMLElement, SiteHeaderProps>(function Site
   const scrolled = useScrolled(scrollThreshold, scrollContainer);
   const [innerCurrent, setInnerCurrent] = useState(defaultCurrent);
   const current = currentProp ?? innerCurrent;
-  const [hovered, setHovered] = useState<string | null>(null);
+  const navHover = useNavigationHover("[data-nav-item]");
   const [open, setOpen] = useState<{ value: string; direction: number } | null>(null);
   const [panel, setPanel] = useState<{ height: number | null; grow: boolean }>({ height: null, grow: true });
   const [menuOpen, setMenuOpen] = useState(false);
@@ -338,7 +339,8 @@ export const SiteHeader = forwardRef<HTMLElement, SiteHeaderProps>(function Site
       <div className={styles.bar}>
         <div className={styles.brandSlot}>{brandNode}</div>
         <LayoutGroup id={id}>
-          <nav className={styles.nav} aria-label={label} onKeyDown={onNavKeyDown} onPointerLeave={() => setHovered(null)}>
+          <nav className={styles.nav} aria-label={label} onKeyDown={onNavKeyDown} onPointerOver={navHover.onPointerOver} onPointerLeave={navHover.clear}>
+            {variant !== "centered" && <NavigationHover target={navHover.target} />}
             <ul className={styles.navList}>
               {items.map(item => {
                 const isCurrent = current === item.value;
@@ -351,11 +353,9 @@ export const SiteHeader = forwardRef<HTMLElement, SiteHeaderProps>(function Site
                   "data-section": item.value,
                   "data-current": isCurrent ? "" : undefined,
                   "data-open": isOpen ? "" : undefined,
-                  onPointerEnter: (event: ReactPointerEvent) => { if (event.pointerType === "mouse") setHovered(item.value); if (withPanel) onTriggerPointerEnter(event, item.value); else if (event.pointerType === "mouse" && open) closeTimer.current = window.setTimeout(() => openPanel(null), LEAVE_GRACE); },
-                  onFocus: () => setHovered(null),
+                  onPointerEnter: (event: ReactPointerEvent) => { if (withPanel) onTriggerPointerEnter(event, item.value); else if (event.pointerType === "mouse" && open) closeTimer.current = window.setTimeout(() => openPanel(null), LEAVE_GRACE); },
                 };
                 const decorations = <>
-                  {hovered === item.value && variant !== "centered" && <motion.span key={`hover-${variant}`} layoutId={`hover-${variant}`} className={styles.hover} transition={reduced ? { duration: 0 } : GLIDE} aria-hidden="true" />}
                   {isCurrent && <motion.span key={`current-${variant}`} layoutId={`current-${variant}`} className={styles.indicator} transition={reduced ? { duration: 0 } : motionTokens.spring.morph} aria-hidden="true" />}
                 </>;
                 return <li key={item.value} className={styles.navCell}>

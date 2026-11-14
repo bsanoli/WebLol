@@ -6,6 +6,7 @@ import type { ComponentPropsWithoutRef } from "react";
 import { ChevronLeft as NavArrowLeft, ChevronRight as NavArrowRight } from "lucide-react";
 import { LayoutGroup, motion, useReducedMotion } from "motion/react";
 import { motionTokens } from "../motion-tokens";
+import { NavigationHover, useNavigationHover } from "../navigation-hover";
 import styles from "./tabs.module.css";
 
 type RootProps = ComponentPropsWithoutRef<typeof TabsPrimitive.Root>;
@@ -22,12 +23,15 @@ export function Tabs({ value, defaultValue, onValueChange, className, ...props }
   return <TabsContext.Provider value={active}><LayoutGroup id={layoutId}><TabsPrimitive.Root {...props} className={[styles.root, className].filter(Boolean).join(" ")} value={active} onValueChange={handleChange}/></LayoutGroup></TabsContext.Provider>;
 }
 
-export function TabsList({ className, ...props }: ComponentPropsWithoutRef<typeof TabsPrimitive.List>) {
+type TabsListProps = ComponentPropsWithoutRef<typeof TabsPrimitive.List> & { slidingHover?: boolean };
+
+export function TabsList({ className, children, slidingHover = false, onPointerOver, onPointerLeave, ...props }: TabsListProps) {
   const active = useContext(TabsContext);
   const reduced = useReducedMotion();
   const shell = useRef<HTMLDivElement>(null);
   const viewport = useRef<HTMLDivElement>(null);
   const list = useRef<HTMLDivElement>(null);
+  const tabHover = useNavigationHover('[role="tab"]:not(:disabled)');
   const [edges, setEdges] = useState({ overflow: false, left: false, right: false });
   const update = useCallback(() => {
     const frame = shell.current;
@@ -66,7 +70,22 @@ export function TabsList({ className, ...props }: ComponentPropsWithoutRef<typeo
   return <div ref={shell} className={styles.listShell} data-overflow={edges.overflow} data-left={edges.left} data-right={edges.right}>
     {edges.overflow && <button type="button" className={`${styles.scrollButton} ${styles.scrollLeft}`} aria-label="Rolar abas para a esquerda" disabled={!edges.left} onClick={() => scrollTabs(-1)}><NavArrowLeft width={17} height={17} aria-hidden="true"/></button>}
     <motion.div ref={viewport} layoutScroll className={styles.viewport} onFocusCapture={event => { if (event.target instanceof HTMLElement && event.target.getAttribute("role") === "tab") reveal(event.target); }}>
-      <TabsPrimitive.List {...props} ref={list} className={[styles.list, className].filter(Boolean).join(" ")}/>
+      <TabsPrimitive.List
+        {...props}
+        ref={list}
+        className={[styles.list, className].filter(Boolean).join(" ")}
+        onPointerOver={event => {
+          onPointerOver?.(event);
+          if (slidingHover) tabHover.onPointerOver(event);
+        }}
+        onPointerLeave={event => {
+          onPointerLeave?.(event);
+          tabHover.clear();
+        }}
+      >
+        {slidingHover && <NavigationHover target={tabHover.target} />}
+        {children}
+      </TabsPrimitive.List>
     </motion.div>
     {edges.overflow && <button type="button" className={`${styles.scrollButton} ${styles.scrollRight}`} aria-label="Rolar abas para a direita" disabled={!edges.right} onClick={() => scrollTabs(1)}><NavArrowRight width={17} height={17} aria-hidden="true"/></button>}
   </div>;

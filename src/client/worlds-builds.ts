@@ -359,25 +359,37 @@ export function orderedMatchups(position: string, champion: string) {
 
 export function buildMatchups(champion: Champion, position: string) {
   const lane = position || champion.main;
-  const opponents = orderedMatchups(lane, champion.name);
+  const opponents = orderedMatchups(lane, champion.name).filter(([, games]) => games > 0);
+  const byWinRate = (a: Matchup, b: Matchup) => a[2] * b[1] - b[2] * a[1];
+  const rank = (direction: number) => (a: Matchup, b: Matchup) =>
+    direction * byWinRate(a, b) || b[1] - a[1] || a[0].localeCompare(b[0], "pt-BR");
   const games = opponents.reduce((total, [, count]) => total + count, 0);
-  return `<h3>Confrontos mais frequentes</h3>
+  const rows = (entries: Matchup[]) => entries.map(([opponent, count, wins]) => `<li>
+    <button type="button" class="build-matchup-row" data-build="${championSlug(opponent)}" data-build-lane="${esc(lane)}">
+      <span class="build-context-name">${ico(opponent)}<span>${esc(opponent)}</span></span>
+      <span class="build-context-count"><strong data-result="${wins * 2 > count ? "positive" : wins * 2 < count ? "negative" : "even"}">${(100 * wins / count).toLocaleString("pt-BR", { maximumFractionDigits: 1 })}%</strong><small>${gameCount(count)}</small></span>
+      ${iconMarkup("next")}
+    </button>
+  </li>`).join("");
+  const ranked = [...opponents].sort(rank(-1));
+  const split = Math.ceil(ranked.length / 2);
+  const best = ranked.slice(0, split);
+  const worst = ranked.slice(split).sort(rank(1));
+  const group = (title: string, entries: Matchup[], collapsed = false) => {
+    if (!entries.length) return "";
+    const extra = entries.slice(5);
+    return `${collapsed ? `<details class="build-matchup-group"><summary>${title}${iconMarkup("next")}</summary>` : `<h4>${title}</h4>`}
+      <ul class="build-context-list" aria-label="${title}">${rows(entries.slice(0, 5))}</ul>
+      ${extra.length ? `<button type="button" data-slot="button" data-variant="ghost"
+        class="build-matchup-more" data-show-matchups aria-label="Ver mais adversários: ${title}">Ver mais adversários (${extra.length}) ${iconMarkup("next")}</button>
+        <ul class="build-context-list" aria-label="Mais adversários: ${title}" hidden>${rows(extra)}</ul>` : ""}${collapsed ? "</details>" : ""}`;
+  };
+  return `<h3>Confrontos</h3>
     <div class="build-context-champion">${ico(champion.name)}<div>
       <strong>${esc(champion.name)}</strong>
-      <span class="lane-label">${laneIconMarkup(lane, true)}${esc(lane)}${games ? ` · ${gameCount(games)} ${DATASET.matchupGames}` : ""}</span>
+      <span class="lane-label">${laneIconMarkup(lane, true)}${esc(lane)}${games ? `<span title="${esc(gameCount(games) + " " + DATASET.matchupGames)}">· ${gameCount(games)}</span>` : ""}</span>
     </div></div>
-    ${opponents.length ? `<ul class="build-context-list" aria-label="Adversários por número de jogos">
-      ${opponents.slice(0, 5).map(([opponent, count, wins]) => `<li>
-        <button type="button" class="build-context-name" data-build="${championSlug(opponent)}"
-          data-build-lane="${esc(lane)}" aria-label="Abrir build de ${esc(opponent)}">${ico(opponent)}${esc(opponent)}</button>
-        <span class="build-context-count">${gameCount(count)}</span>
-        <span class="build-context-result" aria-label="${wins} vitórias e ${count - wins} derrotas">
-          <strong class="build-sample-wins">${wins}V</strong> / <strong class="build-sample-losses">${count - wins}D</strong>
-        </span>
-      </li>`).join("")}
-    </ul>
-    <button type="button" data-slot="button" data-variant="outline" data-size="sm" class="build-context-link"
-      data-build-matchups="${championSlug(champion.name)}" data-lane="${esc(lane.toLowerCase())}">Ver todos os confrontos ${iconMarkup("next")}</button>`
+    ${opponents.length ? group("Mais frequentes", opponents.slice(0, 5)) + group("Melhores taxas de vitória", best, true) + group("Piores taxas de vitória", worst, true)
     : `<p class="hint">Sem confrontos registrados para este campeão na posição.</p>`}`;
 }
 
@@ -449,7 +461,7 @@ export function buildsTable(champions: Champion[], lane: keyof Champion["lanes"]
     <tr class="detail build-inline-detail" id="build-detail-${slug}" hidden><td colspan="8"><div></div></td></tr>`;
   }).join("");
   return `<div class="wl-panel tablewrap builds-table-wrap" role="region" aria-label="Comparação de builds">
-    <table class="builds-table" aria-label="Builds por campeão">
+    <table data-slot="table" class="builds-table" aria-label="Builds por campeão">
       <caption>${DATASET.scopeLong}</caption>
       <thead><tr><th scope="col" class="build-col-champion">Campeão</th>
       ${buildStats.map(([column, key, label]) => `<th scope="col" class="build-col-${column} build-stat"><button type="button" data-k="${key}">${label}${sortIcons}</button></th>`).join("")}

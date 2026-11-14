@@ -1,7 +1,9 @@
 // @ts-nocheck -- O editor legado ainda depende de estado dinâmico vindo do armazenamento local.
+import "@/index.css"
+import { askChoice, askName, confirmAction, showDialog } from "@/components/ui/dialog-controls"
 import { iconMarkup, laneIconMarkup } from "./icon"
 import { LOL_DATA, lolAsset, lolChampion, lolImage } from "./lol-media"
-import { clearTeamControls, mountChampionMenu, mountCompositionMenu, mountLaneNote, mountTeamSelect } from "./team-controls"
+import { clearTeamControls, mountChampionMenu, mountCompositionMenu, mountDraftChampionMenu, mountLaneNote, mountMapEmpty, mountMapImageSwitch, mountTeamSelect, mountSectionTabs, mountToolGroup } from "./team-controls"
 import { initializeTheme } from "./theme"
 import { initializeMotionNav, revealContent } from "./motion"
 
@@ -62,7 +64,7 @@ function save(flash=true){
   if (flash || $("#saved").textContent === "Falha ao salvar") $("#saved").textContent = "Salvo neste navegador";
 }
 const cur=()=>S.comps.find(c=>c.id===S.cur);
-$("#clear-local").onclick=()=>{
+$("#clear-local").onclick=async()=>{
   let base;
   try {
     base=JSON.parse(localStorage.getItem("lol-base"));
@@ -72,7 +74,7 @@ $("#clear-local").onclick=()=>{
     return;
   }
   const destination=base?`a última versão oficial sincronizada (v${base.version})`:"os dados iniciais do site";
-  if(!confirm(`Limpar suas alterações neste navegador?\n\nTodas as composições e jogadas locais serão substituídas por ${destination}.\nSeu login e tema serão mantidos. Envios já feitos para aprovação não serão cancelados.\n\nSe quiser guardar uma cópia, clique em Cancelar e use Exportar antes de continuar.`))return;
+  if(!await confirmAction(`Limpar suas alterações neste navegador?\n\nTodas as composições e jogadas locais serão substituídas pela versão selecionada: ${destination}.\nSeu login e tema serão mantidos. Envios já feitos para aprovação não serão cancelados.\n\nSe quiser guardar uma cópia, clique em Cancelar e use Exportar antes de continuar.`, "Limpar alterações"))return;
   try {
     if(base){
       localStorage.setItem(KEY,JSON.stringify({comps:base.data.comps,plays:base.data.plays,cur:base.data.comps[0]?.id,curPlay:base.data.plays[0]?.id}));
@@ -106,8 +108,8 @@ function renderList(){
     mountCompositionMenu(host,name,()=>{
       duplicateComp(id);
       $("#clist .ci.on")?.focus({preventScroll:true});
-    },()=>{
-      if(deleteComp(id)) ($("#clist .ci.on")||$("#clist .ci")||$("#new")).focus({preventScroll:true});
+    },async()=>{
+      if(await deleteComp(id)) ($("#clist .ci.on")||$("#clist .ci")||$("#new")).focus({preventScroll:true});
     });
   });
 }
@@ -117,7 +119,7 @@ $("#draft-comp").onchange=e=>selectComp(e.target.value);
 $("#csearch").oninput=renderList;
 $("#new").onclick=()=>{const c=blank("Comp "+(S.comps.length+1));S.comps.unshift(c);S.cur=c.id;active="top";save();renderAll();publishTeamRoute("comps");setTimeout(()=>{$("#cname").focus();$("#cname").select()},0)};
 function duplicateComp(id){const c=JSON.parse(JSON.stringify(S.comps.find(c=>c.id===id)));c.id=uid();c.name+=" (cópia)";c.updated=Date.now();S.comps.unshift(c);S.cur=c.id;save();renderAll();publishTeamRoute("comps")};
-function deleteComp(id){const c=S.comps.find(c=>c.id===id);if(!confirm(`Excluir a comp "${c.name}"?`))return false;S.comps=S.comps.filter(x=>x.id!==c.id);if(!S.comps.length)S.comps.push(blank());if(!S.comps.some(x=>x.id===S.cur))S.cur=S.comps[0].id;save();renderAll();publishTeamRoute("comps");return true};
+async function deleteComp(id){const c=S.comps.find(c=>c.id===id);if(!c || !await confirmAction(`Excluir a comp "${c.name}"?`, "Excluir composição"))return false;S.comps=S.comps.filter(x=>x.id!==c.id);if(!S.comps.length)S.comps.push(blank());if(!S.comps.some(x=>x.id===S.cur))S.cur=S.comps[0].id;save();renderAll();publishTeamRoute("comps");return true};
 
 /* ===== Editor ===== */
 function optionHTML(n,l,i){
@@ -155,15 +157,19 @@ function renderEditor(){
   const notes=`<details id="composition-notes" ${notesOpen?"open":""} class="${hasCompNotes(c,dv)?"has-notes":""}"><summary>Anotações da composição<span class="notes-flag" aria-label="tem anotação" title="Esta comp tem anotação">${iconMarkup("edit")}</span></summary><label class="control-label" for="notes">Plano geral</label><textarea id="notes" placeholder="Plano de jogo, condição de vitória…">${esc(c.notes)}</textarea>${dv?`<label class="control-label" for="dnote">Plano do draft · ${DRAFT_SIDE[draftOf(c).side]}</label><textarea id="dnote">${esc(draftOf(c).note[draftOf(c).side])}</textarea><ul id="notes-lanes" class="draft-lane-notes" aria-label="Observações por posição" hidden></ul>`:""}</details>`;
   const editor = $("#editor");
   if (!editor.firstElementChild) {
-    editor.innerHTML = `<div class="editor-controls"><input data-slot="input" id="cname" aria-label="Nome da composição" placeholder="Nome da composição"><div class="vtog wl-motion-pill" role="group" aria-label="Modo da composição"><button data-slot="button" data-variant="ghost" data-view="lanes">Opções por posição</button><button data-slot="button" data-variant="ghost" data-view="draft">Ordem do draft</button></div></div>`;
-    initializeMotionNav("#editor .vtog");
+    editor.innerHTML = `<div class="editor-controls"><input data-slot="input" id="cname" aria-label="Nome da composição" placeholder="Nome da composição"><div class="vtog"></div></div>`;
   }
   $("#cname").value = c.name;
-  for (const button of editor.querySelectorAll("[data-view]")) {
-    const selected = button.dataset.view === S.view;
-    button.setAttribute("aria-pressed", String(selected));
-    button.classList.toggle("on", selected);
-  }
+  mountSectionTabs(editor.querySelector(".vtog"), "Modo da composição", S.view || "lanes", [
+    { value: "lanes", label: "Opções por posição", panel: "composition-panel" },
+    { value: "draft", label: "Ordem do draft", panel: "composition-panel" },
+  ], value => {
+    S.view = value;
+    save(false);
+    renderEditor();
+    renderList();
+    publishTeamRoute("comps");
+  });
   const catalog=$("#champ-picker"),gridScroll=$("#grid").scrollTop;
   if (editor.contains(catalog)) $("#comps").append(catalog);
   clearTeamControls(editor);
@@ -172,17 +178,22 @@ function renderEditor(){
   content.setEnd(editor, editor.childNodes.length);
   content.deleteContents();
   editor.insertAdjacentHTML("beforeend", `
+  <div id="composition-panel" role="tabpanel" aria-labelledby="tab-${dv ? "draft" : "lanes"}">
   ${notes}<button data-slot="button" data-variant="default" type="button" class="jump-picker" data-picker>${iconMarkup("plus")} Adicionar campeão</button>
   ${dv?draftHTML(c):LANES.map(l=>`<div class="lane${active===l.k?" act":""}${l.k==="ban"?" ban-strip":""}" data-l="${l.k}" style="--lc:var(${l.c})">
   ${l.k==="ban"?"":pickArt(c.lanes[l.k][0])}
   <button class="ln lane-label" data-draft-target="${l.k}" aria-pressed="${active===l.k}">${laneIconMarkup(l.k)}${l.n}</button>
   <div class="chips">${c.lanes[l.k].map((n,i)=>optionHTML(n,l.k,i)).join("")||'<span class="empty">Adicionar campeão</span>'}</div>
 <span class="lane-note" data-team-control data-note-lane="${l.k}"></span></div>`).join("")}
-  <p class="help">${dv?"Clique no retrato para torná-lo principal, arraste para reordenar e use o botão direito para excluir.":"Clique no retrato para priorizar. Arraste para reordenar ou use o menu ⋯ de cada campeão."}</p>`);
+  <p class="help">${dv?"Clique no retrato para torná-lo principal, arraste para reordenar e use o botão direito para excluir.":"Clique no retrato para priorizar. Arraste para reordenar ou use o menu ⋯ de cada campeão."}</p></div>`);
   editor.querySelectorAll(".option-menu").forEach(host=>{
     const {n,from}=host.closest(".chip").dataset;
     mountChampionMenu(host,n,Number(host.dataset.optionIndex),c.lanes[from].length,
       direction=>reorderChampion(n,from,direction),()=>removeChampion(n,from));
+  });
+  editor.querySelectorAll(".dchip").forEach(host=>{
+    const {n,from}=host.dataset;
+    mountDraftChampionMenu(host,n,()=>removeChampion(n,from));
   });
   editor.querySelectorAll(".lane-note").forEach(host=>{
     const lane=LN[host.dataset.noteLane];
@@ -245,7 +256,6 @@ $("#editor").addEventListener("click",e=>{
   const rm=e.target.closest("[data-rm]");
   if(rm){removeChampion(rm.dataset.rm,rm.closest("[data-l]").dataset.l);return}
 
-  const vb=e.target.closest("[data-view]");if(vb){S.view=vb.dataset.view;save(false);renderEditor();renderList();$(`[data-view="${S.view}"]`).focus({preventScroll:true});publishTeamRoute("comps");return}
   const sb=e.target.closest("[data-side]");if(sb){draftOf(cur()).side=sb.dataset.side;touch();save();renderEditor();renderList();$(`[data-side="${sb.dataset.side}"]`).focus({preventScroll:true});return}
   const target=e.target.closest("[data-draft-target]");
   if(target){
@@ -302,7 +312,7 @@ function draftHTML(c){
   DORDER.forEach(([ph,slots],pi)=>slots.forEach(s=>{const[t,k]=s.split(":");const i=cnt[t][k]++;seq.push({t,k,i,code:t+(k==="ban"?"B":"")+(i+1),ph:pi,n:++kc[k]})}));
   const find=(t,k,i)=>seq.find(s=>s.t===t&&s.k===k&&s.i===i);
   // No draft: clique esquerdo torna principal, arrastar reordena e o botão direito abre "Excluir".
-  const mini=(n,l,j)=>`<div class="chip dchip ${j===0?"primary":"alternative"}" draggable="true" data-n="${esc(n)}" data-from="${l}"><button class="champ-priority" data-priority="${esc(n)}" data-lane="${l}" aria-label="${j===0?"Principal":"Tornar principal"}: ${esc(n)} em ${LN[l].n}" title="${esc(n)} · ${j+1}ª opção · clique para tornar principal, botão direito para excluir">${img(n)}</button></div>`;
+  const mini=(n,l,j)=>`<div class="chip dchip ${j===0?"primary":"alternative"}" data-team-control draggable="true" data-n="${esc(n)}" data-from="${l}"><button class="champ-priority" data-priority="${esc(n)}" data-lane="${l}" aria-label="${j===0?"Principal":"Tornar principal"}: ${esc(n)} em ${LN[l].n}" title="${esc(n)} · ${j+1}ª opção · clique para tornar principal, botão direito para excluir">${img(n)}</button></div>`;
   // faixa da sequência
   let h=`<div class="draft-toolbar draft-toolbar-top"><div class="dside" role="group" aria-label="Lado da equipe"><span>Nossa equipe</span>
     ${Object.entries(DRAFT_SIDE).map(([key,label])=>`<button data-slot="button" data-variant="outline" data-size="sm" data-side="${key}" aria-pressed="${d.side===key}" class="${d.side===key?`on ${key[0]}`:""}">${label}</button>`).join("")}</div></div>`;
@@ -395,50 +405,37 @@ $("#grid").onclick=e=>{
 };
 
 
-let pickerTrigger=null;
-const pickerDialog=$("#picker-dialog"),picker=$("#champ-picker");
-function openPicker(){pickerTrigger=document.activeElement;pickerDialog.append(picker);pickerDialog.showModal();$("#search").focus()}
-pickerDialog.addEventListener("close",()=>{
-  (document.querySelector("[data-picker]")||pickerTrigger)?.focus();
-  // Keep the content in place through the native dialog exit transition.
-  void Promise.allSettled(pickerDialog.getAnimations().map(animation=>animation.finished))
-    .then(()=>{if(!pickerDialog.open){$("#comps").append(picker);placePicker()}});
-});
-$("#close-picker").onclick=()=>pickerDialog.close();
+let closePicker;
+const picker = $("#champ-picker");
+function openPicker() {
+  if (closePicker) return;
+  closePicker = showDialog({
+    title: "Campeões", children: picker, id: "picker-dialog", className: "wl-picker-dialog wl-panel",
+    initialFocus: () => $("#search"),
+    onClose: () => {
+      closePicker = undefined;
+      $("#comps").append(picker);
+      placePicker();
+      document.querySelector("[data-picker]")?.focus({ preventScroll: true });
+    },
+  });
+}
+$("#close-picker").onclick = () => closePicker?.();
 // Na ordem do draft em tela larga, o catálogo fica no centro, entre os dois lados.
 function placePicker(){
-  const dialog=$("#picker-dialog"),catalog=$("#champ-picker");
-  if(dialog.open)return;
+  const catalog = picker;
+  if (closePicker) return;
   const slot=document.querySelector("#editor .dz-slot");
   if(slot&&window.matchMedia("(min-width: 1100px)").matches){if(catalog.parentElement!==slot)slot.append(catalog)}
   else if(catalog.parentElement!==$("#comps"))$("#comps").append(catalog);
 }
 window.matchMedia("(min-width: 1100px)").addEventListener("change",()=>placePicker());
-const chipMenu=document.createElement("div");
-chipMenu.className="chip-context-menu";chipMenu.hidden=true;chipMenu.setAttribute("role","menu");
-document.body.append(chipMenu);
-const closeChipMenu=()=>{chipMenu.hidden=true};
-$("#editor").addEventListener("contextmenu",e=>{
-  const chip=e.target.closest(".dchip");if(!chip)return;
-  e.preventDefault();
-  const n=chip.dataset.n,l=chip.dataset.from;
-  chipMenu.innerHTML=`<button type="button" role="menuitem" data-slot="button" data-variant="destructive" data-size="sm">${iconMarkup("trash")} Excluir ${esc(n)}</button>`;
-  chipMenu.firstElementChild.onclick=()=>{const c=cur();c.lanes[l]=c.lanes[l].filter(x=>x!==n);closeChipMenu();touch();save();renderEditor();renderList();renderGrid()};
-  chipMenu.hidden=false;
-  const r=chipMenu.getBoundingClientRect();
-  chipMenu.style.left=Math.min(e.clientX,innerWidth-r.width-8)+"px";
-  chipMenu.style.top=Math.min(e.clientY,innerHeight-r.height-8)+"px";
-  chipMenu.firstElementChild.focus();
-});
-document.addEventListener("pointerdown",e=>{if(!chipMenu.hidden&&!chipMenu.contains(e.target))closeChipMenu()});
-document.addEventListener("keydown",e=>{if(e.key==="Escape")closeChipMenu()});
-addEventListener("scroll",closeChipMenu,true);
 $("#editor").addEventListener("click",e=>{
   const tab=e.target.closest("[data-comp-tab]");
   if(tab){if(tab.dataset.compTab!==S.cur)selectComp(tab.dataset.compTab);return}
   if(e.target.closest("[data-comp-new]"))$("#new").click();
 });
-window.matchMedia("(min-width: 1100px)").addEventListener("change",e=>{if(e.matches&&pickerDialog.open)pickerDialog.close()});
+window.matchMedia("(min-width: 1100px)").addEventListener("change",e=>{if(e.matches)closePicker?.()});
 
 /* ===== Exportar / Importar ===== */
 $("#exp").onclick=()=>{
@@ -449,13 +446,19 @@ $("#impb").onclick=()=>$("#imp").click();
 $("#imp").onchange=async e=>{
   const f=e.target.files[0];if(!f)return;
   try{const d=JSON.parse(await f.text());const comps=d.comps||d;if(!Array.isArray(comps))throw 0;
-    const replace=confirm(`Arquivo com ${comps.length} comp(s).\n\nOK = SUBSTITUIR as comps atuais\nCancelar = JUNTAR com as atuais`);
+    if (!comps.length) throw new Error("Arquivo sem composições");
+    const choice = await askChoice("Importar composições", `O arquivo contém ${comps.length} composições. Escolha o que fazer com os dados atuais.`, [
+      { value: "merge", label: "Juntar" },
+      { value: "replace", label: "Substituir", destructive: true },
+    ]);
+    if (!choice) return;
+    const replace = choice === "replace";
     const clean=comps.map(c=>{const b=blank(c.name);b.notes=c.notes||"";b.laneNotes=c.laneNotes||{};if(c.draft)b.draft=c.draft;b.updated=c.updated||Date.now();for(const l of LANES)b.lanes[l.k]=Array.isArray(c.lanes?.[l.k])?c.lanes[l.k].map(String):[];b.id=replace?(c.id||b.id):b.id;return b});
     S.comps=replace?clean:[...clean,...S.comps];S.cur=S.comps[0].id;
     if(Array.isArray(d.plays)){const ps=d.plays.filter(p=>p&&p.live&&Array.isArray(p.steps)).map(p=>({...p,id:replace?(p.id||uid()):uid()}));S.plays=replace?ps:[...plays(),...ps];plays()}
     renderPlays();save();renderAll();publishTeamRoute($("nav [aria-pressed=true]")?.dataset.v || "comps");toast(`${clean.length} comp(s) importada(s)`);
-  }catch(err){alert("Arquivo inválido. Use um .json exportado por esta página.")}
-  e.target.value="";
+  }catch{toast("Arquivo inválido. Use um .json exportado por esta página.")}
+  finally { e.target.value=""; }
 };
 
 /* ===== Abas ===== */
@@ -654,9 +657,9 @@ function renderKnow(){
   const know = $("#know");
   const previousTab = know.dataset.activeTab;
   if (!know.firstElementChild) {
-    know.innerHTML = `<div class="ktabs wl-motion-pill" role="group" aria-label="Seção de conhecimento"><button data-slot="button" data-variant="ghost" data-kt="obj">${iconMarkup("clock")} Objetivos e tempos</button><button data-slot="button" data-variant="ghost" data-kt="wave">${gameIconMarkup("bluemelee_circle_classic")} Controle de wave</button></div>
-  <div id="k-wave">${WAVE_HTML}</div>
-  <div id="k-obj">
+    know.innerHTML = `<div class="ktabs"></div>
+  <div id="panel-wave" role="tabpanel" aria-labelledby="tab-wave">${WAVE_HTML}</div>
+  <div id="panel-obj" role="tabpanel" aria-labelledby="tab-obj">
   <div class="warn">${iconMarkup("warning")} Tempos da temporada 2026 (patch 26.1 em diante, jogo atual 16.x). As mudanças vieram do preview oficial da Riot e de guias de 2026; os primeiros spawns da selva são das notas do patch 26.1; os tempos de volta dos campos pequenos são os de sempre. Confirmem no jogo se algum patch novo mexer nisso. Os tempos são do relógio do jogo.</div>
   <div class="kgrid">${OBJ.map((o,i)=>`<div class="wl-panel obj"><h3>${gameIconMarkup(o.icon)}<span>${o.n}</span></h3>
      <div class="kv"><span>Primeiro spawn</span><span>${o.first}</span></div>
@@ -682,19 +685,21 @@ function renderKnow(){
   <table><tr><th>Tempo</th><th>Evento</th></tr>
   ${[["0:30","1ª onda de minions"],["0:55","Buffs e campos da selva"],["1:07","Gromp e Krugs"],["2:55","Scuttles"],["5:00","1º dragão"],["8:00","Vastilarvas (única onda)"],["15:00","Arauto do Vale"],["19:45","Arauto some se ninguém pegou"],["20:00","Barão Na'Shor"]].map(r=>`<tr><td style="width:100px;font-weight:700">${r[0]}</td><td>${r[1]}</td></tr>`).join("")}</table>
   <p style="color:var(--mut);font-size:12px;margin-top:18px">Fontes: <a style="color:var(--acc)" href="https://www.leagueoflegends.com/news/dev/dev-2026-season-one-gameplay-preview/" target="_blank">Riot — /dev 2026 Season One</a> · <a style="color:var(--acc)" href="https://www.nerfplz.com/2026/08/every-summoners-rift-objective.html" target="_blank">nerfplz — Every Summoner's Rift objective</a> · <a style="color:var(--acc)" href="https://www.riftpatchnotes.com/lol/unit/void-grubs" target="_blank">riftpatchnotes — Voidgrubs</a> · <a style="color:var(--acc)" href="https://www.leagueoflegends.com/en-sg/news/game-updates/patch-26-1-notes/" target="_blank">Riot — Notas do patch 26.1</a></p></div>`;
-    initializeMotionNav("#know .ktabs");
   }
   know.dataset.activeTab = kt;
-  for (const button of know.querySelectorAll("[data-kt]")) {
-    const selected = button.dataset.kt === kt;
-    button.setAttribute("aria-pressed", String(selected));
-    button.classList.toggle("on", selected);
-  }
-  $("#k-wave").hidden = kt !== "wave";
-  $("#k-obj").hidden = kt !== "obj";
+  mountSectionTabs(know.querySelector(".ktabs"), "Seção de conhecimento", kt, [
+    { value: "obj", label: "Objetivos e tempos", icon: "clock" },
+    { value: "wave", label: "Controle de wave", icon: "book" },
+  ], value => {
+    S.kTab = value;
+    save(false);
+    renderKnow();
+    publishTeamRoute("know");
+  });
+  $("#panel-wave").hidden = kt !== "wave";
+  $("#panel-obj").hidden = kt !== "obj";
   if (previousTab && previousTab !== kt) revealContent($("#k-" + kt));
 }
-$("#know").addEventListener("click",e=>{const b=e.target.closest("[data-kt]");if(!b||S.kTab===b.dataset.kt)return;S.kTab=b.dataset.kt;save(false);renderKnow();$("#know [aria-pressed=true]")?.focus({preventScroll:true});publishTeamRoute("know")});
 $("#know").addEventListener("input",e=>{const inp=e.target.closest("[data-o]");if(!inp)return;const s=toS(inp.value);const out=inp.parentElement.querySelector(".r");out.textContent=s==null?"—":fmt(s+ +inp.dataset.o)});
 
 /* ===== Mapa tático ===== */
@@ -729,24 +734,47 @@ const clone=o=>JSON.parse(JSON.stringify(o));
   <circle cx="31" cy="28" r="4" fill="#5b3f8f" stroke="#a37bff" stroke-width=".4"/><text x="31" y="28.7" font-size="1.9" text-anchor="middle" fill="#fff">Barão</text>
   <circle cx="69" cy="72" r="4" fill="#7a4a1e" stroke="#ff9d4d" stroke-width=".4"/><text x="69" y="72.7" font-size="1.9" text-anchor="middle" fill="#fff">Dragão</text>`;
 })();
-function setMapImg(){const im=$("#mapimg");if(!$("#useimg").checked){im.style.display="none";return}
-  im.onload=()=>{if($("#useimg").checked)im.style.display="block"};im.onerror=()=>{im.style.display="none"};
+function setMapImg(){const im=$("#mapimg");if(S.useImg===false){im.style.display="none";return}
+  im.onload=()=>{if(S.useImg!==false)im.style.display="block"};im.onerror=()=>{im.style.display="none"};
   if(im.getAttribute("src")!==lolAsset(LOL_DATA.map))im.src=lolAsset(LOL_DATA.map);
   else if(im.complete&&im.naturalWidth)im.style.display="block"}
-$("#useimg").onchange=()=>{S.useImg=$("#useimg").checked;save(false);setMapImg()};
+function renderMapImageSwitch(){
+  mountMapImageSwitch($("#map-image-control"),S.useImg!==false,checked=>{
+    S.useImg=checked;
+    save(false);
+    setMapImg();
+    renderMapImageSwitch();
+  });
+}
 
 // bolinhas
-$("#map").insertAdjacentHTML("beforeend",TOKS.map(t=>`<div class="tok ${t[0]}" data-t="${t}"></div>`).join(""));
+$("#map").insertAdjacentHTML("beforeend",TOKS.map(t=>`<button type="button" class="tok ${t[0]}" data-t="${t}"></button>`).join(""));
 function compChamp(cid,role){const c=S.comps.find(x=>x.id===cid);return c&&c.lanes[role]&&c.lanes[role][0]}
 function renderTokens(){
   const p=play();
   document.querySelectorAll(".tok").forEach(el=>{const t=el.dataset.t,[side,role]=t.split("_");
     const ch=compChamp(side==="b"?p.cb:p.cr,role);
     el.innerHTML=(ch?img(ch):`<span>${RN[role]}</span>`)+(ch?`<span class="rl">${RN[role]} · ${esc(ch)}</span>`:"");
-    el.title=(side==="b"?"Azul ":"Vermelho ")+RN[role]+(ch?" - "+ch:"")});
+    el.title=(side==="b"?"Azul ":"Vermelho ")+RN[role]+(ch?" - "+ch:"");
+    el.setAttribute("aria-label", el.title);
+  });
   placeTokens(p.live.pos);
 }
 function placeTokens(pos){document.querySelectorAll(".tok").forEach(el=>{const v=pos[el.dataset.t];if(v){el.style.left=v[0]+"%";el.style.top=v[1]+"%"}})}
+$("#map").addEventListener("keydown", event => {
+  const token = event.target.closest(".tok");
+  const direction = { ArrowLeft: [-1, 0], ArrowRight: [1, 0], ArrowUp: [0, -1], ArrowDown: [0, 1] }[event.key];
+  if (!token || !direction || M.playing || event.ctrlKey || event.altKey || event.metaKey) return;
+  event.preventDefault();
+  const current = play().live.pos[token.dataset.t];
+  const next = current.map((value, axis) => Math.max(0, Math.min(100, value + direction[axis] * (event.shiftKey ? 5 : 1))));
+  if (current.every((value, axis) => value === next[axis])) return;
+  pushUndo();
+  play().live.pos[token.dataset.t] = next;
+  placeTokens(play().live.pos);
+  save(false);
+  syncStep();
+});
 let dragT=null;
 $("#map").addEventListener("pointerdown",e=>{
   const tk=e.target.closest(".tok");
@@ -782,7 +810,22 @@ window.addEventListener("resize",()=>drawLines(play().live.lines));
 const COLS=[["#ffd34d","Amarela"],["#3d8bff","Azul"],["#ff4d4d","Vermelha"],["#ffffff","Branca"],["#5be08a","Verde"]];
 $("#cols").innerHTML=COLS.map(([c,name])=>`<button class="col${c===M.color?" on":""}" data-c="${c}" style="--swatch:${c}" aria-label="${name}" aria-pressed="${c===M.color}"></button>`).join("");
 $("#cols").onclick=e=>{const b=e.target.closest("[data-c]");if(!b)return;M.color=b.dataset.c;$("#cols").querySelectorAll("[data-c]").forEach(x=>{x.classList.toggle("on",x===b);x.setAttribute("aria-pressed",String(x===b))})};
-document.querySelectorAll("[data-tool]").forEach(b=>b.onclick=()=>{M.tool=b.dataset.tool;document.querySelectorAll("[data-tool]").forEach(x=>{x.classList.toggle("on",x===b);x.setAttribute("aria-pressed",x===b)});$("#map").classList.toggle("draw",M.tool==="draw");$("#map").classList.toggle("erase",M.tool==="erase");hover=-1;drawLines(play().live.lines)});
+const mapTools = [
+  { value: "move", label: "Mover", icon: "move" },
+  { value: "draw", label: "Desenhar seta", icon: "draw" },
+  { value: "erase", label: "Apagar seta", icon: "erase" },
+];
+function drawMapTools() {
+  mountToolGroup($("#map-modes"), M.tool, mapTools, value => {
+    M.tool = value;
+    $("#map").classList.toggle("draw", value === "draw");
+    $("#map").classList.toggle("erase", value === "erase");
+    hover = -1;
+    drawLines(play().live.lines);
+    drawMapTools();
+  });
+}
+drawMapTools();
 $("#clr").onclick=()=>{if(!play().live.lines.length)return;pushUndo();play().live.lines=[];save(false);drawLines([]);syncStep()};
 document.querySelectorAll("[data-pre]").forEach(b=>b.onclick=()=>{if(M.playing)return;pushUndo();animateTo(preset(b.dataset.pre),play().live.lines)});
 // desfazer / refazer
@@ -812,14 +855,17 @@ function renderPlays(highlightStep = false){
   const opts=`<option value="">Só a função (TOP, JG...)</option>`+S.comps.map(c=>`<option value="${c.id}">${esc(c.name)}</option>`).join("");
   $("#cb").innerHTML=opts;$("#cr").innerHTML=opts;$("#cb").value=p.cb||"";$("#cr").value=p.cr||"";
   ["#psel","#cb","#cr"].forEach(selector=>mountTeamSelect($(selector)));
-  $("#steps").innerHTML=p.steps.map((s,i)=>`<li data-i="${i}" class="${i===M.sel?"on":""}"${i===M.sel?` aria-current="step"${highlightStep?" data-step-highlight":""}`:""}><input data-slot="input" data-lab="${i}" value="${esc(s.label||"Passo "+(i+1))}" aria-label="Nome do passo ${i+1}" title="Clique para renomear"><button data-slot="button" data-variant="destructive" data-size="icon-sm" data-sdel="${i}" aria-label="Apagar passo ${i+1}">${iconMarkup("close")}</button></li>`).join("")||'<li class="none">Nenhum passo ainda.</li>';
+  const steps=$("#steps");
+  clearTeamControls(steps);
+  steps.innerHTML=p.steps.map((s,i)=>`<li data-i="${i}" class="${i===M.sel?"on":""}"${i===M.sel?` aria-current="step"${highlightStep?" data-step-highlight":""}`:""}><input data-slot="input" data-lab="${i}" value="${esc(s.label||"Passo "+(i+1))}" aria-label="Nome do passo ${i+1}" title="Clique para renomear"><button data-slot="button" data-variant="destructive" data-size="icon-sm" data-sdel="${i}" aria-label="Apagar passo ${i+1}">${iconMarkup("close")}</button></li>`).join("")||'<li class="none" data-team-control></li>';
+  if(!p.steps.length)mountMapEmpty(steps.firstElementChild);
   renderStat();
   renderTokens();drawLines(p.live.lines);
 }
 $("#psel").onchange=()=>{S.curPlay=$("#psel").value;M.sel=-1;save(false);renderPlays();publishTeamRoute("map")};
-$("#pnew").onclick=()=>{const n=prompt("Nome da jogada:","Jogada "+(plays().length+1));if(n===null)return;const p=blankPlay(n||undefined);S.plays.push(p);S.curPlay=p.id;M.sel=-1;save();renderPlays();publishTeamRoute("map")};
-$("#pren").onclick=()=>{const p=play(),n=prompt("Novo nome:",p.name);if(!n)return;p.name=n;save();renderPlays()};
-$("#pdel").onclick=()=>{const p=play();if(!confirm(`Excluir a jogada "${p.name}"?`))return;S.plays=S.plays.filter(x=>x.id!==p.id);plays();M.sel=-1;save();renderPlays();publishTeamRoute("map")};
+$("#pnew").onclick=async()=>{const n=await askName("Nova jogada","Jogada "+(plays().length+1));if(n===undefined)return;const p=blankPlay(n||undefined);S.plays.push(p);S.curPlay=p.id;M.sel=-1;save();renderPlays();publishTeamRoute("map")};
+$("#pren").onclick=async()=>{const p=play(),n=await askName("Renomear jogada",p.name);if(!n)return;p.name=n;save();renderPlays()};
+$("#pdel").onclick=async()=>{const p=play();if(!await confirmAction(`Excluir a jogada "${p.name}"?`, "Excluir jogada"))return;S.plays=S.plays.filter(x=>x.id!==p.id);plays();M.sel=-1;save();renderPlays();publishTeamRoute("map")};
 $("#cb").onchange=()=>{play().cb=$("#cb").value;save(false);renderTokens()};
 $("#cr").onchange=()=>{play().cr=$("#cr").value;save(false);renderTokens()};
 
@@ -833,8 +879,8 @@ function renderStat(){const p=play(),s=p.steps[M.sel],b=$("#sedit");
 $("#sadd").onclick=()=>{if(M.playing)return;const p=play(),at=M.sel>=0?M.sel+1:p.steps.length;p.steps.splice(at,0,{label:"Passo "+(p.steps.length+1),pos:clone(p.live.pos),lines:clone(p.live.lines)});M.sel=at;save();renderPlays();toast(`Passo ${at+1} salvo com a posição atual`)};
 $("#sedit").onclick=()=>{M.edit=!M.edit;renderStat();if(M.edit&&M.sel<0)toast("Agora clique no passo que quer editar")};
 $("#steps").addEventListener("input",e=>{const i=e.target.dataset.lab;if(i==null)return;play().steps[+i].label=e.target.value;save(false)});
-$("#steps").onclick=e=>{const d=e.target.closest("[data-sdel]");const p=play();
-  if(d){const i=+d.dataset.sdel;if(!confirm(`Apagar o passo ${i+1}?`))return;p.steps.splice(i,1);if(M.sel===i)M.sel=-1;else if(M.sel>i)M.sel--;save();renderPlays();return}
+$("#steps").onclick=async e=>{const d=e.target.closest("[data-sdel]");const p=play();
+  if(d){const i=+d.dataset.sdel;if(!await confirmAction(`Apagar o passo ${i+1}?`, "Apagar passo"))return;p.steps.splice(i,1);if(M.sel===i)M.sel=-1;else if(M.sel>i)M.sel--;save();renderPlays();return}
   const li=e.target.closest("li[data-i]");if(!li||M.playing)return;const i=+li.dataset.i;if(i!==M.sel)goStep(i)};
 function goStep(i){const p=play();if(i<0||i>=p.steps.length)return;M.sel=i;const s=p.steps[i];renderPlays(true);return animateTo(s.pos,s.lines)}
 $("#sprev").onclick=()=>!M.playing&&goStep(M.sel-1);
@@ -863,4 +909,4 @@ $("#splay").onclick=async()=>{
 /* ===== Início ===== */
 function renderAll(){renderList();renderEditor();renderGrid()}
 mountTeamSelect($("#sort"));
-load();plays();renderAll();renderKnow();$("#useimg").checked=S.useImg!==false;setMapImg();renderPlays();
+load();plays();renderAll();renderKnow();renderMapImageSwitch();setMapImg();renderPlays();

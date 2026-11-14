@@ -1,8 +1,16 @@
 @import "tailwindcss";
 
+@layer components {
+  [data-slot="table-container"] { width: 100%; overflow-x: auto; }
+  [data-slot="table-container"] > [data-slot="table"] { width: 100%; }
+  [data-slot="table-head"] { text-align: start; }
+}
+
 @theme inline {
   --color-background: var(--wl-bg);
   --color-foreground: var(--wl-text);
+  --color-popover: var(--wl-surface);
+  --color-popover-foreground: var(--wl-text);
   --color-card: var(--wl-surface);
   --color-card-foreground: var(--wl-text);
   --color-primary: var(--wl-accent);
@@ -17,6 +25,9 @@
   --color-input: var(--wl-line);
   --color-ring: var(--wl-accent);
   --color-destructive: var(--wl-danger);
+  --color-info: var(--wl-accent);
+  --color-success: var(--wl-success);
+  --color-warning: var(--wl-warning);
   --font-sans: var(--wl-font);
   --font-display: var(--wl-font-display);
   --radius-sm: var(--wl-control-radius);

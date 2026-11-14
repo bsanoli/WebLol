@@ -7,14 +7,18 @@
 <link rel="icon" href="./assets/brand/favicon.ico" sizes="any">
 <link rel="icon" href="./assets/brand/favicon.svg?v=f454a496" type="image/svg+xml">
 <link rel="stylesheet" href="./assets/base.css?v=8b7d9004">
-<link rel="stylesheet" href="./assets/team.css?v=32967a9f">
-<link rel="stylesheet" href="./assets/compositions.css?v=399bc6a0">
+<link rel="stylesheet" href="./assets/team.css?v=ba53bed5">
+<link rel="stylesheet" href="./assets/compositions.css?v=8f2a9411">
 <link rel="stylesheet" href="./assets/motion.css?v=a9ff0ef4">
-<link rel="stylesheet" href="./assets/draft-layout.css?v=8abc1405">
+<link rel="stylesheet" href="./assets/draft-layout.css?v=c208a988">
 <link rel="stylesheet" href="./assets/team-controls.css?v=98e3bf57">
-  <script type="module" crossorigin src="./assets/camp-R424f356.js?v=30ff2e9c"></script>
-  <link rel="modulepreload" crossorigin href="./assets/icon-Cv9Z2xR-.js?v=454e6d19">
-  <link rel="modulepreload" crossorigin href="./assets/motion-BrIxUKIp.js?v=7c05cae0">
+  <script type="module" crossorigin src="./assets/camp-CVR1sySs.js?v=2f8dd3c3"></script>
+  <link rel="modulepreload" crossorigin href="./assets/icon-CmBnF0CE.js?v=cfc59808">
+  <link rel="modulepreload" crossorigin href="./assets/motion-B-TiuPrS.js?v=a77d0f2a">
+  <link rel="modulepreload" crossorigin href="./assets/dropdown-menu-BkOJNsP6.js?v=d7038c42">
+  <link rel="stylesheet" crossorigin href="./assets/icon-C0_tBhsS.css?v=b15fb6e6">
+  <link rel="stylesheet" crossorigin href="./assets/dropdown-menu-D4zHrKmI.css?v=85303c4b">
+  <link rel="stylesheet" crossorigin href="./assets/camp-B6ZLg7li.css?v=7065377a">
 </head>
 <body>
 <header>
@@ -71,7 +75,6 @@
 
  </div>
  </div>
- <dialog class="wl-panel" id="picker-dialog" aria-labelledby="picker-title"></dialog>
 </section>
 
 <section id="v-map" class="view">
@@ -103,11 +106,11 @@
       <label id="cr-label" for="cr-trigger" class="map-red">Vermelho</label><select id="cr" aria-labelledby="cr-label"></select>
      </div>
     </div>
-    <label class="map-check"><input type="checkbox" id="useimg" checked> Usar imagem oficial do mapa</label>
+    <div id="map-image-control"></div>
    </section>
    <section class="wl-panel box map-card" aria-labelledby="map-tools-title">
     <h2 class="wl-card-title" id="map-tools-title">Ferramenta</h2>
-    <div class="map-actions map-modes seg" role="group" aria-label="Modo da ferramenta"><button data-slot="button" data-variant="ghost" data-tool="move" aria-pressed="true" class="on"><svg class="icon" aria-hidden="true" focusable="false"><use href="assets/icons.svg#move"></use></svg> Mover</button><button data-slot="button" data-variant="ghost" data-tool="draw" aria-pressed="false"><svg class="icon" aria-hidden="true" focusable="false"><use href="assets/icons.svg#draw"></use></svg> Desenhar seta</button><button data-slot="button" data-variant="ghost" data-tool="erase" aria-pressed="false" title="Clique numa seta para apagar só ela"><svg class="icon" aria-hidden="true" focusable="false"><use href="assets/icons.svg#erase"></use></svg> Apagar seta</button></div>
+    <div id="map-modes"></div>
     <div class="map-group">
      <h3 id="map-colors-title">Cor da seta</h3>
      <div id="cols" role="group" aria-labelledby="map-colors-title"></div>

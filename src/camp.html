@@ -68,7 +68,6 @@
 
  </div>
  </div>
- <dialog class="wl-panel" id="picker-dialog" aria-labelledby="picker-title"></dialog>
 </section>
 
 <section id="v-map" class="view">
@@ -100,11 +99,11 @@
       <label id="cr-label" for="cr-trigger" class="map-red">Vermelho</label><select id="cr" aria-labelledby="cr-label"></select>
      </div>
     </div>
-    <label class="map-check"><input type="checkbox" id="useimg" checked> Usar imagem oficial do mapa</label>
+    <div id="map-image-control"></div>
    </section>
    <section class="wl-panel box map-card" aria-labelledby="map-tools-title">
     <h2 class="wl-card-title" id="map-tools-title">Ferramenta</h2>
-    <div class="map-actions map-modes seg" role="group" aria-label="Modo da ferramenta"><button data-slot="button" data-variant="ghost" data-tool="move" aria-pressed="true" class="on"><svg class="icon" aria-hidden="true" focusable="false"><use href="assets/icons.svg#move"></use></svg> Mover</button><button data-slot="button" data-variant="ghost" data-tool="draw" aria-pressed="false"><svg class="icon" aria-hidden="true" focusable="false"><use href="assets/icons.svg#draw"></use></svg> Desenhar seta</button><button data-slot="button" data-variant="ghost" data-tool="erase" aria-pressed="false" title="Clique numa seta para apagar só ela"><svg class="icon" aria-hidden="true" focusable="false"><use href="assets/icons.svg#erase"></use></svg> Apagar seta</button></div>
+    <div id="map-modes"></div>
     <div class="map-group">
      <h3 id="map-colors-title">Cor da seta</h3>
      <div id="cols" role="group" aria-labelledby="map-colors-title"></div>

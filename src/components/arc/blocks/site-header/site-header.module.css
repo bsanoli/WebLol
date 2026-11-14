@@ -50,7 +50,7 @@
 .navLabel { position: relative; }
 .chevron { color: var(--text-muted); transition: transform var(--duration-standard) var(--ease-standard); }
 .navItem[data-open] .chevron { transform: rotate(180deg); }
-.hover { position: absolute; z-index: -1; inset: 0; border-radius: inherit; background: var(--surface-muted); }
+.nav { position: relative; isolation: isolate; }
 .indicator { position: absolute; right: var(--space-3); bottom: 4px; left: var(--space-3); height: 2px; border-radius: 2px; background: var(--accent); }
 .navItem:has(.chevron) .indicator { right: calc(var(--space-3) + 18px); }
 .header[data-variant="centered"] .indicator { z-index: -1; inset: 0; height: auto; border: 1px solid var(--border); border-radius: inherit; background: var(--surface); box-shadow: var(--shadow-resting); }
@@ -140,7 +140,7 @@
 :global(#top) .brand { min-height: var(--wl-button-height); padding: 0; }
 :global(#top) .nav { margin-inline-start: var(--wl-space-4); }
 :global(#top) .navItem[data-current] { color: var(--accent); }
-:global(#top) .navItem:not([data-current]):hover,
+:global(#top) .navItem { border-radius: var(--wl-control-radius); }
 :global(#top) .sheetRow:hover,
 :global(#top) .menuButton:hover { background: var(--surface-muted); }
 :global(#top) :is(.brand, .navItem, .sheetRow, .menuButton):focus-visible {

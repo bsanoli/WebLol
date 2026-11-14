@@ -1,11 +1,13 @@
-import { useEffect, useState } from "react"
 import { SiteHeader } from "@/components/arc/blocks/site-header/site-header"
+import { useEffect, useState } from "react"
 import { flushSync } from "react-dom"
 import { createRoot } from "react-dom/client"
 import { Button } from "@/components/ui/button"
 import { AccountAvatar } from "@/components/account-avatar"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { ThemePicker } from "@/components/theme-picker"
+import { confirmAction, showDialog } from "@/components/ui/dialog-controls"
 import "./index.css"
 import { connectAnalytics } from "./analytics-bridge"
 import { iconMarkup } from "./client/icon"
@@ -15,6 +17,7 @@ import { UI_VERSIONS } from "./data/ui-versions"
 const sections = [
   { value: "worlds", label: "Worlds", href: "#/worlds" },
   { value: "builds", label: "Builds", href: "#/builds?fonte=worlds" },
+  { value: "comps", label: "Composições", href: "#/composicoes" },
   { value: "camp", label: "Área do time", href: "#/time" },
   { value: "admin", label: "Administração", href: "#/admin" },
 ]
@@ -37,6 +40,13 @@ function App() {
   const [isAdmin, setIsAdmin] = useState(false)
   const [user, setUser] = useState("")
   const [role, setRole] = useState("")
+  const [accountOpen, setAccountOpen] = useState(false)
+
+  useEffect(() => {
+    const close = () => setAccountOpen(false)
+    document.addEventListener("weblol:close-account", close)
+    return () => document.removeEventListener("weblol:close-account", close)
+  }, [])
 
   useEffect(() => {
     function updateNavigation() {
@@ -53,6 +63,10 @@ function App() {
 
   return (
     <>
+      <a className="skip-link" href="#screens" onClick={event => {
+        event.preventDefault()
+        document.getElementById("screens")?.focus()
+      }}>Ir para o conteúdo</a>
       <SiteHeader
         id="top"
         variant="simple"
@@ -72,29 +86,36 @@ function App() {
             {!user && <Button variant="default" className="signup-trigger" title="Criar conta ou entrar com seu Riot ID"
               onClick={() => (window as unknown as { startSignup?: () => void }).startSignup?.()}>Cadastrar</Button>}
             <ThemePicker initialPalette={initialPalette} />
-            <Button variant="ghost" className="account-trigger" popoverTarget="header-tools"
-              aria-label={user ? `Conta de ${user}` : "Conta"} title={user || "Conta"}>
-              <AccountAvatar user={user} />
-              {user && <span className="account-name">{user}</span>}
-            </Button>
-            <div id="header-tools" className="toolbar" popover="auto" role="group" aria-label="Conta e sincronização">
-              {user && <div className="account-details">
-                <strong>{user}</strong>
-                {role && <small>{role}</small>}
-              </div>}
-              <Button id="sync" variant="outline">
-                <Icon name="reset" />
-                <span id="sync-label" aria-live="polite">Verificando sincronização…</span>
-              </Button>
-              <Button id="send" hidden />
-              <Button id="logout" variant="ghost" title="Sair ou trocar usuário">
-                <Icon name="exit" /> Sair
-              </Button>
-            </div>
+            <Popover open={accountOpen} onOpenChange={setAccountOpen}>
+              <PopoverTrigger asChild>
+                <Button variant="ghost" className="account-trigger"
+                  aria-label={user ? `Conta de ${user}` : "Conta"} title={user || "Conta"}>
+                  <AccountAvatar user={user} />
+                  {user && <span className="account-name">{user}</span>}
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent forceMount id="header-tools" className="toolbar" align="end" aria-label="Conta e sincronização"
+                hidden={!accountOpen} onCloseAutoFocus={event => {
+                  if (document.querySelector(".shell-login-dialog")) event.preventDefault()
+                }}>
+                {user && <div className="account-details">
+                  <strong>{user}</strong>
+                  {role && <small>{role}</small>}
+                </div>}
+                <Button id="sync" variant="outline">
+                  <Icon name="reset" />
+                  <span id="sync-label" aria-live="polite">Verificando sincronização…</span>
+                </Button>
+                <Button id="send" hidden />
+                <Button id="logout" variant="ghost" title="Sair ou trocar usuário">
+                  <Icon name="exit" /> Sair
+                </Button>
+              </PopoverContent>
+            </Popover>
           </div>
         }
       />
-      <main id="screens" aria-label="Painel WebLol">
+      <main id="screens" tabIndex={-1} aria-label="Painel WebLol">
         <iframe id="v-worlds" className="view" title="Estatísticas do Worlds" />
         <iframe id="v-soloq" className="view" title="Builds de SoloQ dos pros" />
         <iframe id="v-camp" className="view" title="Área do time" />
@@ -112,7 +133,6 @@ function App() {
         <div id="screen-loading" role="status" hidden className="screen-message">Carregando esta área…</div>
         <div id="screen-error" role="status" hidden className="screen-message" />
       </main>
-      <dialog id="modal" aria-labelledby="modal-title"><div className="wl-panel" id="mbox" /></dialog>
       <div className="toast" id="toast" role="status" />
     </>
   )
@@ -136,7 +156,7 @@ connectAnalytics(document.getElementById("v-worlds") as HTMLIFrameElement)
 async function start() {
   try {
     // The classic shell still looks up this helper by its global name.
-    Object.assign(window, { iconMarkup, UI_VERSIONS })
+    Object.assign(window, { iconMarkup, UI_VERSIONS, confirmAction, showDialog })
     await loadClassicScript("./assets/sync.js")
     await loadClassicScript("./assets/shell.js")
   } catch {

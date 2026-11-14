@@ -93,8 +93,9 @@
 #v-comps .pk .dchip .av { width: 34px; height: 34px; border-radius: 6px; border: 1px solid #fff4; }
 #v-comps .pk .dchip.primary .av { border: 2px solid var(--wl-accent); }
 #v-comps .pk .draft-alternatives-label { display: none; }
-.chip-context-menu { position: fixed; z-index: 1000; padding: 4px; border: 1px solid var(--line); border-radius: var(--wl-control-radius, 8px); background: var(--panel, #111827); box-shadow: 0 8px 24px #0008; }
-.chip-context-menu button { display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; }
+.chip-menu { z-index: 50; padding: var(--wl-space-1); border: 1px solid var(--line); border-radius: var(--wl-control-radius); background: var(--panel); box-shadow: 0 8px 24px #0008; }
+.chip-menu [role=menuitem] { display: flex; align-items: center; gap: var(--wl-space-2); padding: var(--wl-space-1) var(--wl-space-2); min-height: var(--wl-button-height-sm); color: var(--wl-danger); cursor: pointer; border-radius: var(--wl-control-radius); }
+.chip-menu [data-highlighted] { background: var(--wl-danger-soft); outline: none; }
 
 /* Nome dos lados vira o seletor do lado do time */
 .side-pick { display: flex; flex-direction: column; align-items: inherit; gap: 2px; padding: 4px 8px; margin-block: calc(-1 * var(--wl-space-1)); border: 1px solid transparent; border-radius: var(--wl-control-radius, 8px); background: none; color: inherit; font: inherit; text-align: inherit; cursor: pointer; }

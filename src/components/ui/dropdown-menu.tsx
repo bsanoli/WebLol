@@ -9,11 +9,13 @@ function DropdownMenu({
 }
 
 function DropdownMenuTrigger({
+  asChild,
   ...props
 }: React.ComponentProps<typeof DropdownMenuPrimitive.Trigger>) {
   return (
     <DropdownMenuPrimitive.Trigger
-      data-slot="dropdown-menu-trigger"
+      asChild={asChild}
+      {...(!asChild && { "data-slot": "dropdown-menu-trigger" })}
       {...props}
     />
   )
@@ -103,7 +105,17 @@ function DropdownMenuSeparator({
   )
 }
 
+function DropdownMenuRadioGroup(props: React.ComponentProps<typeof DropdownMenuPrimitive.RadioGroup>) {
+  return <DropdownMenuPrimitive.RadioGroup data-slot="dropdown-menu-radio-group" {...props} />
+}
+
+function DropdownMenuRadioItem(props: React.ComponentProps<typeof DropdownMenuPrimitive.RadioItem>) {
+  return <DropdownMenuPrimitive.RadioItem data-slot="dropdown-menu-radio-item" {...props} />
+}
+
 export {
+  DropdownMenuRadioGroup,
+  DropdownMenuRadioItem,
   DropdownMenu,
   DropdownMenuTrigger,
   DropdownMenuContent,

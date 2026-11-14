@@ -157,7 +157,7 @@ async function setPreview(p){
   if(p==="guest"&&was!=="guest"){lsSet(PBKEY,Object.fromEntries([KEY,BKEY,SKEY,TKEY].map(k=>[k,localStorage.getItem(k)])));for(const k of[KEY,BKEY,SKEY])localStorage.removeItem(k);lsSet(TKEY,"__guest__")}
   if(was==="guest"&&p!=="guest"){const bk=lsGet(PBKEY)||{};for(const[k,v]of Object.entries(bk)){if(v==null)localStorage.removeItem(k);else localStorage.setItem(k,v)}localStorage.removeItem(PBKEY)}
   if(p)lsSet(PKEY,p);else localStorage.removeItem(PKEY);
-  if($("#modal").open)closeModal();
+  closeModal();
   reloadCamp();updateStatus();
   if(currentScreen==="admin"&&p&&p!=="captain"){writeRoute(routeRoots.camp);openRoute()}
   if(p!=="guest"){try{await fb();await enterTeam()}catch(e){}}

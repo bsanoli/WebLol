@@ -57,16 +57,35 @@ async function migrateToTeams(){
 }
 
 /* ================= tela de login ================= */
-function modal(html) {
-  const dialog = $("#modal");
-  $("#mbox").innerHTML = html;
-  $("#mbox h3").id = "modal-title";
-  $("#mbox .err")?.setAttribute("role", "alert");
-  if (!dialog.open) dialog.showModal();
-  $("#mbox input, #mbox [data-variant=default]")?.focus();
+let dismissLogin;
+function closeModal() {
+  dismissLogin?.();
+  dismissLogin = undefined;
 }
-$("#modal").addEventListener("cancel", event => event.preventDefault());
-const closeModal = () => $("#modal").close();
+function modal(html) {
+  document.dispatchEvent(new Event("weblol:close-account"));
+  const box = $("#mbox") || Object.assign(document.createElement("div"), { id: "mbox" });
+  box.innerHTML = html;
+  const error = box.querySelector(".err");
+  if(error){error.dataset.slot="alert";error.setAttribute("role","alert")}
+  box.querySelectorAll("label[for]").forEach(label=>{
+    const input=label.nextElementSibling;
+    if(input?.tagName!=="INPUT")return;
+    const field=document.createElement("div");
+    field.dataset.slot="field";
+    label.before(field);
+    field.append(label,input);
+  });
+  const initialFocus = () => box.querySelector("input, [data-variant=default]");
+  if (dismissLogin) initialFocus()?.focus();
+  else dismissLogin = window.showDialog({
+    title: "Acesso à conta WebLol",
+    children: box,
+    className: "shell-login-dialog",
+    dismissible: false,
+    initialFocus,
+  });
+}
 const merr=m=>{const e=$("#mbox .err");if(e)e.textContent=m};
 const onEnter=go=>$("#mbox").querySelectorAll("input").forEach(i=>i.addEventListener("keydown",e=>{if(e.key==="Enter"){e.preventDefault();go()}}));
 let pendingId=null;
@@ -173,7 +192,7 @@ function useGuest(){
 }
 // login e escolha de time só aparecem na Área do time
 function askOnCamp(){
-  if(currentScreen!=="camp"||$("#modal").open)return;
+  if(currentScreen!=="camp"||dismissLogin)return;
   if(!user()){if(!lsGet(GKEY)&&!preview())stepId();return}
   if(FB&&signedAs(user().id)&&!TEAM&&!user().solo&&!preview())stepTeam();
 }
@@ -226,7 +245,7 @@ function useSolo(){
 
 $("#logout").onclick=async()=>{
   if(!user())return stepId();
-  if(!confirm("Sair deste usuário neste aparelho? As comps do time continuam salvas no banco do time."))return;
+  if(!await window.confirmAction("Sair deste usuário neste aparelho? As comps do time continuam salvas no banco do time."))return;
   localStorage.removeItem(UKEY);
   clearTeamData();
   await idbDel("adminKeys");
@@ -239,7 +258,7 @@ $("#logout").onclick=async()=>{
     writeRoute(routeRoots.camp);
     openRoute();
   }
-  if(currentScreen==="camp"&&!$("#modal").open)stepId();
+  if(currentScreen==="camp"&&!dismissLogin)stepId();
 };
 
 /* ================= aba Gestão do time (dentro da Área do time) ================= */
@@ -247,10 +266,35 @@ $("#logout").onclick=async()=>{
 window.TEAM_NAME=()=>TEAM?.name||"";
 window.captainAccess=()=>!!TEAM&&!!user()&&!user().solo;
 window.canManageTeam=()=>!!TEAM&&(isCaptain()||(!preview()&&!!user()?.admin&&fbIsAdmin()));
+function decorateManagementTables(region) {
+  for (const table of region.querySelectorAll('table[data-slot="table"]')) {
+    const heading = table.rows[0];
+    if (!heading?.querySelector("th")) continue;
+    const head = table.createTHead();
+    head.dataset.slot = "table-header";
+    head.append(heading);
+    for (const body of table.tBodies) body.dataset.slot = "table-body";
+    const container = table.ownerDocument.createElement("div");
+    container.dataset.slot = "table-container";
+    table.before(container);
+    container.append(table);
+    for (const row of table.rows) {
+      row.dataset.slot = "table-row";
+      for (const cell of row.cells) {
+        if (cell.tagName === "TH") {
+          cell.dataset.slot = "table-head";
+          cell.scope = "col";
+          if (!cell.textContent.trim()) cell.setAttribute("aria-label", "Ações");
+        } else cell.dataset.slot = "table-cell";
+      }
+    }
+  }
+}
+
 window.renderCaptainPanel=async function renderCaptainPanel(el){
   if(!el)return;
   if(!captainAccess()){el.innerHTML=`<div class="wl-panel card mut">Entre num time para ver esta aba.</div>`;return}
-  const T=TEAM,manage=window.canManageTeam(),locked=!!preview();el.innerHTML=`<p class="mut">Carregando...</p>`;
+  const T=TEAM,manage=window.canManageTeam(),locked=!!preview();el.innerHTML=`<p class="mut" role="status">Carregando…</p>`;
   let membros=[],off=OFF;
   let memErr="";
   const[ms,r]=await Promise.all([dbList("membros","team",T.id).catch(e=>{memErr=e.message;return[]}),readOfficial().catch(()=>({}))]);membros=ms;if(r?.off)off=r.off;
@@ -262,28 +306,29 @@ window.renderCaptainPanel=async function renderCaptainPanel(el){
   const vers=[...byV.keys()].sort((a,b)=>b-a);
   if(off&&!byV.has(off.version))vers.unshift(off.version);
   const nC=off?.data?.comps?.length||0,nP=off?.data?.plays?.length||0;
-  const row=l=>`<tr><td>${esc(l.from)}</td><td><span class="op ${l.op}">${OPN[l.op]}</span> ${KN[l.kind]} ${esc(l.name)}</td><td class="${l.status==="approved"?"ok":"bad"}">${l.status==="approved"?"aprovada":"recusada"}</td></tr>`;
+  const row=l=>`<tr><td>${esc(l.from)}</td><td><span data-slot="badge" class="op ${l.op}">${OPN[l.op]}</span> ${KN[l.kind]} ${esc(l.name)}</td><td class="${l.status==="approved"?"ok":"bad"}">${l.status==="approved"?"aprovada":"recusada"}</td></tr>`;
   const verHtml=vers.map(v=>{const ls=byV.get(v)||[],cur=off&&v===off.version,at=cur?off.at:ls[0]?.at;
     const ok=ls.filter(l=>l.status==="approved").length,no=ls.length-ok;
     return`<details class="cap-ver"><summary><b>v${v}</b>${cur?' <span class="ok">atual</span>':""} <span class="mut">${at?fmtD(at):""}${cur&&off.by?` · por ${esc(off.by)}`:""}${cur&&off.label?` · ${esc(off.label)}`:""} · ${ok} aprovada${ok===1?"":"s"}${no?`, ${no} recusada${no===1?"":"s"}`:""}</span></summary>
-     ${ls.length?`<table><tr><th>De</th><th>O quê</th><th>Status</th></tr>${ls.map(row).join("")}</table>`:'<p class="mut">Sem alterações registradas nesta versão.</p>'}</details>`}).join("");
+     ${ls.length?`<table data-slot="table"><tr><th>De</th><th>O quê</th><th>Status</th></tr>${ls.map(row).join("")}</table>`:'<p class="mut">Sem alterações registradas nesta versão.</p>'}</details>`}).join("");
   const capName=ativos.find(m=>m.id===T.captain)?.riotId||T.captainId||T.captain;
   el.innerHTML=`
    ${locked?`<div class="wl-panel card mut cap-note">Você está vendo como ${manage?"capitão":"membro"} do ${esc(T.name)}. ${manage?"Os botões ficam desativados nesta visão.":""}</div>`:""}
    ${manage?`<h2>Pedidos para entrar (${pedidos.length})</h2>
-   <div class="wl-panel card">${pedidos.length?`<table><tr><th>Riot ID</th><th>Pedido em</th><th></th></tr>${pedidos.map(m=>`<tr><td>${esc(m.riotId||m.id)}</td><td>${m.at?fmtD(m.at):""}</td><td class="cap-act"><button data-slot="button" data-variant="default" data-acc="${esc(m.id)}">Aceitar</button> <button data-slot="button" data-variant="destructive" data-den="${esc(m.id)}">Recusar</button></td></tr>`).join("")}</table>`:'<span class="mut">Nenhum pedido pendente.</span>'}</div>`:""}
+   <div class="wl-panel card">${pedidos.length?`<table data-slot="table"><tr><th>Riot ID</th><th>Pedido em</th><th></th></tr>${pedidos.map(m=>`<tr><td>${esc(m.riotId||m.id)}</td><td>${m.at?fmtD(m.at):""}</td><td class="cap-act"><button data-slot="button" data-variant="default" data-acc="${esc(m.id)}">Aceitar</button> <button data-slot="button" data-variant="destructive" data-den="${esc(m.id)}">Recusar</button></td></tr>`).join("")}</table>`:'<span class="mut">Nenhum pedido pendente.</span>'}</div>`:""}
    <h2>Jogadores do time (${ativos.length})</h2>
-   <div class="wl-panel card">${memErr?`<p class="bad">Não consegui ler os jogadores do time agora. Tente de novo mais tarde.</p>`:""}${manage?"":`<p class="mut">Capitão: ${esc(capName)}. Só o capitão aceita pedidos e tira jogadores do time.</p>`}<table><tr><th>Riot ID</th><th>Papel</th><th class="cap-since">No time desde</th>${manage?"<th></th>":""}</tr>${ativos.map(m=>`<tr><td>${esc(m.riotId||m.id)}</td><td>${m.id===T.captain?"capitão":"membro"}</td><td class="cap-since">${m.at?fmtD(m.at):""}</td>${manage?`<td class="cap-act">${m.id===T.captain?"":`<button data-slot="button" data-variant="destructive" data-rm="${esc(m.id)}">Excluir do time</button>`}</td>`:""}</tr>`).join("")||`<tr><td colspan="${manage?4:3}" class="mut">Nenhum jogador ainda.</td></tr>`}</table></div>
+   <div class="wl-panel card">${memErr?`<p data-slot="alert" role="alert" class="bad">Não consegui ler os jogadores do time agora. Tente de novo mais tarde.</p>`:""}${manage?"":`<p class="mut">Capitão: ${esc(capName)}. Só o capitão aceita pedidos e tira jogadores do time.</p>`}<table data-slot="table"><tr><th>Riot ID</th><th>Papel</th><th class="cap-since">No time desde</th>${manage?"<th></th>":""}</tr>${ativos.map(m=>`<tr><td>${esc(m.riotId||m.id)}</td><td>${m.id===T.captain?"capitão":"membro"}</td><td class="cap-since">${m.at?fmtD(m.at):""}</td>${manage?`<td class="cap-act">${m.id===T.captain?"":`<button data-slot="button" data-variant="destructive" data-rm="${esc(m.id)}">Excluir do time</button>`}</td>`:""}</tr>`).join("")||`<tr><td colspan="${manage?4:3}" class="mut">Nenhum jogador ainda.</td></tr>`}</table></div>
    <h2>Histórico das comps</h2>
    <div class="wl-panel card">${off?`<p>Versão oficial atual: <b>v${off.version}</b> <span class="mut">· ${nC} comp${nC===1?"":"s"} · ${nP} jogada${nP===1?"":"s"}${off.at?` · ${fmtD(off.at)}`:""}${off.by?` · por ${esc(off.by)}`:""}</span></p>
     <details class="cap-hist"><summary>Ver o histórico inteiro (${vers.length} ${vers.length===1?"versão":"versões"})</summary>${verHtml}</details>`:'<span class="mut">O time ainda não tem versão oficial.</span>'}</div>`;
+  decorateManagementTables(el);
   if(locked){el.querySelectorAll("[data-acc],[data-den],[data-rm]").forEach(b=>b.disabled=true);return}
   if(!manage)return;
   const again=()=>renderCaptainPanel(el);
   const who=id=>{const m=membros.find(x=>x.id===id);return m?.riotId||id};
   el.querySelectorAll("[data-acc]").forEach(b=>b.onclick=async()=>{b.disabled=true;try{await dbSet("membros",b.dataset.acc,{status:"ativo",at:Date.now()},true);toast(`${who(b.dataset.acc)} entrou no ${T.name}`)}catch(e){toast("Erro: "+e.message)}again()});
-  el.querySelectorAll("[data-den]").forEach(b=>b.onclick=async()=>{if(!confirm(`Recusar o pedido de ${who(b.dataset.den)}?`))return;b.disabled=true;try{await dbDel("membros",b.dataset.den);toast("Pedido recusado")}catch(e){toast("Erro: "+e.message)}again()});
-  el.querySelectorAll("[data-rm]").forEach(b=>b.onclick=async()=>{if(!confirm(`Excluir ${who(b.dataset.rm)} do ${T.name}? Ele perde o acesso às comps do time.`))return;b.disabled=true;try{await dbDel("membros",b.dataset.rm);toast(`${who(b.dataset.rm)} saiu do time`)}catch(e){toast("Erro: "+e.message)}again()});
+  el.querySelectorAll("[data-den]").forEach(b=>b.onclick=async()=>{if(!await window.confirmAction(`Recusar o pedido de ${who(b.dataset.den)}?`))return;b.disabled=true;try{await dbDel("membros",b.dataset.den);toast("Pedido recusado")}catch(e){toast("Erro: "+e.message)}again()});
+  el.querySelectorAll("[data-rm]").forEach(b=>b.onclick=async()=>{if(!await window.confirmAction(`Excluir ${who(b.dataset.rm)} do ${T.name}? Ele perde o acesso às comps do time.`))return;b.disabled=true;try{await dbDel("membros",b.dataset.rm);toast(`${who(b.dataset.rm)} saiu do time`)}catch(e){toast("Erro: "+e.message)}again()});
 };
 
 /* ================= aba Administração (admin e capitão) ================= */
@@ -299,14 +344,14 @@ async function renderAdmin(){
       const go=async()=>{try{KEYS=await adminUnlock($("#apw").value,$("#afpw").value);await enterTeam();renderAdmin()}catch(e){if(e.message==="fb"){$("#afw").style.display="";$("#aerr").textContent="Digite também a senha do Firebase"}else $("#aerr").textContent="Senha incorreta"}};
       $("#aok").onclick=go;el.querySelectorAll("input").forEach(i=>i.addEventListener("keydown",e=>{if(e.key==="Enter")go()}));return}
   }
-  el.innerHTML=`<h2>Administração</h2><p class="mut">Carregando...</p>`;
+  el.innerHTML=`<h2>Administração</h2><p class="mut" role="status">Carregando…</p>`;
   let envs=[],pedidos=[],membros=[],contas=[],times=[],todos=[];
   try{
     if(TEAM)[envs,membros]=await Promise.all([dbList(teamPath("envios")),dbList("membros","team",TEAM.id)]);
     if(u.admin){[contas,times,todos]=await Promise.all([dbList("contas"),dbList("times"),dbList("membros")]);
       // versão atual das comps de cada time
       await Promise.all(times.map(async t=>{try{const d=await dbGet(`times/${t.id}/dados`,"oficial");t.off=d?JSON.parse(d.json):null}catch(e){t.off=null}}));}
-  }catch(e){el.innerHTML=`<h2>Administração</h2><div class="wl-panel card bad">Não consegui ler o banco: ${esc(e.message)}</div>`;return}
+  }catch(e){el.innerHTML=`<h2>Administração</h2><div data-slot="alert" role="alert" class="wl-panel card bad">Não consegui ler o banco: ${esc(e.message)}</div>`;return}
   pedidos=membros.filter(m=>m.status==="pendente");const ativos=membros.filter(m=>m.status==="ativo");
   const done=new Set((OFF?.log||[]).map(l=>l.sid)),subs=[];
   for(const d of envs){try{const s=JSON.parse(d.json);s.doc=d.id;if(done.has(s.id)){await dbDel(teamPath("envios"),d.id).catch(()=>{});continue}subs.push(s)}catch(e){subs.push({id:d.id,doc:d.id,from:d.from,err:true})}}
@@ -314,17 +359,17 @@ async function renderAdmin(){
   const mine=pending(),tname=TEAM?esc(TEAM.name):"";
   const teamHtml=!TEAM?`<div class="wl-panel card mut">Você não está em um time. Os envios e pedidos aparecem aqui quando você for capitão de um time.</div>`:`
    <h2>Pedidos para entrar no ${tname} (${pedidos.length})</h2>
-   <div class="wl-panel card">${pedidos.length?`<table><tr><th>Riot ID</th><th>Pedido em</th><th></th></tr>${pedidos.map(m=>`<tr><td>${esc(m.riotId||m.id)}</td><td>${m.at?fmtD(m.at):""}</td><td><button data-slot="button" data-variant="default" data-acc="${esc(m.id)}">Aceitar</button> <button data-slot="button" data-variant="destructive" data-den="${esc(m.id)}">Recusar</button></td></tr>`).join("")}</table>`:'<span class="mut">Nenhum pedido pendente.</span>'}</div>
+   <div class="wl-panel card">${pedidos.length?`<table data-slot="table"><tr><th>Riot ID</th><th>Pedido em</th><th></th></tr>${pedidos.map(m=>`<tr><td>${esc(m.riotId||m.id)}</td><td>${m.at?fmtD(m.at):""}</td><td><button data-slot="button" data-variant="default" data-acc="${esc(m.id)}">Aceitar</button> <button data-slot="button" data-variant="destructive" data-den="${esc(m.id)}">Recusar</button></td></tr>`).join("")}</table>`:'<span class="mut">Nenhum pedido pendente.</span>'}</div>
    <h2>Envios aguardando aprovação (${subs.length})</h2>
    ${subs.length?subs.map((s,si)=>s.err?`<div class="wl-panel card"><span class="bad">Não consegui abrir o envio ${esc(s.id)} de ${esc(s.from)}.</span> <button data-slot="button" data-variant="destructive" data-delf="${si}">Apagar envio</button></div>`:`
     <div class="wl-panel card"><div class="hd"><b>${esc(s.from)}</b><span class="mut">${fmtD(s.at)} · baseado na v${s.baseVersion}${OFF&&s.baseVersion<OFF.version?` <span style="color:var(--gold)">(versão oficial agora é v${OFF.version})</span>`:""}</span></div>
-     ${s.changes.map((c,ci)=>`<label class="chg"><input type="checkbox" data-s="${si}" data-c="${ci}" checked><div><span class="op ${c.op}">${OPN[c.op]}</span> ${KN[c.kind]} <b>${esc(itemName(c))}</b><div class="det">${describe(c)}</div></div></label>`).join("")}
+     ${s.changes.map((c,ci)=>`<label class="chg"><input type="checkbox" data-s="${si}" data-c="${ci}" checked><div><span data-slot="badge" class="op ${c.op}">${OPN[c.op]}</span> ${KN[c.kind]} <b>${esc(itemName(c))}</b><div class="det">${describe(c)}</div></div></label>`).join("")}
      <div class="btns"><button data-slot="button" data-variant="default" data-ap="${si}">✓ Aprovar marcadas</button><button data-slot="button" data-variant="destructive" data-rj="${si}">✕ Recusar tudo</button></div></div>`).join(""):`<div class="wl-panel card mut">Nenhum envio pendente.</div>`}
    <h2>Minhas alterações</h2>
-   <div class="wl-panel card">${mine.length?mine.map(c=>`<div class="chg"><div><span class="op ${c.op}">${OPN[c.op]}</span> ${KN[c.kind]} <b>${esc(itemName(c))}</b><div class="det">${describe(c)}</div></div></div>`).join("")+`<div class="btns"><button data-slot="button" data-variant="default" id="pubmine">Publicar como nova versão</button></div>`:'<span class="mut">Você não tem alterações locais além da versão oficial.</span>'}</div>
-   ${details(`Membros do ${tname} (${ativos.length})`,`<table><tr><th>Riot ID</th><th>Papel</th><th></th></tr>${ativos.map(m=>`<tr><td>${esc(m.riotId||m.id)}</td><td>${m.id===TEAM.captain?"capitão":"membro"}</td><td>${m.id===TEAM.captain?"":`<button data-slot="button" data-variant="destructive" data-den="${esc(m.id)}">Tirar do time</button>`}</td></tr>`).join("")}</table>`)}
-   ${details(`Histórico da versão oficial do ${tname} (v${OFF?.version??"-"})`,`<table><tr><th>Versão</th><th>Data</th><th>De</th><th>O quê</th><th>Status</th></tr>
-    ${(OFF?.log||[]).slice().reverse().slice(0,150).map(l=>`<tr><td>v${l.v}</td><td>${fmtD(l.at)}</td><td>${esc(l.from)}</td><td><span class="op ${l.op}">${OPN[l.op]}</span> ${KN[l.kind]} ${esc(l.name)}</td><td class="${l.status==="approved"?"ok":"bad"}">${l.status==="approved"?"aprovada":"recusada"}</td></tr>`).join("")||'<tr><td colspan="5" class="mut">Ainda sem histórico.</td></tr>'}</table>`)}`;
+   <div class="wl-panel card">${mine.length?mine.map(c=>`<div class="chg"><div><span data-slot="badge" class="op ${c.op}">${OPN[c.op]}</span> ${KN[c.kind]} <b>${esc(itemName(c))}</b><div class="det">${describe(c)}</div></div></div>`).join("")+`<div class="btns"><button data-slot="button" data-variant="default" id="pubmine">Publicar como nova versão</button></div>`:'<span class="mut">Você não tem alterações locais além da versão oficial.</span>'}</div>
+   ${details(`Membros do ${tname} (${ativos.length})`,`<table data-slot="table"><tr><th>Riot ID</th><th>Papel</th><th></th></tr>${ativos.map(m=>`<tr><td>${esc(m.riotId||m.id)}</td><td>${m.id===TEAM.captain?"capitão":"membro"}</td><td>${m.id===TEAM.captain?"":`<button data-slot="button" data-variant="destructive" data-den="${esc(m.id)}">Tirar do time</button>`}</td></tr>`).join("")}</table>`)}
+   ${details(`Histórico da versão oficial do ${tname} (v${OFF?.version??"-"})`,`<table data-slot="table"><tr><th>Versão</th><th>Data</th><th>De</th><th>O quê</th><th>Status</th></tr>
+    ${(OFF?.log||[]).slice().reverse().slice(0,150).map(l=>`<tr><td>v${l.v}</td><td>${fmtD(l.at)}</td><td>${esc(l.from)}</td><td><span data-slot="badge" class="op ${l.op}">${OPN[l.op]}</span> ${KN[l.kind]} ${esc(l.name)}</td><td class="${l.status==="approved"?"ok":"bad"}">${l.status==="approved"?"aprovada":"recusada"}</td></tr>`).join("")||'<tr><td colspan="5" class="mut">Ainda sem histórico.</td></tr>'}</table>`)}`;
   // usuários (só admin): contas + registros de time
   const tmap=new Map(times.map(t=>[t.id,t])),users=new Map();
   for(const c of contas)users.set(c.id,{key:c.id,riotId:c.riotId||c.id,conta:true});
@@ -333,14 +378,14 @@ async function renderAdmin(){
   const ulist=[...users.values()].sort((a,b)=>a.riotId.localeCompare(b.riotId));
   const teamOpts=sel=>`<option value="">Sem time</option>${times.sort((a,b)=>a.name.localeCompare(b.name)).map(t=>`<option value="${esc(t.id)}"${t.id===sel?" selected":""}>${esc(t.name)}</option>`).join("")}`;
   const adminHtml=!u.admin?"":`
-   ${details(`Usuários (${ulist.length})`,`<table><tr><th>Riot ID</th><th>Time</th><th>Situação</th><th></th></tr>
+   ${details(`Usuários (${ulist.length})`,`<table data-slot="table"><tr><th>Riot ID</th><th>Time</th><th>Situação</th><th></th></tr>
     ${ulist.map(x=>{const t=x.m&&tmap.get(x.m.team),cap=t&&t.captain===x.key;
       const st=!x.conta?'<span class="mut">ainda não criou a senha</span>':x.m?.status==="pendente"?'<span style="color:var(--gold)">pedido pendente</span>':cap?"capitão":x.m?"membro":'<span class="mut">sem time</span>';
       return`<tr><td>${esc(x.riotId)}${x.admin?' <small class="mut">admin</small>':""}</td><td><select data-slot="select" data-team="${esc(x.key)}" aria-label="Time de ${esc(x.riotId)}"${cap?' disabled title="Capitão: troque o capitão do time antes"':""}>${teamOpts(x.m?.team||"")}</select></td><td>${st}</td><td>${x.admin||x.key===meKey()?"":`<button data-slot="button" data-variant="destructive" data-delu="${esc(x.key)}">Excluir</button>`}</td></tr>`}).join("")||'<tr><td colspan="4" class="mut">Nenhum usuário ainda.</td></tr>'}</table>
     <p class="mut">Excluir tira o usuário do time e apaga o cadastro dele. Se ele entrar de novo, volta sem time e precisa ser aceito outra vez.</p>`)}
-   ${details(`Times (${times.length})`,`<table><tr><th>Time</th><th>Capitão</th><th>Membros</th><th>Versão das comps</th></tr>${times.map(t=>{const o=t.off,n=o?.data?.comps?.length||0;return`<tr><td>${esc(t.name)}</td><td>${esc(t.captainId||t.captain)}</td><td>${todos.filter(m=>m.team===t.id&&m.status==="ativo").length}</td><td>${o?`<b>v${o.version}</b> <span class="mut">· ${n} comp${n===1?"":"s"}${o.at?` · ${fmtD(o.at)}`:""}${o.by?` · por ${esc(o.by)}`:""}</span>`:'<span class="mut">sem versão ainda</span>'}</td></tr>`}).join("")}</table>`)}
+   ${details(`Times (${times.length})`,`<table data-slot="table"><tr><th>Time</th><th>Capitão</th><th>Membros</th><th>Versão das comps</th></tr>${times.map(t=>{const o=t.off,n=o?.data?.comps?.length||0;return`<tr><td>${esc(t.name)}</td><td>${esc(t.captainId||t.captain)}</td><td>${todos.filter(m=>m.team===t.id&&m.status==="ativo").length}</td><td>${o?`<b>v${o.version}</b> <span class="mut">· ${n} comp${n===1?"":"s"}${o.at?` · ${fmtD(o.at)}`:""}${o.by?` · por ${esc(o.by)}`:""}</span>`:'<span class="mut">sem versão ainda</span>'}</td></tr>`}).join("")}</table>`)}
    <h2>Admins</h2>
-   <div class="wl-panel card"><table><tr><th>Riot ID</th><th>E-mail no banco</th><th>Situação</th><th></th></tr>
+   <div class="wl-panel card"><table data-slot="table"><tr><th>Riot ID</th><th>E-mail no banco</th><th>Situação</th><th></th></tr>
     ${Object.entries(ADMINS).map(([id,em])=>{const sl=slotOf(ADMIN,id),main=normId(id)===normId(ADMIN.id),me=normId(id)===normId(u.id);
       const st=main?"principal":!sl?'<span class="mut">não liberado</span>':sl.temp?'<span style="color:var(--gold)">aguardando o 1º acesso</span>':'<span class="ok">ativo</span>';
       return`<tr><td>${esc(dispId(id))}</td><td>${em?esc(em):'<span class="bad">falta o e-mail no app</span>'}</td><td>${st}</td><td>${main||me||!em?"":`<button data-slot="button" data-variant="outline" data-adm="${esc(id)}">${sl?"Nova senha provisória":"Liberar admin"}</button>`}${sl&&!main&&!me?` <button data-slot="button" data-variant="destructive" data-rmadm="${esc(id)}">Remover</button>`:""}</td></tr>`}).join("")}</table>
@@ -351,20 +396,21 @@ async function renderAdmin(){
     <p class="mut">Guarde o backup completo na pasta Admin do OneDrive de tempos em tempos.</p></div>
    ${details(`Versões da interface${(window.UI_VERSIONS||[])[0]?` <span class="mut">(atual: v${esc(window.UI_VERSIONS[0].version)})</span>`:""}`,(window.UI_VERSIONS||[]).map(v=>`<div style="margin-top:10px"><b>v${esc(v.version)}</b> <span class="mut">${esc(v.date.split("-").reverse().join("/"))}</span><ul style="margin:4px 0 0;padding-left:20px">${v.changes.map(c=>`<li>${esc(c)}</li>`).join("")}</ul></div>`).join("")||'<span class="mut">Sem histórico.</span>')}`;
   el.innerHTML=teamHtml+adminHtml;
+  decorateManagementTables(el);
   if(preview()){el.insertAdjacentHTML("afterbegin",`<div class="wl-panel card mut">Visualização como capitão: os botões ficam desativados. Volte para a visão de admin no menu da conta para agir.</div>`);el.querySelectorAll("button,input,select").forEach(x=>x.disabled=true);return}
   const again=()=>renderAdmin();
   const pick=si=>{const s=subs[si],ap=[],rj=[];document.querySelectorAll(`[data-s="${si}"]`).forEach(cb=>{const c={...s.changes[+cb.dataset.c],sid:s.id,from:s.from};(cb.checked?ap:rj).push(c)});return{s,ap,rj}};
   el.querySelectorAll("[data-ap]").forEach(b=>b.onclick=async()=>{const{s,ap,rj}=pick(+b.dataset.ap);b.disabled=true;await publish(ap,rj,`Envio de ${s.from}`);await dbDel(teamPath("envios"),s.doc).catch(()=>{});again()});
-  el.querySelectorAll("[data-rj]").forEach(b=>b.onclick=async()=>{const s=subs[+b.dataset.rj];if(!confirm(`Recusar todas as alterações de ${s.from}?`))return;b.disabled=true;await publish([],s.changes.map(c=>({...c,sid:s.id,from:s.from})),`Envio de ${s.from} recusado`);await dbDel(teamPath("envios"),s.doc).catch(()=>{});again()});
+  el.querySelectorAll("[data-rj]").forEach(b=>b.onclick=async()=>{const s=subs[+b.dataset.rj];if(!await window.confirmAction(`Recusar todas as alterações de ${s.from}?`))return;b.disabled=true;await publish([],s.changes.map(c=>({...c,sid:s.id,from:s.from})),`Envio de ${s.from} recusado`);await dbDel(teamPath("envios"),s.doc).catch(()=>{});again()});
   el.querySelectorAll("[data-delf]").forEach(b=>b.onclick=async()=>{await dbDel(teamPath("envios"),subs[+b.dataset.delf].doc).catch(()=>{});again()});
   el.querySelectorAll("[data-acc]").forEach(b=>b.onclick=async()=>{b.disabled=true;try{await dbSet("membros",b.dataset.acc,{status:"ativo",at:Date.now()},true);toast("Jogador aceito no time")}catch(e){toast("Erro: "+e.message)}again()});
-  el.querySelectorAll("[data-den]").forEach(b=>b.onclick=async()=>{const m=membros.find(x=>x.id===b.dataset.den);if(!confirm(`Tirar ${m?.riotId||b.dataset.den} do ${TEAM.name}?`))return;b.disabled=true;try{await dbDel("membros",b.dataset.den)}catch(e){toast("Erro: "+e.message)}again()});
+  el.querySelectorAll("[data-den]").forEach(b=>b.onclick=async()=>{const m=membros.find(x=>x.id===b.dataset.den);if(!await window.confirmAction(`Tirar ${m?.riotId||b.dataset.den} do ${TEAM.name}?`))return;b.disabled=true;try{await dbDel("membros",b.dataset.den)}catch(e){toast("Erro: "+e.message)}again()});
   const pm=$("#pubmine");if(pm)pm.onclick=()=>publish(mine.map(c=>({...c,sid:"capitao",from:u.id})),[],"Alterações do capitão");
   if(!u.admin)return;
   el.querySelectorAll("[data-team]").forEach(s=>s.onchange=async()=>{const k=s.dataset.team,x=users.get(k);s.disabled=true;
     try{if(s.value)await dbSet("membros",k,{team:s.value,status:"ativo",riotId:x.riotId,at:Date.now()});else await dbDel("membros",k);
       toast(s.value?`${x.riotId} agora está no ${tmap.get(s.value).name}`:`${x.riotId} ficou sem time`);if(k===meKey())await enterTeam()}catch(e){toast("Erro: "+e.message)}again()});
-  el.querySelectorAll("[data-delu]").forEach(b=>b.onclick=async()=>{const k=b.dataset.delu,x=users.get(k);if(!confirm(`Excluir o usuário ${x.riotId}? Ele sai do time e o cadastro é apagado.`))return;b.disabled=true;
+  el.querySelectorAll("[data-delu]").forEach(b=>b.onclick=async()=>{const k=b.dataset.delu,x=users.get(k);if(!await window.confirmAction(`Excluir o usuário ${x.riotId}? Ele sai do time e o cadastro é apagado.`))return;b.disabled=true;
     try{await dbDel("membros",k).catch(()=>{});await dbDel("contas",k);toast(`${x.riotId} excluído`)}catch(e){toast("Erro: "+e.message)}again()});
   let admId=null;
   el.querySelectorAll("[data-adm]").forEach(b=>b.onclick=()=>{admId=b.dataset.adm;$("#admwho").textContent=dispId(admId);$("#admform").style.display="";$("#admmy").focus()});
@@ -372,7 +418,7 @@ async function renderAdmin(){
     $("#admok").disabled=true;$("#admerr").textContent="";
     try{await setSlot(admId,await makeSlot(await slotRaw(ADMIN,u.id,$("#admmy").value),t,true));toast(`${dispId(admId)} liberado como admin. Passe a senha provisória para ele.`,6000);again()}
     catch(e){$("#admerr").textContent=e.message==="noslot"?"Seu acesso de admin não foi encontrado":/decrypt|operation/i.test(e.message+e.name)?"Sua senha está incorreta":e.message;$("#admok").disabled=false}};
-  el.querySelectorAll("[data-rmadm]").forEach(b=>b.onclick=async()=>{const id=b.dataset.rmadm;if(!confirm(`Remover ${dispId(id)} dos admins? Ele não vai mais conseguir entrar como admin.`))return;try{await setSlot(id,null);again()}catch(e){toast("Erro: "+e.message)}});
+  el.querySelectorAll("[data-rmadm]").forEach(b=>b.onclick=async()=>{const id=b.dataset.rmadm;if(!await window.confirmAction(`Remover ${dispId(id)} dos admins? Ele não vai mais conseguir entrar como admin.`))return;try{await setSlot(id,null);again()}catch(e){toast("Erro: "+e.message)}});
   $("#exp").onclick=exportBackup;
   $("#lock").onclick=async()=>{await idbDel("adminKeys");KEYS=null;try{await FB.au.signOut(FB.auth)}catch(e){}again()};
   $("#refresh").onclick=async()=>{await refreshTeam()};
@@ -384,7 +430,7 @@ const loaded = new Map();
 let currentScreen;
 let currentFrame;
 let focusBuildSource = false;
-const routeRoots = { worlds: "/worlds", builds: "/builds", camp: "/time", admin: "/admin" };
+const routeRoots = { worlds: "/worlds", builds: "/builds", comps: "/composicoes", camp: "/time", admin: "/admin" };
 const frames = [...document.querySelectorAll("#screens iframe")];
 
 function readRoute() {
@@ -392,8 +438,8 @@ function readRoute() {
   const [, root, ...parts] = path.split("/");
   const screen = Object.keys(routeRoots).find(name => routeRoots[name] === "/" + root);
   const params = new URLSearchParams(query);
-  const frame = screen === "builds" ? params.get("fonte") === "soloq" ? "soloq" : "worlds" : screen;
-  return { screen, frame, parts: screen === "builds" ? ["builds", ...parts] : parts, params };
+  const frame = screen === "builds" ? params.get("fonte") === "soloq" ? "soloq" : "worlds" : screen === "comps" ? "worlds" : screen;
+  return { screen, frame, parts: screen === "builds" ? ["builds", ...parts] : screen === "comps" ? ["composicoes", ...parts] : parts, params };
 }
 
 function writeRoute(path, replace = false) {
@@ -437,7 +483,9 @@ function openRoute() {
   const path = rawPath.startsWith("/") ? rawPath : "/" + rawPath;
   const builds = path.match(/^\/(?:(worlds)\/)?(builds|campeoes)(\/[^/]+)?\/?$/);
   const soloq = path.match(/^\/soloq(?:\/builds(\/[^/]+)?)?\/?$/);
-  if (builds || soloq) {
+  if (path === "/worlds/composicoes" || path === "/worlds/composicoes/") {
+    writeRoute(routeRoots.comps + (query ? "?" + query : ""), true);
+  } else if (builds || soloq) {
     const params = new URLSearchParams(query);
     const useSoloq = Boolean(soloq) || (builds?.[2] === "builds" && !builds[1] && params.get("fonte") === "soloq");
     const source = useSoloq ? "soloq" : "worlds";
@@ -451,7 +499,7 @@ function openRoute() {
   show(screen || "worlds", frame || "worlds");
   for (const frame of frames) applyFrameRoute(frame);
   // Worlds e SoloQ não pedem usuário nem time
-  if (currentScreen !== "camp" && currentScreen !== "admin" && $("#modal").open) closeModal();
+  if (currentScreen !== "camp" && currentScreen !== "admin" && dismissLogin) closeModal();
   askOnCamp();
 }
 
@@ -493,7 +541,7 @@ function show(t, frame) {
   if(t==="admin"&&!user()?.admin&&!isCaptain())t=frame="camp";
   currentScreen = t;
   currentFrame = frame;
-  $("#header-tools").hidePopover();
+  document.dispatchEvent(new Event("weblol:close-account"));
   $("#screen-error").hidden = true;
   $("#screen-loading").hidden = t === "admin" || $("#v-" + frame).dataset.ready === "true";
   document.body.dataset.currentScreen = t;
@@ -530,7 +578,7 @@ $("#top").addEventListener("click", event => {
       // login antigo (sem senha) ou sessão expirada: pede para entrar de novo com a senha
       pendingId=user().id;localStorage.removeItem(UKEY);clearTeamData();KEYS=null;reloadCamp();updateStatus();
       if(currentScreen==="admin"){writeRoute(routeRoots.camp);openRoute()}
-      if(currentScreen==="camp"&&!$("#modal").open){stepId();toast("Agora cada jogador entra com Riot ID e senha. Crie a sua senha para continuar.",7000)}
+      if(currentScreen==="camp"&&!dismissLogin){stepId();toast("Agora cada jogador entra com Riot ID e senha. Crie a sua senha para continuar.",7000)}
     }else if(FB){
       if(user().admin)try{await loadAdminKey()}catch(e){}
       await enterTeam();
@@ -541,7 +589,7 @@ $("#top").addEventListener("click", event => {
     if(!TEAM){
       if(MEMB?.status!=="pendente")return;
       try{await loadMembership()}catch(e){return}
-      if(TEAM){toast(`Você foi aceito no time ${TEAM.name}!`,6000);if($("#modal").open)closeModal();await sync()}
+      if(TEAM){toast(`Você foi aceito no time ${TEAM.name}!`,6000);if(dismissLogin)closeModal();await sync()}
       return;
     }
     let result;

@@ -1,20 +1,25 @@
 // @ts-nocheck -- A tela legada ainda usa estado e eventos DOM sem tipos explícitos.
 import { createElement } from "react"
 import { createRoot } from "react-dom/client"
-import { Switch } from "radix-ui"
+import "@/index.css"
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
+import { Checkbox } from "@/components/ui/checkbox"
+import { Collapsible, CollapsibleContent } from "@/components/ui/collapsible"
+import { Popover, PopoverAnchor, PopoverContent } from "@/components/ui/popover"
+import { ExistingContent, showDialog } from "@/components/ui/dialog-controls"
 import { animate } from "motion"
-import { Tabs, TabsList, TabsTrigger } from "@/components/arc/tabs/tabs"
 import { TournamentOverview } from "@/components/analytics"
 import { Button } from "@/components/ui/button"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { flushSync } from "react-dom"
+import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { iconMarkup, laneIconMarkup } from "./icon"
 import DATA from "@dataset/summary"
 import DRAFTS from "@dataset/drafts"
 import { LOL_DATA, lolAsset, lolChampion, lolKey } from "./lol-media"
-import { abilityDetail, buildDetails, buildGameCount, buildLaneHighlights, buildMatchesQuery, buildMatchups, buildOpponentOptions, buildsTable, hydrateBuildTimelines, orderedMatchups } from "./worlds-builds"
+import { abilityDetail, buildDetails, buildGameCount, buildLaneHighlights, buildMatchesQuery, buildMatchups, buildOpponentOptions, buildsTable, hydrateBuildTimelines } from "./worlds-builds"
 import { effectText } from "./worlds-effect-text"
 import { WorldsOpponentSelect } from "./worlds-opponent-select"
-import { LANES, LC, kdaOf, pct, wrPill, ico, esc, championSlug, teamLogo, teamRegion, teamCode } from "./worlds-display"
+import { LANES, pct, wrPill, ico, esc, championSlug, teamLogo, teamRegion, teamCode } from "./worlds-display"
 import { initializeTheme } from "./theme"
 import { revealContent } from "./motion"
 import { DATASET } from "./dataset"
@@ -204,32 +209,37 @@ document.addEventListener("scroll", e => {
 }, true);
 document.addEventListener("pointerdown", event => {
   if (tipTarget?.dataset.gameTip && !tipTarget.contains(event.target) && !tipEl().contains(event.target)) hideTip();
-  const trigger = document.querySelector('[data-floating-picker][aria-expanded="true"]');
-  if (trigger && !trigger.parentElement.contains(event.target)) trigger.click();
 });
-function wireFloatingPicker(trigger, picker, focusOnOpen) {
-  const field = trigger.parentElement;
-  const setOpen = open => {
-    picker.hidden = !open;
+const compositionPopovers = [];
+function wireFloatingPicker(trigger, picker, search) {
+  const anchor = document.createElement("span");
+  trigger.before(anchor);
+  const root = createRoot(anchor);
+  compositionPopovers.push(root);
+  picker.remove();
+  picker.hidden = false;
+  let open = false;
+  const setOpen = next => {
+    if (next) for (const other of compositionPopovers) {
+      if (other !== root) other.dismiss?.();
+    }
+    open = next;
     trigger.setAttribute("aria-expanded", String(open));
+    root.render(createElement(Popover, { open, onOpenChange: setOpen },
+      createElement(PopoverAnchor, { virtualRef: { current: trigger } }),
+      createElement(PopoverContent, {
+        align: "start", className: "wl-composition-popover", "aria-label": picker.getAttribute("aria-label"),
+        onOpenAutoFocus: event => { event.preventDefault(); search().focus(); },
+        onCloseAutoFocus: event => event.preventDefault(),
+        onInteractOutside: event => {
+          if (trigger.contains(event.target)) event.preventDefault();
+        },
+        onEscapeKeyDown: () => trigger.focus(),
+      }, createElement(ExistingContent, { element: picker }))));
   };
-  const close = () => {
-    setOpen(false);
-    trigger.focus();
-  };
-  trigger.onclick = () => {
-    setOpen(picker.hidden);
-    if (!picker.hidden && trigger.matches(":focus-visible")) focusOnOpen()?.focus();
-  };
-  field.onfocusout = e => {
-    if (e.relatedTarget && !field.contains(e.relatedTarget)) setOpen(false);
-  };
-  field.onkeydown = e => {
-    if (e.key !== "Escape" || picker.hidden) return;
-    e.preventDefault();
-    close();
-  };
-  return close;
+  root.dismiss = () => { if (open) setOpen(false); };
+  trigger.onclick = () => setOpen(!open);
+  return () => { setOpen(false); trigger.focus(); };
 }
 function showSort(sort) {
   document.querySelectorAll("th button[data-k]").forEach(button => {
@@ -244,24 +254,16 @@ const topBan=[...C].sort((a,b)=>b.bans-a.bans)[0], topPick=[...C].sort((a,b)=>b.
 if (topBan && topPick) document.getElementById('kpis').innerHTML=[[G,"jogos"],[C.length,"campeões usados"],[topBan.name,`mais banido · ${pct(topBan.bans/G)}`],[topPick.name,`mais pickado · ${topPick.picks}`]]
  .map(([v,l],i)=>`<div class="wl-panel kpi" data-tip="${["Total de jogos do Play-In até as Semifinais","Campeões que foram pickados ou banidos pelo menos uma vez",`${topBan.name} foi banido em ${topBan.bans} de ${G} jogos`,`${topPick.name} foi escolhido em ${topPick.picks} jogos (${topPick.wins} vitórias)`][i]}"><div class="v">${esc(v)}</div><div class="l">${l}</div></div>`).join("");
 
-const TABS = [
-  ["geral", "Visão geral", "chart"],
-  ["builds", "Builds", "inventory"],
-  ["matchups", "Confrontos", "matchups"],
-  ["comps", "Composições", "composition"],
-].filter(([id]) => DATASET.tabs.includes(id));
-const defaultTab = TABS[0][0];
-const tabsHost = document.getElementById("tabs");
-const tabsRoot = tabsHost ? createRoot(tabsHost) : null;
+const defaultTab = DATASET.source === "soloq" ? "builds" : "geral";
 const laneById = new Map(LANES.map(([lane]) => [lane.toLowerCase(), lane]));
 let buildChampion = "", buildQuery = "", buildOpponent = "";
-const worldsPaths = { geral: "", builds: "/builds", matchups: "/confrontos", comps: "/composicoes" };
+const worldsPaths = { geral: "", builds: "/builds", comps: "/composicoes" };
 const laneFromParam = value => laneById.get(value) || "";
 
 function publishWorlds(id, parts = [], filters = {}, replace = false) {
   const path = id === "builds" && window.frameElement
     ? buildsPath(DATASET.source, parts, filters)
-    : DATASET.root + worldsPaths[id] + parts.map(part => "/" + part).join("") + routeQuery(filters);
+    : (id === "comps" && window.frameElement ? worldsPaths.comps : DATASET.root + worldsPaths[id]) + parts.map(part => "/" + part).join("") + routeQuery(filters);
   if (window.frameElement) window.frameElement.dispatchEvent(new CustomEvent("weblol:navigate", {detail:{path, replace}}));
   else if (location.hash !== "#" + path) history[replace ? "replaceState" : "pushState"](null, "", "#" + path);
 }
@@ -282,18 +284,16 @@ window.applyWebLolRoute = ([page, first, second], params) => {
     return;
   }
   const legacyChampions = page === "campeoes";
-  const id = legacyChampions ? "builds" : Object.keys(worldsPaths).find(key => worldsPaths[key] === "/" + page) || defaultTab;
+  const legacyMatchups = page === "confrontos";
+  const id = legacyChampions || legacyMatchups ? "builds" : Object.keys(worldsPaths).find(key => worldsPaths[key] === "/" + page) || defaultTab;
   const query = params.get("busca") || "";
   const lane = laneFromParam(params.get("posicao"));
   if (id === "builds") {
-    buildChampion = first || "";
+    buildChampion = (legacyMatchups ? second : first) || "";
     buildOpponent = buildChampion ? params.get("adversario") || "" : "";
     buildQuery = query;
-    bLane = lane || (legacyChampions ? "Top" : "");
+    bLane = legacyMatchups ? laneFromParam(first) : lane || (legacyChampions ? "Top" : "");
     buildMinGames = readBuildMinGames(params.get("minJogos"));
-  } else if (id === "matchups") {
-    muLane = laneFromParam(first) || "Mid";
-    muChamp = Object.keys(DATA.matchups[muLane] || {}).find(name => championSlug(name) === second);
   } else if (id === "comps") {
     cQ = query;
     cTeam = params.get("time") || "";
@@ -304,28 +304,11 @@ window.applyWebLolRoute = ([page, first, second], params) => {
     if (!DATA.comps.some(game => game.st === cSt)) cSt = "";
   }
   render(id);
-  if (legacyChampions) publishWorlds("builds", first ? [first] : [], {posicao:bLane.toLowerCase(), busca:query, minJogos:buildMinGames}, true);
+  if (legacyChampions || legacyMatchups) publishWorlds("builds", buildChampion ? [buildChampion] : [], {posicao:bLane.toLowerCase(), busca:query, minJogos:buildMinGames}, true);
 };
-const validTab = id => TABS.some(tab => tab[0] === id);
-function renderTabs(active) {
-  tabsRoot?.render(createElement(Tabs, {
-    value: active,
-    activationMode: "manual",
-    "data-variant": "underline",
-    onValueChange: id => {
-      go(id);
-      window.scrollTo(0, 0);
-    },
-  }, createElement(TabsList, { "aria-label": DATASET.tabsLabel },
-    TABS.map(([id, label, icon]) => createElement(TabsTrigger, {
-      key: id, value: id, id: `worlds-tab-${id}`, "aria-controls": "view",
-    }, createElement("svg", { className: "icon", "aria-hidden": true, focusable: false },
-      createElement("use", { href: `assets/icons.svg#${icon}` })), label))
-  )));
-}
 function go(id) {
   const lane = laneById.get(id);
-  const tab = lane ? "builds" : validTab(id) ? id : defaultTab;
+  const tab = lane ? "builds" : defaultTab;
   const filters = lane ? {posicao:id} : {};
   window.applyWebLolRoute([worldsPaths[tab].slice(1)], new URLSearchParams(filters));
   publishWorlds(tab, [], filters);
@@ -335,10 +318,21 @@ let standaloneOverview;
 let opponentSelectRoot;
 let compActionsRoot;
 let compStageRoot;
+let buildFiltersRoot;
+const buildControlRoots = new Map();
+
+function disposeBuildControls() {
+  for (const root of buildControlRoots.values()) root.unmount();
+  buildControlRoots.clear();
+}
 
 function render(id){
-  const previousPage=document.body.dataset.page;
+  const previousPage = document.body.dataset.page;
+  disposeBuildControls();
   hideTip();
+  for (const root of compositionPopovers.splice(0)) root.unmount();
+  buildFiltersRoot?.unmount();
+  buildFiltersRoot = undefined;
   standaloneOverview?.unmount();
   standaloneOverview = undefined;
   opponentSelectRoot?.unmount();
@@ -349,22 +343,11 @@ function render(id){
   compStageRoot = undefined;
   window.frameElement?.dispatchEvent(new CustomEvent("weblol:analytics-clear"));
   document.getElementById("kpis").hidden = !!window.frameElement || id !== "geral";
-  if(id !== "builds" && !validTab(id))id=defaultTab;
   const builds = id === "builds";
   document.querySelector(".wrap > header").hidden = builds;
   document.querySelector(".wrap > .foot").hidden = builds && DATASET.source === "worlds";
-  if (tabsHost) tabsHost.hidden = builds;
-  if (previousPage !== id) renderTabs(id);
   const v = document.getElementById("view");
-  if (tabsRoot && !builds) {
-    v.setAttribute("role", "tabpanel");
-    v.setAttribute("aria-labelledby", `worlds-tab-${id}`);
-  } else {
-    v.removeAttribute("role");
-    v.removeAttribute("aria-labelledby");
-  }
   if(id==="geral"){v.innerHTML=overview();wireLaneOverview(v)}
-  else if(id==="matchups"){v.innerHTML=muView();wireMu()}
   else if(id==="comps"){v.innerHTML=compsView();wireComps()}
   else if(id==="builds"){v.innerHTML=buildsView();wireBuilds()}
   document.body.dataset.page = id;
@@ -403,7 +386,7 @@ function overview(){
     const href = `./#/builds?fonte=worlds&posicao=${id}`;
     return `<article class="wl-panel lane-card" data-go="${id}">
       <h3 class="wl-card-title" id="lane-title-${id}"><span class="lane-label">${laneIconMarkup(lane)}${lane}</span></h3>
-      <table aria-labelledby="lane-title-${id}">
+      <table data-slot="table" aria-labelledby="lane-title-${id}">
         <thead><tr><th scope="col">Campeão</th><th scope="col" data-tip="Jogos nesta lane">Jogos</th><th scope="col" data-tip="Taxa de vitória do campeão em todas as posições">Vitórias</th></tr></thead>
         <tbody>${rows}</tbody>
       </table>
@@ -440,13 +423,17 @@ function syncBuildDetailSpan() {
 }
 compactBuilds.addEventListener("change", syncBuildDetailSpan);
 const buildLaneIcon = lane => lane ? laneIconMarkup(lane) : iconMarkup("layers");
-function buildLaneOptions(lanes, detail = false) {
-  return `<div class="build-lane-tabs${detail ? " build-detail-lanes" : ""}" role="group" aria-label="${detail ? "Posição do campeão" : "Filtrar por posição"}">
-    ${["", ...lanes].map(lane => {
-      const label = esc(lane || "Todas as posições");
-      return `<button type="button" data-slot="button" data-variant="ghost" data-lane="${esc(lane)}" aria-label="${label}" title="${label}" aria-pressed="${lane === bLane}">${buildLaneIcon(lane)}${detail ? esc(lane || "Todas") : ""}</button>`;
-    }).join("")}
-  </div>`;
+function positionFilter(lanes, current, label, showNames, change) {
+  return createElement(ToggleGroup, {
+    type: "single", value: current || "all", spacing: 1, size: "sm",
+    className: "build-lane-tabs", "aria-label": label,
+    onValueChange: value => { if (value) change(value === "all" ? "" : value); },
+  }, lanes.map(lane => createElement(ToggleGroupItem, {
+    key: lane, value: lane || "all", title: lane || "Todas as posições",
+    "aria-label": lane || "Todas as posições", "data-lane": lane,
+    "data-slot": "button", "data-variant": "ghost",
+  }, createElement("span", { dangerouslySetInnerHTML: { __html: buildLaneIcon(lane) } }),
+  showNames ? lane || "Todas" : null)));
 }
 
 function buildsView(){
@@ -460,14 +447,13 @@ function buildsView(){
     </div>
   </header>
   <div class="wl-panel tools"><input data-slot="input" id="bq" type="search" placeholder="Buscar campeão ou item…" aria-label="Buscar campeão ou item">
-  ${buildLaneOptions(LANES.map(([lane]) => lane))}
+  <div id="build-lane-filter"></div>
   <label class="build-min-games" for="bmin">Mínimo de jogos <input data-slot="input" id="bmin" type="number" min="0" step="1" inputmode="numeric" value="${buildMinGames}"></label>
   <button id="build-clear-all" type="button" data-slot="button" data-variant="outline">${iconMarkup("reset")} Limpar filtros</button></div>
   <div class="bcards" id="bc"></div></section>`}
 function wireBuilds(){
+  buildFiltersRoot = createRoot(document.getElementById("build-lane-filter"));
   const q=document.getElementById('bq'),bc=document.getElementById('bc');
-  const laneTabs = document.querySelector<HTMLElement>(".build-lane-tabs");
-  const laneButtons = [...laneTabs.querySelectorAll<HTMLButtonElement>("button")];
   const minimum = document.getElementById("bmin");
   const clearAll = document.getElementById("build-clear-all");
   const hasFilters = () => Boolean(buildQuery || bLane || buildMinGames);
@@ -475,6 +461,7 @@ function wireBuilds(){
   const games = champion => buildGameCount(champion, bLane);
   const bySlug = new Map(list.map(champion => [championSlug(champion.name), champion]));
   const detailAnimations = new WeakMap<HTMLElement, ReturnType<typeof animate>>();
+  const detailContents = new WeakMap<HTMLElement, { element: HTMLElement, root: ReturnType<typeof createRoot> }>();
   let contextAnimation: ReturnType<typeof animate> | undefined;
   let highlights = "";
   const sortBuildRows = () => {
@@ -494,6 +481,27 @@ function wireBuilds(){
   const parts = () => buildChampion ? [buildChampion] : [];
   const filters = () => ({posicao:bLane.toLowerCase(), busca:buildQuery, minJogos:buildMinGames, adversario:buildChampion && buildOpponent});
   const publish = (replace = false) => publishWorlds("builds", parts(), filters(), replace);
+  const mountSkillOptions = container => {
+    for (const host of container.querySelectorAll(".build-skill-options")) {
+      if (buildControlRoots.has(host)) continue;
+      const options = [...host.querySelectorAll("[data-skill-sequence]")].map(button => ({
+        value: button.dataset.skillSequence, label: button.textContent,
+      }));
+      const panels = host.closest(".build-skills").querySelectorAll("[data-skill-panel]");
+      const root = createRoot(host);
+      buildControlRoots.set(host, root);
+      const select = value => {
+        if (!value) return;
+      for (const panel of panels) panel.hidden = panel.dataset.skillPanel !== value;
+        root.render(createElement(ToggleGroup, {
+          type: "single", value, spacing: 1, "aria-label": "Sequências mais frequentes", onValueChange: select,
+        }, options.map(option => createElement(ToggleGroupItem, {
+          key: option.value, value: option.value, "data-slot": "button", "data-variant": "outline", "data-size": "sm",
+        }, option.label))));
+      };
+      select("0");
+    }
+  };
   document.querySelector(".build-source-options").onclick = event => {
     const source = event.target.closest("[data-build-source]")?.dataset.buildSource;
     if (!source || source === DATASET.source) return;
@@ -533,6 +541,7 @@ function wireBuilds(){
     </article>`;
   };
   const draw=(restoreOpponentFocus = false, normalizeRoute = false)=>{const f=q.value.trim().toLowerCase();
+    disposeBuildControls();
     opponentSelectRoot?.unmount();
     opponentSelectRoot = undefined;
     contextAnimation?.stop();
@@ -559,7 +568,7 @@ function wireBuilds(){
       : [];
     const back = buildChampion ? `<div class="build-back">
       <button data-slot="button" data-variant="outline" data-size="sm" class="build-route" data-build="">Voltar à lista de builds</button>
-      ${selectedChampion ? buildLaneOptions(availableLanes, true) : ""}
+      ${selectedChampion ? '<div class="build-detail-lanes"></div>' : ""}
     </div>` : "";
     bc.classList.toggle("build-detail", !!buildChampion);
     bc.innerHTML=back+(content
@@ -567,6 +576,19 @@ function wireBuilds(){
       : buildChampion ? `<div class="empty-state" role="status"><h3>Sem partidas para esta build</h3><p>A base ${DATASET.label} ainda não tem partidas para este campeão${bLane ? ` na posição ${esc(bLane)}` : ""}.</p></div>`
       : list.length ? '<div class="empty-state" role="status"><h3>Nenhum campeão encontrado</h3><p>Ajuste a busca, a posição ou o mínimo de jogos.</p></div>'
       : '<div class="empty-state" role="status"><h3>Ainda não há partidas coletadas</h3><p>As builds aparecem aqui depois da primeira coleta diária.</p></div>');
+    const detailLanes = bc.querySelector(".build-detail-lanes");
+    if (detailLanes) {
+      const root = createRoot(detailLanes);
+      buildControlRoots.set(detailLanes, root);
+      root.render(positionFilter(["", ...availableLanes], bLane, "Posição do campeão", true, lane => {
+        bLane = lane;
+        syncLane();
+        draw();
+        publish();
+        requestAnimationFrame(() => bc.querySelector('.build-detail-lanes [data-state="on"]')?.focus({ preventScroll: true }));
+      }));
+    }
+    mountSkillOptions(bc);
     sortBuildRows();
     const opponentSelect = bc.querySelector("[data-build-opponent]");
     if (opponentSelect) {
@@ -595,6 +617,11 @@ function wireBuilds(){
     button.setAttribute("aria-expanded", String(expanded));
     detail.inert = !expanded;
     detail.hidden = false;
+    const content = detailContents.get(panel);
+    flushSync(() => content.root.render(createElement(Collapsible, { open: expanded },
+      createElement(CollapsibleContent, { forceMount: true },
+        createElement(ExistingContent, { element: content.element })))));
+    mountSkillOptions(content.element);
     cell.colSpan = compactBuilds.matches ? 4 : 8;
     panel.style.height = "";
     const endHeight = expanded ? panel.getBoundingClientRect().height : 0;
@@ -669,21 +696,24 @@ function wireBuilds(){
     const champion=bySlug.get(toggle.dataset.buildToggle);
     const context=buildMatchups(champion,bLane);
     const panel = document.getElementById(toggle.getAttribute("aria-controls")).cells[0].firstElementChild;
-    if (!panel.firstElementChild) panel.innerHTML = championCard(champion, bLane, toggle.dataset.buildToggle);
+    if (!detailContents.has(panel)) {
+      const element = document.createElement("div");
+      element.innerHTML = championCard(champion, bLane, toggle.dataset.buildToggle);
+      const root = createRoot(panel);
+      buildControlRoots.set(panel, root);
+      detailContents.set(panel, { element, root });
+    }
     setExpanded(toggle,true);
     updateBuildContext(context, toggle);
     enhanceAnalyticsUI();
   };
   bc.onclick=e=>{
-    const laneOption = e.target.closest(".build-detail-lanes button[data-lane]");
-    if (laneOption) {
-      const lane = laneOption.dataset.lane;
-      if (lane === bLane) return;
-      bLane = lane;
-      syncLane();
-      draw();
-      publish();
-      bc.querySelector('.build-detail-lanes [aria-pressed="true"]')?.focus({preventScroll:true});
+    const more = e.target.closest("[data-show-matchups]");
+    if (more) {
+      const list = more.nextElementSibling;
+      list.hidden = false;
+      list.querySelector("button")?.focus({ preventScroll: true });
+      more.remove();
       return;
     }
     const view = e.target.closest("[data-timeline-view]") as HTMLButtonElement | null;
@@ -695,31 +725,11 @@ function wireBuilds(){
       section.querySelector<HTMLElement>(".build-timeline-games")!.dataset.view = view.dataset.timelineView;
       return;
     }
-    const sequence = e.target.closest("[data-skill-sequence]") as HTMLButtonElement | null;
-    if (sequence) {
-      const skills = sequence.closest(".build-skills")!;
-      skills.querySelectorAll<HTMLButtonElement>("[data-skill-sequence]").forEach(button => {
-        button.setAttribute("aria-pressed", String(button === sequence));
-      });
-      skills.querySelectorAll<HTMLElement>("[data-skill-panel]").forEach(panel => {
-        panel.hidden = panel.dataset.skillPanel !== sequence.dataset.skillSequence;
-      });
-      return;
-    }
     const sort = e.target.closest(".builds-table thead button[data-k]");
     if (sort) {
       const k = sort.dataset.k;
       buildSort = {k, d:buildSort.k === k ? -buildSort.d : -1};
       sortBuildRows();
-      return;
-    }
-    const matchup = e.target.closest("[data-build-matchups]");
-    if(matchup){
-      const parts=[matchup.dataset.lane, matchup.dataset.buildMatchups];
-      window.applyWebLolRoute(["confrontos", ...parts], new URLSearchParams());
-      publishWorlds("matchups",parts);
-      document.querySelector("#mulist [aria-pressed='true']")?.focus();
-      window.scrollTo(0, 0);
       return;
     }
     const highlight=e.target.closest("[data-highlight-build]");
@@ -747,19 +757,14 @@ function wireBuilds(){
   };
   q.oninput=()=>{buildQuery=q.value;buildChampion="";draw();publish(true)};
   const syncLane = () => {
-    laneButtons.forEach(option => {
-      const selected = option.dataset.lane === bLane;
-      option.setAttribute("aria-pressed", String(selected));
-    });
-  };
-  laneTabs.onclick = e => {
-    const option = e.target.closest("button[data-lane]");
-    if (!option || option.dataset.lane === bLane) return;
-    bLane = option.dataset.lane;
-    buildChampion = "";
-    syncLane();
-    draw();
-    publish();
+    buildFiltersRoot.render(positionFilter(["", ...LANES.map(([lane]) => lane)], bLane,
+      "Filtrar por posição", false, lane => {
+        bLane = lane;
+        buildChampion = "";
+        syncLane();
+        draw();
+        publish();
+      }));
   };
   syncLane();
   minimum.oninput = () => {
@@ -783,61 +788,6 @@ function wireBuilds(){
 }
 
 // Matchups
-let muLane="Mid", muChamp=null;
-function muView(){
-  return `<section class="matchups-view"><h2>Confrontos por posição</h2><p class="hint">Como cada campeão foi contra o adversário direto da mesma lane. Base: ${DATA.mgames} jogos com draft completo. Escolha a lane e o campeão.</p>
-  <nav id="mulanes" style="margin:0 0 12px">${LANES.map(([l])=>`<button data-slot="button" data-variant="ghost" data-l="${l}" aria-selected="${l===muLane}"><span class="lane-label">${laneIconMarkup(l)}${l}</span></button>`).join("")}</nav>
-  <div class="matchups-grid">
-   <div class="wl-panel panel mu-picker"><div class="mu-picker-heading"><h2>Escolha o campeão</h2></div><div id="mulist" class="mulist"></div></div>
-   <div class="wl-panel panel" id="mudetail"></div>
-  </div>
-  <section class="wl-panel panel mu-repeated"><h2>Confrontos mais repetidos</h2><p class="hint">Duelos que mais aconteceram nesta lane. A barra mostra quem venceu mais.</p><div id="mutop" class="bars"></div></section></section>`;
-}
-function wireMu(){
-  const M=DATA.matchups[muLane]||{};
-  const champs=Object.entries(M).map(([c,ops])=>({c,n:ops.reduce((s,o)=>s+o[1],0),w:ops.reduce((s,o)=>s+o[2],0)})).sort((a,b)=>b.n-a.n);
-  if(!muChamp||!M[muChamp])muChamp=champs[0]&&champs[0].c;
-  document.getElementById('mulanes').onclick=e=>{const b=e.target.closest('button');if(!b)return;muLane=b.dataset.l;muChamp=null;render("matchups");publishWorlds("matchups",[muLane.toLowerCase()])};
-  const list=document.getElementById('mulist');
-  list.innerHTML=champs.map(({c,n,w})=>`<button type="button" class="murow" aria-pressed="${c===muChamp}" data-c="${esc(c)}">
-    ${ico(c)}<span><span class="murow-name">${esc(c)}</span><span class="murow-stats"><span class="na">${n} ${n===1?'jogo':'jogos'} · </span>${wrPill(w,n)}</span></span>
-  </button>`).join("");
-  list.onclick=e=>{
-    const button=e.target.closest('button');
-    if(!button || button.dataset.c===muChamp)return;
-    list.querySelector('[aria-pressed="true"]')?.setAttribute('aria-pressed','false');
-    button.setAttribute('aria-pressed','true');
-    muChamp=button.dataset.c;
-    drawMuDetail();
-    enhanceAnalyticsUI();
-    publishWorlds("matchups",[muLane.toLowerCase(),championSlug(muChamp)]);
-  };
-  drawMuDetail();
-  // most repeated duels in lane
-  const seen=new Set(), pairs=[];
-  for(const [c,ops2] of Object.entries(M))for(const o of ops2){const key=[c,o[0]].sort().join("|");if(seen.has(key))continue;seen.add(key);pairs.push({a:c,b:o[0],n:o[1],w:o[2]})}
-  pairs.sort((x,y)=>y.n-x.n);
-  const top=pairs.slice(0,10), mx=top.length?top[0].n:1;
-  document.getElementById('mutop').innerHTML=top.map(p=>`<div class="duel"><span class="nmi">${ico(p.a)}${esc(p.a)}</span>
-    <span class="track"><i style="width:${p.w/p.n*100}%;background:var(${LC[muLane]})"></i><i style="width:${(p.n-p.w)/p.n*100}%;background:var(--line)"></i></span>
-    <span class="nmi" style="justify-content:flex-end">${esc(p.b)}${ico(p.b)}</span><span class="val">${p.w}-${p.n-p.w}</span></div>`).join("");
-}
-function drawMuDetail(){
-  const ops=orderedMatchups(muLane,muChamp);
-  const tot=ops.reduce((s,o)=>s+o[1],0), tw=ops.reduce((s,o)=>s+o[2],0);
-  const good=ops.filter(o=>o[1]>=2&&o[2]/o[1]>=.6), bad=ops.filter(o=>o[1]>=2&&o[2]/o[1]<=.4);
-  document.getElementById('mudetail').innerHTML=`<div class="muhead">${ico(muChamp)}<div><h2 style="margin:0">${esc(muChamp)} <span class="na" style="font-size:16px">${muLane}</span></h2>
-    <div class="hint" style="margin:0">${tot} jogos · ${tw}V ${tot-tw}D · ${ops.length} adversários diferentes</div></div></div>
-   <div class="chips" style="margin:12px 0">${good.length?`<span class="na" style="font-size:12px;align-self:center">Maior taxa de vitória:</span>`+good.map(o=>`<span class="chip good">${ico(o[0])}${esc(o[0])} ${o[2]}-${o[1]-o[2]}</span>`).join(""):""}
-   ${bad.length?`<span class="na" style="font-size:12px;align-self:center;margin-left:8px">Menor taxa de vitória:</span>`+bad.map(o=>`<span class="chip bad">${ico(o[0])}${esc(o[0])} ${o[2]}-${o[1]-o[2]}</span>`).join(""):""}</div>
-   <div class="tablewrap mu-table"><table><thead><tr><th>Contra</th><th>Jogos</th><th>Resultado</th><th>KDA ${esc(muChamp)}</th><th>KDA adversário</th><th>K / D / A médio</th></tr></thead>
-   <tbody>${ops.map(o=>{const[op,n,w,k,d,a,ok,od,oa]=o;const my=kdaOf(k,d,a),their=kdaOf(ok,od,oa);
-     return `<tr><td class="champ"><span class="nmi">${ico(op)}${esc(op)}</span></td><td class="num">${n}</td>
-     <td><span class="mini"><span class="wl" data-tip="${w} vitórias e ${n-w} derrotas contra ${esc(op)}">${'<i class="w"></i>'.repeat(w)}${'<i class="l"></i>'.repeat(n-w)}</span>${wrPill(w,n)}</span></td>
-     <td class="num kda" style="color:var(${my>=their?'--good':'--bad'})" data-tip="KDA de ${esc(muChamp)} nesses jogos: (${k} + ${a}) ÷ ${d}">${my.toFixed(2)}</td><td class="num" data-tip="KDA de ${esc(op)} nesses jogos: (${ok} + ${oa}) ÷ ${od}">${their.toFixed(2)}</td>
-     <td class="num">${(k/n).toFixed(1)} / ${(d/n).toFixed(1)} / ${(a/n).toFixed(1)}</td></tr>`}).join("")}</tbody></table></div>
-   <p class="hint" style="margin:10px 0 0">Com 1 ou 2 jogos o resultado é só um indício. Os destaques consideram duelos com pelo menos 2 jogos.</p>`;
-}
 const compChampionLanes = new Map();
 for (const game of DATA.comps) {
   for (const [lane, blue, , , red] of game.p) {
@@ -857,7 +807,7 @@ let cWinsOnly = false;
 const teamFilterLabel = () => cTeam ? `${teamLogo(cTeam)}<span class="comp-team-name" title="${esc(cTeam)}">${esc(cTeam)}</span>` : "Todos os times";
 function compPicker({id, label, value, hint, options, image, search, empty, clear, category}) {
   return `<div class="comp-picker-field"><span>${label}</span>
-    <button id="${id}" class="comp-picker-trigger" type="button" data-slot="button" data-variant="outline" data-floating-picker aria-expanded="false" aria-controls="${id}-picker"${hint ? ` aria-describedby="${hint}"` : ""}>
+    <button id="${id}" class="comp-picker-trigger" type="button" data-slot="button" data-variant="outline" aria-haspopup="dialog" aria-expanded="false"${hint ? ` aria-describedby="${hint}"` : ""}>
       <span class="comp-picker-value">${value}</span>${iconMarkup("descending")}
     </button>
     <div id="${id}-picker" class="comp-picker" role="group" aria-label="Filtro de ${label.toLowerCase()}" hidden>
@@ -898,7 +848,7 @@ function compsView(){
     </div>
     <p class="comp-count" id="cn" role="status"></p>
     <div class="cgrid" id="cl"></div>
-    <dialog class="match-dialog" id="match-dialog" aria-label="Detalhes da partida e draft"></dialog>
+
   </section>`;
 }
 function wireCompPicker(id, {isSelected, onSelect, onClear}) {
@@ -1076,7 +1026,7 @@ function compCard(g, q, champions, index: number){
     </div>
     <div class="match-details">
       <div class="match-scoreboard">${team(g.b,"azul",g.bw)}<span class="vs">VS</span>${team(g.r,"vermelho",!g.bw)}</div>
-      <table class="match-lanes" aria-label="Duelos por rota entre ${esc(g.b)} e ${esc(g.r)}">
+      <table data-slot="table" class="match-lanes" aria-label="Duelos por rota entre ${esc(g.b)} e ${esc(g.r)}">
         <colgroup><col><col class="kda-column"><col class="lane-column"><col class="kda-column"><col></colgroup>
         <thead><tr>
           <th scope="col" aria-label="Campeão e jogador do lado azul">Campeão</th>
@@ -1095,7 +1045,7 @@ function wireComps(){
   const order=g=>{const m=g.s.match(/(\d+)/g)||[];const base=g.s.startsWith('play')?0:g.s.includes('quarter')?200:g.s.includes('semi')?300:g.s.includes('final')?400:100;return base+(+m[0]||0)*10+(+m[1]||0)/100};
   const all=DATA.comps.slice().sort((a,b)=>order(b)-order(a)||a.g-b.g);
   const matchGrid = document.getElementById("cl");
-  const draftDialog = document.getElementById("match-dialog") as HTMLDialogElement;
+
   matchGrid.onclick = (event) => {
     if (!(event.target instanceof Element)) return;
     const button = event.target.closest<HTMLButtonElement>(".match-draft-toggle");
@@ -1116,13 +1066,15 @@ function wireComps(){
     closeButton.dataset.size = "icon-lg";
     closeButton.setAttribute("aria-label", "Fechar draft");
     closeButton.innerHTML = iconMarkup("close");
-    closeButton.onclick = () => draftDialog.close();
+    closeButton.onclick = () => closeDraft();
     const controls = document.createElement("div");
     controls.className = "match-dialog-controls";
     controls.append(closeButton);
-    draftDialog.replaceChildren(controls, card);
-    draftDialog.showModal();
-    draftDialog.scrollTop = 0;
+    const content = document.createElement("div");
+    content.append(controls, card);
+    let closeDraft;
+    closeDraft = showDialog({ title: "Detalhes da partida e draft", children: content,
+      className: "match-dialog", initialFocus: () => closeButton });
     const modeButtons = panel.querySelectorAll<HTMLButtonElement>("[data-draft-mode]");
     for (const mode of modeButtons) {
       mode.onclick = () => {
@@ -1132,15 +1084,6 @@ function wireComps(){
         for (const view of panel.querySelectorAll<HTMLElement>(".match-draft-order-view")) view.hidden = !chronological;
       };
     }
-  };
-  draftDialog.onclick = (event) => {
-    if (event.target !== draftDialog) return;
-    const bounds = draftDialog.getBoundingClientRect();
-    if (event.clientX < bounds.left || event.clientX > bounds.right ||
-        event.clientY < bounds.top || event.clientY > bounds.bottom) draftDialog.close();
-  };
-  draftDialog.onclose = () => {
-    draftDialog.replaceChildren();
   };
   const activeChampions = document.getElementById("cc-active");
   const search = document.getElementById("cq");
@@ -1168,23 +1111,23 @@ function wireComps(){
       align: "start",
       collisionPadding: 8,
     },
-    createElement(SelectItem, { value: "all" }, "Todas as fases"),
-    ...stages.map(stage => createElement(SelectItem, { key: stage, value: stage }, stage)))));
+    createElement(SelectGroup, null, createElement(SelectItem, { value: "all" }, "Todas as fases"),
+    ...stages.map(stage => createElement(SelectItem, { key: stage, value: stage }, stage))))));
   };
   const hasFilters = () => Boolean(cQ || cTeam || cSt || cChamps.size || cWinsOnly);
   compActionsRoot = createRoot(document.getElementById("comp-filter-actions"));
   const drawActions = () => {
     compActionsRoot.render([
       createElement("label", { key: "wins", className: "comp-wins-label" },
-      createElement(Switch.Root, {
-        className: "comp-wins-switch",
+      createElement(Checkbox, {
+        className: "comp-wins-check",
         checked: cWinsOnly,
         "aria-describedby": "cc-hint",
         onCheckedChange: checked => {
-          cWinsOnly = checked;
+          cWinsOnly = checked === true;
           updateResults();
         },
-      }, createElement(Switch.Thumb, { className: "comp-wins-thumb" })),
+      }),
       "Só vitórias",
       ),
       createElement(Button, {

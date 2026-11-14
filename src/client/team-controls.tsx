@@ -1,7 +1,12 @@
+import { Tabs, TabsList, TabsTrigger } from "@/components/arc/tabs/tabs"
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
 import { Fragment, useEffect, useId, useReducer, useState } from "react"
 import type { ReactNode } from "react"
 import { createRoot, type Root } from "react-dom/client"
 import { ArrowDown, ArrowUp, MoreHorizontal } from "lucide-react"
+import { ContextMenu } from "radix-ui"
+import { Switch } from "@/components/arc/switch/switch"
+import { Empty, EmptyDescription, EmptyHeader } from "@/components/ui/empty"
 
 import { DropdownMenu, DropdownMenuContent, DropdownMenuGroup, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { Input } from "@/components/ui/input"
@@ -28,6 +33,38 @@ export function clearTeamControls(region: Element) {
 
 function Icon({ name }: { name: string }) {
   return <svg className="icon" aria-hidden="true"><use href={`assets/icons.svg#${name}`} /></svg>
+}
+
+export function mountDraftChampionMenu(host: HTMLElement, name: string, remove: () => void) {
+  const button = host.querySelector("button")!
+  const { priority, lane } = button.dataset
+  const html = button.innerHTML
+  renderControl(host, <ContextMenu.Root>
+    <ContextMenu.Trigger asChild>
+      <button type="button" className={button.className} data-priority={priority} data-lane={lane}
+        aria-label={button.getAttribute("aria-label") ?? name} title={button.title}
+        dangerouslySetInnerHTML={{ __html: html }} />
+    </ContextMenu.Trigger>
+    <ContextMenu.Portal>
+      <ContextMenu.Content className="chip-menu" aria-label={name}>
+        <ContextMenu.Item data-slot="dropdown-menu-item" data-variant="destructive"
+          onSelect={() => queueMicrotask(remove)}>
+          <Icon name="trash" /> Excluir {name}
+        </ContextMenu.Item>
+      </ContextMenu.Content>
+    </ContextMenu.Portal>
+  </ContextMenu.Root>)
+}
+
+export function mountMapEmpty(host: Element) {
+  renderControl(host, <Empty className="map-empty">
+    <EmptyHeader><EmptyDescription>Nenhum passo ainda.</EmptyDescription></EmptyHeader>
+  </Empty>)
+}
+
+export function mountMapImageSwitch(host: Element, checked: boolean, onCheckedChange: (checked: boolean) => void) {
+  renderControl(host, <Switch className="map-check" label="Usar imagem oficial do mapa"
+    checked={checked} onCheckedChange={onCheckedChange} />)
 }
 
 type MenuAction = {
@@ -151,7 +188,7 @@ function TeamSelect({ field }: { field: HTMLSelectElement }) {
   return (
     <Select open={open} value={selected ? String(selected.index) : ""} disabled={field.disabled || options.length === 0}
       onOpenChange={nextOpen => {
-        if (nextOpen) setPortalContainer(field.closest("dialog[open]") ?? undefined)
+        if (nextOpen) setPortalContainer(field.closest<HTMLElement>('[role="dialog"]') ?? undefined)
         setOpen(nextOpen)
       }}
       onValueChange={value => {
@@ -195,4 +232,29 @@ export function mountTeamSelect(field: HTMLSelectElement) {
   }
   renderControl(host, <TeamSelect field={field} />)
   field.hidden = true
+}
+type SectionOption = { value: string; label: string; icon?: string; panel?: string }
+
+export function mountSectionTabs(host: Element, label: string, value: string, options: SectionOption[],
+  change: (value: string) => void) {
+  renderControl(host, <Tabs value={value} onValueChange={change} activationMode="manual" data-variant="underline">
+    <TabsList aria-label={label}>
+      {options.map(option => <TabsTrigger key={option.value} value={option.value}
+        id={`tab-${option.value}`} aria-controls={option.panel ?? `panel-${option.value}`}>
+        {option.icon && <Icon name={option.icon} />}{option.label}
+      </TabsTrigger>)}
+    </TabsList>
+  </Tabs>)
+}
+
+export function mountToolGroup(host: Element, value: string, options: SectionOption[],
+  change: (value: string) => void) {
+  renderControl(host, <ToggleGroup type="single" value={value} spacing={1}
+    className="map-actions map-modes seg" aria-label="Modo da ferramenta"
+    onValueChange={next => { if (next) change(next) }}>
+    {options.map(option => <ToggleGroupItem key={option.value} value={option.value}
+      data-slot="button" data-variant="ghost" data-tool={option.value}>
+      {option.icon && <Icon name={option.icon} />}{option.label}
+    </ToggleGroupItem>)}
+  </ToggleGroup>)
 }

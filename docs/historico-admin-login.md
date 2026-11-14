@@ -8,6 +8,13 @@ Formato de cada entrada: data, pedido (palavras do Bruno), decisão (quem escolh
 
 ---
 
+## 13/11/2026 — migração visual para shadcn/ui
+
+- **Pedido:** “implemente toda a migração sugerida, e apenas finalize quando estiver tudo pronto”.
+- **Decisão:** usar o Dialog do shadcn para os passos do login e o AlertDialog para as confirmações existentes da conta, da gestão e da Administração.
+- **Mudança:** o menu da conta usa Popover, os campos de login têm rótulos agrupados e os erros são anunciados. As tabelas de capitão e Administração usam cabeçalhos de coluna e rolagem própria. Os passos de login e as regras de acesso continuam no fluxo existente.
+- **Regras do Firestore:** nenhuma alteração.
+
 ## 13/11/2026: limpeza de rotinas sem uso
 
 - **Pedido:** remover código sem uso e publicar a limpeza.

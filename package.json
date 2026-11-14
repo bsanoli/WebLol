@@ -24,7 +24,9 @@
   },
   "homepage": "https://github.com/bsanoli/WebLol#readme",
   "dependencies": {
+    "@radix-ui/react-switch": "^1.4.1",
     "@radix-ui/react-tabs": "^1.2.1",
+    "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "lucide-react": "^1.72.0",
     "motion": "^14.13.0",

@@ -6,7 +6,7 @@
 .listShell[data-right="true"] .viewport { mask-image: linear-gradient(to right, black, black calc(100% - 35px), transparent); }
 .listShell[data-left="true"][data-right="true"] .viewport { mask-image: linear-gradient(to right, transparent, black 35px, black calc(100% - 35px), transparent); }
 /* The list owns the stacking context so the gliding highlight passes under every label, not over earlier ones. */
-.list { isolation: isolate; display: inline-flex; width: max-content; align-items: center; gap: var(--space-1); padding: var(--space-1); }
+.list { position: relative; isolation: isolate; display: inline-flex; width: max-content; align-items: center; gap: var(--space-1); padding: var(--space-1); }
 .scrollButton { position: absolute; z-index: 2; top: 0; bottom: 0; display: grid; width: 33px; place-items: center; border: 0; background: var(--surface-muted); color: var(--foreground); }
 .scrollLeft { left: 0; border-radius: var(--radius-control) 0 0 var(--radius-control); }
 .scrollRight { right: 0; border-radius: 0 var(--radius-control) var(--radius-control) 0; }
@@ -41,10 +41,10 @@
 .root[data-variant="underline"] .listShell { border: 0; background: transparent; }
 .root[data-variant="underline"] .list { gap: var(--wl-space-2); padding: var(--wl-space-2) 0; }
 .root[data-variant="underline"] .trigger { min-width: 0; padding-inline: var(--wl-space-4); border-radius: var(--wl-control-radius); }
-.root[data-variant="underline"] .trigger:hover { background: var(--wl-raised); }
 .root[data-variant="underline"] .trigger:focus-visible { outline: 2px solid var(--wl-accent); outline-offset: -2px; }
 .root[data-variant="underline"] .triggerLabel { display: flex; align-items: center; gap: var(--wl-space-2); }
 .root[data-variant="underline"] .selection {
+  z-index: 0;
   inset: auto var(--wl-space-4) var(--wl-space-1);
   height: 2px;
   border: 0;
