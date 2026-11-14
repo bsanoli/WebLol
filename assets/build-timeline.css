@@ -77,5 +77,10 @@
 .build-matchup-group > summary::-webkit-details-marker { display: none; }
 .build-matchup-group > summary:is(:hover, :focus-visible) { background: var(--wl-raised); color: var(--wl-accent); }
 .build-matchup-group > summary:focus-visible { outline: 2px solid var(--wl-accent); outline-offset: -2px; }
-.build-matchup-group > summary .icon { width: var(--wl-space-3); height: var(--wl-space-3); }
+.build-matchup-group > summary .icon {
+  width: var(--wl-space-3);
+  height: var(--wl-space-3);
+  transition: rotate var(--wl-motion-panel) ease-in-out;
+}
 .build-matchup-group[open] > summary .icon { rotate: 90deg; }
+.build-context-side { --build-matchup-close-ease: ease-in-out; }

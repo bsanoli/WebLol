@@ -251,6 +251,7 @@ export function buildDetails(champion: Champion, lane: string, action = "", with
 
 type Matchup = [opponent: string, games: number, wins: number, ...stats: number[]]
 const matchups: Record<string, Record<string, (string | number)[][]>> = DATA.matchups
+export const MATCHUP_PAGE_SIZE = 5;
 
 export function orderedMatchups(position: string, champion: string) {
   return (matchups[position]?.[champion] ?? [])
@@ -266,7 +267,7 @@ export function buildMatchups(champion: Champion, position: string) {
   const rank = (direction: number) => (a: Matchup, b: Matchup) =>
     direction * byWinRate(a, b) || b[1] - a[1] || a[0].localeCompare(b[0], "pt-BR");
   const games = opponents.reduce((total, [, count]) => total + count, 0);
-  const rows = (entries: Matchup[]) => entries.map(([opponent, count, wins]) => `<li>
+  const rows = (entries: Matchup[], hidden = false) => entries.map(([opponent, count, wins]) => `<li${hidden ? " hidden" : ""}>
     <button type="button" class="build-matchup-row" data-build="${championSlug(opponent)}" data-build-lane="${esc(lane)}">
       <span class="build-context-name">${ico(opponent)}<span>${esc(opponent)}</span></span>
       <span class="build-context-count"><strong data-result="${wins * 2 > count ? "positive" : wins * 2 < count ? "negative" : "even"}">${(100 * wins / count).toLocaleString("pt-BR", { maximumFractionDigits: 1 })}%</strong><small>${gameCount(count)}</small></span>
@@ -279,10 +280,13 @@ export function buildMatchups(champion: Champion, position: string) {
   const worst = ranked.slice(split).sort(rank(1));
   const group = (title: string, entries: Matchup[], collapsed = false) => {
     if (!entries.length) return "";
-    const extra = entries.slice(5);
+    const extra = entries.slice(MATCHUP_PAGE_SIZE);
+    const paginated = DATASET.source === "soloq" && collapsed;
     return `${collapsed ? `<details class="build-matchup-group"><summary>${title}${iconMarkup("next")}</summary>` : `<h4>${title}</h4>`}
-      <ul class="build-context-list" aria-label="${title}">${rows(entries.slice(0, 5))}</ul>
-      ${extra.length ? `<button type="button" data-slot="button" data-variant="ghost"
+      <ul class="build-context-list" aria-label="${title}">${rows(entries.slice(0, MATCHUP_PAGE_SIZE))}${paginated ? rows(extra, true) : ""}</ul>
+      ${extra.length && paginated ? `<button type="button" data-slot="button" data-variant="ghost"
+        class="build-matchup-more" data-show-matchup-page><span>Ver mais ${Math.min(MATCHUP_PAGE_SIZE, extra.length)}</span> ${iconMarkup("next")}</button>`
+      : extra.length ? `<button type="button" data-slot="button" data-variant="ghost"
         class="build-matchup-more" data-show-matchups aria-label="Ver mais adversários: ${title}">Ver mais adversários (${extra.length}) ${iconMarkup("next")}</button>
         <ul class="build-context-list" aria-label="Mais adversários: ${title}" hidden>${rows(extra)}</ul>` : ""}${collapsed ? "</details>" : ""}`;
   };

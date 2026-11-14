@@ -7,7 +7,7 @@ import { ExistingContent } from "@/shared/ui/dialog-controls"
 import { animate } from "motion"
 import { flushSync } from "react-dom"
 import { iconMarkup, laneIconMarkup } from "@/shared/ui/icon"
-import { buildDetails, buildGameCount, buildLaneHighlights, buildMatchesQuery, buildMatchups, buildsTable, hydrateBuildTimelines } from "./build-details"
+import { buildDetails, buildGameCount, buildLaneHighlights, buildMatchesQuery, buildMatchups, buildsTable, hydrateBuildTimelines, MATCHUP_PAGE_SIZE } from "./build-details"
 import { buildOpponentOptions } from "../model/build-statistics"
 import { WorldsOpponentSelect } from "./opponent-select"
 import { ico } from "@/entities/champion"
@@ -92,6 +92,7 @@ function wireBuilds({ publishWorlds, buildsPath }){
   const detailAnimations = new WeakMap<HTMLElement, ReturnType<typeof animate>>();
   const detailContents = new WeakMap<HTMLElement, { element: HTMLElement, root: ReturnType<typeof createRoot> }>();
   let contextAnimation: ReturnType<typeof animate> | undefined;
+  let matchupCardAnimation: Animation | undefined;
   let highlights = "";
   const sortBuildRows = () => {
     const body = bc.querySelector(".builds-table tbody");
@@ -279,6 +280,7 @@ function wireBuilds({ publishWorlds, buildsPath }){
     detailAnimations.set(panel, animation);
   };
   const updateBuildContext = (html: string, trigger: HTMLButtonElement) => {
+    matchupCardAnimation?.cancel();
     const viewport = bc.querySelector<HTMLElement>(".build-context-transition");
     const outgoing = viewport.lastElementChild as HTMLElement;
     const startHeight = viewport.getBoundingClientRect().height;
@@ -342,6 +344,45 @@ function wireBuilds({ publishWorlds, buildsPath }){
     enhanceAnalyticsUI();
   };
   bc.onclick=e=>{
+    const matchupSummary = e.target.closest(".build-context-side .build-matchup-group > summary");
+    if (matchupSummary) {
+      matchupCardAnimation?.cancel();
+      const group = matchupSummary.parentElement;
+      const card = group.closest(".build-context-side");
+      if (!group.open || reduceBuildMotion.matches || card.scrollHeight <= card.clientHeight
+        || !CSS.supports("interpolate-size", "allow-keywords")) return;
+
+      const contentHeight = parseFloat(getComputedStyle(group, "::details-content").blockSize);
+      const startHeight = card.offsetHeight;
+      const endHeight = card.scrollHeight - contentHeight + startHeight - card.clientHeight;
+      if (endHeight < startHeight) {
+        // Animate the viewport cap in sync with the native details transition.
+        const styles = getComputedStyle(card);
+        matchupCardAnimation = card.animate(
+          { maxBlockSize: [`${startHeight}px`, `${Math.ceil(endHeight)}px`] },
+          {
+            duration: parseFloat(styles.getPropertyValue("--wl-motion-panel")),
+            easing: styles.getPropertyValue("--build-matchup-close-ease").trim(),
+          },
+        );
+      }
+      return;
+    }
+    const page = e.target.closest("[data-show-matchup-page]");
+    if (page) {
+      const hiddenRows = [...page.previousElementSibling.querySelectorAll("li[hidden]")];
+      const nextRows = hiddenRows.slice(0, MATCHUP_PAGE_SIZE);
+      nextRows.forEach(row => { row.hidden = false; });
+      nextRows[0]?.querySelector("button")?.focus({ preventScroll: true });
+
+      const remaining = hiddenRows.length - nextRows.length;
+      if (remaining) {
+        page.firstElementChild.textContent = `Ver mais ${Math.min(MATCHUP_PAGE_SIZE, remaining)}`;
+      } else {
+        page.remove();
+      }
+      return;
+    }
     const more = e.target.closest("[data-show-matchups]");
     if (more) {
       const list = more.nextElementSibling;

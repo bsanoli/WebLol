@@ -132,6 +132,13 @@ details:not([open])::details-content { pointer-events: none; }
       content-visibility var(--wl-motion-panel) allow-discrete;
   }
   details:not(.palette)[open]::details-content { block-size: auto; }
+
+  /* Keep long matchup lists visible while their height recedes. */
+  .build-matchup-group:not([open])::details-content {
+    transition: block-size var(--wl-motion-panel) var(--build-matchup-close-ease, ease-in-out),
+      opacity var(--wl-motion-panel) var(--build-matchup-close-ease, ease-in-out),
+      content-visibility var(--wl-motion-panel) allow-discrete;
+  }
 }
 
 #tip {

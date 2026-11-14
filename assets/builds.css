@@ -165,6 +165,7 @@
   justify-content: space-between;
   font-size: 13px;
 }
+.build-matchup-more[data-show-matchup-page] > .icon { rotate: 90deg; }
 .build-context-count :is(strong, small) { display: block; white-space: nowrap; }
 .build-context-count strong { color: var(--ink); }
 .build-context-count strong[data-result="positive"] { color: var(--wl-win-text); }
