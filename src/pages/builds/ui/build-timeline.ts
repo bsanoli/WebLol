@@ -141,14 +141,14 @@ export function renderBuildTimeline(section: HTMLElement) {
   section.innerHTML = `<header class="build-timeline-header">
       <h4>Compras jogo a jogo</h4>
       <div class="build-skill-options build-timeline-view" role="group" aria-label="Quais compras mostrar">
-        <button type="button" data-slot="button" data-variant="outline" data-size="sm" data-timeline-view="all" aria-pressed="true">Todas as compras</button>
-        <button type="button" data-slot="button" data-variant="outline" data-size="sm" data-timeline-view="core" aria-pressed="false">Itens completos e botas</button>
+        <button type="button" data-slot="button" data-variant="outline" data-size="sm" data-timeline-view="core" aria-pressed="true">Itens completos e botas</button>
+        <button type="button" data-slot="button" data-variant="outline" data-size="sm" data-timeline-view="all" aria-pressed="false">Todas as compras</button>
       </div>
     </header>
     ${summary(entries)}
     <p class="build-data-sample">Minuto médio da primeira compra de cada item completo, em ${entries.length === 1 ? "1 jogo" : `${entries.length} jogos`}. Compras na mesma ida à base aparecem no mesmo minuto. ${DATASET.sourceNote}</p>
     <p class="build-timeline-count build-data-sample" role="status">${status()}</p>
-    <ol class="build-timeline-games" data-view="all">${entries.slice(0, visible).map(gameRow).join("")}</ol>
+    <ol class="build-timeline-games" data-view="core">${entries.slice(0, visible).map(gameRow).join("")}</ol>
     ${visible < entries.length ? `<button type="button" data-slot="button" data-variant="outline" data-size="sm" class="build-timeline-more">${loadLabel()}</button>` : ""}`;
 
   const list = section.querySelector<HTMLOListElement>(".build-timeline-games")!;
