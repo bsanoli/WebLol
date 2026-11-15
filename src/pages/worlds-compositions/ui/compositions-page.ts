@@ -167,7 +167,7 @@ function wireCompPicker(id, {isSelected, onSelect, onClear}) {
 }
 function wireComps(publishWorlds){
   const order=g=>{const m=g.s.match(/(\d+)/g)||[];const base=g.s.startsWith('play')?0:g.s.includes('quarter')?200:g.s.includes('semi')?300:g.s.includes('final')?400:100;return base+(+m[0]||0)*10+(+m[1]||0)/100};
-  const all=DATA.comps.slice().sort((a,b)=>order(b)-order(a)||a.g-b.g);
+  const all = DATA.comps.slice().sort((a, b) => order(b) - order(a) || b.g - a.g);
   const matchGrid = document.getElementById("cl");
 
   matchGrid.onclick = (event) => {
