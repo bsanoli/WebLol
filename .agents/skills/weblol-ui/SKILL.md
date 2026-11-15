@@ -10,6 +10,12 @@ description: Implemente ou ajuste a interface do WebLol, incluindo tabelas, card
 3. Confira a rota no navegador em desktop, incluindo janelas mais estreitas quando a largura disponível afetar o layout. Compare o alinhamento dos cards equivalentes, a altura dos controles vizinhos e a separação entre grupos. Exercite a ação alterada e, conforme a interação, verifique foco, teclado e ausência de rolagem horizontal acidental. Para listas e filtros, inclua um estado vazio ou com dados escassos quando isso puder mudar o layout.
 4. Rode `npm run build` e `git diff --check`. Informe o que mudou, como verificar localmente e qualquer limitação relevante da validação.
 
+## Escolha de skills complementares
+
+- Em correções pontuais de layout ou interação, siga o fluxo desta skill e aplique `feature-sliced-design` ao editar código, conforme o `AGENTS.md`.
+- Use `ui-ux-pro-max` para comparar organização, densidade ou fluxos. Para definir a direção visual de uma tela nova, escolha `frontend-design` ou `design-taste-frontend`. Quando houver alternativas com impacto relevante na interface, apresente as propostas, os trade-offs e como validar cada uma antes de implementar.
+- Em mudanças mais amplas, use `web-design-guidelines` para revisar a implementação, com atenção à acessibilidade e à interação. Corrija os achados pertinentes e verifique novamente o fluxo afetado.
+
 ## Área do Time → Composições
 
 - Ao alterar a barra da composição, confira a troca entre **Opções por posição** e **Ordem do draft** nos dois sentidos. Nome, abas, copiar link e status de salvamento devem ficar no mesmo lugar.

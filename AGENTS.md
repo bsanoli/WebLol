@@ -3,6 +3,7 @@
 - O WebLol é destinado ao acesso pelo navegador no desktop. Projete e valide a interface para desktop. O celular está fora do escopo de suporte.
 
 - Em mudanças de interface, use a skill [weblol-ui](.agents/skills/weblol-ui/SKILL.md). Reutilize os componentes e tokens do WebLol. Linhas e cards clicáveis devem ter cursor `pointer`, hover visível e foco por teclado.
+- Em mudanças maiores de interface, delegue a subagentes as subtarefas independentes que puderem avançar em paralelo, como pesquisa de referências, levantamento de casos de borda e revisão de acessibilidade. Se houver edição em paralelo, atribua arquivos distintos a cada agente. O agente principal integra os resultados e conduz a implementação, os testes e a validação no navegador desktop até concluir o pedido.
 - Em cards e linhas equivalentes, mantenha títulos, ícones, métricas e ações nas mesmas posições relativas. Valide o alinhamento com textos longos, quebra de linha e campos opcionais.
 - Em páginas de detalhe, use o estilo compacto e sem borda de “Ver página” para voltar à lista, com o chevron à esquerda do rótulo.
 - Trabalhe nos arquivos fonte em `src/` e `public/`. Os HTMLs e `assets/` da raiz são gerados para o GitHub Pages.
