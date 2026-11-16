@@ -10,6 +10,14 @@
 - Toda implementação no WebLol deve seguir a arquitetura Feature-Sliced Design. Use a skill [feature-sliced-design](.agents/skills/feature-sliced-design/SKILL.md) ao criar, alterar ou refatorar código. Respeite as responsabilidades das camadas, a direção dos imports e as APIs públicas dos slices, inclusive em correções pontuais.
 - Faça commit ou push quando o usuário pedir a respectiva ação. Para publicar no GitHub Pages, use a skill [weblol-publicar](.agents/skills/weblol-publicar/SKILL.md).
 
+## Organização do código
+
+- Dê às funções nomes que indiquem a ação e seu alvo. Use `handle…` para eventos de interface. Separe regras e estado em `model`, renderização em `ui` e acesso a dados em módulos próprios. Em Composições, `createCompositionCopy` cria a cópia sem acessar o DOM ou o armazenamento, e `duplicateComposition` aplica a mudança na página.
+- Mantenha componentes e funções no slice enquanto forem usados apenas por ele. Extraia para uma camada compartilhada quando houver consumidores reais com a mesma regra ou comportamento.
+- Revise arquivos JS e TS das camadas FSD a partir de 300 linhas não vazias. Extraia responsabilidades que possam evoluir separadamente. Dados e arquivos gerados ficam fora dessa contagem.
+- Evite introduzir `@ts-nocheck`. Ao refatorar código legado, tipifique os módulos extraídos e valide dados externos nas fronteiras que mudar, como parâmetros da URL e dados do armazenamento.
+- Use `npm run check` para verificar a arquitetura e os tipos. O build também executa esse comando. O tamanho gera aviso, e dependências que violem a direção das camadas ou a API pública de outro slice fazem a verificação falhar.
+
 ## Admin e login
 
 Toda mudança em login, contas, times, capitão ou Administração entra em `docs/historico-admin-login.md`, com o pedido, a decisão e o que mudou. Antes de uma mudança importante nessa área, pergunte ao Bruno e registre a escolha dele no mesmo arquivo.

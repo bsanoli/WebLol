@@ -42,6 +42,40 @@ test("Abre uma composição salva no formato anterior em modo Draft", async ({ p
   }
 })
 
+test("Duplica e salva uma composição do formato anterior sem alterar a original", async ({ page }) => {
+  const original = {
+    id: "comp-antiga",
+    name: "Composição anterior",
+    lanes: { top: ["Ornn"], jg: [], mid: ["Ahri"], adc: [], sup: [], ban: [] },
+    laneNotes: { top: "Iniciar a luta" },
+    notes: "Plano salvo",
+  }
+  await page.addInitScript((composition) => {
+    const key = "lol-comps-time-v1"
+    if (!localStorage.getItem(key)) {
+      localStorage.setItem(key, JSON.stringify({ comps: [composition], cur: composition.id }))
+    }
+  }, original)
+  await page.goto("/camp.html")
+
+  await page.getByRole("button", { name: "Ações de Composição anterior" }).click()
+  await page.getByRole("menuitem", { name: "Duplicar" }).click()
+  const name = page.getByRole("textbox", { name: "Nome da composição" })
+  await expect(name).toHaveValue("Composição anterior (cópia)")
+
+  const state = await page.evaluate(() => JSON.parse(localStorage.getItem("lol-comps-time-v1")!))
+  expect(state.cur).not.toBe(original.id)
+  expect(state.comps).toHaveLength(2)
+  expect(state.comps).toMatchObject([
+    { ...original, id: state.cur, name: "Composição anterior (cópia)", updated: expect.any(Number) },
+    original,
+  ])
+  expect(state.comps[0].draft).toEqual(state.comps[1].draft)
+
+  await page.reload()
+  await expect(name).toHaveValue("Composição anterior (cópia)")
+})
+
 test("Restaura a versão sincronizada somente após confirmação", async ({ page }) => {
   await page.addInitScript(() => {
     if (localStorage.getItem("lol-base")) return

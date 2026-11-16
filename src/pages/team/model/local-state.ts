@@ -1,6 +1,6 @@
 export const KEY="lol-comps-time-v1";
 export const uid=()=>Math.random().toString(36).slice(2,10);
-type Composition = {
+export type Composition = {
   id: string
   name: string
   lanes: Record<"top" | "jg" | "mid" | "adc" | "sup" | "ban", string[]>

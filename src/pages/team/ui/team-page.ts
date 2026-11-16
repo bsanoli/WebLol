@@ -7,6 +7,7 @@ import { initializeTheme } from "@/shared/config/theme"
 import { initializeMotionNav, revealContent } from "@/shared/lib/motion"
 
 import { CH } from "../model/champion-catalog"
+import { createCompositionCopy } from "../model/composition"
 import WS from "../api/worlds-champion-stats.json"
 import { KEY, uid, blank, loadTeamState } from "../model/local-state"
 import { DRAFT_SIDE, PICKNAME, compositionPreview, draftHTML, draftOf, sideDot } from "./draft"
@@ -132,7 +133,7 @@ function renderList(){
   list.querySelectorAll(".composition-menu").forEach((host,index)=>{
     const {id,name}=matches[index];
     mountCompositionMenu(host,name,()=>{
-      duplicateComp(id);
+      duplicateComposition(id);
       $("#clist .ci.on")?.focus({preventScroll:true});
     },async()=>{
       if(await deleteComp(id)) ($("#clist .ci.on")||$("#clist .ci")||$("#new")).focus({preventScroll:true});
@@ -144,7 +145,17 @@ $("#clist").onclick=e=>{const it=e.target.closest(".ci");if(it)selectComp(it.dat
 $("#draft-comp").onchange=e=>selectComp(e.target.value);
 $("#csearch").oninput=renderList;
 $("#new").onclick=()=>{const c=blank("Comp "+(S.comps.length+1));S.comps.unshift(c);S.cur=c.id;active="top";save();renderAll();publishTeamRoute("comps");setTimeout(()=>{$("#cname").focus();$("#cname").select()},0)};
-function duplicateComp(id){const c=JSON.parse(JSON.stringify(S.comps.find(c=>c.id===id)));c.id=uid();c.name+=" (cópia)";c.updated=Date.now();S.comps.unshift(c);S.cur=c.id;save();renderAll();publishTeamRoute("comps")};
+function duplicateComposition(id: string) {
+  const source = S.comps.find(comp => comp.id === id);
+  if (!source) return;
+
+  const copy = createCompositionCopy(source, uid(), Date.now());
+  S.comps.unshift(copy);
+  S.cur = copy.id;
+  save();
+  renderAll();
+  publishTeamRoute("comps");
+}
 async function deleteComp(id){const c=S.comps.find(c=>c.id===id);if(!c || !await confirmAction(`Excluir a comp "${c.name}"?`, "Excluir composição"))return false;S.comps=S.comps.filter(x=>x.id!==c.id);if(!S.comps.length)S.comps.push(blank());if(!S.comps.some(x=>x.id===S.cur))S.cur=S.comps[0].id;save();renderAll();publishTeamRoute("comps");return true};
 
 /* ===== Editor ===== */

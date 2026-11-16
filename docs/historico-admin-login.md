@@ -8,6 +8,13 @@ Formato de cada entrada: data, pedido (palavras do Bruno), decisão (quem escolh
 
 ---
 
+## 16/11/2026 — organização da duplicação de composições
+
+- **Pedido:** “implemente a sua recomendação”.
+- **Decisão:** usar a duplicação local de composições como primeiro exemplo da separação entre regras e interface.
+- **Mudança:** a criação da cópia passou para um módulo tipado. A página continua responsável por selecionar, salvar e exibir a cópia.
+- **Regras do Firestore:** nenhuma alteração.
+
 ## 13/11/2026 — migração visual para shadcn/ui
 
 - **Pedido:** “implemente toda a migração sugerida, e apenas finalize quando estiver tudo pronto”.
