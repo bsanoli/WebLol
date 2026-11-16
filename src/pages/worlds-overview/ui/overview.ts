@@ -10,7 +10,7 @@ export function renderKpis() {
 // KPIs
 const topBan=[...C].sort((a,b)=>b.bans-a.bans)[0], topPick=[...C].sort((a,b)=>b.picks-a.picks)[0];
 if (topBan && topPick) document.getElementById('kpis').innerHTML=[[G,"jogos"],[C.length,"campeões usados"],[topBan.name,`mais banido · ${pct(topBan.bans/G)}`],[topPick.name,`mais pickado · ${topPick.picks}`]]
- .map(([v,l],i)=>`<div class="wl-panel kpi" data-tip="${["Total de jogos do Play-In até as Semifinais","Campeões que foram pickados ou banidos pelo menos uma vez",`${topBan.name} foi banido em ${topBan.bans} de ${G} jogos`,`${topPick.name} foi escolhido em ${topPick.picks} jogos (${topPick.wins} vitórias)`][i]}"><div class="v">${esc(v)}</div><div class="l">${l}</div></div>`).join("");
+ .map(([v,l],i)=>`<div class="wl-panel kpi" data-tip="${["Total de jogos do Play-In até a final","Campeões que foram pickados ou banidos pelo menos uma vez",`${topBan.name} foi banido em ${topBan.bans} de ${G} jogos`,`${topPick.name} foi escolhido em ${topPick.picks} jogos (${topPick.wins} vitórias)`][i]}"><div class="v">${esc(v)}</div><div class="l">${l}</div></div>`).join("");
 
 }
 function championSummaries() {

@@ -88,7 +88,7 @@ function compsView(){
   return `<section class="worlds-compositions" aria-labelledby="comps-title">
     <div class="comps-intro">
       <h2 id="comps-title">Composições do Worlds</h2>
-      <p class="hint">Compare campeões, jogadores e KDA nas cinco rotas de cada partida. A base reúne ${DATA.mgames} jogos com draft completo.</p>
+      <p class="hint">Compare campeões, jogadores e KDA nas cinco rotas de cada partida. Esta seção reúne ${DATA.comps.length} dos ${DATA.games} jogos do torneio.</p>
     </div>
     <div class="wl-panel comp-filters" role="group" aria-label="Filtrar jogos">
       <label for="cq">Buscar<input data-slot="input" id="cq" type="search" placeholder="Campeão ou jogador" value="${esc(cQ||"")}"></label>

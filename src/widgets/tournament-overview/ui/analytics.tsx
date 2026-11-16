@@ -101,7 +101,7 @@ export function TournamentOverview({ champions, games, showSummary = true }: {
     {showSummary && <section className="wl-panel draft-summary" aria-labelledby="draft-summary-title">
       <h2 id="draft-summary-title">Resumo do torneio</h2>
       <div className="metric-grid">
-        <MetricCard label="Jogos analisados" value={games} note="Play-In até as semifinais" />
+        <MetricCard label="Jogos analisados" value={games} note="Play-In até a final" />
         <MetricCard label="Campeões no draft" value={champions.length} note="Escolhidos ou banidos" />
         <MetricCard label="Mais escolhido" value={picks[0].name} portrait={picks[0].portrait} note={`${picks[0].picks} jogos · ${percent(picks[0].wins / picks[0].picks)} de vitórias`} />
         <MetricCard label="Mais banido" value={bans[0].name} portrait={bans[0].portrait} note={`${bans[0].bans} bans · ${percent(bans[0].bans / games)} dos jogos`} />
