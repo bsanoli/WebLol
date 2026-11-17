@@ -79,9 +79,18 @@ function renderKnow(){
   });
   $("#panel-wave").hidden = kt !== "wave";
   $("#panel-obj").hidden = kt !== "obj";
-  if (previousTab && previousTab !== kt) revealContent($("#k-" + kt));
+  if (previousTab && previousTab !== kt) revealContent($("#panel-" + kt));
 }
-$("#know").addEventListener("input",e=>{const inp=e.target.closest("[data-o]");if(!inp)return;const s=toS(inp.value);const out=inp.parentElement.querySelector(".r");out.textContent=s==null?"—":fmt(s+ +inp.dataset.o)});
+$("#know").addEventListener("input", event => {
+  const input = event.target.closest("[data-o]");
+  if (!input) return;
+  const time = toS(input.value);
+  const result = input.parentElement.querySelector(".r");
+  const next = time == null ? "—" : fmt(time + Number(input.dataset.o));
+  if (result.textContent === next) return;
+  result.textContent = next;
+  if (time != null) revealContent(result, true);
+});
 
 return renderKnow;
 }

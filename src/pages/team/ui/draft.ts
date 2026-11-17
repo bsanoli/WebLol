@@ -28,7 +28,7 @@ export function draftHTML(c, { active, compositions, LN, img, esc, pickArt }){
   DORDER.forEach(([ph,slots],pi)=>slots.forEach(s=>{const[t,k]=s.split(":");const i=cnt[t][k]++;seq.push({t,k,i,code:t+(k==="ban"?"B":"")+(i+1),ph:pi,n:++kc[k]})}));
   const find=(t,k,i)=>seq.find(s=>s.t===t&&s.k===k&&s.i===i);
   // No draft: clique esquerdo torna principal, arrastar reordena e o botão direito abre "Excluir".
-  const mini=(n,l,j)=>`<div class="chip dchip ${j===0?"primary":"alternative"}" data-team-control draggable="true" data-n="${esc(n)}" data-from="${l}"><button class="champ-priority" data-priority="${esc(n)}" data-lane="${l}" aria-label="${j===0?"Principal":"Tornar principal"}: ${esc(n)} em ${LN[l].n}" title="${esc(n)} · ${j+1}ª opção · clique para tornar principal, botão direito para excluir">${img(n)}</button></div>`;
+  const mini=(n,l,j)=>`<div class="chip dchip ${j===0?"primary":"alternative"}" data-team-control draggable="true" data-n="${esc(n)}" data-from="${l}"${j>0?` data-champion-slot="${j}" data-champion-name="${esc(n)}"`:""}><button class="champ-priority" data-priority="${esc(n)}" data-lane="${l}" aria-label="${j===0?"Principal":"Tornar principal"}: ${esc(n)} em ${LN[l].n}" title="${esc(n)} · ${j+1}ª opção · clique para tornar principal, botão direito para excluir">${img(n)}</button></div>`;
   // faixa da sequência
   let h=`<div class="draft-toolbar draft-toolbar-top"><div class="dside" role="group" aria-label="Lado da equipe"><span>Nossa equipe</span>
     ${Object.entries(DRAFT_SIDE).map(([key,label])=>`<button data-slot="button" data-variant="outline" data-size="sm" data-side="${key}" aria-pressed="${d.side===key}" class="${d.side===key?`on ${key[0]}`:""}">${label}</button>`).join("")}</div></div>`;
@@ -36,16 +36,16 @@ export function draftHTML(c, { active, compositions, LN, img, esc, pickArt }){
   const team=t=>{
     const mine=t===us,side=t==="B"?"b":"r";
     const banSq=i=>{const s=find(t,"ban",i),n=mine?c.lanes.ban[i]:null;
-      return `<div class="bsq${n?" has":""}${mine?" mine":""}${mine&&active==="ban"?" act":""}" ${mine?`data-l="ban" data-bi="${i}"`:""} title="${s.n}º ban">
+      return `<div class="bsq${n?" has":""}${mine?" mine":""}${mine&&active==="ban"?" act":""}" ${mine?`data-l="ban" data-bi="${i}" data-champion-slot="${i}" data-champion-name="${esc(n)}"`:""} title="${s.n}º ban">
         ${n?`<span class="dm" draggable="true" data-n="${esc(n)}" data-from="ban">${img(n)}<button class="x" data-rm="${esc(n)}" aria-label="Remover ${esc(n)}">${iconMarkup("close")}</button></span>`:`<span class="bn">${s.n}</span>`}</div>`};
     const pick=i=>{const s=find(t,"pick",i),tip=PICKTIP[s.code]||"";
       const meta=`<span class="pkh"><b title="${s.code} · ${s.n}º pick">${PICKNAME[s.code]}</b></span>`;
       if(!mine)return `<div class="pk ${side} them">${meta}<div class="pkn">${iconMarkup("champion")} A definir</div></div>`;
       const l=d.order[d.side][i],L=LN[l],ch=c.lanes[l],m=ch[0];
       const editing=active===l;
-      return `<div class="pk ${side} mine${editing?" act":""}" data-l="${l}" style="--lc:var(${L.c})">
+      return `<div class="pk ${side} mine${editing?" act":""}" data-l="${l}" data-champion-group="${t}-pick-${i}" style="--lc:var(${L.c})">
         ${pickArt(m)}
-        <button type="button" class="pk-target" data-draft-target="${l}" aria-pressed="${editing}" aria-label="${PICKNAME[s.code]} · ${L.n}${m?" · "+esc(m):" · Escolher campeão"}">
+        <button type="button" class="pk-target" data-champion-slot="0" data-champion-name="${esc(m)}" data-draft-target="${l}" aria-pressed="${editing}" aria-label="${PICKNAME[s.code]} · ${L.n}${m?" · "+esc(m):" · Escolher campeão"}">
           ${meta}${m?img(m):iconMarkup("champion-add")}
           <span class="pkn${m?"":" pk-empty"}">${m?esc(m):"Escolher campeão"}</span>
         </button>
@@ -56,7 +56,7 @@ export function draftHTML(c, { active, compositions, LN, img, esc, pickArt }){
     return `<section class="tm ${side}${mine?" mine":""}" aria-labelledby="draft-side-${side}">
       <div class="draft-bans">
         ${mine?`<button type="button" class="draft-ban-target" data-draft-target="ban" aria-pressed="${active==="ban"}">Bans ${active==="ban"?'<span class="draft-editing">Editando</span>':""}</button>`:'<div class="draft-phase">Bans</div>'}
-        <div class="bans" role="group" aria-label="Bans da primeira e da segunda fase">${[0,1,2].map(banSq).join("")}<span class="bgap"></span>${[3,4].map(banSq).join("")}</div>
+        <div class="bans"${mine?` data-champion-group="${t}-ban"`:""} role="group" aria-label="Bans da primeira e da segunda fase">${[0,1,2].map(banSq).join("")}<span class="bgap"></span>${[3,4].map(banSq).join("")}</div>
       </div>
       <div class="draft-phase">Picks · Fase 1</div>
       ${[0,1,2].map(pick).join("")}
@@ -76,6 +76,6 @@ export function draftHTML(c, { active, compositions, LN, img, esc, pickArt }){
     </div>
     ${team("R")}</div>`;
   const extra=c.lanes.ban.slice(5);
-  if(extra.length)h+=`<div class="lbl">Bans alternativos</div><div class="alts" data-l="ban">${extra.map((n,j)=>mini(n,"ban",j+5)).join("")}</div>`;
+  h+=`<div data-champion-group="${us}-ban-alternatives"${extra.length?"":" hidden"}>${extra.length?`<div class="lbl">Bans alternativos</div><div class="alts" data-l="ban">${extra.map((n,j)=>mini(n,"ban",j+5)).join("")}</div>`:""}</div>`;
   return h;
 }

@@ -66,14 +66,10 @@ function compDraft(game: (typeof DATA.comps)[number], panelId: string) {
       const actions = turns.map(turn => {
         const side = turn === 0 ? first : second;
         number++;
-        const highlight = number === 7 ? "First pick" : number === 20 ? "Last pick" : "";
+        const highlight = number === 7 ? "Primeiro pick" : number === 20 ? "Último pick" : "";
         return { side, markup: entry(side, draft[side][kind][next[side]++], number, label, highlight) };
       });
-      const startingSide = actions[0].side;
-      const otherSide = startingSide === "blue" ? "red" : "blue";
-      const sides = kind === "picks" && offset === 3
-        ? [otherSide, startingSide]
-        : [startingSide, otherSide];
+      const sides = ["blue", "red"] as const;
       const groups = sides.map(side => ({
         side,
         actions: actions.filter(action => action.side === side),
@@ -107,8 +103,11 @@ export function compCard(g, q, champions, index: number){
   const draft = compDraft(g, panelId);
   const hl=(text, selected=false)=>selected || (q && text.toLowerCase().includes(q)) ? `<mark>${esc(text)}</mark>` : esc(text);
   const team=(name, color, won)=>`<div class="match-team" data-side="${color}">
-    ${teamLogo(name)}
-    <strong class="match-team-name">${esc(name)}${won?`&nbsp;<span class="match-winner" role="img" aria-label="Vencedor" title="Vencedor">${iconMarkup("check")}</span>`:""}</strong>
+    <span class="match-team-crest" aria-hidden="true">${teamLogo(name)}</span>
+    <div class="match-team-label">
+      <strong class="match-team-name" title="${esc(name)}">${esc(name)}</strong>
+      <small class="match-team-result"${won ? " data-winner" : ""}>${won ? "Vitória" : "Derrota"}</small>
+    </div>
   </div>`;
   const side=(champion, player, kda, right)=>{
     const pick=`<td class="match-pick"><div class="match-champion">

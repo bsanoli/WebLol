@@ -13,6 +13,7 @@ import { lolKey } from "@/entities/champion"
 import { ico } from "@/entities/champion"
 import { LANES, esc, championSlug, teamLogo, teamRegion } from "@/entities/match"
 import { enhanceAnalyticsUI } from "@/shared/lib/analytics-dom";
+import { revealContent } from "@/shared/lib/motion";
 let compActionsRoot, compStageRoot;
 const compositionPopovers = [];
 function wireFloatingPicker(trigger, picker, search) {
@@ -200,12 +201,16 @@ function wireComps(publishWorlds){
     closeDraft = showDialog({ title: "Detalhes da partida e draft", children: content,
       className: "match-dialog", initialFocus: () => closeButton });
     const modeButtons = panel.querySelectorAll<HTMLButtonElement>("[data-draft-mode]");
+    const draftViews = panel.querySelectorAll<HTMLElement>(".match-draft-team-view, .match-draft-order-view");
     for (const mode of modeButtons) {
       mode.onclick = () => {
+        if (mode.getAttribute("aria-pressed") === "true") return;
         const chronological = mode.dataset.draftMode === "order";
         for (const button of modeButtons) button.setAttribute("aria-pressed", String(button === mode));
-        for (const view of panel.querySelectorAll<HTMLElement>(".match-draft-team-view")) view.hidden = chronological;
-        for (const view of panel.querySelectorAll<HTMLElement>(".match-draft-order-view")) view.hidden = !chronological;
+        for (const view of draftViews) {
+          view.hidden = view.classList.contains("match-draft-team-view") === chronological;
+          if (!view.hidden) revealContent(view, true);
+        }
       };
     }
   };
@@ -301,7 +306,10 @@ function wireComps(publishWorlds){
   };
   const publish = (replace = false) => publishWorlds("comps", [], {time:cTeam, fase:cSt, busca:cQ, campeoes:[...cChamps].join(","), vitorias:cWinsOnly ? "1" : ""}, replace);
   const updateResults = () => {
+    const count = document.getElementById("cn");
+    const previousSummary = count.textContent;
     draw();
+    if (count.textContent !== previousSummary) revealContent(count, true);
     enhanceAnalyticsUI();
     publish();
   };

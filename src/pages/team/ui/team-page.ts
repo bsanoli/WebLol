@@ -11,6 +11,7 @@ import { createCompositionCopy } from "../model/composition"
 import WS from "../api/worlds-champion-stats.json"
 import { KEY, uid, blank, loadTeamState } from "../model/local-state"
 import { DRAFT_SIDE, PICKNAME, compositionPreview, draftHTML, draftOf, sideDot } from "./draft"
+import { capturePickFeedback } from "./pick-feedback"
 import { mountKnowledge } from "@/widgets/team-knowledge"
 import { mountTacticalMap } from "@/widgets/tactical-map"
 
@@ -161,7 +162,7 @@ async function deleteComp(id){const c=S.comps.find(c=>c.id===id);if(!c || !await
 /* ===== Editor ===== */
 function optionHTML(n,l,i){
   return `<div class="chip ${i===0?"primary":"alternative"}" draggable="true" data-n="${esc(n)}" data-from="${l}">
-    <button class="champ-priority" data-priority="${esc(n)}" data-lane="${l}" aria-label="Priorizar ${esc(n)} em ${LN[l].n}" title="${i+1}ª opção · tornar principal">${img(n)}${i===0?`<span><small>Principal</small><b>${esc(n)}</b></span>`:""}</button>
+    <button class="champ-priority" data-champion-slot="${i}" data-champion-name="${esc(n)}" data-priority="${esc(n)}" data-lane="${l}" aria-label="Priorizar ${esc(n)} em ${LN[l].n}" title="${i+1}ª opção · tornar principal">${img(n)}${i===0?`<span><small>Principal</small><b>${esc(n)}</b></span>`:""}</button>
     <span class="option-menu" data-team-control data-option-index="${i}"></span>
   </div>`;
 }
@@ -188,11 +189,15 @@ const markCompNotes=()=>$("#composition-notes")?.classList.toggle("has-notes",ha
 function renderEditor(){
   const previousComposition = $("#editor").dataset.motionComposition;
   const c=cur(),dv=S.view==="draft";
+  const view = dv ? "draft" : "lanes";
+  const previousView = $("#editor").dataset.motionView;
   const notesOpen=$("#composition-notes")?.open;
   $("#v-comps").classList.toggle("draft-view",dv);
   $("#draft-comp").hidden=true;
   const notes=`<details id="composition-notes" ${notesOpen?"open":""} class="${hasCompNotes(c,dv)?"has-notes":""}"><summary>Anotações da composição<span class="notes-flag" aria-label="tem anotação" title="Esta comp tem anotação">${iconMarkup("edit")}</span></summary><label class="control-label" for="notes">Plano geral</label><textarea id="notes" placeholder="Plano de jogo, condição de vitória…">${esc(c.notes)}</textarea>${dv?`<label class="control-label" for="dnote">Plano do draft · ${DRAFT_SIDE[draftOf(c).side]}</label><textarea id="dnote">${esc(draftOf(c).note[draftOf(c).side])}</textarea><ul id="notes-lanes" class="draft-lane-notes" aria-label="Observações por posição" hidden></ul>`:""}</details>`;
   const editor = $("#editor");
+  const showPickFeedback = previousComposition === c.id && previousView === view
+    ? capturePickFeedback(editor) : undefined;
   $("#cname").value = c.name;
   mountSectionTabs($(".editor-controls .vtog"), "Modo da composição", S.view || "lanes", [
     { value: "lanes", label: "Opções por posição", panel: "composition-panel" },
@@ -214,7 +219,7 @@ function renderEditor(){
   ${dv?draftHTML(c, { active, compositions: S.comps, LN, img, esc, pickArt }):LANES.map(l=>`<div class="lane${active===l.k?" act":""}${l.k==="ban"?" ban-strip":""}" data-l="${l.k}" style="--lc:var(${l.c})">
   ${l.k==="ban"?"":pickArt(c.lanes[l.k][0])}
   <button class="ln lane-label" data-draft-target="${l.k}" aria-pressed="${active===l.k}">${laneIconMarkup(l.k)}${l.n}</button>
-  <div class="chips">${c.lanes[l.k].map((n,i)=>optionHTML(n,l.k,i)).join("")||'<span class="empty">Adicionar campeão</span>'}</div>
+  <div class="chips" data-champion-group="${l.k}">${c.lanes[l.k].map((n,i)=>optionHTML(n,l.k,i)).join("")||'<span class="empty">Adicionar campeão</span>'}</div>
 <span class="lane-note" data-team-control data-note-lane="${l.k}"></span></div>`).join("")}
   <p class="help">${dv?"Clique no retrato para torná-lo principal, arraste para reordenar e use o botão direito para excluir.":"Clique no retrato para priorizar. Arraste para reordenar ou use o menu ⋯ de cada campeão."}</p></div>`);
   editor.querySelectorAll(".option-menu").forEach(host=>{
@@ -240,7 +245,10 @@ function renderEditor(){
   $("#grid").scrollTop=gridScroll;
   renderTarget();
   editor.dataset.motionComposition = c.id;
+  editor.dataset.motionView = view;
   if (previousComposition !== c.id) revealContent(editor);
+  else if (previousView !== view) revealContent(editor, true);
+  else showPickFeedback?.();
 }
 const touch=()=>{cur().updated=Date.now()};
 $("#v-comps").addEventListener("input",e=>{
@@ -428,13 +436,13 @@ function showTeamView(view) {
   if(view==="cap")renderCaptain();
 }
 
-function publishTeamRoute(view, {includeItem = true, copy = false} = {}) {
+function publishTeamRoute(view, {includeItem = true, onCopy = undefined} = {}) {
   $("#route-note").hidden=true;
   let path="/time/"+teamPages[view];
   if(view==="know")path+="/"+(guides[S.kTab]||guides.obj);
   if(includeItem && view==="comps")path+="/"+encodeURIComponent(S.cur)+"?modo="+(S.view==="draft"?"draft":"lane");
   if(includeItem && view==="map")path+="/"+encodeURIComponent(S.curPlay);
-  window.frameElement?.dispatchEvent(new CustomEvent("weblol:navigate",{detail:{path, copy}}));
+  window.frameElement?.dispatchEvent(new CustomEvent("weblol:navigate",{detail:{path, onCopy}}));
 }
 
 /* ===== Gestão do time (todo o time vê; só o capitão e admins agem; os dados vêm do app principal) ===== */
@@ -493,8 +501,29 @@ teamNav.forEach(button=>button.onclick=()=>{
   showTeamView(view);
   publishTeamRoute(view,{includeItem:false});
 });
-$("#copy-comp").onclick=()=>publishTeamRoute("comps",{copy:true});
-$("#copy-play").onclick=()=>publishTeamRoute("map",{copy:true});
+function wireCopyButton(button: HTMLButtonElement, view: "comps" | "map") {
+  const icon = button.querySelector("use");
+  const original = icon.getAttribute("href");
+  let request = 0;
+  let resetTimer: number;
+  const reset = () => {
+    icon.setAttribute("href", original);
+    button.removeAttribute("data-link-copied");
+  };
+  button.onclick = () => {
+    const attempt = ++request;
+    clearTimeout(resetTimer);
+    reset();
+    publishTeamRoute(view, { onCopy: () => {
+      if (attempt !== request) return;
+      icon.setAttribute("href", "assets/icons.svg#check");
+      button.setAttribute("data-link-copied", "");
+      resetTimer = window.setTimeout(reset, 1600);
+    } });
+  };
+}
+wireCopyButton($("#copy-comp"), "comps");
+wireCopyButton($("#copy-play"), "map");
 
 /* ===== Início ===== */
 const getState = () => S;

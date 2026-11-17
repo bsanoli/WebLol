@@ -240,6 +240,30 @@
   gap: var(--wl-space-1);
   font-size: 12px;
 }
+@media (prefers-reduced-motion: no-preference) {
+  .builds-page :is(.worlds-detail-action, .build-route, .build-matchup-more, .build-timeline-source) > svg {
+    transition: translate var(--wl-motion-fast) var(--wl-motion-ease);
+  }
+  .builds-page .build-route { --build-action-shift: -3px 0; }
+  .builds-page .build-matchup-more[data-show-matchup-page] { --build-action-shift: 0 3px; }
+  .builds-page .build-timeline-source { --build-action-shift: 2px -2px; }
+  .builds-page :is(.worlds-detail-action, .build-route, .build-matchup-more, .build-timeline-source):focus-visible > svg {
+    translate: var(--build-action-shift, 3px 0);
+  }
+  @media (hover: hover) and (pointer: fine) {
+    .builds-page :is(.worlds-detail-action, .build-route, .build-matchup-more, .build-timeline-source):hover > svg {
+      translate: var(--build-action-shift, 3px 0);
+    }
+  }
+  /* Only the purchases revealed by "Todas as compras" enter. */
+  .build-timeline-games[data-view="all"] :is(
+    .build-timeline-minute:not([data-major]),
+    .build-timeline-minute[data-major] > .build-timeline-item:not([data-kind="major"])
+  ) {
+    transition: opacity var(--wl-motion-normal) var(--wl-motion-ease);
+    @starting-style { opacity: .45; }
+  }
+}
 .build-card-heading {
   display: flex;
   flex-wrap: wrap;
@@ -250,16 +274,23 @@
   padding-bottom: var(--wl-space-4);
   border-bottom: 1px solid var(--build-divider);
 }
-.build-card-heading h3 {
+.build-card-identity {
   display: flex;
   align-items: center;
-  gap: var(--wl-space-2);
-  margin: 0;
-  font-size: 20px;
+  gap: var(--wl-space-3);
+  min-width: 0;
 }
-.build-card-heading .av {
-  width: var(--wl-space-8);
-  height: var(--wl-space-8);
+.build-card-identity h3 {
+  margin: 0;
+  font-family: var(--wl-font-display);
+  font-size: var(--wl-title-size);
+  line-height: 1;
+  overflow-wrap: anywhere;
+}
+.build-card-identity > .av {
+  flex: none;
+  width: var(--wl-space-12);
+  height: var(--wl-space-12);
   margin: 0;
 }
 .build-card-meta {
@@ -271,6 +302,16 @@
   color: var(--muted);
   font-size: 13px;
 }
+.build-card-source {
+  color: var(--wl-accent);
+  font-weight: 700;
+}
+.build-card-position {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--wl-space-1);
+}
+.build-card-position .lane-icon { width: var(--wl-space-4); height: var(--wl-space-4); }
 .build-card-filters {
   display: flex;
   flex-wrap: wrap;

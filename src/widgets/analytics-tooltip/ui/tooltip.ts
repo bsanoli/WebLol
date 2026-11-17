@@ -5,8 +5,18 @@ import { effectText } from "../model/effect-text"
 
 const tipEl = () => document.getElementById("tip");
 const tipSelector = "[data-game-tip], [data-tip]";
+const hoverDelay = 250;
+const warmWindow = 300;
 let tipTarget, dismissedGameTip;
 let definitionTerm;
+let pendingHover: { target: HTMLElement; timer: number } | undefined;
+let warmUntil = 0;
+
+function cancelPendingHover() {
+  if (!pendingHover) return;
+  window.clearTimeout(pendingHover.timer);
+  pendingHover = undefined;
+}
 function hideDefinition() {
   if (!definitionTerm) return;
   definitionTerm.removeAttribute("aria-describedby");
@@ -36,12 +46,15 @@ function showDefinition(term) {
   definition.style.top = Math.max(8, Math.min(top, innerHeight - height - 8)) + "px";
 }
 export function hideTip() {
+  cancelPendingHover();
+  warmUntil = 0;
   hideDefinition();
   if (tipTarget?.dataset.gameTip) tipTarget.removeAttribute("aria-describedby");
   tipEl().hidden = true;
   tipTarget = undefined;
 }
 function showTip(target, x, y) {
+  cancelPendingHover();
   const el = tipEl();
   const { tip, gameTip } = target.dataset;
   if (gameTip && tipTarget === target && !el.hidden) return;
@@ -101,18 +114,46 @@ function showTip(target, x, y) {
   el.style.left = Math.max(8, left) + "px";
   el.style.top = Math.max(8, top) + "px";
 }
-document.addEventListener("mousemove", e => {
+// Warm Tooltip (React Bits): the first pointer tooltip waits, then nearby
+// targets open immediately while the group is warm.
+// https://www.reactbits.dev/micro/warm-tooltip
+function handleTooltipMouseMove(e: MouseEvent) {
+  if (!(e.target instanceof Element)) return;
   if (tipEl().contains(e.target)) {
     const term = e.target.closest(".effect-term");
     if (term) showDefinition(term);
     return;
   }
   if (definitionTerm !== document.activeElement) hideDefinition();
-  const target = e.target.closest?.(tipSelector);
+  const target = e.target.closest<HTMLElement>(tipSelector);
   if (target && target === dismissedGameTip) return;
   dismissedGameTip = undefined;
-  if (target) showTip(target, e.clientX, e.clientY);
-  else hideTip();
+  const gameTipOpen = tipTarget?.hasAttribute("data-game-tip") && !tipEl().hidden;
+  if (!target || !target.hasAttribute("data-game-tip")) {
+    const nextWarmUntil = gameTipOpen ? performance.now() + warmWindow : warmUntil;
+    if (target) showTip(target, e.clientX, e.clientY);
+    else hideTip();
+    warmUntil = nextWarmUntil;
+    return;
+  }
+  if (gameTipOpen || performance.now() < warmUntil) {
+    showTip(target, e.clientX, e.clientY);
+    return;
+  }
+  if (pendingHover?.target === target) return;
+  hideTip();
+  const timer = window.setTimeout(() => {
+    pendingHover = undefined;
+    if (target.isConnected && target.matches(":hover")) showTip(target);
+  }, hoverDelay);
+  pendingHover = { target, timer };
+}
+document.addEventListener("mousemove", handleTooltipMouseMove);
+document.addEventListener("mouseout", e => {
+  if (e.relatedTarget) return;
+  const nextWarmUntil = tipTarget?.hasAttribute("data-game-tip") ? performance.now() + warmWindow : warmUntil;
+  hideTip();
+  warmUntil = nextWarmUntil;
 });
 document.addEventListener("focusin", e => {
   if (tipEl().contains(e.target)) {
@@ -157,6 +198,7 @@ document.addEventListener("keydown", e => {
   if (e.key !== "Escape") return;
   if (panel.contains(e.target)) tipTarget?.focus({preventScroll: true});
   if (tipTarget?.dataset.gameTip) dismissedGameTip = tipTarget;
+  else if (pendingHover) dismissedGameTip = pendingHover.target;
   hideTip();
 });
 document.addEventListener("scroll", e => {

@@ -28,10 +28,19 @@ const clone=o=>JSON.parse(JSON.stringify(o));
   <circle cx="31" cy="28" r="4" fill="#5b3f8f" stroke="#a37bff" stroke-width=".4"/><text x="31" y="28.7" font-size="1.9" text-anchor="middle" fill="#fff">Barão</text>
   <circle cx="69" cy="72" r="4" fill="#7a4a1e" stroke="#ff9d4d" stroke-width=".4"/><text x="69" y="72.7" font-size="1.9" text-anchor="middle" fill="#fff">Dragão</text>`;
 })();
-function setMapImg(){const im=$("#mapimg");if(getState().useImg===false){im.style.display="none";return}
-  im.onload=()=>{if(getState().useImg!==false)im.style.display="block"};im.onerror=()=>{im.style.display="none"};
-  if(im.getAttribute("src")!==lolAsset(LOL_DATA.map))im.src=lolAsset(LOL_DATA.map);
-  else if(im.complete&&im.naturalWidth)im.style.display="block"}
+function setMapImg() {
+  const image = $("#mapimg");
+  const syncMapImage = () => {
+    image.toggleAttribute("data-map-visible", getState().useImg !== false && image.complete && image.naturalWidth > 0);
+  };
+  if (getState().useImg !== false) {
+    const source = lolAsset(LOL_DATA.map);
+    image.onload = syncMapImage;
+    image.onerror = syncMapImage;
+    if (image.getAttribute("src") !== source) image.src = source;
+  }
+  syncMapImage();
+}
 function renderMapImageSwitch(){
   mountMapImageSwitch($("#map-image-control"),getState().useImg!==false,checked=>{
     getState().useImg=checked;

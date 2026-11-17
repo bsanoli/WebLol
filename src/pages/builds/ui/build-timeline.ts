@@ -1,11 +1,13 @@
-import { games } from "@dataset/build-timeline"
+import type { games } from "@dataset/build-timeline"
 import { bootItems, isCompletedItem, itemIcon, itemName } from "./build-details"
 import { directOpponent } from "../model/build-statistics"
 import { ico } from "@/entities/champion"
 import { championSlug, esc } from "@/entities/match"
 import { DATASET, isReference } from "@/shared/config/dataset"
+import { revealContent } from "@/shared/lib/motion"
 
-type Game = (typeof games)[number]
+export type TimelineGame = (typeof games)[number]
+type Game = TimelineGame
 type Player = Game["players"][number]
 type Entry = { game: Game; player: Player; opponent?: Player; won: boolean }
 
@@ -26,9 +28,10 @@ function stageLabel(game: Game, player: Player) {
 /** Itens que contam como "completos" na visão resumida: itens finais e botas. */
 const isMajor = (item: number) => isCompletedItem(item) || bootItems.has(item);
 
-function entriesFor(champion: string, lane: string, opponent: string): Entry[] {
+function entriesFor(games: TimelineGame[], champion: string, lane: string, opponent: string): Entry[] {
   return games.flatMap(game => game.players
-    .filter(player => !isReference(player) && player.champion === champion && (!lane || player.role === lane))
+    .filter(player => !isReference(player) && player.champion === champion && (!lane || player.role === lane)
+      && player.itemEventsByMinute?.some(([, items]) => Array.isArray(items) && items.length > 0))
     .map(player => {
       const side = player.side as "blue" | "red";
       return {
@@ -125,11 +128,11 @@ function gameRow({ game, player, opponent, won }: Entry) {
   </li>`;
 }
 
-export function renderBuildTimeline(section: HTMLElement) {
+export function renderBuildTimeline(section: HTMLElement, games: TimelineGame[]) {
   const { buildTimeline: champion = "", lane = "", opponent = "" } = section.dataset;
-  const entries = entriesFor(champion, lane, opponent);
+  const entries = entriesFor(games, champion, lane, opponent);
   if (!entries.length) {
-    section.innerHTML = '<p class="na">Sem compras registradas.</p>';
+    section.innerHTML = '<header class="build-timeline-header"><h4>Compras jogo a jogo</h4></header><p class="na" role="status">Sem compras registradas.</p>';
     return;
   }
   let visible = Math.min(gamesPerPage, entries.length);
@@ -159,6 +162,7 @@ export function renderBuildTimeline(section: HTMLElement) {
     visible = Math.min(start + gamesPerPage, entries.length);
     list.insertAdjacentHTML("beforeend", entries.slice(start, visible).map(gameRow).join(""));
     count.textContent = status();
+    for (const row of Array.from(list.children).slice(start)) revealContent(row, true);
     const firstAdded = list.children[start] as HTMLElement;
     firstAdded.tabIndex = -1;
     firstAdded.focus();

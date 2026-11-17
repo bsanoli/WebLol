@@ -34,7 +34,12 @@ function developmentDatasets(): Plugin {
     },
     load(id) {
       if (!id.startsWith("\0" + prefix)) return
-      const name = id.slice(prefix.length + 1) as keyof typeof datasets.worlds
+      const datasetName = id.slice(prefix.length + 1)
+      if (datasetName === "build-timeline-url") {
+        return `export default document.body.dataset.dataset === "soloq"
+          ? "/${datasets.soloq["build-timeline"]}" : "/${datasets.worlds["build-timeline"]}";`
+      }
+      const name = datasetName as keyof typeof datasets.worlds
       const worlds = datasets.worlds[name]
       const soloq = datasets.soloq[name]
       if (!worlds || !soloq) return
@@ -74,7 +79,10 @@ export default defineConfig(({ command, mode }) => {
     resolve: {
       alias: [
         ...(command === "build"
-          ? Object.entries(dataset).map(([name, path]) => ({ find: `@dataset/${name}`, replacement: src(path) }))
+          ? [
+              ...Object.entries(dataset).map(([name, path]) => ({ find: `@dataset/${name}`, replacement: src(path) })),
+              { find: "@dataset/build-timeline-url", replacement: src(dataset["build-timeline"]) + "?url" },
+            ]
           : []),
         { find: "@", replacement: src("") },
       ],

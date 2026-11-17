@@ -149,9 +149,15 @@ details:not([open])::details-content { pointer-events: none; }
 @starting-style { #tip:not([hidden]) { opacity: 0; } }
 .toast {
   translate: 0 var(--wl-motion-distance);
-  transition: opacity var(--wl-motion-normal) ease, translate var(--wl-motion-normal) var(--wl-motion-ease);
+  scale: .98;
+  transition: opacity var(--wl-motion-fast) ease,
+    translate var(--wl-motion-fast) var(--wl-motion-ease), scale var(--wl-motion-fast) var(--wl-motion-ease);
 }
-.toast.on { translate: 0 0; }
+.toast.on {
+  translate: 0 0;
+  scale: 1;
+  transition-duration: var(--wl-motion-panel);
+}
 .saved, .sstat .ok { transition: opacity var(--wl-motion-normal) ease; }
 #sync-label { transition: color var(--wl-motion-fast) ease; }
 

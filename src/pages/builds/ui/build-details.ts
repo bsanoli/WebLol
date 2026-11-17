@@ -223,20 +223,14 @@ function buildHtml(champion: Champion, lane: string, withTimeline: boolean, oppo
       </div>
     </div>
     ${withTimeline ? `<section class="build-timeline" data-build-timeline="${esc(champion.name)}" data-lane="${esc(lane)}" data-opponent="${esc(opponent)}" aria-label="Compras jogo a jogo">
-      <p class="build-data-sample">Carregando compras jogo a jogo…</p>
+      ${buildTimelineLoading()}
     </section>` : ""}`;
 }
 
-/** Preenche as seções "Compras jogo a jogo" de `root`; os dados por jogo ficam num arquivo separado. */
-export async function hydrateBuildTimelines(root: ParentNode) {
-  const sections = [...root.querySelectorAll<HTMLElement>("[data-build-timeline]:not([data-ready])")];
-  if (!sections.length) return;
-  const { renderBuildTimeline } = await import("./build-timeline");
-  for (const section of sections) {
-    if (!section.isConnected || section.hasAttribute("data-ready")) continue;
-    section.dataset.ready = "";
-    renderBuildTimeline(section);
-  }
+export function buildTimelineLoading() {
+  return `<header class="build-timeline-header"><h4>Compras jogo a jogo</h4></header>
+    <p class="build-data-sample" role="status">Carregando compras jogo a jogo…</p>
+    <div class="build-timeline-placeholder" aria-hidden="true"><span></span><span></span></div>`;
 }
 
 /** `withTimeline`: mostra "Compras jogo a jogo" (só na página do campeão). */

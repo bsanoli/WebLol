@@ -3,9 +3,25 @@ import { iconMarkup, laneIconMarkup } from "@/shared/ui/icon"
 import DATA from "@dataset/summary"
 import { lolAsset, lolChampion } from "@/entities/champion"
 import { ico } from "@/entities/champion"
-import { LANES, pct, wrPill, esc } from "@/entities/match"
+import { LANES, pct, wrPill, esc, teamLogo } from "@/entities/match"
+import { confirmedFinalSeries } from "../model/final-series"
 
 const G=DATA.games, C=DATA.champs;
+export function renderWorldsFinal() {
+  const scoreboard = document.getElementById("worlds-final");
+  if (!scoreboard) return;
+  const final = confirmedFinalSeries(DATA.comps);
+  if (!final) return;
+  const { winner, runnerUp, score } = final;
+  scoreboard.innerHTML = `<h2>Final do Worlds</h2>
+    <div class="worlds-final-score">
+      <div class="worlds-final-team">${teamLogo(winner)}<span><strong>${esc(winner)}</strong><small>Campeã</small></span></div>
+      <strong class="worlds-final-result">${score[0]} <span>×</span> ${score[1]}</strong>
+      <div class="worlds-final-team">${teamLogo(runnerUp)}<strong>${esc(runnerUp)}</strong></div>
+    </div>`;
+  scoreboard.dataset.confirmed = "";
+}
+
 export function renderKpis() {
 // KPIs
 const topBan=[...C].sort((a,b)=>b.bans-a.bans)[0], topPick=[...C].sort((a,b)=>b.picks-a.picks)[0];

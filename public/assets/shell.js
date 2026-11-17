@@ -474,7 +474,7 @@ for (const frame of frames) {
     writeRoute(detail.path, detail.replace);
     const route = readRoute();
     if (route.screen !== currentScreen || route.frame !== currentFrame) openRoute();
-    if (detail.copy) void copyCurrentLink();
+    if (detail.onCopy) void copyCurrentLink(detail.onCopy);
   });
 }
 
@@ -504,15 +504,17 @@ function openRoute() {
 }
 
 addEventListener("hashchange", () => openRoute());
-async function copyCurrentLink() {
+async function copyCurrentLink(onCopy) {
   const url = new URL(location.href);
   if (!readRoute().screen) url.hash = routeRoots[currentScreen];
   try {
     await navigator.clipboard.writeText(url.href);
-    toast("Link copiado");
   } catch {
     prompt("Copie o endereço desta tela", url.href);
+    return;
   }
+  onCopy();
+  toast("Link copiado");
 }
 
 async function loadScreen(name) {

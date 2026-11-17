@@ -4,6 +4,8 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/shar
 import { Button } from "@/shared/ui/button"
 import { ChevronDown, ChevronUp } from "lucide-react"
 import { useEffect, useId, useRef, useState } from "react"
+import { CountUp } from "./count-up"
+import { AnimatedRankingRow } from "./animated-ranking-row"
 
 export interface ChampionSummary {
   name: string
@@ -21,7 +23,7 @@ function MetricCard({ label, value, note, portrait }: {
     <span>{label}</span>
     <strong className={portrait ? "metric-champion" : undefined}>
       {portrait && <img src={portrait} alt="" width={28} height={28} />}
-      {value}
+      {typeof value === "number" ? <CountUp value={value} /> : value}
     </strong>
     <small>{note}</small>
   </div>
@@ -61,11 +63,13 @@ function RankedBars({ title, description, rows, games, sharedExpansion }: {
   const expanded = sharedExpansion?.expanded ?? localExpanded
   const listId = sharedExpansion?.listId ?? `${id}-list`
   const limit = Math.min(rows.length, 15)
+  const initialLimit = 8
   return <Card className="wl-panel analytics-panel champion-ranking" aria-labelledby={`${id}-title`}>
     <div className="analytics-heading"><h2 id={`${id}-title`}>{title}</h2><p>{description}</p></div>
     <ol className="ranked-bars" id={listId}>
-      {rows.slice(0, expanded ? limit : 8).map(({ name, portrait, segments, rate }, index) =>
-        <li key={name} data-series={segments.length}>
+      {rows.slice(0, expanded ? limit : initialLimit).map(({ name, portrait, segments, rate }, index) => {
+        const Row = index < initialLimit ? "li" : AnimatedRankingRow
+        return <Row key={name} data-series={segments.length}>
           <span className="chart-rank" aria-hidden="true">{index + 1}</span>
           <span className="chart-name">{portrait && <img src={portrait} alt="" loading="lazy" />}<b>{name}</b></span>
           <RankedBarTrack segments={segments} games={games} />
@@ -75,10 +79,10 @@ function RankedBars({ title, description, rows, games, sharedExpansion }: {
             <TooltipTrigger asChild><strong className="chart-value" tabIndex={0}>{percent(rate)}</strong></TooltipTrigger>
             <TooltipContent>{segments.map(segment => `${segment.count} ${segment.label}`).join(" · ")}</TooltipContent>
           </Tooltip></TooltipProvider>
-        </li>
-      )}
+        </Row>
+      })}
     </ol>
-    <div className="chart-footer"><span>{games} jogos no total</span>{!sharedExpansion && limit > 8 &&
+    <div className="chart-footer"><span>{games} jogos no total</span>{!sharedExpansion && limit > initialLimit &&
       <Button className="cursor-pointer" variant="outline" size="sm" aria-controls={listId} aria-expanded={expanded}
         onClick={() => setLocalExpanded(value => !value)}>
         {expanded ? "Mostrar menos" : "Mostrar mais campeões"}

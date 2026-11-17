@@ -1,1 +1,1 @@
-export { championSummaries, overview, renderKpis, wireLaneOverview } from "./ui/overview"
+export { championSummaries, overview, renderKpis, renderWorldsFinal, wireLaneOverview } from "./ui/overview"

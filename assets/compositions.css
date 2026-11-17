@@ -434,3 +434,25 @@ summary::-webkit-details-marker { display:none; }
 @media (min-width: 1100px) {
   #v-comps #comps { grid-template-rows: auto minmax(0, 1fr); }
 }
+@media (prefers-reduced-motion: no-preference) {
+  #editor [data-pick-feedback] {
+    animation: team-pick-feedback var(--wl-motion-normal) var(--wl-motion-ease);
+  }
+  @keyframes team-pick-feedback {
+    from { opacity: .5; }
+  }
+  #editor [data-pick-feedback="removed"] {
+    animation-name: team-pick-removed;
+  }
+  @keyframes team-pick-removed {
+    from { box-shadow: 0 0 0 1px var(--wl-accent); }
+    to { box-shadow: 0 0 0 1px transparent; }
+  }
+  #grid .ch .champ-portrait {
+    transition: transform var(--wl-motion-normal) var(--wl-motion-ease);
+  }
+  #grid .ch:focus-visible .champ-portrait { transform: scale(1.13); }
+  @media (hover: hover) and (pointer: fine) {
+    #grid .ch:hover .champ-portrait { transform: scale(1.13); }
+  }
+}

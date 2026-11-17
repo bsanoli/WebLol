@@ -7,14 +7,26 @@ import { ExistingContent } from "@/shared/ui/dialog-controls"
 import { animate } from "motion"
 import { flushSync } from "react-dom"
 import { iconMarkup, laneIconMarkup } from "@/shared/ui/icon"
-import { buildDetails, buildGameCount, buildLaneHighlights, buildMatchesQuery, buildMatchups, buildsTable, hydrateBuildTimelines, MATCHUP_PAGE_SIZE } from "./build-details"
-import { buildOpponentOptions } from "../model/build-statistics"
+import { buildDetails, buildGameCount, buildLaneHighlights, buildMatchesQuery, buildMatchups, buildsTable, MATCHUP_PAGE_SIZE } from "./build-details"
+import { hydrateBuildTimelines } from "./load-build-timeline"
+import { buildOpponentOptions, championBuild } from "../model/build-statistics"
 import { WorldsOpponentSelect } from "./opponent-select"
 import { ico } from "@/entities/champion"
 import { LANES, wrPill, esc, championSlug } from "@/entities/match"
 import DATA from "@dataset/summary"
 import { DATASET } from "@/shared/config/dataset"
 import { enhanceAnalyticsUI, showSort } from "@/shared/lib/analytics-dom";
+import { revealContent } from "@/shared/lib/motion"
+
+function showBuildOption(panels: NodeListOf<HTMLElement>, dataKey: "runeView" | "skillPanel", value: string) {
+  for (const panel of panels) {
+    const show = panel.dataset[dataKey] === value;
+    const wasHidden = panel.hidden;
+    panel.hidden = !show;
+    if (show && wasHidden) revealContent(panel, true);
+  }
+}
+
 document.addEventListener("click", event => {
   const button = event.target.closest?.("[data-rune-tree-option]");
   if (!button) return;
@@ -22,9 +34,7 @@ document.addEventListener("click", event => {
   tree.querySelectorAll("[data-rune-tree-option]").forEach(option => {
     option.setAttribute("aria-pressed", String(option === button));
   });
-  tree.querySelectorAll("[data-rune-view]").forEach(view => {
-    view.hidden = view.dataset.runeView !== button.dataset.runeTreeOption;
-  });
+  showBuildOption(tree.querySelectorAll("[data-rune-view]"), "runeView", button.dataset.runeTreeOption);
 });
 const { games: G, champs: C } = DATA;
 let buildChampion = "", buildQuery = "", buildOpponent = "";
@@ -122,7 +132,7 @@ function wireBuilds({ publishWorlds, buildsPath }){
       buildControlRoots.set(host, root);
       const select = value => {
         if (!value) return;
-      for (const panel of panels) panel.hidden = panel.dataset.skillPanel !== value;
+        showBuildOption(panels, "skillPanel", value);
         root.render(createElement(ToggleGroup, {
           type: "single", value, spacing: 1, "aria-label": "Sequências mais frequentes", onValueChange: select,
         }, options.map(option => createElement(ToggleGroupItem, {
@@ -145,15 +155,20 @@ function wireBuilds({ publishWorlds, buildsPath }){
       ? `<section class="build-context build-context-inline" aria-label="Confrontos da build">${buildMatchups(champion, position)}</section>`
       : "";
     const selectedOpponent = opponents.find(opponent => opponent.slug === buildOpponent);
-    const gameCount = selectedOpponent?.games ?? buildGameCount(champion, position);
+    const gameCount = selectedOpponent?.games ?? championBuild(champion, position)?.games;
     const multiplePositions = Object.values(champion.lanes).filter(lane => lane.picks).length > 1;
     const positionLabel = position || (multiplePositions ? "Todas as posições" : champion.main);
     const heading = pageSlug ? "" : `<header class="build-card-heading">
-        <div>
-          <h3>${ico(champion.name)}${esc(champion.name)}</h3>
-          <div class="build-card-meta">
-            <span>${DATASET.label} · ${gameCount} ${gameCount === 1 ? "jogo" : "jogos"} · ${esc(positionLabel)}</span>
-            ${selectedOpponent ? "" : `<span class="build-winrate">${wrPill(champion.wins,champion.picks)} <small>de vitórias ${DATASET.scope}</small></span>`}
+        <div class="build-card-identity">
+          ${ico(champion.name)}
+          <div>
+            <h3>${esc(champion.name)}</h3>
+            <div class="build-card-meta">
+              <span class="build-card-source">${DATASET.label}</span>
+              <span class="build-card-position">${laneIconMarkup(position)}${esc(positionLabel)}</span>
+              ${gameCount === undefined ? "" : `<span>Amostra de ${gameCount} ${gameCount === 1 ? "jogo" : "jogos"}</span>`}
+              ${selectedOpponent ? "" : `<span class="build-winrate">${wrPill(champion.wins,champion.picks)} <small>de vitórias ${DATASET.scope}</small></span>`}
+            </div>
           </div>
         </div>
         <div class="build-card-filters">
@@ -202,7 +217,7 @@ function wireBuilds({ publishWorlds, buildsPath }){
       ? championCard(champion, position, undefined, opponents)
       : matches.length ? buildsTable(matches, bLane) : "";
     const back = buildChampion ? `<div class="build-back">
-      <button data-slot="button" data-variant="outline" data-size="sm" class="build-route" data-build="">${iconMarkup("previous")} Voltar à lista de builds</button>
+      <button data-slot="button" data-variant="ghost" data-size="sm" class="build-route" data-build="">${iconMarkup("previous")} Voltar à lista de builds</button>
       ${selectedChampion && !champion ? '<div class="build-detail-lanes"></div>' : ""}
     </div>` : "";
     bc.classList.toggle("build-detail", !!buildChampion);
@@ -238,7 +253,7 @@ function wireBuilds({ publishWorlds, buildsPath }){
       }));
     }
     enhanceAnalyticsUI();
-    void hydrateBuildTimelines(bc).then(enhanceAnalyticsUI);
+    hydrateBuildTimelines(bc);
   };
   const setExpanded = (button: HTMLButtonElement, expanded: boolean) => {
     const detail = document.getElementById(button.getAttribute("aria-controls")) as HTMLTableRowElement;
@@ -372,7 +387,10 @@ function wireBuilds({ publishWorlds, buildsPath }){
     if (page) {
       const hiddenRows = [...page.previousElementSibling.querySelectorAll("li[hidden]")];
       const nextRows = hiddenRows.slice(0, MATCHUP_PAGE_SIZE);
-      nextRows.forEach(row => { row.hidden = false; });
+      nextRows.forEach(row => {
+        row.hidden = false;
+        revealContent(row, true);
+      });
       nextRows[0]?.querySelector("button")?.focus({ preventScroll: true });
 
       const remaining = hiddenRows.length - nextRows.length;
@@ -387,6 +405,7 @@ function wireBuilds({ publishWorlds, buildsPath }){
     if (more) {
       const list = more.nextElementSibling;
       list.hidden = false;
+      revealContent(list, true);
       list.querySelector("button")?.focus({ preventScroll: true });
       more.remove();
       return;

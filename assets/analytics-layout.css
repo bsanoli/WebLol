@@ -20,7 +20,6 @@
   .tablewrap td.champ { position: sticky; left: 0; background: var(--surface); z-index: 1; }
   .cg { padding-inline: var(--wl-space-3); }
   .match-details { min-width: 0; }
-  .match-team .team-logo { width: 26px; height: 26px; }
   .match-lanes .kda-column { width: 43px; }
   .match-champion { gap: 6px; }
   .match-champion .av { width: 26px; height: 26px; }

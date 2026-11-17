@@ -19,21 +19,22 @@
 <link rel="stylesheet" href="/assets/motion.css">
 </head><body>
 <div class="wrap">
-  <header>
-    <div>
+  <header class="worlds-header">
+    <div class="worlds-heading">
       <h1>Worlds 2026</h1>
       <p class="sub">Picks, bans e desempenho por posição</p>
+      <dl class="tournament-scope">
+        <div><dt>Cobertura</dt><dd>Play-In até a final</dd></div>
+        <div><dt>Patch</dt><dd>26.20</dd></div>
+        <div><dt>Dados de</dt><dd><time datetime="2026-11-14">14/11/2026</time></dd></div>
+      </dl>
     </div>
-    <dl class="tournament-scope">
-      <div><dt>Cobertura</dt><dd>Play-In até a final</dd></div>
-      <div><dt>Patch</dt><dd>26.20</dd></div>
-      <div><dt>Dados de</dt><dd><time datetime="2026-11-14">14/11/2026</time></dd></div>
-    </dl>
+    <section id="worlds-final" class="worlds-final" hidden></section>
     <div class="kpis" id="kpis"></div>
   </header>
   <main><div id="view" tabindex="0"></div></main>
   <div id="tip" role="tooltip" hidden></div>
-  <p class="foot">Fonte: riftgraphs.com (dados do Leaguepedia). O recorte inclui a final, BLG 3 × 1 Gen.G. Win rate = vitórias ÷ jogos do campeão no torneio. Presença = (picks + bans) ÷ total de jogos. KDA = (abates + assistências) ÷ mortes, pelas médias por jogo. Os detalhes (KDA, runas, jogadores) cobrem os 44 campeões mais jogados; em alguns deles a média usa só parte dos jogos, indicado como "amostra". Campeões com menos de 5 jogos têm amostra pequena.</p>
+  <p class="foot">Fonte: riftgraphs.com (dados do Leaguepedia). Win rate = vitórias ÷ jogos do campeão no torneio. Presença = (picks + bans) ÷ total de jogos. KDA = (abates + assistências) ÷ mortes, pelas médias por jogo. Os detalhes (KDA, runas, jogadores) cobrem os 44 campeões mais jogados; em alguns deles a média usa só parte dos jogos, indicado como "amostra". Campeões com menos de 5 jogos têm amostra pequena.</p>
 </div>
 
 <script type="module" src="/app/entrypoints/worlds.ts"></script>
