@@ -206,7 +206,13 @@ nav{display:flex;gap:6px}
   --adc: var(--wl-lane-adc); --sup: var(--wl-lane-support); --ban: var(--wl-danger);
 }
 header { padding-inline: var(--wl-gutter); gap: var(--wl-space-2) var(--wl-space-4); }
-header nav { flex-wrap: wrap; gap: var(--wl-space-1); }
+.team-navigation {
+  position: relative;
+  isolation: isolate;
+  flex-wrap: wrap;
+  gap: var(--wl-space-1);
+}
+.team-navigation .icon { width: var(--wl-icon-size); height: var(--wl-icon-size); }
 .team-brand { color: var(--gold); font-weight: 700; }
 .page-head { padding: var(--wl-space-4) var(--wl-gutter) var(--wl-space-2); }
 .page-head h1 { font-size: var(--wl-title-size); margin: 0; line-height: 1.15; }

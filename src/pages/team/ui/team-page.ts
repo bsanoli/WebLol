@@ -4,19 +4,19 @@ import { iconMarkup, laneIconMarkup } from "@/shared/ui/icon"
 import { lolAsset, lolChampion, lolImage } from "@/entities/champion"
 import { clearTeamControls, mountChampionMenu, mountCompositionMenu, mountDraftChampionMenu, mountLaneNote, mountMapEmpty, mountMapImageSwitch, mountTeamSelect, mountSectionTabs, mountToolGroup } from "./team-controls"
 import { initializeTheme } from "@/shared/config/theme"
-import { initializeMotionNav, revealContent } from "@/shared/lib/motion"
+import { revealContent } from "@/shared/lib/motion"
 
 import { CH } from "../model/champion-catalog"
 import { createCompositionCopy } from "../model/composition"
 import WS from "../api/worlds-champion-stats.json"
 import { KEY, uid, blank, loadTeamState } from "../model/local-state"
 import { DRAFT_SIDE, PICKNAME, compositionPreview, draftHTML, draftOf, sideDot } from "./draft"
+import { mountTeamNavigation } from "./team-navigation"
 import { capturePickFeedback } from "./pick-feedback"
 import { mountKnowledge } from "@/widgets/team-knowledge"
 import { mountTacticalMap } from "@/widgets/tactical-map"
 
 initializeTheme()
-initializeMotionNav("header nav")
 
 const LANES=[
  {k:"top",n:"Top",c:"--top"},{k:"jg",n:"Jungle",c:"--jg"},{k:"mid",n:"Mid",c:"--mid"},
@@ -416,7 +416,7 @@ $("#imp").onchange=async e=>{
     const clean=comps.map(c=>{const b=blank(c.name);b.notes=c.notes||"";b.laneNotes=c.laneNotes||{};if(c.draft)b.draft=c.draft;b.updated=c.updated||Date.now();for(const l of LANES)b.lanes[l.k]=Array.isArray(c.lanes?.[l.k])?c.lanes[l.k].map(String):[];b.id=replace?(c.id||b.id):b.id;return b});
     S.comps=replace?clean:[...clean,...S.comps];S.cur=S.comps[0].id;
     if(Array.isArray(d.plays)){const ps=d.plays.filter(p=>p&&p.live&&Array.isArray(p.steps)).map(p=>({...p,id:replace?(p.id||uid()):uid()}));S.plays=replace?ps:[...plays(),...ps];plays()}
-    renderPlays();save();renderAll();publishTeamRoute($("nav [aria-pressed=true]")?.dataset.v || "comps");toast(`${clean.length} comp(s) importada(s)`);
+    renderPlays();save();renderAll();publishTeamRoute(currentTeamView);toast(`${clean.length} comp(s) importada(s)`);
   }catch{toast("Arquivo inválido. Use um .json exportado por esta página.")}
   finally { e.target.value=""; }
 };
@@ -424,13 +424,17 @@ $("#imp").onchange=async e=>{
 /* ===== Abas ===== */
 const teamPages = {comps:"composicoes", map:"mapa", know:"conhecimento", cap:"gestao"};
 const guides = {obj:"objetivos", wave:"wave"};
-const teamNav = [...document.querySelectorAll("header nav [data-v]")];
+let currentTeamView = "comps";
+const renderTeamNavigation = mountTeamNavigation($("#team-navigation"), handleTeamNavigation);
+
+function handleTeamNavigation(view) {
+  showTeamView(view);
+  publishTeamRoute(view, {includeItem:false});
+}
+
 function showTeamView(view) {
-  teamNav.forEach(button=>{
-    const active=button.dataset.v===view;
-    button.classList.toggle("on",active);
-    button.setAttribute("aria-pressed",active);
-  });
+  currentTeamView = view;
+  renderTeamNavigation(view, hasCaptainAccess());
   document.querySelectorAll(".view").forEach(section=>section.classList.toggle("on",section.id==="v-"+view));
   if(view==="map")renderPlays();
   if(view==="cap")renderCaptain();
@@ -447,7 +451,6 @@ function publishTeamRoute(view, {includeItem = true, onCopy = undefined} = {}) {
 
 /* ===== Gestão do time (todo o time vê; só o capitão e admins agem; os dados vêm do app principal) ===== */
 const host = window.parent as any;
-const captainTab = $('header nav [data-v="cap"]');
 let wantCaptain = false; // link para a gestão aberto antes de o time carregar
 const hasCaptainAccess = () => { try { return !!host?.captainAccess?.(); } catch { return false; } };
 function renderCaptain() {
@@ -458,14 +461,14 @@ function renderCaptain() {
 }
 (window as any).weblolTeamChanged = () => {
   const ok = hasCaptainAccess();
-  captainTab.hidden = !ok;
+  renderTeamNavigation(currentTeamView, ok);
   if (ok && wantCaptain) { wantCaptain = false; showTeamView("cap"); return; }
   if ($("#v-cap").classList.contains("on")) {
     if (ok) renderCaptain();
     else { showTeamView("comps"); publishTeamRoute("comps", {includeItem:false}); }
   }
 };
-captainTab.hidden = !hasCaptainAccess();
+renderTeamNavigation(currentTeamView, hasCaptainAccess());
 
 window.applyWebLolRoute = ([page, item], params) => {
   let view=Object.keys(teamPages).find(key=>teamPages[key]===page)||"comps";
@@ -496,11 +499,6 @@ window.applyWebLolRoute = ([page, item], params) => {
   showTeamView(view);
 };
 
-teamNav.forEach(button=>button.onclick=()=>{
-  const view=button.dataset.v;
-  showTeamView(view);
-  publishTeamRoute(view,{includeItem:false});
-});
 function wireCopyButton(button: HTMLButtonElement, view: "comps" | "map") {
   const icon = button.querySelector("use");
   const original = icon.getAttribute("href");

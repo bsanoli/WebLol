@@ -258,7 +258,7 @@
   /* Only the purchases revealed by "Todas as compras" enter. */
   .build-timeline-games[data-view="all"] :is(
     .build-timeline-minute:not([data-major]),
-    .build-timeline-minute[data-major] > .build-timeline-item:not([data-kind="major"])
+    .build-timeline-minute[data-major] .build-timeline-item:not([data-kind="major"])
   ) {
     transition: opacity var(--wl-motion-normal) var(--wl-motion-ease);
     @starting-style { opacity: .45; }

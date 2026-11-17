@@ -1,5 +1,6 @@
 export const palettes = [
   { id: "weblol", label: "WebLol" },
+  { id: "black-gold", label: "weblol2" },
   { id: "dracula", label: "Dracula" },
   { id: "monokai", label: "Monokai" },
   { id: "nord", label: "Nord" },

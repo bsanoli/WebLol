@@ -348,7 +348,7 @@ export const SiteHeader = forwardRef<HTMLElement, SiteHeaderProps>(function Site
                 const isOpen = open?.value === item.value;
                 const panelId = `${id}-panel`;
                 const common = {
-                  className: styles.navItem,
+                  className: headerId === "top" ? `${styles.navItem} ${styles.accentItem}` : styles.navItem,
                   "data-nav-item": "",
                   "data-section": item.value,
                   "data-current": isCurrent ? "" : undefined,

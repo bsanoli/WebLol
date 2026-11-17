@@ -213,8 +213,7 @@ summary::-webkit-details-marker { display:none; }
 @media (max-width:600px) {
  body:has(#v-comps.on) > header { gap:6px; padding:8px 12px; }
  body:has(#v-comps.on) > header .team-brand,body:has(#v-comps.on) > header .sp { display:none; }
- body:has(#v-comps.on) > header nav { width:100%; flex-wrap:wrap; gap:4px; }
- body:has(#v-comps.on) > header nav button { font-size:13px; gap:4px; }
+ body:has(#v-comps.on) > header #team-navigation { width:100%; }
  body:has(#v-comps.on) > header #exp { margin-left:auto; }
 }
 

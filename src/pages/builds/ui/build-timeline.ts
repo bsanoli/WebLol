@@ -77,20 +77,26 @@ function summary(entries: Entry[]) {
     const share = `${count} de ${bought.length} jogos`;
     return `<li class="build-timeline-stat">
       <span class="build-timeline-stat-label">${title}</span>
-      <span class="build-timeline-stat-item">${itemIcon(item, share)}<span>${esc(itemName(item))}
-        <small>${percent.format(count / bought.length * 100)}% · ${share}</small></span></span>
-      <strong class="build-timeline-stat-minute" aria-label="Minuto médio ${minutes.format(average)}">${minutes.format(average)}'</strong>
+      <span class="build-timeline-stat-icon">${itemIcon(item, share)}</span>
+      <span class="build-timeline-stat-item">${esc(itemName(item))}</span>
+      <strong class="build-timeline-stat-minute" aria-label="Minuto médio ${minutes.format(average)}">${minutes.format(average)}′</strong>
+      <small class="build-timeline-stat-frequency">${percent.format(count / bought.length * 100)}% · ${share}</small>
     </li>`;
   };
   const cores = entries.map(entry => coreItems(entry.player));
-  return `<ul class="build-timeline-stats" aria-label="Minuto médio de cada item">
-    ${slot("Botas", entries.map(entry => firstBoots(entry.player)))}
-    ${[0, 1, 2].map(index => slot(`${index + 1}º item`, cores.map(core => core[index]))).join("")}
-  </ul>`;
+  const stats = [
+    slot("Botas", entries.map(entry => firstBoots(entry.player))),
+    ...[0, 1, 2].map(index => slot(`${index + 1}º item`, cores.map(core => core[index]))),
+  ].join("");
+  if (!stats) return "";
+  return `<ul class="build-timeline-stats" aria-label="Minuto médio de compra">${stats}</ul>
+    <p class="build-data-sample">O minuto médio considera as partidas com compra em cada posição. O percentual indica a frequência do item mostrado.</p>`;
 }
 
 function timeline(player: Player) {
-  return `<ol class="build-timeline-events" aria-label="Compras por minuto">${(player.itemEventsByMinute as [number, number[]][])
+  const events = (player.itemEventsByMinute as [number, number[]][]).filter(([, items]) => items.length);
+  const hasMajor = events.some(([, items]) => items.some(item => item > 0 && isMajor(item)));
+  return `<ol class="build-timeline-events" aria-label="Compras por minuto">${events
     .map(([minute, items]) => {
       const major = items.some(item => item > 0 && isMajor(item));
       const icons = items.map(item => {
@@ -100,8 +106,9 @@ function timeline(player: Player) {
         const usage = sold ? `vendeu aos ${minute} min` : `${minute} min`;
         return `<span class="build-timeline-item" data-kind="${kind}">${itemIcon(id, usage)}</span>`;
       }).join("");
-      return `<li class="build-timeline-minute"${major ? " data-major" : ""}><span class="build-timeline-time">${minute}'</span>${icons}</li>`;
-    }).join("")}</ol>`;
+      return `<li class="build-timeline-minute"${major ? " data-major" : ""}><span class="build-timeline-time">${minute}'</span><div class="build-timeline-items">${icons}</div></li>`;
+    }).join("")}</ol>
+    ${hasMajor ? "" : '<p class="build-timeline-no-major">Sem itens completos ou botas.</p>'}`;
 }
 
 function gameRow({ game, player, opponent, won }: Entry) {
@@ -110,7 +117,7 @@ function gameRow({ game, player, opponent, won }: Entry) {
     <div class="build-timeline-who">
       <span class="build-timeline-player" aria-label="${esc(`${player.champion} contra ${opponent?.champion ?? "adversário desconhecido"}`)}">
         ${ico(player.champion)}<span class="build-timeline-vs" aria-hidden="true">vs</span>
-        ${opponent ? `${ico(opponent.champion)}<strong>${esc(opponent.champion)}</strong>` : '<span class="na">—</span>'}</span>
+        ${opponent ? `${ico(opponent.champion)}<strong>${esc(opponent.champion)}</strong>` : '<span class="na">Adversário desconhecido</span>'}</span>
       <span class="build-timeline-meta">
         <strong class="${won ? "build-sample-wins" : "build-sample-losses"}">${won ? "V" : "D"}</strong>
         <span>${k}/${d}/${a}</span>
@@ -143,16 +150,21 @@ export function renderBuildTimeline(section: HTMLElement, games: TimelineGame[])
   };
   section.innerHTML = `<header class="build-timeline-header">
       <h4>Compras jogo a jogo</h4>
+    </header>
+    ${summary(entries)}
+    <div class="build-timeline-toolbar">
+      <p class="build-timeline-count" role="status">${status()}</p>
       <div class="build-skill-options build-timeline-view" role="group" aria-label="Quais compras mostrar">
         <button type="button" data-slot="button" data-variant="outline" data-size="sm" data-timeline-view="core" aria-pressed="true">Itens completos e botas</button>
         <button type="button" data-slot="button" data-variant="outline" data-size="sm" data-timeline-view="all" aria-pressed="false">Todas as compras</button>
       </div>
-    </header>
-    ${summary(entries)}
-    <p class="build-data-sample">Minuto médio da primeira compra de cada item completo, em ${entries.length === 1 ? "1 jogo" : `${entries.length} jogos`}. Compras na mesma ida à base aparecem no mesmo minuto. ${DATASET.sourceNote}</p>
-    <p class="build-timeline-count build-data-sample" role="status">${status()}</p>
+    </div>
+    <div class="build-timeline-columns" aria-hidden="true"><span>Confronto</span><span>Compras por minuto</span></div>
     <ol class="build-timeline-games" data-view="core">${entries.slice(0, visible).map(gameRow).join("")}</ol>
-    ${visible < entries.length ? `<button type="button" data-slot="button" data-variant="outline" data-size="sm" class="build-timeline-more">${loadLabel()}</button>` : ""}`;
+    <footer class="build-timeline-footer">
+      ${visible < entries.length ? `<button type="button" data-slot="button" data-variant="outline" data-size="sm" class="build-timeline-more">${loadLabel()}</button>` : ""}
+      <p class="build-data-sample">${DATASET.sourceNote}</p>
+    </footer>`;
 
   const list = section.querySelector<HTMLOListElement>(".build-timeline-games")!;
   const count = section.querySelector<HTMLElement>(".build-timeline-count")!;
