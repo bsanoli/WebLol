@@ -1,20 +1,15 @@
 ---
 name: weblol-ui
-description: Implemente ou ajuste a interface do WebLol, incluindo tabelas, cards, menus, filtros, tooltips e layouts responsivos, com validação visual no navegador.
+description: Implemente ou ajuste a interface do WebLol, incluindo tabelas, cards, menus, filtros, tooltips e layouts desktop, com validação visual no navegador.
 ---
 
 # Ajustar a interface do WebLol
 
-1. Localize a tela, a interação e os componentes existentes. Antes de implementar, consulte [OP.GG](https://op.gg/lol), [OP.GG Esports](https://esports.op.gg/), [Mobalytics](https://mobalytics.gg/lol) e [League of Graphs](https://www.leagueofgraphs.com/). Aproveite padrões relevantes de densidade, organização ou navegação dentro da identidade do WebLol.
-2. Aplique a regra dos 8 em toda criação ou alteração de UI, incluindo ajustes pequenos e os breakpoints de desktop envolvidos. Em menus flutuantes, preserve a interação interna e permita fechar por clique fora.
-3. Confira a rota no navegador em desktop, incluindo janelas mais estreitas quando a largura disponível afetar o layout. Compare o alinhamento dos cards equivalentes, a altura dos controles vizinhos e a separação entre grupos. Exercite a ação alterada e, conforme a interação, verifique foco, teclado e ausência de rolagem horizontal acidental. Para listas e filtros, inclua um estado vazio ou com dados escassos quando isso puder mudar o layout.
-4. Rode `npm run build` e `git diff --check`. Informe o que mudou, como verificar localmente e qualquer limitação relevante da validação.
+Localize a tela, a interação e os componentes existentes. Reutilize os padrões do WebLol e aplique a escala de espaçamento da seção abaixo. Em menus flutuantes, preserve a interação interna e permita fechar por clique fora.
 
-## Escolha de skills complementares
+Use [visual-review](../visual-review/SKILL.md) para conferir no navegador desktop os estados afetados. Escolha as verificações de código pelo impacto da mudança. Use o build quando houver impacto na compilação e os testes Playwright quando cobrirem comportamentos afetados. Revise o diff.
 
-- Em correções pontuais de layout ou interação, siga o fluxo desta skill e aplique `feature-sliced-design` ao editar código, conforme o `AGENTS.md`.
-- Use `ui-ux-pro-max` para comparar organização, densidade ou fluxos. Para definir a direção visual de uma tela nova, escolha `frontend-design` ou `design-taste-frontend`. Quando houver alternativas com impacto relevante na interface, apresente as propostas, os trade-offs e como validar cada uma antes de implementar.
-- Em mudanças mais amplas, use `web-design-guidelines` para revisar a implementação, com atenção à acessibilidade e à interação. Corrija os achados pertinentes e verifique novamente o fluxo afetado.
+Quando a tarefa pedir uma direção visual ou comparação, OP.GG, OP.GG Esports, Mobalytics e League of Graphs podem servir de referência para densidade, organização ou navegação. Use recursos complementares de design e acessibilidade se ajudarem a resolver o pedido e estiverem disponíveis.
 
 ## Área do Time → Composições
 

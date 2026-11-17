@@ -1,13 +1,16 @@
 # WebLol
 
+O [catálogo de agentes e skills](docs/agentes.md) vale para Codex e Claude Code.
+
 - O WebLol é destinado ao acesso pelo navegador no desktop. Projete e valide a interface para desktop. O celular está fora do escopo de suporte.
+- Em relatos de bugs e pedidos de funcionalidades, use a descrição em linguagem comum para entender o resultado esperado e escolher a abordagem técnica. Se uma suposição fácil de reverter permitir avançar, siga e informe qual foi. Se a dúvida puder mudar de forma importante o que será entregue, faça uma pergunta com opções descritas em termos de como a pessoa usará o WebLol.
 
 - Em mudanças de interface, use a skill [weblol-ui](.agents/skills/weblol-ui/SKILL.md). Reutilize os componentes e tokens do WebLol. Linhas e cards clicáveis devem ter cursor `pointer`, hover visível e foco por teclado.
-- Em mudanças maiores de interface, delegue a subagentes as subtarefas independentes que puderem avançar em paralelo, como pesquisa de referências, levantamento de casos de borda e revisão de acessibilidade. Se houver edição em paralelo, atribua arquivos distintos a cada agente. O agente principal integra os resultados e conduz a implementação, os testes e a validação no navegador desktop até concluir o pedido.
+- Em mudanças maiores, use agentes especializados quando a divisão ajudar e a sessão permitir. Em edições paralelas, atribua responsabilidades e arquivos distintos. Quem coordena a tarefa integra as mudanças e verifica o resultado.
 - Em cards e linhas equivalentes, mantenha títulos, ícones, métricas e ações nas mesmas posições relativas. Valide o alinhamento com textos longos, quebra de linha e campos opcionais.
 - Em páginas de detalhe, use o estilo compacto e sem borda de “Ver página” para voltar à lista, com o chevron à esquerda do rótulo.
 - Trabalhe nos arquivos fonte em `src/` e `public/`. Os HTMLs e `assets/` da raiz são gerados para o GitHub Pages.
-- Toda implementação no WebLol deve seguir a arquitetura Feature-Sliced Design. Use a skill [feature-sliced-design](.agents/skills/feature-sliced-design/SKILL.md) ao criar, alterar ou refatorar código. Respeite as responsabilidades das camadas, a direção dos imports e as APIs públicas dos slices, inclusive em correções pontuais.
+- Toda implementação no WebLol deve seguir a arquitetura Feature-Sliced Design. Consulte a skill [feature-sliced-design](.agents/skills/feature-sliced-design/SKILL.md) para decidir fronteiras entre módulos, organizar dependências ou migrar código. Respeite as responsabilidades das camadas, a direção dos imports e as APIs públicas dos slices, inclusive em correções pontuais.
 - Faça commit ou push quando o usuário pedir a respectiva ação. Para publicar no GitHub Pages, use a skill [weblol-publicar](.agents/skills/weblol-publicar/SKILL.md).
 
 ## Organização do código
