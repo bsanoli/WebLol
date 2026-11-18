@@ -2,7 +2,7 @@
 import { askChoice, askName, confirmAction, showDialog } from "@/shared/ui/dialog-controls"
 import { iconMarkup, laneIconMarkup } from "@/shared/ui/icon"
 import { lolAsset, lolChampion, lolImage } from "@/entities/champion"
-import { clearTeamControls, mountChampionMenu, mountCompositionMenu, mountDraftChampionMenu, mountLaneNote, mountMapEmpty, mountMapImageSwitch, mountTeamSelect, mountSectionTabs, mountToolGroup } from "./team-controls"
+import { clearTeamControls, mountChampionMenu, mountCompositionMenu, mountDraftChampionMenu, mountLaneNote, mountMapEmpty, mountMapSwitch, mountTeamSelect, mountSectionTabs, mountToolGroup } from "./team-controls"
 import { initializeTheme } from "@/shared/config/theme"
 import { revealContent } from "@/shared/lib/motion"
 
@@ -524,12 +524,13 @@ wireCopyButton($("#copy-comp"), "comps");
 wireCopyButton($("#copy-play"), "map");
 
 /* ===== Início ===== */
+S = loadTeamState();
 const getState = () => S;
 const renderKnow = mountKnowledge({ getState, save, publishTeamRoute, mountSectionTabs });
 const { plays, renderPlays, renderMapImageSwitch, setMapImg, selectPlay } = mountTacticalMap({
   getState, save, publishTeamRoute, toast, uid, img, esc,
-  mountTeamSelect, mountMapEmpty, mountMapImageSwitch, mountToolGroup, clearTeamControls,
+  mountTeamSelect, mountMapEmpty, mountMapSwitch, mountToolGroup, clearTeamControls,
 });
 function renderAll(){renderList();renderEditor();renderGrid()}
 mountTeamSelect($("#sort"));
-S = loadTeamState();plays();renderAll();renderKnow();renderMapImageSwitch();setMapImg();renderPlays();
+plays();renderAll();renderKnow();renderMapImageSwitch();setMapImg();renderPlays();

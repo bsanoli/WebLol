@@ -16,6 +16,7 @@ const icons = {
   move: "Move",
   draw: "ArrowUpRight",
   erase: "Eraser",
+  ward: "Eye",
   folder: "Folder",
   exit: "LogOut01",
   chart: "BarChart03",

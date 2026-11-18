@@ -7,19 +7,19 @@
 <title>Comps do Time</title>
 <link rel="icon" href="./assets/brand/favicon.ico" sizes="any">
 <link rel="icon" href="./assets/brand/favicon.svg?v=f454a496" type="image/svg+xml">
-<link rel="stylesheet" href="./assets/base.css?v=380a22a7">
-<link rel="stylesheet" href="./assets/team.css?v=3de2f059">
+<link rel="stylesheet" href="./assets/base.css?v=05357973">
+<link rel="stylesheet" href="./assets/team.css?v=f097363e">
 <link rel="stylesheet" href="./assets/compositions.css?v=e452b11c">
 <link rel="stylesheet" href="./assets/motion.css?v=0e5e7875">
 <link rel="stylesheet" href="./assets/draft-layout.css?v=f8250db4">
-<link rel="stylesheet" href="./assets/team-controls.css?v=98e3bf57">
-  <script type="module" crossorigin src="./assets/camp-DJEUhrJY.js?v=f1bf09a4"></script>
-  <link rel="modulepreload" crossorigin href="./assets/icon-aSZLxfSj.js?v=663081bf">
-  <link rel="modulepreload" crossorigin href="./assets/select-HUf3u_xV.js?v=d73ed843">
-  <link rel="modulepreload" crossorigin href="./assets/dropdown-menu-B0tsdUZE.js?v=cd29cb97">
-  <link rel="stylesheet" crossorigin href="./assets/icon-CgAEoSnW.css?v=810ece58">
-  <link rel="stylesheet" crossorigin href="./assets/dropdown-menu-CZ9TUQ4V.css?v=aa09ab78">
-  <link rel="stylesheet" crossorigin href="./assets/camp-Dmc_kLnv.css?v=6fd32b4b">
+<link rel="stylesheet" href="./assets/team-controls.css?v=3d209602">
+  <script type="module" crossorigin src="./assets/camp-BPu6RaDS.js?v=b2e05a77"></script>
+  <link rel="modulepreload" crossorigin href="./assets/icon-BwYJgj9N.js?v=663081bf">
+  <link rel="modulepreload" crossorigin href="./assets/select-C45-X-KV.js?v=e47c95af">
+  <link rel="modulepreload" crossorigin href="./assets/dropdown-menu-fPezAbl1.js?v=a5b40888">
+  <link rel="stylesheet" crossorigin href="./assets/icon-jN8092oe.css?v=a9c3d2eb">
+  <link rel="stylesheet" crossorigin href="./assets/dropdown-menu-BduzkyJQ.css?v=3d53ab28">
+  <link rel="stylesheet" crossorigin href="./assets/camp-Y_F_sCZ6.css?v=10e0da9c">
 </head>
 <body>
 <header>
@@ -90,22 +90,47 @@
 </section>
 
 <section id="v-map" class="view">
- <div class="page-head"><h1>Mapa tático</h1><p>Monte uma jogada por etapas e reproduza os movimentos do time.</p></div>
- <div id="mapw">
-  <div id="map">
-   <svg viewBox="0 0 100 100" id="schem"></svg>
-   <img class="bg" id="mapimg" alt="">
-   <canvas id="cv"></canvas>
+ <div class="page-head map-header">
+  <h1>Mapa tático</h1>
+  <div class="map-display" role="group" aria-label="Exibição do mapa">
+   <div id="map-image-control"></div>
+   <div id="map-faelight-toggle"></div>
+   <div id="map-faelight-options" hidden>
+    <label for="map-faelight-terrain-trigger" id="map-faelight-terrain-label">Rift Elemental</label>
+    <select id="map-faelight-terrain" aria-labelledby="map-faelight-terrain-label">
+     <option value="initial">Antes da transformação</option>
+     <option value="infernal">Infernal</option>
+     <option value="mountain">Montanha</option>
+     <option value="ocean">Oceano</option>
+     <option value="cloud">Nuvens</option>
+     <option value="hextech">Hextec</option>
+     <option value="chemtech">Quimtec</option>
+    </select>
+   </div>
   </div>
-  <div id="mside">
-   <section class="wl-panel box map-card" aria-labelledby="map-play-title">
-    <h2 class="wl-card-title" id="map-play-title">Jogada</h2>
-    <select id="psel" aria-label="Jogada selecionada"></select>
-    <div class="map-actions">
-     <button data-slot="button" data-variant="default" id="pnew"><svg class="icon" aria-hidden="true" focusable="false"><use href="assets/icons.svg#plus"></use></svg> Nova jogada</button>
-     <button data-slot="button" data-variant="outline" id="copy-play"><svg class="icon" aria-hidden="true" focusable="false"><use href="assets/icons.svg#link"></use></svg> Copiar link</button>
-     <button data-slot="button" data-variant="outline" id="pren"><svg class="icon" aria-hidden="true" focusable="false"><use href="assets/icons.svg#edit"></use></svg> Renomear</button>
-     <button data-slot="button" data-variant="destructive" id="pdel"><svg class="icon" aria-hidden="true" focusable="false"><use href="assets/icons.svg#trash"></use></svg> Excluir</button>
+ </div>
+ <div id="mapw">
+  <div class="map-sidebar">
+   <section class="wl-panel box map-card" aria-labelledby="map-tools-title">
+    <h2 class="wl-card-title" id="map-tools-title">Ferramentas</h2>
+    <div id="map-modes"></div>
+    <div id="map-ward-options" hidden>
+     <label id="map-ward-type-label" for="map-ward-type-trigger">Tipo de ward</label>
+     <select id="map-ward-type" aria-labelledby="map-ward-type-label"></select>
+    </div>
+    <p id="map-ward-hint" class="map-ward-hint" hidden></p>
+    <div class="map-group" id="map-arrow-options" hidden>
+     <h3 id="map-colors-title">Cor da seta</h3>
+     <div id="cols" role="group" aria-labelledby="map-colors-title"></div>
+    </div>
+    <div class="map-actions map-group" role="group" aria-label="Histórico de edição">
+     <button data-slot="button" data-variant="outline" id="undo" title="Desfazer (Ctrl+Z)"><svg class="icon" aria-hidden="true" focusable="false"><use href="assets/icons.svg#undo"></use></svg> Desfazer</button>
+     <button data-slot="button" data-variant="outline" id="redo" title="Refazer (Ctrl+Y)"><svg class="icon" aria-hidden="true" focusable="false"><use href="assets/icons.svg#redo"></use></svg> Refazer</button>
+    </div>
+    <div class="map-actions" role="group" aria-label="Limpeza do mapa">
+     <button data-slot="button" data-variant="destructive" id="clr" title="Apaga todas as setas"><svg class="icon" aria-hidden="true" focusable="false"><use href="assets/icons.svg#trash"></use></svg> Limpar setas</button>
+     <button type="button" data-slot="button" data-variant="destructive" id="map-clear-wards" disabled><svg class="icon" aria-hidden="true" focusable="false"><use href="assets/icons.svg#trash"></use></svg> Limpar wards</button>
+     <button type="button" data-slot="button" data-variant="destructive" id="map-clear-all" title="Limpa todas as setas e wards do mapa atual" disabled><svg class="icon" aria-hidden="true" focusable="false"><use href="assets/icons.svg#trash"></use></svg> Limpar tudo</button>
     </div>
    </section>
    <section class="wl-panel box map-card" aria-labelledby="map-positions-title">
@@ -118,28 +143,62 @@
       <label id="cr-label" for="cr-trigger" class="map-red">Vermelho</label><select id="cr" aria-labelledby="cr-label"></select>
      </div>
     </div>
-    <div id="map-image-control"></div>
    </section>
-   <section class="wl-panel box map-card" aria-labelledby="map-tools-title">
-    <h2 class="wl-card-title" id="map-tools-title">Ferramenta</h2>
-    <div id="map-modes"></div>
-    <div class="map-group">
-     <h3 id="map-colors-title">Cor da seta</h3>
-     <div id="cols" role="group" aria-labelledby="map-colors-title"></div>
+  </div>
+  <div class="map-stage">
+   <div id="map">
+    <svg viewBox="0 0 100 100" id="schem"></svg>
+    <img class="bg" src="./assets/lol/map/map11.png" alt="">
+    <img class="bg" id="mapimg" alt="">
+    <div id="map-faelights" role="group" aria-label="Localização dos Lumes Feéricos" hidden></div>
+    <svg id="map-wards" viewBox="0 0 100 100" role="group" aria-label="Wards no mapa"></svg>
+    <canvas id="cv"></canvas>
+    <button id="map-ward-cursor" type="button" aria-description="Use as setas para mover o cursor e Enter ou Espaço para agir." hidden></button>
+   </div>
+   <div class="map-legends">
+    <div class="map-faelight-legend" id="map-faelight-legend" role="status" hidden>
+     <span>8 Lumes iniciais</span>
+     <span id="map-faelight-elemental-legend" data-elemental hidden>4 Lumes do Rift Elemental</span>
     </div>
-    <div class="map-actions map-history"><button data-slot="button" data-variant="outline" id="undo" title="Desfazer (Ctrl+Z)"><svg class="icon" aria-hidden="true" focusable="false"><use href="assets/icons.svg#undo"></use></svg> Desfazer</button><button data-slot="button" data-variant="outline" id="redo" title="Refazer (Ctrl+Y)"><svg class="icon" aria-hidden="true" focusable="false"><use href="assets/icons.svg#redo"></use></svg> Refazer</button><button data-slot="button" data-variant="destructive" id="clr" title="Apaga todas as setas"><svg class="icon" aria-hidden="true" focusable="false"><use href="assets/icons.svg#trash"></use></svg> Limpar setas</button></div>
-   </section>
+    <div id="map-ward-legend" class="map-ward-hint" hidden>
+     <ul id="map-ward-types" aria-label="Tipos de ward no mapa"></ul>
+     <div class="map-vision-key">
+      <span><i class="vision-range-key" aria-hidden="true"></i>Alcance aproximado</span>
+      <span id="map-ward-bonus-legend" hidden><i class="vision-bonus-key" aria-hidden="true"></i>Visão bônus</span>
+     </div>
+    </div>
+   </div>
+  </div>
+  <div class="map-sidebar">
    <section class="wl-panel box map-card" aria-labelledby="map-sequence-title">
     <h2 class="wl-card-title" id="map-sequence-title">Sequência da jogada</h2>
-    <div id="sstat" class="sstat" role="status"></div>
-    <ol id="steps"></ol>
     <div class="map-actions"><button data-slot="button" data-variant="default" id="sadd"><svg class="icon" aria-hidden="true" focusable="false"><use href="assets/icons.svg#plus"></use></svg> Novo passo</button><button data-slot="button" data-variant="ghost" id="sedit" class="edt" aria-pressed="false" title="Liga/desliga a edição do passo selecionado"><svg class="icon" aria-hidden="true" focusable="false"><use href="assets/icons.svg#edit"></use></svg> Modo edição</button></div>
     <div class="map-group">
      <div class="map-playback"><button data-slot="button" data-variant="outline" data-size="icon" id="sprev" aria-label="Passo anterior"><svg class="icon" aria-hidden="true" focusable="false"><use href="assets/icons.svg#previous"></use></svg></button><button data-slot="button" data-variant="outline" id="splay"><svg class="icon" aria-hidden="true" focusable="false"><use href="assets/icons.svg#play"></use></svg> Reproduzir</button><button data-slot="button" data-variant="outline" data-size="icon" id="snext" aria-label="Próximo passo"><svg class="icon" aria-hidden="true" focusable="false"><use href="assets/icons.svg#next"></use></svg></button></div>
      <label class="map-speed" for="spd">Velocidade <input type="range" id="spd" min="0.4" max="3" step="0.1" value="1.2"> <span id="spdv">1.2s</span></label>
     </div>
+    <div id="sstat" class="sstat" role="status"></div>
+    <ol id="steps"></ol>
    </section>
-   <details class="help"><summary>Como montar uma jogada</summary><br>1. Arraste as bolinhas para a posição inicial e clique em <b>Novo passo</b>.<br>2. Mova as bolinhas para o próximo momento e clique em <b>Novo passo</b> de novo. Repita para cada momento.<br>3. Clique em <b><svg class="icon" aria-hidden="true" focusable="false"><use href="assets/icons.svg#play"></use></svg> Reproduzir</b>.<br><b>Corrigir um passo:</b> ligue o <b>Modo edição</b>, clique no passo e mexa no mapa. Com o modo edição desligado, nenhum passo é alterado. Clique no nome de um passo para renomear.<br><b>Setas:</b> use <b>Apagar seta</b> e clique numa seta para apagar só ela. <b>Ctrl+Z</b> desfaz e <b>Ctrl+Y</b> refaz (setas e movimentos das bolinhas).</details>
+   <section class="wl-panel box map-card" aria-labelledby="map-play-title">
+    <h2 class="wl-card-title" id="map-play-title">Jogada</h2>
+    <select id="psel" aria-label="Jogada selecionada"></select>
+    <div class="map-actions">
+     <button data-slot="button" data-variant="default" id="pnew"><svg class="icon" aria-hidden="true" focusable="false"><use href="assets/icons.svg#plus"></use></svg> Nova jogada</button>
+     <button data-slot="button" data-variant="outline" id="copy-play"><svg class="icon" aria-hidden="true" focusable="false"><use href="assets/icons.svg#link"></use></svg> Copiar link</button>
+     <button data-slot="button" data-variant="outline" id="pren"><svg class="icon" aria-hidden="true" focusable="false"><use href="assets/icons.svg#edit"></use></svg> Renomear</button>
+     <button data-slot="button" data-variant="destructive" id="pdel"><svg class="icon" aria-hidden="true" focusable="false"><use href="assets/icons.svg#trash"></use></svg> Excluir</button>
+    </div>
+   </section>
+   <details class="help">
+    <summary>Como montar uma jogada</summary>
+    <ol>
+     <li>Posicione os campeões e adicione setas e wards conforme precisar.</li>
+     <li>Clique em <b>Novo passo</b> para gravar o mapa. Repita para cada momento da jogada.</li>
+     <li>Clique em <b>Reproduzir</b> para ver a sequência.</li>
+    </ol>
+    <p>Para corrigir um passo, selecione-o e ligue o <b>Modo edição</b>. Use <b>Ctrl+Z</b> para desfazer e <b>Ctrl+Y</b> para refazer.</p>
+   </details>
   </div>
  </div>
 </section>

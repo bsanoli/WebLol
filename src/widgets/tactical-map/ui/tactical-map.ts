@@ -1,17 +1,22 @@
 // @ts-nocheck -- Integração legada com o DOM e dados locais.
 import { askName, confirmAction } from "@/shared/ui/dialog-controls"
-import { LOL_DATA, lolAsset } from "@/entities/champion"
 import { iconMarkup } from "@/shared/ui/icon"
 import { RN, TOKS, blankPlay, preset, sw } from "../model/play"
+import { readWards } from "../model/wards"
+import { mountFaelightLayer } from "./faelight-layer"
+import { mountWardLayer } from "./ward-layer"
 
-export function mountTacticalMap({ getState, save, publishTeamRoute, toast, uid, img, esc, mountTeamSelect, mountMapEmpty, mountMapImageSwitch, mountToolGroup, clearTeamControls }) {
+export function mountTacticalMap({ getState, save, publishTeamRoute, toast, uid, img, esc, mountTeamSelect, mountMapEmpty, mountMapSwitch, mountToolGroup, clearTeamControls }) {
 const $ = selector => document.querySelector(selector);
+const clearMap = $("#map-clear-all");
+const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
 let M={tool:"move",color:"#ffd34d",sel:-1,playing:false};
 function plays(){if(!Array.isArray(getState().plays)||!getState().plays.length){getState().plays=[blankPlay(uid, "Jogada 1")];getState().curPlay=getState().plays[0].id}if(!getState().plays.some(p=>p.id===getState().curPlay))getState().curPlay=getState().plays[0].id;return getState().plays}
 const play=()=>plays().find(p=>p.id===getState().curPlay);
 const clone=o=>JSON.parse(JSON.stringify(o));
+const snapshotFrame=({pos,lines,wards})=>clone({pos,lines:lines??[],wards:wards??[]});
 
-// mapa esquemático (sempre desenhado; a imagem oficial fica por cima quando carrega)
+// O desenho serve de fundo enquanto as imagens do mapa carregam.
 (function schem(){
   const T=[[7,30],[8,54],[7,74],[39,61],[32,68],[24,76],[70,93],[46,92],[26,93],[11,89]];
   const tw=(t,c)=>`<rect x="${t[0]-1.3}" y="${t[1]-1.3}" width="2.6" height="2.6" rx=".5" fill="${c}" stroke="#000" stroke-width=".3"/>`;
@@ -32,9 +37,10 @@ function setMapImg() {
   const image = $("#mapimg");
   const syncMapImage = () => {
     image.toggleAttribute("data-map-visible", getState().useImg !== false && image.complete && image.naturalWidth > 0);
+    wardLayer.render();
   };
   if (getState().useImg !== false) {
-    const source = lolAsset(LOL_DATA.map);
+    const source = "assets/lol/map/summoners-rift-realista.jpeg";
     image.onload = syncMapImage;
     image.onerror = syncMapImage;
     if (image.getAttribute("src") !== source) image.src = source;
@@ -42,7 +48,7 @@ function setMapImg() {
   syncMapImage();
 }
 function renderMapImageSwitch(){
-  mountMapImageSwitch($("#map-image-control"),getState().useImg!==false,checked=>{
+  mountMapSwitch($("#map-image-control"),"Usar mapa realista",getState().useImg!==false,checked=>{
     getState().useImg=checked;
     save(false);
     setMapImg();
@@ -67,7 +73,7 @@ function placeTokens(pos){document.querySelectorAll(".tok").forEach(el=>{const v
 $("#map").addEventListener("keydown", event => {
   const token = event.target.closest(".tok");
   const direction = { ArrowLeft: [-1, 0], ArrowRight: [1, 0], ArrowUp: [0, -1], ArrowDown: [0, 1] }[event.key];
-  if (!token || !direction || M.playing || event.ctrlKey || event.altKey || event.metaKey) return;
+  if (!token || !direction || M.playing || $("#map").classList.contains("ward-editing") || event.ctrlKey || event.altKey || event.metaKey) return;
   event.preventDefault();
   const current = play().live.pos[token.dataset.t];
   const next = current.map((value, axis) => Math.max(0, Math.min(100, value + direction[axis] * (event.shiftKey ? 5 : 1))));
@@ -81,13 +87,31 @@ $("#map").addEventListener("keydown", event => {
 let dragT=null;
 $("#map").addEventListener("pointerdown",e=>{
   const tk=e.target.closest(".tok");
-  if(M.playing)return;
+  if(M.playing||$("#map").classList.contains("ward-editing"))return;
   if(tk){preSnap=snapLive();moved=false;dragT=tk;tk.setPointerCapture(e.pointerId);e.preventDefault();return}
   if(M.tool==="erase"){const i=hitLine(pt(e));if(i<0)return toast("Clique em cima de uma seta para apagar");pushUndo();play().live.lines.splice(i,1);hover=-1;save(false);drawLines(play().live.lines);syncStep();return}
   if(M.tool==="draw"){preSnap=snapLive();const p=pt(e);cur_line={c:M.color,pts:[p]};play().live.lines.push(cur_line);$("#cv").setPointerCapture(e.pointerId)}
 });
 let cur_line=null;
 const pt=e=>{const r=$("#map").getBoundingClientRect();return[Math.max(0,Math.min(100,(e.clientX-r.left)/r.width*100)),Math.max(0,Math.min(100,(e.clientY-r.top)/r.height*100))].map(v=>Math.round(v*10)/10)};
+const wardLayer = mountWardLayer({
+  read: () => play().live.wards,
+  write: wards => {
+    pushUndo();
+    play().live.wards = wards;
+    save(false);
+    syncStep();
+    wardLayer.render();
+    updateClearMap();
+  },
+  getTool: () => M.tool,
+  isPlaying: () => M.playing,
+  pointFromEvent: pt,
+  mountTeamSelect,
+});
+const previewFaelights = mountFaelightLayer({
+  getState, save, mountTeamSelect, mountMapSwitch, onTerrainChange: wardLayer.render,
+});
 $("#map").addEventListener("pointermove",e=>{
   if(M.tool==="erase"&&!dragT&&!M.playing){const h=hitLine(pt(e));if(h!==hover){hover=h;drawLines(play().live.lines)}return}
   if(dragT){const p=pt(e);moved=true;play().live.pos[dragT.dataset.t]=p;dragT.style.left=p[0]+"%";dragT.style.top=p[1]+"%"}
@@ -98,6 +122,7 @@ $("#map").addEventListener("pointerup",endPtr);$("#map").addEventListener("point
 
 // desenho
 function drawLines(lines){
+  updateClearMap();
   const cv=$("#cv"),r=cv.getBoundingClientRect(),dpr=window.devicePixelRatio||1;
   if(cv.width!==Math.round(r.width*dpr)){cv.width=Math.round(r.width*dpr);cv.height=Math.round(r.height*dpr)}
   const g=cv.getContext("2d"),W=cv.width/100,H=cv.height/100;g.clearRect(0,0,cv.width,cv.height);
@@ -117,12 +142,17 @@ const mapTools = [
   { value: "move", label: "Mover", icon: "move" },
   { value: "draw", label: "Desenhar seta", icon: "draw" },
   { value: "erase", label: "Apagar seta", icon: "erase" },
+  { value: "ward", label: "Colocar ward", icon: "ward" },
+  { value: "remove-ward", label: "Remover ward", icon: "trash" },
 ];
 function drawMapTools() {
   mountToolGroup($("#map-modes"), M.tool, mapTools, value => {
     M.tool = value;
     $("#map").classList.toggle("draw", value === "draw");
     $("#map").classList.toggle("erase", value === "erase");
+    $("#map-arrow-options").hidden = value !== "draw";
+    wardLayer.setTool(value);
+    previewFaelights(value === "ward");
     hover = -1;
     drawLines(play().live.lines);
     drawMapTools();
@@ -130,6 +160,22 @@ function drawMapTools() {
 }
 drawMapTools();
 $("#clr").onclick=()=>{if(!play().live.lines.length)return;pushUndo();play().live.lines=[];save(false);drawLines([]);syncStep()};
+function updateClearMap() {
+  const { lines, wards } = play().live;
+  clearMap.disabled = M.playing || (!lines?.length && !readWards(wards).length);
+}
+clearMap.onclick = () => {
+  if (clearMap.disabled) return;
+  pushUndo();
+  const live = play().live;
+  live.lines = [];
+  live.wards = [];
+  hover = -1;
+  save(false);
+  drawLines(live.lines);
+  wardLayer.render();
+  syncStep();
+};
 document.querySelectorAll("[data-pre]").forEach(b=>b.onclick=()=>{if(M.playing)return;pushUndo();animateTo(preset(b.dataset.pre),play().live.lines)});
 // desfazer / refazer
 let preSnap=null,moved=false,hover=-1;const UNDO=[],REDO=[];
@@ -160,10 +206,19 @@ function renderPlays(highlightStep = false){
   ["#psel","#cb","#cr"].forEach(selector=>mountTeamSelect($(selector)));
   const steps=$("#steps");
   clearTeamControls(steps);
-  steps.innerHTML=p.steps.map((s,i)=>`<li data-i="${i}" class="${i===M.sel?"on":""}"${i===M.sel?` aria-current="step"${highlightStep?" data-step-highlight":""}`:""}><input data-slot="input" data-lab="${i}" value="${esc(s.label||"Passo "+(i+1))}" aria-label="Nome do passo ${i+1}" title="Clique para renomear"><button data-slot="button" data-variant="destructive" data-size="icon-sm" data-sdel="${i}" aria-label="Apagar passo ${i+1}">${iconMarkup("close")}</button></li>`).join("")||'<li class="none" data-team-control></li>';
+  steps.innerHTML = p.steps.map((step, index) => {
+    const number = index + 1;
+    const current = index === M.sel;
+    const name = esc(step.label || `Passo ${number}`);
+    return `<li data-i="${index}"${current ? ' class="on"' : ""}${current && highlightStep ? " data-step-highlight" : ""}>
+      <button type="button" class="map-step-select" data-slot="button" data-variant="ghost" data-size="icon-sm" data-step-select="${index}" aria-label="Selecionar passo ${number}"${current ? ' aria-current="step"' : ""}>${number}</button>
+      <input data-slot="input" data-lab="${index}" value="${name}" aria-label="Nome do passo ${number}" title="Renomear passo">
+      <button data-slot="button" data-variant="destructive" data-size="icon-sm" data-sdel="${index}" aria-label="Apagar passo ${number}">${iconMarkup("close")}</button>
+    </li>`;
+  }).join("") || '<li class="none" data-team-control></li>';
   if(!p.steps.length)mountMapEmpty(steps.firstElementChild);
   renderStat();
-  renderTokens();drawLines(p.live.lines);
+  renderTokens();drawLines(p.live.lines);wardLayer.render();
 }
 $("#psel").onchange=()=>{getState().curPlay=$("#psel").value;M.sel=-1;save(false);renderPlays();publishTeamRoute("map")};
 $("#pnew").onclick=async()=>{const n=await askName("Nova jogada","Jogada "+(plays().length+1));if(n===undefined)return;const p=blankPlay(uid, n||undefined);getState().plays.push(p);getState().curPlay=p.id;M.sel=-1;save();renderPlays();publishTeamRoute("map")};
@@ -173,40 +228,91 @@ $("#cb").onchange=()=>{play().cb=$("#cb").value;save(false);renderTokens()};
 $("#cr").onchange=()=>{play().cr=$("#cr").value;save(false);renderTokens()};
 
 // passos: o passo selecionado salva sozinho tudo o que muda no mapa
-function syncStep(){const p=play();if(!M.edit||M.playing||M.sel<0||!p.steps[M.sel])return;const s=p.steps[M.sel];s.pos=clone(p.live.pos);s.lines=clone(p.live.lines);save(false);flashStep()}
+function syncStep(){const p=play();if(!M.edit||M.playing||M.sel<0||!p.steps[M.sel])return;Object.assign(p.steps[M.sel],snapshotFrame(p.live));save(false);flashStep()}
 let tFl;function flashStep(){const el=$("#sstat .ok");if(!el)return;el.style.opacity=1;clearTimeout(tFl);tFl=setTimeout(()=>el.style.opacity=0,900)}
-function renderStat(){const p=play(),s=p.steps[M.sel],b=$("#sedit");
-  b.classList.toggle("on",!!M.edit);b.setAttribute("aria-pressed",M.edit);
-  $("#sstat").className="sstat"+(M.edit&&s?" ed":"");
-  $("#sstat").innerHTML=M.playing?`${iconMarkup("play")} Reproduzindo...`:M.edit?(s?`${iconMarkup("edit")} <b>Modo edição ligado</b>: o que você mover no mapa é salvo no <b>passo ${M.sel+1}</b>. <span class="ok">${iconMarkup("check")} salvo</span>`:`${iconMarkup("edit")} Modo edição ligado: clique num passo da lista para escolher qual editar.`):p.steps.length?`${iconMarkup("lock")} Modo edição desligado: mover as bolinhas não altera nenhum passo. Para criar o próximo, mova e clique em <b>Novo passo</b>. Para corrigir um passo, selecione e ligue o modo edição.`:"Posicione as bolinhas e clique em <b>Novo passo</b> para salvar o primeiro momento da jogada.";}
-$("#sadd").onclick=()=>{if(M.playing)return;const p=play(),at=M.sel>=0?M.sel+1:p.steps.length;p.steps.splice(at,0,{label:"Passo "+(p.steps.length+1),pos:clone(p.live.pos),lines:clone(p.live.lines)});M.sel=at;save();renderPlays();toast(`Passo ${at+1} salvo com a posição atual`)};
+function renderStat(){
+  updateClearMap();
+  const { steps } = play();
+  const editingStep = M.edit && steps[M.sel];
+  const button = $("#sedit");
+  const status = $("#sstat");
+  button.classList.toggle("on", !!M.edit);
+  button.setAttribute("aria-pressed", M.edit);
+  status.classList.toggle("ed", !!editingStep);
+
+  let icon = "";
+  let message = "Use <b>Novo passo</b> para salvar o mapa como está agora.";
+  if(M.playing){
+    icon = "play";
+    message = "Reproduzindo...";
+  } else if(M.edit){
+    icon = "edit";
+    message = editingStep
+      ? `<b>Modo edição ligado</b>. As mudanças no mapa são salvas no <b>passo ${M.sel + 1}</b>. <span class="ok">${iconMarkup("check")} salvo</span>`
+      : "<b>Modo edição ligado</b>. Clique num passo da lista para escolher qual editar.";
+  } else if(steps.length){
+    icon = "lock";
+    message = "<b>Modo edição desligado</b>. Use <b>Novo passo</b> para salvar as mudanças, ou ligue a edição para corrigir um passo.";
+  }
+  status.innerHTML = `${icon ? iconMarkup(icon) : ""}<span>${message}</span>`;
+}
+$("#sadd").onclick=()=>{if(M.playing)return;const p=play(),at=M.sel>=0?M.sel+1:p.steps.length;p.steps.splice(at,0,{label:"Passo "+(p.steps.length+1),...snapshotFrame(p.live)});M.sel=at;save();renderPlays();toast(`Passo ${at+1} salvo com a posição atual`)};
 $("#sedit").onclick=()=>{M.edit=!M.edit;renderStat();if(M.edit&&M.sel<0)toast("Agora clique no passo que quer editar")};
 $("#steps").addEventListener("input",e=>{const i=e.target.dataset.lab;if(i==null)return;play().steps[+i].label=e.target.value;save(false)});
 $("#steps").onclick=async e=>{const d=e.target.closest("[data-sdel]");const p=play();
   if(d){const i=+d.dataset.sdel;if(!await confirmAction(`Apagar o passo ${i+1}?`, "Apagar passo"))return;p.steps.splice(i,1);if(M.sel===i)M.sel=-1;else if(M.sel>i)M.sel--;save();renderPlays();return}
-  const li=e.target.closest("li[data-i]");if(!li||M.playing)return;const i=+li.dataset.i;if(i!==M.sel)goStep(i)};
-function goStep(i){const p=play();if(i<0||i>=p.steps.length)return;M.sel=i;const s=p.steps[i];renderPlays(true);return animateTo(s.pos,s.lines)}
+  const li=e.target.closest("li[data-i]");if(!li||M.playing)return;
+  const index = Number(li.dataset.i);
+  if (index === M.sel) return;
+  const active = e.target.closest("[data-step-select], [data-lab]");
+  const field = active?.matches("[data-lab]");
+  const caret = field && [active.selectionStart, active.selectionEnd];
+  goStep(index);
+  if (active) {
+    const replacement = $(field ? `[data-lab="${index}"]` : `[data-step-select="${index}"]`);
+    replacement?.focus({ preventScroll: true });
+    if (caret) replacement?.setSelectionRange(...caret);
+  }
+};
+function goStep(i){const p=play();if(i<0||i>=p.steps.length)return;M.sel=i;const s=p.steps[i];renderPlays(true);return animateTo(s.pos,s.lines,s.wards??[])}
 $("#sprev").onclick=()=>!M.playing&&goStep(M.sel-1);
 $("#snext").onclick=()=>!M.playing&&goStep(M.sel+1);
 $("#spd").oninput=()=>$("#spdv").textContent=$("#spd").value+"s";
-function animateTo(target,lines){
-  return new Promise(res=>{
-    const p=play(),from=clone(p.live.pos),dur=+$("#spd").value*1000,t0=performance.now();
-    p.live.lines=clone(lines||[]);drawLines(p.live.lines);
+function animateTo(target,lines,wards=play().live.wards??[]){
+  const p = play();
+  const duration = Number($("#spd").value) * 1000;
+  p.live.lines = clone(lines ?? []);
+  p.live.wards = clone(wards);
+  drawLines(p.live.lines);
+  wardLayer.render();
+  const finish = () => {
+    p.live.pos = clone(target);
+    save(false);
+    syncStep();
+  };
+  if (reducedMotion.matches) {
+    placeTokens(target);
+    finish();
+    return M.playing ? new Promise(resolve => setTimeout(resolve, duration)) : Promise.resolve();
+  }
+
+  const from = clone(p.live.pos);
+  const startTime = performance.now();
+  return new Promise(resolve => {
     const ease=t=>t<.5?2*t*t:1-Math.pow(-2*t+2,2)/2;
-    (function f(now){const k=ease(Math.min(1,(now-t0)/dur)),cur={};
+    (function f(now){const k=ease(Math.min(1,(now-startTime)/duration)),cur={};
       for(const t of TOKS){const a=from[t]||target[t],b=target[t]||a;cur[t]=[a[0]+(b[0]-a[0])*k,a[1]+(b[1]-a[1])*k]}
       placeTokens(cur);
-      if(k<1)requestAnimationFrame(f);else{p.live.pos=clone(target);save(false);syncStep();res()}})(t0);
+      if(k<1)requestAnimationFrame(f);else{finish();resolve()}})(startTime);
   });
 }
 $("#splay").onclick=async()=>{
   const p=play();if(M.playing){M.playing=false;return}
   if(!p.steps.length)return toast("Salve pelo menos 2 passos para reproduzir");
   M.playing=true;$("#splay").innerHTML=iconMarkup("stop")+" Parar";renderStat();
-  p.live.pos=clone(p.steps[0].pos);M.sel=0;renderPlays(true);
-  for(let i=1;i<p.steps.length&&M.playing;i++){await new Promise(r=>setTimeout(r,450));if(!M.playing)break;M.sel=i;renderPlays(true);placeTokens(p.steps[i-1].pos);p.live.pos=clone(p.steps[i-1].pos);await animateTo(p.steps[i].pos,p.steps[i].lines)}
-  M.playing=false;$("#splay").innerHTML=iconMarkup("play")+" Reproduzir";renderStat();
+  p.live=snapshotFrame(p.steps[0]);M.sel=0;renderPlays(true);
+  for(let i=1;i<p.steps.length&&M.playing;i++){await new Promise(r=>setTimeout(r,450));if(!M.playing)break;M.sel=i;renderPlays(true);placeTokens(p.steps[i-1].pos);p.live.pos=clone(p.steps[i-1].pos);await animateTo(p.steps[i].pos,p.steps[i].lines,p.steps[i].wards??[])}
+  M.playing=false;$("#splay").innerHTML=iconMarkup("play")+" Reproduzir";renderStat();wardLayer.render();
 };
 
 return { plays, renderPlays, renderMapImageSwitch, setMapImg, selectPlay(id) {

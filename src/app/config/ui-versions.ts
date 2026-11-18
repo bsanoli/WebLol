@@ -8,6 +8,15 @@ export interface UiVersion {
 
 export const UI_VERSIONS: UiVersion[] = [
   {
+    version: "1.34",
+    date: "2026-11-18",
+    changes: [
+      "Mapa tático centralizado, com ferramentas e controles de sequência nas laterais.",
+      "Mapa realista, Lumes Feéricos e wards com alcance por tipo e visão bônus.",
+      "Limpeza de setas e wards com desfazer e seleção de passos pelo teclado.",
+    ],
+  },
+  {
     version: "1.33",
     date: "2026-11-13",
     changes: [

@@ -62,8 +62,8 @@ export function mountMapEmpty(host: Element) {
   </Empty>)
 }
 
-export function mountMapImageSwitch(host: Element, checked: boolean, onCheckedChange: (checked: boolean) => void) {
-  renderControl(host, <Switch className="map-check" label="Usar imagem oficial do mapa"
+export function mountMapSwitch(host: Element, label: string, checked: boolean, onCheckedChange: (checked: boolean) => void) {
+  renderControl(host, <Switch className="map-check" label={label}
     checked={checked} onCheckedChange={onCheckedChange} />)
 }
 
