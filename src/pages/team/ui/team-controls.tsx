@@ -188,7 +188,7 @@ function TeamSelect({ field }: { field: HTMLSelectElement }) {
   return (
     <Select open={open} value={selected ? String(selected.index) : ""} disabled={field.disabled || options.length === 0}
       onOpenChange={nextOpen => {
-        if (nextOpen) setPortalContainer(field.closest<HTMLElement>('[role="dialog"]') ?? undefined)
+        if (nextOpen) setPortalContainer(field.closest<HTMLElement>('[role="dialog"], #v-map:fullscreen, #v-map.map-expanded') ?? undefined)
         setOpen(nextOpen)
       }}
       onValueChange={value => {
@@ -233,7 +233,7 @@ export function mountTeamSelect(field: HTMLSelectElement) {
   renderControl(host, <TeamSelect field={field} />)
   field.hidden = true
 }
-type SectionOption = { value: string; label: string; icon?: string; panel?: string }
+type SectionOption = { value: string; label: string; icon?: string; image?: string; panel?: string }
 
 export function mountSectionTabs(host: Element, label: string, value: string, options: SectionOption[],
   change: (value: string) => void, variant: "underline" | "navigation" = "underline") {
@@ -247,14 +247,15 @@ export function mountSectionTabs(host: Element, label: string, value: string, op
   </Tabs>)
 }
 
-export function mountToolGroup(host: Element, value: string, options: SectionOption[],
-  change: (value: string) => void) {
-  renderControl(host, <ToggleGroup type="single" value={value} spacing={1}
-    className="map-actions map-modes seg" aria-label="Modo da ferramenta"
+export function mountToolGroup(host: Element, value: string, options: (SectionOption & { shortcuts?: string })[],
+  change: (value: string) => void, disabled = false) {
+  renderControl(host, <ToggleGroup type="single" value={value} spacing={1} disabled={disabled}
+    className="map-modes seg" aria-label="Modo da ferramenta"
     onValueChange={next => { if (next) change(next) }}>
     {options.map(option => <ToggleGroupItem key={option.value} value={option.value}
-      data-slot="button" data-variant="ghost" data-tool={option.value}>
-      {option.icon && <Icon name={option.icon} />}{option.label}
+      data-slot="button" data-variant="ghost" data-tool={option.value} aria-label={option.label}
+      aria-keyshortcuts={option.shortcuts} data-map-tip={option.shortcuts ? `${option.label} (${option.shortcuts.replaceAll(" ", " / ")})` : option.label}>
+      {option.image ? <img className="map-tool-image" src={option.image} alt="" /> : option.icon && <Icon name={option.icon} />}
     </ToggleGroupItem>)}
   </ToggleGroup>)
 }

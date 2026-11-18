@@ -8,6 +8,88 @@ export interface UiVersion {
 
 export const UI_VERSIONS: UiVersion[] = [
   {
+    version: "1.46",
+    date: "2026-11-18",
+    changes: ["Camadas e Composições aparecem primeiro no painel do mapa."],
+  },
+  {
+    version: "1.45",
+    date: "2026-11-18",
+    changes: ["O menu Área do time fecha ao clicar no conteúdo da página abaixo do cabeçalho."],
+  },
+  {
+    version: "1.44",
+    date: "2026-11-18",
+    changes: ["Ferramentas disponíveis em todas as visões e encaixe mais limpo na ponta da seta de traço livre."],
+  },
+  {
+    version: "1.43",
+    date: "2026-11-18",
+    changes: ["Visão junto às ferramentas do mapa e card de abas com menos espaço interno."],
+  },
+  {
+    version: "1.42",
+    date: "2026-11-18",
+    changes: [
+      "Troca de visão em um clique, câmera no canto do mapa e abas agrupadas no painel.",
+      "Atalhos de desenho, Borracha para wards e ponta de seta mais estável nas curvas.",
+    ],
+  },
+  {
+    version: "1.41",
+    date: "2026-11-18",
+    changes: [
+      "As waves passam pelo centro das curvas do Topo e da rota Inferior no mapa realista.",
+      "O lado da ward é editado em um menu junto à peça, sem redimensionar o mapa.",
+    ],
+  },
+  {
+    version: "1.40",
+    date: "2026-11-18",
+    changes: [
+      "Menu Arquivos na barra do mapa e painel em abas com paginação dos passos.",
+      "O zoom do mapa usa toda a área livre ao redor da imagem.",
+    ],
+  },
+  {
+    version: "1.39",
+    date: "2026-11-18",
+    changes: ["O menu Área do time usa as transições e a navegação por teclado do Intent UI."],
+  },
+  {
+    version: "1.38",
+    date: "2026-11-18",
+    changes: [
+      "Mapa tático inteiro na janela, camadas no painel lateral e colocação de waves pela rota mais próxima.",
+      "A Área do time ganhou um menu no cabeçalho. Os quatro Lumes extras agora têm um controle próprio.",
+    ],
+  },
+  {
+    version: "1.37",
+    date: "2026-11-18",
+    changes: [
+      "O mapa tático ganhou espaço com uma barra compacta e uma única lateral.",
+      "Campeões podem ser movidos em todas as visões. Resetar mapa restaura posições e torres e limpa anotações.",
+    ],
+  },
+  {
+    version: "1.36",
+    date: "2026-11-18",
+    changes: [
+      "Controles compactos no mapa tático, zoom com a roda e navegação ao segurar Espaço.",
+      "Uma wave de seis minions por rota e opção de ponta de seta no traço livre.",
+    ],
+  },
+  {
+    version: "1.35",
+    date: "2026-11-18",
+    changes: [
+      "Mapa tático com zoom, tela cheia, traço livre e ajustes de estilo de desenho.",
+      "Visão tática por lado, wards móveis, waves por rota e alcance de ataque das torres.",
+      "Ícones de rota nos marcadores do mapa.",
+    ],
+  },
+  {
     version: "1.34",
     date: "2026-11-18",
     changes: [

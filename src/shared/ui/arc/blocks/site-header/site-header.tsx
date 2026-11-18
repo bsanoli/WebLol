@@ -7,6 +7,7 @@ import type { Transition, Variants } from "motion/react";
 import { ArrowRight, ChevronDown, Menu, X } from "lucide-react";
 import { motionTokens } from "../../motion-tokens";
 import { NavigationHover, useNavigationHover } from "../../navigation-hover";
+import { IntentNavbarMenu } from "@/shared/ui/intent-navbar-menu";
 import styles from "./site-header.module.css";
 
 type SiteHeaderVariant = "simple" | "centered" | "mega";
@@ -29,7 +30,7 @@ interface SiteHeaderFeature {
   image?: { src: string; alt: string };
 }
 
-/** A top level destination. With `links` and the mega variant it opens a panel; otherwise it is a plain link. */
+/** A top level destination. Links can open a navigation panel in the simple and mega variants. */
 interface SiteHeaderItem {
   /** Stable value, also used for `current`. */
   value: string;
@@ -193,7 +194,8 @@ export const SiteHeader = forwardRef<HTMLElement, SiteHeaderProps>(function Site
   const panelRef = useRef<HTMLDivElement>(null);
   const openTimer = useRef<number | undefined>(undefined), closeTimer = useRef<number | undefined>(undefined);
   const focusFirst = useRef(false);
-  const hasPanels = variant === "mega";
+  const hasPanels = variant !== "centered" && items.some(item => item.links?.length);
+  const compactPanel = variant === "simple";
   const openItem = open ? items.find(item => item.value === open.value) : undefined;
 
   const setRefs = useCallback((node: HTMLElement | null) => {
@@ -358,6 +360,13 @@ export const SiteHeader = forwardRef<HTMLElement, SiteHeaderProps>(function Site
                 const decorations = <>
                   {isCurrent && <motion.span key={`current-${variant}`} layoutId={`current-${variant}`} className={styles.indicator} transition={reduced ? { duration: 0 } : motionTokens.spring.morph} aria-hidden="true" />}
                 </>;
+                if (compactPanel && item.links?.length) return <li key={item.value} className={styles.navCell}>
+                  <IntentNavbarMenu links={item.links} className={common.className} data-nav-item="" data-section={item.value} data-current={common["data-current"]}>
+                    {decorations}
+                    <span className={styles.navLabel}>{item.label}</span>
+                    <ChevronDown className={styles.chevron} size={14} strokeWidth={2} aria-hidden="true" />
+                  </IntentNavbarMenu>
+                </li>;
                 return <li key={item.value} className={styles.navCell}>
                   {withPanel
                     ? <button
@@ -401,7 +410,7 @@ export const SiteHeader = forwardRef<HTMLElement, SiteHeaderProps>(function Site
         {toolbar}
       </div>
 
-      {hasPanels && <AnimatePresence>
+      {hasPanels && !compactPanel && <AnimatePresence>
         {openItem?.links && <motion.div
           key="panel"
           id={`${id}-panel`}
@@ -455,7 +464,7 @@ export const SiteHeader = forwardRef<HTMLElement, SiteHeaderProps>(function Site
             <ul className={styles.sheetList}>
               {items.map((item, index) => {
                 const isCurrent = current === item.value;
-                const group = !!item.links?.length && variant === "mega";
+                const group = !!item.links?.length && hasPanels;
                 const isExpanded = expanded === item.value;
                 const rowMotion = { initial: reduced ? false : { opacity: 0, y: -6 }, animate: { opacity: 1, y: 0 }, transition: { duration: motionTokens.duration.standard, ease: enter, delay: reduced ? 0 : .04 + index * motionTokens.stagger.item } } as const;
                 return <motion.li key={item.value} className={styles.sheetItem} {...rowMotion}>

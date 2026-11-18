@@ -247,6 +247,7 @@ function updateStatus(keepChip){
   renderTeamView();renderPreview();
   try{$("#v-camp")?.contentWindow?.weblolTeamChanged?.()}catch(e){}
   document.body.dataset.accountName = u?.id ?? "";
+  document.body.dataset.teamManagement = String(window.captainAccess?.() ?? false);
   document.body.dataset.accountRole = preview()==="user"?"Vendo como membro":preview()==="captain"?"Vendo como capitão":u?.admin?"Admin":isCaptain()?"Capitão":"";
   document.body.dataset.preview = preview();
   document.body.classList.toggle("isadmin",!!u?.admin||isCaptain());

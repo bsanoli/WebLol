@@ -1,11 +1,13 @@
-import { editWards, getWardType, readWards, wardOnMap, wardTypes, type WardScene } from "../model/wards"
+import { addWard, getWardType, placeWard, readWards, wardOnMap, wardTypes, type Ward, type WardScene } from "../model/wards"
+import { isSide, sideLabel, mapRadius, type Side } from "../model/battlefield"
 import type { MapPoint } from "../model/faelights"
+import { mountWardSidePopover } from "./ward-side-popover"
 
 const directions = new Map<string, MapPoint>([
   ["ArrowLeft", [-1, 0]], ["ArrowRight", [1, 0]], ["ArrowUp", [0, -1]], ["ArrowDown", [0, 1]],
 ])
 const clamp = (axis: number) => Math.min(100, Math.max(0, axis))
-const mapWidthInUnits = 15000
+const wardItems = { stealth: 3340, control: 2055, farsight: 3363 }
 const wardShapes = {
   stealth: '<circle r="1.65"/>',
   control: '<path d="M0 -2 L2 0 L0 2 L-2 0 Z"/>',
@@ -21,6 +23,7 @@ export function mountWardLayer({ read, write, getTool, isPlaying, pointFromEvent
   mountTeamSelect: (field: HTMLSelectElement) => void
 }) {
   const map = document.querySelector<HTMLElement>("#map")!
+  const viewport = document.querySelector<HTMLElement>("#map-viewport")!
   const layer = map.querySelector<SVGSVGElement>("#map-wards")!
   const realistic = map.querySelector("#mapimg")!
   const spots = map.querySelector("#map-faelights")!
@@ -32,22 +35,30 @@ export function mountWardLayer({ read, write, getTool, isPlaying, pointFromEvent
   const clear = document.querySelector<HTMLButtonElement>("#map-clear-wards")!
   const options = document.querySelector<HTMLElement>("#map-ward-options")!
   const typeSelect = document.querySelector<HTMLSelectElement>("#map-ward-type")!
+  const sideSelect = document.querySelector<HTMLSelectElement>("#map-ward-side")!
+  const targets = map.querySelector<HTMLElement>("#map-ward-targets")!
+  const editor = mountWardSidePopover(viewport, changeSide)
   for (const { id, label, sight } of wardTypes) {
     const option = new Option(label, id)
     option.dataset.description = `${sight} unidades de visão`
     typeSelect.add(option)
   }
   mountTeamSelect(typeSelect)
+  mountTeamSelect(sideSelect)
   let cursorPosition: MapPoint = [50, 50]
+  let selected = -1
+  let drag: { index: number; pointer: number; start: MapPoint; preview?: Ward[] } | undefined
 
   const scene = (): WardScene => ({
     style: realistic.hasAttribute("data-map-visible") ? "realistic" : "minimap",
-    transformed: spots.hasAttribute("data-transformed"),
+    additionalFaelights: spots.hasAttribute("data-additional"),
   })
 
-  function render() {
+  function render(preview?: Ward[]) {
+    editor.close()
     const view = scene()
-    const wards = readWards(read()).map(ward => wardOnMap(ward, view))
+    const wards = (preview ?? readWards(read())).map(ward => wardOnMap(ward, view))
+    if (selected >= wards.length) selected = -1
     clear.disabled = wards.length === 0 || isPlaying()
     legend.hidden = wards.length === 0
     bonusLegend.hidden = !wards.some(ward => ward.faelight)
@@ -55,24 +66,32 @@ export function mountWardLayer({ read, write, getTool, isPlaying, pointFromEvent
     typeLegend.innerHTML = wardTypes.filter(type => placedTypes.has(type.id)).map(({ id, label }) => `
       <li><svg class="ward-marker" data-ward-type="${id}" viewBox="-2.5 -2.5 5 5" aria-hidden="true">${wardShapes[id]}</svg>${label}</li>
     `).join("")
-    const coverage = wards.map(({ point: [x, y], faelight, type, sight }) => `
+    const coverage = wards.map(({ point: [x, y], faelight, type, sight, side }) => `
       ${faelight ? `<path class="ward-vision-bonus" data-faelight="${faelight.id}" d="${faelight.bonusPath}"
         transform="translate(${x - faelight.minimap[0]} ${y - faelight.minimap[1]})"/>` : ""}
-      <circle class="ward-vision-range" data-ward-type="${type.id}" cx="${x}" cy="${y}" r="${sight * 100 / mapWidthInUnits}"/>
+      <circle class="ward-vision-range" data-ward-type="${type.id}" data-side="${side ?? ""}" cx="${x}" cy="${y}" r="${mapRadius(sight)}"/>
     `).join("")
-    const markers = wards.map(({ point: [x, y], faelight, type, sight }) => `
-      <g class="ward-marker" data-ward-type="${type.id}" transform="translate(${x} ${y})"
-        role="img" aria-label="${type.label}, ${sight} unidades de visão${faelight ? `, Lume Feérico em ${faelight.location}` : ""}">
-        ${wardShapes[type.id]}<use href="assets/icons.svg#ward" x="-1.2" y="-1.2" width="2.4" height="2.4"/>
+    const markers = wards.map(({ point: [x, y], faelight, type, sight, side }, index) => `
+      <g class="ward-marker" data-ward-type="${type.id}" data-side="${side ?? ""}" transform="translate(${x} ${y})"
+        role="img" aria-label="${type.label}, ${sight} unidades de visão${faelight ? `, Lume Feérico em ${faelight.location}` : ""}${side ? `, ${sideLabel[side]}` : ""}">
+        <g class="${index === selected ? "ward-selected" : ""}">${wardShapes[type.id]}</g><use href="assets/icons.svg#ward" x="-1.2" y="-1.2" width="2.4" height="2.4"/>
+        <image href="assets/lol/hud/ward-${wardItems[type.id]}.png" x="-1.1" y="-1.1" width="2.2" height="2.2"/>
       </g>`).join("")
     layer.innerHTML = `<g aria-hidden="true">${coverage}</g>${markers}`
+    const erasing = getTool() === "erase"
+    const interactive = !isPlaying() && (getTool() === "move" || erasing)
+    targets.innerHTML = interactive ? wards.map(({ point: [x, y], type, side }, index) => `
+      <button type="button" class="map-ward-target" data-ward-index="${index}" style="left:${x}%;top:${y}%"
+        aria-label="${erasing ? "Apagar" : "Mover"} ${type.label} — ${side ? sideLabel[side] : "Sem lado"}"
+        ${erasing ? "" : 'aria-haspopup="dialog" aria-controls="map-ward-popover" aria-expanded="false"'}
+        title="${type.label} — ${side ? sideLabel[side] : "Sem lado"}"></button>`).join("") : ""
   }
 
   function handleWardAction(point: MapPoint) {
-    const tool = getTool()
-    if (isPlaying() || (tool !== "ward" && tool !== "remove-ward")) return
+    if (isPlaying() || getTool() !== "ward") return
     const wards = readWards(read())
-    const next = editWards(wards, tool, point, scene(), getWardType(typeSelect.value).id)
+    const side = isSide(sideSelect.value) ? sideSelect.value : "b"
+    const next = addWard(wards, point, scene(), getWardType(typeSelect.value).id, side)
     if (next !== wards) write(next)
   }
 
@@ -94,16 +113,103 @@ export function mountWardLayer({ read, write, getTool, isPlaying, pointFromEvent
     cursor.style.top = `${y}%`
   })
 
-  return { render, setTool(tool: string) {
-    const editing = tool === "ward" || tool === "remove-ward"
-    options.hidden = tool !== "ward"
+  const targetAt = (index: number) => targets.querySelector<HTMLButtonElement>(`[data-ward-index="${index}"]`)
+  const focus = (index: number) => targetAt(index)?.focus({ preventScroll: true })
+  function openEditor(index: number) {
+    const ward = readWards(read())[index]
+    if (!ward) return
+    selected = index
+    render()
+    const target = targetAt(index)
+    if (target) editor.open(target, ward.side)
+  }
+  function changeSide(side?: Side) {
+    const index = selected
+    const wards = readWards(read()), ward = wards[index]
+    if (!ward || isPlaying() || getTool() !== "move") return
+    editor.close()
+    if (ward.side !== side) {
+      wards[index] = { ...ward, side }
+      write(wards)
+    }
+    focus(index)
+  }
+  targets.addEventListener("click", event => {
+    const target = (event.target as Element).closest<HTMLElement>("[data-ward-index]")
+    if (!target || isPlaying()) return
+    const index = Number(target.dataset.wardIndex)
+    if (getTool() === "erase") {
+      event.stopPropagation()
+      const wards = readWards(read())
+      if (!wards[index]) return
+      selected = -1
+      write(wards.filter((_, candidate) => candidate !== index))
+      if (event.detail === 0) {
+        const next = targetAt(Math.min(index, wards.length - 2)) ?? viewport
+        next.focus({ preventScroll: true })
+      }
+    } else if (getTool() === "move" && event.detail === 0) openEditor(index)
+  })
+  targets.addEventListener("pointerdown", event => {
+    const target = (event.target as Element).closest<HTMLElement>("[data-ward-index]")
+    if (!target || event.button !== 0 || isPlaying() || getTool() !== "move") return
+    editor.close()
+    drag = { index: Number(target.dataset.wardIndex), pointer: event.pointerId, start: pointFromEvent(event) }
+    map.setPointerCapture(event.pointerId)
+  })
+  map.addEventListener("pointermove", event => {
+    if (!drag || drag.pointer !== event.pointerId || isPlaying()) return
+    const point = pointFromEvent(event)
+    if (!drag.preview && Math.hypot(point[0] - drag.start[0], point[1] - drag.start[1]) < .3) return
+    const wards = readWards(read()), ward = wards[drag.index]
+    if (!ward) return
+    wards[drag.index] = placeWard(ward, point, scene())
+    drag.preview = wards
+    render(wards)
+  })
+  map.addEventListener("pointerup", event => {
+    if (!drag || drag.pointer !== event.pointerId) return
+    const change = drag
+    drag = undefined
+    if (isPlaying()) { render(); return }
+    if (change.preview) {
+      selected = change.index
+      write(change.preview)
+      focus(selected)
+    } else openEditor(change.index)
+  })
+  map.addEventListener("lostpointercapture", event => {
+    if (drag?.pointer !== event.pointerId) return
+    drag = undefined
+    render()
+  })
+  targets.addEventListener("keydown", event => {
+    const target = (event.target as Element).closest<HTMLElement>("[data-ward-index]")
+    if (!target || isPlaying() || getTool() !== "move" || event.ctrlKey || event.altKey || event.metaKey) return
+    const index = Number(target.dataset.wardIndex), direction = directions.get(event.key)
+    const wards = readWards(read()), ward = wards[index]
+    if (!ward || (!direction && event.key !== "Delete")) return
+    event.preventDefault()
+    if (direction) {
+      const [x, y] = wardOnMap(ward, scene()).point
+      const step = event.shiftKey ? 6 : ward.faelightId ? 3 : 1
+      wards[index] = placeWard(ward, [clamp(x + direction[0] * step), clamp(y + direction[1] * step)], scene())
+      selected = index
+    } else {
+      wards.splice(index, 1)
+      selected = -1
+    }
+    write(wards)
+    focus(index)
+  })
+
+  return { render, scene, closeEditor: editor.close, clearSelection() { editor.close(); selected = -1 }, setTool(tool: string, focusCursor = false) {
+    const editing = tool === "ward"
+    options.hidden = !editing
     cursor.hidden = hint.hidden = !editing
     map.classList.toggle("ward-editing", editing)
-    const action = tool === "ward" ? "Colocar ward" : "Remover ward"
-    cursor.setAttribute("aria-label", `${action} no mapa`)
-    if (editing) cursor.focus({ preventScroll: true })
-    hint.textContent = tool === "ward"
-      ? "Clique no mapa para colocar uma ward. Sobre um Lume Feérico, ela mostra a visão extra."
-      : "Clique em uma ward para removê-la."
+    cursor.setAttribute("aria-label", "Colocar ward no mapa")
+    if (editing && focusCursor) cursor.focus({ preventScroll: true })
+    hint.textContent = "Clique no mapa para colocar uma ward. Sobre um Lume Feérico, ela mostra a visão extra."
   } }
 }

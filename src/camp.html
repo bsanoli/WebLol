@@ -19,15 +19,22 @@
   <strong class="team-brand">Área do time</strong>
   <div id="team-navigation"></div>
   <div class="sp"></div>
+  <div id="team-file-slot">
+   <details class="map-disclosure" id="team-files" data-map-menu>
+    <summary data-slot="button" data-variant="outline"><svg class="icon" aria-hidden="true"><use href="assets/icons.svg#folder"></use></svg> Arquivos</summary>
+    <div class="map-disclosure-panel" role="group" aria-label="Backup da Área do time">
   <button data-slot="button" data-variant="outline" id="exp" title="Baixa um arquivo .json com todas as comps (backup / mandar pro time)"><svg class="icon" aria-hidden="true" focusable="false"><use href="assets/icons.svg#download"></use></svg> Exportar</button>
   <button data-slot="button" data-variant="outline" id="impb" title="Carrega um .json exportado antes"><svg class="icon" aria-hidden="true" focusable="false"><use href="assets/icons.svg#upload"></use></svg> Importar</button>
   <input type="file" id="imp" accept=".json,application/json" hidden>
+    </div>
+   </details>
+  </div>
 </header>
 <p id="route-note" class="route-note" role="status" hidden></p>
 
 <section id="v-comps" class="view on">
  <div class="comp-workspace">
- <div class="page-head"><h1>Composições do time</h1></div>
+ <div class="page-head team-page-heading"><h1>Composições do time</h1><div id="team-files-comps"></div></div>
  <div id="comps">
   <div class="wl-panel box composition-toolbar">
     <div class="editor-controls">
@@ -82,76 +89,133 @@
  </div>
 </section>
 
-<section id="v-map" class="view">
- <div class="page-head map-header">
-  <h1>Mapa tático</h1>
-  <div class="map-display" role="group" aria-label="Exibição do mapa">
-   <div id="map-image-control"></div>
-   <div id="map-faelight-toggle"></div>
-   <div id="map-faelight-options" hidden>
-    <label for="map-faelight-terrain-trigger" id="map-faelight-terrain-label">Rift Elemental</label>
-    <select id="map-faelight-terrain" aria-labelledby="map-faelight-terrain-label">
-     <option value="initial">Antes da transformação</option>
-     <option value="infernal">Infernal</option>
-     <option value="mountain">Montanha</option>
-     <option value="ocean">Oceano</option>
-     <option value="cloud">Nuvens</option>
-     <option value="hextech">Hextec</option>
-     <option value="chemtech">Quimtec</option>
-    </select>
-   </div>
-  </div>
- </div>
+<section id="v-map" class="view" aria-label="Mapa tático">
  <div id="mapw">
-  <div class="map-sidebar">
-   <section class="wl-panel box map-card" aria-labelledby="map-tools-title">
-    <h2 class="wl-card-title" id="map-tools-title">Ferramentas</h2>
-    <div id="map-modes"></div>
+  <div class="map-toolbar">
+    <div class="map-edit-toolbar">
+     <div class="map-primary-tools">
+      <div id="map-modes"></div>
+      <div class="map-vision-controls" id="map-perspective" role="group" aria-label="Visão">
+       <button type="button" data-slot="button" data-variant="ghost" data-size="icon-sm" data-vision="all" aria-pressed="true" aria-label="Visão geral" data-map-tip="Visão geral"><svg class="icon" aria-hidden="true"><use href="assets/icons.svg#ward"></use></svg></button>
+       <button type="button" data-slot="button" data-variant="ghost" data-size="icon-sm" data-vision="b" aria-pressed="false" aria-label="Visão azul" data-map-tip="Visão azul"><svg class="icon" aria-hidden="true"><use href="assets/icons.svg#ward"></use></svg></button>
+       <button type="button" data-slot="button" data-variant="ghost" data-size="icon-sm" data-vision="r" aria-pressed="false" aria-label="Visão vermelha" data-map-tip="Visão vermelha"><svg class="icon" aria-hidden="true"><use href="assets/icons.svg#ward"></use></svg></button>
+      </div>
+     </div>
+     <div class="map-history-toolbar" role="group" aria-label="Histórico e limpeza">
+     <button data-slot="button" data-variant="outline" id="undo" aria-label="Desfazer" data-map-tip="Desfazer (Ctrl+Z)"><svg class="icon" aria-hidden="true" focusable="false"><use href="assets/icons.svg#undo"></use></svg></button>
+     <button data-slot="button" data-variant="outline" id="redo" aria-label="Refazer" data-map-tip="Refazer (Ctrl+Y)"><svg class="icon" aria-hidden="true" focusable="false"><use href="assets/icons.svg#redo"></use></svg></button>
+      <details class="map-disclosure" data-map-menu>
+       <summary data-slot="button" data-variant="ghost" aria-label="Limpeza" data-map-tip="Limpeza"><svg class="icon" aria-hidden="true"><use href="assets/icons.svg#trash"></use></svg><svg class="icon map-caret" aria-hidden="true"><use href="assets/icons.svg#descending"></use></svg></summary>
+       <div class="map-disclosure-panel" role="group" aria-label="Limpeza do mapa">
+     <button data-slot="button" data-variant="destructive" id="clr" title="Apaga todas as setas"><svg class="icon" aria-hidden="true" focusable="false"><use href="assets/icons.svg#trash"></use></svg> Limpar setas</button>
+     <button type="button" data-slot="button" data-variant="destructive" id="map-clear-wards" disabled><svg class="icon" aria-hidden="true" focusable="false"><use href="assets/icons.svg#trash"></use></svg> Limpar wards</button>
+     <button type="button" data-slot="button" data-variant="destructive" id="map-clear-all" title="Limpa desenhos, wards e waves do mapa atual" disabled><svg class="icon" aria-hidden="true" focusable="false"><use href="assets/icons.svg#trash"></use></svg> Limpar tudo</button>
+       </div>
+      </details>
+      <details class="map-disclosure" data-map-menu>
+       <summary data-slot="button" data-variant="ghost" aria-label="Posições prontas" data-map-tip="Posições prontas"><svg class="icon" aria-hidden="true"><use href="assets/icons.svg#map"></use></svg><svg class="icon map-caret" aria-hidden="true"><use href="assets/icons.svg#descending"></use></svg></summary>
+       <div class="map-disclosure-panel" role="group" aria-label="Posições de campeões">
+        <button data-slot="button" data-variant="outline" data-pre="base">Todos na base</button><button data-slot="button" data-variant="outline" data-pre="lane" title="Fase de rotas (~1:30)">Fase de rotas</button>
+       </div>
+      </details>
+      <button type="button" data-slot="button" data-variant="outline" id="map-reset" title="Restaura posições e torres e limpa as anotações" disabled><svg class="icon" aria-hidden="true"><use href="assets/icons.svg#reset"></use></svg> Resetar mapa</button>
+     </div>
+    </div>
+   <div class="map-stage-bar" role="group" aria-label="Arquivos e painel">
+    <div id="map-file-slot"></div>
+    <details class="map-disclosure map-help" data-map-menu>
+    <summary data-slot="button" data-variant="outline">Ajuda</summary>
+    <div class="map-disclosure-panel">
+    <ol>
+     <li>Use <b>Mover</b> para ajustar campeões, wards e waves. Para desenhar uma seta, arraste ou clique no início e no fim.</li>
+     <li>Clique em <b>Novo passo</b> para gravar o mapa. Repita para cada momento da jogada.</li>
+     <li>Clique em <b>Reproduzir</b> para ver a sequência.</li>
+    </ol>
+    <p>Role a roda sobre o mapa para ajustar o zoom. Segure <b>Espaço</b> e arraste para navegar. Com <b>Alcance das torres</b> ligado, use <b>Mover</b> para alternar o estado de uma torre.</p>
+    <p>Com o mapa em foco, use <kbd>V</kbd> para Mover, <kbd>H</kbd> para Mão, <kbd>Shift+L</kbd> para Seta, <kbd>Shift+P</kbd> para Traço livre e <kbd>B</kbd> ou <kbd>E</kbd> para a Borracha. A Borracha apaga traços, wards e waves.</p>
+    <p>Para corrigir um passo, selecione-o e ligue o <b>Modo edição</b>. Use <b>Ctrl+Z</b> para desfazer e <b>Ctrl+Y</b> para refazer.</p>
+    </div>
+   </details>
+    <button type="button" data-slot="button" data-variant="outline" id="map-panel-toggle" aria-expanded="false" aria-controls="map-sidebar">Painel</button>
+   </div>
+   </div>
+  <div class="map-stage">
+   <div class="map-tool-options">
     <div id="map-ward-options" hidden>
+     <label for="map-ward-side-trigger" id="map-ward-side-label">Lado da ward</label>
+     <select id="map-ward-side" aria-labelledby="map-ward-side-label"><option value="b">Azul</option><option value="r">Vermelho</option></select>
      <label id="map-ward-type-label" for="map-ward-type-trigger">Tipo de ward</label>
      <select id="map-ward-type" aria-labelledby="map-ward-type-label"></select>
     </div>
     <p id="map-ward-hint" class="map-ward-hint" hidden></p>
+    <div id="map-wave-options" class="map-tool-fields" hidden>
+     <label for="map-wave-side-trigger" id="map-wave-side-label">Lado da wave</label>
+     <select id="map-wave-side" aria-labelledby="map-wave-side-label"><option value="b">Azul</option><option value="r">Vermelho</option></select>
+     <span class="map-ward-hint">Clique perto da rota desejada.</span>
+     <output id="map-wave-detected" aria-live="polite"></output>
+    </div>
     <div class="map-group" id="map-arrow-options" hidden>
      <h3 id="map-colors-title">Cor da seta</h3>
      <div id="cols" role="group" aria-labelledby="map-colors-title"></div>
-    </div>
-    <div class="map-actions map-group" role="group" aria-label="Histórico de edição">
-     <button data-slot="button" data-variant="outline" id="undo" title="Desfazer (Ctrl+Z)"><svg class="icon" aria-hidden="true" focusable="false"><use href="assets/icons.svg#undo"></use></svg> Desfazer</button>
-     <button data-slot="button" data-variant="outline" id="redo" title="Refazer (Ctrl+Y)"><svg class="icon" aria-hidden="true" focusable="false"><use href="assets/icons.svg#redo"></use></svg> Refazer</button>
-    </div>
-    <div class="map-actions" role="group" aria-label="Limpeza do mapa">
-     <button data-slot="button" data-variant="destructive" id="clr" title="Apaga todas as setas"><svg class="icon" aria-hidden="true" focusable="false"><use href="assets/icons.svg#trash"></use></svg> Limpar setas</button>
-     <button type="button" data-slot="button" data-variant="destructive" id="map-clear-wards" disabled><svg class="icon" aria-hidden="true" focusable="false"><use href="assets/icons.svg#trash"></use></svg> Limpar wards</button>
-     <button type="button" data-slot="button" data-variant="destructive" id="map-clear-all" title="Limpa todas as setas e wards do mapa atual" disabled><svg class="icon" aria-hidden="true" focusable="false"><use href="assets/icons.svg#trash"></use></svg> Limpar tudo</button>
-    </div>
-   </section>
-   <section class="wl-panel box map-card" aria-labelledby="map-positions-title">
-    <h2 class="wl-card-title" id="map-positions-title">Posições prontas</h2>
-    <div class="map-actions"><button data-slot="button" data-variant="outline" data-pre="base">Todos na base</button><button data-slot="button" data-variant="outline" data-pre="lane">Fase de rotas (~1:30)</button></div>
-    <div class="map-group">
-     <h3>Composição de cada lado</h3>
-     <div class="map-sides">
-      <label id="cb-label" for="cb-trigger" class="map-blue">Azul</label><select id="cb" aria-labelledby="cb-label"></select>
-      <label id="cr-label" for="cr-trigger" class="map-red">Vermelho</label><select id="cr" aria-labelledby="cr-label"></select>
+     <div class="map-stroke-options">
+      <label for="map-stroke-width-trigger" id="map-stroke-width-label">Espessura</label>
+      <select id="map-stroke-width" aria-labelledby="map-stroke-width-label"><option value="2">Fina</option><option value="3.2" selected>Média</option><option value="5">Grossa</option></select>
+      <label for="map-stroke-style-trigger" id="map-stroke-style-label">Estilo</label>
+      <select id="map-stroke-style" aria-labelledby="map-stroke-style-label"><option value="solid">Contínuo</option><option value="dashed">Tracejado</option></select>
      </div>
+     <label id="map-arrowhead-option" class="map-check" hidden><input type="checkbox" id="map-stroke-arrowhead"> Ponta de seta</label>
     </div>
-   </section>
-  </div>
-  <div class="map-stage">
+   </div>
+   <div class="map-board-slot">
+   <div id="map-viewport" role="region" aria-label="Mapa da jogada" tabindex="0" class="map-viewport">
    <div id="map">
     <svg viewBox="0 0 100 100" id="schem"></svg>
     <img class="bg" src="./assets/lol/map/map11.png" alt="">
     <img class="bg" id="mapimg" alt="">
+    <svg id="map-tower-ranges" viewBox="0 0 100 100" aria-hidden="true"></svg>
     <div id="map-faelights" role="group" aria-label="Localização dos Lumes Feéricos" hidden></div>
     <svg id="map-wards" viewBox="0 0 100 100" role="group" aria-label="Wards no mapa"></svg>
     <canvas id="cv"></canvas>
+    <svg id="map-vision-mask" viewBox="0 0 100 100" aria-hidden="true"></svg>
+    <div id="map-towers" role="group" aria-label="Torres"></div>
+    <div id="map-waves" role="group" aria-label="Waves"></div>
+    <span id="map-wave-preview" aria-hidden="true" hidden></span>
+    <span id="map-wave-cursor" aria-hidden="true" hidden></span>
+    <div id="map-ward-targets" role="group" aria-label="Interagir com wards"></div>
     <button id="map-ward-cursor" type="button" aria-description="Use as setas para mover o cursor e Enter ou Espaço para agir." hidden></button>
    </div>
+   </div>
+   <div class="map-camera-controls" role="group" aria-label="Câmera do mapa">
+    <button type="button" data-slot="button" data-variant="outline" data-size="icon-sm" id="map-zoom-out" aria-label="Diminuir zoom" data-map-tip="Diminuir zoom">−</button>
+    <output id="map-zoom-value" aria-live="polite">100%</output>
+    <button type="button" data-slot="button" data-variant="outline" data-size="icon-sm" id="map-zoom-in" aria-label="Aumentar zoom" data-map-tip="Aumentar zoom">+</button>
+    <button type="button" data-slot="button" data-variant="ghost" data-size="sm" id="map-zoom-fit">Ajustar</button>
+    <button type="button" data-slot="button" data-variant="outline" data-size="icon-sm" id="map-fullscreen" aria-label="Tela cheia"></button>
+   </div>
+   </div>
+   <div id="map-ward-popover" popover="auto" role="dialog" aria-labelledby="map-ward-popover-title">
+    <p id="map-ward-popover-title">Lado da ward</p>
+    <div class="map-ward-side-actions">
+     <button type="button" data-slot="button" data-variant="ghost" data-size="sm" data-ward-side="b" aria-pressed="false">Azul</button>
+     <button type="button" data-slot="button" data-variant="ghost" data-size="sm" data-ward-side="r" aria-pressed="false">Vermelho</button>
+     <button type="button" data-slot="button" data-variant="ghost" data-size="sm" data-ward-side="" aria-pressed="false">Sem lado</button>
+    </div>
+   </div>
+   <p id="map-preview-notice" class="map-ward-hint" hidden>Prévia tática aproximada da visão da equipe.</p>
+  </div>
+  <aside class="map-sidebar" id="map-sidebar" aria-label="Painel do mapa" tabindex="-1">
+   <div id="map-sidebar-tabs"></div>
+   <section class="wl-panel box map-card" role="tabpanel" id="panel-map-layers" aria-labelledby="tab-map-layers" data-map-tab="map-layers" tabindex="0" hidden>
+    <div class="map-display-switches" role="group" aria-label="Camadas do mapa">
+     <div id="map-image-control"></div>
+     <div id="map-faelight-toggle"></div>
+     <div id="map-faelight-additional-toggle"></div>
+     <div id="map-tower-range-control"></div>
+    </div>
    <div class="map-legends">
     <div class="map-faelight-legend" id="map-faelight-legend" role="status" hidden>
      <span>8 Lumes iniciais</span>
-     <span id="map-faelight-elemental-legend" data-elemental hidden>4 Lumes do Rift Elemental</span>
+     <span id="map-faelight-additional-legend" data-additional-spot hidden>4 Lumes adicionais</span>
     </div>
     <div id="map-ward-legend" class="map-ward-hint" hidden>
      <ul id="map-ward-types" aria-label="Tipos de ward no mapa"></ul>
@@ -161,20 +225,8 @@
      </div>
     </div>
    </div>
-  </div>
-  <div class="map-sidebar">
-   <section class="wl-panel box map-card" aria-labelledby="map-sequence-title">
-    <h2 class="wl-card-title" id="map-sequence-title">Sequência da jogada</h2>
-    <div class="map-actions"><button data-slot="button" data-variant="default" id="sadd"><svg class="icon" aria-hidden="true" focusable="false"><use href="assets/icons.svg#plus"></use></svg> Novo passo</button><button data-slot="button" data-variant="ghost" id="sedit" class="edt" aria-pressed="false" title="Liga/desliga a edição do passo selecionado"><svg class="icon" aria-hidden="true" focusable="false"><use href="assets/icons.svg#edit"></use></svg> Modo edição</button></div>
-    <div class="map-group">
-     <div class="map-playback"><button data-slot="button" data-variant="outline" data-size="icon" id="sprev" aria-label="Passo anterior"><svg class="icon" aria-hidden="true" focusable="false"><use href="assets/icons.svg#previous"></use></svg></button><button data-slot="button" data-variant="outline" id="splay"><svg class="icon" aria-hidden="true" focusable="false"><use href="assets/icons.svg#play"></use></svg> Reproduzir</button><button data-slot="button" data-variant="outline" data-size="icon" id="snext" aria-label="Próximo passo"><svg class="icon" aria-hidden="true" focusable="false"><use href="assets/icons.svg#next"></use></svg></button></div>
-     <label class="map-speed" for="spd">Velocidade <input type="range" id="spd" min="0.4" max="3" step="0.1" value="1.2"> <span id="spdv">1.2s</span></label>
-    </div>
-    <div id="sstat" class="sstat" role="status"></div>
-    <ol id="steps"></ol>
    </section>
-   <section class="wl-panel box map-card" aria-labelledby="map-play-title">
-    <h2 class="wl-card-title" id="map-play-title">Jogada</h2>
+   <section class="wl-panel box map-card" role="tabpanel" id="panel-map-play" aria-labelledby="tab-map-play" data-map-tab="map-play" tabindex="0" hidden>
     <select id="psel" aria-label="Jogada selecionada"></select>
     <div class="map-actions">
      <button data-slot="button" data-variant="default" id="pnew"><svg class="icon" aria-hidden="true" focusable="false"><use href="assets/icons.svg#plus"></use></svg> Nova jogada</button>
@@ -183,26 +235,37 @@
      <button data-slot="button" data-variant="destructive" id="pdel"><svg class="icon" aria-hidden="true" focusable="false"><use href="assets/icons.svg#trash"></use></svg> Excluir</button>
     </div>
    </section>
-   <details class="help">
-    <summary>Como montar uma jogada</summary>
-    <ol>
-     <li>Posicione os campeões e adicione setas e wards conforme precisar.</li>
-     <li>Clique em <b>Novo passo</b> para gravar o mapa. Repita para cada momento da jogada.</li>
-     <li>Clique em <b>Reproduzir</b> para ver a sequência.</li>
-    </ol>
-    <p>Para corrigir um passo, selecione-o e ligue o <b>Modo edição</b>. Use <b>Ctrl+Z</b> para desfazer e <b>Ctrl+Y</b> para refazer.</p>
-   </details>
-  </div>
+   <section class="wl-panel box map-card" role="tabpanel" id="panel-map-comps" aria-labelledby="tab-map-comps" data-map-tab="map-comps" tabindex="0" hidden>
+     <div class="map-sides">
+      <label id="cb-label" for="cb-trigger" class="map-blue">Azul</label><select id="cb" aria-labelledby="cb-label"></select>
+      <label id="cr-label" for="cr-trigger" class="map-red">Vermelho</label><select id="cr" aria-labelledby="cr-label"></select>
+     </div>
+   </section>
+   <section class="wl-panel box map-card" role="tabpanel" id="panel-map-sequence" aria-labelledby="tab-map-sequence" data-map-tab="map-sequence" tabindex="0">
+    <div class="map-actions"><button data-slot="button" data-variant="default" id="sadd"><svg class="icon" aria-hidden="true" focusable="false"><use href="assets/icons.svg#plus"></use></svg> Novo passo</button><button data-slot="button" data-variant="ghost" id="sedit" class="edt" aria-pressed="false" title="Liga/desliga a edição do passo selecionado"><svg class="icon" aria-hidden="true" focusable="false"><use href="assets/icons.svg#edit"></use></svg> Modo edição</button></div>
+    <div class="map-group">
+     <div class="map-playback"><button data-slot="button" data-variant="outline" data-size="icon" id="sprev" aria-label="Passo anterior"><svg class="icon" aria-hidden="true" focusable="false"><use href="assets/icons.svg#previous"></use></svg></button><button data-slot="button" data-variant="outline" id="splay"><svg class="icon" aria-hidden="true" focusable="false"><use href="assets/icons.svg#play"></use></svg> Reproduzir</button><button data-slot="button" data-variant="outline" data-size="icon" id="snext" aria-label="Próximo passo"><svg class="icon" aria-hidden="true" focusable="false"><use href="assets/icons.svg#next"></use></svg></button></div>
+     <label class="map-speed" for="spd">Velocidade <input type="range" id="spd" min="0.4" max="3" step="0.1" value="1.2"> <span id="spdv">1.2s</span></label>
+    </div>
+    <div id="sstat" class="sstat" role="status"></div>
+    <div id="map-steps-slot"><ol id="steps"></ol></div>
+    <div class="map-step-pager" id="map-step-pager" role="group" aria-label="Páginas dos passos">
+     <button type="button" data-slot="button" data-variant="outline" data-size="icon-sm" id="map-steps-prev" aria-label="Página anterior de passos"><svg class="icon" aria-hidden="true"><use href="assets/icons.svg#previous"></use></svg></button>
+     <output id="map-steps-page" aria-live="polite"></output>
+     <button type="button" data-slot="button" data-variant="outline" data-size="icon-sm" id="map-steps-next" aria-label="Próxima página de passos"><svg class="icon" aria-hidden="true"><use href="assets/icons.svg#next"></use></svg></button>
+    </div>
+   </section>
+  </aside>
  </div>
 </section>
 
 <section id="v-know" class="view">
- <div class="page-head"><h1>Conhecimento</h1><p>Consulte tempos de objetivos e princípios de controle de wave.</p></div>
+ <div class="page-head team-page-heading"><div><h1>Conhecimento</h1><p>Consulte tempos de objetivos e princípios de controle de wave.</p></div><div id="team-files-know"></div></div>
  <div id="know"></div>
 </section>
 
 <section id="v-cap" class="view">
- <div class="page-head"><h1>Gestão do time</h1><p id="cap-sub">Aceite pedidos, gerencie os jogadores e veja o histórico das comps do time.</p></div>
+ <div class="page-head team-page-heading"><div><h1>Gestão do time</h1><p id="cap-sub">Aceite pedidos, gerencie os jogadores e veja o histórico das comps do time.</p></div><div id="team-files-cap"></div></div>
  <div id="cap"></div>
 </section>
 

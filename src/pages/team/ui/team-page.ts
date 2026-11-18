@@ -425,7 +425,9 @@ $("#imp").onchange=async e=>{
 const teamPages = {comps:"composicoes", map:"mapa", know:"conhecimento", cap:"gestao"};
 const guides = {obj:"objetivos", wave:"wave"};
 let currentTeamView = "comps";
-const renderTeamNavigation = mountTeamNavigation($("#team-navigation"), handleTeamNavigation);
+const usesParentNavigation = window.frameElement?.id === "v-camp";
+document.body.toggleAttribute("data-parent-navigation", usesParentNavigation);
+const renderTeamNavigation = usesParentNavigation ? () => {} : mountTeamNavigation($("#team-navigation"), handleTeamNavigation);
 
 function handleTeamNavigation(view) {
   showTeamView(view);
@@ -434,6 +436,9 @@ function handleTeamNavigation(view) {
 
 function showTeamView(view) {
   currentTeamView = view;
+  $("#team-files").open = false;
+  const filesSlot = view === "map" ? "#map-file-slot" : usesParentNavigation ? "#team-files-" + view : "#team-file-slot";
+  $(filesSlot).append($("#team-files"));
   renderTeamNavigation(view, hasCaptainAccess());
   document.querySelectorAll(".view").forEach(section=>section.classList.toggle("on",section.id==="v-"+view));
   if(view==="map")renderPlays();
@@ -529,7 +534,7 @@ const getState = () => S;
 const renderKnow = mountKnowledge({ getState, save, publishTeamRoute, mountSectionTabs });
 const { plays, renderPlays, renderMapImageSwitch, setMapImg, selectPlay } = mountTacticalMap({
   getState, save, publishTeamRoute, toast, uid, img, esc,
-  mountTeamSelect, mountMapEmpty, mountMapSwitch, mountToolGroup, clearTeamControls,
+  mountTeamSelect, mountMapEmpty, mountMapSwitch, mountToolGroup, mountSectionTabs, clearTeamControls,
 });
 function renderAll(){renderList();renderEditor();renderGrid()}
 mountTeamSelect($("#sort"));

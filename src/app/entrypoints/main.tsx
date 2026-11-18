@@ -22,6 +22,11 @@ const sections = [
   { value: "admin", label: "Administração", href: "#/admin" },
 ]
 const publicSections = sections.filter(({ value }) => value !== "admin")
+const teamLinks = [
+  { label: "Composições", href: "#/time/composicoes" },
+  { label: "Mapa tático", href: "#/time/mapa" },
+  { label: "Conhecimento", href: "#/time/conhecimento" },
+]
 
 const initialPalette = initializeTheme()
 
@@ -38,6 +43,7 @@ function Icon({ name }: { name: IconName }) {
 function App() {
   const [current, setCurrent] = useState("worlds")
   const [isAdmin, setIsAdmin] = useState(false)
+  const [canViewManagement, setCanViewManagement] = useState(false)
   const [user, setUser] = useState("")
   const [role, setRole] = useState("")
   const [accountOpen, setAccountOpen] = useState(false)
@@ -52,11 +58,12 @@ function App() {
     function updateNavigation() {
       setCurrent(document.body.dataset.currentScreen ?? "worlds")
       setIsAdmin(document.body.classList.contains("isadmin"))
+      setCanViewManagement(document.body.dataset.teamManagement === "true")
       setUser(document.body.dataset.accountName ?? "")
       setRole(document.body.dataset.accountRole ?? "")
     }
     const observer = new MutationObserver(updateNavigation)
-    observer.observe(document.body, { attributes: true, attributeFilter: ["class", "data-current-screen", "data-account-name", "data-account-role"] })
+    observer.observe(document.body, { attributes: true, attributeFilter: ["class", "data-current-screen", "data-account-name", "data-account-role", "data-team-management"] })
     updateNavigation()
     return () => observer.disconnect()
   }, [])
@@ -77,7 +84,10 @@ function App() {
           href: "#/worlds",
           mark: <img src="./assets/brand/weblol-logo-horizontal-transparent.png" alt="" width="1200" height="185" className="h-auto w-[120px]" />,
         }}
-        items={isAdmin ? sections : publicSections}
+        items={(isAdmin ? sections : publicSections).map(section => section.value === "camp" ? {
+          ...section,
+          links: canViewManagement ? [...teamLinks, { label: "Gestão do time", href: "#/time/gestao" }] : teamLinks,
+        } : section)}
         current={current}
         primaryAction={null}
         secondaryAction={null}
@@ -118,7 +128,7 @@ function App() {
       <main id="screens" tabIndex={-1} aria-label="Painel WebLol">
         <iframe id="v-worlds" className="view" title="Estatísticas do Worlds" />
         <iframe id="v-soloq" className="view" title="Builds de SoloQ dos pros" />
-        <iframe id="v-camp" className="view" title="Área do time" />
+        <iframe id="v-camp" className="view" title="Área do time" allowFullScreen />
         <section id="v-admin" className="view" aria-label="Administração">
           <div className="wrap">
             <Card>

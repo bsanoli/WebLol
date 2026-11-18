@@ -1,0 +1,27 @@
+.popover {
+  min-width: max(var(--trigger-width, 0px), 224px);
+  max-width: min(320px, calc(100vw - 32px));
+  transform-origin: var(--trigger-anchor-point);
+  border: 1px solid var(--wl-line);
+  border-radius: var(--wl-panel-radius);
+  background: var(--wl-raised);
+  color: var(--wl-text);
+  box-shadow: 0 8px 24px rgb(0 0 0 / 48%);
+  --intent-slide: -4px;
+}
+.popover[data-placement="top"] { --intent-slide: 4px; }
+.popover[data-entering] { animation: intent-navbar-enter 150ms ease-out; }
+.popover[data-exiting] { animation: intent-navbar-exit 150ms ease-in; }
+.menu { display: grid; gap: var(--wl-space-1); padding: var(--wl-space-1); outline: none; }
+.item {
+  display: flex; align-items: center; padding: var(--wl-space-1) var(--wl-space-2);
+  min-height: var(--wl-button-height-sm); border-radius: var(--wl-control-radius);
+  color: inherit; font-size: var(--wl-detail-size); text-decoration: none; cursor: pointer; outline: none;
+}
+.item:is([data-hovered], [data-focused]) { background: var(--wl-surface); color: var(--wl-accent); }
+.item[data-focus-visible] { box-shadow: inset 0 0 0 2px var(--wl-accent); }
+@keyframes intent-navbar-enter { from { opacity: 0; transform: translateY(var(--intent-slide)); } to { opacity: 1; transform: translateY(0); } }
+@keyframes intent-navbar-exit { from { opacity: 1; transform: translateY(0); } to { opacity: 0; transform: translateY(var(--intent-slide)); } }
+@media (prefers-reduced-motion: reduce) {
+  .popover:is([data-entering], [data-exiting]) { animation: none; }
+}

@@ -7,7 +7,7 @@ type Faelight = {
   minimap: MapPoint
   realistic: MapPoint
   bonusPath: string
-  afterTransformation?: true
+  additional?: true
 }
 
 // Regras de 2026: https://www.leagueoflegends.com/pt-br/news/game-updates/patch-26-1-notes/
@@ -30,12 +30,12 @@ export const faelights: readonly Faelight[] = [
     bonusPath: "M67.8 57.9 L64.8 64.6 L59.7 63.5 L57.1 60.5 L62.6 54.8 L65 55.9 Z" },
   { id: "lower-island", location: "Arbusto ilhado do rio inferior", minimap: [78, 73], realistic: [77.8, 73.4],
     bonusPath: "M78 73 L74.7 73.3 L73.4 71.4 L70.7 68.2 L74.2 63.9 L76.8 66.3 L77.5 68 L78.6 69 Z" },
-  { id: "blue-top-jungle", location: "Selva azul perto do top", minimap: [15.4, 33.8], realistic: [16.3, 34.6], afterTransformation: true,
+  { id: "blue-top-jungle", location: "Selva azul perto do top", minimap: [15.4, 33.8], realistic: [16.3, 34.6], additional: true,
     bonusPath: "M15.4 33.8 L16 29.7 L19.1 29.8 L21.6 33.5 L23.3 35.5 L22.9 36.4 L19.1 36.4 L18.7 37.4 L20.1 40.4 L22.7 43.5 L26.6 44 L28.1 47 L27.9 48.7 L21.5 48.7 L17.5 46.8 L13.6 43.6 L14.2 38.3 Z" },
-  { id: "blue-bot-jungle", location: "Selva azul perto do bot", minimap: [62.1, 84.6], realistic: [62.2, 85.3], afterTransformation: true,
+  { id: "blue-bot-jungle", location: "Selva azul perto do bot", minimap: [62.1, 84.6], realistic: [62.2, 85.3], additional: true,
     bonusPath: "M62.1 84.6 L59.1 84.9 L56.1 86.6 L53.9 86.7 L52 84.7 L54.6 82.5 L55.5 80.6 L57.8 80.5 L58.9 83 L63.7 82.4 L67.9 80.7 L71.5 80 L74.6 83.7 L72.3 85.6 L68 84.4 Z" },
-  { id: "red-top-jungle", location: "Selva vermelha perto do top", minimap: [35.8, 10.8], realistic: [35.6, 12.5], afterTransformation: true,
+  { id: "red-top-jungle", location: "Selva vermelha perto do top", minimap: [35.8, 10.8], realistic: [35.6, 12.5], additional: true,
     bonusPath: "M35.8 10.8 L38.4 12.9 L42.8 13.7 L45 12.3 L47 12.4 L50 14.7 L47.8 16 L47 15.5 L45 15.7 L44.4 19 L42.6 19 L41 17.8 L40 17 L37.7 18.3 L33.7 18.5 L31.5 17.4 L28.2 18.5 L29.4 15.6 L32.3 14 Z" },
-  { id: "red-bot-jungle", location: "Selva vermelha perto do bot", minimap: [87.4, 59], realistic: [87.2, 59.4], afterTransformation: true,
+  { id: "red-bot-jungle", location: "Selva vermelha perto do bot", minimap: [87.4, 59], realistic: [87.2, 59.4], additional: true,
     bonusPath: "M87.4 59 L85.8 65 L84.4 69 L82 72.1 L80.2 69.7 L82.2 65.8 L82.2 61.1 L80.7 58.4 L78.5 56.3 L78.5 51 L80.8 51.6 L82.7 51.4 L85 53.7 L87 54.7 Z" },
 ]

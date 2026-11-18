@@ -1,36 +1,25 @@
 import { faelights } from "../model/faelights"
 
-type VisionPreferences = {
-  showFaelights?: boolean
-  faelightTerrain?: string
-}
-
-export function mountFaelightLayer({ getState, save, mountTeamSelect, mountMapSwitch, onTerrainChange }: {
-  getState: () => VisionPreferences
+export function mountFaelightLayer({ getState, save, mountMapSwitch, onAvailabilityChange }: {
+  getState: () => { showFaelights?: boolean; additionalFaelights?: boolean }
   save: () => void
-  mountTeamSelect: (field: HTMLSelectElement) => void
   mountMapSwitch: (host: Element, label: string, checked: boolean, change: (checked: boolean) => void) => void
-  onTerrainChange: () => void
+  onAvailabilityChange: () => void
 }) {
   const layer = document.querySelector<HTMLElement>("#map-faelights")!
   const toggle = document.querySelector<HTMLElement>("#map-faelight-toggle")!
-  const options = document.querySelector<HTMLElement>("#map-faelight-options")!
-  const terrain = document.querySelector<HTMLSelectElement>("#map-faelight-terrain")!
-  const legend = document.querySelector<HTMLElement>("#map-faelight-elemental-legend")!
+  const additionalToggle = document.querySelector<HTMLElement>("#map-faelight-additional-toggle")!
+  const legend = document.querySelector<HTMLElement>("#map-faelight-additional-legend")!
   const fullLegend = document.querySelector<HTMLElement>("#map-faelight-legend")!
   let previewPlacement = false
   const renderVisibility = () => { layer.hidden = getState().showFaelights !== true && !previewPlacement }
 
-  terrain.value = getState().faelightTerrain ?? terrain.options[0].value
-  if (terrain.selectedIndex === -1) terrain.selectedIndex = 0
-  mountTeamSelect(terrain)
-
-  for (const { location, minimap, realistic, afterTransformation } of faelights) {
+  for (const { location, minimap, realistic, additional } of faelights) {
     const marker = document.createElement("span")
     marker.className = "faelight-marker"
     marker.setAttribute("role", "img")
     marker.setAttribute("aria-label", location)
-    marker.toggleAttribute("data-elemental", Boolean(afterTransformation))
+    marker.toggleAttribute("data-additional-spot", Boolean(additional))
     marker.style.setProperty("--map-x", `${minimap[0]}%`)
     marker.style.setProperty("--map-y", `${minimap[1]}%`)
     marker.style.setProperty("--realistic-x", `${realistic[0]}%`)
@@ -38,22 +27,21 @@ export function mountFaelightLayer({ getState, save, mountTeamSelect, mountMapSw
     layer.append(marker)
   }
 
-  const renderTerrain = () => {
-    const transformed = terrain.value !== "initial"
-    layer.toggleAttribute("data-transformed", transformed)
-    legend.hidden = !transformed
-  }
-  terrain.onchange = () => {
-    getState().faelightTerrain = terrain.value
-    save()
-    renderTerrain()
-    onTerrainChange()
+  function renderAdditional() {
+    const additional = getState().additionalFaelights === true
+    layer.toggleAttribute("data-additional", additional)
+    legend.hidden = !additional
+    mountMapSwitch(additionalToggle, "Lumes adicionais", additional, next => {
+      getState().additionalFaelights = next
+      save()
+      renderAdditional()
+      onAvailabilityChange()
+    })
   }
 
   function renderToggle() {
     const checked = getState().showFaelights === true
     renderVisibility()
-    options.hidden = !checked
     fullLegend.hidden = !checked
     mountMapSwitch(toggle, "Mostrar Lumes Feéricos", checked, next => {
       getState().showFaelights = next
@@ -62,10 +50,16 @@ export function mountFaelightLayer({ getState, save, mountTeamSelect, mountMapSw
     })
   }
 
-  renderTerrain()
   renderToggle()
-  return (preview: boolean) => {
-    previewPlacement = preview
-    renderVisibility()
+  renderAdditional()
+  return {
+    refresh() {
+      renderToggle()
+      renderAdditional()
+    },
+    preview(preview: boolean) {
+      previewPlacement = preview
+      renderVisibility()
+    },
   }
 }

@@ -7,4 +7,5 @@ const PRE={
  lane:{top:[8,38],jg:[24,50],mid:[42,58],adc:[62,93],sup:[60,89]}
 };
 export function preset(k: keyof typeof PRE){const p: Record<string, number[]>={};for(const r of ROLES){p["b_"+r]=PRE[k][r].slice();p["r_"+r]=sw(PRE[k][r])}return p}
-export const blankPlay=(uid: () => string,n?: string)=>({id:uid(),name:n||"Nova jogada",live:{pos:preset("lane"),lines:[]},steps:[],cb:"",cr:""});
+export const initialFrame = () => ({ pos: preset("lane"), lines: [], wards: [], waves: [], destroyedTowers: [] });
+export const blankPlay=(uid: () => string,n?: string)=>({id:uid(),name:n||"Nova jogada",live:initialFrame(),steps:[],cb:"",cr:""});
