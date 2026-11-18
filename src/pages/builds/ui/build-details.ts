@@ -121,8 +121,9 @@ function buildSample(sample: LaneSample, position?: string, action = "") {
 }
 
 function frequencyList(options: Option[]) {
-  return `<ul class="items build-frequency">${options.map(option =>
-    `<li class="item"><span class="item-name">${option.icons.join("")}<span>${esc(option.label)}</span></span><span class="pb" aria-hidden="true"><i style="width:${option.percent}%"></i></span><span class="p">${percent.format(option.percent)}%</span></li>`
+  const iconColumns = Math.max(1, ...options.map(option => option.icons.filter(Boolean).length));
+  return `<ul class="items build-frequency" style="--build-item-icons:${iconColumns}">${options.map(option =>
+    `<li class="item"><span class="item-name"><span class="build-frequency-icons">${option.icons.join("")}</span><span>${esc(option.label)}</span></span><span class="pb" aria-hidden="true"><i style="width:${option.percent}%"></i></span><span class="p">${percent.format(option.percent)}%</span></li>`
   ).join("")}</ul>`;
 }
 
@@ -278,9 +279,9 @@ export function buildMatchups(champion: Champion, position: string) {
     const paginated = DATASET.source === "soloq" && collapsed;
     return `${collapsed ? `<details class="build-matchup-group"><summary>${title}${iconMarkup("next")}</summary>` : `<h4>${title}</h4>`}
       <ul class="build-context-list" aria-label="${title}">${rows(entries.slice(0, MATCHUP_PAGE_SIZE))}${paginated ? rows(extra, true) : ""}</ul>
-      ${extra.length && paginated ? `<button type="button" data-slot="button" data-variant="ghost"
+      ${extra.length && paginated ? `<button type="button" data-slot="button" data-variant="ghost" data-size="sm"
         class="build-matchup-more" data-show-matchup-page><span>Ver mais ${Math.min(MATCHUP_PAGE_SIZE, extra.length)}</span> ${iconMarkup("next")}</button>`
-      : extra.length ? `<button type="button" data-slot="button" data-variant="ghost"
+      : extra.length ? `<button type="button" data-slot="button" data-variant="ghost" data-size="sm"
         class="build-matchup-more" data-show-matchups aria-label="Ver mais adversários: ${title}">Ver mais adversários (${extra.length}) ${iconMarkup("next")}</button>
         <ul class="build-context-list" aria-label="Mais adversários: ${title}" hidden>${rows(extra)}</ul>` : ""}${collapsed ? "</details>" : ""}`;
   };

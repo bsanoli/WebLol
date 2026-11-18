@@ -8,6 +8,13 @@ Formato de cada entrada: data, pedido (palavras do Bruno), decisão (quem escolh
 
 ---
 
+## 18/11/2026 — revisão visual de conta, login e Administração
+
+- **Pedido:** “revise detalhe por detalhe em cada tela, aplique oque estiver pendente”.
+- **Decisão:** alinhar a Conta aos controles do cabeçalho, agrupar os elementos do formulário e usar o título da página como referência para os estados da Administração.
+- **Mudança:** o menu da Conta acompanha o espaçamento do seletor de temas e o login aproxima campos, mensagens e ações. A Administração usa um único título, mantém as ações de cada linha na coluna da direita e aproxima os títulos das tabelas nas seções recolhíveis.
+- **Regras do Firestore:** nenhuma alteração.
+
 ## 16/11/2026 — organização da duplicação de composições
 
 - **Pedido:** “implemente a sua recomendação”.

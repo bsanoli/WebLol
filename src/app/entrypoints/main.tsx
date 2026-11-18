@@ -98,13 +98,13 @@ function App() {
             <ThemePicker initialPalette={initialPalette} />
             <Popover open={accountOpen} onOpenChange={setAccountOpen}>
               <PopoverTrigger asChild>
-                <Button variant="ghost" className="account-trigger"
+                <Button variant="ghost" size={user ? "default" : "icon"} className="account-trigger"
                   aria-label={user ? `Conta de ${user}` : "Conta"} title={user || "Conta"}>
                   <AccountAvatar user={user} />
                   {user && <span className="account-name">{user}</span>}
                 </Button>
               </PopoverTrigger>
-              <PopoverContent forceMount id="header-tools" className="toolbar" align="end" aria-label="Conta e sincronização"
+              <PopoverContent forceMount id="header-tools" className="toolbar" align="end" sideOffset={12} aria-label="Conta e sincronização"
                 hidden={!accountOpen} onCloseAutoFocus={event => {
                   if (document.querySelector(".shell-login-dialog")) event.preventDefault()
                 }}>

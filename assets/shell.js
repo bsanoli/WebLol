@@ -332,26 +332,26 @@ window.renderCaptainPanel=async function renderCaptainPanel(el){
 };
 
 /* ================= aba Administração (admin e capitão) ================= */
-const details=(title,body,open)=>`<details class="wl-panel card"${open?" open":""}><summary>${title}</summary><div style="margin-top:12px">${body}</div></details>`;
+const details=(title,body,open)=>`<details class="wl-panel card"${open?" open":""}><summary>${title}</summary><div>${body}</div></details>`;
 async function renderAdmin(){
   const el=$("#admin"),u=user();if(!u?.admin&&!isCaptain())return;
-  if(!ONLINE){el.innerHTML=`<h2>Administração</h2><div class="wl-panel card">O banco online ainda não foi configurado neste app.</div>`;return}
+  if(!ONLINE){el.innerHTML=`<div class="wl-panel card">O banco online ainda não foi configurado neste app.</div>`;return}
   try{await fb()}catch(e){}
   if(u.admin){
     if(!ADMIN){try{await loadAdminKey()}catch(e){}}
-    if(!ADMIN){el.innerHTML=`<h2>Administração</h2><div class="wl-panel card">Sem conexão com o banco do time. <button data-slot="button" data-variant="outline" id="refresh">Tentar de novo</button></div>`;$("#refresh").onclick=renderAdmin;return}
-    if(!KEYS||!fbIsAdmin()){el.innerHTML=`<h2>Administração</h2><div class="wl-panel card"><p>Digite a senha de admin para desbloquear neste aparelho.</p><input data-slot="input" type="password" id="apw" aria-label="Senha de administrador" style="max-width:300px"> <span id="afw" style="display:none"><input data-slot="input" type="password" id="afpw" aria-label="Senha do Firebase" placeholder="Senha do Firebase" style="max-width:220px"></span> <button data-slot="button" data-variant="default" id="aok">Desbloquear</button> <span class="bad" id="aerr"></span></div>`;
+    if(!ADMIN){el.innerHTML=`<div class="wl-panel card admin-status-row"><span>Sem conexão com o banco do time.</span><button data-slot="button" data-variant="outline" id="refresh">Tentar de novo</button></div>`;$("#refresh").onclick=renderAdmin;return}
+    if(!KEYS||!fbIsAdmin()){el.innerHTML=`<div class="wl-panel card"><p>Digite a senha de admin para desbloquear neste aparelho.</p><input data-slot="input" type="password" id="apw" aria-label="Senha de administrador" style="max-width:300px"> <span id="afw" style="display:none"><input data-slot="input" type="password" id="afpw" aria-label="Senha do Firebase" placeholder="Senha do Firebase" style="max-width:220px"></span> <button data-slot="button" data-variant="default" id="aok">Desbloquear</button> <span class="bad" id="aerr"></span></div>`;
       const go=async()=>{try{KEYS=await adminUnlock($("#apw").value,$("#afpw").value);await enterTeam();renderAdmin()}catch(e){if(e.message==="fb"){$("#afw").style.display="";$("#aerr").textContent="Digite também a senha do Firebase"}else $("#aerr").textContent="Senha incorreta"}};
       $("#aok").onclick=go;el.querySelectorAll("input").forEach(i=>i.addEventListener("keydown",e=>{if(e.key==="Enter")go()}));return}
   }
-  el.innerHTML=`<h2>Administração</h2><p class="mut" role="status">Carregando…</p>`;
+  el.innerHTML=`<p class="mut" role="status">Carregando…</p>`;
   let envs=[],pedidos=[],membros=[],contas=[],times=[],todos=[];
   try{
     if(TEAM)[envs,membros]=await Promise.all([dbList(teamPath("envios")),dbList("membros","team",TEAM.id)]);
     if(u.admin){[contas,times,todos]=await Promise.all([dbList("contas"),dbList("times"),dbList("membros")]);
       // versão atual das comps de cada time
       await Promise.all(times.map(async t=>{try{const d=await dbGet(`times/${t.id}/dados`,"oficial");t.off=d?JSON.parse(d.json):null}catch(e){t.off=null}}));}
-  }catch(e){el.innerHTML=`<h2>Administração</h2><div data-slot="alert" role="alert" class="wl-panel card bad">Não consegui ler o banco: ${esc(e.message)}</div>`;return}
+  }catch(e){el.innerHTML=`<div data-slot="alert" role="alert" class="wl-panel card bad">Não consegui ler o banco: ${esc(e.message)}</div>`;return}
   pedidos=membros.filter(m=>m.status==="pendente");const ativos=membros.filter(m=>m.status==="ativo");
   const done=new Set((OFF?.log||[]).map(l=>l.sid)),subs=[];
   for(const d of envs){try{const s=JSON.parse(d.json);s.doc=d.id;if(done.has(s.id)){await dbDel(teamPath("envios"),d.id).catch(()=>{});continue}subs.push(s)}catch(e){subs.push({id:d.id,doc:d.id,from:d.from,err:true})}}

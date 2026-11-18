@@ -1,11 +1,59 @@
-import { championSight, clamp, isSide, laneLabel, mapRadius, minionSight, nearestLane, progressOnLane, readWaves, sideLabel, towerAttack, towers, towerSight, wavePosition, type Side, type Wave } from "../model/battlefield"
-import type { MapPoint } from "../model/faelights"
-import { readWards, wardOnMap, type WardScene } from "../model/wards"
+import { clamp, isSide, laneLabel, mapRadius, nearestLane, progressOnLane, readWaves, sideLabel, towerAttack, towers, waveKey, wavePosition, type Side, type Wave } from "../model/battlefield"
+import type { MapPoint, MapStyle } from "../model/faelights"
+import type { WardScene } from "../model/wards"
+import { mountMapSightLayer, type SightFrame } from "./map-sight-layer"
+import { waveToolSide } from "./map-tools"
 
-type Frame = { pos: Record<string, MapPoint>; waves?: unknown; wards?: unknown; destroyedTowers?: string[] }
+type Frame = SightFrame & { waves?: unknown }
 type Changes = Pick<Frame, "waves" | "destroyedTowers">
 
-export function mountBattlefield({ read, write, canEdit, getTool, getPerspective, point, wardScene, uid }: {
+const casterPortrait = { b: "bluerange_circle.png", r: "redrange_circle.png" }
+const laneOrder = { top: 0, mid: 2, adc: 4 }
+
+function waveMarkerPositions(waves: Wave[], style: MapStyle, boardWidth: number) {
+  const clearance = Math.max(4.5, boardWidth ? 2400 / boardWidth : 0) + .2
+  const occupied: MapPoint[] = []
+  const positions = new Map<ReturnType<typeof waveKey>, MapPoint>()
+  // Use a consistent order even when the waves were placed in a different order.
+  const order = (wave: Wave) => laneOrder[wave.lane] + Number(wave.side === "r")
+  for (const wave of [...waves].sort((a, b) => order(a) - order(b))) {
+    const [x, y] = wavePosition(wave, style)
+    let marker: MapPoint = [x, y]
+    if (occupied.some(([px, py]) => Math.hypot(px - x, py - y) < clearance)) {
+      const [ax, ay] = wavePosition({ ...wave, progress: wave.progress - .01 }, style)
+      const [bx, by] = wavePosition({ ...wave, progress: wave.progress + .01 }, style)
+      const normal = Math.atan2(by - ay, bx - ax) + Math.PI / 2
+      let nearest = Infinity
+      for (let direction = 0; direction < 8; direction++) {
+        const angle = normal + direction * Math.PI / 4
+        const ux = Math.cos(angle), uy = Math.sin(angle)
+        // Intersect this ray with each earlier marker's clearance circle.
+        const intervals = occupied.flatMap(([px, py]) => {
+          const dx = px - x, dy = py - y
+          const along = dx * ux + dy * uy
+          const across = dx * uy - dy * ux
+          if (Math.abs(across) >= clearance) return []
+          const reach = Math.sqrt(clearance ** 2 - across ** 2)
+          return [{ start: along - reach, end: along + reach }]
+        }).sort((a, b) => a.start - b.start)
+        let distance = 0
+        for (const interval of intervals) {
+          if (interval.start > distance) break
+          distance = Math.max(distance, interval.end)
+        }
+        if (distance < nearest - .0001) {
+          nearest = distance
+          marker = [x + ux * distance, y + uy * distance]
+        }
+      }
+    }
+    occupied.push(marker)
+    positions.set(waveKey(wave), marker)
+  }
+  return positions
+}
+
+export function mountBattlefield({ read, write, canEdit, getTool, getPerspective, point, wardScene, uid, onPlaced }: {
   read: () => Frame
   write: (changes: Changes) => void
   canEdit: () => boolean
@@ -14,13 +62,13 @@ export function mountBattlefield({ read, write, canEdit, getTool, getPerspective
   point: (event: MouseEvent) => MapPoint
   wardScene: () => WardScene
   uid: () => string
+  onPlaced: () => void
 }) {
   const get = <T extends HTMLElement | SVGElement = HTMLElement>(id: string) => document.getElementById(id) as unknown as T
   const map = get("map")
   const towersHost = get("map-towers")
   const wavesHost = get("map-waves")
-  const vision = get("map-vision-mask")
-  const waveSide = get<HTMLSelectElement>("map-wave-side")
+  const paintSight = mountMapSightLayer(get<SVGElement>("map-vision-mask"), getPerspective, wardScene)
   const preview = get("map-wave-preview")
   const cursor = get("map-wave-cursor")
   const detectedLane = get("map-wave-detected")
@@ -30,42 +78,27 @@ export function mountBattlefield({ read, write, canEdit, getTool, getPerspective
   let drag: { index: number; wave: Wave; pointer: number; start: MapPoint; moved: boolean } | undefined
 
   const at = ([x, y]: MapPoint) => `left:${x}%;top:${y}%`
-  const circle = ([x, y]: MapPoint, units: number) => `<circle cx="${x}" cy="${y}" r="${mapRadius(units)}"/>`
-
   function renderSight(frame: Frame, waves = readWaves(frame.waves)) {
-    const side = getPerspective()
-    if (!isSide(side)) {
-      vision.innerHTML = ""
-      return
-    }
-    const allied = Object.entries(frame.pos).filter(([id]) => id.startsWith(side + "_")).map(([, pos]) => circle(pos, championSight))
-    const towersSight = towers.filter(t => t.side === side && !frame.destroyedTowers?.includes(t.id)).map(t => circle(t.point, towerSight))
-    const scene = wardScene()
-    const wavesSight = waves.filter(w => w.side === side).map(w => circle(wavePosition(w, scene.style), minionSight))
-    const wards = readWards(frame.wards).map(w => wardOnMap(w, scene)).filter(w => w.side === side)
-    const wardSight = wards.map(w => {
-      const bonus = w.faelight
-      const [x, y] = w.point
-      return circle(w.point, w.sight) + (bonus ? `<path d="${bonus.bonusPath}" transform="translate(${x - bonus.minimap[0]} ${y - bonus.minimap[1]})"/>` : "")
-    })
-    vision.innerHTML = `<defs><mask id="tactical-fog" x="0" y="0" width="100" height="100" maskUnits="userSpaceOnUse"><rect width="100" height="100" fill="white"/><g fill="black">${[...allied, ...towersSight, ...wavesSight, ...wardSight].join("")}</g></mask></defs><rect width="100" height="100" fill="#050911" opacity=".77" mask="url(#tactical-fog)"/>`
+    paintSight(frame, waves)
   }
 
   function render(frame = read()) {
     const waves = readWaves(frame.waves)
     const { style } = wardScene()
     const interactive = canEdit() && getTool() === "move"
+    const positions = waveMarkerPositions(waves, style, map.clientWidth)
     wavesHost.innerHTML = waves.map((wave, index) => `<button type="button" class="map-piece map-wave" data-side="${wave.side}" data-wave-index="${index}"
-      style="${at(wavePosition(wave, style))}" aria-label="Wave — ${laneLabel[wave.lane]} — ${sideLabel[wave.side]}" aria-description="Grupo de seis minions" title="Wave — ${laneLabel[wave.lane]} — ${sideLabel[wave.side]}"
-      ${interactive || (canEdit() && getTool() === "erase") ? "" : "disabled"}><span class="map-wave-minions" aria-hidden="true">${"<i></i>".repeat(6)}</span></button>`).join("")
+      style="${at(positions.get(waveKey(wave))!)}" aria-label="Wave — ${laneLabel[wave.lane]} — ${sideLabel[wave.side]}" aria-description="Grupo de seis minions" title="Wave — ${laneLabel[wave.lane]} — ${sideLabel[wave.side]}"
+      ${interactive || (canEdit() && getTool() === "erase") ? "" : "disabled"}><img class="map-wave-caster" src="assets/lol/hud/${casterPortrait[wave.side]}" alt=""></button>`).join("")
     renderSight(frame, waves)
   }
 
   function renderTowers(frame = read()) {
     const interactive = canEdit() && getTool() === "move"
+    const { style } = wardScene()
     const activeTowers = towers.filter(tower => !frame.destroyedTowers?.includes(tower.id))
     get("map-tower-ranges").innerHTML = showTowers ? activeTowers.map(tower =>
-      `<g data-side="${tower.side}">${circle(tower.point, towerAttack)}</g>`).join("") : ""
+      `<g data-side="${tower.side}"><circle cx="${tower.point[0]}" cy="${tower.point[1]}" r="${mapRadius(towerAttack, style)}"/></g>`).join("") : ""
     towersHost.innerHTML = showTowers ? towers.map(tower => {
       const destroyed = frame.destroyedTowers?.includes(tower.id)
       return `<button type="button" class="map-piece map-tower" data-side="${tower.side}" data-tower="${tower.id}"
@@ -74,12 +107,16 @@ export function mountBattlefield({ read, write, canEdit, getTool, getPerspective
     }).join("") : ""
   }
 
+  function toggleTower(id: string) {
+    const destroyed = read().destroyedTowers ?? []
+    write({ destroyedTowers: destroyed.includes(id) ? destroyed.filter(value => value !== id) : [...destroyed, id] })
+  }
+
   towersHost.addEventListener("click", event => {
     const button = (event.target as Element).closest<HTMLButtonElement>("[data-tower]")
     if (!button || !canEdit() || getTool() !== "move") return
     const id = button.dataset.tower!
-    const destroyed = read().destroyedTowers ?? []
-    write({ destroyedTowers: destroyed.includes(id) ? destroyed.filter(value => value !== id) : [...destroyed, id] })
+    toggleTower(id)
     towersHost.querySelector<HTMLElement>(`[data-tower="${id}"]`)?.focus({ preventScroll: true })
   })
 
@@ -91,21 +128,22 @@ export function mountBattlefield({ read, write, canEdit, getTool, getPerspective
   }
 
   function placeWave(at: MapPoint) {
-    const side = waveSide.value
+    const side = waveToolSide(getTool())
     const { lane, progress } = nearestLane(at, wardScene().style)
     if (isSide(side)) {
       const waves = readWaves(read().waves)
-      const index = waves.findIndex(wave => wave.lane === lane)
+      const index = waves.findIndex(wave => wave.lane === lane && wave.side === side)
       const existing = waves[index]
-      if (existing?.side === side && existing.progress === progress) return
+      if (existing?.progress === progress) return
       const wave = { id: existing?.id ?? uid(), side, lane, progress }
       if (existing) waves[index] = wave
       else waves.push(wave)
       write({ waves })
+      onPlaced()
     }
   }
   function showPreview(target: MapPoint, fromKeyboard = false) {
-    const side = waveSide.value
+    const side = waveToolSide(getTool())
     if (!isSide(side)) return
     const { style } = wardScene()
     const wave = nearestLane(target, style)
@@ -126,21 +164,21 @@ export function mountBattlefield({ read, write, canEdit, getTool, getPerspective
     if (!canEdit()) return
     const marker = (event.target as Element).closest<HTMLElement>("[data-wave-index]")
     if (marker && getTool() === "erase") write({ waves: withWave(Number(marker.dataset.waveIndex)) })
-    if (getTool() === "wave") placeWave(point(event))
+    if (waveToolSide(getTool())) placeWave(point(event))
   })
   map.addEventListener("pointermove", event => {
-    if (canEdit() && getTool() === "wave" && !viewport.classList.contains("map-temporary-hand")) showPreview(point(event))
+    if (canEdit() && waveToolSide(getTool()) && !viewport.classList.contains("map-temporary-hand")) showPreview(point(event))
   })
   viewport.addEventListener("pointerleave", hidePreview)
   viewport.addEventListener("focus", () => {
-    if (!canEdit() || getTool() !== "wave") return
+    if (!canEdit() || !waveToolSide(getTool())) return
     const rect = viewport.getBoundingClientRect()
     keyboardPoint = point(new MouseEvent("click", { clientX: rect.left + rect.width / 2, clientY: rect.top + rect.height / 2 }))
     showPreview(keyboardPoint, true)
   })
   viewport.addEventListener("blur", hidePreview)
   viewport.addEventListener("keydown", event => {
-    if (event.target !== viewport || !canEdit() || getTool() !== "wave" || event.ctrlKey || event.metaKey || event.altKey ||
+    if (event.target !== viewport || !canEdit() || !waveToolSide(getTool()) || event.ctrlKey || event.metaKey || event.altKey ||
       viewport.classList.contains("map-temporary-hand")) return
     if (event.key === "Enter") {
       event.preventDefault()
@@ -203,8 +241,38 @@ export function mountBattlefield({ read, write, canEdit, getTool, getPerspective
     wavesHost.querySelector<HTMLElement>(`[data-wave-index="${index}"]`)?.focus({ preventScroll: true })
   })
 
+  function contextAction(event: MouseEvent | KeyboardEvent, kind: "wave" | "tower") {
+    if (!canEdit()) return
+    const host = kind === "wave" ? wavesHost : towersHost
+    const selector = kind === "wave" ? "[data-wave-index]" : "[data-tower]"
+    const direct = (event.target as Element).closest<HTMLButtonElement>(selector)
+    const button = direct && host.contains(direct) ? direct : "clientX" in event
+      ? [...host.querySelectorAll<HTMLButtonElement>(selector)].reverse().find(candidate => {
+        const bounds = candidate.getBoundingClientRect()
+        return event.clientX >= bounds.left && event.clientX <= bounds.right &&
+          event.clientY >= bounds.top && event.clientY <= bounds.bottom
+      }) : undefined
+    if (!button) return
+    const targetName = button.getAttribute("aria-label") ?? ""
+    if (kind === "tower") {
+      const id = button.dataset.tower!
+      const destroyed = read().destroyedTowers?.includes(id)
+      return { label: destroyed ? "Restaurar" : "Marcar como destruída", targetName, marker: button, run: () => {
+        if (canEdit()) toggleTower(id)
+      } }
+    }
+    const wave = readWaves(read().waves)[Number(button.dataset.waveIndex)]
+    if (!wave) return
+    return { label: "Excluir", targetName, marker: button, run: () => {
+      if (!canEdit()) return
+      const waves = readWaves(read().waves)
+      const next = waves.filter(candidate => waveKey(candidate) !== waveKey(wave) || candidate.id !== wave.id)
+      if (next.length !== waves.length) write({ waves: next })
+    } }
+  }
+
   return {
-    render, renderSight,
+    render, renderSight, contextAction,
     renderTowers,
     get showTowers() { return showTowers },
     toggleTowers(enabled: boolean) {

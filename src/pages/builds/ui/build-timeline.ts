@@ -116,8 +116,11 @@ function gameRow({ game, player, opponent, won }: Entry) {
   return `<li class="build-timeline-game">
     <div class="build-timeline-who">
       <span class="build-timeline-player" aria-label="${esc(`${player.champion} contra ${opponent?.champion ?? "adversário desconhecido"}`)}">
-        ${ico(player.champion)}<span class="build-timeline-vs" aria-hidden="true">vs</span>
-        ${opponent ? `${ico(opponent.champion)}<strong>${esc(opponent.champion)}</strong>` : '<span class="na">Adversário desconhecido</span>'}</span>
+        <span class="build-timeline-portraits" aria-hidden="true">
+          ${ico(player.champion)}<span class="build-timeline-vs">vs</span>${opponent ? ico(opponent.champion) : ""}
+        </span>
+        ${opponent ? `<strong>${esc(opponent.champion)}</strong>` : '<span class="na">Adversário desconhecido</span>'}
+      </span>
       <span class="build-timeline-meta">
         <strong class="${won ? "build-sample-wins" : "build-sample-losses"}">${won ? "V" : "D"}</strong>
         <span>${k}/${d}/${a}</span>

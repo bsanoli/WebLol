@@ -11,6 +11,14 @@ Use [visual-review](../visual-review/SKILL.md) para conferir no navegador deskto
 
 Quando a tarefa pedir uma direção visual ou comparação, OP.GG, OP.GG Esports, Mobalytics e League of Graphs podem servir de referência para densidade, organização ou navegação. Use recursos complementares de design e acessibilidade se ajudarem a resolver o pedido e estiverem disponíveis.
 
+## Gestalt e acessibilidade
+
+- **Proximidade e região comum.** Aproxime ícone e rótulo, campo e mensagem de erro, métrica e unidade. Use mais espaço entre grupos. Quando uma borda ou superfície delimitar um grupo visual, associe o título ao grupo também no HTML.
+- **Semelhança e continuidade.** Use a mesma variante para ações equivalentes. Alinhe bordas, retratos, valores e ações nas linhas repetidas, inclusive com dados ausentes. Preserve a hierarquia da tarefa principal e faça a ordem de leitura no HTML acompanhar a ordem visual.
+- **Semântica e estados.** Prefira botões, links, campos rotulados e cabeçalhos de tabela nativos. Inclua o rótulo visível no nome acessível e dê nome explícito a controles só com ícone. Comunique seleção, erros e mudanças de estado por texto ou ícone com significado e exponha o estado à tecnologia assistiva. Mantenha os dados de gráficos disponíveis em rótulos, texto ou tabelas.
+- **Contraste e interação.** Conforme a [WCAG 2.2 AA](https://www.w3.org/TR/WCAG22/), confira 4,5:1 para texto comum, 3:1 para texto grande e 3:1 para componentes e gráficos quando exigido. Use áreas clicáveis de pelo menos 24 × 24 CSS px ou uma exceção prevista pelo critério. Permita uso por teclado com foco visível e sem obstrução, ofereça alternativa de ponteiro para ações de arrastar e respeite a preferência por movimento reduzido.
+- **Validação.** Abra o fluxo em desktop e confira a tela inteira e as distâncias internas dos componentes alterados. Teste nomes longos, campos opcionais e estados vazios quando aplicáveis. Verifique que o conteúdo e as ações seguem disponíveis a 200% de zoom, confira o contraste nos temas afetados e valide nomes, estados e foco dos controles alterados no navegador.
+
 ## Área do Time → Composições
 
 - Ao alterar a barra da composição, confira a troca entre **Opções por posição** e **Ordem do draft** nos dois sentidos. Nome, abas, copiar link e status de salvamento devem ficar no mesmo lugar.

@@ -15,7 +15,7 @@ export function getWardType(id: unknown) {
   return wardTypes.find(type => type.id === id) ?? wardTypes[0]
 }
 
-export type WardScene = { style: MapStyle; additionalFaelights: boolean }
+export type WardScene = { style: MapStyle; additionalFaelights: boolean; showAdditionalFaelights?: boolean }
 
 const faelightsById = new Map(faelights.map(spot => [spot.id, spot]))
 
@@ -52,7 +52,8 @@ function nearestIndex(target: MapPoint, points: readonly MapPoint[], radius: num
 }
 
 export function placeWard(ward: Ward, point: MapPoint, scene: WardScene): Ward {
-  const available = faelights.filter(spot => !spot.additional || scene.additionalFaelights)
+  const available = faelights.filter(spot => !spot.additional || (scene.additionalFaelights &&
+    (scene.showAdditionalFaelights !== false || ward.faelightId === spot.id)))
   const hit = nearestIndex(point, available.map(spot => spot[scene.style]), 2.2)
   const spot = available[hit]
   return { point: spot?.minimap ?? point, type: ward.type, side: ward.side, faelightId: spot?.id }

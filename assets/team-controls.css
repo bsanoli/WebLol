@@ -21,7 +21,8 @@ button[data-team-trigger]:is(:hover, [data-state="open"]):not(:disabled) {
 button[data-team-trigger]:disabled { cursor: not-allowed; opacity: .5; }
 [data-team-trigger] svg { flex: none; width: var(--wl-icon-size); height: var(--wl-icon-size); }
 [data-team-trigger="icon"] { width: var(--wl-button-height-sm); padding: 0; }
-[data-team-trigger="note"] { width: 100%; color: var(--wl-accent); }
+[data-team-trigger="note"] { width: 100%; color: var(--wl-muted); }
+[data-team-trigger="note"]:is([data-has-note], :hover, [data-state="open"]) { color: var(--wl-accent); }
 .lane-note { min-width: 0; }
 .option-menu { align-self: center; }
 

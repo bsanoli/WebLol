@@ -3,12 +3,14 @@ import type { MapPoint, MapStyle } from "./faelights"
 export type Side = "b" | "r"
 export type Lane = keyof typeof routes
 export type Wave = { id: string; side: Side; lane: Lane; progress: number }
+export const waveKey = ({ lane, side }: Pick<Wave, "lane" | "side">) => `${lane}:${side}` as const
 
 export const sideLabel = { b: "Azul", r: "Vermelho" }
 export const laneLabel = { top: "Topo", mid: "Meio", adc: "Inferior" }
 export const isSide = (value: unknown): value is Side => value === "b" || value === "r"
 export const clamp = (value: number, max = 100) => Math.min(max, Math.max(0, value))
-export const mapRadius = (units: number) => units / 150
+// The authored minimap spans 14,850 units; the realistic image is calibrated against tower positions.
+export const mapRadius = (units: number, style: MapStyle) => units / (style === "minimap" ? 148.5 : 150)
 
 const routes = {
   top: [[11, 87], [9, 73], [10, 55], [8, 35], [9, 21], [12, 12], [19, 8], [30, 8], [49, 8.5], [70, 8.5], [88, 11]],
@@ -77,12 +79,12 @@ export function nearestLane(point: MapPoint, style: MapStyle) {
 
 export function readWaves(value: unknown): Wave[] {
   if (!Array.isArray(value)) return []
-  const byLane = new Map<Lane, Wave>()
+  const slots = new Map<ReturnType<typeof waveKey>, Wave>()
   for (const wave of value) {
     if (typeof wave?.id === "string" && isSide(wave.side) && isLane(wave.lane) &&
-      Number.isFinite(wave.progress) && wave.progress >= 0 && wave.progress <= 1) byLane.set(wave.lane, wave)
+      Number.isFinite(wave.progress) && wave.progress >= 0 && wave.progress <= 1) slots.set(waveKey(wave), wave)
   }
-  return [...byLane.values()]
+  return [...slots.values()]
 }
 
 const blueTowers: MapPoint[] = [[7.5, 29.8], [11, 54.6], [8.7, 70.8], [39.9, 56.9], [34.4, 67.3], [25.2, 74.2], [71, 92.5], [47, 89.4], [29.5, 90.6], [12.4, 84.3], [15.4, 87.5]]

@@ -18,6 +18,7 @@ let compActionsRoot, compStageRoot;
 const compositionPopovers = [];
 function wireFloatingPicker(trigger, picker, search) {
   const anchor = document.createElement("span");
+  anchor.className = "comp-picker-host";
   trigger.before(anchor);
   const root = createRoot(anchor);
   compositionPopovers.push(root);
@@ -188,7 +189,7 @@ function wireComps(publishWorlds){
     closeButton.classList.remove("worlds-detail-action");
     closeButton.classList.replace("match-draft-toggle", "match-dialog-close");
     closeButton.dataset.variant = "ghost";
-    closeButton.dataset.size = "icon-lg";
+    closeButton.dataset.size = "icon-sm";
     closeButton.setAttribute("aria-label", "Fechar draft");
     closeButton.innerHTML = iconMarkup("close");
     closeButton.onclick = () => closeDraft();

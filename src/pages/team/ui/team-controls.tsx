@@ -62,9 +62,9 @@ export function mountMapEmpty(host: Element) {
   </Empty>)
 }
 
-export function mountMapSwitch(host: Element, label: string, checked: boolean, onCheckedChange: (checked: boolean) => void) {
+export function mountMapSwitch(host: Element, label: string, checked: boolean, onCheckedChange: (checked: boolean) => void, disabled = false) {
   renderControl(host, <Switch className="map-check" label={label}
-    checked={checked} onCheckedChange={onCheckedChange} />)
+    checked={checked} disabled={disabled} onCheckedChange={onCheckedChange} />)
 }
 
 type MenuAction = {
@@ -149,7 +149,8 @@ function LaneNote({ label, initialNote, onEdit }: {
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
-      <PopoverTrigger data-team-trigger="note" aria-label={label} title={note || "Adicionar observação"}>
+      <PopoverTrigger data-team-trigger="note" data-has-note={note.trim() ? "" : undefined}
+        aria-label={label} title={note.trim() ? note : "Adicionar observação"}>
         <Icon name="edit" />
         <span className="pick-note-preview">{note || "Nota"}</span>
       </PopoverTrigger>
@@ -251,9 +252,9 @@ export function mountToolGroup(host: Element, value: string, options: (SectionOp
   change: (value: string) => void, disabled = false) {
   renderControl(host, <ToggleGroup type="single" value={value} spacing={1} disabled={disabled}
     className="map-modes seg" aria-label="Modo da ferramenta"
-    onValueChange={next => { if (next) change(next) }}>
+    onValueChange={next => change(next || value)}>
     {options.map(option => <ToggleGroupItem key={option.value} value={option.value}
-      data-slot="button" data-variant="ghost" data-tool={option.value} aria-label={option.label}
+      data-slot="button" data-variant="ghost" data-tool={option.value} aria-label={option.label} aria-controls={option.panel}
       aria-keyshortcuts={option.shortcuts} data-map-tip={option.shortcuts ? `${option.label} (${option.shortcuts.replaceAll(" ", " / ")})` : option.label}>
       {option.image ? <img className="map-tool-image" src={option.image} alt="" /> : option.icon && <Icon name={option.icon} />}
     </ToggleGroupItem>)}

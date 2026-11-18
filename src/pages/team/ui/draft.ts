@@ -29,23 +29,21 @@ export function draftHTML(c, { active, compositions, LN, img, esc, pickArt }){
   const find=(t,k,i)=>seq.find(s=>s.t===t&&s.k===k&&s.i===i);
   // No draft: clique esquerdo torna principal, arrastar reordena e o botão direito abre "Excluir".
   const mini=(n,l,j)=>`<div class="chip dchip ${j===0?"primary":"alternative"}" data-team-control draggable="true" data-n="${esc(n)}" data-from="${l}"${j>0?` data-champion-slot="${j}" data-champion-name="${esc(n)}"`:""}><button class="champ-priority" data-priority="${esc(n)}" data-lane="${l}" aria-label="${j===0?"Principal":"Tornar principal"}: ${esc(n)} em ${LN[l].n}" title="${esc(n)} · ${j+1}ª opção · clique para tornar principal, botão direito para excluir">${img(n)}</button></div>`;
-  // faixa da sequência
-  let h=`<div class="draft-toolbar draft-toolbar-top"><div class="dside" role="group" aria-label="Lado da equipe"><span>Nossa equipe</span>
+  const sideToolbar=`<div class="draft-toolbar draft-toolbar-top"><div class="dside" role="group" aria-label="Lado da equipe"><span>Nossa equipe</span>
     ${Object.entries(DRAFT_SIDE).map(([key,label])=>`<button data-slot="button" data-variant="outline" data-size="sm" data-side="${key}" aria-pressed="${d.side===key}" class="${d.side===key?`on ${key[0]}`:""}">${label}</button>`).join("")}</div></div>`;
-  const head=h;h="";
   const team=t=>{
     const mine=t===us,side=t==="B"?"b":"r";
     const banSq=i=>{const s=find(t,"ban",i),n=mine?c.lanes.ban[i]:null;
       return `<div class="bsq${n?" has":""}${mine?" mine":""}${mine&&active==="ban"?" act":""}" ${mine?`data-l="ban" data-bi="${i}" data-champion-slot="${i}" data-champion-name="${esc(n)}"`:""} title="${s.n}º ban">
-        ${n?`<span class="dm" draggable="true" data-n="${esc(n)}" data-from="ban">${img(n)}<button class="x" data-rm="${esc(n)}" aria-label="Remover ${esc(n)}">${iconMarkup("close")}</button></span>`:`<span class="bn">${s.n}</span>`}</div>`};
+        ${n?`<span class="dm" draggable="true" data-n="${esc(n)}" data-from="ban">${img(n)}<button type="button" class="draft-ban-remove" data-slot="button" data-variant="ghost" data-size="icon-xs" data-rm="${esc(n)}" aria-label="Remover ${esc(n)}">${iconMarkup("close")}</button></span>`:`<span class="bn">${s.n}</span>`}</div>`};
     const pick=i=>{const s=find(t,"pick",i),tip=PICKTIP[s.code]||"";
       const meta=`<span class="pkh"><b title="${s.code} · ${s.n}º pick">${PICKNAME[s.code]}</b></span>`;
-      if(!mine)return `<div class="pk ${side} them">${meta}<div class="pkn">${iconMarkup("champion")} A definir</div></div>`;
+      if(!mine)return `<div class="pk ${side} them"><div class="pick-choice">${meta}${iconMarkup("champion")}<span class="pkn">A definir</span></div></div>`;
       const l=d.order[d.side][i],L=LN[l],ch=c.lanes[l],m=ch[0];
       const editing=active===l;
       return `<div class="pk ${side} mine${editing?" act":""}" data-l="${l}" data-champion-group="${t}-pick-${i}" style="--lc:var(${L.c})">
         ${pickArt(m)}
-        <button type="button" class="pk-target" data-champion-slot="0" data-champion-name="${esc(m)}" data-draft-target="${l}" aria-pressed="${editing}" aria-label="${PICKNAME[s.code]} · ${L.n}${m?" · "+esc(m):" · Escolher campeão"}">
+        <button type="button" class="pk-target pick-choice" data-champion-slot="0" data-champion-name="${esc(m)}" data-draft-target="${l}" aria-pressed="${editing}" aria-label="${PICKNAME[s.code]} · ${L.n}${m?" · "+esc(m):" · Escolher campeão"}">
           ${meta}${m?img(m):iconMarkup("champion-add")}
           <span class="pkn${m?"":" pk-empty"}">${m?esc(m):"Escolher campeão"}</span>
         </button>
@@ -67,11 +65,10 @@ export function draftHTML(c, { active, compositions, LN, img, esc, pickArt }){
   const sideName=t=>{const side=t==="B"?"b":"r",key=t==="B"?"blue":"red",mine=t===us;return `<h3 class="tmh" id="draft-side-${side}"><button type="button" class="side-pick${mine?" on":""}" data-side="${key}" aria-pressed="${mine}" title="${mine?"Nosso time está neste lado":"Clique para colocar nosso time neste lado"}">${DRAFT_SIDE[key]}<span>${mine?"Nossa equipe":"Adversário"}</span></button></h3>`};
   const tabs=compositions.map(x=>{const firsts=compositionPreview(x);
     return `<button type="button" class="dz-tab${x.id===c.id?" on":""}" data-comp-tab="${esc(x.id)}" aria-pressed="${x.id===c.id}" title="${esc(x.name)}"><b>${sideDot(x)}${esc(x.name)}</b><span class="mini">${firsts.map(img).join("")||'<small>vazia</small>'}</span></button>`}).join("");
-  h+=`<div class="dz">${team("B")}
+  let h=`${sideToolbar}<div class="dz">${team("B")}
     <div class="dz-center">
       <div class="dz-names">${sideName("B")}${sideName("R")}</div>
       <div class="dz-tabs" role="group" aria-label="Composições do time">${tabs}<button type="button" class="dz-tab dz-new" data-comp-new aria-label="Nova composição" title="Nova composição">${iconMarkup("plus")}</button></div>
-      ${head}
       <div class="dz-slot"></div>
     </div>
     ${team("R")}</div>`;

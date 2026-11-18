@@ -7,9 +7,11 @@ import { readWaves } from "../model/battlefield"
 import { mountBattlefield } from "./battlefield-layer"
 import { mountMapCamera } from "./map-camera"
 import { mountMapCompositions } from "./map-compositions"
+import { mountMapContextMenu } from "./map-context-menu"
+import { mountMapCursorColor } from "./map-cursor-color"
 import { hasArrowhead, mountMapDrawing } from "./map-drawing"
 import { renderMapFallback } from "./map-fallback"
-import { mountMapDisclosures, mountMapSidebar, mountMapTools, mountMapVision } from "./map-tools"
+import { mapQuickTools, mountMapDisclosures, mountMapSidebar, mountMapTools, mountMapVision, waveToolSide } from "./map-tools"
 import { mountChampionLayer } from "./champion-layer"
 import { animatePieces } from "./frame-animation"
 import { mountMapHistory } from "./map-history"
@@ -20,6 +22,8 @@ import { mountMapPanel, mountStepPages } from "./map-panel"
 export function mountTacticalMap({ getState, save, publishTeamRoute, toast, uid, img, esc, compositionPreview, mountTeamSelect, mountMapEmpty, mountMapSwitch, mountToolGroup, mountSectionTabs, clearTeamControls }) {
 const $ = selector => document.querySelector(selector);
 const clearMap = $("#map-clear-all");
+const clearWaves = $("#map-clear-waves");
+const clearStrokes = $("#map-clear-strokes");
 const resetMap = $("#map-reset");
 const initialPositions = initialFrame().pos;
 const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
@@ -43,6 +47,7 @@ function setMapImg() {
     image.toggleAttribute("data-map-visible", getState().useImg !== false && image.complete && image.naturalWidth > 0);
     wardLayer.render();
     battlefield.render();
+    battlefield.renderTowers();
   };
   if (getState().useImg !== false) {
     const source = "assets/lol/map/summoners-rift-realista.jpeg";
@@ -62,7 +67,12 @@ function renderMapImageSwitch(){
 }
 
 const map = $("#map");
-const camera = mountMapCamera($("#map-viewport"), map, () => drawing.render(), () => canChangeFrame() ? M.tool : "hand", () => wardLayer.closeEditor());
+const viewport = $("#map-viewport");
+mountMapCursorColor($("#mapw"));
+const camera = mountMapCamera(viewport, map, () => drawing.render(), () => canChangeFrame() ? M.tool : "hand", () => {
+  wardLayer.closeEditor();
+  contextMenu.close();
+});
 const pt = camera.point;
 const champions = mountChampionLayer({
   map, read: () => visibleFrame().pos, write: pos => writeFrame({ pos }),
@@ -88,16 +98,33 @@ const drawing = mountMapDrawing({
 });
 const wardLayer = mountWardLayer({
   read: () => visibleFrame().wards, write: wards => commit({ wards }),
-  getTool: () => M.tool, isPlaying: () => !canEdit(), pointFromEvent: pt, mountTeamSelect,
+  getTool: () => M.tool, isPlaying: () => !canEdit(), pointFromEvent: pt, mountTeamSelect, onPlaced,
 });
 const battlefield = mountBattlefield({
   read: visibleFrame, write: commit, canEdit, getTool: () => M.tool, getPerspective,
-  point: pt, wardScene: wardLayer.scene, uid,
+  point: pt, wardScene: wardLayer.scene, uid, onPlaced,
 });
+const historyActions = [
+  { label: "Desfazer", icon: "undo", button: $("#undo"), startsHistory: true },
+  { label: "Refazer", icon: "redo", button: $("#redo") },
+];
+const contextMenu = mountMapContextMenu(map, viewport, event => {
+  if (!canEdit()) return;
+  return wardLayer.contextAction(event) ?? battlefield.contextAction(event, "wave") ??
+    battlefield.contextAction(event, "tower") ?? (event instanceof MouseEvent ? drawing.contextAction(event) : undefined);
+}, () => canEdit() ? [
+  ...mapQuickTools.map(tool => ({
+    label: tool.label, icon: tool.icon, selected: M.tool === tool.value,
+    run: () => { if (M.tool !== tool.value) selectTool(tool.value, false) },
+  })),
+  ...historyActions.map(({ button, ...action }) => ({
+    ...action, disabled: button.disabled, run: () => button.click(),
+  })),
+] : []);
 const previewFaelights = mountFaelightLayer({
   getState, save: () => save(false), mountMapSwitch, onAvailabilityChange: refreshMap,
 });
-const zoomFields = ["#map-wave-side", "#map-stroke-width", "#map-stroke-style"];
+const zoomFields = ["#map-stroke-width", "#map-stroke-style"];
 zoomFields.forEach(selector => mountTeamSelect($(selector)));
 function renderTowerSwitch() {
   mountMapSwitch($("#map-tower-range-control"), "Alcance das torres", battlefield.showTowers, checked => {
@@ -113,25 +140,30 @@ const syncStepPages = mountStepPages();
 
 const renderToolControls = mountMapTools({
   map, canEdit, canMove: canChangeFrame, currentTool: () => M.tool, chooseColor: drawing.setColor, mountToolGroup,
-  chooseTool: tool => {
-    M.tool = tool;
-    drawing.reset();
-    wardLayer.clearSelection();
-    drawMapTools(true);
-    drawing.render();
-    wardLayer.render();
-    battlefield.renderTowers();
-    battlefield.render();
-  },
+  chooseTool: tool => selectTool(tool, true),
 });
+function selectTool(tool, focusCursor) {
+  M.tool = tool;
+  drawing.reset();
+  wardLayer.clearSelection();
+  contextMenu.close();
+  drawMapTools(focusCursor);
+  refreshMap();
+  drawing.render();
+}
+function onPlaced() {
+  selectTool("move", false);
+  viewport.focus({ preventScroll: true });
+}
 function drawMapTools(focusCursor = false) {
   const tool = renderToolControls();
   champions.setInteractive(tool === "move");
   wardLayer.setTool(tool, focusCursor);
   previewFaelights.preview(tool === "ward");
-  battlefield.setWavePreview(tool === "wave", focusCursor);
+  battlefield.setWavePreview(Boolean(waveToolSide(tool)), focusCursor);
 }
 function refreshMap() {
+  contextMenu.close();
   placeTokens();
   wardLayer.render();
   battlefield.renderTowers();
@@ -152,13 +184,18 @@ function writeFrame(changes) {
 }
 function updateClearMap() {
   const { pos, lines, wards, waves, destroyedTowers } = play().live;
-  const hasAnnotations = lines?.length || readWards(wards).length || readWaves(waves).length;
+  const hasWaves = readWaves(waves).length > 0;
+  const hasAnnotations = lines?.length || readWards(wards).length || hasWaves;
   $("#clr").disabled = !canEdit() || !lines?.some(hasArrowhead);
+  clearStrokes.disabled = !canEdit() || !lines?.some(line => !hasArrowhead(line));
+  clearWaves.disabled = !canEdit() || !hasWaves;
   clearMap.disabled = !canEdit() || !hasAnnotations;
   resetMap.disabled = !canChangeFrame() || (!hasAnnotations && !destroyedTowers?.length &&
     TOKS.every(id => initialPositions[id].every((axis, index) => axis === pos[id]?.[index])));
 }
 $("#clr").onclick=()=>{if(!$("#clr").disabled)commit({lines:play().live.lines.filter(line=>!hasArrowhead(line))})};
+clearStrokes.onclick=()=>{if(!clearStrokes.disabled)commit({lines:play().live.lines.filter(hasArrowhead)})};
+clearWaves.onclick=()=>{if(!clearWaves.disabled)commit({waves:[]})};
 clearMap.onclick=()=>{if(!clearMap.disabled){drawing.reset();wardLayer.clearSelection();commit({lines:[],wards:[],waves:[]})}};
 resetMap.onclick=()=>{
   if (resetMap.disabled) return;

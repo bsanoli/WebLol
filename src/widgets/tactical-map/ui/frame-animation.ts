@@ -1,11 +1,11 @@
-import type { Wave } from "../model/battlefield"
+import { waveKey, type Wave } from "../model/battlefield"
 import type { MapPoint } from "../model/faelights"
 
 type MovingPieces = { pos: Record<string, MapPoint>; waves: Wave[] }
 
 export function animatePieces(from: MovingPieces, to: MovingPieces, duration: number, active: () => boolean, update: (pieces: MovingPieces) => void) {
   const start = performance.now()
-  const previousWaves = new Map(from.waves.map(wave => [wave.lane, wave]))
+  const previousWaves = new Map(from.waves.map(wave => [waveKey(wave), wave]))
   return new Promise<boolean>(resolve => {
     function frame(now: number) {
       if (!active()) { resolve(false); return }
@@ -16,7 +16,7 @@ export function animatePieces(from: MovingPieces, to: MovingPieces, duration: nu
         return [id, [origin[0] + (end[0] - origin[0]) * progress, origin[1] + (end[1] - origin[1]) * progress] as MapPoint]
       }))
       const waves = to.waves.map(wave => {
-        const previous = previousWaves.get(wave.lane)
+        const previous = previousWaves.get(waveKey(wave))
         return previous
           ? { ...wave, progress: previous.progress + (wave.progress - previous.progress) * progress }
           : wave

@@ -143,7 +143,7 @@
 [data-palette=one-dark] {
   --wl-bg:#21252b; --wl-surface:#282c34; --wl-raised:#353b45;
   --wl-text:#d7dce5; --wl-muted:#abb2bf;
-  --wl-accent:#c678dd; --wl-on-accent:#22102d; --wl-accent-soft:#49344f;
+  --wl-accent:#d88ce9; --wl-on-accent:#22102d; --wl-accent-soft:#49344f;
 }
 [data-palette=everforest] {
   --wl-bg:#232a2e; --wl-surface:#2d353b; --wl-raised:#374145;
@@ -333,6 +333,9 @@ dialog::backdrop { background: var(--wl-backdrop); }
   --button-height: var(--wl-button-height-sm);
   padding-inline: var(--wl-space-2);
   font-size: 13px;
+}
+[data-slot=button]:where([data-size=sm][data-variant=ghost]:has(> svg)) {
+  padding-inline: var(--wl-space-3);
 }
 [data-slot=button]:where([data-size=xs],[data-size=icon-xs]) {
   --button-height: 28px;

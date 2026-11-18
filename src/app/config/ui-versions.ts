@@ -8,6 +8,25 @@ export interface UiVersion {
 
 export const UI_VERSIONS: UiVersion[] = [
   {
+    version: "1.51",
+    date: "2026-11-18",
+    changes: ["Botões de wave por lado, menu de limpeza por tipo e barra de ferramentas estável durante o zoom."],
+  },
+  {
+    version: "1.50",
+    date: "2026-11-18",
+    changes: ["O menu do clique direito identifica e destaca o elemento selecionado no mapa."],
+  },
+  {
+    version: "1.49",
+    date: "2026-11-18",
+    changes: [
+      "O mapa usa toda a largura disponível e tem cursores próprios para as ferramentas.",
+      "Uma wave por equipe em cada rota, com ícones de minions conjuradores.",
+      "Menu de contexto para excluir elementos e controle de Lumes adicionais ligado à exibição dos Lumes.",
+    ],
+  },
+  {
     version: "1.48",
     date: "2026-11-18",
     changes: ["A linha da seta reta termina dentro da ponta, sem ultrapassá-la."],
@@ -96,16 +115,16 @@ export const UI_VERSIONS: UiVersion[] = [
     changes: [
       "Mapa tático com zoom, tela cheia, traço livre e ajustes de estilo de desenho.",
       "Visão tática por lado, wards móveis, waves por rota e alcance de ataque das torres.",
-      "Ícones de rota nos marcadores do mapa.",
+      "Rift Elemental por jogada, com terreno esquemático e ícones de rota nos marcadores.",
     ],
   },
   {
     version: "1.34",
     date: "2026-11-18",
     changes: [
-      "Mapa tático centralizado, com ferramentas e controles de sequência nas laterais.",
-      "Mapa realista, Lumes Feéricos e wards com alcance por tipo e visão bônus.",
-      "Limpeza de setas e wards com desfazer e seleção de passos pelo teclado.",
+      "Mapa tático centralizado, com ferramentas e sequência da jogada nas laterais.",
+      "Mapa realista, Lumes Feéricos e alcance de visão por tipo de ward.",
+      "Limpar tudo remove setas e wards em uma ação reversível.",
     ],
   },
   {

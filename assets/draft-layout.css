@@ -2,6 +2,31 @@
    picks em faixas nas laterais, bans acima dos picks e, no centro,
    os nomes dos lados, as comps do time e o catálogo de campeões. */
 .dz-center, .dz-names, .dz-tabs { display: none; }
+
+@media (min-width: 1000px) {
+  #v-comps.draft-view .tm > .pk .pick-choice {
+    display: grid;
+    grid-template-columns: calc(var(--wl-space-12) + var(--wl-space-8)) var(--wl-space-6) minmax(0, 1fr);
+    align-items: center;
+    width: 100%;
+    min-width: 0;
+    min-height: var(--wl-space-6);
+    gap: var(--wl-space-2);
+  }
+  #v-comps.draft-view .tm > .pk .pick-choice > .av {
+    width: var(--wl-space-6);
+    height: var(--wl-space-6);
+    margin: 0;
+  }
+  #v-comps.draft-view .pick-choice > .icon {
+    width: var(--wl-icon-size);
+    height: var(--wl-icon-size);
+    justify-self: center;
+  }
+  #v-comps.draft-view .tm > .pk.them { align-items: center; align-content: center; }
+  #v-comps.draft-view .tm .pick-choice .pkh { justify-content: flex-start; }
+}
+
 @media (min-width: 1100px) {
   body:has(#v-comps.draft-view.on) { height: 100dvh; }
   #v-comps.draft-view.on,
@@ -28,13 +53,13 @@
   #v-comps.draft-view .draft-bans { display: flex; align-items: center; gap: 6px; min-height: 52px; }
   #v-comps.draft-view .tm.r .draft-bans { flex-direction: row-reverse; }
   #v-comps.draft-view .draft-bans .bsq { width: 44px; height: 44px; flex: none; }
-  #v-comps.draft-view .draft-bans .bans { gap: 5px; }
+  #v-comps.draft-view .draft-bans .bans { gap: var(--wl-space-1); }
 
   /* Faixas dos picks */
   #v-comps.draft-view .tm > .pk {
     flex: 1 1 0; min-height: 92px; position: relative; overflow: hidden;
     display: flex; flex-direction: column; justify-content: space-between; align-items: flex-start;
-    gap: 6px; padding: 8px 10px; border-radius: var(--wl-card-radius);
+    gap: var(--wl-space-2); padding: var(--wl-space-2); border-radius: var(--wl-card-radius);
   }
   #v-comps.draft-view .tm.r > .pk { align-items: flex-end; text-align: right; border-left-width: 1px; border-right: 5px solid var(--wl-side-red); }
   #v-comps.draft-view .tm > .pk.mine .pick-splash { inset: 0; width: 100%; opacity: 1; object-position: center 22%; }
@@ -44,11 +69,12 @@
   }
   #v-comps.draft-view .tm > .pk.mine .pkf { order: -1; flex: none; flex-direction: row; align-items: center; max-width: 100%; width: auto; flex-wrap: wrap; gap: 4px; }
   #v-comps.draft-view .tm.r > .pk.mine .pkf { justify-content: flex-end; }
-  #v-comps.draft-view .tm > .pk.mine .pk-target { flex: none; width: 100%; min-height: 0; gap: 8px; }
-  #v-comps.draft-view .tm.r > .pk.mine .pk-target { flex-direction: row-reverse; text-align: right; }
-  #v-comps.draft-view .tm > .pk.mine:has(.pick-splash) .pk-target > .av { display: none; }
+  #v-comps.draft-view .tm > .pk .pick-choice { flex: none; }
+  #v-comps.draft-view .tm.r .pick-choice { direction: rtl; text-align: right; }
+  #v-comps.draft-view .tm.r .pick-choice > * { direction: ltr; }
+  #v-comps.draft-view .tm.r .pick-choice .pkh { justify-content: flex-end; }
   #v-comps.draft-view .tm > .pk.mine .pkn:not(.pk-empty) { font-size: 20px; text-shadow: 0 1px 4px #000; }
-  #v-comps.draft-view .tm > .pk.them { justify-content: space-between; }
+  #v-comps.draft-view .tm > .pk.them { justify-content: flex-end; }
   #v-comps.draft-view .tm > .pk { min-height: 0; }
 
   /* Centro */
@@ -77,12 +103,31 @@
   #v-comps.draft-view .dz-slot .gtools label { margin: 0; font-size: 12px; }
   #v-comps.draft-view .dz-slot .roles { padding-block: 2px; gap: 2px; }
   #v-comps.draft-view .dz-slot .worlds-filter { padding-block: 2px; }
-  #v-comps.draft-view .tm > .pk.them .pkh { width: 100%; justify-content: flex-start; }
-  #v-comps.draft-view .tm.r > .pk.them .pkh { justify-content: flex-end; }
   #v-comps.draft-view .dz-slot .champ-picker > * { flex: none; }
   #v-comps.draft-view .dz-slot .champ-picker > #grid { flex: 1 1 0; }
   #v-comps.draft-view .dz-slot #grid { flex: 1 1 0; max-height: none; min-height: var(--wl-space-8); overflow: auto; overscroll-behavior: contain; }
   #v-comps.draft-view > .comp-workspace ~ * .draft-help, #v-comps.draft-view .draft-help { text-align: center; }
+}
+
+.draft-ban-remove[data-slot="button"] {
+  --button-height: var(--wl-space-6);
+  position: absolute;
+  inset-block-start: 0;
+  inset-inline-end: 0;
+  z-index: 1;
+  background: var(--wl-surface);
+  color: var(--wl-danger);
+  opacity: 0;
+  pointer-events: none;
+}
+.bsq:hover .draft-ban-remove[data-slot="button"],
+.draft-ban-remove[data-slot="button"]:focus-visible {
+  opacity: 1;
+  pointer-events: auto;
+}
+.draft-ban-remove[data-slot="button"]:hover {
+  background: var(--wl-danger-soft);
+  color: var(--wl-danger);
 }
 
 /* Lane do time ao lado de "Ordenar por" (substitui o quadro de destino) */

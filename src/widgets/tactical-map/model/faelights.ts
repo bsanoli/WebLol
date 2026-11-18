@@ -24,7 +24,7 @@ export const faelights: readonly Faelight[] = [
     bonusPath: "M80 32 L83.5 37.7 L82.9 38.7 L83 40 L84.1 42.1 L84 46.7 L87 49.3 L86.6 52.8 L83.2 51 L80.8 51.6 L76.4 50 L71.2 50 L71.3 47.7 L74.6 47.8 L76.8 46.4 L77.2 45 L76.3 44 L75.3 45.2 L74 45 L72.8 43.2 L72.7 41 L70.3 42.7 L69.7 44.3 L66.8 44.4 L67.1 41.4 L68.6 39 L71 38.9 L72.4 37.8 L74.5 38.7 L76.2 39.7 L78 42.2 L79.5 44.4 L80 47.5 L81.6 47.6 L81.4 43 L79 40 L79.5 38.6 L79.4 35.9 Z" },
   { id: "upper-island", location: "Arbusto ilhado do rio superior", minimap: [22.6, 22.5], realistic: [23.4, 23.6],
     bonusPath: "M22.6 22.5 L25.5 25.4 L25.8 27.2 L27 29 L29.7 31.5 L25.9 35.9 L21.6 33 L21.5 31.8 L20 27.2 Z" },
-  { id: "upper-wall", location: "Arbusto da parede do rio superior", minimap: [33.4, 41], realistic: [32.6, 41.4],
+  { id: "upper-wall", location: "Arbusto da parede do rio superior", minimap: [33.4, 41], realistic: [33, 41.5],
     bonusPath: "M33.4 41 L36.9 35.8 L39.6 36.2 L44.2 40.3 L38.3 45 L36.8 44.1 L35.6 43.8 Z" },
   { id: "lower-wall", location: "Arbusto da parede do rio inferior", minimap: [67.8, 57.9], realistic: [68.4, 59.1],
     bonusPath: "M67.8 57.9 L64.8 64.6 L59.7 63.5 L57.1 60.5 L62.6 54.8 L65 55.9 Z" },

@@ -9,6 +9,27 @@ type Role = keyof typeof RN
 const directions = new Map<string, MapPoint>([
   ["ArrowLeft", [-1, 0]], ["ArrowRight", [1, 0]], ["ArrowUp", [0, -1]], ["ArrowDown", [0, 1]],
 ])
+const sizeKey = "weblol-map-champion-size"
+
+function mountChampionSize(map: HTMLElement) {
+  const input = document.querySelector<HTMLInputElement>("#map-champion-size")!
+  const display = document.getElementById("map-champion-size-value")!
+  try {
+    const saved = Number(localStorage.getItem(sizeKey))
+    if (saved >= Number(input.min) && saved <= Number(input.max)) input.valueAsNumber = saved
+  } catch {}
+  function apply() {
+    const value = input.valueAsNumber
+    map.style.setProperty("--map-champion-scale", String(value / 100))
+    display.textContent = `${value}%`
+    input.setAttribute("aria-valuetext", `${value}%`)
+  }
+  input.addEventListener("input", apply)
+  input.addEventListener("change", () => {
+    try { localStorage.setItem(sizeKey, input.value) } catch {}
+  })
+  apply()
+}
 
 export function mountChampionLayer({ map, read, write, preview, canMove, point, champion, portrait }: {
   map: HTMLElement
@@ -20,6 +41,7 @@ export function mountChampionLayer({ map, read, write, preview, canMove, point, 
   champion: (side: Side, role: Role) => string | undefined
   portrait: (name: string) => string
 }) {
+  mountChampionSize(map)
   const tokens = TOKS.map(id => {
     const [side, role] = id.split("_") as [Side, Role]
     const button = document.createElement("button")

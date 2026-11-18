@@ -13,6 +13,11 @@ O [catálogo de agentes e skills](docs/agentes.md) vale para Codex e Claude Code
 - Toda implementação no WebLol deve seguir a arquitetura Feature-Sliced Design. Consulte a skill [feature-sliced-design](.agents/skills/feature-sliced-design/SKILL.md) para decidir fronteiras entre módulos, organizar dependências ou migrar código. Respeite as responsabilidades das camadas, a direção dos imports e as APIs públicas dos slices, inclusive em correções pontuais.
 - Faça commit ou push quando o usuário pedir a respectiva ação. Para publicar no GitHub Pages, use a skill [weblol-publicar](.agents/skills/weblol-publicar/SKILL.md).
 
+## Design e acessibilidade
+
+- Toda criação ou alteração de interface deve aplicar os princípios de Gestalt e atender aos critérios aplicáveis da [WCAG 2.2 nível AA](https://www.w3.org/TR/WCAG22/), do layout da tela ao espaçamento interno de cada controle.
+- Na implementação e na revisão, siga a [seção de Gestalt e acessibilidade da skill weblol-ui](.agents/skills/weblol-ui/SKILL.md#gestalt-e-acessibilidade). Valide os componentes e estados afetados no fluxo real em desktop e registre o que conferiu.
+
 ## Organização do código
 
 - Dê às funções nomes que indiquem a ação e seu alvo. Use `handle…` para eventos de interface. Separe regras e estado em `model`, renderização em `ui` e acesso a dados em módulos próprios. Em Composições, `createCompositionCopy` cria a cópia sem acessar o DOM ou o armazenamento, e `duplicateComposition` aplica a mudança na página.

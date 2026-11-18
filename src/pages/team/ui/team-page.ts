@@ -130,7 +130,7 @@ function renderList(){
   list.innerHTML=matches
    .map(c=>{const firsts=compositionPreview(c);
      return `<div class="composition-item"><button class="ci${c.id===S.cur?" on":""}" aria-pressed="${c.id===S.cur}" data-id="${c.id}"><b>${sideDot(c)}${esc(c.name)}</b>
-      <span class="mini">${firsts.map(img).join("")||'<small style="color:var(--mut)">vazia</small>'}</span></button><span class="composition-menu" data-team-control></span></div>`}).join("")||'<div style="color:var(--mut);padding:10px;font-size:12px">Nenhuma comp.</div>';
+      <span class="mini">${firsts.map(img).join("")||'<small style="color:var(--mut)">vazia</small>'}</span></button><span class="composition-menu" data-team-control></span></div>`}).join("")||'<p class="composition-empty" role="status">Nenhuma composição encontrada.</p>';
   list.querySelectorAll(".composition-menu").forEach((host,index)=>{
     const {id,name}=matches[index];
     mountCompositionMenu(host,name,()=>{
@@ -183,8 +183,13 @@ function renderDraftLaneNotes(c){
   list.hidden=!list.childElementCount;
 }
 
-// Destaca o "Anotações da composição" recolhido quando há algo escrito
-function hasCompNotes(c,dv){const d=draftOf(c);return !!((c.notes||"").trim()||(dv&&(d.note[d.side]||"").trim()))}
+// Destaca "Anotações da composição" quando o painel tem algo escrito.
+function hasCompNotes(c,dv){
+  if(c.notes?.trim()) return true;
+  if(!dv) return false;
+  const d=draftOf(c);
+  return !!d.note[d.side]?.trim() || LANES.some(lane=>c.laneNotes[lane.k]?.trim());
+}
 const markCompNotes=()=>$("#composition-notes")?.classList.toggle("has-notes",hasCompNotes(cur(),S.view==="draft"));
 function renderEditor(){
   const previousComposition = $("#editor").dataset.motionComposition;
@@ -198,7 +203,9 @@ function renderEditor(){
   const editor = $("#editor");
   const showPickFeedback = previousComposition === c.id && previousView === view
     ? capturePickFeedback(editor) : undefined;
-  $("#cname").value = c.name;
+  const nameInput = $("#cname");
+  nameInput.value = c.name;
+  nameInput.title = c.name;
   mountSectionTabs($(".editor-controls .vtog"), "Modo da composição", S.view || "lanes", [
     { value: "lanes", label: "Opções por posição", panel: "composition-panel" },
     { value: "draft", label: "Ordem do draft", panel: "composition-panel" },
@@ -236,6 +243,7 @@ function renderEditor(){
     mountLaneNote(host,`Observação de ${lane.n}`,c.laneNotes[lane.k]||"",value=>{
       c.laneNotes[lane.k]=value;
       renderDraftLaneNotes(c);
+      markCompNotes();
       touch();save();
     });
   });
@@ -253,7 +261,11 @@ function renderEditor(){
 const touch=()=>{cur().updated=Date.now()};
 $("#v-comps").addEventListener("input",e=>{
   const c=cur();
-  if(e.target.id==="cname"){c.name=e.target.value;touch();save();renderList()}
+  if(e.target.id==="cname"){
+    c.name=e.target.value;
+    e.target.title=c.name;
+    touch();save();renderList();
+  }
   else if(e.target.id==="notes"){c.notes=e.target.value;touch();save();markCompNotes()}
   else if(e.target.id==="dnote"){const d=draftOf(c);d.note[d.side]=e.target.value;touch();save();markCompNotes()}
 });
@@ -295,7 +307,15 @@ $("#editor").addEventListener("click",e=>{
   const rm=e.target.closest("[data-rm]");
   if(rm){removeChampion(rm.dataset.rm,rm.closest("[data-l]").dataset.l);return}
 
-  const sb=e.target.closest("[data-side]");if(sb){draftOf(cur()).side=sb.dataset.side;touch();save();renderEditor();renderList();$(`[data-side="${sb.dataset.side}"]`).focus({preventScroll:true});return}
+  const sideButton=e.target.closest("button[data-side]");
+  if(sideButton){
+    const side=sideButton.dataset.side;
+    const group=sideButton.closest(".dside") ? ".dside" : ".dz-names";
+    draftOf(cur()).side=side;
+    touch();save();renderEditor();renderList();
+    $(`${group} button[data-side="${side}"]`)?.focus({preventScroll:true});
+    return;
+  }
   const target=e.target.closest("[data-draft-target]");
   if(target){
     active=target.dataset.draftTarget;
@@ -353,7 +373,7 @@ function renderGrid(){
     return `<button class="ch${wh?" in":""}" aria-pressed="${c.lanes[active].includes(ch.n)}" draggable="true" data-n="${esc(ch.n)}" aria-label="${esc(ch.n)}">${img(ch.n)}
       ${wh?`<span class="tag" style="--lc:var(${wh[0].c})">${wh.map(l=>l.n.slice(0,3).toUpperCase()).join("/")}</span>`:""}
       ${srt!=="az"&&w?`<span class="ws">${srt==="ws"?w[0]:w[2]}</span>`:""}
-      <span class="nm">${esc(ch.n)}</span></button>`}).join("")||'<div style="color:var(--mut)">Nenhum campeão encontrado.</div>';
+      <span class="nm">${esc(ch.n)}</span></button>`}).join("")||'<p class="composition-empty" role="status">Nenhum campeão encontrado.</p>';
   $("#gfoot").textContent="";
 }
 $("#grid").onclick=e=>{

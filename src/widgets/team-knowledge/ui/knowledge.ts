@@ -41,17 +41,17 @@ function renderKnow(){
     know.innerHTML = `<div class="ktabs"></div>
   <div id="panel-wave" role="tabpanel" aria-labelledby="tab-wave">${WAVE_HTML}</div>
   <div id="panel-obj" role="tabpanel" aria-labelledby="tab-obj">
-  <div class="warn">${iconMarkup("warning")} Tempos da temporada 2026 (patch 26.1 em diante, jogo atual 16.x). As mudanças vieram do preview oficial da Riot e de guias de 2026; os primeiros spawns da selva são das notas do patch 26.1; os tempos de volta dos campos pequenos são os de sempre. Confirmem no jogo se algum patch novo mexer nisso. Os tempos são do relógio do jogo.</div>
+  <div class="warn">${iconMarkup("warning")}<span>Tempos da temporada 2026 (patch 26.1 em diante, jogo atual 16.x). As mudanças vieram do preview oficial da Riot e de guias de 2026; os primeiros spawns da selva são das notas do patch 26.1; os tempos de volta dos campos pequenos são os de sempre. Confirmem no jogo se algum patch novo mexer nisso. Os tempos são do relógio do jogo.</span></div>
   <div class="kgrid">${OBJ.map((o,i)=>`<div class="wl-panel obj"><h3>${gameIconMarkup(o.icon)}<span>${o.n}</span></h3>
      <div class="kv"><span>Primeiro spawn</span><span>${o.first}</span></div>
      <div class="kv"><span>Volta em</span><span>${o.resp}</span></div>
      ${o.rows.map(r=>`<div class="kv"><span>${r[0]}</span><span>${r[1]}</span></div>`).join("")}
      <p>${o.p}</p>
-     ${o.rs?`<div class="calc">Morreu em <input data-slot="input" data-o="${o.rs}" placeholder="mm:ss"> → volta <span class="r" id="r${i}">—</span></div>`:""}
+     ${o.rs?`<div class="calc"><label for="objective-time-${i}">Morreu em</label><input id="objective-time-${i}" aria-label="Horário da morte de ${o.n}" data-slot="input" data-o="${o.rs}" placeholder="mm:ss"><span>→ volta <output class="r" for="objective-time-${i}">—</output></span></div>`:""}
    </div>`).join("")}</div>
   <h2 class="ks">Selva e estruturas</h2>
   <table><tr><th>O quê</th><th>Primeiro spawn</th><th>Volta em</th><th>Calculadora</th></tr>
-  ${CAMPS.map((c,i)=>`<tr><td>${c[0]}</td><td>${c[1]}</td><td>${c[2]}</td><td>${c[3]?`<div class="calc" style="margin:0">morreu <input data-slot="input" data-o="${c[3]}" placeholder="mm:ss"> → <span class="r">—</span></div>`:""}</td></tr>`).join("")}</table>
+  ${CAMPS.map((c,i)=>`<tr><td>${c[0]}</td><td>${c[1]}</td><td>${c[2]}</td><td>${c[3]?`<div class="calc"><label for="camp-time-${i}">Morreu em</label><input id="camp-time-${i}" aria-label="Horário da morte de ${c[0]}" data-slot="input" data-o="${c[3]}" placeholder="mm:ss"><span>→ <output class="r" for="camp-time-${i}">—</output></span></div>`:"—"}</td></tr>`).join("")}</table>
   <h2 class="ks">Ouro das torres e placas (patch 26.1)</h2>
   <table><tr><th>Torre</th><th>Placas</th><th>Ouro por placa</th><th>Total</th><th>Detalhes</th></tr>
   <tr><td>Externa (T1)</td><td>5</td><td>120</td><td>até 600</td><td>A placa perde 10 de ouro por minuto a partir dos 11:00, no máximo −40 (fica em 80 a partir dos 15:00). Torre destruída não dá ouro extra (antes dava 250). Total mínimo de 400.</td></tr>

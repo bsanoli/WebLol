@@ -3,7 +3,7 @@ import { faelights } from "../model/faelights"
 export function mountFaelightLayer({ getState, save, mountMapSwitch, onAvailabilityChange }: {
   getState: () => { showFaelights?: boolean; additionalFaelights?: boolean }
   save: () => void
-  mountMapSwitch: (host: Element, label: string, checked: boolean, change: (checked: boolean) => void) => void
+  mountMapSwitch: (host: Element, label: string, checked: boolean, change: (checked: boolean) => void, disabled?: boolean) => void
   onAvailabilityChange: () => void
 }) {
   const layer = document.querySelector<HTMLElement>("#map-faelights")!
@@ -28,15 +28,18 @@ export function mountFaelightLayer({ getState, save, mountMapSwitch, onAvailabil
   }
 
   function renderAdditional() {
+    const visible = getState().showFaelights === true
     const additional = getState().additionalFaelights === true
     layer.toggleAttribute("data-additional", additional)
-    legend.hidden = !additional
-    mountMapSwitch(additionalToggle, "Lumes adicionais", additional, next => {
+    layer.toggleAttribute("data-additional-visible", additional && visible)
+    legend.hidden = !additional || !visible
+    mountMapSwitch(additionalToggle, "Lumes adicionais", additional && visible, next => {
+      if (getState().showFaelights !== true) return
       getState().additionalFaelights = next
       save()
       renderAdditional()
       onAvailabilityChange()
-    })
+    }, !visible)
   }
 
   function renderToggle() {
@@ -47,6 +50,7 @@ export function mountFaelightLayer({ getState, save, mountMapSwitch, onAvailabil
       getState().showFaelights = next
       save()
       renderToggle()
+      renderAdditional()
     })
   }
 

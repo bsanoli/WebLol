@@ -2,7 +2,7 @@ import { iconMarkup } from "@/shared/ui/icon"
 import { gameIconMarkup } from "./game-icon"
 
 export const WAVE_HTML=`
-<div class="warn">${iconMarkup("book")} Guia de controle de wave para a temporada 2026. Os números da wave são das notas dos patches 26.1 e 26.9. As técnicas (freeze, slow push, etc.) são os fundamentos de sempre, ajustados aos tempos novos.</div>
+<div class="warn">${iconMarkup("book")}<span>Guia de controle de wave para a temporada 2026. Os números da wave são das notas dos patches 26.1 e 26.9. As técnicas (freeze, slow push, etc.) são os fundamentos de sempre, ajustados aos tempos novos.</span></div>
 
 <h2 class="ks">Números da wave em 2026</h2>
 <table>
@@ -30,8 +30,8 @@ export const WAVE_HTML=`
 <h2 class="ks">Técnicas</h2>
 <div class="kgrid wv">
  <div class="wl-panel obj"><h3>${iconMarkup("freeze")} Freeze (congelar)</h3>
-  <div class="lanefig"><span class="tw b">${gameIconMarkup("tower")}</span><span class="zone">zona do freeze</span><span class="mm b">●●</span><span class="mm r">●●●●●</span><span class="tw r">${gameIconMarkup("tower")}</span></div>
   <p><b>O que é:</b> segurar a wave parada logo <b>fora do alcance da sua torre</b>, só dando last hit.</p>
+  <div class="lanefig"><span class="tw b">${gameIconMarkup("tower")}</span><span class="zone">zona do freeze</span><span class="mm b">●●</span><span class="mm r">●●●●●</span><span class="tw r">${gameIconMarkup("tower")}</span></div>
   <p><b>Como:</b> a wave inimiga precisa ser maior que a sua (uns 3–4 minions a mais) para ficar parada ali. Deixe a wave vir até você, só dê o último golpe e não bata nos minions à toa. Se a sua wave estiver grande demais, deixe ela bater na torre inimiga e monte o freeze com a próxima.</p>
   <p><b>Quando:</b> você está na frente e quer negar farm/XP; o caçador inimigo está do outro lado do mapa; o inimigo não tem como quebrar o freeze sem se arriscar.</p>
   <p><b>Cuidado:</b> freeze não gera prio. Você fica preso na lane e não ajuda em objetivo.</p></div>

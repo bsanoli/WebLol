@@ -35,6 +35,7 @@ export function mountMapDrawing({ map, read, write, getTool, canEdit, point, sca
   const arrowhead = document.querySelector<HTMLInputElement>("#map-stroke-arrowhead")!
   let color = "#ffd34d"
   let hover = -1
+  let contextIndex = -1
   let pending: MapPoint | undefined
   let active: { id: number; origin: MapPoint; points: MapPoint[]; kind: StrokeKind } | undefined
 
@@ -56,7 +57,8 @@ export function mountMapDrawing({ map, read, write, getTool, canEdit, point, sca
     const lines = preview ? [...read(), preview] : read()
     lines.forEach((line, index) => {
       if (line.pts.length < 2) return
-      const highlight = getTool() === "erase" && index === hover
+      const contextSelected = index === contextIndex
+      const highlight = !contextSelected && getTool() === "erase" && index === hover
       const thickness = (highlight ? 6 : line.width ?? 3.2) * dpr
       g.strokeStyle = g.fillStyle = highlight ? "#ff5656" : line.c
       g.lineWidth = thickness
@@ -81,6 +83,13 @@ export function mountMapDrawing({ map, read, write, getTool, canEdit, point, sca
           g.lineTo(tail.point[0] * unit, tail.point[1] * unit)
           g.lineTo(x * unit - inset * Math.cos(angle), y * unit - inset * Math.sin(angle))
         }
+        if (contextSelected) {
+          g.save()
+          g.strokeStyle = "#fff2b7"
+          g.lineWidth = thickness + 5 * dpr
+          g.stroke()
+          g.restore()
+        }
         g.stroke()
       }
       if (!drawHead) return
@@ -89,6 +98,14 @@ export function mountMapDrawing({ map, read, write, getTool, canEdit, point, sca
       g.lineTo(x * unit - tip * Math.cos(angle - .45), y * unit - tip * Math.sin(angle - .45))
       g.lineTo(x * unit - tip * Math.cos(angle + .45), y * unit - tip * Math.sin(angle + .45))
       g.closePath()
+      if (contextSelected) {
+        g.save()
+        g.setLineDash([])
+        g.strokeStyle = "#fff2b7"
+        g.lineWidth = 5 * dpr
+        g.stroke()
+        g.restore()
+      }
       g.fill()
     })
     if (pending) {
@@ -172,5 +189,22 @@ export function mountMapDrawing({ map, read, write, getTool, canEdit, point, sca
     if (event.key === "Escape" && (active || pending)) { reset(); render() }
   })
 
-  return { render, reset, setColor(value: string) { color = value; render() } }
+  return { render, reset, contextAction(event: MouseEvent) {
+    const index = hit(point(event))
+    const line = read()[index]
+    if (!line) return
+    const targetName = line.kind === "freehand" ? "Traço livre" : line.kind === "freehand-arrow" ? "Traço livre com seta" : "Seta"
+    return {
+      label: "Excluir",
+      targetName,
+      highlight(active: boolean) {
+        contextIndex = active ? index : -1
+        render()
+      },
+      run() {
+        hover = -1
+        if (canEdit()) write(read().filter((_, candidate) => candidate !== index))
+      },
+    }
+  }, setColor(value: string) { color = value; render() } }
 }

@@ -7,7 +7,12 @@ export function mountMapCamera(viewport: HTMLElement, map: HTMLElement, onChange
   const fit = document.querySelector<HTMLButtonElement>("#map-zoom-fit")!
   const value = document.querySelector<HTMLOutputElement>("#map-zoom-value")!
   const workspace = document.querySelector<HTMLElement>("#v-map")!
+  const layout = workspace.querySelector<HTMLElement>("#mapw")!
   const fullscreen = document.querySelector<HTMLButtonElement>("#map-fullscreen")!
+  const toolbar = workspace.querySelector<HTMLElement>(".map-toolbar")!
+  const editToolbar = toolbar.querySelector<HTMLElement>(".map-edit-toolbar")!
+  const stageBar = toolbar.querySelector<HTMLElement>(".map-stage-bar")!
+  const stage = viewport.closest<HTMLElement>(".map-stage")!
   let zoom = 1
   let x = 0, y = 0
   let space = false
@@ -18,6 +23,16 @@ export function mountMapCamera(viewport: HTMLElement, map: HTMLElement, onChange
 
   function limit(offset: number, length: number, board: number) {
     return board <= length ? (length - board) / 2 : Math.max(length - board, Math.min(0, offset))
+  }
+
+  function alignToolbar() {
+    const fitInset = Math.max(0, (viewport.clientWidth - stage.clientHeight) / 2)
+    const sharedRow = stageBar.offsetTop < editToolbar.offsetTop + editToolbar.offsetHeight &&
+      editToolbar.offsetTop < stageBar.offsetTop + stageBar.offsetHeight
+    const gap = Number.parseFloat(getComputedStyle(toolbar).columnGap)
+    const boundary = sharedRow ? stageBar.offsetLeft - gap : toolbar.clientWidth
+    const room = boundary - editToolbar.offsetLeft - editToolbar.offsetWidth
+    layout.style.setProperty("--map-toolbar-inset", `${Math.max(0, Math.min(fitInset, room))}px`)
   }
 
   function render(redraw = true) {
@@ -78,7 +93,7 @@ export function mountMapCamera(viewport: HTMLElement, map: HTMLElement, onChange
     const focusedControl = target?.closest(controlSelector)
     if (focusedControl && (focusedControl !== pointerControl || focusedControl.matches("[data-ward-index]"))) return
     if (target?.closest('input, textarea, select, [contenteditable]:not([contenteditable="false"]), [role="dialog"]') ||
-      document.querySelector('[role="listbox"][data-state="open"], [role="menu"][data-state="open"], dialog[open]')) return
+      document.querySelector('[role="listbox"][data-state="open"], [role="menu"][data-state="open"], dialog[open], #map-context-menu:popover-open')) return
     event.preventDefault()
     setSpace(true)
   })
@@ -137,13 +152,13 @@ export function mountMapCamera(viewport: HTMLElement, map: HTMLElement, onChange
   document.addEventListener("fullscreenchange", syncFullscreen)
   workspace.addEventListener("keydown", event => {
     if (event.key !== "Escape" || event.defaultPrevented || !workspace.classList.contains("map-expanded")) return
-    if ((event.target as Element).closest("[data-map-menu][open]") || workspace.querySelector("#map-ward-popover:popover-open")) return
+    if ((event.target as Element).closest("[data-map-menu][open]") || workspace.querySelector(":popover-open")) return
     workspace.classList.remove("map-expanded")
     syncFullscreen()
     fullscreen.focus()
   })
   let lastWidth = 0, lastHeight = 0
-  new ResizeObserver(() => {
+  const resize = new ResizeObserver(() => {
     const width = viewport.clientWidth, height = viewport.clientHeight
     if (!width || !height) return
     if (lastWidth && lastHeight) {
@@ -154,9 +169,14 @@ export function mountMapCamera(viewport: HTMLElement, map: HTMLElement, onChange
     }
     lastWidth = width
     lastHeight = height
+    alignToolbar()
     render()
-  }).observe(viewport)
+  })
+  resize.observe(viewport)
+  resize.observe(editToolbar)
+  resize.observe(stageBar)
   syncFullscreen()
+  alignToolbar()
   render(false)
 
   return {

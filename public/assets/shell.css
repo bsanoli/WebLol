@@ -21,9 +21,9 @@ input{width:100%}
 #admin tr:hover td{background:var(--panel2)}
 .ok{color:var(--green)}.bad{color:var(--red)}
 #mbox h3{margin:0}
-#mbox p{color:var(--mut);margin:var(--wl-space-2) 0 var(--wl-space-4);font-size:13px;line-height:1.5}
-#mbox .err{color:var(--red);font-size:13px;min-height:1.5em;margin-top:var(--wl-space-2)}
-#mbox .row{display:flex;gap:var(--wl-space-2);margin-top:var(--wl-space-6);justify-content:flex-end;flex-wrap:wrap}
+#mbox p{color:var(--mut);margin:var(--wl-space-2) 0 var(--wl-space-2);font-size:13px;line-height:1.5}
+#mbox .err{color:var(--red);font-size:13px;min-height:var(--wl-space-4);line-height:var(--wl-space-4);margin-top:var(--wl-space-2)}
+#mbox .row{display:flex;gap:var(--wl-space-2);margin-top:var(--wl-space-4);justify-content:flex-end;flex-wrap:wrap}
 .rid{display:flex;align-items:center;gap:6px}.rid span{font-size:22px;font-weight:800;color:var(--gold)}.rid #rtag{width:110px;flex:none;text-transform:uppercase}
 .fpath{background:var(--bg);border:1px solid var(--gold);border-radius:var(--wl-control-radius);padding:10px 12px;font-size:15px;margin:4px 0 10px}
 #mbox label{display:block;font-size:12px;color:var(--mut);margin:var(--wl-space-4) 0 var(--wl-space-1)}
@@ -61,7 +61,7 @@ input{width:100%}
   text-align: start;
 }
 #top .header-actions { display: flex; align-items: center; gap: var(--wl-space-2); }
-#top .account-trigger { min-width: var(--wl-button-height); padding-inline: var(--wl-space-2); }
+#top .account-trigger:not([data-size=icon]) { padding-inline: var(--wl-space-2); }
 .account-name { max-width: 112px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .account-details {
   display: flex;
@@ -75,7 +75,7 @@ input{width:100%}
   #top .account-name { display: none; }
 }
 .palette-options {
-  width:216px;
+  width: min(240px, calc(100vw - 2 * var(--wl-gutter)));
   max-height:min(31rem,60dvh); overflow:auto; padding:var(--wl-menu-padding); background:var(--panel); border:1px solid var(--line);
   border-radius:var(--wl-card-radius); box-shadow:0 8px 24px #0008;
 }
@@ -86,6 +86,15 @@ input{width:100%}
 }
 .palette-option:is(:hover,[data-highlighted]) { background:var(--panel2); }
 .palette-option[data-state=checked] { border-color:var(--gold); background:var(--panel2); font-weight:700; }
+.palette-label { flex: 1; min-width: 0; }
+.palette-option .palette-indicator {
+  flex: none;
+  width: var(--wl-icon-size);
+  height: var(--wl-icon-size);
+  color: var(--gold);
+  visibility: hidden;
+}
+.palette-option[data-state=checked] .palette-indicator { visibility: visible; }
 .palette-preview {
   flex:none; width:var(--wl-space-8); height:var(--wl-icon-size); border:1px solid var(--wl-line); border-radius:var(--wl-control-radius);
   background:linear-gradient(90deg,var(--wl-bg) 33.333%,var(--wl-raised) 33.333% 66.666%,var(--wl-accent) 66.666%);
@@ -111,17 +120,33 @@ body:has(#header-tools[data-state=open]) #screens::after {
 #admin summary { align-content: center; min-height: var(--wl-button-height); cursor: pointer; font-weight: 600; }
 #admin details[open] > summary { margin-bottom: var(--wl-space-2); }
 #admin .card { overflow-x: auto; }
+#admin td { font-variant-numeric: tabular-nums; }
+#admin table:has(> thead th[aria-label="Ações"]:last-child) td:last-child:not([colspan]) {
+  width: 1%;
+  text-align: end;
+  white-space: nowrap;
+}
+#admin td > [data-slot=button] + [data-slot=button] { margin-inline-start: var(--wl-space-1); }
+.admin-status-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: var(--wl-space-2);
+}
 .shell-login-dialog {
   max-width: min(500px, calc(100vw - var(--wl-space-8)));
   max-height: calc(100dvh - var(--wl-space-8));
   overflow: auto;
   padding: 0;
+  border-color: var(--wl-line);
 }
 #mbox { width: 100%; padding: var(--wl-dialog-padding); }
 #mbox h3 { color: var(--txt); font-size: var(--wl-section-size); line-height: 1.2; font-weight: 700; }
 #mbox label { font-size: var(--wl-label-size); }
 .eyebrow { display: block; color: var(--gold); font-weight: 600; font-size: 12px; margin-bottom: 8px; }
 .rid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(94px, .43fr); gap: var(--wl-space-3); align-items: end; }
+#mbox .rid label { margin-block-start: var(--wl-space-2); }
 .rid #rtag { width: 100%; }
 @media (max-width: 759px) {
   #top { --wl-button-height: var(--wl-space-12); }

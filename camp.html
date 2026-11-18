@@ -7,17 +7,17 @@
 <title>Comps do Time</title>
 <link rel="icon" href="./assets/brand/favicon.ico" sizes="any">
 <link rel="icon" href="./assets/brand/favicon.svg?v=f454a496" type="image/svg+xml">
-<link rel="stylesheet" href="./assets/base.css?v=05357973">
-<link rel="stylesheet" href="./assets/team.css?v=cb21a2af">
-<link rel="stylesheet" href="./assets/compositions.css?v=e452b11c">
+<link rel="stylesheet" href="./assets/base.css?v=5c6667dc">
+<link rel="stylesheet" href="./assets/team.css?v=a29899e3">
+<link rel="stylesheet" href="./assets/compositions.css?v=527964ce">
 <link rel="stylesheet" href="./assets/motion.css?v=0e5e7875">
-<link rel="stylesheet" href="./assets/draft-layout.css?v=f8250db4">
-<link rel="stylesheet" href="./assets/team-controls.css?v=3d209602">
-  <script type="module" crossorigin src="./assets/camp-BIcdDcic.js?v=f05fc179"></script>
-  <link rel="modulepreload" crossorigin href="./assets/icon-BHrXOZ-G.js?v=6ddcc16b">
-  <link rel="modulepreload" crossorigin href="./assets/select-DPLKjgVg.js?v=3d636968">
-  <link rel="modulepreload" crossorigin href="./assets/dropdown-menu-DItqVUjm.js?v=2f123a3b">
-  <link rel="stylesheet" crossorigin href="./assets/icon-B3E9ssv-.css?v=dcca4e62">
+<link rel="stylesheet" href="./assets/draft-layout.css?v=6cc687a9">
+<link rel="stylesheet" href="./assets/team-controls.css?v=b259621e">
+  <script type="module" crossorigin src="./assets/camp-D9NruEjO.js?v=82380a97"></script>
+  <link rel="modulepreload" crossorigin href="./assets/icon-CepnqSQJ.js?v=6ddcc16b">
+  <link rel="modulepreload" crossorigin href="./assets/select-C4s3pdoO.js?v=ad8b2265">
+  <link rel="modulepreload" crossorigin href="./assets/dropdown-menu-iOPIZzLO.js?v=93ec7821">
+  <link rel="stylesheet" crossorigin href="./assets/icon-CIQx-7-q.css?v=0e30be89">
   <link rel="stylesheet" crossorigin href="./assets/dropdown-menu-BduzkyJQ.css?v=3d53ab28">
   <link rel="stylesheet" crossorigin href="./assets/camp-Y_F_sCZ6.css?v=10e0da9c">
 </head>
@@ -76,7 +76,7 @@
   </div>
 
   <div class="wl-panel box champ-picker" id="champ-picker">
-    <div class="picker-heading"><h2 id="picker-title">Campeões</h2><button data-slot="button" data-variant="outline" id="close-picker" aria-label="Fechar catálogo">Fechar</button></div>
+    <div class="picker-heading"><h2 id="picker-title">Campeões</h2><button data-slot="button" data-variant="ghost" data-size="icon-sm" id="close-picker" type="button" aria-label="Fechar catálogo"><svg class="icon" aria-hidden="true" focusable="false"><use href="assets/icons.svg#close"></use></svg></button></div>
     <div id="target"></div>
     <div class="gtools">
       <label>Buscar campeão<input data-slot="input" id="search" placeholder="Nome do campeão"></label>
@@ -111,14 +111,21 @@
      <div class="map-history-toolbar" role="group" aria-label="Histórico e limpeza">
      <button data-slot="button" data-variant="outline" id="undo" aria-label="Desfazer" data-map-tip="Desfazer (Ctrl+Z)"><svg class="icon" aria-hidden="true" focusable="false"><use href="assets/icons.svg#undo"></use></svg></button>
      <button data-slot="button" data-variant="outline" id="redo" aria-label="Refazer" data-map-tip="Refazer (Ctrl+Y)"><svg class="icon" aria-hidden="true" focusable="false"><use href="assets/icons.svg#redo"></use></svg></button>
-      <details class="map-disclosure" data-map-menu>
-       <summary data-slot="button" data-variant="ghost" aria-label="Limpeza" data-map-tip="Limpeza"><svg class="icon" aria-hidden="true"><use href="assets/icons.svg#trash"></use></svg><svg class="icon map-caret" aria-hidden="true"><use href="assets/icons.svg#descending"></use></svg></summary>
-       <div class="map-disclosure-panel" role="group" aria-label="Limpeza do mapa">
-     <button data-slot="button" data-variant="destructive" id="clr" title="Apaga todas as setas"><svg class="icon" aria-hidden="true" focusable="false"><use href="assets/icons.svg#trash"></use></svg> Limpar setas</button>
-     <button type="button" data-slot="button" data-variant="destructive" id="map-clear-wards" disabled><svg class="icon" aria-hidden="true" focusable="false"><use href="assets/icons.svg#trash"></use></svg> Limpar wards</button>
-     <button type="button" data-slot="button" data-variant="destructive" id="map-clear-all" title="Limpa desenhos, wards e waves do mapa atual" disabled><svg class="icon" aria-hidden="true" focusable="false"><use href="assets/icons.svg#trash"></use></svg> Limpar tudo</button>
-       </div>
-      </details>
+      <div class="map-cleanup-tools" role="group" aria-label="Limpeza do mapa">
+       <button type="button" data-slot="button" data-variant="ghost" data-size="icon-sm" id="clr" aria-label="Limpar setas" data-map-tip="Limpar setas" disabled>
+        <span class="map-cleanup-glyph" aria-hidden="true"><svg class="icon" aria-hidden="true"><use href="assets/icons.svg#map-tool-arrow"></use></svg><span class="map-cleanup-badge">×</span></span>
+       </button>
+       <button type="button" data-slot="button" data-variant="ghost" data-size="icon-sm" id="map-clear-strokes" aria-label="Limpar traços sem seta" data-map-tip="Limpar traços sem seta" disabled>
+        <span class="map-cleanup-glyph" aria-hidden="true"><svg class="icon" aria-hidden="true"><use href="assets/icons.svg#map-tool-brush"></use></svg><span class="map-cleanup-badge">×</span></span>
+       </button>
+       <button type="button" data-slot="button" data-variant="ghost" data-size="icon-sm" id="map-clear-wards" aria-label="Limpar wards" data-map-tip="Limpar wards" disabled>
+        <span class="map-cleanup-glyph" aria-hidden="true"><img src="assets/lol/hud/ward-3340.png" alt=""><span class="map-cleanup-badge">×</span></span>
+       </button>
+       <button type="button" data-slot="button" data-variant="ghost" data-size="icon-sm" id="map-clear-waves" aria-label="Limpar waves" data-map-tip="Limpar waves" disabled>
+        <span class="map-cleanup-glyph" aria-hidden="true"><img src="assets/lol/hud/bluerange_circle.png" alt=""><span class="map-cleanup-badge">×</span></span>
+       </button>
+       <button type="button" data-slot="button" data-variant="destructive" data-size="icon-sm" id="map-clear-all" aria-label="Limpar tudo" data-map-tip="Limpar todas as anotações" disabled><svg class="icon" aria-hidden="true"><use href="assets/icons.svg#trash"></use></svg></button>
+      </div>
       <details class="map-disclosure" data-map-menu>
        <summary data-slot="button" data-variant="ghost" aria-label="Posições prontas" data-map-tip="Posições prontas"><svg class="icon" aria-hidden="true"><use href="assets/icons.svg#map"></use></svg><svg class="icon map-caret" aria-hidden="true"><use href="assets/icons.svg#descending"></use></svg></summary>
        <div class="map-disclosure-panel" role="group" aria-label="Posições de campeões">
@@ -128,7 +135,20 @@
       <button type="button" data-slot="button" data-variant="outline" id="map-reset" title="Restaura posições e torres e limpa as anotações" disabled><svg class="icon" aria-hidden="true"><use href="assets/icons.svg#reset"></use></svg> Resetar mapa</button>
      </div>
     </div>
-   <div class="map-stage-bar" role="group" aria-label="Arquivos e painel">
+   <div class="map-stage-bar" role="group" aria-label="Cursor, arquivos e painel">
+    <details class="map-disclosure" id="map-cursor-menu" data-map-menu>
+     <summary data-slot="button" data-variant="outline" aria-label="Configurar cursor" data-map-tip="Configurar cursor"><svg class="icon" aria-hidden="true"><use href="assets/icons.svg#map-tool-move"></use></svg><svg class="icon map-caret" aria-hidden="true"><use href="assets/icons.svg#descending"></use></svg></summary>
+     <div class="map-disclosure-panel">
+      <span class="map-cursor-label" aria-hidden="true">Cor</span>
+      <div id="map-cursor-colors" role="group" aria-label="Cores do cursor"></div>
+      <span class="map-cursor-label" aria-hidden="true">Tamanho</span>
+      <div id="map-cursor-sizes" role="group" aria-label="Tamanho do cursor">
+       <button type="button" data-slot="button" data-variant="ghost" data-size="sm" data-cursor-size="24" aria-pressed="true">Padrão</button>
+       <button type="button" data-slot="button" data-variant="ghost" data-size="sm" data-cursor-size="32" aria-pressed="false">Médio</button>
+       <button type="button" data-slot="button" data-variant="ghost" data-size="sm" data-cursor-size="40" aria-pressed="false">Grande</button>
+      </div>
+     </div>
+    </details>
     <div id="map-file-slot"></div>
     <details class="map-disclosure map-help" data-map-menu>
     <summary data-slot="button" data-variant="outline">Ajuda</summary>
@@ -140,6 +160,7 @@
     </ol>
     <p>Role a roda sobre o mapa para ajustar o zoom. Segure <b>Espaço</b> e arraste para navegar. Com <b>Alcance das torres</b> ligado, use <b>Mover</b> para alternar o estado de uma torre.</p>
     <p>Com o mapa em foco, use <kbd>V</kbd> para Mover, <kbd>H</kbd> para Mão, <kbd>Shift+L</kbd> para Seta, <kbd>Shift+P</kbd> para Traço livre e <kbd>B</kbd> ou <kbd>E</kbd> para a Borracha. A Borracha apaga traços, wards e waves.</p>
+    <p>Clique com o botão direito em uma área vazia para acessar ferramentas e histórico. Com o mapa em foco, use <kbd>Shift+F10</kbd> para abrir o mesmo menu.</p>
     <p>Para corrigir um passo, selecione-o e ligue o <b>Modo edição</b>. Use <b>Ctrl+Z</b> para desfazer e <b>Ctrl+Y</b> para refazer.</p>
     </div>
    </details>
@@ -155,12 +176,6 @@
      <select id="map-ward-type" aria-labelledby="map-ward-type-label"></select>
     </div>
     <p id="map-ward-hint" class="map-ward-hint" hidden></p>
-    <div id="map-wave-options" class="map-tool-fields" hidden>
-     <label for="map-wave-side-trigger" id="map-wave-side-label">Lado da wave</label>
-     <select id="map-wave-side" aria-labelledby="map-wave-side-label"><option value="b">Azul</option><option value="r">Vermelho</option></select>
-     <span class="map-ward-hint">Clique perto da rota desejada.</span>
-     <output id="map-wave-detected" aria-live="polite"></output>
-    </div>
     <div class="map-group" id="map-arrow-options" hidden>
      <h3 id="map-colors-title">Cor da seta</h3>
      <div id="cols" role="group" aria-labelledby="map-colors-title"></div>
@@ -189,8 +204,13 @@
     <span id="map-wave-preview" aria-hidden="true" hidden></span>
     <span id="map-wave-cursor" aria-hidden="true" hidden></span>
     <div id="map-ward-targets" role="group" aria-label="Interagir com wards"></div>
+    <span id="map-context-target" aria-hidden="true" hidden></span>
     <button id="map-ward-cursor" type="button" aria-description="Use as setas para mover o cursor e Enter ou Espaço para agir." hidden></button>
    </div>
+   </div>
+   <div id="map-wave-options" hidden>
+    <span>Clique perto da rota desejada.</span>
+    <output id="map-wave-detected" aria-live="polite"></output>
    </div>
    <div class="map-camera-controls" role="group" aria-label="Câmera do mapa">
     <button type="button" data-slot="button" data-variant="outline" data-size="icon-sm" id="map-zoom-out" aria-label="Diminuir zoom" data-map-tip="Diminuir zoom">−</button>
@@ -209,6 +229,10 @@
     </div>
    </div>
    <p id="map-preview-notice" class="map-ward-hint" hidden>Prévia tática aproximada da visão da equipe.</p>
+   <div id="map-context-menu" class="map-context-menu" popover="auto" role="menu" aria-label="Ações do elemento no mapa">
+    <div class="map-context-title" aria-hidden="true"></div>
+    <div class="map-context-items" role="presentation"></div>
+   </div>
   </div>
   <aside class="map-sidebar" id="map-sidebar" aria-label="Painel do mapa" tabindex="-1">
    <div id="map-sidebar-tabs"></div>
@@ -218,6 +242,11 @@
      <div id="map-faelight-toggle"></div>
      <div id="map-faelight-additional-toggle"></div>
      <div id="map-tower-range-control"></div>
+    </div>
+    <div class="map-champion-size">
+     <label for="map-champion-size">Tamanho dos ícones</label>
+     <span id="map-champion-size-value" aria-hidden="true">100%</span>
+     <input type="range" id="map-champion-size" min="60" max="100" step="5" value="100">
     </div>
    <div class="map-legends">
     <div class="map-faelight-legend" id="map-faelight-legend" role="status" hidden>

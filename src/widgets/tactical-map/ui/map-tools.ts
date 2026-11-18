@@ -1,18 +1,30 @@
 import { isSide, type Side } from "../model/battlefield"
 
-type Tool = "move" | "hand" | "draw" | "freehand" | "erase" | "ward" | "wave"
+type Tool = "move" | "hand" | "draw" | "freehand" | "erase" | "ward" | "wave-b" | "wave-r"
+
+export function waveToolSide(tool: string): Side | undefined {
+  if (tool === "wave-b") return "b"
+  if (tool === "wave-r") return "r"
+}
 
 const colors=[["#ffd34d","Amarela"],["#3d8bff","Azul"],["#ff4d4d","Vermelha"],["#ffffff","Branca"],["#5be08a","Verde"]];
 
-const mapTools = [
+export const mapQuickTools = [
   { value: "move", label: "Mover", icon: "map-tool-move", shortcuts: "V" },
   { value: "hand", label: "Mão", icon: "map-tool-hand", shortcuts: "H" },
-  { value: "draw", label: "Desenhar seta", icon: "map-tool-arrow", shortcuts: "Shift+L" },
-  { value: "freehand", label: "Traço livre", icon: "map-tool-brush", shortcuts: "Shift+P" },
+  { value: "draw", label: "Desenhar seta", icon: "map-tool-arrow", shortcuts: "Shift+L", panel: "map-arrow-options" },
+  { value: "freehand", label: "Traço livre", icon: "map-tool-brush", shortcuts: "Shift+P", panel: "map-arrow-options" },
   { value: "erase", label: "Borracha", icon: "map-tool-erase", shortcuts: "B E" },
-  { value: "ward", label: "Colocar ward", image: "assets/lol/hud/ward-3340.png" },
-  { value: "wave", label: "Colocar wave", image: "assets/lol/hud/bluemelee_circle_classic.png" },
-] satisfies { value: Tool; label: string; icon?: string; image?: string; shortcuts?: string }[]
+] as const
+
+type ToolOption = { value: Tool; label: string; icon?: string; image?: string; shortcuts?: string; panel?: string }
+
+const mapTools: ToolOption[] = [
+  ...mapQuickTools,
+  { value: "ward", label: "Colocar ward", image: "assets/lol/hud/ward-3340.png", panel: "map-ward-options" },
+  { value: "wave-b", label: "Colocar wave azul", image: "assets/lol/hud/bluerange_circle.png" },
+  { value: "wave-r", label: "Colocar wave vermelha", image: "assets/lol/hud/redrange_circle.png" },
+]
 
 export function mountMapVision(onChange: () => void) {
   const options = document.querySelectorAll<HTMLButtonElement>("#map-perspective [data-vision]")
@@ -41,14 +53,22 @@ export function mountMapTools({ map, canEdit, canMove, currentTool, chooseTool, 
 }) {
   const host = document.getElementById("map-modes")!
   const viewport = document.getElementById("map-viewport")!
+  const colorOptions = document.getElementById("map-arrow-options")!
+  const wardOptions = document.getElementById("map-ward-options")!
+  const wardHint = document.getElementById("map-ward-hint")!
+  const panels: Partial<Record<Tool, HTMLElement>> = { draw: colorOptions, freehand: colorOptions, ward: wardOptions }
+  function setPanelOpen(panel: HTMLElement, open: boolean) {
+    panel.hidden = !open
+    if (panel === wardOptions) wardHint.hidden = !open
+  }
   const palette = document.getElementById("cols")!
-  palette.innerHTML = colors.map(([color, name], index) => `<button class="col${index ? "" : " on"}" data-color="${color}" style="--swatch:${color}" aria-label="${name}" aria-pressed="${index === 0}"></button>`).join("")
+  let renderedTool: Tool | undefined
+  palette.innerHTML = colors.map(([color, name], index) => `<button type="button" class="col" data-color="${color}" style="--swatch:${color}" aria-label="${name}" aria-pressed="${index === 0}"></button>`).join("")
   palette.onclick = event => {
     const button = (event.target as Element).closest<HTMLButtonElement>("[data-color]")
     if (!button || !canEdit()) return
     chooseColor(button.dataset.color!)
     palette.querySelectorAll("[data-color]").forEach(swatch => {
-      swatch.classList.toggle("on", swatch === button)
       swatch.setAttribute("aria-pressed", String(swatch === button))
     })
   }
@@ -78,25 +98,45 @@ export function mountMapTools({ map, canEdit, canMove, currentTool, chooseTool, 
   return () => {
     const tools = availableTools()
     const tool = canMove() ? currentTool() : "hand"
-    mountToolGroup(host, tool, tools, value => { if (canMove() && tools.some(item => item.value === value)) chooseTool(value as Tool) }, !canMove())
+    mountToolGroup(host, tool, tools, value => {
+      if (!canMove() || !tools.some(item => item.value === value)) return
+      if (value === tool) {
+        const panel = panels[tool]
+        if (panel) setPanelOpen(panel, panel.hasAttribute("hidden"))
+        return
+      }
+      chooseTool(value as Tool)
+    }, !canMove())
     map.dataset.tool = tool
-    map.classList.toggle("draw", tool === "draw" || tool === "freehand" || tool === "wave")
-    map.classList.toggle("erase", tool === "erase")
-    document.getElementById("map-arrow-options")!.hidden = tool !== "draw" && tool !== "freehand"
+    if (renderedTool !== tool) {
+      const activePanel = panels[tool]
+      setPanelOpen(colorOptions, activePanel === colorOptions)
+      setPanelOpen(wardOptions, activePanel === wardOptions)
+      renderedTool = tool
+    }
     document.getElementById("map-arrowhead-option")!.hidden = tool !== "freehand"
     document.getElementById("map-colors-title")!.textContent = tool === "freehand" ? "Cor do traço" : "Cor da seta"
-    document.getElementById("map-wave-options")!.hidden = tool !== "wave"
+    document.getElementById("map-wave-options")!.hidden = !waveToolSide(tool)
     return tool
   }
 }
 
 export function mountMapDisclosures() {
   const menus = () => Array.from(document.querySelectorAll<HTMLDetailsElement>("[data-map-menu][open]"))
+  function fitPanel(menu: HTMLDetailsElement) {
+    const panel = menu.querySelector<HTMLElement>(".map-disclosure-panel")
+    if (!panel) return
+    panel.style.removeProperty("--map-menu-shift-x")
+    const { left, right } = panel.getBoundingClientRect()
+    const edge = 8
+    const shift = Math.max(0, edge - left) - Math.max(0, right - document.documentElement.clientWidth + edge)
+    if (shift) panel.style.setProperty("--map-menu-shift-x", `${shift}px`)
+  }
   document.addEventListener("pointerdown", event => {
     for (const menu of menus()) {
       if (!menu.contains(event.target as Node)) menu.open = false
     }
-  })
+  }, true)
   document.addEventListener("keydown", event => {
     if (event.defaultPrevented || event.key !== "Escape") return
     const open = menus().find(menu => menu.contains(event.target as Node))
@@ -109,7 +149,9 @@ export function mountMapDisclosures() {
     const menu = event.target
     if (!(menu instanceof HTMLDetailsElement) || !menu.open || !menu.hasAttribute("data-map-menu")) return
     for (const other of menus()) if (other !== menu) other.open = false
+    fitPanel(menu)
   }, true)
+  window.addEventListener("resize", () => menus().forEach(fitPanel))
 }
 
 export function mountMapSidebar(workspace: HTMLElement) {

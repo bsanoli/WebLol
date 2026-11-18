@@ -23,7 +23,7 @@ export function ThemePicker({ initialPalette }: { initialPalette: PaletteId }) {
         <span className="palette-preview" aria-hidden="true" />
       </Button>
     </DropdownMenuTrigger>
-    <DropdownMenuContent className="palette-options" align="end" aria-label="Temas do WebLol"
+    <DropdownMenuContent className="palette-options" align="end" sideOffset={12} aria-label="Temas do WebLol"
       onCloseAutoFocus={event => { if (document.activeElement instanceof HTMLIFrameElement) event.preventDefault() }}>
       <DropdownMenuGroup>
         <DropdownMenuRadioGroup value={palette} onValueChange={value => {
@@ -35,7 +35,10 @@ export function ThemePicker({ initialPalette }: { initialPalette: PaletteId }) {
           {palettes.map(option => <DropdownMenuRadioItem key={option.id} value={option.id}
             className="palette-option" data-palette={option.id}>
             <span className="palette-preview" aria-hidden="true" />
-            {option.label}
+            <span className="palette-label">{option.label}</span>
+            <svg className="icon palette-indicator" aria-hidden="true" focusable="false">
+              <use href="assets/icons.svg#check" />
+            </svg>
           </DropdownMenuRadioItem>)}
         </DropdownMenuRadioGroup>
       </DropdownMenuGroup>
