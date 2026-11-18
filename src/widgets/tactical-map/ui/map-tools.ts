@@ -5,11 +5,11 @@ type Tool = "move" | "hand" | "draw" | "freehand" | "erase" | "ward" | "wave"
 const colors=[["#ffd34d","Amarela"],["#3d8bff","Azul"],["#ff4d4d","Vermelha"],["#ffffff","Branca"],["#5be08a","Verde"]];
 
 const mapTools = [
-  { value: "move", label: "Mover", icon: "move", shortcuts: "V" },
-  { value: "hand", label: "Mão", icon: "hand", shortcuts: "H" },
-  { value: "draw", label: "Desenhar seta", icon: "draw", shortcuts: "Shift+L" },
-  { value: "freehand", label: "Traço livre", icon: "edit", shortcuts: "Shift+P" },
-  { value: "erase", label: "Borracha", icon: "erase", shortcuts: "B E" },
+  { value: "move", label: "Mover", icon: "map-tool-move", shortcuts: "V" },
+  { value: "hand", label: "Mão", icon: "map-tool-hand", shortcuts: "H" },
+  { value: "draw", label: "Desenhar seta", icon: "map-tool-arrow", shortcuts: "Shift+L" },
+  { value: "freehand", label: "Traço livre", icon: "map-tool-brush", shortcuts: "Shift+P" },
+  { value: "erase", label: "Borracha", icon: "map-tool-erase", shortcuts: "B E" },
   { value: "ward", label: "Colocar ward", image: "assets/lol/hud/ward-3340.png" },
   { value: "wave", label: "Colocar wave", image: "assets/lol/hud/bluemelee_circle_classic.png" },
 ] satisfies { value: Tool; label: string; icon?: string; image?: string; shortcuts?: string }[]

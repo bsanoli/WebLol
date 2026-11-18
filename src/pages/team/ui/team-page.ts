@@ -533,7 +533,7 @@ S = loadTeamState();
 const getState = () => S;
 const renderKnow = mountKnowledge({ getState, save, publishTeamRoute, mountSectionTabs });
 const { plays, renderPlays, renderMapImageSwitch, setMapImg, selectPlay } = mountTacticalMap({
-  getState, save, publishTeamRoute, toast, uid, img, esc,
+  getState, save, publishTeamRoute, toast, uid, img, esc, compositionPreview,
   mountTeamSelect, mountMapEmpty, mountMapSwitch, mountToolGroup, mountSectionTabs, clearTeamControls,
 });
 function renderAll(){renderList();renderEditor();renderGrid()}

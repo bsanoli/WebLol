@@ -6,6 +6,7 @@ import { readWards } from "../model/wards"
 import { readWaves } from "../model/battlefield"
 import { mountBattlefield } from "./battlefield-layer"
 import { mountMapCamera } from "./map-camera"
+import { mountMapCompositions } from "./map-compositions"
 import { hasArrowhead, mountMapDrawing } from "./map-drawing"
 import { renderMapFallback } from "./map-fallback"
 import { mountMapDisclosures, mountMapSidebar, mountMapTools, mountMapVision } from "./map-tools"
@@ -16,7 +17,7 @@ import { mountFaelightLayer } from "./faelight-layer"
 import { mountWardLayer } from "./ward-layer"
 import { mountMapPanel, mountStepPages } from "./map-panel"
 
-export function mountTacticalMap({ getState, save, publishTeamRoute, toast, uid, img, esc, mountTeamSelect, mountMapEmpty, mountMapSwitch, mountToolGroup, mountSectionTabs, clearTeamControls }) {
+export function mountTacticalMap({ getState, save, publishTeamRoute, toast, uid, img, esc, compositionPreview, mountTeamSelect, mountMapEmpty, mountMapSwitch, mountToolGroup, mountSectionTabs, clearTeamControls }) {
 const $ = selector => document.querySelector(selector);
 const clearMap = $("#map-clear-all");
 const resetMap = $("#map-reset");
@@ -70,6 +71,17 @@ const champions = mountChampionLayer({
   champion: (side, role) => getState().comps.find(comp => comp.id === (side === "b" ? play().cb : play().cr))?.lanes?.[role]?.[0],
 });
 const renderTokens = champions.render, placeTokens = champions.place;
+const compositions = mountMapCompositions({
+  read: () => getState().comps.map(comp => ({ id: comp.id, name: comp.name, champions: compositionPreview(comp) })),
+  selected: side => side === "b" ? play().cb : play().cr,
+  choose: (side, id) => {
+    if (!canEdit()) return;
+    play()[side === "b" ? "cb" : "cr"] = id;
+    save(false);
+    renderTokens();
+  },
+  portrait: img,
+});
 const drawing = mountMapDrawing({
   map, read: () => visibleFrame().lines ?? [], write: lines => commit({ lines }),
   canEdit, getTool: () => M.tool, point: pt, scale: camera.scale, update: updateClearMap,
@@ -185,9 +197,8 @@ const history = mountMapHistory({
 function renderPlays(highlightStep = false){
   const p=play();
   $("#psel").innerHTML=plays().map(x=>`<option value="${x.id}"${x.id===p.id?" selected":""} data-description="${x.steps.length} ${x.steps.length===1?"passo":"passos"}">${esc(x.name)}</option>`).join("");
-  const opts=`<option value="">Só o ícone da rota</option>`+getState().comps.map(c=>`<option value="${c.id}">${esc(c.name)}</option>`).join("");
-  $("#cb").innerHTML=opts;$("#cr").innerHTML=opts;$("#cb").value=p.cb||"";$("#cr").value=p.cr||"";
-  ["#psel","#cb","#cr"].forEach(selector=>mountTeamSelect($(selector)));
+  mountTeamSelect($("#psel"));
+  compositions.render();
   const steps=$("#steps");
   clearTeamControls(steps);
   steps.innerHTML = p.steps.map((step, index) => {
@@ -213,8 +224,6 @@ $("#psel").onchange=()=>{stopPlayback();getState().curPlay=$("#psel").value;M.se
 $("#pnew").onclick=async()=>{const n=await askName("Nova jogada","Jogada "+(plays().length+1));if(n===undefined)return;const p=blankPlay(uid, n||undefined);getState().plays.push(p);getState().curPlay=p.id;M.sel=-1;save();renderPlays();publishTeamRoute("map")};
 $("#pren").onclick=async()=>{const p=play(),n=await askName("Renomear jogada",p.name);if(!n)return;p.name=n;save();renderPlays()};
 $("#pdel").onclick=async()=>{const p=play();if(!await confirmAction(`Excluir a jogada "${p.name}"?`, "Excluir jogada"))return;getState().plays=getState().plays.filter(x=>x.id!==p.id);plays();M.sel=-1;save();renderPlays();publishTeamRoute("map")};
-$("#cb").onchange=()=>{if(!canEdit())return;play().cb=$("#cb").value;save(false);renderTokens()};
-$("#cr").onchange=()=>{if(!canEdit())return;play().cr=$("#cr").value;save(false);renderTokens()};
 
 // passos: o passo selecionado salva sozinho tudo o que muda no mapa
 function syncStep(){const p=play();if(!M.edit||!canChangeFrame()||M.sel<0||!p.steps[M.sel])return;Object.assign(p.steps[M.sel],snapshotFrame(p.live));save(false);flashStep()}
@@ -227,10 +236,7 @@ function renderStat(){
   const preview = getPerspective() !== "all";
   $("#map-preview-notice").hidden = !preview;
   document.querySelectorAll("#sadd,#sedit,[data-pre],#pnew,#pren,#pdel").forEach(button => { button.disabled = !editingAllowed; });
-  for (const selector of ["#cb", "#cr"]) {
-    const field = $(selector);
-    if (field.disabled !== !editingAllowed) { field.disabled = !editingAllowed; mountTeamSelect(field); }
-  }
+  compositions.setDisabled(!editingAllowed);
   $("#steps").querySelectorAll("[data-lab]").forEach(field => { field.readOnly = !editingAllowed; });
   $("#steps").querySelectorAll("[data-sdel]").forEach(button => { button.disabled = !editingAllowed; });
   const { steps } = play();

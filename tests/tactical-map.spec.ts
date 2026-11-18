@@ -139,7 +139,7 @@ test("Atalhos alternam ferramentas e a Borracha apaga uma ward antes do traço s
   await expect(clearArrows).toBeDisabled()
 })
 
-test("A ponta do traço curvo mantém a direção ao soltar o mouse com um pequeno desvio", async ({ page }) => {
+test("Setas retas e curvas encaixam o traço na ponta", async ({ page }) => {
   await page.setViewportSize(size)
   await page.goto("/camp.html")
   await page.getByRole("button", { name: "Mapa tático" }).click()
@@ -188,6 +188,21 @@ test("A ponta do traço curvo mantém a direção ao soltar o mouse com um peque
       expect(Math.abs(saved)).toBeLessThan(.45)
     }
   }
+  await page.getByRole("radio", { name: "Desenhar seta", exact: true }).click()
+  const start = await mapPoint(page, .37, .39)
+  const end = await mapPoint(page, .57, .39)
+  await page.mouse.move(start.x, start.y)
+  await page.mouse.down()
+  await page.mouse.move(end.x, end.y, { steps: 5 })
+  expect(Number(await canvas.getAttribute("data-shaft-inset"))).toBeGreaterThan(4)
+  await page.mouse.up()
+  expect(Number(await canvas.getAttribute("data-shaft-inset"))).toBeGreaterThan(4)
+
+  const clickStart = await mapPoint(page, .39, .44)
+  const clickEnd = await mapPoint(page, .59, .37)
+  await page.mouse.click(clickStart.x, clickStart.y)
+  await page.mouse.click(clickEnd.x, clickEnd.y)
+  expect(Number(await canvas.getAttribute("data-shaft-inset"))).toBeGreaterThan(4)
 })
 
 test("Projeta as waves nas curvas do mapa realista e mantém o progresso salvo", async ({ page }) => {
@@ -632,7 +647,11 @@ test("Arquivos, paginação e zoom usam o espaço do mapa sem rolagem", async ({
   await (await chooser).setFiles({
     name: "estrategia.json", mimeType: "application/json",
     buffer: Buffer.from(JSON.stringify({
-      comps: [{ name: "Composição importada" }],
+      comps: [
+        { name: "Composição importada com nome longo para testar o espaço do painel", lanes: { top: ["Garen"], jg: ["Vi"], mid: ["Ahri"], adc: ["Jinx"], sup: ["Leona"] } },
+        { name: "Formação vermelha", lanes: { top: ["Darius"] } },
+        { name: "Composição vazia" },
+      ],
       plays: [{ id: "paginated", name: "Jogada longa", live: frame,
         steps: Array.from({ length: 30 }, (_, i) => ({ label: "Estratégia " + (i + 1), ...frame })) }],
     })),
@@ -646,6 +665,22 @@ test("Arquivos, paginação e zoom usam o espaço do mapa sem rolagem", async ({
   const visibleSteps = team.locator("#steps [data-step-select]:visible")
   await visibleSteps.first().click()
   await expect(visibleSteps.first()).toHaveAttribute("aria-current", "step")
+
+  await team.getByRole("tab", { name: "Composições", exact: true }).click()
+  const blueList = team.getByRole("group", { name: "Composições para o lado Azul", exact: true })
+  const blueComp = blueList.getByRole("button", { name: /Composição importada com nome longo/ })
+  await expect(blueComp.locator(".mini img")).toHaveCount(5)
+  await expect(blueList.getByRole("button", { name: /Composição vazia/ })).toContainText("Sem campeões")
+  await blueComp.press("Enter")
+  await expect(blueComp).toHaveAttribute("aria-pressed", "true")
+  await expect(team.getByRole("button", { name: "Azul TOP - Garen", exact: true })).toBeVisible()
+  await team.getByRole("button", { name: "Vermelho", exact: true }).click()
+  const redList = team.getByRole("group", { name: "Composições para o lado Vermelho", exact: true })
+  await expect(redList.getByRole("button", { name: "Só o ícone da rota", exact: true })).toHaveAttribute("aria-pressed", "true")
+  await redList.getByRole("button", { name: "Formação vermelha", exact: true }).click()
+  await expect(team.getByRole("button", { name: "Vermelho TOP - Darius", exact: true })).toBeVisible()
+  await team.getByRole("button", { name: "Azul", exact: true }).click()
+  await expect(blueComp).toHaveAttribute("aria-pressed", "true")
 
   const board = team.locator("#map"), viewport = team.locator("#map-viewport")
   const before = (await board.boundingBox())!, available = (await viewport.boundingBox())!

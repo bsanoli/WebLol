@@ -69,7 +69,7 @@ export function mountMapDrawing({ map, read, write, getTool, canEdit, point, sca
       const angle = Math.atan2(y - by, x - bx), tip = Math.max(9 * dpr, thickness * 3.4)
       // End the round stroke inside the wider part of the arrowhead.
       const inset = tip * .72
-      const tail = freehandArrow && drawHead ? pointBeforeEnd(line.pts, inset / unit) : undefined
+      const tail = drawHead ? pointBeforeEnd(line.pts, inset / unit) : undefined
       if (!tail || tail.index >= 0) {
         g.beginPath()
         g.moveTo(line.pts[0][0] * unit, line.pts[0][1] * unit)

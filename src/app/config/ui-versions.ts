@@ -8,6 +8,16 @@ export interface UiVersion {
 
 export const UI_VERSIONS: UiVersion[] = [
   {
+    version: "1.48",
+    date: "2026-11-18",
+    changes: ["A linha da seta reta termina dentro da ponta, sem ultrapassá-la."],
+  },
+  {
+    version: "1.47",
+    date: "2026-11-18",
+    changes: ["Ícones próprios nas ferramentas do mapa e lista de composições com retratos dos campeões."],
+  },
+  {
     version: "1.46",
     date: "2026-11-18",
     changes: ["Camadas e Composições aparecem primeiro no painel do mapa."],

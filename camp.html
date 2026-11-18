@@ -8,12 +8,12 @@
 <link rel="icon" href="./assets/brand/favicon.ico" sizes="any">
 <link rel="icon" href="./assets/brand/favicon.svg?v=f454a496" type="image/svg+xml">
 <link rel="stylesheet" href="./assets/base.css?v=05357973">
-<link rel="stylesheet" href="./assets/team.css?v=b41ad23b">
+<link rel="stylesheet" href="./assets/team.css?v=cb21a2af">
 <link rel="stylesheet" href="./assets/compositions.css?v=e452b11c">
 <link rel="stylesheet" href="./assets/motion.css?v=0e5e7875">
 <link rel="stylesheet" href="./assets/draft-layout.css?v=f8250db4">
 <link rel="stylesheet" href="./assets/team-controls.css?v=3d209602">
-  <script type="module" crossorigin src="./assets/camp-jAoWUIgc.js?v=94e113c7"></script>
+  <script type="module" crossorigin src="./assets/camp-BIcdDcic.js?v=f05fc179"></script>
   <link rel="modulepreload" crossorigin href="./assets/icon-BHrXOZ-G.js?v=6ddcc16b">
   <link rel="modulepreload" crossorigin href="./assets/select-DPLKjgVg.js?v=3d636968">
   <link rel="modulepreload" crossorigin href="./assets/dropdown-menu-DItqVUjm.js?v=2f123a3b">
@@ -243,10 +243,11 @@
     </div>
    </section>
    <section class="wl-panel box map-card" role="tabpanel" id="panel-map-comps" aria-labelledby="tab-map-comps" data-map-tab="map-comps" tabindex="0" hidden>
-     <div class="map-sides">
-      <label id="cb-label" for="cb-trigger" class="map-blue">Azul</label><select id="cb" aria-labelledby="cb-label"></select>
-      <label id="cr-label" for="cr-trigger" class="map-red">Vermelho</label><select id="cr" aria-labelledby="cr-label"></select>
-     </div>
+    <div class="map-composition-sides" role="group" aria-label="Lado da composição">
+     <button type="button" data-slot="button" data-variant="ghost" data-size="sm" data-composition-side="b" aria-pressed="true" aria-controls="map-composition-list">Azul</button>
+     <button type="button" data-slot="button" data-variant="ghost" data-size="sm" data-composition-side="r" aria-pressed="false" aria-controls="map-composition-list">Vermelho</button>
+    </div>
+    <div id="map-composition-list" class="map-composition-list" role="group" aria-label="Composições para o lado Azul"></div>
    </section>
    <section class="wl-panel box map-card" role="tabpanel" id="panel-map-sequence" aria-labelledby="tab-map-sequence" data-map-tab="map-sequence" tabindex="0">
     <div class="map-actions"><button data-slot="button" data-variant="default" id="sadd"><svg class="icon" aria-hidden="true" focusable="false"><use href="assets/icons.svg#plus"></use></svg> Novo passo</button><button data-slot="button" data-variant="ghost" id="sedit" class="edt" aria-pressed="false" title="Liga/desliga a edição do passo selecionado"><svg class="icon" aria-hidden="true" focusable="false"><use href="assets/icons.svg#edit"></use></svg> Modo edição</button></div>
