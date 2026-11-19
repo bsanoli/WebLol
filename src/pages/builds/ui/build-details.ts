@@ -85,6 +85,25 @@ function spellOption(entry: Frequency<string>): Option {
   };
 }
 
+type Loadout = { spells?: string[]; keystone?: number; secondaryTree?: number }
+
+/** Feitiços, runa principal e árvore secundária de um jogador numa partida. */
+export function playerLoadout({ spells = [], keystone, secondaryTree }: Loadout) {
+  const usage = "nesta partida";
+  const spellIcons = spells.map(name => {
+    const key = spellKeys.get(name) ?? lolKey(name);
+    return buildIcon("spell", key, LOL_DATA.spellDetails[key]?.name ?? key, usage);
+  }).join("");
+  const rune = (id: number | undefined, label: string) => id
+    ? runeIcon({ value: id, count: 1, percent: 100 }, 1).replace("1 de 1 · 100%", `${label} ${usage}`) : "";
+  const runes = rune(keystone, "runa principal") + rune(secondaryTree, "árvore secundária");
+  if (!spellIcons && !runes) return "";
+  return `<span class="build-timeline-loadout">
+    ${spellIcons ? `<span class="build-timeline-loadout-group" role="group" aria-label="Feitiços">${spellIcons}</span>` : ""}
+    ${runes ? `<span class="build-timeline-loadout-group" role="group" aria-label="Runas">${runes}</span>` : ""}
+  </span>`;
+}
+
 export function buildMatchesQuery(champion: Champion, lane: string, query: string) {
   const term = query.normalize("NFD").replace(/\p{M}/gu, "").toLowerCase();
   const matches = (value: string) => value.normalize("NFD").replace(/\p{M}/gu, "").toLowerCase().includes(term);
