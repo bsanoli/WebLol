@@ -319,7 +319,12 @@ $("#steps").onclick=async e=>{const d=e.target.closest("[data-sdel]");const p=pl
 function goStep(i){const p=play();if(i<0||i>=p.steps.length)return;M.sel=i;wardLayer.clearSelection();drawing.reset();renderPlays(true);return animateTo(snapshotFrame(p.steps[i]))}
 $("#sprev").onclick=()=>!M.playing&&!M.transition&&goStep(M.sel-1);
 $("#snext").onclick=()=>!M.playing&&!M.transition&&goStep(M.sel+1);
-$("#spd").oninput=()=>$("#spdv").textContent=$("#spd").value+"s";
+const stepSpeed = $("#spd");
+stepSpeed.oninput = () => {
+  const seconds = Number(stepSpeed.value).toLocaleString("pt-BR");
+  $("#spdv").textContent = `${seconds} s`;
+  stepSpeed.setAttribute("aria-valuetext", `${seconds} ${stepSpeed.valueAsNumber === 1 ? "segundo" : "segundos"}`);
+};
 function animateTo(target) {
   const p = play(), from = snapshotFrame(p.live);
   const duration = Number($("#spd").value) * 1000;

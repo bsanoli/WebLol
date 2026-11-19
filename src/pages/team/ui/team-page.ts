@@ -129,8 +129,8 @@ function renderList(){
   clearTeamControls(list);
   list.innerHTML=matches
    .map(c=>{const firsts=compositionPreview(c);
-     return `<div class="composition-item"><button class="ci${c.id===S.cur?" on":""}" aria-pressed="${c.id===S.cur}" data-id="${c.id}"><b>${sideDot(c)}${esc(c.name)}</b>
-      <span class="mini">${firsts.map(img).join("")||'<small style="color:var(--mut)">vazia</small>'}</span></button><span class="composition-menu" data-team-control></span></div>`}).join("")||'<p class="composition-empty" role="status">Nenhuma composição encontrada.</p>';
+     return `<div class="composition-item"><button class="ci${c.id===S.cur?" on":""}" aria-pressed="${c.id===S.cur}" data-id="${c.id}" title="${esc(c.name)}"><b>${sideDot(c)}${esc(c.name)}</b>
+      <span class="mini">${firsts.map(img).join("")||'<small style="color:var(--mut)">vazia</small>'}</span></button><span class="composition-menu" data-team-control></span></div>`}).join("")||'<p class="composition-empty" role="status">Nenhuma composição encontrada. Tente outro nome ou campeão.</p>';
   list.querySelectorAll(".composition-menu").forEach((host,index)=>{
     const {id,name}=matches[index];
     mountCompositionMenu(host,name,()=>{
@@ -142,7 +142,12 @@ function renderList(){
   });
 }
 function selectComp(id){S.cur=id;save(false);renderAll();publishTeamRoute("comps")}
-$("#clist").onclick=e=>{const it=e.target.closest(".ci");if(it)selectComp(it.dataset.id)};
+$("#clist").onclick = event => {
+  const item = event.target.closest(".ci");
+  if (!item || item.dataset.id === S.cur) return;
+  selectComp(item.dataset.id);
+  $("#clist .ci[aria-pressed=true]")?.focus({ preventScroll: true });
+};
 $("#draft-comp").onchange=e=>selectComp(e.target.value);
 $("#csearch").oninput=renderList;
 $("#new").onclick=()=>{const c=blank("Comp "+(S.comps.length+1));S.comps.unshift(c);S.cur=c.id;active="top";save();renderAll();publishTeamRoute("comps");setTimeout(()=>{$("#cname").focus();$("#cname").select()},0)};
@@ -228,7 +233,7 @@ function renderEditor(){
   <button class="ln lane-label" data-draft-target="${l.k}" aria-pressed="${active===l.k}">${laneIconMarkup(l.k)}${l.n}</button>
   <div class="chips" data-champion-group="${l.k}">${c.lanes[l.k].map((n,i)=>optionHTML(n,l.k,i)).join("")||'<span class="empty">Adicionar campeão</span>'}</div>
 <span class="lane-note" data-team-control data-note-lane="${l.k}"></span></div>`).join("")}
-  <p class="help">${dv?"Clique no retrato para torná-lo principal, arraste para reordenar e use o botão direito para excluir.":"Clique no retrato para priorizar. Arraste para reordenar ou use o menu ⋯ de cada campeão."}</p></div>`);
+  <p class="help">${dv?"Selecione o retrato para torná-lo principal. Para remover, abra o menu do retrato com o botão direito ou Shift+F10.":"Selecione o retrato para priorizar. Arraste ou use o menu ⋯ para reordenar."}</p></div>`);
   editor.querySelectorAll(".option-menu").forEach(host=>{
     const {n,from}=host.closest(".chip").dataset;
     mountChampionMenu(host,n,Number(host.dataset.optionIndex),c.lanes[from].length,
@@ -411,7 +416,13 @@ function placePicker(){
 window.matchMedia("(min-width: 1100px)").addEventListener("change",()=>placePicker());
 $("#editor").addEventListener("click",e=>{
   const tab=e.target.closest("[data-comp-tab]");
-  if(tab){if(tab.dataset.compTab!==S.cur)selectComp(tab.dataset.compTab);return}
+  if (tab) {
+    if (tab.dataset.compTab !== S.cur) {
+      selectComp(tab.dataset.compTab);
+      $('#editor [data-comp-tab][aria-pressed=true]')?.focus({ preventScroll: true });
+    }
+    return;
+  }
   if(e.target.closest("[data-comp-new]"))$("#new").click();
 });
 window.matchMedia("(min-width: 1100px)").addEventListener("change",e=>{if(e.matches)closePicker?.()});

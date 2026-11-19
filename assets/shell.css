@@ -22,7 +22,9 @@ input{width:100%}
 .ok{color:var(--green)}.bad{color:var(--red)}
 #mbox h3{margin:0}
 #mbox p{color:var(--mut);margin:var(--wl-space-2) 0 var(--wl-space-2);font-size:13px;line-height:1.5}
-#mbox .err{color:var(--red);font-size:13px;min-height:var(--wl-space-4);line-height:var(--wl-space-4);margin-top:var(--wl-space-2)}
+#mbox .err, #mbox .login-field-error{color:var(--red)}
+#mbox .err, #mbox .login-status, #mbox .login-field-error{display:block;font-size:13px;line-height:1.5;margin-top:var(--wl-space-2)}
+#mbox .err:empty, #mbox .login-status:empty { position:absolute; width:1px; height:1px; overflow:hidden; clip-path:inset(50%); margin:0; }
 #mbox .row{display:flex;gap:var(--wl-space-2);margin-top:var(--wl-space-4);justify-content:flex-end;flex-wrap:wrap}
 .rid{display:flex;align-items:center;gap:6px}.rid span{font-size:22px;font-weight:800;color:var(--gold)}.rid #rtag{width:110px;flex:none;text-transform:uppercase}
 .fpath{background:var(--bg);border:1px solid var(--gold);border-radius:var(--wl-control-radius);padding:10px 12px;font-size:15px;margin:4px 0 10px}
@@ -134,6 +136,13 @@ body:has(#header-tools[data-state=open]) #screens::after {
   flex-wrap: wrap;
   gap: var(--wl-space-2);
 }
+.admin-form { display: grid; gap: var(--wl-space-3); max-width: 360px; }
+.admin-form [data-slot=field]:not([hidden]) { display: grid; gap: var(--wl-space-1); }
+.admin-form [data-slot=field][hidden], #admform[hidden] { display: none; }
+.admin-form label { color: var(--mut); font-size: var(--wl-label-size); }
+.admin-form [data-slot=button] { justify-self: start; }
+.admin-form [role=alert]:empty { position: absolute; }
+#admform { margin-top: var(--wl-space-4); }
 .shell-login-dialog {
   max-width: min(500px, calc(100vw - var(--wl-space-8)));
   max-height: calc(100dvh - var(--wl-space-8));
@@ -146,8 +155,10 @@ body:has(#header-tools[data-state=open]) #screens::after {
 #mbox label { font-size: var(--wl-label-size); }
 .eyebrow { display: block; color: var(--gold); font-weight: 600; font-size: 12px; margin-bottom: 8px; }
 .rid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(94px, .43fr); gap: var(--wl-space-3); align-items: end; }
+#mbox .rid-fields { align-items: start; }
 #mbox .rid label { margin-block-start: var(--wl-space-2); }
 .rid #rtag { width: 100%; }
+#mbox .login-guest-note { margin-bottom: 0; text-align: end; }
 @media (max-width: 759px) {
   #top { --wl-button-height: var(--wl-space-12); }
   .palette-option { min-height: var(--wl-button-height); }

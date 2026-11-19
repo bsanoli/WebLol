@@ -90,7 +90,7 @@ function summary(entries: Entry[]) {
   ].join("");
   if (!stats) return "";
   return `<ul class="build-timeline-stats" aria-label="Minuto médio de compra">${stats}</ul>
-    <p class="build-data-sample">O minuto médio considera as partidas com compra em cada posição. O percentual indica a frequência do item mostrado.</p>`;
+    <p class="build-data-sample">A média e a frequência consideram só as partidas com compra naquela etapa. O percentual se refere ao item exibido.</p>`;
 }
 
 function timeline(player: Player) {

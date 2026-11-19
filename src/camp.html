@@ -38,10 +38,13 @@
  <div id="comps">
   <div class="wl-panel box composition-toolbar">
     <div class="editor-controls">
-      <input data-slot="input" id="cname" aria-label="Nome da composição" placeholder="Nome da composição">
+      <label class="composition-name-field">Nome da composição
+        <input data-slot="input" id="cname">
+      </label>
       <div class="vtog"></div>
     </div>
     <div class="editor-status">
+      <button data-slot="button" data-variant="outline" data-size="sm" id="copy-comp" aria-label="Copiar link da composição"><svg class="icon" aria-hidden="true" focusable="false"><use href="assets/icons.svg#link"></use></svg> Copiar link</button>
       <details class="local-save-actions" id="local-save">
         <summary data-slot="button" data-variant="outline" data-size="sm">
           <span class="saved" id="saved" role="status">Salvamento automático</span>
@@ -52,7 +55,7 @@
           <button data-slot="button" data-variant="outline" data-size="sm" type="button" id="clear-local">Restaurar dados locais…</button>
         </div>
       </details>
-      <button data-slot="button" data-variant="outline" data-size="sm" id="copy-comp"><svg class="icon" aria-hidden="true" focusable="false"><use href="assets/icons.svg#link"></use></svg> Copiar link da composição</button></div>
+    </div>
   </div>
   <div class="wl-panel box comp-library">
     <h2>Composições salvas</h2>
@@ -101,10 +104,11 @@
        <button type="button" data-slot="button" data-variant="ghost" data-size="icon-sm" data-vision="r" aria-pressed="false" aria-label="Visão vermelha" data-map-tip="Visão vermelha"><svg class="icon" aria-hidden="true"><use href="assets/icons.svg#ward"></use></svg></button>
       </div>
      </div>
-     <div class="map-history-toolbar" role="group" aria-label="Histórico e limpeza">
+     <div class="map-history-toolbar map-toolbar-group" role="group" aria-label="Histórico de edição">
      <button data-slot="button" data-variant="outline" id="undo" aria-label="Desfazer" data-map-tip="Desfazer (Ctrl+Z)"><svg class="icon" aria-hidden="true" focusable="false"><use href="assets/icons.svg#undo"></use></svg></button>
      <button data-slot="button" data-variant="outline" id="redo" aria-label="Refazer" data-map-tip="Refazer (Ctrl+Y)"><svg class="icon" aria-hidden="true" focusable="false"><use href="assets/icons.svg#redo"></use></svg></button>
-      <div class="map-cleanup-tools" role="group" aria-label="Limpeza do mapa">
+     </div>
+      <div class="map-cleanup-tools map-toolbar-group" role="group" aria-label="Limpar anotações">
        <button type="button" data-slot="button" data-variant="ghost" data-size="icon-sm" id="clr" aria-label="Limpar setas" data-map-tip="Limpar setas" disabled>
         <span class="map-cleanup-glyph" aria-hidden="true"><svg class="icon" aria-hidden="true"><use href="assets/icons.svg#map-tool-arrow"></use></svg><span class="map-cleanup-badge">×</span></span>
        </button>
@@ -119,6 +123,7 @@
        </button>
        <button type="button" data-slot="button" data-variant="destructive" data-size="icon-sm" id="map-clear-all" aria-label="Limpar tudo" data-map-tip="Limpar todas as anotações" disabled><svg class="icon" aria-hidden="true"><use href="assets/icons.svg#trash"></use></svg></button>
       </div>
+      <div class="map-board-tools map-toolbar-group" role="group" aria-label="Posições e estado do mapa">
       <details class="map-disclosure" data-map-menu>
        <summary data-slot="button" data-variant="ghost" aria-label="Posições prontas" data-map-tip="Posições prontas"><svg class="icon" aria-hidden="true"><use href="assets/icons.svg#map"></use></svg><svg class="icon map-caret" aria-hidden="true"><use href="assets/icons.svg#descending"></use></svg></summary>
        <div class="map-disclosure-panel" role="group" aria-label="Posições de campeões">
@@ -128,7 +133,7 @@
       <button type="button" data-slot="button" data-variant="outline" id="map-reset" title="Restaura posições e torres e limpa as anotações" disabled><svg class="icon" aria-hidden="true"><use href="assets/icons.svg#reset"></use></svg> Resetar mapa</button>
      </div>
     </div>
-   <div class="map-stage-bar" role="group" aria-label="Cursor, arquivos e painel">
+   <div class="map-stage-bar" role="group" aria-label="Cursor, arquivos e ajuda">
     <details class="map-disclosure" id="map-cursor-menu" data-map-menu>
      <summary data-slot="button" data-variant="outline" aria-label="Configurar cursor" data-map-tip="Configurar cursor"><svg class="icon" aria-hidden="true"><use href="assets/icons.svg#map-tool-move"></use></svg><svg class="icon map-caret" aria-hidden="true"><use href="assets/icons.svg#descending"></use></svg></summary>
      <div class="map-disclosure-panel">
@@ -146,11 +151,13 @@
     <details class="map-disclosure map-help" data-map-menu>
     <summary data-slot="button" data-variant="outline">Ajuda</summary>
     <div class="map-disclosure-panel">
+    <strong>Montar uma jogada</strong>
     <ol>
      <li>Use <b>Mover</b> para ajustar campeões, wards e waves. Para desenhar uma seta, arraste ou clique no início e no fim.</li>
      <li>Clique em <b>Novo passo</b> para gravar o mapa. Repita para cada momento da jogada.</li>
      <li>Clique em <b>Reproduzir</b> para ver a sequência.</li>
     </ol>
+    <strong>Navegação e atalhos</strong>
     <p>Role a roda sobre o mapa para ajustar o zoom. Segure <b>Espaço</b> e arraste para navegar. Com <b>Alcance das torres</b> ligado, use <b>Mover</b> para alternar o estado de uma torre.</p>
     <p>Com o mapa em foco, use <kbd>V</kbd> para Mover, <kbd>H</kbd> para Mão, <kbd>Shift+L</kbd> para Seta, <kbd>Shift+P</kbd> para Traço livre e <kbd>B</kbd> ou <kbd>E</kbd> para a Borracha. A Borracha apaga traços, wards e waves.</p>
     <p>Clique com o botão direito em uma área vazia para acessar ferramentas e histórico. Com o mapa em foco, use <kbd>Shift+F10</kbd> para abrir o mesmo menu.</p>
@@ -275,7 +282,7 @@
     <div class="map-actions"><button data-slot="button" data-variant="default" id="sadd"><svg class="icon" aria-hidden="true" focusable="false"><use href="assets/icons.svg#plus"></use></svg> Novo passo</button><button data-slot="button" data-variant="ghost" id="sedit" class="edt" aria-pressed="false" title="Liga/desliga a edição do passo selecionado"><svg class="icon" aria-hidden="true" focusable="false"><use href="assets/icons.svg#edit"></use></svg> Modo edição</button></div>
     <div class="map-group">
      <div class="map-playback"><button data-slot="button" data-variant="outline" data-size="icon" id="sprev" aria-label="Passo anterior"><svg class="icon" aria-hidden="true" focusable="false"><use href="assets/icons.svg#previous"></use></svg></button><button data-slot="button" data-variant="outline" id="splay"><svg class="icon" aria-hidden="true" focusable="false"><use href="assets/icons.svg#play"></use></svg> Reproduzir</button><button data-slot="button" data-variant="outline" data-size="icon" id="snext" aria-label="Próximo passo"><svg class="icon" aria-hidden="true" focusable="false"><use href="assets/icons.svg#next"></use></svg></button></div>
-     <label class="map-speed" for="spd">Velocidade <input type="range" id="spd" min="0.4" max="3" step="0.1" value="1.2"> <span id="spdv">1.2s</span></label>
+     <label class="map-speed" for="spd">Tempo por passo <input type="range" id="spd" min="0.4" max="3" step="0.1" value="1.2" aria-valuetext="1,2 segundos"> <span id="spdv" aria-hidden="true">1,2 s</span></label>
     </div>
     <div id="sstat" class="sstat" role="status"></div>
     <div id="map-steps-slot"><ol id="steps"></ol></div>
@@ -290,7 +297,7 @@
 </section>
 
 <section id="v-know" class="view">
- <div class="page-head team-page-heading"><div><h1>Conhecimento</h1><p>Consulte tempos de objetivos e princípios de controle de wave.</p></div><div id="team-files-know"></div></div>
+ <div class="page-head team-page-heading"><h1>Conhecimento</h1><div id="team-files-know"></div></div>
  <div id="know"></div>
 </section>
 

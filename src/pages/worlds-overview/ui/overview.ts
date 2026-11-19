@@ -53,13 +53,13 @@ function overview(){
     return `<article class="wl-panel lane-card" data-go="${id}">
       <h3 class="wl-card-title" id="lane-title-${id}"><span class="lane-label">${laneIconMarkup(lane)}${lane}</span></h3>
       <table data-slot="table" aria-labelledby="lane-title-${id}">
-        <thead><tr><th scope="col">Campeão</th><th scope="col" data-tip="Jogos nesta lane">Jogos</th><th scope="col" data-tip="Taxa de vitória do campeão em todas as posições">Vitórias</th></tr></thead>
+        <thead><tr><th scope="col">Campeão</th><th scope="col" data-tip="Jogos nesta lane">Jogos</th><th scope="col" data-tip="Taxa de vitória do campeão em todas as posições">Taxa de vitória</th></tr></thead>
         <tbody>${rows}</tbody>
       </table>
       <a class="lane-card-link" href="${href}" aria-label="Ver todos os campeões de ${lane}">Ver todos os campeões ${iconMarkup("next")}</a>
     </article>`;
   }).join("");
-  return `<div id="analytics-root"></div><section class="lane-overview"><h2>Explore por posição</h2><p class="hint">Mais escolhidos em cada posição. A taxa de vitória considera todos os jogos do campeão.</p><div class="lane-grid">${lanes}</div></section>`;
+  return `<div id="analytics-root"></div><section class="lane-overview"><h2>Mais escolhidos por posição</h2><p class="hint">A taxa de vitória considera todos os jogos do campeão.</p><div class="lane-grid">${lanes}</div></section>`;
 }
 
 function wireLaneOverview(view, go) {

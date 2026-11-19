@@ -67,7 +67,13 @@ function modal(html) {
   const box = $("#mbox") || Object.assign(document.createElement("div"), { id: "mbox" });
   box.innerHTML = html;
   const error = box.querySelector(".err");
-  if(error){error.dataset.slot="alert";error.setAttribute("role","alert")}
+  if (error) {
+    error.setAttribute("role", "alert");
+    const status = document.createElement("div");
+    status.className = "login-status";
+    status.setAttribute("role", "status");
+    error.after(status);
+  }
   box.querySelectorAll("label[for]").forEach(label=>{
     const input=label.nextElementSibling;
     if(input?.tagName!=="INPUT")return;
@@ -86,21 +92,49 @@ function modal(html) {
     initialFocus,
   });
 }
-const merr=m=>{const e=$("#mbox .err");if(e)e.textContent=m};
+function setLoginFeedback(message, pending = false) {
+  const error = $("#mbox .err"), status = $("#mbox .login-status");
+  if (error) error.textContent = pending ? "" : message;
+  if (status) status.textContent = pending ? message : "";
+}
+const merr = message => setLoginFeedback(message);
+const mstatus = message => setLoginFeedback(message, true);
+function showLoginFieldError(input, message) {
+  merr("");
+  const field = input.parentElement;
+  let error = field.querySelector(".login-field-error");
+  if (!error) {
+    error = document.createElement("span");
+    error.id = `${input.id}-error`;
+    error.className = "login-field-error";
+    error.setAttribute("role", "alert");
+    field.append(error);
+    input.addEventListener("input", () => {
+      error.remove();
+      input.removeAttribute("aria-invalid");
+      input.removeAttribute("aria-errormessage");
+    }, { once: true });
+  }
+  error.textContent = message;
+  input.setAttribute("aria-invalid", "true");
+  input.setAttribute("aria-errormessage", error.id);
+  input.focus();
+}
 const onEnter=go=>$("#mbox").querySelectorAll("input").forEach(i=>i.addEventListener("keydown",e=>{if(e.key==="Enter"){e.preventDefault();go()}}));
 let pendingId=null;
 function stepId(){
-  modal(`<span class="eyebrow">Entrar</span><h3>Identifique-se com seu Riot ID</h3><p>Use o nome e a tag do League of Legends. No próximo passo você entra com a sua senha, ou cria uma no primeiro acesso.</p>
+  modal(`<h3>Entre com seu Riot ID</h3><p>Use o nome e a tag do League of Legends. Você cria uma senha no primeiro acesso.</p>
 
-   <div class="rid"><div><label for="rname">Nome no LoL</label><input data-slot="input" id="rname" placeholder="Nome (ex: brunoltz)" maxlength="16" autocomplete="username" spellcheck="false"></div><div><label for="rtag">Tag depois do #</label><input data-slot="input" id="rtag" placeholder="TAG" maxlength="5" autocomplete="off" spellcheck="false"></div></div>
+   <div class="rid rid-fields"><div><label for="rname">Nome no LoL</label><input data-slot="input" id="rname" placeholder="Ex.: brunoltz" maxlength="16" autocomplete="username" spellcheck="false"></div><div><label for="rtag">Tag depois do #</label><input data-slot="input" id="rtag" placeholder="Ex.: LTZ" maxlength="5" autocomplete="off" spellcheck="false"></div></div>
    <div class="err"></div>
-   <div class="row"><button data-slot="button" data-variant="outline" id="guest" title="As comps e alterações não são salvas">Entrar sem usuário</button><button data-slot="button" data-variant="default" id="ok">Continuar</button></div>`);
+   <div class="row"><button data-slot="button" data-variant="outline" id="guest" aria-describedby="guest-note">Entrar sem usuário</button><button data-slot="button" data-variant="default" id="ok">Continuar</button></div>
+   <p id="guest-note" class="login-guest-note">As alterações feitas sem usuário somem ao recarregar.</p>`);
   $("#guest").onclick=useGuest;
   const nm=$("#rname"),tg=$("#rtag");
   if(pendingId){const[a,b]=dispId(pendingId).split("#");nm.value=a;tg.value=b||""}
   const go=()=>{const n=nm.value.trim(),tag=tg.value.replace(/[#\s]/g,"").toUpperCase();
-    if(n.length<3)return merr("Digite o nome (mínimo 3 letras)."),nm.focus();
-    if(!/^[A-Za-z0-9]{2,5}$/.test(tag))return merr("Digite a TAG depois do # (2 a 5 letras ou números)."),tg.focus();
+    if(n.length<3)return showLoginFieldError(nm,"Digite pelo menos 3 caracteres.");
+    if(!/^[A-Za-z0-9]{2,5}$/.test(tag))return showLoginFieldError(tg,"Digite 2 a 5 letras ou números.");
     pendingId=n+"#"+tag;afterId()};
   // se a pessoa digitar ou colar "nome#TAG" no primeiro campo, separa sozinho
   nm.addEventListener("input",()=>{if(nm.value.includes("#")){const[a,...r]=nm.value.split("#");nm.value=a.trim();tg.value=(r.join("")+tg.value).replace(/\s/g,"").slice(0,5);tg.focus()}});
@@ -110,7 +144,7 @@ function stepId(){
   $("#ok").onclick=go;
 }
 async function afterId(){
-  merr("Conectando ao banco do time...");
+  mstatus("Conectando ao banco do time…");
   if(!ONLINE)return merr("O banco online ainda não foi configurado neste app.");
   try{await fb()}catch(e){return merr("Não consegui conectar ao banco do time. Verifique a internet.")}
   if(isAdminId(pendingId)){
@@ -134,8 +168,8 @@ function stepPw(exists){
    <div class="row"><button data-slot="button" data-variant="outline" id="back">Voltar</button><button data-slot="button" data-variant="default" id="ok">Criar e entrar</button></div>`);
   $("#back").onclick=stepId;
   const go=async()=>{const pw=$("#pw").value,{auth,au}=FB,email=playerEmail(pendingId);
-    if(!exists){if(pw.length<6)return merr("Use pelo menos 6 caracteres.");if(pw!==$("#pw2").value)return merr("As senhas não são iguais.")}
-    $("#ok").disabled=true;merr(exists?"Entrando...":"Criando a sua conta...");
+    if(!exists){if(pw.length<6)return showLoginFieldError($("#pw"),"Use pelo menos 6 caracteres.");if(pw!==$("#pw2").value)return showLoginFieldError($("#pw2"),"Repita a mesma senha.")}
+    $("#ok").disabled=true;mstatus(exists?"Entrando…":"Criando a conta…");
     try{
       if(exists)await au.signInWithEmailAndPassword(auth,email,pw);
       else try{await au.createUserWithEmailAndPassword(auth,email,pw)}catch(e){if(!/email-already-in-use/.test(e.code||e.message))throw e;await au.signInWithEmailAndPassword(auth,email,pw)}
@@ -147,9 +181,9 @@ function stepPw(exists){
 }
 function stepAdminPw(){
   modal(`<h3>Login do admin</h3><p>Este Riot ID é administrador. Digite a senha de admin.</p>
-   <label for="pw">Senha</label><input data-slot="input" type="password" id="pw"><div id="fbw" style="display:none"><label for="fpw">Senha do Firebase (do e-mail ${esc(adminEmail(pendingId))})</label><input data-slot="input" type="password" id="fpw"></div><div class="err"></div>
+   <label for="pw">Senha</label><input data-slot="input" type="password" id="pw" autocomplete="current-password"><div id="fbw" style="display:none"><label for="fpw">Senha do Firebase (${esc(adminEmail(pendingId))})</label><input data-slot="input" type="password" id="fpw" autocomplete="current-password"></div><div class="err"></div>
    <div class="row"><button data-slot="button" data-variant="outline" id="back">Voltar</button><button data-slot="button" data-variant="default" id="ok">Entrar</button></div>`);
-  const go=async()=>{$("#ok").disabled=true;merr("Verificando...");
+  const go=async()=>{$("#ok").disabled=true;mstatus("Verificando…");
     try{const pw=$("#pw").value;KEYS=await adminUnlock(pw,$("#fpw").value);if(slotOf(ADMIN,pendingId).temp)return stepNewPw(pw);finishLogin(true)}
     catch(e){$("#ok").disabled=false;if(e.message==="fb"){$("#fbw").style.display="";merr($("#fpw").value?"Senha do Firebase incorreta.":"A senha do Firebase é diferente da senha de admin. Digite a do Firebase também.");$("#fpw").focus()}else merr("Senha incorreta.")}};
   $("#ok").onclick=go;onEnter(go);$("#back").onclick=stepId;
@@ -157,10 +191,10 @@ function stepAdminPw(){
 // primeiro acesso de um admin novo: troca a senha provisória pela senha dele
 function stepNewPw(tmp){
   modal(`<h3>Crie a sua senha de admin</h3><p>Você entrou com a senha provisória. Agora crie a sua senha. Só você vai saber, e ela também vira a sua senha do banco do time.</p>
-   <label for="np">Nova senha (mínimo 8 caracteres)</label><input data-slot="input" type="password" id="np"><label for="np2">Repita a senha</label><input data-slot="input" type="password" id="np2"><div class="err"></div>
+   <label for="np">Nova senha (mínimo 8 caracteres)</label><input data-slot="input" type="password" id="np" autocomplete="new-password"><label for="np2">Repita a senha</label><input data-slot="input" type="password" id="np2" autocomplete="new-password"><div class="err"></div>
    <div class="row"><button data-slot="button" data-variant="default" id="ok">Salvar senha</button></div>`);
-  const go=async()=>{const a=$("#np").value,b=$("#np2").value;if(a.length<8)return merr("Use pelo menos 8 caracteres.");if(a!==b)return merr("As senhas não são iguais.");if(a===tmp)return merr("Escolha uma senha diferente da provisória.");
-    $("#ok").disabled=true;merr("Salvando...");
+  const go=async()=>{const a=$("#np").value,b=$("#np2").value;if(a.length<8)return showLoginFieldError($("#np"),"Use pelo menos 8 caracteres.");if(a!==b)return showLoginFieldError($("#np2"),"Repita a mesma senha.");if(a===tmp)return showLoginFieldError($("#np"),"Escolha uma senha diferente da provisória.");
+    $("#ok").disabled=true;mstatus("Salvando…");
     try{await setSlot(meId(),await makeSlot(await slotRaw(ADMIN,meId(),tmp),a,false));await FB.au.updatePassword(FB.auth.currentUser,a);finishLogin(true)}
     catch(e){merr("Erro: "+e.message);$("#ok").disabled=false}};
   $("#ok").onclick=go;onEnter(go);
@@ -180,7 +214,7 @@ async function finishLogin(admin){
 }
 // depois do login: entra no time, ou mostra a tela de time
 // Área do time sem usuário: dá para montar comps, mas nada é salvo (apaga ao recarregar)
-// botão "Cadastrar" do topo: abre o login na Área do time
+// O botão "Entrar ou criar conta" abre o login na Área do time.
 window.startSignup=()=>{
   if(preview())return toast("Você está vendo como quem não tem conta. Volte para a visão de admin no menu da conta.",5000);
   localStorage.removeItem(GKEY);writeRoute(routeRoots.camp);openRoute();stepId();
@@ -188,7 +222,7 @@ window.startSignup=()=>{
 function useGuest(){
   lsSet(GKEY,true);for(const k of[KEY,BKEY,SKEY])localStorage.removeItem(k);lsSet(TKEY,"__guest__");
   closeModal();reloadCamp();updateStatus();
-  toast("Sem usuário: as comps e alterações feitas não são salvas.",5000);
+  toast("As alterações feitas sem usuário somem ao recarregar.",5000);
 }
 // login e escolha de time só aparecem na Área do time
 function askOnCamp(){
@@ -212,7 +246,7 @@ async function stepTeam(){
     modal(`<span class="eyebrow">${esc(u.id)}</span><h3>Aguardando o capitão</h3><p>Você pediu para entrar no time <b>${esc(MEMB.teamName||MEMB.team)}</b>. Assim que o capitão aceitar, as comps do time aparecem aqui.</p><div class="err"></div>
      <div class="row"><button data-slot="button" data-variant="outline" id="cancel">Cancelar pedido</button><button data-slot="button" data-variant="outline" id="solo">Usar sem time</button><button data-slot="button" data-variant="default" id="check">Verificar de novo</button></div>`);
     $("#cancel").onclick=async()=>{try{await dbDel("membros",meKey());MEMB=null;stepTeam()}catch(e){merr("Erro: "+e.message)}};
-    $("#check").onclick=async()=>{merr("Verificando...");await enterTeam();if(!TEAM)merr("O capitão ainda não aceitou.")};
+    $("#check").onclick=async()=>{mstatus("Verificando…");await enterTeam();if(!TEAM)mstatus("O pedido continua aguardando a aprovação do capitão.")};
     $("#solo").onclick=useSolo;
     return;
   }
@@ -225,7 +259,7 @@ async function stepTeam(){
   $("#solo").onclick=useSolo;
   $("#create").onclick=async()=>{const name=$("#tname").value.trim();if(name.length<2)return merr("Digite o nome do time.");
     if(times.some(t=>t.name.toLowerCase()===name.toLowerCase()))return merr("Já existe um time com esse nome.");
-    $("#create").disabled=true;merr("Criando o time...");
+    $("#create").disabled=true;mstatus("Criando o time…");
     const id=name.toLowerCase().normalize("NFD").replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"").slice(0,20)+"-"+Math.random().toString(36).slice(2,6);
     try{await dbSet("times",id,{name,captain:meKey(),captainId:u.id,created:Date.now()});
       await dbSet("membros",meKey(),{team:id,status:"ativo",riotId:u.id,at:Date.now()});
@@ -293,7 +327,7 @@ function decorateManagementTables(region) {
 
 window.renderCaptainPanel=async function renderCaptainPanel(el){
   if(!el)return;
-  if(!captainAccess()){el.innerHTML=`<div class="wl-panel card mut">Entre num time para ver esta aba.</div>`;return}
+  if(!captainAccess()){el.innerHTML=`<div class="wl-panel card">Entre em um time para ver os jogadores e o histórico.</div>`;return}
   const T=TEAM,manage=window.canManageTeam(),locked=!!preview();el.innerHTML=`<p class="mut" role="status">Carregando…</p>`;
   let membros=[],off=OFF;
   let memErr="";
@@ -312,12 +346,13 @@ window.renderCaptainPanel=async function renderCaptainPanel(el){
     return`<details class="cap-ver"><summary><b>v${v}</b>${cur?' <span class="ok">atual</span>':""} <span class="mut">${at?fmtD(at):""}${cur&&off.by?` · por ${esc(off.by)}`:""}${cur&&off.label?` · ${esc(off.label)}`:""} · ${ok} aprovada${ok===1?"":"s"}${no?`, ${no} recusada${no===1?"":"s"}`:""}</span></summary>
      ${ls.length?`<table data-slot="table"><tr><th>De</th><th>O quê</th><th>Status</th></tr>${ls.map(row).join("")}</table>`:'<p class="mut">Sem alterações registradas nesta versão.</p>'}</details>`}).join("");
   const capName=ativos.find(m=>m.id===T.captain)?.riotId||T.captainId||T.captain;
+  const membersUnavailable = '<p data-slot="alert" role="alert" class="bad">Não foi possível carregar os pedidos e jogadores. Reabra Gestão do time para tentar novamente.</p>';
   el.innerHTML=`
    ${locked?`<div class="wl-panel card mut cap-note">Você está vendo como ${manage?"capitão":"membro"} do ${esc(T.name)}. ${manage?"Os botões ficam desativados nesta visão.":""}</div>`:""}
-   ${manage?`<h2>Pedidos para entrar (${pedidos.length})</h2>
-   <div class="wl-panel card">${pedidos.length?`<table data-slot="table"><tr><th>Riot ID</th><th>Pedido em</th><th></th></tr>${pedidos.map(m=>`<tr><td>${esc(m.riotId||m.id)}</td><td>${m.at?fmtD(m.at):""}</td><td class="cap-act"><button data-slot="button" data-variant="default" data-acc="${esc(m.id)}">Aceitar</button> <button data-slot="button" data-variant="destructive" data-den="${esc(m.id)}">Recusar</button></td></tr>`).join("")}</table>`:'<span class="mut">Nenhum pedido pendente.</span>'}</div>`:""}
+   ${memErr ? membersUnavailable : `${manage?`<h2>Pedidos para entrar (${pedidos.length})</h2>
+   <div class="wl-panel card">${pedidos.length?`<table data-slot="table"><tr><th>Riot ID</th><th>Pedido em</th><th></th></tr>${pedidos.map(m=>`<tr><td>${esc(m.riotId||m.id)}</td><td>${m.at?fmtD(m.at):"Não informado"}</td><td class="cap-act"><button data-slot="button" data-variant="default" data-acc="${esc(m.id)}" aria-label="Aceitar pedido de ${esc(m.riotId||m.id)}">Aceitar</button> <button data-slot="button" data-variant="destructive" data-den="${esc(m.id)}" aria-label="Recusar pedido de ${esc(m.riotId||m.id)}">Recusar</button></td></tr>`).join("")}</table>`:'<span class="mut">Nenhum pedido pendente.</span>'}</div>`:""}
    <h2>Jogadores do time (${ativos.length})</h2>
-   <div class="wl-panel card">${memErr?`<p data-slot="alert" role="alert" class="bad">Não consegui ler os jogadores do time agora. Tente de novo mais tarde.</p>`:""}${manage?"":`<p class="mut">Capitão: ${esc(capName)}. Só o capitão aceita pedidos e tira jogadores do time.</p>`}<table data-slot="table"><tr><th>Riot ID</th><th>Papel</th><th class="cap-since">No time desde</th>${manage?"<th></th>":""}</tr>${ativos.map(m=>`<tr><td>${esc(m.riotId||m.id)}</td><td>${m.id===T.captain?"capitão":"membro"}</td><td class="cap-since">${m.at?fmtD(m.at):""}</td>${manage?`<td class="cap-act">${m.id===T.captain?"":`<button data-slot="button" data-variant="destructive" data-rm="${esc(m.id)}">Excluir do time</button>`}</td>`:""}</tr>`).join("")||`<tr><td colspan="${manage?4:3}" class="mut">Nenhum jogador ainda.</td></tr>`}</table></div>
+   <div class="wl-panel card">${manage?"":`<p class="mut">Capitão: ${esc(capName)}. Só o capitão aceita pedidos e tira jogadores do time.</p>`}<table data-slot="table"><tr><th>Riot ID</th><th>Papel</th><th class="cap-since">No time desde</th>${manage?"<th></th>":""}</tr>${ativos.map(m=>`<tr><td>${esc(m.riotId||m.id)}</td><td>${m.id===T.captain?"capitão":"membro"}</td><td class="cap-since">${m.at?fmtD(m.at):"Não informado"}</td>${manage?`<td class="cap-act">${m.id===T.captain?"":`<button data-slot="button" data-variant="destructive" data-rm="${esc(m.id)}">Retirar do time</button>`}</td>`:""}</tr>`).join("")||`<tr><td colspan="${manage?4:3}" class="mut">Nenhum jogador ainda.</td></tr>`}</table></div>`}
    <h2>Histórico das comps</h2>
    <div class="wl-panel card">${off?`<p>Versão oficial atual: <b>v${off.version}</b> <span class="mut">· ${nC} comp${nC===1?"":"s"} · ${nP} jogada${nP===1?"":"s"}${off.at?` · ${fmtD(off.at)}`:""}${off.by?` · por ${esc(off.by)}`:""}</span></p>
     <details class="cap-hist"><summary>Ver o histórico inteiro (${vers.length} ${vers.length===1?"versão":"versões"})</summary>${verHtml}</details>`:'<span class="mut">O time ainda não tem versão oficial.</span>'}</div>`;
@@ -328,7 +363,7 @@ window.renderCaptainPanel=async function renderCaptainPanel(el){
   const who=id=>{const m=membros.find(x=>x.id===id);return m?.riotId||id};
   el.querySelectorAll("[data-acc]").forEach(b=>b.onclick=async()=>{b.disabled=true;try{await dbSet("membros",b.dataset.acc,{status:"ativo",at:Date.now()},true);toast(`${who(b.dataset.acc)} entrou no ${T.name}`)}catch(e){toast("Erro: "+e.message)}again()});
   el.querySelectorAll("[data-den]").forEach(b=>b.onclick=async()=>{if(!await window.confirmAction(`Recusar o pedido de ${who(b.dataset.den)}?`))return;b.disabled=true;try{await dbDel("membros",b.dataset.den);toast("Pedido recusado")}catch(e){toast("Erro: "+e.message)}again()});
-  el.querySelectorAll("[data-rm]").forEach(b=>b.onclick=async()=>{if(!await window.confirmAction(`Excluir ${who(b.dataset.rm)} do ${T.name}? Ele perde o acesso às comps do time.`))return;b.disabled=true;try{await dbDel("membros",b.dataset.rm);toast(`${who(b.dataset.rm)} saiu do time`)}catch(e){toast("Erro: "+e.message)}again()});
+  el.querySelectorAll("[data-rm]").forEach(b=>b.onclick=async()=>{if(!await window.confirmAction(`Retirar ${who(b.dataset.rm)} do ${T.name}? O jogador perde o acesso às composições do time.`))return;b.disabled=true;try{await dbDel("membros",b.dataset.rm);toast(`${who(b.dataset.rm)} saiu do time`)}catch(e){toast("Erro: "+e.message)}again()});
 };
 
 /* ================= aba Administração (admin e capitão) ================= */
@@ -339,9 +374,12 @@ async function renderAdmin(){
   try{await fb()}catch(e){}
   if(u.admin){
     if(!ADMIN){try{await loadAdminKey()}catch(e){}}
-    if(!ADMIN){el.innerHTML=`<div class="wl-panel card admin-status-row"><span>Sem conexão com o banco do time.</span><button data-slot="button" data-variant="outline" id="refresh">Tentar de novo</button></div>`;$("#refresh").onclick=renderAdmin;return}
-    if(!KEYS||!fbIsAdmin()){el.innerHTML=`<div class="wl-panel card"><p>Digite a senha de admin para desbloquear neste aparelho.</p><input data-slot="input" type="password" id="apw" aria-label="Senha de administrador" style="max-width:300px"> <span id="afw" style="display:none"><input data-slot="input" type="password" id="afpw" aria-label="Senha do Firebase" placeholder="Senha do Firebase" style="max-width:220px"></span> <button data-slot="button" data-variant="default" id="aok">Desbloquear</button> <span class="bad" id="aerr"></span></div>`;
-      const go=async()=>{try{KEYS=await adminUnlock($("#apw").value,$("#afpw").value);await enterTeam();renderAdmin()}catch(e){if(e.message==="fb"){$("#afw").style.display="";$("#aerr").textContent="Digite também a senha do Firebase"}else $("#aerr").textContent="Senha incorreta"}};
+    if(!ADMIN){el.innerHTML=`<div class="wl-panel card admin-status-row"><span role="status">Não foi possível conectar ao banco do time.</span><button data-slot="button" data-variant="outline" id="refresh">Tentar novamente</button></div>`;$("#refresh").onclick=renderAdmin;return}
+    if(!KEYS||!fbIsAdmin()){el.innerHTML=`<div class="wl-panel card"><h2>Desbloquear Administração</h2><p>Use sua senha de administrador neste aparelho.</p>
+      <div class="admin-form"><div data-slot="field"><label for="apw">Senha de administrador</label><input data-slot="input" type="password" id="apw" autocomplete="current-password"></div>
+      <div data-slot="field" id="afw" hidden><label for="afpw">Senha do Firebase</label><input data-slot="input" type="password" id="afpw" autocomplete="current-password"></div>
+      <div class="bad" id="aerr" role="alert"></div><button data-slot="button" data-variant="default" id="aok">Desbloquear</button></div></div>`;
+      const go=async()=>{try{KEYS=await adminUnlock($("#apw").value,$("#afpw").value);await enterTeam();renderAdmin()}catch(e){if(e.message==="fb"){$("#afw").hidden=false;$("#aerr").textContent="Digite também a senha do Firebase.";$("#afpw").focus()}else{$("#aerr").textContent="Senha incorreta. Confira e tente novamente.";$("#apw").focus()}}};
       $("#aok").onclick=go;el.querySelectorAll("input").forEach(i=>i.addEventListener("keydown",e=>{if(e.key==="Enter")go()}));return}
   }
   el.innerHTML=`<p class="mut" role="status">Carregando…</p>`;
@@ -389,8 +427,10 @@ async function renderAdmin(){
     ${Object.entries(ADMINS).map(([id,em])=>{const sl=slotOf(ADMIN,id),main=normId(id)===normId(ADMIN.id),me=normId(id)===normId(u.id);
       const st=main?"principal":!sl?'<span class="mut">não liberado</span>':sl.temp?'<span style="color:var(--gold)">aguardando o 1º acesso</span>':'<span class="ok">ativo</span>';
       return`<tr><td>${esc(dispId(id))}</td><td>${em?esc(em):'<span class="bad">falta o e-mail no app</span>'}</td><td>${st}</td><td>${main||me||!em?"":`<button data-slot="button" data-variant="outline" data-adm="${esc(id)}">${sl?"Nova senha provisória":"Liberar admin"}</button>`}${sl&&!main&&!me?` <button data-slot="button" data-variant="destructive" data-rmadm="${esc(id)}">Remover</button>`:""}</td></tr>`}).join("")}</table>
-    <div id="admform" style="display:none;margin-top:10px"><p>Liberar <b id="admwho"></b>. Primeiro cadastre o e-mail dele no Firebase (Authentication › Usuários) com uma senha provisória. Depois digite aqui a mesma senha provisória e passe para ele. No primeiro acesso ele cria a senha dele.</p>
-     <input data-slot="input" type="password" id="admmy" placeholder="Sua senha de admin" style="max-width:220px"> <input data-slot="input" type="password" id="admtmp" placeholder="Senha provisória dele" style="max-width:220px"> <button data-slot="button" data-variant="default" id="admok">Liberar</button> <span class="bad" id="admerr"></span></div></div>
+    <div id="admform" hidden><p>Para liberar <b id="admwho"></b>, cadastre a conta em Authentication › Usuários no Firebase. Informe aqui a mesma senha provisória. A pessoa troca a senha no primeiro acesso.</p>
+     <div class="admin-form"><div data-slot="field"><label for="admmy">Sua senha de administrador</label><input data-slot="input" type="password" id="admmy" autocomplete="current-password"></div>
+     <div data-slot="field"><label for="admtmp">Senha provisória da outra pessoa</label><input data-slot="input" type="password" id="admtmp" autocomplete="new-password"></div>
+     <div class="bad" id="admerr" role="alert"></div><button data-slot="button" data-variant="default" id="admok">Liberar acesso</button></div></div></div>
    <h2>Banco e backup</h2><div class="wl-panel card"><span class="mut">Chave do admin: ${esc(KEYS.fp)}</span>
     <div class="btns"><button data-slot="button" data-variant="outline" id="exp">Baixar backup completo</button><button data-slot="button" data-variant="outline" id="lock">Bloquear admin neste aparelho</button><button data-slot="button" data-variant="outline" id="refresh">Atualizar</button></div>
     <p class="mut">Guarde o backup completo na pasta Admin do OneDrive de tempos em tempos.</p></div>
@@ -413,8 +453,8 @@ async function renderAdmin(){
   el.querySelectorAll("[data-delu]").forEach(b=>b.onclick=async()=>{const k=b.dataset.delu,x=users.get(k);if(!await window.confirmAction(`Excluir o usuário ${x.riotId}? Ele sai do time e o cadastro é apagado.`))return;b.disabled=true;
     try{await dbDel("membros",k).catch(()=>{});await dbDel("contas",k);toast(`${x.riotId} excluído`)}catch(e){toast("Erro: "+e.message)}again()});
   let admId=null;
-  el.querySelectorAll("[data-adm]").forEach(b=>b.onclick=()=>{admId=b.dataset.adm;$("#admwho").textContent=dispId(admId);$("#admform").style.display="";$("#admmy").focus()});
-  $("#admok").onclick=async()=>{const t=$("#admtmp").value;if(t.length<6)return $("#admerr").textContent="A senha provisória precisa de 6 caracteres ou mais";
+  el.querySelectorAll("[data-adm]").forEach(b=>b.onclick=()=>{admId=b.dataset.adm;$("#admwho").textContent=dispId(admId);$("#admform").hidden=false;$("#admmy").focus()});
+  $("#admok").onclick=async()=>{const t=$("#admtmp").value;if(t.length<6){$("#admerr").textContent="Use pelo menos 6 caracteres na senha provisória.";$("#admtmp").focus();return}
     $("#admok").disabled=true;$("#admerr").textContent="";
     try{await setSlot(admId,await makeSlot(await slotRaw(ADMIN,u.id,$("#admmy").value),t,true));toast(`${dispId(admId)} liberado como admin. Passe a senha provisória para ele.`,6000);again()}
     catch(e){$("#admerr").textContent=e.message==="noslot"?"Seu acesso de admin não foi encontrado":/decrypt|operation/i.test(e.message+e.name)?"Sua senha está incorreta":e.message;$("#admok").disabled=false}};

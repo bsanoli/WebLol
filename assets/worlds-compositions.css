@@ -1,6 +1,4 @@
-.comps-intro { margin-bottom: var(--wl-space-4); }
-.comps-intro h2 { margin-bottom: var(--wl-space-1); }
-.comps-intro .hint { margin: 0; }
+.comps-intro { margin: 0 0 var(--wl-space-4); }
 .comp-filters {
   --comp-control-height: var(--wl-button-height-sm);
   display: grid;

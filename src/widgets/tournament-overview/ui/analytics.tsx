@@ -1,6 +1,5 @@
 import { Card } from "@/shared/ui/card"
 import { Empty, EmptyDescription, EmptyHeader } from "@/shared/ui/empty"
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/shared/ui/tooltip"
 import { Button } from "@/shared/ui/button"
 import { ChevronDown, ChevronUp } from "lucide-react"
 import { useEffect, useId, useRef, useState } from "react"
@@ -17,7 +16,7 @@ export interface ChampionSummary {
 const percent = (value: number) => `${Math.round(value * 100)}%`
 
 function MetricCard({ label, value, note, portrait }: {
-  label: string; value: string | number; note: string; portrait?: string
+  label: string; value: string | number; note?: string; portrait?: string
 }) {
   return <div className="metric-card">
     <span>{label}</span>
@@ -25,7 +24,7 @@ function MetricCard({ label, value, note, portrait }: {
       {portrait && <img src={portrait} alt="" width={28} height={28} />}
       {typeof value === "number" ? <CountUp value={value} /> : value}
     </strong>
-    <small>{note}</small>
+    {note && <small>{note}</small>}
   </div>
 }
 
@@ -75,10 +74,7 @@ function RankedBars({ title, description, rows, games, sharedExpansion }: {
           <RankedBarTrack segments={segments} games={games} />
           <span className="ranking-counts">{segments.map(({ kind, count, label }) =>
             <span key={kind}><i className={`series-${kind}`} aria-hidden="true" />{count} {label}</span>)}</span>
-          <TooltipProvider delayDuration={300}><Tooltip>
-            <TooltipTrigger asChild><strong className="chart-value" tabIndex={0}>{percent(rate)}</strong></TooltipTrigger>
-            <TooltipContent>{segments.map(segment => `${segment.count} ${segment.label}`).join(" · ")}</TooltipContent>
-          </Tooltip></TooltipProvider>
+          <strong className="chart-value">{percent(rate)}</strong>
         </Row>
       })}
     </ol>
@@ -105,7 +101,7 @@ export function TournamentOverview({ champions, games, showSummary = true }: {
     {showSummary && <section className="wl-panel draft-summary" aria-labelledby="draft-summary-title">
       <h2 id="draft-summary-title">Resumo do torneio</h2>
       <div className="metric-grid">
-        <MetricCard label="Jogos analisados" value={games} note="Play-In até a final" />
+        <MetricCard label="Jogos analisados" value={games} />
         <MetricCard label="Campeões no draft" value={champions.length} note="Escolhidos ou banidos" />
         <MetricCard label="Mais escolhido" value={picks[0].name} portrait={picks[0].portrait} note={`${picks[0].picks} jogos · ${percent(picks[0].wins / picks[0].picks)} de vitórias`} />
         <MetricCard label="Mais banido" value={bans[0].name} portrait={bans[0].portrait} note={`${bans[0].bans} bans · ${percent(bans[0].bans / games)} dos jogos`} />
@@ -115,11 +111,11 @@ export function TournamentOverview({ champions, games, showSummary = true }: {
       games={games} rows={presence.map(c => ({ ...c, rate: (c.picks + c.bans) / games,
         segments: [{ label: "picks", kind: "pick", count: c.picks }, { label: "bans", kind: "ban", count: c.bans }] }))} />
     <div className="analytics-columns">
-      <RankedBars title="Campeões mais escolhidos" description="Vitórias e derrotas nas partidas em que cada campeão foi escolhido. À direita, a taxa de vitória."
+      <RankedBars title="Campeões mais escolhidos" description="Taxa de vitória nos jogos com o campeão."
         sharedExpansion={{ expanded: rankingsExpanded, listId: picksListId }}
         games={games} rows={picks.map(c => ({ ...c, rate: c.picks ? c.wins / c.picks : 0,
           segments: [{ label: "vitórias", kind: "win", count: c.wins }, { label: "derrotas", kind: "loss", count: c.picks - c.wins }] }))} />
-      <RankedBars title="Campeões mais banidos" description="Total de bans e percentual de jogos em que cada campeão foi banido."
+      <RankedBars title="Campeões mais banidos" description="Taxa de banimento sobre o total de jogos."
         sharedExpansion={{ expanded: rankingsExpanded, listId: bansListId }}
         games={games} rows={bans.map(c => ({ ...c, rate: c.bans / games,
           segments: [{ label: "bans", kind: "ban", count: c.bans }] }))} />

@@ -390,6 +390,14 @@ summary::-webkit-details-marker { display:none; }
   gap: var(--wl-space-2);
   margin: 0;
 }
+#v-comps .composition-name-field {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--wl-space-1) var(--wl-space-2);
+  font-size: var(--wl-label-size);
+  color: var(--wl-muted);
+}
 #v-comps .editor-controls #cname {
   flex: 0 1 auto;
   width: clamp(216px, 24vw, 320px);
@@ -403,7 +411,7 @@ summary::-webkit-details-marker { display:none; }
 #v-comps .editor-status {
   display: flex;
   position: static;
-  flex-direction: row-reverse;
+  flex-direction: row;
   flex-wrap: wrap;
   justify-content: flex-start;
   align-items: center;

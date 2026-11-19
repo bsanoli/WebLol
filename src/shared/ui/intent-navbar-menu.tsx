@@ -4,7 +4,7 @@ import { Menu, MenuItem, MenuTrigger } from "react-aria-components/Menu"
 import { Popover } from "react-aria-components/Popover"
 import styles from "./intent-navbar-menu.module.css"
 
-type NavigationLink = { label: string; href?: string }
+type NavigationLink = { label: string; href?: string; current?: boolean }
 
 // Intent UI navbar-01 uses MenuTrigger, NavbarItem and Menu for its category dropdown.
 // WebLol supplies the trigger appearance and the hover opening mode.
@@ -88,7 +88,10 @@ export function IntentNavbarMenu({ links, children, ...trigger }: {
       <Popover placement="bottom start" offset={8} isNonModal={mode === "hover"} className={styles.popover}
         data-intent-navbar-menu="" onPointerEnter={stopTimers} onPointerLeave={leave}>
         <Menu className={styles.menu} autoFocus={mode === "hover" ? false : undefined} items={links}>
-          {link => <MenuItem id={link.href ?? link.label} href={link.href} textValue={link.label} className={styles.item}>{link.label}</MenuItem>}
+          {link => <MenuItem id={link.href ?? link.label} href={link.href} textValue={link.label} className={styles.item}
+            render={link.current ? props => "href" in props ? <a {...props} aria-current="page" /> : <div {...props} /> : undefined}>
+            {link.label}
+          </MenuItem>}
         </Menu>
       </Popover>
     </MenuTrigger>

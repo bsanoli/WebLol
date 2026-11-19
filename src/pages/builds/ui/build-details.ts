@@ -106,7 +106,7 @@ function buildSample(sample: LaneSample, position?: string, action = "") {
   return `<section class="build-sample" aria-label="Amostra${position ? ` de ${esc(position)}` : ""}">
     <header class="build-sample-heading">
       <h4>${position ? laneIconMarkup(position) + esc(position) : "Amostra"}</h4>
-      <span>${gameCount(sample.n)} na amostra${sample.n < sample.picks ? ` de ${sample.picks} jogos` : ""}</span>
+      <span>${sample.n < sample.picks ? `${sample.n} de ${gameCount(sample.picks)}` : gameCount(sample.n)} na amostra</span>
       ${action}
     </header>
     <div class="build-sample-grid">
@@ -188,7 +188,7 @@ function buildSkills(champion: string, order: BuildData["skillOrder"], games: nu
     </div>` : ""}
     ${sequences.length ? sequences.map((sequence, index) => `<div data-skill-panel="${index}"${index ? " hidden" : ""}>
       ${skillSequence(champion, sequence.value)}
-      <p class="build-data-sample build-skill-sample">${index === 0 ? "Sequência mais comum" : `Alternativa ${index}`} · ${usageOf(sequence, games)}</p>
+      <p class="build-data-sample build-skill-sample">${usageOf(sequence, games)}</p>
     </div>`).join("") : '<span class="na">Sem sequência de habilidades registrada.</span>'}
   </section>`;
 }

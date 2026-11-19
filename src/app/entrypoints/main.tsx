@@ -17,11 +17,14 @@ import { UI_VERSIONS } from "../config/ui-versions"
 const sections = [
   { value: "worlds", label: "Worlds", href: "#/worlds" },
   { value: "builds", label: "Builds", href: "#/builds?fonte=worlds" },
-  { value: "comps", label: "Composições", href: "#/composicoes" },
   { value: "camp", label: "Área do time", href: "#/time" },
   { value: "admin", label: "Administração", href: "#/admin" },
 ]
 const publicSections = sections.filter(({ value }) => value !== "admin")
+const worldsLinks = [
+  { value: "worlds", label: "Visão geral", href: "#/worlds" },
+  { value: "comps", label: "Composições do Worlds", href: "#/composicoes" },
+]
 const teamLinks = [
   { label: "Composições", href: "#/time/composicoes" },
   { label: "Mapa tático", href: "#/time/mapa" },
@@ -68,6 +71,18 @@ function App() {
     return () => observer.disconnect()
   }, [])
 
+  const navigationItems = (isAdmin ? sections : publicSections).map(section => {
+    if (section.value === "worlds") return {
+      ...section,
+      links: worldsLinks.map(link => ({ ...link, current: link.value === current })),
+    }
+    if (section.value === "camp") return {
+      ...section,
+      links: canViewManagement ? [...teamLinks, { label: "Gestão do time", href: "#/time/gestao" }] : teamLinks,
+    }
+    return section
+  })
+
   return (
     <>
       <a className="skip-link" href="#screens" onClick={event => {
@@ -84,17 +99,14 @@ function App() {
           href: "#/worlds",
           mark: <img src="./assets/brand/weblol-logo-horizontal-transparent.png" alt="" width="1200" height="185" className="h-auto w-[120px]" />,
         }}
-        items={(isAdmin ? sections : publicSections).map(section => section.value === "camp" ? {
-          ...section,
-          links: canViewManagement ? [...teamLinks, { label: "Gestão do time", href: "#/time/gestao" }] : teamLinks,
-        } : section)}
-        current={current}
+        items={navigationItems}
+        current={current === "comps" ? "worlds" : current}
         primaryAction={null}
         secondaryAction={null}
         toolbar={
           <div className="header-actions">
             {!user && <Button variant="default" className="signup-trigger" title="Criar conta ou entrar com seu Riot ID"
-              onClick={() => (window as unknown as { startSignup?: () => void }).startSignup?.()}>Cadastrar</Button>}
+              onClick={() => (window as unknown as { startSignup?: () => void }).startSignup?.()}>Entrar ou criar conta</Button>}
             <ThemePicker initialPalette={initialPalette} />
             <Popover open={accountOpen} onOpenChange={setAccountOpen}>
               <PopoverTrigger asChild>
@@ -134,7 +146,7 @@ function App() {
             <Card>
               <CardHeader>
                 <CardTitle><h1 className="font-display text-[length:var(--wl-title-size)] font-bold">Administração</h1></CardTitle>
-                <CardDescription>Revise as alterações enviadas e publique a versão oficial do time.</CardDescription>
+                <CardDescription>Revise os envios e publique a versão oficial do time.</CardDescription>
               </CardHeader>
               <CardContent id="admin" />
             </Card>

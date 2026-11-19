@@ -88,10 +88,7 @@ function compPicker({id, label, value, hint, options, image, search, empty, clea
 function compsView(){
   const teams=[...new Set(DATA.comps.flatMap(g=>[g.b,g.r]))].sort();
   return `<section class="worlds-compositions" aria-labelledby="comps-title">
-    <div class="comps-intro">
-      <h2 id="comps-title">Composições do Worlds</h2>
-      <p class="hint">Compare campeões, jogadores e KDA nas cinco rotas de cada partida. Esta seção reúne ${DATA.comps.length} dos ${DATA.games} jogos do torneio.</p>
-    </div>
+    <h2 id="comps-title" class="comps-intro">Composições do Worlds</h2>
     <div class="wl-panel comp-filters" role="group" aria-label="Filtrar jogos">
       <label for="cq">Buscar<input data-slot="input" id="cq" type="search" placeholder="Campeão ou jogador" value="${esc(cQ||"")}"></label>
       ${compPicker({id:"cc", label:"Campeões", value:`${iconMarkup("champion-add")} Escolher campeões`, hint:"cc-hint",
@@ -301,7 +298,10 @@ function wireComps(publishWorlds){
     });
     let extra="";
     if(cTeam){const w=L.filter(g=>(g.b===cTeam)===g.bw).length;extra=`<span>${esc(cTeam)} · ${w} vitórias · ${L.length-w} derrotas</span>`}
-    document.getElementById('cn').innerHTML=`<strong>${L.length} jogo${L.length===1?'':'s'}</strong>${extra}`;
+    const countLabel = hasFilters()
+      ? `${L.length} ${L.length === 1 ? "jogo encontrado" : "jogos encontrados"}`
+      : `${DATA.comps.length} de ${DATA.games} jogos do torneio`;
+    document.getElementById('cn').innerHTML=`<strong>${countLabel}</strong>${extra}`;
     const highlightedChampions = new Set(champions);
     matchGrid.innerHTML=L.map((g,index)=>compCard(g,q,highlightedChampions,index)).join("")||'<div class="empty-state"><h3>Nenhum jogo encontrado</h3><p>Remova um campeão ou ajuste os outros filtros para ver mais partidas.</p></div>';
   };

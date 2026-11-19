@@ -19,6 +19,7 @@
   color: inherit; font-size: var(--wl-detail-size); text-decoration: none; cursor: pointer; outline: none;
 }
 .item:is([data-hovered], [data-focused]) { background: var(--wl-surface); color: var(--wl-accent); }
+.item[aria-current="page"] { color: var(--wl-accent); font-weight: 600; }
 .item[data-focus-visible] { box-shadow: inset 0 0 0 2px var(--wl-accent); }
 @keyframes intent-navbar-enter { from { opacity: 0; transform: translateY(var(--intent-slide)); } to { opacity: 1; transform: translateY(0); } }
 @keyframes intent-navbar-exit { from { opacity: 1; transform: translateY(0); } to { opacity: 0; transform: translateY(var(--intent-slide)); } }

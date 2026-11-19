@@ -42,8 +42,15 @@
 }
 .tools { padding: var(--wl-panel-padding); gap: var(--wl-space-3); margin: var(--wl-space-4) 0; }
 .tools #lane-select { margin: 0; min-width: 100px; }
-.build-min-games { display: flex; align-items: center; gap: var(--wl-space-2); font-size: 13px; }
-.tools .build-min-games input { width: calc(var(--wl-space-12) + var(--wl-space-8)); flex: none; }
+.builds-page > .tools { align-items: end; }
+.build-filter-field { display: grid; gap: var(--wl-space-1); min-width: 0; color: var(--muted); font-size: var(--wl-label-size); }
+.build-search { flex: 1 1 12rem; }
+.build-search input { width: 100%; }
+.build-filter-field #build-lane-filter { display: flex; align-items: center; min-height: var(--wl-button-height); }
+.build-results-count { margin: 0 0 var(--wl-space-2); color: var(--ink); font-size: 14px; font-weight: 600; }
+.build-results-count:empty { margin: 0; }
+.build-min-games { width: calc(2 * var(--wl-space-12)); }
+.build-min-games input { width: 100%; }
 .builds-page > .tools :is(#bq, #bmin, #build-clear-all) {
   height: var(--wl-button-height);
   min-height: var(--wl-button-height);
@@ -238,7 +245,7 @@
 .build-inline-detail .bcard { padding-top: var(--wl-space-2); }
 .worlds-detail-action {
   margin-inline-start: auto;
-  font-size: 12px;
+  font-weight: 600;
 }
 @media (prefers-reduced-motion: no-preference) {
   .builds-page :is(.worlds-detail-action, .build-route, .build-matchup-more) > svg {

@@ -8,6 +8,13 @@ Formato de cada entrada: data, pedido (palavras do Bruno), decisão (quem escolh
 
 ---
 
+## 19/11/2026 — revisão de UX de Conta, Gestão do time e Administração
+
+- **Pedido:** aplicar o Tapa de UX às telas do WebLol, incluindo as áreas restritas.
+- **Decisão:** Bruno escolheu revisar as áreas restritas e aplicar ajustes pontuais de apresentação. Mudanças maiores ficam para uma decisão específica.
+- **Mudança:** o acesso no cabeçalho identifica entrada e cadastro. A tela de Riot ID e a criação de senha indicam qual campo corrigir, separam espera de erro e explicam o modo sem usuário. A Gestão do time distingue falha de leitura de lista vazia. A Administração usa rótulos visíveis nos campos de senha e leva o foco ao campo que precisa de atenção.
+- **Regras do Firestore:** nenhuma alteração.
+
 ## 18/11/2026 — revisão visual de conta, login e Administração
 
 - **Pedido:** “revise detalhe por detalhe em cada tela, aplique oque estiver pendente”.

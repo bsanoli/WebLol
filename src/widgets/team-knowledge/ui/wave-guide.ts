@@ -2,7 +2,7 @@ import { iconMarkup } from "@/shared/ui/icon"
 import { gameIconMarkup } from "./game-icon"
 
 export const WAVE_HTML=`
-<div class="warn">${iconMarkup("book")}<span>Guia de controle de wave para a temporada 2026. Os números da wave são das notas dos patches 26.1 e 26.9. As técnicas (freeze, slow push, etc.) são os fundamentos de sempre, ajustados aos tempos novos.</span></div>
+<p class="knowledge-intro">Técnicas de controle de wave para a temporada 2026. Os tempos seguem os patches 26.1 e 26.9.</p>
 
 <h2 class="ks">Números da wave em 2026</h2>
 <table>
@@ -20,9 +20,19 @@ export const WAVE_HTML=`
 <h2 class="ks">Quem a wave favorece</h2>
 <div class="kgrid">
  <div class="wl-panel obj"><h3>A wave empurra para quem…</h3>
-  <p style="font-size:13px;color:var(--txt);line-height:1.6">• tem <b>mais minions vivos</b> (um caster a mais já faz diferença)<br>• tem o <b>canhão</b> na wave (canhão vivo = wave mais forte)<br>• matou a wave inimiga primeiro (a próxima wave dele chega e empurra)<br>• tem campeão com <b>limpeza em área</b> ou mais nível<br>• tem o <b>caçador por perto</b> (pode empurrar sem medo)</p></div>
+  <ul class="wave-cues">
+   <li>Tem <b>mais minions vivos</b>. Um caster a mais já faz diferença.</li>
+   <li>Tem um <b>canhão vivo</b> na wave.</li>
+   <li>Matou a wave inimiga primeiro. A próxima wave chega e empurra.</li>
+   <li>Tem campeão com <b>limpeza em área</b> ou mais nível.</li>
+   <li>Tem o <b>caçador por perto</b> para cobrir o avanço.</li>
+  </ul></div>
  <div class="wl-panel obj"><h3>Onde a wave está</h3>
-  <p style="font-size:13px;color:var(--txt);line-height:1.6">• <b>Perto da SUA torre:</b> você está seguro, o inimigo fica exposto ao gank e perde farm se não chegar perto.<br>• <b>No meio:</b> neutra, ninguém tem vantagem grande.<br>• <b>Perto da torre DELE:</b> você tem prioridade (pode sair da lane primeiro), mas está exposto a gank.</p></div>
+  <ul class="wave-cues">
+   <li><b>Perto da sua torre.</b> Você está mais seguro. O inimigo se expõe a ganks para pegar farm.</li>
+   <li><b>No meio.</b> A wave está neutra, sem grande vantagem para ninguém.</li>
+   <li><b>Perto da torre inimiga.</b> Você pode sair da rota primeiro, mas se expõe a ganks.</li>
+  </ul></div>
  <div class="wl-panel obj"><h3>Prioridade (prio)</h3>
   <p style="font-size:13px;color:var(--txt);line-height:1.6">Ter <b>prio</b> é ter a wave empurrada para o lado inimigo. Quem tem prio chega primeiro no rio, no dragão, nas vastilarvas e no arauto. Antes de qualquer objetivo, o time precisa de prio em mid e na lane do lado do objetivo.</p></div>
 </div>

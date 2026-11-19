@@ -76,25 +76,29 @@ function positionFilter(lanes, current, label, showNames, change) {
 }
 
 function buildsView(){
+  const gameSource = DATASET.source === "soloq" ? `de ${DATASET.label}` : "na base";
   return `<section class="builds-page" aria-label="Builds">
   <header class="builds-heading">
-    <div><h1>Builds</h1><p class="hint">${DATASET.label} · ${G.toLocaleString("pt-BR")} jogos na base</p></div>
+    <div><h1>Builds</h1><p class="hint">${G.toLocaleString("pt-BR")} jogos ${gameSource}</p></div>
     <div class="build-source-options" role="group" aria-label="Fonte das builds">
       ${[["worlds", "Worlds"], ["soloq", "SoloQ"]].map(([source, label]) =>
         `<button type="button" data-slot="button" data-variant="${source === DATASET.source ? "default" : "ghost"}" data-build-source="${source}" aria-pressed="${source === DATASET.source}">${label}</button>`
       ).join("")}
     </div>
   </header>
-  <div class="wl-panel tools"><input data-slot="input" id="bq" type="search" placeholder="Buscar campeão ou item…" aria-label="Buscar campeão ou item">
-  <div id="build-lane-filter"></div>
-  <label class="build-min-games" for="bmin">Mínimo de jogos <input data-slot="input" id="bmin" type="number" min="0" step="1" inputmode="numeric" value="${buildMinGames}"></label>
-  <button id="build-clear-all" type="button" data-slot="button" data-variant="outline">${iconMarkup("reset")} Limpar filtros</button></div>
+  <div class="wl-panel tools" role="group" aria-label="Filtros de builds">
+  <label class="build-filter-field build-search" for="bq">Buscar campeão ou item<input data-slot="input" id="bq" type="search" placeholder="Ex.: Ahri ou Eclipse"></label>
+  <div class="build-filter-field"><span aria-hidden="true">Posição</span><div id="build-lane-filter"></div></div>
+  <label class="build-filter-field build-min-games" for="bmin">Mínimo de jogos <input data-slot="input" id="bmin" type="number" min="0" step="1" inputmode="numeric" value="${buildMinGames}"></label>
+  <button id="build-clear-all" type="button" data-slot="button" data-variant="ghost">${iconMarkup("reset")} Limpar filtros</button></div>
+  <p id="build-results-count" class="build-results-count" role="status"></p>
   <div class="bcards" id="bc"></div></section>`}
 function wireBuilds({ publishWorlds, buildsPath }){
   buildFiltersRoot = createRoot(document.getElementById("build-lane-filter"));
   const q=document.getElementById('bq'),bc=document.getElementById('bc');
   const minimum = document.getElementById("bmin");
   const clearAll = document.getElementById("build-clear-all");
+  const resultCount = document.getElementById("build-results-count");
   const hasFilters = () => Boolean(buildQuery || bLane || buildMinGames);
   const list = C.filter(champion => champion.picks > 0);
   const games = champion => buildGameCount(champion, bLane);
@@ -180,7 +184,7 @@ function wireBuilds({ publishWorlds, buildsPath }){
         </div>
       </header>`;
     const action = pageSlug
-      ? `<button class="worlds-detail-action" data-slot="button" data-variant="ghost" data-size="sm" type="button" data-build="${pageSlug}" aria-label="Abrir página da build de ${esc(champion.name)}">Ver página ${iconMarkup("next")}</button>`
+      ? `<button class="worlds-detail-action" data-slot="button" data-variant="ghost" data-size="sm" type="button" data-build="${pageSlug}" aria-label="Ver página da build de ${esc(champion.name)}">Ver página ${iconMarkup("next")}</button>`
       : "";
     return `<article class="bcard${pageSlug ? "" : " wl-panel"}">
       ${heading}
@@ -198,6 +202,10 @@ function wireBuilds({ publishWorlds, buildsPath }){
     const matches=buildChampion ? [] : list.filter(c=>
       games(c) > 0 && games(c) >= buildMinGames &&
       buildMatchesQuery(c, bLane, f));
+    const countLabel = matches.length
+      ? `${matches.length.toLocaleString("pt-BR")} ${matches.length === 1 ? "campeão" : "campeões"}`
+      : "";
+    if (resultCount.textContent !== countLabel) resultCount.textContent = countLabel;
     const selectedChampion = buildChampion ? bySlug.get(buildChampion) : undefined;
     const availableLanes = selectedChampion
       ? LANES.map(([lane]) => lane).filter(lane => buildGameCount(selectedChampion, lane) > 0)

@@ -15,6 +15,7 @@ type SiteHeaderVariant = "simple" | "centered" | "mega";
 /** One destination inside a mega menu panel. */
 interface SiteHeaderLink {
   label: string;
+  current?: boolean;
   /** One short line under the label. */
   description?: string;
   /** A plain decorative icon beside the label. */
@@ -429,7 +430,7 @@ export const SiteHeader = forwardRef<HTMLElement, SiteHeaderProps>(function Site
               <div className={styles.faceGrid} data-featured={openItem.feature ? "" : undefined}>
                 <ul className={styles.panelLinks}>
                   {openItem.links.map(link => <li key={link.label}>
-                    <Destination link={link} className={styles.panelLink} data-panel-link="" onChoose={() => choose({ label: link.label, href: link.href, section: openItem.value }, openItem.value)}>
+                    <Destination link={link} className={styles.panelLink} data-panel-link="" aria-current={link.current ? "page" : undefined} onChoose={() => choose({ label: link.label, href: link.href, section: openItem.value }, openItem.value)}>
                       {link.icon && <span className={styles.panelIcon}>{link.icon}</span>}
                       <span className={styles.panelText}><span>{link.label}</span>{link.description && <span>{link.description}</span>}</span>
                     </Destination>
@@ -475,7 +476,7 @@ export const SiteHeader = forwardRef<HTMLElement, SiteHeaderProps>(function Site
                     <AnimatePresence initial={false}>
                       {isExpanded && <motion.div key="group" id={`${id}-group-${item.value}`} className={styles.sheetGroup} initial={reduced ? { opacity: 0 } : { height: 0, opacity: 0 }} animate={reduced ? { opacity: 1 } : { height: "auto", opacity: 1 }} exit={reduced ? { opacity: 0 } : { height: 0, opacity: 0 }} transition={reduced ? { duration: 0 } : { height: motionTokens.spring.smooth, opacity: { duration: motionTokens.duration.fast } }}>
                         <ul>{item.links!.map(link => <li key={link.label}>
-                          <Destination link={link} className={styles.sheetLink} onChoose={() => choose({ label: link.label, href: link.href, section: item.value }, item.value)}>
+                          <Destination link={link} className={styles.sheetLink} aria-current={link.current ? "page" : undefined} onChoose={() => choose({ label: link.label, href: link.href, section: item.value }, item.value)}>
                             {link.icon}<span>{link.label}</span>
                           </Destination>
                         </li>)}</ul>
