@@ -8,6 +8,11 @@ export interface UiVersion {
 
 export const UI_VERSIONS: UiVersion[] = [
   {
+    version: "1.58",
+    date: "2026-11-19",
+    changes: ["Composições: nova aba Táticas, com um campo grande de texto à esquerda e, à direita, as comps do time e os picks e bans da comp escolhida em formato reduzido. Há também Táticas gerais, sem composição."],
+  },
+  {
     version: "1.57",
     date: "2026-11-19",
     changes: ["Builds (página do campeão): em Compras jogo a jogo, cada partida mostra abaixo do KDA os feitiços, a runa principal e a árvore secundária usados nela, na SoloQ e no Worlds."],

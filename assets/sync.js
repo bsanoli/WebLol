@@ -79,27 +79,27 @@ const getJ=async(col,id)=>{const d=await dbGet(col,id);if(!d)return null;try{ret
 const putJ=(col,id,obj)=>dbSet(col,id,{json:JSON.stringify(obj),at:Date.now()});
 
 /* ================= dados: diferenças e versões ================= */
-const shared=S=>({comps:clone(S?.comps||[]),plays:clone(S?.plays||[])});
-const normItem=(kind,it)=>{const o={...it};if(kind==="comp")delete o.updated;else delete o.live;return JSON.stringify(o)};
+const shared=S=>({comps:clone(S?.comps||[]),plays:clone(S?.plays||[]),tactics:clone(S?.tactics||[])});
+const normItem=(kind,it)=>{const o={...it};if(kind==="play")delete o.live;else delete o.updated;return JSON.stringify(o)};
 function hsh(s){let h1=0xdeadbeef,h2=0x41c6ce57;for(let i=0;i<s.length;i++){const c=s.charCodeAt(i);h1=Math.imul(h1^c,2654435761);h2=Math.imul(h2^c,1597334677)}h1=Math.imul(h1^(h1>>>16),2246822507)^Math.imul(h2^(h2>>>13),3266489909);h2=Math.imul(h2^(h2>>>16),2246822507)^Math.imul(h1^(h1>>>13),3266489909);return(4294967296*(2097151&h2)+(h1>>>0)).toString(36)}
 function diff(local,base){
   const ch=[];
-  for(const kind of["comp","play"]){const k=kind+"s",L=local[k]||[],B=base[k]||[],bm=new Map(B.map(x=>[x.id,x])),lm=new Map(L.map(x=>[x.id,x]));
+  for(const kind of["comp","play","tactic"]){const k=kind+"s",L=local[k]||[],B=base[k]||[],bm=new Map(B.map(x=>[x.id,x])),lm=new Map(L.map(x=>[x.id,x]));
     for(const x of L){const b=bm.get(x.id);if(!b)ch.push({kind,op:"add",id:x.id,after:x});else if(normItem(kind,x)!==normItem(kind,b))ch.push({kind,op:"edit",id:x.id,before:b,after:x})}
     for(const b of B)if(!lm.has(b.id))ch.push({kind,op:"del",id:b.id,before:b})}
   ch.forEach(c=>c.h=hsh(c.op+c.id+(c.after?normItem(c.kind,c.after):"")));
   return ch;
 }
 function applyChanges(data,changes){
-  const out={comps:clone(data.comps||[]),plays:clone(data.plays||[])};
+  const out={comps:clone(data.comps||[]),plays:clone(data.plays||[]),tactics:clone(data.tactics||[])};
   for(const c of changes){const arr=out[c.kind+"s"],i=arr.findIndex(x=>x.id===c.id);
     if(c.op==="del"){if(i>=0)arr.splice(i,1)}else if(i>=0)arr[i]=clone(c.after);else arr.unshift(clone(c.after))}
   return out;
 }
 const itemName=c=>(c.after||c.before||{}).name||"(sem nome)";
-const KN={comp:"Comp",play:"Jogada"},OPN={add:"nova",edit:"alterada",del:"apagada"};
+const KN={comp:"Comp",play:"Jogada",tactic:"Tática"},OPN={add:"nova",edit:"alterada",del:"apagada"};
 function describe(c){ // resumo legível do que mudou
-  if(c.op!=="edit")return c.kind==="comp"&&c.after?`Campeões: ${Object.entries(c.after.lanes||{}).map(([l,a])=>a.length?`<b>${l.toUpperCase()}</b> ${esc(a.join(", "))}`:"").filter(Boolean).join(" · ")||"nenhum"}`:c.kind==="play"&&c.after?`${c.after.steps?.length||0} passos`:"";
+  if(c.op!=="edit")return c.kind==="comp"&&c.after?`Campeões: ${Object.entries(c.after.lanes||{}).map(([l,a])=>a.length?`<b>${l.toUpperCase()}</b> ${esc(a.join(", "))}`:"").filter(Boolean).join(" · ")||"nenhum"}`:c.kind==="play"&&c.after?`${c.after.steps?.length||0} passos`:c.kind==="tactic"&&c.after?"Texto da tática":"";
   const a=c.after,b=c.before,out=[];
   if(a.name!==b.name)out.push(`Nome: <b>${esc(b.name)}</b> → <b>${esc(a.name)}</b>`);
   if(c.kind==="comp"){
@@ -109,6 +109,7 @@ function describe(c){ // resumo legível do que mudou
     if((a.notes||"")!==(b.notes||""))out.push("Anotações alteradas");
     if(JSON.stringify(a.laneNotes||{})!==JSON.stringify(b.laneNotes||{}))out.push("Obs. das lanes alteradas");
     if(JSON.stringify(a.draft||{})!==JSON.stringify(b.draft||{}))out.push("Ordem do draft alterada");
+  }else if(c.kind==="tactic"){if((a.text||"")!==(b.text||""))out.push("Texto da tática alterado")
   }else{if((a.steps||[]).length!==(b.steps||[]).length)out.push(`Passos: ${(b.steps||[]).length} → ${(a.steps||[]).length}`);else out.push("Posições/passos alterados");
     if(a.cb!==b.cb||a.cr!==b.cr)out.push("Comps das bolinhas alteradas")}
   return out.join("<br>");
@@ -229,7 +230,7 @@ async function sync(opts={}){
     write(applyChanges(OFF.data,mine));changed=true;
   }
   function write(data){const S2=local()||{};const live=new Map((S2.plays||[]).map(p=>[p.id,p.live]));
-    S2.comps=data.comps;S2.plays=data.plays.map(p=>live.has(p.id)?{...p,live:live.get(p.id)}:p);
+    S2.comps=data.comps;S2.tactics=data.tactics||[];S2.plays=data.plays.map(p=>live.has(p.id)?{...p,live:live.get(p.id)}:p);
     if(!S2.comps.some(c=>c.id===S2.cur))S2.cur=S2.comps[0]?.id;if(!S2.plays.some(p=>p.id===S2.curPlay))S2.curPlay=S2.plays[0]?.id;
     lsSet(KEY,S2);lsSet(BKEY,{version:OFF.version,data:OFF.data});}
   if(changed&&opts.reload!==false)reloadCamp();

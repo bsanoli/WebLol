@@ -13,6 +13,8 @@ import WS from "../api/worlds-champion-stats.json"
 import { KEY, uid, blank, loadTeamState } from "../model/local-state"
 import { DRAFT_SIDE, PICKNAME, compositionPreview, draftHTML, draftOf, sideDot } from "./draft"
 import { mountTeamNavigation } from "./team-navigation"
+import { tacticsHTML } from "./tactics"
+import { ensureTactics, hasTactic, readTactic, writeTactic } from "../model/tactics"
 import { capturePickFeedback } from "./pick-feedback"
 
 initializeTheme()
@@ -101,8 +103,9 @@ $("#clear-local").onclick=async()=>{
     }
     if (base) {
       const { comps, plays } = base.data;
+      const tactics = Array.isArray(base.data.tactics) ? base.data.tactics : [];
       localStorage.setItem(KEY, JSON.stringify({
-        comps, plays, view: S.view,
+        comps, plays, tactics, view: S.view,
         cur: comps.find(comp => comp.id === S.cur)?.id ?? comps[0]?.id,
         curPlay: plays.find(play => play.id === S.curPlay)?.id ?? plays[0]?.id,
       }));
@@ -199,11 +202,12 @@ function hasCompNotes(c,dv){
 const markCompNotes=()=>$("#composition-notes")?.classList.toggle("has-notes",hasCompNotes(cur(),S.view==="draft"));
 function renderEditor(){
   const previousComposition = $("#editor").dataset.motionComposition;
-  const c=cur(),dv=S.view==="draft";
-  const view = dv ? "draft" : "lanes";
+  const c=cur(),dv=S.view==="draft",tv=S.view==="tactics";
+  const view = tv ? "tactics" : dv ? "draft" : "lanes";
   const previousView = $("#editor").dataset.motionView;
   const notesOpen=$("#composition-notes")?.open;
   $("#v-comps").classList.toggle("draft-view",dv);
+  $("#v-comps").classList.toggle("tactics-view",tv);
   $("#draft-comp").hidden=true;
   const notes=`<details id="composition-notes" ${notesOpen?"open":""} class="${hasCompNotes(c,dv)?"has-notes":""}"><summary>Anotações da composição<span class="notes-flag" aria-label="tem anotação" title="Esta comp tem anotação">${iconMarkup("edit")}</span></summary><label class="control-label" for="notes">Plano geral</label><textarea id="notes" placeholder="Plano de jogo, condição de vitória…">${esc(c.notes)}</textarea>${dv?`<label class="control-label" for="dnote">Plano do draft · ${DRAFT_SIDE[draftOf(c).side]}</label><textarea id="dnote">${esc(draftOf(c).note[draftOf(c).side])}</textarea><ul id="notes-lanes" class="draft-lane-notes" aria-label="Observações por posição" hidden></ul>`:""}</details>`;
   const editor = $("#editor");
@@ -215,6 +219,7 @@ function renderEditor(){
   mountSectionTabs($(".editor-controls .vtog"), "Modo da composição", S.view || "lanes", [
     { value: "lanes", label: "Opções por posição", panel: "composition-panel" },
     { value: "draft", label: "Ordem do draft", panel: "composition-panel" },
+    { value: "tactics", label: "Táticas", panel: "composition-panel" },
   ], value => {
     S.view = value;
     save(false);
@@ -222,10 +227,23 @@ function renderEditor(){
     renderList();
     publishTeamRoute("comps");
   }, "navigation");
-  const catalog=$("#champ-picker"),gridScroll=$("#grid").scrollTop,tabsScroll=editor.querySelector(".dz-tabs")?.scrollTop||0;
+  const catalog=$("#champ-picker"),gridScroll=$("#grid").scrollTop,tabsScroll=editor.querySelector(".dz-tabs, .tx-tabs")?.scrollTop||0;
   if (editor.contains(catalog)) $("#comps").append(catalog);
   clearTeamControls(editor);
   editor.replaceChildren();
+  if (tv) {
+    const txScroll = tabsScroll;
+    editor.insertAdjacentHTML("beforeend", `<div id="composition-panel" role="tabpanel" aria-labelledby="tab-tactics">${tacticsHTML(c, {
+      compositions: S.comps, general: !!S.tacticsGeneral, text: readTactic(S, S.tacticsGeneral ? null : c.id),
+      hasTactic: id => hasTactic(S, id), LN, img, esc,
+    })}</div>`);
+    const txTabs = editor.querySelector(".tx-tabs");
+    if (txTabs) txTabs.scrollTop = txScroll;
+    editor.dataset.motionComposition = c.id;
+    editor.dataset.motionView = view;
+    if (previousView !== view) revealContent(editor, true);
+    return;
+  }
   editor.insertAdjacentHTML("beforeend", `
   <div id="composition-panel" role="tabpanel" aria-labelledby="tab-${dv ? "draft" : "lanes"}">
   ${notes}<button data-slot="button" data-variant="default" type="button" class="jump-picker" data-picker>${iconMarkup("plus")} Adicionar campeão</button>
@@ -274,6 +292,14 @@ $("#v-comps").addEventListener("input",e=>{
     touch();save();renderList();
   }
   else if(e.target.id==="notes"){c.notes=e.target.value;touch();save();markCompNotes()}
+  else if(e.target.id==="tactics-text"){
+    const general=!!S.tacticsGeneral;
+    writeTactic(S,general?null:c.id,c.name,e.target.value,Date.now());save();
+    const tab=$(general?"#editor [data-tactic-general]":`#editor [data-tactic-comp="${CSS.escape(c.id)}"]`);
+    const has=!!e.target.value.trim(),mark=tab?.querySelector(".tx-has");
+    if(has&&!mark)tab?.querySelector("b")?.insertAdjacentHTML("beforeend",`<span class="tx-has" title="Tem anotação de tática">${iconMarkup("edit")}</span>`);
+    else if(!has)mark?.remove();
+  }
   else if(e.target.id==="dnote"){const d=draftOf(c);d.note[d.side]=e.target.value;touch();save();markCompNotes()}
 });
 $("#editor").addEventListener("change",e=>{
@@ -417,6 +443,17 @@ function placePicker(){
 }
 window.matchMedia("(min-width: 1100px)").addEventListener("change",()=>placePicker());
 $("#editor").addEventListener("click",e=>{
+  const tacticTab=e.target.closest("[data-tactic-comp],[data-tactic-general]");
+  if (tacticTab) {
+    const general=tacticTab.hasAttribute("data-tactic-general"),id=tacticTab.dataset.tacticComp;
+    if (general===!!S.tacticsGeneral && (general || id===S.cur)) return;
+    S.tacticsGeneral=general;
+    if (general) { save(); renderEditor(); }
+    else if (id!==S.cur) selectComp(id);
+    else { save(); renderEditor(); renderList(); }
+    $("#editor .tx-tabs [aria-pressed=true]")?.focus({ preventScroll: true });
+    return;
+  }
   const tab=e.target.closest("[data-comp-tab]");
   if (tab) {
     if (tab.dataset.compTab !== S.cur) {
@@ -496,7 +533,7 @@ function publishTeamRoute(view, {includeItem = true, onCopy = undefined} = {}) {
   $("#route-note").hidden=true;
   let path="/time/"+teamPages[view];
   if(view==="know")path+="/"+(guides[S.kTab]||guides.obj);
-  if(includeItem && view==="comps")path+="/"+encodeURIComponent(S.cur)+"?modo="+(S.view==="draft"?"draft":"lane");
+  if(includeItem && view==="comps")path+="/"+encodeURIComponent(S.cur)+"?modo="+(S.view==="draft"?"draft":S.view==="tactics"?"taticas":"lane");
   if(includeItem && view==="map")path+="/"+encodeURIComponent(S.curPlay);
   window.frameElement?.dispatchEvent(new CustomEvent("weblol:navigate",{detail:{path, onCopy}}));
 }
@@ -560,7 +597,7 @@ async function openTeamView(view, item, params) {
       else missing="A composição deste link não está disponível neste navegador. Conecte a pasta do time para carregar a versão oficial.";
     }
     const mode=params?.get("modo");
-    if(mode==="draft"||mode==="lane")S.view=mode==="draft"?"draft":"lanes";
+    if(mode==="draft"||mode==="lane"||mode==="taticas")S.view=mode==="draft"?"draft":mode==="taticas"?"tactics":"lanes";
   } else if(view==="map" && item){
     const selected=plays().find(matches);
     if(selected) tacticalMap.selectPlay(selected.id);
@@ -601,6 +638,7 @@ wireCopyButton($("#copy-play"), "map");
 
 /* ===== Início ===== */
 S = loadTeamState();
+ensureTactics(S);
 function renderAll(){renderList();renderEditor();renderGrid()}
 plays();
 if (!usesParentNavigation) void openTeamView("comps");

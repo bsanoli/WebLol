@@ -8,6 +8,13 @@ Formato de cada entrada: data, pedido (palavras do Bruno), decisão (quem escolh
 
 ---
 
+## 19/11/2026 — táticas entram na aprovação do capitão
+
+- **Pedido:** "quero criar mais uma aba chamada \"Táticas\" [...] para fazer anotações sobre táticas dentro do jogo com base em uma composição ou não".
+- **Decisão:** para as táticas chegarem ao time como as comps e jogadas, cada tática virou um item próprio ("Tática") no envio e na aprovação do capitão. Não muda login, contas nem regras do Firestore.
+- **O que mudou:** `public/assets/sync.js` passou a incluir `tactics` nos dados do time, nas diferenças e na versão oficial; a lista de aprovação mostra "Tática" com o resumo "Texto da tática alterado".
+- Versão da interface 1.58.
+
 ## 19/11/2026 — revisão de UX de Conta, Gestão do time e Administração
 
 - **Pedido:** aplicar o Tapa de UX às telas do WebLol, incluindo as áreas restritas.
