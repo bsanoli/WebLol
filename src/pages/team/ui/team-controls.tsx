@@ -67,6 +67,7 @@ export function mountPickSwapMenu(host: HTMLElement, lane: string, current: stri
   renderControl(host, <ContextMenu.Root>
     <ContextMenu.Trigger asChild>
       <button type="button" className={button.className} style={color ? { ["--lc" as string]: color } : undefined}
+        data-draft-target={button.dataset.draftTarget} aria-pressed={button.getAttribute("aria-pressed") === null ? undefined : button.getAttribute("aria-pressed") === "true"}
         aria-label={button.getAttribute("aria-label") ?? current} title={button.title}
         dangerouslySetInnerHTML={{ __html: html }} />
     </ContextMenu.Trigger>

@@ -13,8 +13,8 @@ import WS from "../api/worlds-champion-stats.json"
 import { KEY, uid, blank, loadTeamState } from "../model/local-state"
 import { DRAFT_SIDE, PICKNAME, compositionPreview, draftHTML, draftOf, sideDot } from "./draft"
 import { mountTeamNavigation } from "./team-navigation"
-import { tacticsHTML } from "./tactics"
-import { ensureTactics, hasTactic, readTactic, writeTactic } from "../model/tactics"
+import { tacticGridHTML, tacticsHTML } from "./tactics"
+import { createSavedTactic, ensureTactics, hasTactic, isSavedTactic, itemsForView, markTacticPanel, readTactic, writeTactic } from "../model/tactics"
 import { capturePickFeedback } from "./pick-feedback"
 
 initializeTheme()
@@ -125,7 +125,7 @@ function toast(m){const t=$("#toast");t.textContent=m;t.classList.add("on");setT
 /* ===== Lista de comps ===== */
 function renderList(){
   const q=$("#csearch").value.toLowerCase();
-  const matches=S.comps.filter(c=>!q||c.name.toLowerCase().includes(q)||Object.values(c.lanes).flat().some(n=>n.toLowerCase().includes(q)));
+  const matches=itemsForView(S.comps,"lane").filter(c=>!q||c.name.toLowerCase().includes(q)||Object.values(c.lanes).flat().some(n=>n.toLowerCase().includes(q)));
   const selected=cur();
   $("#draft-comp").innerHTML=[selected,...matches.filter(c=>c!==selected)]
     .map(c=>`<option value="${esc(c.id)}">${esc(c.name)}</option>`).join("");
@@ -133,7 +133,7 @@ function renderList(){
   clearTeamControls(list);
   list.innerHTML=matches
    .map(c=>{const firsts=compositionPreview(c);
-     return `<div class="composition-item"><button class="ci${c.id===S.cur?" on":""}" aria-pressed="${c.id===S.cur}" data-id="${c.id}" title="${esc(c.name)}"><b>${sideDot(c)}${esc(c.name)}</b>
+     return `<div class="composition-item"><button class="ci${c.id===S.cur?" on":""}" aria-pressed="${c.id===S.cur}" data-id="${c.id}" title="${esc(c.name)}"><b>${isSavedTactic(c)?iconMarkup("book"):sideDot(c)}${esc(c.name)}</b>
       <span class="mini">${firsts.map(img).join("")||'<small style="color:var(--mut)">vazia</small>'}</span></button><span class="composition-menu" data-team-control></span></div>`}).join("")||'<p class="composition-empty" role="status">Nenhuma composição encontrada. Tente outro nome ou campeão.</p>';
   list.querySelectorAll(".composition-menu").forEach((host,index)=>{
     const {id,name}=matches[index];
@@ -235,15 +235,16 @@ function renderEditor(){
     const txScroll = tabsScroll;
     editor.insertAdjacentHTML("beforeend", `<div id="composition-panel" role="tabpanel" aria-labelledby="tab-tactics">${tacticsHTML(c, {
       compositions: S.comps, general: !!S.tacticsGeneral, text: readTactic(S, S.tacticsGeneral ? null : c.id),
-      hasTactic: id => hasTactic(S, id), panel: S.tacticsPanel === "priority" ? "priority" : "draft", LN, img, esc,
+      hasTactic: id => hasTactic(S, id), panel: tacticPanel(), active, query: tacticQuery, champions: CH, LN, img, esc,
     })}</div>`);
-    if (!S.tacticsGeneral && S.tacticsPanel !== "priority") editor.querySelectorAll("[data-swap-lane]").forEach(host => {
+    if (!S.tacticsGeneral && tacticPanel() === "draft") editor.querySelectorAll("[data-swap-lane]").forEach(host => {
       const lane = host.dataset.swapLane, list = c.lanes[lane];
       mountPickSwapMenu(host, LN[lane].n, list[0] || "", list.slice(1).map(name => ({ name, portrait: img(name) })), name => {
         const champions = cur().lanes[lane], index = champions.indexOf(name);
         if (index < 1) return;
         champions.splice(index, 1);
         champions.unshift(name);
+        markTacticPanel(cur(), "draft");
         touch(); save(); renderEditor(); renderList();
         toast(`${name} agora é o principal em ${LN[lane].n}`);
       });
@@ -258,7 +259,7 @@ function renderEditor(){
   editor.insertAdjacentHTML("beforeend", `
   <div id="composition-panel" role="tabpanel" aria-labelledby="tab-${dv ? "draft" : "lanes"}">
   ${notes}<button data-slot="button" data-variant="default" type="button" class="jump-picker" data-picker>${iconMarkup("plus")} Adicionar campeão</button>
-  ${dv?draftHTML(c, { active, compositions: S.comps, LN, img, esc, pickArt }):LANES.map(l=>`<div class="lane${active===l.k?" act":""}${l.k==="ban"?" ban-strip":""}" data-l="${l.k}" style="--lc:var(${l.c})">
+  ${dv?draftHTML(c, { active, compositions: itemsForView(S.comps,"draft"), LN, img, esc, pickArt }):LANES.map(l=>`<div class="lane${active===l.k?" act":""}${l.k==="ban"?" ban-strip":""}" data-l="${l.k}" style="--lc:var(${l.c})">
   ${l.k==="ban"?"":pickArt(c.lanes[l.k][0])}
   <button class="ln lane-label" data-draft-target="${l.k}" aria-pressed="${active===l.k}">${laneIconMarkup(l.k)}${l.n}</button>
   <div class="chips" data-champion-group="${l.k}">${c.lanes[l.k].map((n,i)=>optionHTML(n,l.k,i)).join("")||'<span class="empty">Adicionar campeão</span>'}</div>
@@ -330,6 +331,7 @@ function reorderChampion(name,lane,direction){
     const next=index+direction;
     [champions[index],champions[next]]=[champions[next],champions[index]];
   }
+  if(S.view==="tactics")markTacticPanel(cur(),tacticPanel());
   active=lane;touch();save();renderEditor();renderList();renderGrid();
   if(S.view==="draft"){
     $(`[data-draft-target="${lane}"]`)?.focus({preventScroll:true});
@@ -453,6 +455,51 @@ function placePicker(){
   else if(catalog.parentElement!==$("#comps"))$("#comps").append(catalog);
 }
 window.matchMedia("(min-width: 1100px)").addEventListener("change",()=>placePicker());
+/* ===== Táticas salvas ===== */
+let tacticQuery = "";
+const tacticPanel = () => S.tacticsPanel === "lane" || S.tacticsPanel === "priority" ? "lane" : "draft";
+// "Salvar tática" copia os picks e o texto da comp (ou o texto geral) para uma tática própria; "Nova tática" começa vazia.
+async function createTactic(source, copyText = false) {
+  const text = copyText ? readTactic(S, source ? source.id : null) : "";
+  const suggested = source ? `Tática · ${source.name}` : copyText ? "Tática geral" : "Nova tática";
+  const name = (await askName("Nome da tática", suggested))?.trim();
+  if (!name) return;
+  const item = createSavedTactic(source, uid(), name, Date.now(), tacticPanel());
+  S.comps.unshift(item);
+  if (text.trim()) writeTactic(S, item.id, item.name, text, Date.now());
+  S.tacticsGeneral = false;
+  S.cur = item.id;
+  active = tacticPanel() === "draft" ? draftOf(item).order[draftOf(item).side][0] : "top";
+  save(); renderAll(); publishTeamRoute("comps");
+  toast(copyText ? `Tática "${name}" salva` : `Tática "${name}" criada`);
+  $("#editor .tx-tabs [aria-pressed=true]")?.focus({ preventScroll: true });
+}
+async function deleteTactic() {
+  const item = cur();
+  if (!isSavedTactic(item) || !await confirmAction(`Excluir a tática "${item.name}"?`, "Excluir tática")) return;
+  writeTactic(S, item.id, item.name, "", Date.now());
+  S.comps = S.comps.filter(x => x.id !== item.id);
+  if (!S.comps.some(x => !isSavedTactic(x))) S.comps.push(blank());
+  S.cur = (S.comps.find(x => !isSavedTactic(x)) || S.comps[0]).id;
+  save(); renderAll(); publishTeamRoute("comps");
+  $("#editor [data-tactic-new]")?.focus({ preventScroll: true });
+}
+function toggleTacticChampion(name) {
+  const c = cur(), list = c.lanes[active];
+  if (!isSavedTactic(c)) return;
+  if (list.includes(name)) c.lanes[active] = list.filter(x => x !== name);
+  else if (active !== "ban" || list.length < 5) list.push(name);
+  else { toast("Os 5 bans já estão preenchidos"); return; }
+  markTacticPanel(c, tacticPanel());
+  touch(); save(); renderEditor(); renderList();
+  $(`#editor [data-tactic-champ="${CSS.escape(name)}"]`)?.focus({ preventScroll: true });
+}
+$("#editor").addEventListener("input", e => {
+  if (e.target.id !== "tx-search") return;
+  tacticQuery = e.target.value;
+  const grid = $("#editor .tx-grid");
+  if (grid) grid.innerHTML = tacticGridHTML(cur(), { champions: CH, query: tacticQuery, active, LN, img, esc });
+});
 $("#editor").addEventListener("click",e=>{
   const panelButton=e.target.closest("[data-tactic-panel]");
   if (panelButton) {
@@ -463,6 +510,11 @@ $("#editor").addEventListener("click",e=>{
     }
     return;
   }
+  const champ=e.target.closest("[data-tactic-champ]");
+  if (champ) { toggleTacticChampion(champ.dataset.tacticChamp); return; }
+  if (e.target.closest("[data-tactic-new]")) { void createTactic(null); return; }
+  if (e.target.closest("[data-tactic-save]")) { void createTactic(S.tacticsGeneral ? null : cur(), true); return; }
+  if (e.target.closest("[data-tactic-delete]")) { void deleteTactic(); return; }
   const tacticTab=e.target.closest("[data-tactic-comp],[data-tactic-general]");
   if (tacticTab) {
     const general=tacticTab.hasAttribute("data-tactic-general"),id=tacticTab.dataset.tacticComp;

@@ -1,3 +1,4 @@
+import { blank, type Composition } from "./local-state"
 // Táticas do time: texto livre, geral ou ligado a uma composição.
 // Cada tática é um item próprio em `tactics`, sincronizado como as comps e jogadas.
 export const GENERAL_TACTIC = "geral"
@@ -47,3 +48,33 @@ export function writeTactic(state: TacticsState, compId: string | null, compName
 }
 
 export const hasTactic = (state: TacticsState, compId: string | null) => !!readTactic(state, compId).trim()
+
+// Táticas salvas: ficam na lista de comps com a marca `tactic`, mas não são composições.
+// Aparecem em Opções por posição ou na Ordem do draft só quando a parte correspondente foi preenchida.
+export type TacticPanel = "draft" | "lane"
+type TacticItem = Composition & { tactic?: boolean; tacticViews?: Partial<Record<TacticPanel, boolean>> }
+
+export const isSavedTactic = (item: unknown): boolean => (item as TacticItem | undefined)?.tactic === true
+
+const hasChampions = (item: Composition) => Object.values(item.lanes).some(list => list.length > 0)
+
+/** Cria a tática salva a partir de uma comp (cópia dos picks) ou vazia. */
+export function createSavedTactic(source: Composition | null, id: string, name: string, now: number, panel: TacticPanel): TacticItem {
+  const base = source ? structuredClone(source) as TacticItem : blank(name) as TacticItem
+  const item: TacticItem = { ...base, id, name, updated: now, tactic: true, tacticViews: {} }
+  if (hasChampions(item)) item.tacticViews = { [panel]: true }
+  return item
+}
+
+/** Marca em qual visão a tática foi preenchida; sem campeões ela some das outras abas. */
+export function markTacticPanel(item: Composition, panel: TacticPanel) {
+  const tactic = item as TacticItem
+  if (!tactic.tactic) return
+  tactic.tacticViews = hasChampions(item) ? { ...tactic.tacticViews, [panel]: true } : {}
+}
+
+/** Comps que aparecem numa visão do editor: táticas salvas primeiro, só se preenchidas naquela visão. */
+export function itemsForView<T extends Composition>(items: T[], panel: TacticPanel): T[] {
+  const tactics = items.filter(item => isSavedTactic(item) && (item as TacticItem).tacticViews?.[panel])
+  return [...tactics, ...items.filter(item => !isSavedTactic(item))]
+}

@@ -82,3 +82,53 @@ button.tx-pick > .tx-pick-name, button.tx-pick > .tx-pick-champ { grid-column: 2
 .tx-prio-champ.main .av { width: 34px; height: 34px; opacity: 1; box-shadow: 0 0 0 2px var(--lc, var(--line)); }
 .tx-prio-champ.main b { font-size: 13px; }
 .tx-prio-empty { color: var(--mut); font-size: 12px; }
+
+/* Linha da troca de visão: seletor à esquerda, salvar/excluir tática à direita */
+.tx-panel-row { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 10px; }
+.tx-panel-row .tx-panel-switch { margin-bottom: 0; }
+.tx-panel-row .tx-action { margin-left: auto; }
+.tx-panel-row .tx-action .icon { width: 14px; height: 14px; }
+
+/* Nova tática e táticas salvas na lista */
+#v-comps .tx-tabs .dz-tab.tx-new { flex-direction: row; align-items: center; justify-content: center; gap: 6px; border: 1px dashed var(--line); color: var(--mut); font-size: 12px; font-weight: 600; }
+#v-comps .tx-tabs .dz-tab.tx-new:hover { color: var(--txt); }
+#v-comps .tx-tabs .dz-tab.tx-new .icon { width: 16px; height: 16px; }
+#v-comps .tx-tabs .dz-tab.tx-saved b { color: var(--gold, var(--wl-accent)); }
+
+/* Visão Lane: alternativos clicáveis e bans só com ícones do mesmo tamanho */
+#v-comps .tx-prio-alt { display: block; padding: 0; border: 0; border-radius: 4px; background: none; cursor: pointer; }
+#v-comps .tx-prio-alt:hover .av { opacity: 1; box-shadow: 0 0 0 2px var(--lc, var(--line)); }
+#v-comps .tx-prio-alt:focus-visible { outline: 2px solid var(--txt); outline-offset: 2px; }
+.tx-prio-static { display: flex; align-items: center; gap: 6px; }
+.tx-prio-lane.bans .tx-prio-champ .av { width: 28px; height: 28px; opacity: 1; box-shadow: none; filter: grayscale(.6); }
+.tx-prio-lane.bans .tx-prio-champ { margin: 0; }
+#v-comps button.tx-prio-name { padding: 4px 6px; margin-left: -6px; border: 1px solid transparent; border-radius: var(--wl-control-radius); background: none; color: var(--txt); font: inherit; font-size: 12px; font-weight: 600; text-align: left; cursor: pointer; }
+#v-comps button.tx-prio-name:hover { background: color-mix(in srgb, var(--txt) 8%, transparent); }
+#v-comps button.tx-prio-name:focus-visible { outline: 2px solid var(--txt); outline-offset: 1px; }
+.tx-prio-lane.act { background: var(--wl-accent-soft); }
+#v-comps button.tx-prio-name.act { border-color: var(--wl-accent); }
+
+/* Draft editável da tática */
+#v-comps button.tx-ban { padding: 0; background: none; cursor: pointer; }
+#v-comps button.tx-ban:hover { border-color: var(--txt); }
+#v-comps button.tx-ban.act { border-color: var(--wl-accent); border-style: solid; }
+#v-comps button.tx-ban:focus-visible { outline: 2px solid var(--txt); outline-offset: 1px; }
+#v-comps button.tx-pick.act { background: var(--wl-accent-soft); box-shadow: inset 0 0 0 1px var(--wl-accent); }
+#v-comps button.tx-pick[data-draft-target] { cursor: pointer; }
+#v-comps .tx-side-pick { display: flex; flex: 1; align-items: center; gap: 2px; padding: 0; border: 0; background: none; color: inherit; font: inherit; cursor: pointer; }
+#v-comps .tx-side-pick:hover { text-decoration: underline; }
+#v-comps .tx-side-pick:focus-visible { outline: 2px solid var(--txt); outline-offset: 2px; }
+#v-comps .tx-side-pick small { margin-left: auto; color: var(--mut); font-size: 11px; font-weight: 500; }
+
+/* Seletor reduzido de campeões da tática */
+.tx-picker { margin-top: 12px; padding-top: 10px; border-top: 1px solid var(--line); }
+.tx-picker-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 8px; color: var(--mut); font-size: 12px; }
+.tx-picker-head b { color: var(--txt); }
+#v-comps #tx-search { width: 200px; min-height: 30px; font-size: 12px; }
+.tx-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(34px, 1fr)); gap: 4px; max-height: 190px; overflow: auto; overscroll-behavior: contain; padding: 2px; }
+#v-comps .tx-ch { display: block; aspect-ratio: 1; padding: 0; border: 1px solid transparent; border-radius: 4px; background: none; cursor: pointer; }
+#v-comps .tx-ch .av { display: block; width: 100%; height: 100%; border-radius: 3px; }
+#v-comps .tx-ch:hover { border-color: var(--txt); }
+#v-comps .tx-ch:focus-visible { outline: 2px solid var(--txt); outline-offset: 1px; }
+#v-comps .tx-ch.on { border-color: var(--wl-accent); box-shadow: 0 0 0 1px var(--wl-accent); }
+.tx-grid-empty { grid-column: 1 / -1; margin: 0; color: var(--mut); font-size: 12px; }

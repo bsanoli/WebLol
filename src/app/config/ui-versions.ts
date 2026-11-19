@@ -8,6 +8,11 @@ export interface UiVersion {
 
 export const UI_VERSIONS: UiVersion[] = [
   {
+    version: "1.61",
+    date: "2026-11-19",
+    changes: ["Táticas: \"Picks prioritários\" virou \"Lane\", com clique no alternativo para torná-lo principal e bans só com ícones do mesmo tamanho.", "Táticas: botões Salvar tática e Nova tática. A tática salva fica no topo da lista, tem seletor reduzido de campeões (ícones e busca) e aparece em Opções por posição ou na Ordem do draft quando a parte Lane ou Draft foi preenchida."],
+  },
+  {
     version: "1.60",
     date: "2026-11-19",
     changes: ["Táticas: seletor Draft / Picks prioritários acima da barra do time; Picks prioritários mostra os campeões de cada lane em ordem de prioridade, sem as notas."],
