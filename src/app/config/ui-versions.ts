@@ -8,6 +8,11 @@ export interface UiVersion {
 
 export const UI_VERSIONS: UiVersion[] = [
   {
+    version: "1.55",
+    date: "2026-11-19",
+    changes: ["As abas Worlds, SoloQ e Área do time sempre conferem se há versão nova ao abrir, para as correções aparecerem sem esperar o cache do navegador."],
+  },
+  {
     version: "1.54",
     date: "2026-11-19",
     changes: ["Ordem do draft: o nome do campeão volta a ficar em uma linha, ao lado do nome do pick."],

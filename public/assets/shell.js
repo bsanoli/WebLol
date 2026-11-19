@@ -559,7 +559,7 @@ async function copyCurrentLink(onCopy) {
 
 async function loadScreen(name) {
   if (!loaded.has(name)) {
-    const source = fetch(screens[name]).then(response => {
+    const source = fetch(screens[name], { cache: "no-cache" }).then(response => {
       if (!response.ok) throw new Error("Falha ao carregar " + name);
       return response.text();
     });
