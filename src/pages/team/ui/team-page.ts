@@ -14,7 +14,7 @@ import { KEY, uid, blank, loadTeamState } from "../model/local-state"
 import { DRAFT_SIDE, PICKNAME, compositionPreview, draftHTML, draftOf, sideDot } from "./draft"
 import { mountTeamNavigation } from "./team-navigation"
 import { tacticGridHTML, tacticsHTML } from "./tactics"
-import { createSavedTactic, ensureTactics, hasTactic, isSavedTactic, itemsForView, markTacticPanel, readTactic, readTacticImages, writeTactic } from "../model/tactics"
+import { createSavedTactic, ensureTactics, hasTactic, isSavedTactic, itemsForView, setTacticView, readTactic, readTacticImages, writeTactic } from "../model/tactics"
 import { compressImage } from "../lib/compress-image"
 import { capturePickFeedback } from "./pick-feedback"
 
@@ -246,7 +246,6 @@ function renderEditor(){
         if (index < 1) return;
         champions.splice(index, 1);
         champions.unshift(name);
-        markTacticPanel(cur(), "draft");
         touch(); save(); renderEditor(); renderList();
         toast(`${name} agora é o principal em ${LN[lane].n}`);
       });
@@ -334,7 +333,6 @@ function reorderChampion(name,lane,direction){
     const next=index+direction;
     [champions[index],champions[next]]=[champions[next],champions[index]];
   }
-  if(S.view==="tactics")markTacticPanel(cur(),tacticPanel());
   active=lane;touch();save();renderEditor();renderList();renderGrid();
   if(S.view==="draft"){
     $(`[data-draft-target="${lane}"]`)?.focus({preventScroll:true});
@@ -387,7 +385,7 @@ $("#editor").addEventListener("drop",e=>{
   const arr=c.lanes[to].filter(x=>x!==n);
   const over=e.target.closest(".chip,.dm,.tx-prio-champ");let idx=ln.dataset.bi!=null?Math.min(+ln.dataset.bi,arr.length):arr.length;
   if(over&&over.dataset.n!==n&&ln.dataset.bi==null){idx=arr.indexOf(over.dataset.n);const r=over.getBoundingClientRect();if(e.clientX>r.left+r.width/2)idx++}
-  arr.splice(idx,0,n);c.lanes[to]=arr;drag=null;if(S.view==="tactics")markTacticPanel(c,tacticPanel());active=to;touch();save();renderEditor();renderList();renderGrid();
+  arr.splice(idx,0,n);c.lanes[to]=arr;drag=null;active=to;touch();save();renderEditor();renderList();renderGrid();
 });
 document.addEventListener("dragend",()=>{drag=null;document.querySelectorAll(".drop").forEach(x=>x.classList.remove("drop"))});
 
@@ -468,7 +466,7 @@ async function createTactic(source, copyText = false) {
   const suggested = source ? `Tática · ${source.name}` : copyText ? "Tática geral" : "Nova tática";
   const name = (await askName("Nome da tática", suggested))?.trim();
   if (!name) return;
-  const item = createSavedTactic(source, uid(), name, Date.now(), tacticPanel());
+  const item = createSavedTactic(source, uid(), name, Date.now());
   S.comps.unshift(item);
   if (text.trim() || images.length) writeTactic(S, item.id, item.name, text, Date.now(), images);
   S.tacticsGeneral = false;
@@ -494,7 +492,6 @@ function toggleTacticChampion(name) {
   if (list.includes(name)) c.lanes[active] = list.filter(x => x !== name);
   else if (active !== "ban" || list.length < 5) list.push(name);
   else { toast("Os 5 bans já estão preenchidos"); return; }
-  markTacticPanel(c, tacticPanel());
   touch(); save(); renderEditor(); renderList();
   $(`#editor [data-tactic-champ="${CSS.escape(name)}"]`)?.focus({ preventScroll: true });
 }
@@ -579,6 +576,14 @@ $("#editor").addEventListener("click",e=>{
   if (printOpen) { void openPrint(printOpen.dataset.printOpen); return; }
   const printRemove=e.target.closest("[data-print-remove]");
   if (printRemove) { removePrint(printRemove.dataset.printRemove); return; }
+  const viewToggle=e.target.closest("[data-tactic-view]");
+  if (viewToggle) {
+    const c=cur(),panel=viewToggle.dataset.tacticView,on=viewToggle.getAttribute("aria-checked")!=="true";
+    setTacticView(c,panel,on);touch();save();renderEditor();renderList();
+    $(`#editor [data-tactic-view="${panel}"]`)?.focus({ preventScroll: true });
+    toast(on?`Tática aparece em ${panel==="lane"?"Opções por posição":"Ordem do draft"}`:`Tática saiu de ${panel==="lane"?"Opções por posição":"Ordem do draft"}`);
+    return;
+  }
   const champ=e.target.closest("[data-tactic-champ]");
   if (champ) { toggleTacticChampion(champ.dataset.tacticChamp); return; }
   if (e.target.closest("[data-tactic-new]")) { void createTactic(null); return; }

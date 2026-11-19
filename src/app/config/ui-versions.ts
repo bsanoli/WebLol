@@ -8,6 +8,11 @@ export interface UiVersion {
 
 export const UI_VERSIONS: UiVersion[] = [
   {
+    version: "1.65",
+    date: "2026-11-19",
+    changes: ["Táticas: opções Aplicar em Opções por posição e/ou Ordem do draft na linha Draft | Lane; a tática salva só aparece nessas abas quando a opção está marcada."],
+  },
+  {
     version: "1.64",
     date: "2026-11-19",
     changes: ["Táticas, visão Lane: arraste o ícone de um campeão para a esquerda ou a direita para mudar a ordem dos picks e bans."],

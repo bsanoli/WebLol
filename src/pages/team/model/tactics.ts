@@ -60,28 +60,26 @@ export const hasTactic = (state: TacticsState, compId: string | null) =>
   !!readTactic(state, compId).trim() || readTacticImages(state, compId).length > 0
 
 // Táticas salvas: ficam na lista de comps com a marca `tactic`, mas não são composições.
-// Aparecem em Opções por posição ou na Ordem do draft só quando a parte correspondente foi preenchida.
+// Aparecem em Opções por posição ou na Ordem do draft só quando essa opção está marcada na tática.
 export type TacticPanel = "draft" | "lane"
 type TacticItem = Composition & { tactic?: boolean; tacticViews?: Partial<Record<TacticPanel, boolean>> }
 
 export const isSavedTactic = (item: unknown): boolean => (item as TacticItem | undefined)?.tactic === true
 
-const hasChampions = (item: Composition) => Object.values(item.lanes).some(list => list.length > 0)
-
 /** Cria a tática salva a partir de uma comp (cópia dos picks) ou vazia. */
-export function createSavedTactic(source: Composition | null, id: string, name: string, now: number, panel: TacticPanel): TacticItem {
+export function createSavedTactic(source: Composition | null, id: string, name: string, now: number): TacticItem {
   const base = source ? structuredClone(source) as TacticItem : blank(name) as TacticItem
-  const item: TacticItem = { ...base, id, name, updated: now, tactic: true, tacticViews: {} }
-  if (hasChampions(item)) item.tacticViews = { [panel]: true }
-  return item
+  return { ...base, id, name, updated: now, tactic: true, tacticViews: {} }
 }
 
-/** Marca em qual visão a tática foi preenchida; sem campeões ela some das outras abas. */
-export function markTacticPanel(item: Composition, panel: TacticPanel) {
+/** Liga ou desliga a tática em Opções por posição ("lane") ou na Ordem do draft ("draft"). */
+export function setTacticView(item: Composition, panel: TacticPanel, on: boolean) {
   const tactic = item as TacticItem
   if (!tactic.tactic) return
-  tactic.tacticViews = hasChampions(item) ? { ...tactic.tacticViews, [panel]: true } : {}
+  tactic.tacticViews = { ...tactic.tacticViews, [panel]: on }
 }
+
+export const tacticShownIn = (item: Composition, panel: TacticPanel) => !!(item as TacticItem).tacticViews?.[panel]
 
 /** Comps que aparecem numa visão do editor: táticas salvas primeiro, só se preenchidas naquela visão. */
 export function itemsForView<T extends Composition>(items: T[], panel: TacticPanel): T[] {

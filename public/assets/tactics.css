@@ -161,3 +161,13 @@ button.tx-pick > .tx-pick-name, button.tx-pick > .tx-pick-champ { grid-column: 2
 .tx-prio-champ[draggable="true"]:active { cursor: grabbing; }
 .tx-prio-champ img { -webkit-user-drag: none; }
 .tx-prio-champs.drop { outline: 1px dashed var(--wl-accent); outline-offset: 3px; border-radius: 4px; }
+
+/* Aplicar a tática em outras abas (centro da linha Draft | Lane) */
+.tx-apply { display: flex; flex: 1; align-items: center; justify-content: center; gap: 6px; min-width: 0; color: var(--mut); font-size: 12px; }
+#v-comps .tx-apply-option { display: inline-flex; align-items: center; gap: 6px; min-height: 30px; padding: 0 10px; border: 1px solid var(--line); border-radius: var(--wl-control-radius); background: transparent; color: var(--txt); font-size: 12px; white-space: nowrap; cursor: pointer; }
+#v-comps .tx-apply-option:hover { background: color-mix(in srgb, var(--txt) 8%, transparent); }
+#v-comps .tx-apply-option:focus-visible { outline: 2px solid var(--txt); outline-offset: 1px; }
+#v-comps .tx-apply-option.on { border-color: var(--wl-accent); background: var(--wl-accent-soft); }
+.tx-check { display: grid; place-items: center; width: 14px; height: 14px; border: 1px solid var(--mut); border-radius: 3px; }
+.tx-apply-option.on .tx-check { border-color: var(--wl-accent); background: var(--wl-accent); color: var(--bg); }
+.tx-check .icon { width: 11px; height: 11px; }

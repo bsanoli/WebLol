@@ -1,7 +1,7 @@
 // @ts-nocheck -- Usa os mesmos helpers de markup do editor legado (img, esc, LN).
 import { iconMarkup, laneIconMarkup } from "@/shared/ui/icon"
 import { DRAFT_SIDE, PICKNAME, compositionPreview, draftOf, sideDot } from "./draft"
-import { isSavedTactic } from "../model/tactics"
+import { isSavedTactic, tacticShownIn } from "../model/tactics"
 
 /** Picks e bans em formato reduzido, um lado por coluna. Numa tática salva os slots escolhem o alvo do seletor. */
 function draftSummaryHTML(c, { LN, img, esc, editable, active }) {
@@ -99,11 +99,13 @@ export function tacticsHTML(c, { compositions, general, text, images = [], hasTa
   const hint = general
     ? "Ideias de jogo que valem para qualquer composição."
     : editable
-      ? "Tática salva: escreva o plano e, se quiser, monte os picks em Draft ou em Lane."
+      ? "Tática salva: escreva o plano, monte os picks em Draft ou em Lane e marque em quais abas ela deve aparecer."
       : "Como jogar com esta composição: rotações, objetivos, lutas e condição de vitória."
   const action = editable
     ? `<button type="button" data-slot="button" data-variant="ghost" data-size="sm" class="tx-action" data-tactic-delete>${iconMarkup("trash")} Excluir tática</button>`
     : `<button type="button" data-slot="button" data-variant="outline" data-size="sm" class="tx-action" data-tactic-save>${iconMarkup("check")} Salvar tática</button>`
+  const applyHTML = editable ? `<div class="tx-apply" role="group" aria-label="Aplicar a tática em outras abas"><span>Aplicar em</span>${[["lane", "Opções por posição"], ["draft", "Ordem do draft"]]
+    .map(([value, label]) => { const on = tacticShownIn(c, value); return `<button type="button" role="checkbox" class="tx-apply-option${on ? " on" : ""}" data-tactic-view="${value}" aria-checked="${on}"><span class="tx-check" aria-hidden="true">${on ? iconMarkup("check") : ""}</span>${label}</button>` }).join("")}</div>` : ""
   const switcher = general ? "" : `<div class="tx-panel-switch" role="group" aria-label="Visão da comp">${[["draft", "Draft"], ["lane", "Lane"]]
     .map(([value, label]) => `<button type="button" data-tactic-panel="${value}" aria-pressed="${panel === value}"${panel === value ? ' class="on"' : ""}>${label}</button>`).join("")}</div>`
   const body = general
@@ -124,7 +126,7 @@ export function tacticsHTML(c, { compositions, general, text, images = [], hasTa
     <aside class="tx-aside" aria-label="Táticas, composições e draft">
       <div class="tx-tabs" role="group" aria-label="Escolher a tática">${generalTab}${newTab}${tabs}</div>
       <div class="tx-draft">
-        <div class="tx-panel-row">${switcher}${action}</div>
+        <div class="tx-panel-row">${switcher}${applyHTML}${action}</div>
         ${body}
         ${picker}
       </div>
