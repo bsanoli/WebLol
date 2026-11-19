@@ -35,6 +35,9 @@ const clone=o=>JSON.parse(JSON.stringify(o));
 const snapshotFrame=({pos,lines,wards,waves,destroyedTowers})=>clone({pos,lines:lines??[],wards:readWards(wards),waves:readWaves(waves),destroyedTowers:Array.isArray(destroyedTowers)?destroyedTowers:[]});
 const canChangeFrame=()=>!M.playing&&!M.transition;
 const { getPerspective, resetPerspective } = mountMapVision(() => {
+  $("#map-preview-notice").textContent = getPerspective() === "both"
+    ? "Prévia tática aproximada da visão das duas equipes."
+    : "Prévia tática aproximada da visão da equipe.";
   renderStat();
   battlefield.renderTowers();
   battlefield.renderSight(visibleFrame());

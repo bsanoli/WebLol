@@ -1,4 +1,4 @@
-import { clamp, isSide, laneLabel, mapRadius, nearestLane, progressOnLane, readWaves, sideLabel, towerAttack, towers, waveKey, wavePosition, type Side, type Wave } from "../model/battlefield"
+import { clamp, isSide, laneLabel, mapRadius, nearestLane, progressOnLane, readWaves, sideLabel, towerAttack, towers, waveKey, wavePosition, type MapPerspective, type Wave } from "../model/battlefield"
 import type { MapPoint, MapStyle } from "../model/faelights"
 import type { WardScene } from "../model/wards"
 import { mountMapSightLayer, type SightFrame } from "./map-sight-layer"
@@ -58,7 +58,7 @@ export function mountBattlefield({ read, write, canEdit, getTool, getPerspective
   write: (changes: Changes) => void
   canEdit: () => boolean
   getTool: () => string
-  getPerspective: () => Side | "all"
+  getPerspective: () => MapPerspective
   point: (event: MouseEvent) => MapPoint
   wardScene: () => WardScene
   uid: () => string

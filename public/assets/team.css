@@ -714,8 +714,9 @@ body:has(#v-map.on) > header { flex:none; }
 .map-stage-bar,.map-camera-controls,.map-vision-controls{display:flex;align-items:center;gap:var(--wl-space-1)}
 .map-stage-bar{flex-wrap:wrap}
 .map-vision-controls { padding-inline-start:var(--wl-space-1); border-inline-start:1px solid var(--wl-divider); }
-#v-map .map-vision-controls [data-vision="b"] { color:var(--wl-side-blue-text); }
-#v-map .map-vision-controls [data-vision="r"] { color:var(--wl-side-red-text); }
+#v-map .map-vision-controls :is([data-vision="b"],[data-side="b"]) { color:var(--wl-side-blue-text); }
+#v-map .map-vision-controls :is([data-vision="r"],[data-side="r"]) { color:var(--wl-side-red-text); }
+.map-vision-controls [data-vision="both"] .icon { width:20px; height:20px; }
 #v-map .map-vision-controls [aria-pressed="true"] { background:var(--wl-raised); box-shadow:inset 0 0 0 1px currentColor; }
 #v-map .map-vision-controls [data-map-tip]::after { inset-inline:auto 0; }
 .map-camera-controls {

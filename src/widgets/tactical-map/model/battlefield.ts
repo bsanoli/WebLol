@@ -1,6 +1,7 @@
 import type { MapPoint, MapStyle } from "./faelights"
 
 export type Side = "b" | "r"
+export type MapPerspective = Side | "both" | "all"
 export type Lane = keyof typeof routes
 export type Wave = { id: string; side: Side; lane: Lane; progress: number }
 export const waveKey = ({ lane, side }: Pick<Wave, "lane" | "side">) => `${lane}:${side}` as const

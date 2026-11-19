@@ -3,7 +3,7 @@ import { expect, test, type FrameLocator, type Page } from "@playwright/test"
 const size = { width: 1600, height: 1000 }
 
 const vision = (team: Page | FrameLocator) => team.getByRole("group", { name: "Visão", exact: true })
-const visionButton = (team: Page | FrameLocator, side: "geral" | "azul" | "vermelha") =>
+const visionButton = (team: Page | FrameLocator, side: "geral" | "azul" | "vermelha" | "azul e vermelha") =>
   vision(team).getByRole("button", { name: `Visão ${side}`, exact: true })
 
 test("Abre Camadas com ícones em 60% e mantém o tamanho escolhido", async ({ page }) => {
@@ -449,7 +449,24 @@ test("Destrói e restaura torres nas visões de equipe sem ligar o alcance de at
   await expect(red).toHaveAttribute("aria-pressed", "false")
   await expect(sight).toHaveCount(11)
 
-  await visionButton(page, "geral").click()
+  const combined = visionButton(page, "azul e vermelha")
+  await combined.press("Space")
+  await expect(combined).toHaveAttribute("aria-pressed", "true")
+  await expect(visionButton(page, "vermelha")).toHaveAttribute("aria-pressed", "false")
+  await expect(page.getByText("Prévia tática aproximada da visão das duas equipes.")).toBeVisible()
+  await expect(page.locator("#tactical-fog [data-champion-sight]")).toHaveCount(10)
+  await expect(sight).toHaveCount(22)
+  await expect(rings).toHaveCount(0)
+  await red.click()
+  await expect(sight).toHaveCount(21)
+  await red.click()
+  await expect(sight).toHaveCount(22)
+  await combined.click()
+  await expect(visionButton(page, "geral")).toHaveAttribute("aria-pressed", "true")
+  await expect(sight).toHaveCount(0)
+  await combined.click()
+  await page.getByRole("button", { name: "Resetar mapa" }).click()
+  await expect(visionButton(page, "geral")).toHaveAttribute("aria-pressed", "true")
   await expect(red).toBeHidden()
   await expect(sight).toHaveCount(0)
   await reach.click()
@@ -730,6 +747,11 @@ test("Move wards e waves, alterna a visão aliada e restaura o estado das torres
   await visionButton(page, "azul").click()
   await expect(waveSight).toHaveCount(3)
   await expect(page.locator("#tactical-fog [data-faelight-sight]")).toHaveCount(0)
+  await visionButton(page, "azul e vermelha").click()
+  await expect(waveSight).toHaveCount(6)
+  await expect(page.locator('#tactical-fog [data-sight-source="ward"]')).toHaveCount(1)
+  await expect(page.locator("#tactical-fog [data-faelight-sight]")).toHaveCount(1)
+  await expect(page.locator('#tactical-fog [data-sight-source="tower"]')).toHaveCount(21)
 
   await page.getByRole("button", { name: "Selecionar passo 1" }).click()
   await expect(tower).toHaveAttribute("aria-pressed", "false")

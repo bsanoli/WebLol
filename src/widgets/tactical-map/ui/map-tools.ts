@@ -1,4 +1,4 @@
-import { isSide, type Side } from "../model/battlefield"
+import { isSide, type MapPerspective, type Side } from "../model/battlefield"
 
 type Tool = "move" | "hand" | "draw" | "freehand" | "erase" | "ward" | "wave-b" | "wave-r"
 
@@ -28,8 +28,8 @@ const mapTools: ToolOption[] = [
 
 export function mountMapVision(onChange: () => void) {
   const options = document.querySelectorAll<HTMLButtonElement>("#map-perspective [data-vision]")
-  let perspective: Side | "all" = "all"
-  function setPerspective(next: Side | "all") {
+  let perspective: MapPerspective = "all"
+  function setPerspective(next: MapPerspective) {
     if (next === perspective) return
     perspective = next
     for (const button of options) button.setAttribute("aria-pressed", String(button.dataset.vision === next))
@@ -38,7 +38,7 @@ export function mountMapVision(onChange: () => void) {
   for (const option of options) {
     option.onclick = () => {
       const value = option.dataset.vision
-      setPerspective(isSide(value) && value !== perspective ? value : "all")
+      setPerspective((isSide(value) || value === "both") && value !== perspective ? value : "all")
     }
   }
   return {
