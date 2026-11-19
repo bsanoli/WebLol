@@ -14,7 +14,7 @@ import { KEY, uid, blank, loadTeamState } from "../model/local-state"
 import { DRAFT_SIDE, PICKNAME, compositionPreview, draftHTML, draftOf, sideDot } from "./draft"
 import { mountTeamNavigation } from "./team-navigation"
 import { tacticGridHTML, tacticsHTML } from "./tactics"
-import { createSavedTactic, ensureTactics, hasTactic, isSavedTactic, itemsForView, setTacticView, readTactic, readTacticImages, writeTactic } from "../model/tactics"
+import { createSavedTactic, ensureTactics, hasTactic, isSavedTactic, itemsForView, setTacticView, tacticShownIn, readTactic, readTacticImages, writeTactic } from "../model/tactics"
 import { compressImage } from "../lib/compress-image"
 import { capturePickFeedback } from "./pick-feedback"
 
@@ -146,7 +146,7 @@ function renderList(){
     });
   });
 }
-function selectComp(id){S.cur=id;save(false);renderAll();publishTeamRoute("comps")}
+function selectComp(id){S.cur=id;if(!isSavedTactic(S.comps.find(c=>c.id===id)))S.lastComp=id;save(false);renderAll();publishTeamRoute("comps")}
 $("#clist").onclick = event => {
   const item = event.target.closest(".ci");
   if (!item || item.dataset.id === S.cur) return;
@@ -201,7 +201,17 @@ function hasCompNotes(c,dv){
   return !!d.note[d.side]?.trim() || LANES.some(lane=>c.laneNotes[lane.k]?.trim());
 }
 const markCompNotes=()=>$("#composition-notes")?.classList.toggle("has-notes",hasCompNotes(cur(),S.view==="draft"));
+// Fora da aba Táticas, uma tática salva só fica aberta se estiver aplicada àquela aba;
+// senão volta para a última comp usada (ou a primeira comp da lista).
+function keepCompositionForView(){
+  if(S.view==="tactics")return;
+  const c=cur();
+  if(!isSavedTactic(c)||tacticShownIn(c,S.view==="draft"?"draft":"lane"))return;
+  const next=S.comps.find(x=>x.id===S.lastComp&&!isSavedTactic(x))||S.comps.find(x=>!isSavedTactic(x));
+  if(next){S.cur=next.id;save();}
+}
 function renderEditor(){
+  keepCompositionForView();
   const previousComposition = $("#editor").dataset.motionComposition;
   const c=cur(),dv=S.view==="draft",tv=S.view==="tactics";
   const view = tv ? "tactics" : dv ? "draft" : "lanes";
@@ -785,6 +795,6 @@ wireCopyButton($("#copy-play"), "map");
 /* ===== Início ===== */
 S = loadTeamState();
 ensureTactics(S);
-function renderAll(){renderList();renderEditor();renderGrid()}
+function renderAll(){keepCompositionForView();renderList();renderEditor();renderGrid()}
 plays();
 if (!usesParentNavigation) void openTeamView("comps");

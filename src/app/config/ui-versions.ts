@@ -8,6 +8,11 @@ export interface UiVersion {
 
 export const UI_VERSIONS: UiVersion[] = [
   {
+    version: "1.66",
+    date: "2026-11-19",
+    changes: ["Correção: ao sair da aba Táticas com uma tática aberta, Opções por posição e Ordem do draft voltam para uma composição da aba quando a tática não está aplicada a ela."],
+  },
+  {
     version: "1.65",
     date: "2026-11-19",
     changes: ["Táticas: opções Aplicar em Opções por posição e/ou Ordem do draft na linha Draft | Lane; a tática salva só aparece nessas abas quando a opção está marcada."],
