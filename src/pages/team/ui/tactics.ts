@@ -47,7 +47,7 @@ function laneHTML(c, { LN, img, esc, editable, active }) {
       ? list.map((n, i) => {
         const main = i === 0 && !ban
         const label = ban ? `Ban: ${esc(n)}` : main ? `Principal em ${lane.n}: ${esc(n)}` : `Tornar ${esc(n)} principal em ${lane.n}`
-        const content = `${img(n)}${main ? `<b>${esc(n)}</b>` : ""}`
+        const content = img(n)
         return `<li class="tx-prio-champ${main ? " main" : ""}">${ban || main
           ? `<span class="tx-prio-static" title="${esc(n)}" aria-label="${label}">${content}</span>`
           : `<button type="button" class="tx-prio-alt" data-priority="${esc(n)}" data-lane="${k}" aria-label="${label}" title="${i + 1}ª opção · clique para tornar principal">${content}</button>`}</li>`

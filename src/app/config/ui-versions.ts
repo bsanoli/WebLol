@@ -8,6 +8,11 @@ export interface UiVersion {
 
 export const UI_VERSIONS: UiVersion[] = [
   {
+    version: "1.63",
+    date: "2026-11-19",
+    changes: ["Táticas, visão Lane: saiu o nome do campeão principal; ficam só os ícones."],
+  },
+  {
     version: "1.62",
     date: "2026-11-19",
     changes: ["Táticas: prints junto do texto da tática. Cole com Ctrl+V, arraste a imagem ou use Adicionar print; clique na miniatura para ampliar."],
