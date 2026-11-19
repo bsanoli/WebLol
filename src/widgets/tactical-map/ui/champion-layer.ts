@@ -1,7 +1,7 @@
 import { laneIconMarkup } from "@/shared/ui/icon"
 import type { MapPoint } from "../model/faelights"
 import { clamp } from "../model/battlefield"
-import { RN, TOKS } from "../model/play"
+import { RN, TOKS } from "@/entities/tactical-play"
 
 type Positions = Record<string, MapPoint>
 type Side = "b" | "r"

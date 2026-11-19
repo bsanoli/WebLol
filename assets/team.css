@@ -614,9 +614,8 @@ body:has(#v-map.on) > header { flex:none; }
   background: var(--wl-surface);
 }
 #mapw { position:relative; display:grid; grid-template-columns:minmax(0,1fr) clamp(220px,17vw,252px); grid-template-rows:auto minmax(0,1fr); gap:var(--wl-space-2) var(--wl-space-3); width:100%; min-height:0; padding:var(--wl-space-2) var(--wl-gutter); }
-.map-stage { display:grid; grid-template-rows:auto minmax(0,1fr); grid-column:1; grid-row:2; min-width:0; min-height:0; }
-.map-tool-options { grid-row:1; margin-bottom:var(--wl-space-2); }
-.map-board-slot { grid-row:2; position:relative; container-type:size; display:grid; place-items:center; min-height:0; }
+.map-stage { display:grid; grid-template-rows:minmax(0,1fr); grid-column:1; grid-row:2; min-width:0; min-height:0; }
+.map-board-slot { position:relative; container-type:size; display:grid; place-items:center; min-height:0; }
 .map-sidebar { grid-column:2; grid-row:2; display:grid; grid-template-rows:auto minmax(0,1fr); align-items:start; gap:var(--wl-space-2); min-width:0; min-height:0; }
 .map-sidebar > [role=tabpanel] { grid-row:2; }
 #map-sidebar-tabs { padding:var(--wl-space-1); border:1px solid var(--wl-divider); border-radius:var(--wl-panel-radius); background:var(--wl-surface); }
@@ -709,8 +708,7 @@ body:has(#v-map.on) > header { flex:none; }
 }
 .map-disclosure[open] > [data-map-tip]::after { display:none; }
 .map-toolbar:has([data-map-menu][open]) [data-map-tip]::after { display:none; }
-#v-map:has(#map-arrow-options:not([hidden])) .map-modes [aria-controls="map-arrow-options"]::after,
-#v-map:has(#map-ward-options:not([hidden])) .map-modes [aria-controls="map-ward-options"]::after { display:none; }
+#v-map:has(.map-tool-menu:not([hidden])) .map-modes [aria-controls][aria-checked="true"]::after { display:none; }
 .map-stage-bar,.map-camera-controls,.map-vision-controls{display:flex;align-items:center;gap:var(--wl-space-1)}
 .map-stage-bar{flex-wrap:wrap}
 .map-vision-controls { padding-inline-start:var(--wl-space-1); border-inline-start:1px solid var(--wl-divider); }
@@ -726,26 +724,20 @@ body:has(#v-map.on) > header { flex:none; }
 }
 #v-map .map-camera-controls [data-map-tip]::after { inset-block:auto calc(100% + var(--wl-space-1)); inset-inline:auto 0; }
 .map-camera-controls output{min-width:4ch;text-align:center;font-size:var(--wl-detail-size);color:var(--mut);font-variant-numeric:tabular-nums}
-.map-tool-options:not(:has(> :not([hidden]))) { display:none; }
-.map-tool-options,#map-ward-options:not([hidden]) {
-  display:flex; flex-wrap:wrap; align-items:center; gap:var(--wl-space-2);
-}
-.map-tool-options { padding:var(--wl-space-1) var(--wl-space-2); border:1px solid var(--wl-divider); border-radius:var(--wl-control-radius); }
-.map-tool-options { margin-inline-start:var(--map-toolbar-inset, 0px); }
-#map-arrow-options {
+.map-tool-menu {
   position:absolute; z-index:20;
-  left:var(--map-drawing-left, 0px); top:var(--map-drawing-top, 100%);
+  left:var(--map-tool-menu-left, 0px); top:var(--map-tool-menu-top, 100%);
   display:grid; gap:var(--wl-space-2);
-  width:min(248px, calc(100vw - var(--wl-space-4))); padding:var(--wl-space-3);
+  width:min(var(--map-tool-menu-width, 248px), calc(100vw - var(--wl-space-4))); padding:var(--wl-space-3);
   background:var(--wl-raised); border:1px solid var(--wl-line);
   border-radius:var(--wl-control-radius); box-shadow:0 6px 16px #0006;
 }
+#map-ward-options { --map-tool-menu-width:304px; }
 #map-colors-title { margin:0; font-size:var(--wl-detail-size); font-weight:600; }
-.map-stroke-options { display:grid; grid-template-columns:auto minmax(0,1fr); align-items:center; gap:var(--wl-space-1) var(--wl-space-2); }
-.map-tool-options .team-select,#map-arrow-options .team-select { min-width:88px; }
-.map-stroke-options label,#map-ward-side-label{color:var(--mut);font-size:var(--wl-detail-size)}
+.map-tool-fields { display:grid; grid-template-columns:auto minmax(0,1fr); align-items:center; gap:var(--wl-space-1) var(--wl-space-2); }
+.map-tool-fields .team-select { min-width:88px; }
+.map-tool-fields label { color:var(--mut); font-size:var(--wl-detail-size); }
 .map-ward-hint { margin: 0; color: var(--mut); font-size: var(--wl-detail-size); line-height: 1.5; }
-#map-ward-type-label { color: var(--mut); font-size: var(--wl-detail-size); }
 #map-ward-legend:not([hidden]) { display: grid; gap: var(--wl-space-1); }
 #map-ward-types, .map-vision-key { display: flex; flex-wrap: wrap; gap: var(--wl-space-1) var(--wl-space-4); }
 #map-ward-types { list-style: none; padding: 0; margin: 0; }

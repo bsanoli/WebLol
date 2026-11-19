@@ -29,7 +29,6 @@ export function mountWardLayer({ read, write, getTool, isPlaying, pointFromEvent
   const realistic = map.querySelector("#mapimg")!
   const spots = map.querySelector("#map-faelights")!
   const cursor = map.querySelector<HTMLButtonElement>("#map-ward-cursor")!
-  const hint = document.querySelector<HTMLElement>("#map-ward-hint")!
   const legend = document.querySelector<HTMLElement>("#map-ward-legend")!
   const typeLegend = document.querySelector<HTMLElement>("#map-ward-types")!
   const bonusLegend = document.querySelector<HTMLElement>("#map-ward-bonus-legend")!
@@ -245,6 +244,5 @@ export function mountWardLayer({ read, write, getTool, isPlaying, pointFromEvent
     map.classList.toggle("ward-editing", editing)
     cursor.setAttribute("aria-label", "Colocar ward no mapa")
     if (editing && focusCursor) cursor.focus({ preventScroll: true })
-    hint.textContent = "Clique no mapa para colocar uma ward. Sobre um Lume Feérico, ela mostra a visão extra."
   } }
 }

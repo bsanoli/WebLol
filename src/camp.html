@@ -32,7 +32,7 @@
 </header>
 <p id="route-note" class="route-note" role="status" hidden></p>
 
-<section id="v-comps" class="view on">
+<section id="v-comps" class="view">
  <div class="comp-workspace">
  <div class="page-head team-page-heading"><h1>Composições do time</h1><div id="team-files-comps"></div></div>
  <div id="comps">
@@ -98,16 +98,25 @@
     <div class="map-edit-toolbar">
      <div class="map-primary-tools">
       <div id="map-modes"></div>
-      <div id="map-arrow-options" role="group" aria-label="Opções de desenho" hidden>
+      <div id="map-arrow-options" class="map-tool-menu" role="group" aria-label="Opções de desenho" hidden>
        <h3 id="map-colors-title">Cor da seta</h3>
        <div id="cols" role="group" aria-labelledby="map-colors-title"></div>
-       <div class="map-stroke-options">
+       <div class="map-tool-fields">
         <label for="map-stroke-width-trigger" id="map-stroke-width-label">Espessura</label>
         <select id="map-stroke-width" aria-labelledby="map-stroke-width-label"><option value="2">Fina</option><option value="3.2" selected>Média</option><option value="5">Grossa</option></select>
         <label for="map-stroke-style-trigger" id="map-stroke-style-label">Estilo</label>
         <select id="map-stroke-style" aria-labelledby="map-stroke-style-label"><option value="solid">Contínuo</option><option value="dashed">Tracejado</option></select>
        </div>
        <label id="map-arrowhead-option" class="map-check" hidden><input type="checkbox" id="map-stroke-arrowhead"> Ponta de seta</label>
+      </div>
+      <div id="map-ward-options" class="map-tool-menu" role="group" aria-label="Opções de ward" aria-describedby="map-ward-hint" hidden>
+       <div class="map-tool-fields">
+        <label for="map-ward-side-trigger" id="map-ward-side-label">Lado da ward</label>
+        <select id="map-ward-side" aria-labelledby="map-ward-side-label"><option value="b">Azul</option><option value="r">Vermelho</option></select>
+        <label for="map-ward-type-trigger" id="map-ward-type-label">Tipo de ward</label>
+        <select id="map-ward-type" aria-labelledby="map-ward-type-label"></select>
+       </div>
+       <p id="map-ward-hint" class="map-ward-hint">Clique no mapa para colocar uma ward. Sobre um Lume Feérico, ela mostra a visão extra.</p>
       </div>
       <div class="map-vision-controls" id="map-perspective" role="group" aria-label="Visão">
        <button type="button" data-slot="button" data-variant="ghost" data-size="icon-sm" data-vision="all" aria-pressed="true" aria-label="Visão geral" data-map-tip="Visão geral"><svg class="icon" aria-hidden="true"><use href="assets/icons.svg#ward"></use></svg></button>
@@ -133,10 +142,10 @@
         <span class="map-cleanup-glyph" aria-hidden="true"><svg class="icon" aria-hidden="true"><use href="assets/icons.svg#map-tool-brush"></use></svg><span class="map-cleanup-badge">×</span></span>
        </button>
        <button type="button" data-slot="button" data-variant="ghost" data-size="icon-sm" id="map-clear-wards" aria-label="Limpar wards" data-map-tip="Limpar wards" disabled>
-        <span class="map-cleanup-glyph" aria-hidden="true"><img src="assets/lol/hud/ward-3340.png" alt=""><span class="map-cleanup-badge">×</span></span>
+        <span class="map-cleanup-glyph" aria-hidden="true"><img data-src="assets/lol/hud/ward-3340.png" alt=""><span class="map-cleanup-badge">×</span></span>
        </button>
        <button type="button" data-slot="button" data-variant="ghost" data-size="icon-sm" id="map-clear-waves" aria-label="Limpar waves" data-map-tip="Limpar waves" disabled>
-        <span class="map-cleanup-glyph" aria-hidden="true"><img src="assets/lol/hud/bluerange_circle.png" alt=""><span class="map-cleanup-badge">×</span></span>
+        <span class="map-cleanup-glyph" aria-hidden="true"><img data-src="assets/lol/hud/bluerange_circle.png" alt=""><span class="map-cleanup-badge">×</span></span>
        </button>
        <button type="button" data-slot="button" data-variant="destructive" data-size="icon-sm" id="map-clear-all" aria-label="Limpar tudo" data-map-tip="Limpar todas as anotações" disabled><svg class="icon" aria-hidden="true"><use href="assets/icons.svg#trash"></use></svg></button>
       </div>
@@ -186,20 +195,11 @@
    </div>
    </div>
   <div class="map-stage">
-   <div class="map-tool-options">
-    <div id="map-ward-options" hidden>
-     <label for="map-ward-side-trigger" id="map-ward-side-label">Lado da ward</label>
-     <select id="map-ward-side" aria-labelledby="map-ward-side-label"><option value="b">Azul</option><option value="r">Vermelho</option></select>
-     <label id="map-ward-type-label" for="map-ward-type-trigger">Tipo de ward</label>
-     <select id="map-ward-type" aria-labelledby="map-ward-type-label"></select>
-    </div>
-    <p id="map-ward-hint" class="map-ward-hint" hidden></p>
-   </div>
    <div class="map-board-slot">
    <div id="map-viewport" role="region" aria-label="Mapa da jogada" tabindex="0" class="map-viewport">
    <div id="map">
     <svg viewBox="0 0 100 100" id="schem"></svg>
-    <img class="bg" src="./assets/lol/map/map11.png" alt="">
+    <img class="bg" data-src="./assets/lol/map/map11.png" alt="">
     <img class="bg" id="mapimg" alt="">
     <svg id="map-tower-ranges" viewBox="0 0 100 100" aria-hidden="true"></svg>
     <div id="map-faelights" role="group" aria-label="Localização dos Lumes Feéricos" hidden></div>

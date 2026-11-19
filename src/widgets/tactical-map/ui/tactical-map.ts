@@ -1,7 +1,7 @@
 // @ts-nocheck -- Integração legada com o DOM e dados locais.
 import { askName, confirmAction } from "@/shared/ui/dialog-controls"
 import { iconMarkup } from "@/shared/ui/icon"
-import { TOKS, blankPlay, initialFrame, preset } from "../model/play"
+import { TOKS, blankPlay, ensureTeamPlays, initialFrame, preset } from "@/entities/tactical-play"
 import { readWards } from "../model/wards"
 import { readWaves } from "../model/battlefield"
 import { mountBattlefield } from "./battlefield-layer"
@@ -29,7 +29,7 @@ const resetMap = $("#map-reset");
 const initialPositions = initialFrame().pos;
 const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
 let M={tool:"move",sel:-1,playing:false};
-function plays(){if(!Array.isArray(getState().plays)||!getState().plays.length){getState().plays=[blankPlay(uid, "Jogada 1")];getState().curPlay=getState().plays[0].id}if(!getState().plays.some(p=>p.id===getState().curPlay))getState().curPlay=getState().plays[0].id;return getState().plays}
+const plays = () => ensureTeamPlays(getState(), uid);
 const play=()=>plays().find(p=>p.id===getState().curPlay);
 const clone=o=>JSON.parse(JSON.stringify(o));
 const snapshotFrame=({pos,lines,wards,waves,destroyedTowers})=>clone({pos,lines:lines??[],wards:readWards(wards),waves:readWaves(waves),destroyedTowers:Array.isArray(destroyedTowers)?destroyedTowers:[]});
@@ -123,7 +123,7 @@ const contextMenu = mountMapContextMenu(map, viewport, event => {
     label: tool.label, icon: tool.icon, selected: M.tool === tool.value,
     run: () => {
       if (M.tool !== tool.value) selectTool(tool.value, false);
-      else showDrawingOptions();
+      else showToolOptions();
     },
   })),
   ...historyActions.map(({ button, ...action }) => ({
@@ -147,7 +147,7 @@ mountMapSidebar($("#v-map"));
 mountMapPanel(mountSectionTabs);
 const syncStepPages = mountStepPages();
 
-const { render: renderToolControls, showDrawingOptions } = mountMapTools({
+const { render: renderToolControls, showToolOptions } = mountMapTools({
   map, canEdit, canMove: canChangeFrame, currentTool: () => M.tool, chooseColor: drawing.setColor, mountToolGroup,
   chooseTool: tool => selectTool(tool, true),
 });
@@ -409,7 +409,14 @@ $("#splay").onclick = async () => {
   renderPlays();
 };
 
-return { plays, renderPlays, renderMapImageSwitch, setMapImg, selectPlay(id) {
+for (const image of $("#v-map").querySelectorAll("img[data-src]")) {
+  image.src = image.dataset.src;
+  delete image.dataset.src;
+}
+renderMapImageSwitch();
+setMapImg();
+
+return { renderPlays, selectPlay(id) {
   if (getState().curPlay === id) return;
   stopPlayback();
   M.sel = -1;

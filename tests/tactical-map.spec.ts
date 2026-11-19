@@ -343,7 +343,7 @@ test("Setas retas e curvas encaixam o traço na ponta", async ({ page }) => {
   expect(Number(await canvas.getAttribute("data-shaft-inset"))).toBeGreaterThan(4)
 })
 
-test("Aviso de visão e paleta preservam a área e a câmera do mapa", async ({ page }) => {
+test("Aviso de visão e menus de ferramenta preservam a área e a câmera do mapa", async ({ page }) => {
   await page.setViewportSize(size)
   await page.emulateMedia({ reducedMotion: "reduce" })
   await page.goto("/#/time/mapa")
@@ -383,6 +383,28 @@ test("Aviso de visão e paleta preservam a área e a câmera do mapa", async ({ 
   await width.press("Escape")
   await expect(options).toBeHidden()
   await expect(brush).toBeFocused()
+  expect(await bounds()).toEqual(initial)
+
+  const ward = tool("Colocar ward")
+  const wardOptions = team.getByRole("group", { name: "Opções de ward" })
+  await ward.click()
+  await expect(wardOptions).toBeVisible()
+  expect(await bounds()).toEqual(initial)
+  await choose(team, "Lado da ward", "Vermelho")
+  const wardType = wardOptions.getByRole("combobox", { name: "Tipo de ward" })
+  await wardType.click()
+  await team.getByRole("option", { name: /^Sentinela de Controle/ }).click()
+  await expect(wardOptions).toBeVisible()
+  await wardType.press("Escape")
+  await expect(wardOptions).toBeHidden()
+  await expect(ward).toBeChecked()
+  await expect(ward).toBeFocused()
+  await ward.click()
+  await expect(wardOptions).toBeVisible()
+  const wardPoint = await mapPoint(team, .55, .52)
+  await page.mouse.click(wardPoint.x, wardPoint.y)
+  await expect(wardOptions).toBeHidden()
+  await expect(team.getByRole("button", { name: "Mover Sentinela de Controle — Vermelho" })).toBeVisible()
   expect(await bounds()).toEqual(initial)
 
   await arrow.click()
@@ -556,6 +578,7 @@ async function drag(page: Page, from: { x: number; y: number }, to: { x: number;
 
 test("Desenha no zoom, limpa apenas setas e mantém a câmera em tela cheia", async ({ page }) => {
   await page.setViewportSize(size)
+  await page.emulateMedia({ reducedMotion: "reduce" })
   await page.goto("/#/time/mapa")
   await page.getByRole("button", { name: "Entrar sem usuário" }).click()
   const team = page.frameLocator("#v-camp")
@@ -829,7 +852,9 @@ test("Move campeões nas duas visões e reseta a visão e o quadro em edição",
   await page.goto("/camp.html")
   await page.getByRole("button", { name: "Mapa tático" }).click()
   const reset = page.getByRole("button", { name: "Resetar mapa" })
-  const positions = () => page.locator("#map .tok").evaluateAll(nodes => nodes.map(node => node.getAttribute("style")))
+  const tokens = page.locator("#map .tok")
+  await expect(tokens).toHaveCount(10)
+  const positions = () => tokens.evaluateAll(nodes => nodes.map(node => node.getAttribute("style")))
   const initial = await positions()
   await expect(reset).toBeDisabled()
   const general = visionButton(page, "geral")

@@ -2,6 +2,7 @@
 import { askChoice, askName, confirmAction, showDialog } from "@/shared/ui/dialog-controls"
 import { iconMarkup, laneIconMarkup } from "@/shared/ui/icon"
 import { lolAsset, lolChampion, lolImage } from "@/entities/champion"
+import { ensureTeamPlays } from "@/entities/tactical-play"
 import { clearTeamControls, mountChampionMenu, mountCompositionMenu, mountDraftChampionMenu, mountLaneNote, mountMapEmpty, mountMapSwitch, mountTeamSelect, mountSectionTabs, mountToolGroup } from "./team-controls"
 import { initializeTheme } from "@/shared/config/theme"
 import { revealContent } from "@/shared/lib/motion"
@@ -13,8 +14,6 @@ import { KEY, uid, blank, loadTeamState } from "../model/local-state"
 import { DRAFT_SIDE, PICKNAME, compositionPreview, draftHTML, draftOf, sideDot } from "./draft"
 import { mountTeamNavigation } from "./team-navigation"
 import { capturePickFeedback } from "./pick-feedback"
-import { mountKnowledge } from "@/widgets/team-knowledge"
-import { mountTacticalMap } from "@/widgets/tactical-map"
 
 initializeTheme()
 
@@ -31,6 +30,8 @@ const img=n=>`<span class="av">${esc(ini(n))}${lolImage(champArt(n)?.portrait,"c
 
 /* ===== Estado / armazenamento ===== */
 let S;
+const getState = () => S;
+const plays = () => ensureTeamPlays(S, uid);
 const savedStatus = $("#saved");
 const localSave = $("#local-save");
 
@@ -447,7 +448,9 @@ $("#imp").onchange=async e=>{
     const clean=comps.map(c=>{const b=blank(c.name);b.notes=c.notes||"";b.laneNotes=c.laneNotes||{};if(c.draft)b.draft=c.draft;b.updated=c.updated||Date.now();for(const l of LANES)b.lanes[l.k]=Array.isArray(c.lanes?.[l.k])?c.lanes[l.k].map(String):[];b.id=replace?(c.id||b.id):b.id;return b});
     S.comps=replace?clean:[...clean,...S.comps];S.cur=S.comps[0].id;
     if(Array.isArray(d.plays)){const ps=d.plays.filter(p=>p&&p.live&&Array.isArray(p.steps)).map(p=>({...p,id:replace?(p.id||uid()):uid()}));S.plays=replace?ps:[...plays(),...ps];plays()}
-    renderPlays();save();renderAll();publishTeamRoute(currentTeamView);toast(`${clean.length} comp(s) importada(s)`);
+    if (currentTeamView === "map") tacticalMap.renderPlays();
+    if (currentTeamView === "comps") renderAll();
+    save();publishTeamRoute(currentTeamView);toast(`${clean.length} comp(s) importada(s)`);
   }catch{toast("Arquivo inválido. Use um .json exportado por esta página.")}
   finally { e.target.value=""; }
 };
@@ -456,13 +459,18 @@ $("#imp").onchange=async e=>{
 const teamPages = {comps:"composicoes", map:"mapa", know:"conhecimento", cap:"gestao"};
 const guides = {obj:"objetivos", wave:"wave"};
 let currentTeamView = "comps";
+let routeRequest = 0;
+let tacticalMap;
+let renderKnow;
+let compositionsMounted = false;
 const usesParentNavigation = window.frameElement?.id === "v-camp";
 document.body.toggleAttribute("data-parent-navigation", usesParentNavigation);
 const renderTeamNavigation = usesParentNavigation ? () => {} : mountTeamNavigation($("#team-navigation"), handleTeamNavigation);
 
 function handleTeamNavigation(view) {
-  showTeamView(view);
-  publishTeamRoute(view, {includeItem:false});
+  void openTeamView(view).then(opened => {
+    if (opened) publishTeamRoute(view, {includeItem:false});
+  });
 }
 
 function showTeamView(view) {
@@ -472,7 +480,14 @@ function showTeamView(view) {
   $(filesSlot).append($("#team-files"));
   renderTeamNavigation(view, hasCaptainAccess());
   document.querySelectorAll(".view").forEach(section=>section.classList.toggle("on",section.id==="v-"+view));
-  if(view==="map")renderPlays();
+  if (view === "comps") {
+    if (!compositionsMounted) {
+      mountTeamSelect($("#sort"));
+      compositionsMounted = true;
+    }
+    renderAll();
+  }
+  if(view==="map")tacticalMap.renderPlays();
   if(view==="cap")renderCaptain();
 }
 
@@ -498,18 +513,43 @@ function renderCaptain() {
 (window as any).weblolTeamChanged = () => {
   const ok = hasCaptainAccess();
   renderTeamNavigation(currentTeamView, ok);
-  if (ok && wantCaptain) { wantCaptain = false; showTeamView("cap"); return; }
+  if (ok && wantCaptain) { wantCaptain = false; void openTeamView("cap"); return; }
   if ($("#v-cap").classList.contains("on")) {
     if (ok) renderCaptain();
-    else { showTeamView("comps"); publishTeamRoute("comps", {includeItem:false}); }
+    else { handleTeamNavigation("comps"); }
   }
 };
-renderTeamNavigation(currentTeamView, hasCaptainAccess());
-
 window.applyWebLolRoute = ([page, item], params) => {
-  let view=Object.keys(teamPages).find(key=>teamPages[key]===page)||"comps";
+  const view=Object.keys(teamPages).find(key=>teamPages[key]===page)||"comps";
+  return openTeamView(view, item, params);
+};
+
+async function openTeamView(view, item, params) {
+  const request = ++routeRequest;
   wantCaptain=false;
   if(view==="cap"&&!hasCaptainAccess()){view="comps";wantCaptain=true}
+  const note = $("#route-note");
+  if ((view === "map" && !tacticalMap) || (view === "know" && !renderKnow)) {
+    note.textContent = "Carregando esta seção…";
+    note.hidden = false;
+    try {
+      if (view === "map") {
+        const { mountTacticalMap } = await import("@/widgets/tactical-map");
+        if (request !== routeRequest) return false;
+        tacticalMap = mountTacticalMap({
+          getState, save, publishTeamRoute, toast, uid, img, esc, compositionPreview,
+          mountTeamSelect, mountMapEmpty, mountMapSwitch, mountToolGroup, mountSectionTabs, clearTeamControls,
+        });
+      } else {
+        const { mountKnowledge } = await import("@/widgets/team-knowledge");
+        if (request !== routeRequest) return false;
+        renderKnow = mountKnowledge({ getState, save, publishTeamRoute, mountSectionTabs });
+      }
+    } catch {
+      if (request === routeRequest) note.textContent = "Não foi possível carregar esta seção. Recarregue a página para tentar novamente.";
+      return false;
+    }
+  }
   let missing="";
   const matches=entry=>encodeURIComponent(entry.id)===item;
   if(view==="comps"){
@@ -518,22 +558,21 @@ window.applyWebLolRoute = ([page, item], params) => {
       if(comp){S.cur=comp.id;$("#csearch").value=""}
       else missing="A composição deste link não está disponível neste navegador. Conecte a pasta do time para carregar a versão oficial.";
     }
-    const mode=params.get("modo");
+    const mode=params?.get("modo");
     if(mode==="draft"||mode==="lane")S.view=mode==="draft"?"draft":"lanes";
-    renderAll();
   } else if(view==="map" && item){
     const selected=plays().find(matches);
-    if(selected) selectPlay(selected.id);
+    if(selected) tacticalMap.selectPlay(selected.id);
     if(!selected)missing="A jogada deste link não está disponível neste navegador. Conecte a pasta do time para carregar a versão oficial.";
   } else if(view==="know"){
     if(item)S.kTab=item==="wave"?"wave":"obj";
     renderKnow();
   }
-  const note=$("#route-note");
   note.textContent=missing;
   note.hidden=!missing;
   showTeamView(view);
-};
+  return true;
+}
 
 function wireCopyButton(button: HTMLButtonElement, view: "comps" | "map") {
   const icon = button.querySelector("use");
@@ -561,12 +600,6 @@ wireCopyButton($("#copy-play"), "map");
 
 /* ===== Início ===== */
 S = loadTeamState();
-const getState = () => S;
-const renderKnow = mountKnowledge({ getState, save, publishTeamRoute, mountSectionTabs });
-const { plays, renderPlays, renderMapImageSwitch, setMapImg, selectPlay } = mountTacticalMap({
-  getState, save, publishTeamRoute, toast, uid, img, esc, compositionPreview,
-  mountTeamSelect, mountMapEmpty, mountMapSwitch, mountToolGroup, mountSectionTabs, clearTeamControls,
-});
 function renderAll(){renderList();renderEditor();renderGrid()}
-mountTeamSelect($("#sort"));
-plays();renderAll();renderKnow();renderMapImageSwitch();setMapImg();renderPlays();
+plays();
+if (!usesParentNavigation) void openTeamView("comps");

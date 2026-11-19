@@ -9,3 +9,12 @@ const PRE={
 export function preset(k: keyof typeof PRE){const p: Record<string, number[]>={};for(const r of ROLES){p["b_"+r]=PRE[k][r].slice();p["r_"+r]=sw(PRE[k][r])}return p}
 export const initialFrame = () => ({ pos: preset("lane"), lines: [], wards: [], waves: [], destroyedTowers: [] });
 export const blankPlay=(uid: () => string,n?: string)=>({id:uid(),name:n||"Nova jogada",live:initialFrame(),steps:[],cb:"",cr:""});
+
+export function ensureTeamPlays<Play extends { id: string }>(
+  state: { plays?: (Play | ReturnType<typeof blankPlay>)[]; curPlay?: string },
+  uid: () => string,
+) {
+  if (!Array.isArray(state.plays) || !state.plays.length) state.plays = [blankPlay(uid, "Jogada 1")];
+  if (!state.plays.some(play => play.id === state.curPlay)) state.curPlay = state.plays[0].id;
+  return state.plays;
+}

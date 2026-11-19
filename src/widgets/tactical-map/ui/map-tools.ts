@@ -61,45 +61,48 @@ export function mountMapTools({ map, canEdit, canMove, currentTool, chooseTool, 
   const workspace = document.getElementById("v-map")!
   const toolbar = host.closest<HTMLElement>(".map-toolbar")!
   const editToolbar = host.closest<HTMLElement>(".map-edit-toolbar")!
-  const colorOptions = document.getElementById("map-arrow-options")!
-  const wardOptions = document.getElementById("map-ward-options")!
-  const wardHint = document.getElementById("map-ward-hint")!
-  const panels: Partial<Record<Tool, HTMLElement>> = { draw: colorOptions, freehand: colorOptions, ward: wardOptions }
-  const drawingButton = () => host.querySelector<HTMLElement>(`[data-tool="${currentTool()}"][aria-controls="map-arrow-options"]`)
-  const activeSelect = () => colorOptions.querySelector('[data-team-trigger="select"][data-state="open"]')
+  const panels = new Map<Tool, HTMLElement>()
+  for (const { value, panel } of mapTools) {
+    if (panel) panels.set(value, document.getElementById(panel)!)
+  }
+  let openPanel: HTMLElement | undefined
+  const panelButton = () => host.querySelector<HTMLElement>(`[data-tool="${currentTool()}"][aria-controls]`)
+  const activeSelect = () => openPanel?.querySelector('[data-team-trigger="select"][data-state="open"]')
   let placementFrame = 0
-  function scheduleDrawingPlacement() {
-    if (colorOptions.hidden || placementFrame) return
+  function schedulePanelPlacement() {
+    if (!openPanel || placementFrame) return
     placementFrame = requestAnimationFrame(() => {
       placementFrame = 0
-      const anchor = drawingButton()
-      if (colorOptions.hidden || !anchor) return
+      const anchor = panelButton()
+      if (!openPanel || !anchor) return
       const button = anchor.getBoundingClientRect()
       const parent = editToolbar.getBoundingClientRect()
       const edge = 8
-      const maxLeft = document.documentElement.clientWidth - colorOptions.offsetWidth - edge
+      const maxLeft = document.documentElement.clientWidth - openPanel.offsetWidth - edge
       const left = Math.max(edge, Math.min(button.left, maxLeft))
       const top = Math.max(button.bottom, toolbar.getBoundingClientRect().bottom) + 4
-      colorOptions.style.setProperty("--map-drawing-left", `${left - parent.left}px`)
-      colorOptions.style.setProperty("--map-drawing-top", `${top - parent.top}px`)
+      openPanel.style.setProperty("--map-tool-menu-left", `${left - parent.left}px`)
+      openPanel.style.setProperty("--map-tool-menu-top", `${top - parent.top}px`)
     })
   }
-  function setPanelOpen(panel: HTMLElement, open: boolean) {
-    panel.hidden = !open
-    if (panel === wardOptions) wardHint.hidden = !open
-    if (panel === colorOptions && open) scheduleDrawingPlacement()
+  function showPanel(panel?: HTMLElement) {
+    if (openPanel && openPanel !== panel) openPanel.hidden = true
+    openPanel = panel
+    if (!panel) return
+    panel.hidden = false
+    schedulePanelPlacement()
   }
-  const placementObserver = new ResizeObserver(scheduleDrawingPlacement)
+  const placementObserver = new ResizeObserver(schedulePanelPlacement)
   placementObserver.observe(toolbar)
   placementObserver.observe(editToolbar)
   placementObserver.observe(viewport)
   document.addEventListener("pointerdown", event => {
-    if (colorOptions.hidden || !(event.target instanceof Element)) return
+    if (!openPanel || !(event.target instanceof Element)) return
     const listId = activeSelect()?.getAttribute("aria-controls")
     const list = listId && document.getElementById(listId)
-    if (colorOptions.contains(event.target) || drawingButton()?.contains(event.target) ||
+    if (openPanel.contains(event.target) || panelButton()?.contains(event.target) ||
       (list && list.contains(event.target))) return
-    setPanelOpen(colorOptions, false)
+    showPanel()
   }, true)
   const palette = document.getElementById("cols")!
   let renderedTool: Tool | undefined
@@ -119,12 +122,12 @@ export function mountMapTools({ map, canEdit, canMove, currentTool, chooseTool, 
   }, true)
   workspace.addEventListener("keydown", event => {
     const target = event.target as Element
-    if (event.key === "Escape" && !event.defaultPrevented && !colorOptions.hidden && !activeSelect()) {
-      setPanelOpen(colorOptions, false)
-      if (colorOptions.contains(target)) {
+    if (event.key === "Escape" && !event.defaultPrevented && openPanel && !activeSelect()) {
+      if (openPanel.contains(target)) {
         event.preventDefault()
-        drawingButton()?.focus({ preventScroll: true })
+        panelButton()?.focus({ preventScroll: true })
       }
+      showPanel()
       return
     }
     const fromToolbar = host.contains(target)
@@ -140,8 +143,8 @@ export function mountMapTools({ map, canEdit, canMove, currentTool, chooseTool, 
       chooseTool(tool.value)
       const nextFocus = fromToolbar ? host.querySelector<HTMLElement>(`[data-tool="${tool.value}"]`) : viewport
       nextFocus?.focus({ preventScroll: true })
-    } else if (panels[tool.value] === colorOptions) {
-      setPanelOpen(colorOptions, true)
+    } else {
+      showPanel(panels.get(tool.value))
     }
   })
 
@@ -151,17 +154,15 @@ export function mountMapTools({ map, canEdit, canMove, currentTool, chooseTool, 
     mountToolGroup(host, tool, tools, value => {
       if (!canMove() || !tools.some(item => item.value === value)) return
       if (value === tool) {
-        const panel = panels[tool]
-        if (panel) setPanelOpen(panel, panel.hasAttribute("hidden"))
+        const panel = panels.get(tool)
+        showPanel(openPanel === panel ? undefined : panel)
         return
       }
       chooseTool(value as Tool)
     }, !canMove())
     map.dataset.tool = tool
     if (renderedTool !== tool) {
-      const activePanel = panels[tool]
-      setPanelOpen(colorOptions, activePanel === colorOptions)
-      setPanelOpen(wardOptions, activePanel === wardOptions)
+      showPanel(panels.get(tool))
       renderedTool = tool
     }
     document.getElementById("map-arrowhead-option")!.hidden = tool !== "freehand"
@@ -172,8 +173,8 @@ export function mountMapTools({ map, canEdit, canMove, currentTool, chooseTool, 
 
   return {
     render,
-    showDrawingOptions() {
-      if (canEdit() && panels[currentTool()] === colorOptions) setPanelOpen(colorOptions, true)
+    showToolOptions() {
+      if (canEdit()) showPanel(panels.get(currentTool()))
     },
   }
 }

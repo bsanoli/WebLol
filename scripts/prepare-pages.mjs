@@ -6,6 +6,7 @@ import { fileURLToPath } from "node:url"
 const root = fileURLToPath(new URL("../", import.meta.url))
 const dist = join(root, "dist")
 const distSoloq = join(root, "dist-soloq")
+const publicDir = join(root, "public")
 const pages = ["assets", "camp.html", "worlds.html", "index.html", "soloq.html"]
 
 // A aba SoloQ sai de um segundo build (vite build --mode soloq); junta tudo em dist/.
@@ -23,17 +24,19 @@ for (const path of pages) {
   const source = join(dist, path)
   const destination = join(root, path)
   if (path.endsWith(".html")) {
-    writeFileSync(destination, versionStatic(readFileSync(source, "utf8").replace(/\r+\n/g, "\n")))
+    writeFileSync(destination, versionPublicAssets(readFileSync(source, "utf8").replace(/\r+\n/g, "\n")))
   } else {
     cpSync(source, destination, { recursive: true })
   }
 }
 
-// Arquivos de public/ não ganham hash do Vite; o ?v= força o navegador a
-// baixar a versão nova depois de cada publicação.
-function versionStatic(html) {
+// O Vite já inclui o hash dos bundles no nome e usa a mesma URL nos imports e preloads.
+// Os arquivos copiados de public/ mantêm o nome fixo e são versionados na URL.
+function versionPublicAssets(html) {
   return html.replace(/(href|src)="(\.?\/assets\/[^"?]+\.(?:css|svg|js))"/g, (all, attr, path) => {
-    const file = join(dist, path.replace(/^\.?\//, ""))
+    const relativePath = path.replace(/^\.?\//, "")
+    if (!statSync(join(publicDir, relativePath), { throwIfNoEntry: false })?.isFile()) return all
+    const file = join(dist, relativePath)
     if (!existsSync(file)) return all
     const v = createHash("sha1").update(readFileSync(file)).digest("hex").slice(0, 8)
     return `${attr}="${path}?v=${v}"`

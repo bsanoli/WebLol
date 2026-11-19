@@ -1,4 +1,4 @@
-import { sw } from "../model/play"
+import { sw } from "@/entities/tactical-play"
 
 // O desenho serve de fundo enquanto as imagens do mapa carregam.
 export function renderMapFallback(svg: SVGSVGElement) {
