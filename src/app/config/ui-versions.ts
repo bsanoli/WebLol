@@ -8,6 +8,11 @@ export interface UiVersion {
 
 export const UI_VERSIONS: UiVersion[] = [
   {
+    version: "1.57",
+    date: "2026-11-19",
+    changes: ["Builds (página do campeão): em Compras jogo a jogo, cada partida mostra abaixo do KDA os feitiços, a runa principal e a árvore secundária usados nela, na SoloQ e no Worlds."],
+  },
+  {
     version: "1.56",
     date: "2026-11-19",
     changes: ["Builds: SoloQ passa a ser a fonte principal. Fica à esquerda no seletor SoloQ | Worlds e abre por padrão ao entrar em Builds."],

@@ -433,7 +433,7 @@ def build_dataset(cache, config, ddragon):
     write("build-timeline.json", {"games": [{
         "id": g["id"], "date": g["date"], "stage": "soloq", "round": ROUTING[g["platform"]][2], "number": 0,
         "buildsSource": source(g), "blue": "", "red": "", "winner": g["winner"],
-        "players": [p if p.get("ref") else {k: p[k] for k in ("player", "champion", "role", "side", "kda", "itemEventsByMinute")}
+        "players": [p if p.get("ref") else {**{k: p[k] for k in ("player", "champion", "role", "side", "kda", "spells", "secondaryTree", "itemEventsByMinute")}, "keystone": p["primaryRunes"][0]}
                     for p in g["players"]],
     } for g in games]})
     write("build-assets.json", {"runes": rune_assets, "completedItems": sorted(completed),

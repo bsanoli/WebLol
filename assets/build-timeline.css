@@ -116,6 +116,9 @@
 .build-timeline-vs { display: inline-flex; align-items: center; gap: var(--wl-space-1); color: var(--muted); }
 .build-timeline-meta { grid-row: 2; grid-column: 1 / -1; display: flex; flex-wrap: wrap; align-items: center; gap: var(--wl-space-1) var(--wl-space-2); color: var(--muted); font-size: 12px; }
 .build-timeline-source[data-slot="button"] { grid-row: 1; grid-column: 2; align-self: start; }
+.build-timeline-loadout { grid-row: 3; grid-column: 1 / -1; display: flex; flex-wrap: wrap; align-items: center; gap: var(--wl-space-2); }
+.build-timeline-loadout-group { display: flex; align-items: center; gap: var(--wl-space-1); }
+.build-timeline-loadout-group + .build-timeline-loadout-group { padding-inline-start: var(--wl-space-2); border-inline-start: 1px solid var(--build-divider); }
 .build-timeline-source:hover, .build-timeline-source:focus-visible { color: var(--gold); }
 .build-timeline-events { display: flex; flex-wrap: wrap; gap: var(--wl-space-2) 0; min-width: 0; margin: 0; padding: 0; list-style: none; }
 .build-timeline-minute {

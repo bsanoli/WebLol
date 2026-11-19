@@ -1,5 +1,5 @@
 import type { games } from "@dataset/build-timeline"
-import { bootItems, isCompletedItem, itemIcon, itemName } from "./build-details"
+import { bootItems, isCompletedItem, itemIcon, itemName, playerLoadout } from "./build-details"
 import { directOpponent } from "../model/build-statistics"
 import { ico } from "@/entities/champion"
 import { championSlug, esc } from "@/entities/match"
@@ -126,6 +126,7 @@ function gameRow({ game, player, opponent, won }: Entry) {
         <span>${k}/${d}/${a}</span>
         <span>${esc(stageLabel(game, player))}</span>
       </span>
+      ${playerLoadout(player)}
       <a class="build-timeline-source" data-slot="button" data-variant="ghost" data-size="icon-sm"
         href="${esc(game.buildsSource)}" target="_blank" rel="noopener"
         aria-label="Abrir histórico da partida no ${DATASET.sourceName} em nova aba" title="Ver histórico no ${DATASET.sourceName}">

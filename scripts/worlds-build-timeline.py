@@ -39,7 +39,7 @@ for game in builds["games"]:
     timeline.append({
         **{key: game[key] for key in ("id", "date", "stage", "round", "number", "buildsSource")},
         "blue": b, "red": r, "winner": winner,
-        "players": [{key: p[key] for key in ("player", "champion", "role", "side", "kda", "itemEventsByMinute")}
+        "players": [{**{key: p[key] for key in ("player", "champion", "role", "side", "kda", "spells", "secondaryTree", "itemEventsByMinute")}, "keystone": p["primaryRunes"][0]}
                     for p in game["players"]],
     })
 (DATA / "worlds-2026-build-timeline.json").write_text(
