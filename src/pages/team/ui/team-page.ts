@@ -377,7 +377,7 @@ $("#editor").addEventListener("click",e=>{
 });
 // arrastar e soltar
 let drag=null;
-document.addEventListener("dragstart",e=>{const ch=e.target.closest(".chip,.ch,.dm");if(!ch)return;drag={n:ch.dataset.n,from:ch.dataset.from||null};e.dataTransfer.setData("text/plain",ch.dataset.n);e.dataTransfer.effectAllowed="move"});
+document.addEventListener("dragstart",e=>{const ch=e.target.closest(".chip,.ch,.dm,.tx-prio-champ");if(!ch)return;drag={n:ch.dataset.n,from:ch.dataset.from||null};e.dataTransfer.setData("text/plain",ch.dataset.n);e.dataTransfer.effectAllowed="move"});
 $("#editor").addEventListener("dragover",e=>{const ln=e.target.closest("[data-l]");if(!ln||!drag)return;e.preventDefault();document.querySelectorAll(".drop").forEach(x=>x!==ln&&x.classList.remove("drop"));ln.classList.add("drop")});
 $("#editor").addEventListener("dragleave",e=>{const ln=e.target.closest("[data-l]");if(ln&&!ln.contains(e.relatedTarget))ln.classList.remove("drop")});
 $("#editor").addEventListener("drop",e=>{
@@ -385,9 +385,9 @@ $("#editor").addEventListener("drop",e=>{
   const to=ln.dataset.l,c=cur(),n=drag.n;
   if(drag.from)c.lanes[drag.from]=c.lanes[drag.from].filter(x=>x!==n);
   const arr=c.lanes[to].filter(x=>x!==n);
-  const over=e.target.closest(".chip,.dm");let idx=ln.dataset.bi!=null?Math.min(+ln.dataset.bi,arr.length):arr.length;
+  const over=e.target.closest(".chip,.dm,.tx-prio-champ");let idx=ln.dataset.bi!=null?Math.min(+ln.dataset.bi,arr.length):arr.length;
   if(over&&over.dataset.n!==n&&ln.dataset.bi==null){idx=arr.indexOf(over.dataset.n);const r=over.getBoundingClientRect();if(e.clientX>r.left+r.width/2)idx++}
-  arr.splice(idx,0,n);c.lanes[to]=arr;drag=null;active=to;touch();save();renderEditor();renderList();renderGrid();
+  arr.splice(idx,0,n);c.lanes[to]=arr;drag=null;if(S.view==="tactics")markTacticPanel(c,tacticPanel());active=to;touch();save();renderEditor();renderList();renderGrid();
 });
 document.addEventListener("dragend",()=>{drag=null;document.querySelectorAll(".drop").forEach(x=>x.classList.remove("drop"))});
 

@@ -48,7 +48,7 @@ function laneHTML(c, { LN, img, esc, editable, active }) {
         const main = i === 0 && !ban
         const label = ban ? `Ban: ${esc(n)}` : main ? `Principal em ${lane.n}: ${esc(n)}` : `Tornar ${esc(n)} principal em ${lane.n}`
         const content = img(n)
-        return `<li class="tx-prio-champ${main ? " main" : ""}">${ban || main
+        return `<li class="tx-prio-champ${main ? " main" : ""}" draggable="true" data-n="${esc(n)}" data-from="${k}" title="Arraste para mudar a ordem">${ban || main
           ? `<span class="tx-prio-static" title="${esc(n)}" aria-label="${label}">${content}</span>`
           : `<button type="button" class="tx-prio-alt" data-priority="${esc(n)}" data-lane="${k}" aria-label="${label}" title="${i + 1}ª opção · clique para tornar principal">${content}</button>`}</li>`
       }).join("")
@@ -57,7 +57,7 @@ function laneHTML(c, { LN, img, esc, editable, active }) {
     const name = editable
       ? `<button type="button" class="tx-prio-name${on ? " act" : ""}" data-draft-target="${k}" aria-pressed="${on}" title="Escolher campeões para ${lane.n}">${ban ? "" : laneIconMarkup(k)}${lane.n}</button>`
       : `<span class="tx-prio-name">${ban ? "" : laneIconMarkup(k)}${lane.n}</span>`
-    return `<li class="tx-prio-lane${ban ? " bans" : ""}${on ? " act" : ""}" style="--lc:var(${lane.c})">${name}<ol class="tx-prio-champs" aria-label="${lane.n} em ordem de prioridade">${champs}</ol></li>`
+    return `<li class="tx-prio-lane${ban ? " bans" : ""}${on ? " act" : ""}" style="--lc:var(${lane.c})">${name}<ol class="tx-prio-champs" data-l="${k}" aria-label="${lane.n} em ordem de prioridade">${champs}</ol></li>`
   }).join("")}</ol>`
 }
 
