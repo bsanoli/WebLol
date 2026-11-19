@@ -226,7 +226,7 @@ Error generating stack: `+e.message+`
   <header class="builds-heading">
     <div><h1>Builds</h1><p class="hint">${Hx.toLocaleString(`pt-BR`)} jogos ${e}</p></div>
     <div class="build-source-options" role="group" aria-label="Fonte das builds">
-      ${[[`worlds`,`Worlds`],[`soloq`,`SoloQ`]].map(([e,t])=>`<button type="button" data-slot="button" data-variant="${e===fy.source?`default`:`ghost`}" data-build-source="${e}" aria-pressed="${e===fy.source}">${t}</button>`).join(``)}
+      ${[[`soloq`,`SoloQ`],[`worlds`,`Worlds`]].map(([e,t])=>`<button type="button" data-slot="button" data-variant="${e===fy.source?`default`:`ghost`}" data-build-source="${e}" aria-pressed="${e===fy.source}">${t}</button>`).join(``)}
     </div>
   </header>
   <div class="wl-panel tools" role="group" aria-label="Filtros de builds">

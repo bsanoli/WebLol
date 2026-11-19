@@ -16,7 +16,7 @@ import { UI_VERSIONS } from "../config/ui-versions"
 
 const sections = [
   { value: "worlds", label: "Worlds", href: "#/worlds" },
-  { value: "builds", label: "Builds", href: "#/builds?fonte=worlds" },
+  { value: "builds", label: "Builds", href: "#/builds?fonte=soloq" },
   { value: "camp", label: "Área do time", href: "#/time" },
   { value: "admin", label: "Administração", href: "#/admin" },
 ]

@@ -478,7 +478,7 @@ function readRoute() {
   const [, root, ...parts] = path.split("/");
   const screen = Object.keys(routeRoots).find(name => routeRoots[name] === "/" + root);
   const params = new URLSearchParams(query);
-  const frame = screen === "builds" ? params.get("fonte") === "soloq" ? "soloq" : "worlds" : screen === "comps" ? "worlds" : screen;
+  const frame = screen === "builds" ? params.get("fonte") === "worlds" ? "worlds" : "soloq" : screen === "comps" ? "worlds" : screen;
   return { screen, frame, parts: screen === "builds" ? ["builds", ...parts] : screen === "comps" ? ["composicoes", ...parts] : parts, params };
 }
 
@@ -527,7 +527,7 @@ function openRoute() {
     writeRoute(routeRoots.comps + (query ? "?" + query : ""), true);
   } else if (builds || soloq) {
     const params = new URLSearchParams(query);
-    const useSoloq = Boolean(soloq) || (builds?.[2] === "builds" && !builds[1] && params.get("fonte") === "soloq");
+    const useSoloq = Boolean(soloq) || (builds?.[2] === "builds" && !builds[1] && params.get("fonte") !== "worlds");
     const source = useSoloq ? "soloq" : "worlds";
     params.set("fonte", source);
     if (builds?.[2] === "campeoes" && !params.has("posicao")) params.set("posicao", "top");

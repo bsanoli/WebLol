@@ -81,7 +81,7 @@ function buildsView(){
   <header class="builds-heading">
     <div><h1>Builds</h1><p class="hint">${G.toLocaleString("pt-BR")} jogos ${gameSource}</p></div>
     <div class="build-source-options" role="group" aria-label="Fonte das builds">
-      ${[["worlds", "Worlds"], ["soloq", "SoloQ"]].map(([source, label]) =>
+      ${[["soloq", "SoloQ"], ["worlds", "Worlds"]].map(([source, label]) =>
         `<button type="button" data-slot="button" data-variant="${source === DATASET.source ? "default" : "ghost"}" data-build-source="${source}" aria-pressed="${source === DATASET.source}">${label}</button>`
       ).join("")}
     </div>
