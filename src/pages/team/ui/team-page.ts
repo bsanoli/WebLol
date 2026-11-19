@@ -222,7 +222,7 @@ function renderEditor(){
     renderList();
     publishTeamRoute("comps");
   }, "navigation");
-  const catalog=$("#champ-picker"),gridScroll=$("#grid").scrollTop;
+  const catalog=$("#champ-picker"),gridScroll=$("#grid").scrollTop,tabsScroll=editor.querySelector(".dz-tabs")?.scrollTop||0;
   if (editor.contains(catalog)) $("#comps").append(catalog);
   clearTeamControls(editor);
   editor.replaceChildren();
@@ -257,6 +257,7 @@ function renderEditor(){
   renderDraftLaneNotes(c);
   placePicker();
   $("#grid").scrollTop=gridScroll;
+  const tabs=editor.querySelector(".dz-tabs");if(tabs)tabs.scrollTop=tabsScroll;
   renderTarget();
   editor.dataset.motionComposition = c.id;
   editor.dataset.motionView = view;
