@@ -8,6 +8,11 @@ export interface UiVersion {
 
 export const UI_VERSIONS: UiVersion[] = [
   {
+    version: "1.52",
+    date: "2026-11-19",
+    changes: ["Ordem do draft: saiu o ícone pequeno do campeão ao lado esquerdo do nome no pick; a foto de fundo continua."],
+  },
+  {
     version: "1.51",
     date: "2026-11-18",
     changes: ["Botões de wave por lado, menu de limpeza por tipo e barra de ferramentas estável durante o zoom."],

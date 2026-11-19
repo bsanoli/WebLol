@@ -44,7 +44,7 @@ export function draftHTML(c, { active, compositions, LN, img, esc, pickArt }){
       return `<div class="pk ${side} mine${editing?" act":""}" data-l="${l}" data-champion-group="${t}-pick-${i}" style="--lc:var(${L.c})">
         ${pickArt(m)}
         <button type="button" class="pk-target pick-choice" data-champion-slot="0" data-champion-name="${esc(m)}" data-draft-target="${l}" aria-pressed="${editing}" aria-label="${PICKNAME[s.code]} · ${L.n}${m?" · "+esc(m):" · Escolher campeão"}">
-          ${meta}${m?img(m):iconMarkup("champion-add")}
+          ${meta}${m?"":iconMarkup("champion-add")}
           <span class="pkn${m?"":" pk-empty"}">${m?esc(m):"Escolher campeão"}</span>
         </button>
         <div class="pkf"><span class="lane-label"><select data-team-select="lane" data-pick-position="${i}" aria-label="Posição do pick ${t}${i+1}">${PLANES.map(x=>`<option value="${x}"${x===l?" selected":""}>${LN[x].n}</option>`).join("")}</select></span>
