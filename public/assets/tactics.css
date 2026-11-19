@@ -132,3 +132,26 @@ button.tx-pick > .tx-pick-name, button.tx-pick > .tx-pick-champ { grid-column: 2
 #v-comps .tx-ch:focus-visible { outline: 2px solid var(--txt); outline-offset: 1px; }
 #v-comps .tx-ch.on { border-color: var(--wl-accent); box-shadow: 0 0 0 1px var(--wl-accent); }
 .tx-grid-empty { grid-column: 1 / -1; margin: 0; color: var(--mut); font-size: 12px; }
+
+/* Prints da tática, abaixo do texto */
+.tx-prints { display: flex; flex-direction: column; gap: 8px; margin-top: 8px; }
+.tx-print-list { display: flex; flex-wrap: wrap; gap: 8px; max-height: 236px; margin: 0; padding: 0; overflow: auto; list-style: none; }
+.tx-print { position: relative; width: 160px; height: 108px; overflow: hidden; border: 1px solid var(--line); border-radius: var(--wl-card-radius); background: var(--bg); }
+.tx-print.missing::after { content: "Print indisponível"; position: absolute; inset: 0; display: grid; place-items: center; color: var(--mut); font-size: 11px; pointer-events: none; }
+#v-comps .tx-print-open { display: block; width: 100%; height: 100%; padding: 0; border: 0; background: none; cursor: zoom-in; }
+#v-comps .tx-print-open img { display: block; width: 100%; height: 100%; object-fit: cover; }
+#v-comps .tx-print-open:hover img { filter: brightness(1.12); }
+#v-comps .tx-print-open:focus-visible { outline: 2px solid var(--txt); outline-offset: -2px; }
+#v-comps .tx-print-remove { position: absolute; top: 4px; right: 4px; display: grid; place-items: center; width: 24px; height: 24px; padding: 0; border: 0; border-radius: 50%; background: #000b; color: #fff; cursor: pointer; }
+#v-comps .tx-print-remove:hover { background: var(--wl-danger, #ef4444); }
+#v-comps .tx-print-remove:focus-visible { outline: 2px solid var(--txt); outline-offset: 1px; }
+.tx-print-remove .icon { width: 14px; height: 14px; }
+.tx-print-actions { display: flex; align-items: center; gap: 10px; }
+.tx-print-add { display: inline-flex; align-items: center; gap: 6px; cursor: pointer; }
+.tx-print-add:focus-within { outline: 2px solid var(--txt); outline-offset: 1px; }
+.tx-print-add input { position: absolute; width: 1px; height: 1px; opacity: 0; }
+.tx-print-add .icon { width: 14px; height: 14px; }
+.tx-print-hint { color: var(--mut); font-size: 12px; }
+#v-comps #tactics-text { min-height: 300px; }
+.tx-print-dialog { max-width: min(92vw, 1400px); }
+.tx-print-full { display: block; max-width: 100%; max-height: 80vh; margin: 0 auto; border-radius: var(--wl-card-radius); }

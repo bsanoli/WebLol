@@ -8,6 +8,16 @@ Formato de cada entrada: data, pedido (palavras do Bruno), decisão (quem escolh
 
 ---
 
+## 19/11/2026 — prints das táticas no banco do time
+
+- **Pedido:** "permita colocar prints dentro do campo de escrever tática".
+- **Decisão do Bruno:** "Banco do time, à parte" (cartão de decisão): cada print é um documento próprio, fora dos dados do time, que têm teto de 1 MB.
+- **O que mudou:**
+  - Nova coleção `times/{id}/imagens/{print}` com a imagem comprimida no navegador (WebP, até ~700 KB).
+  - Regra nova no `firestore.rules`: membros ativos, capitão e admins leem e criam; capitão e admins apagam. **O Bruno precisa publicar a regra no console do Firebase.**
+  - A tática guarda só os ids dos prints. Sem time, ou antes da regra publicada, o print fica só no navegador.
+  - `public/assets/sync.js` ganhou `window.weblolImages` (salvar e carregar prints).
+
 ## 19/11/2026 — táticas entram na aprovação do capitão
 
 - **Pedido:** "quero criar mais uma aba chamada \"Táticas\" [...] para fazer anotações sobre táticas dentro do jogo com base em uma composição ou não".

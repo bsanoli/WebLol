@@ -71,7 +71,21 @@ export function tacticGridHTML(c, { champions, query, active, LN, img, esc }) {
   }).join("") || `<p class="tx-grid-empty" role="status">Nenhum campeão encontrado.</p>`
 }
 
-export function tacticsHTML(c, { compositions, general, text, hasTactic, panel, active, query, champions, LN, img, esc }) {
+/** Prints anexados à tática: miniaturas carregadas depois (as imagens ficam guardadas à parte). */
+function printsHTML(images, esc) {
+  const items = images.map((id, i) => `<li class="tx-print">
+      <button type="button" class="tx-print-open" data-print-open="${esc(id)}" aria-label="Abrir print ${i + 1}" title="Abrir print ${i + 1}"><img alt="" data-print-src="${esc(id)}"></button>
+      <button type="button" class="tx-print-remove" data-print-remove="${esc(id)}" aria-label="Remover print ${i + 1}" title="Remover print">${iconMarkup("close")}</button></li>`).join("")
+  return `<div class="tx-prints">
+    ${images.length ? `<ul class="tx-print-list" aria-label="Prints da tática">${items}</ul>` : ""}
+    <div class="tx-print-actions">
+      <label class="tx-print-add" data-slot="button" data-variant="outline" data-size="sm">${iconMarkup("plus")} Adicionar print<input type="file" id="tx-print-file" accept="image/*" multiple></label>
+      <span class="tx-print-hint">ou cole com Ctrl+V, ou arraste a imagem para o texto</span>
+    </div>
+  </div>`
+}
+
+export function tacticsHTML(c, { compositions, general, text, images = [], hasTactic, panel, active, query, champions, LN, img, esc }) {
   const mark = has => has ? `<span class="tx-has" title="Tem anotação de tática">${iconMarkup("edit")}</span>` : ""
   const tab = (x, on) => `<button type="button" class="dz-tab${on ? " on" : ""}${isSavedTactic(x) ? " tx-saved" : ""}" data-tactic-comp="${esc(x.id)}" aria-pressed="${on}" title="${esc(x.name)}">
       <b>${isSavedTactic(x) ? iconMarkup("book") : sideDot(x)}${esc(x.name)}${mark(hasTactic(x.id))}</b><span class="mini">${compositionPreview(x).map(img).join("") || `<small>${isSavedTactic(x) ? "Tática sem picks" : "vazia"}</small>`}</span></button>`
@@ -105,6 +119,7 @@ export function tacticsHTML(c, { compositions, general, text, hasTactic, panel, 
       <label class="tx-title" for="tactics-text">${title}</label>
       <p class="tx-hint">${hint}</p>
       <textarea id="tactics-text" placeholder="Escreva a tática…">${esc(text)}</textarea>
+      ${printsHTML(images, esc)}
     </section>
     <aside class="tx-aside" aria-label="Táticas, composições e draft">
       <div class="tx-tabs" role="group" aria-label="Escolher a tática">${generalTab}${newTab}${tabs}</div>

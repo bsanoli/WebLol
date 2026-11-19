@@ -14,7 +14,8 @@ import { KEY, uid, blank, loadTeamState } from "../model/local-state"
 import { DRAFT_SIDE, PICKNAME, compositionPreview, draftHTML, draftOf, sideDot } from "./draft"
 import { mountTeamNavigation } from "./team-navigation"
 import { tacticGridHTML, tacticsHTML } from "./tactics"
-import { createSavedTactic, ensureTactics, hasTactic, isSavedTactic, itemsForView, markTacticPanel, readTactic, writeTactic } from "../model/tactics"
+import { createSavedTactic, ensureTactics, hasTactic, isSavedTactic, itemsForView, markTacticPanel, readTactic, readTacticImages, writeTactic } from "../model/tactics"
+import { compressImage } from "../lib/compress-image"
 import { capturePickFeedback } from "./pick-feedback"
 
 initializeTheme()
@@ -235,6 +236,7 @@ function renderEditor(){
     const txScroll = tabsScroll;
     editor.insertAdjacentHTML("beforeend", `<div id="composition-panel" role="tabpanel" aria-labelledby="tab-tactics">${tacticsHTML(c, {
       compositions: S.comps, general: !!S.tacticsGeneral, text: readTactic(S, S.tacticsGeneral ? null : c.id),
+      images: readTacticImages(S, S.tacticsGeneral ? null : c.id),
       hasTactic: id => hasTactic(S, id), panel: tacticPanel(), active, query: tacticQuery, champions: CH, LN, img, esc,
     })}</div>`);
     if (!S.tacticsGeneral && tacticPanel() === "draft") editor.querySelectorAll("[data-swap-lane]").forEach(host => {
@@ -249,6 +251,7 @@ function renderEditor(){
         toast(`${name} agora é o principal em ${LN[lane].n}`);
       });
     });
+    loadPrintThumbnails(editor);
     const txTabs = editor.querySelector(".tx-tabs");
     if (txTabs) txTabs.scrollTop = txScroll;
     editor.dataset.motionComposition = c.id;
@@ -461,12 +464,13 @@ const tacticPanel = () => S.tacticsPanel === "lane" || S.tacticsPanel === "prior
 // "Salvar tática" copia os picks e o texto da comp (ou o texto geral) para uma tática própria; "Nova tática" começa vazia.
 async function createTactic(source, copyText = false) {
   const text = copyText ? readTactic(S, source ? source.id : null) : "";
+  const images = copyText ? readTacticImages(S, source ? source.id : null) : [];
   const suggested = source ? `Tática · ${source.name}` : copyText ? "Tática geral" : "Nova tática";
   const name = (await askName("Nome da tática", suggested))?.trim();
   if (!name) return;
   const item = createSavedTactic(source, uid(), name, Date.now(), tacticPanel());
   S.comps.unshift(item);
-  if (text.trim()) writeTactic(S, item.id, item.name, text, Date.now());
+  if (text.trim() || images.length) writeTactic(S, item.id, item.name, text, Date.now(), images);
   S.tacticsGeneral = false;
   S.cur = item.id;
   active = tacticPanel() === "draft" ? draftOf(item).order[draftOf(item).side][0] : "top";
@@ -477,7 +481,7 @@ async function createTactic(source, copyText = false) {
 async function deleteTactic() {
   const item = cur();
   if (!isSavedTactic(item) || !await confirmAction(`Excluir a tática "${item.name}"?`, "Excluir tática")) return;
-  writeTactic(S, item.id, item.name, "", Date.now());
+  writeTactic(S, item.id, item.name, "", Date.now(), []);
   S.comps = S.comps.filter(x => x.id !== item.id);
   if (!S.comps.some(x => !isSavedTactic(x))) S.comps.push(blank());
   S.cur = (S.comps.find(x => !isSavedTactic(x)) || S.comps[0]).id;
@@ -494,6 +498,67 @@ function toggleTacticChampion(name) {
   touch(); save(); renderEditor(); renderList();
   $(`#editor [data-tactic-champ="${CSS.escape(name)}"]`)?.focus({ preventScroll: true });
 }
+/* ===== Prints das táticas ===== */
+// O app principal guarda cada print à parte (window.weblolImages); aberto sozinho, fica só neste navegador.
+const localImages = {
+  async save(data) { const id = "local-" + uid(); try { localStorage.setItem("lol-img-" + id, data) } catch {} return { id, shared: false } },
+  async load(id) { try { return localStorage.getItem("lol-img-" + id) } catch { return null } },
+};
+const printStore = () => { try { return (window.parent as any)?.weblolImages || localImages } catch { return localImages } };
+const tacticKey = () => S.tacticsGeneral ? null : cur().id;
+function loadPrintThumbnails(root) {
+  root.querySelectorAll("img[data-print-src]").forEach(image => {
+    void printStore().load(image.dataset.printSrc).then(data => {
+      if (data) image.src = data;
+      else image.closest(".tx-print")?.classList.add("missing");
+    });
+  });
+}
+async function addPrints(files) {
+  const images = [...files].filter(file => file.type.startsWith("image/"));
+  if (!images.length) return;
+  const key = tacticKey(), name = cur().name, ids = [];
+  let localOnly = false, failed = "";
+  for (const file of images) {
+    try {
+      const result = await printStore().save(await compressImage(file));
+      ids.push(result.id);
+      if (!result.shared) localOnly = true;
+      if (result.error) failed = result.error;
+    } catch (error) { failed = error.message || "erro"; }
+  }
+  if (!ids.length) { toast(`Não consegui adicionar o print (${failed}).`); return; }
+  writeTactic(S, key, name, readTactic(S, key), Date.now(), [...readTacticImages(S, key), ...ids]);
+  save(); renderEditor();
+  toast(failed ? "O print ficou só neste navegador: não consegui enviá-lo ao time." : localOnly ? "Print salvo neste navegador." : ids.length > 1 ? `${ids.length} prints adicionados` : "Print adicionado");
+}
+function removePrint(id) {
+  const key = tacticKey();
+  writeTactic(S, key, cur().name, readTactic(S, key), Date.now(), readTacticImages(S, key).filter(x => x !== id));
+  save(); renderEditor();
+  $("#tx-print-file")?.closest("label")?.focus?.({ preventScroll: true });
+}
+async function openPrint(id) {
+  const data = await printStore().load(id);
+  if (!data) { toast("Este print não está disponível neste navegador."); return; }
+  const image = document.createElement("img");
+  image.src = data; image.alt = "Print da tática"; image.className = "tx-print-full";
+  showDialog({ title: "Print da tática", children: image, className: "wl-panel tx-print-dialog" });
+}
+$("#editor").addEventListener("change", e => { if (e.target.id === "tx-print-file") { void addPrints(e.target.files); e.target.value = ""; } });
+$("#editor").addEventListener("paste", e => {
+  if (e.target.id !== "tactics-text") return;
+  const files = [...(e.clipboardData?.files || [])].filter(file => file.type.startsWith("image/"));
+  if (!files.length) return;
+  e.preventDefault();
+  void addPrints(files);
+});
+$("#editor").addEventListener("dragover", e => { if (e.target.id === "tactics-text" && e.dataTransfer?.types.includes("Files")) e.preventDefault(); });
+$("#editor").addEventListener("drop", e => {
+  if (e.target.id !== "tactics-text" || !e.dataTransfer?.files.length) return;
+  e.preventDefault();
+  void addPrints(e.dataTransfer.files);
+});
 $("#editor").addEventListener("input", e => {
   if (e.target.id !== "tx-search") return;
   tacticQuery = e.target.value;
@@ -510,6 +575,10 @@ $("#editor").addEventListener("click",e=>{
     }
     return;
   }
+  const printOpen=e.target.closest("[data-print-open]");
+  if (printOpen) { void openPrint(printOpen.dataset.printOpen); return; }
+  const printRemove=e.target.closest("[data-print-remove]");
+  if (printRemove) { removePrint(printRemove.dataset.printRemove); return; }
   const champ=e.target.closest("[data-tactic-champ]");
   if (champ) { toggleTacticChampion(champ.dataset.tacticChamp); return; }
   if (e.target.closest("[data-tactic-new]")) { void createTactic(null); return; }

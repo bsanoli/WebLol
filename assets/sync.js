@@ -288,3 +288,25 @@ async function sendChanges(){
   updateStatus();
 }
 addEventListener("storage",e=>{if(e.key===KEY)updateStatus()});
+
+/* ================= prints das táticas ================= */
+// Cada print fica num documento próprio em times/{time}/imagens/{id}, fora dos dados do time (limite de 1 MB).
+// Sem time (ou se o envio falhar) o print fica só neste navegador.
+const IMGKEY="lol-img-",imgCache=new Map();
+function imgLocal(id,data){try{if(data)localStorage.setItem(IMGKEY+id,data);else return localStorage.getItem(IMGKEY+id)}catch(e){return null}}
+window.weblolImages={
+  async save(data){
+    const id=Date.now().toString(36)+Math.random().toString(36).slice(2,8);
+    imgCache.set(id,data);imgLocal(id,data);
+    if(!TEAM||!user()||user().solo)return{id,shared:false};
+    try{await dbSet(teamPath("imagens"),id,{data,at:Date.now(),by:meId()});return{id,shared:true}}
+    catch(e){return{id,shared:false,error:e.message}}
+  },
+  async load(id){
+    if(imgCache.has(id))return imgCache.get(id);
+    let data=imgLocal(id);
+    if(!data&&TEAM){try{data=(await dbGet(teamPath("imagens"),id))?.data||null}catch(e){data=null}}
+    if(data)imgCache.set(id,data);
+    return data;
+  },
+};

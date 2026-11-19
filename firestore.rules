@@ -49,6 +49,13 @@ service cloud.firestore {
         allow read: if isAdmin() || membroAtivo(t);
         allow write: if isAdmin() || capitao(t);
       }
+      // Prints das táticas: um documento por imagem, comprimida no navegador.
+      match /imagens/{id} {
+        allow read: if isAdmin() || membroAtivo(t) || capitao(t);
+        allow create: if (isAdmin() || membroAtivo(t) || capitao(t))
+          && request.resource.data.data is string && request.resource.data.data.size() < 1000000;
+        allow delete: if isAdmin() || capitao(t);
+      }
       // Envios dos membros para o capitão aprovar.
       match /envios/{id} {
         allow create: if isAdmin() || (membroAtivo(t) && request.resource.data.from == me());
