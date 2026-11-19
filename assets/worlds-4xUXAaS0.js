@@ -178,7 +178,7 @@ import{$ as e,A as t,Dn as n,En as r,G as i,H as a,J as o,Q as s,S as c,U as l,W
   <header class="builds-heading">
     <div><h1>Builds</h1><p class="hint">${Qn.toLocaleString(`pt-BR`)} jogos ${e}</p></div>
     <div class="build-source-options" role="group" aria-label="Fonte das builds">
-      ${[[`worlds`,`Worlds`],[`soloq`,`SoloQ`]].map(([e,t])=>`<button type="button" data-slot="button" data-variant="${e===R.source?`default`:`ghost`}" data-build-source="${e}" aria-pressed="${e===R.source}">${t}</button>`).join(``)}
+      ${[[`soloq`,`SoloQ`],[`worlds`,`Worlds`]].map(([e,t])=>`<button type="button" data-slot="button" data-variant="${e===R.source?`default`:`ghost`}" data-build-source="${e}" aria-pressed="${e===R.source}">${t}</button>`).join(``)}
     </div>
   </header>
   <div class="wl-panel tools" role="group" aria-label="Filtros de builds">
