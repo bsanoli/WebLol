@@ -95,7 +95,7 @@ export async function confirmAction(message: string, label = "Confirmar") {
   return (await askChoice(label, message, [{ value: "confirm", label, destructive: true }])) === "confirm"
 }
 
-export function askName(title: string, initial: string) {
+export function askName(title: string, initial: string, label = "Nome da jogada") {
   const trigger = document.activeElement
   return new Promise<string | undefined>(resolve => {
     const host = document.createElement("div")
@@ -120,7 +120,7 @@ export function askName(title: string, initial: string) {
           event.preventDefault()
           finish(String(new FormData(event.currentTarget).get("name")).trim())
         }}>
-          <label className="grid gap-2" data-slot="field">Nome da jogada
+          <label className="grid gap-2" data-slot="field">{label}
             <Input name="name" defaultValue={initial} onFocus={event => event.currentTarget.select()} />
           </label>
           <div className="flex justify-end gap-2">

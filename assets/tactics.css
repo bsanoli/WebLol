@@ -171,3 +171,14 @@ button.tx-pick > .tx-pick-name, button.tx-pick > .tx-pick-champ { grid-column: 2
 .tx-check { display: grid; place-items: center; width: 14px; height: 14px; border: 1px solid var(--mut); border-radius: 3px; }
 .tx-apply-option.on .tx-check { border-color: var(--wl-accent); background: var(--wl-accent); color: var(--bg); }
 .tx-check .icon { width: 11px; height: 11px; }
+
+/* Cabeçalho da tática: de quem é e OP.GG */
+.tx-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
+.tx-head-text { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+.tx-team-tools { display: flex; flex: none; align-items: center; gap: 8px; }
+.tx-team-tools .tx-panel-switch { margin-bottom: 0; }
+#v-comps .tx-team button.on.enemy { background: var(--wl-danger-soft, color-mix(in srgb, #ef4444 18%, transparent)); color: var(--wl-danger, #ef4444); }
+#v-comps .tx-opgg { display: inline-flex; align-items: center; gap: 6px; }
+#v-comps .tx-opgg .icon { width: 14px; height: 14px; }
+#v-comps .tx-opgg:not(.has) { color: var(--mut); border-style: dashed; }
+.tx-enemy-tag { flex: none; margin-left: 6px; padding: 0 5px; border-radius: 999px; background: var(--wl-danger-soft, color-mix(in srgb, #ef4444 18%, transparent)); color: var(--wl-danger, #ef4444); font-size: 10px; font-weight: 600; }

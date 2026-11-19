@@ -1,4 +1,4 @@
-import{r as e,t}from"./icon-fxkcrle0.js";function n(e){return`<img class="icon game-icon" src="assets/lol/hud/${e}.png" width="24" height="24" alt="">`}var r=`
+import{r as e,t}from"./icon-DP-HUlc6.js";function n(e){return`<img class="icon game-icon" src="assets/lol/hud/${e}.png" width="24" height="24" alt="">`}var r=`
 <p class="knowledge-intro">Técnicas de controle de wave para a temporada 2026. Os tempos seguem os patches 26.1 e 26.9.</p>
 
 <h2 class="ks">Números da wave em 2026</h2>

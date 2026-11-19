@@ -8,6 +8,11 @@ export interface UiVersion {
 
 export const UI_VERSIONS: UiVersion[] = [
   {
+    version: "1.67",
+    date: "2026-11-19",
+    changes: ["Táticas: no cabeçalho da tática salva, seletor Minha equipe | Equipe adversária e botão OP.GG (clique abre o OP.GG do time; botão direito troca o link)."],
+  },
+  {
     version: "1.66",
     date: "2026-11-19",
     changes: ["Correção: ao sair da aba Táticas com uma tática aberta, Opções por posição e Ordem do draft voltam para uma composição da aba quando a tática não está aplicada a ela."],

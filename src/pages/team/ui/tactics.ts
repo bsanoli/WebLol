@@ -1,7 +1,7 @@
 // @ts-nocheck -- Usa os mesmos helpers de markup do editor legado (img, esc, LN).
 import { iconMarkup, laneIconMarkup } from "@/shared/ui/icon"
 import { DRAFT_SIDE, PICKNAME, compositionPreview, draftOf, sideDot } from "./draft"
-import { isSavedTactic, tacticShownIn } from "../model/tactics"
+import { isSavedTactic, tacticOpggOf, tacticShownIn, tacticTeamOf } from "../model/tactics"
 
 /** Picks e bans em formato reduzido, um lado por coluna. Numa tática salva os slots escolhem o alvo do seletor. */
 function draftSummaryHTML(c, { LN, img, esc, editable, active }) {
@@ -85,10 +85,21 @@ function printsHTML(images, esc) {
   </div>`
 }
 
+/** Cabeçalho da tática salva: de quem é a tática e o OP.GG do time. */
+function teamToolsHTML(c, esc) {
+  const team = tacticTeamOf(c), link = tacticOpggOf(c)
+  const toggle = `<div class="tx-panel-switch tx-team" role="group" aria-label="De quem é a tática">${[["mine", "Minha equipe"], ["enemy", "Equipe adversária"]]
+    .map(([value, label]) => `<button type="button" data-tactic-team="${value}" aria-pressed="${team === value}" class="${team === value ? `on ${value}` : ""}">${label}</button>`).join("")}</div>`
+  const opgg = `<button type="button" data-slot="button" data-variant="outline" data-size="sm" class="tx-opgg${link ? " has" : ""}" data-tactic-opgg
+    aria-label="${link ? "Abrir o OP.GG do time. Botão direito para trocar o link" : "Adicionar o link do OP.GG do time"}"
+    title="${link ? `${esc(link)}\nBotão direito: trocar o link` : "Clique para colocar o link do OP.GG"}">${iconMarkup("link")} OP.GG</button>`
+  return `<div class="tx-team-tools">${toggle}${opgg}</div>`
+}
+
 export function tacticsHTML(c, { compositions, general, text, images = [], hasTactic, panel, active, query, champions, LN, img, esc }) {
   const mark = has => has ? `<span class="tx-has" title="Tem anotação de tática">${iconMarkup("edit")}</span>` : ""
   const tab = (x, on) => `<button type="button" class="dz-tab${on ? " on" : ""}${isSavedTactic(x) ? " tx-saved" : ""}" data-tactic-comp="${esc(x.id)}" aria-pressed="${on}" title="${esc(x.name)}">
-      <b>${isSavedTactic(x) ? iconMarkup("book") : sideDot(x)}${esc(x.name)}${mark(hasTactic(x.id))}</b><span class="mini">${compositionPreview(x).map(img).join("") || `<small>${isSavedTactic(x) ? "Tática sem picks" : "vazia"}</small>`}</span></button>`
+      <b>${isSavedTactic(x) ? iconMarkup("book") : sideDot(x)}${esc(x.name)}${mark(hasTactic(x.id))}${isSavedTactic(x) && tacticTeamOf(x) === "enemy" ? `<small class="tx-enemy-tag">Adversária</small>` : ""}</b><span class="mini">${compositionPreview(x).map(img).join("") || `<small>${isSavedTactic(x) ? "Tática sem picks" : "vazia"}</small>`}</span></button>`
   const generalTab = `<button type="button" class="dz-tab tx-general${general ? " on" : ""}" data-tactic-general aria-pressed="${general}">
     <b>${iconMarkup("book")}Táticas gerais${mark(hasTactic(null))}</b><span class="mini"><small>Sem composição</small></span></button>`
   const newTab = `<button type="button" class="dz-tab dz-new tx-new" data-tactic-new aria-label="Nova tática" title="Nova tática">${iconMarkup("plus")}<span>Nova tática</span></button>`
@@ -118,8 +129,11 @@ export function tacticsHTML(c, { compositions, general, text, images = [], hasTa
     </div>` : ""
   return `<div class="tx">
     <section class="tx-write">
-      <label class="tx-title" for="tactics-text">${title}</label>
-      <p class="tx-hint">${hint}</p>
+      <div class="tx-head">
+        <div class="tx-head-text"><label class="tx-title" for="tactics-text">${title}</label>
+        <p class="tx-hint">${hint}</p></div>
+        ${editable ? teamToolsHTML(c, esc) : ""}
+      </div>
       <textarea id="tactics-text" placeholder="Escreva a tática…">${esc(text)}</textarea>
       ${printsHTML(images, esc)}
     </section>

@@ -58,6 +58,9 @@ Uma tática salva é um item próprio. Ela não é uma composição e não entra
 
   Clicar em "Lado azul" ou "Lado vermelho" troca o lado do time.
 - O nome da tática é editado no campo "Nome da composição", no topo da página.
+- No cabeçalho da tática salva, à direita:
+  - **Minha equipe | Equipe adversária** define de quem é a tática. Na lista, a tática adversária ganha a etiqueta "Adversária".
+  - **OP.GG**: o clique esquerdo abre o OP.GG do time numa nova aba. O botão direito (ou Shift+F10) troca o link. Sem link, o clique esquerdo também pede o endereço. Apagar o endereço remove o link. Só são aceitos endereços http(s), e sem protocolo a página assume https.
 - **Excluir tática** pede confirmação e apaga a tática, o texto e as referências aos prints.
 
 ### Onde a tática aparece
@@ -75,7 +78,7 @@ Se você sair da aba Táticas com uma tática aberta que não está aplicada à 
 ## Onde os dados ficam
 
 - O texto de cada tática fica na lista `tactics` dos dados do time. Cada item tem o id `geral` ou `comp-<id da comp>`, o texto e os ids dos prints.
-- A tática salva fica na lista de comps com `tactic: true` e `tacticViews: { lane, draft }`, que são as opções de "Aplicar em".
+- A tática salva fica na lista de comps com `tactic: true`, `tacticViews: { lane, draft }` (as opções de "Aplicar em"), `tacticTeam` (`mine` ou `enemy`) e `opgg` (o link).
 - Cada print fica num documento próprio do Firebase em `times/{time}/imagens/{print}`, fora dos dados do time, que têm limite de 1 MB. Essa escolha foi do Bruno em 19/11/2026 e está no [histórico de admin e login](historico-admin-login.md).
   - A regra `match /imagens/{id}` do `firestore.rules` precisa estar publicada no console do Firebase.
   - Sem a regra publicada, ou sem time, o print fica só no navegador, e a página avisa.

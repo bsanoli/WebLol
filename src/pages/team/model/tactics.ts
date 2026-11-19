@@ -62,7 +62,8 @@ export const hasTactic = (state: TacticsState, compId: string | null) =>
 // Táticas salvas: ficam na lista de comps com a marca `tactic`, mas não são composições.
 // Aparecem em Opções por posição ou na Ordem do draft só quando essa opção está marcada na tática.
 export type TacticPanel = "draft" | "lane"
-type TacticItem = Composition & { tactic?: boolean; tacticViews?: Partial<Record<TacticPanel, boolean>> }
+export type TacticTeam = "mine" | "enemy"
+type TacticItem = Composition & { tactic?: boolean; tacticViews?: Partial<Record<TacticPanel, boolean>>; tacticTeam?: TacticTeam; opgg?: string }
 
 export const isSavedTactic = (item: unknown): boolean => (item as TacticItem | undefined)?.tactic === true
 
@@ -77,6 +78,33 @@ export function setTacticView(item: Composition, panel: TacticPanel, on: boolean
   const tactic = item as TacticItem
   if (!tactic.tactic) return
   tactic.tacticViews = { ...tactic.tacticViews, [panel]: on }
+}
+
+/** De quem é a tática salva: da nossa equipe (padrão) ou da equipe adversária. */
+export const tacticTeamOf = (item: Composition): TacticTeam => (item as TacticItem).tacticTeam === "enemy" ? "enemy" : "mine"
+
+export function setTacticTeam(item: Composition, team: TacticTeam) {
+  if (isSavedTactic(item)) (item as TacticItem).tacticTeam = team
+}
+
+/** Link do OP.GG do time. Aceita só http(s); sem protocolo, assume https. Vazio apaga. */
+export function normalizeOpggLink(value: string): string | null {
+  const raw = value.trim()
+  if (!raw) return ""
+  try {
+    const url = new URL(/^https?:\/\//i.test(raw) ? raw : `https://${raw}`)
+    return url.protocol === "https:" || url.protocol === "http:" ? url.href : null
+  } catch {
+    return null
+  }
+}
+
+export const tacticOpggOf = (item: Composition) => (item as TacticItem).opgg || ""
+
+export function setTacticOpgg(item: Composition, link: string) {
+  if (!isSavedTactic(item)) return
+  if (link) (item as TacticItem).opgg = link
+  else delete (item as TacticItem).opgg
 }
 
 export const tacticShownIn = (item: Composition, panel: TacticPanel) => !!(item as TacticItem).tacticViews?.[panel]

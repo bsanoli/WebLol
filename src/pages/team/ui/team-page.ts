@@ -14,7 +14,7 @@ import { KEY, uid, blank, loadTeamState } from "../model/local-state"
 import { DRAFT_SIDE, PICKNAME, compositionPreview, draftHTML, draftOf, sideDot } from "./draft"
 import { mountTeamNavigation } from "./team-navigation"
 import { tacticGridHTML, tacticsHTML } from "./tactics"
-import { createSavedTactic, ensureTactics, hasTactic, isSavedTactic, itemsForView, setTacticView, tacticShownIn, readTactic, readTacticImages, writeTactic } from "../model/tactics"
+import { createSavedTactic, ensureTactics, hasTactic, isSavedTactic, itemsForView, setTacticView, tacticShownIn, setTacticTeam, setTacticOpgg, tacticOpggOf, normalizeOpggLink, readTactic, readTacticImages, writeTactic } from "../model/tactics"
 import { compressImage } from "../lib/compress-image"
 import { capturePickFeedback } from "./pick-feedback"
 
@@ -474,7 +474,7 @@ async function createTactic(source, copyText = false) {
   const text = copyText ? readTactic(S, source ? source.id : null) : "";
   const images = copyText ? readTacticImages(S, source ? source.id : null) : [];
   const suggested = source ? `Tática · ${source.name}` : copyText ? "Tática geral" : "Nova tática";
-  const name = (await askName("Nome da tática", suggested))?.trim();
+  const name = (await askName("Nome da tática", suggested, "Nome da tática"))?.trim();
   if (!name) return;
   const item = createSavedTactic(source, uid(), name, Date.now());
   S.comps.unshift(item);
@@ -505,6 +505,21 @@ function toggleTacticChampion(name) {
   touch(); save(); renderEditor(); renderList();
   $(`#editor [data-tactic-champ="${CSS.escape(name)}"]`)?.focus({ preventScroll: true });
 }
+// Botão direito no OP.GG troca o link; sem link, o clique esquerdo também pede.
+async function editOpggLink() {
+  const item=cur(),value=await askName("Link do OP.GG do time",tacticOpggOf(item),"Endereço (deixe vazio para remover)");
+  if (value===undefined) return;
+  const link=normalizeOpggLink(value);
+  if (link===null) { toast("Link inválido. Cole o endereço completo do OP.GG."); return; }
+  setTacticOpgg(item,link);touch();save();renderEditor();
+  toast(link?"Link do OP.GG salvo":"Link do OP.GG removido");
+  $("#editor [data-tactic-opgg]")?.focus({ preventScroll: true });
+}
+$("#editor").addEventListener("contextmenu", e => {
+  if (!e.target.closest("[data-tactic-opgg]")) return;
+  e.preventDefault();
+  void editOpggLink();
+});
 /* ===== Prints das táticas ===== */
 // O app principal guarda cada print à parte (window.weblolImages); aberto sozinho, fica só neste navegador.
 const localImages = {
@@ -586,6 +601,18 @@ $("#editor").addEventListener("click",e=>{
   if (printOpen) { void openPrint(printOpen.dataset.printOpen); return; }
   const printRemove=e.target.closest("[data-print-remove]");
   if (printRemove) { removePrint(printRemove.dataset.printRemove); return; }
+  const teamButton=e.target.closest("[data-tactic-team]");
+  if (teamButton) {
+    setTacticTeam(cur(),teamButton.dataset.tacticTeam);touch();save();renderEditor();
+    $(`#editor [data-tactic-team="${teamButton.dataset.tacticTeam}"]`)?.focus({ preventScroll: true });
+    return;
+  }
+  if (e.target.closest("[data-tactic-opgg]")) {
+    const link=tacticOpggOf(cur());
+    if (link) window.open(link,"_blank","noopener");
+    else void editOpggLink();
+    return;
+  }
   const viewToggle=e.target.closest("[data-tactic-view]");
   if (viewToggle) {
     const c=cur(),panel=viewToggle.dataset.tacticView,on=viewToggle.getAttribute("aria-checked")!=="true";
