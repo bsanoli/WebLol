@@ -8,6 +8,11 @@ export interface UiVersion {
 
 export const UI_VERSIONS: UiVersion[] = [
   {
+    version: "1.59",
+    date: "2026-11-19",
+    changes: ["Táticas: botão direito num pick abre um menu para trocar o campeão por um dos alternativos da comp; o pick mostra quantos alternativos tem (+1, +2…)."],
+  },
+  {
     version: "1.58",
     date: "2026-11-19",
     changes: ["Composições: nova aba Táticas, com um campo grande de texto à esquerda e, à direita, as comps do time e os picks e bans da comp escolhida em formato reduzido. Há também Táticas gerais, sem composição."],

@@ -56,6 +56,33 @@ export function mountDraftChampionMenu(host: HTMLElement, name: string, remove: 
   </ContextMenu.Root>)
 }
 
+type PickSwapOption = { name: string; portrait: string }
+
+/** Botão direito num pick da aba Táticas: troca o campeão por um dos alternativos da comp. */
+export function mountPickSwapMenu(host: HTMLElement, lane: string, current: string, options: PickSwapOption[], swap: (name: string) => void) {
+  const button = host.querySelector("button")!
+  const html = button.innerHTML
+  const style = button.getAttribute("style") ?? ""
+  const color = /--lc:\s*([^;]+)/.exec(style)?.[1]
+  renderControl(host, <ContextMenu.Root>
+    <ContextMenu.Trigger asChild>
+      <button type="button" className={button.className} style={color ? { ["--lc" as string]: color } : undefined}
+        aria-label={button.getAttribute("aria-label") ?? current} title={button.title}
+        dangerouslySetInnerHTML={{ __html: html }} />
+    </ContextMenu.Trigger>
+    <ContextMenu.Portal>
+      <ContextMenu.Content className="chip-menu pick-swap-menu" aria-label={`Trocar ${current || lane}`}>
+        <ContextMenu.Label className="pick-swap-label">Trocar por alternativo</ContextMenu.Label>
+        {options.length ? options.map(option => (
+          <ContextMenu.Item key={option.name} data-slot="dropdown-menu-item" onSelect={() => queueMicrotask(() => swap(option.name))}>
+            <span className="pick-swap-portrait" dangerouslySetInnerHTML={{ __html: option.portrait }} />{option.name}
+          </ContextMenu.Item>
+        )) : <ContextMenu.Item data-slot="dropdown-menu-item" disabled>Nenhum alternativo nesta lane</ContextMenu.Item>}
+      </ContextMenu.Content>
+    </ContextMenu.Portal>
+  </ContextMenu.Root>)
+}
+
 export function mountMapEmpty(host: Element) {
   renderControl(host, <Empty className="map-empty">
     <EmptyHeader><EmptyDescription>Nenhum passo ainda.</EmptyDescription></EmptyHeader>

@@ -3,7 +3,7 @@ import { askChoice, askName, confirmAction, showDialog } from "@/shared/ui/dialo
 import { iconMarkup, laneIconMarkup } from "@/shared/ui/icon"
 import { lolAsset, lolChampion, lolImage } from "@/entities/champion"
 import { ensureTeamPlays } from "@/entities/tactical-play"
-import { clearTeamControls, mountChampionMenu, mountCompositionMenu, mountDraftChampionMenu, mountLaneNote, mountMapEmpty, mountMapSwitch, mountTeamSelect, mountSectionTabs, mountToolGroup } from "./team-controls"
+import { clearTeamControls, mountChampionMenu, mountCompositionMenu, mountDraftChampionMenu, mountLaneNote, mountPickSwapMenu, mountMapEmpty, mountMapSwitch, mountTeamSelect, mountSectionTabs, mountToolGroup } from "./team-controls"
 import { initializeTheme } from "@/shared/config/theme"
 import { revealContent } from "@/shared/lib/motion"
 
@@ -237,6 +237,17 @@ function renderEditor(){
       compositions: S.comps, general: !!S.tacticsGeneral, text: readTactic(S, S.tacticsGeneral ? null : c.id),
       hasTactic: id => hasTactic(S, id), LN, img, esc,
     })}</div>`);
+    if (!S.tacticsGeneral) editor.querySelectorAll("[data-swap-lane]").forEach(host => {
+      const lane = host.dataset.swapLane, list = c.lanes[lane];
+      mountPickSwapMenu(host, LN[lane].n, list[0] || "", list.slice(1).map(name => ({ name, portrait: img(name) })), name => {
+        const champions = cur().lanes[lane], index = champions.indexOf(name);
+        if (index < 1) return;
+        champions.splice(index, 1);
+        champions.unshift(name);
+        touch(); save(); renderEditor(); renderList();
+        toast(`${name} agora é o principal em ${LN[lane].n}`);
+      });
+    });
     const txTabs = editor.querySelector(".tx-tabs");
     if (txTabs) txTabs.scrollTop = txScroll;
     editor.dataset.motionComposition = c.id;

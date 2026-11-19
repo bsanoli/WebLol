@@ -46,3 +46,19 @@
 .tx-pick-champ { color: var(--txt); font-size: 13px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .tx-pick.them { grid-template-columns: minmax(0, 1fr); border-left-color: var(--line); }
 .tx-pick.them .tx-pick-champ { color: var(--mut); font-weight: 500; }
+
+/* Pick clicável (botão direito troca pelo alternativo) */
+.tx-pick-item { display: block; }
+#v-comps button.tx-pick { position: relative; width: 100%; margin: 0; border-top: 0; border-right: 0; border-bottom: 0; color: inherit; font: inherit; text-align: left; cursor: context-menu; }
+#v-comps button.tx-pick:hover { background: color-mix(in srgb, var(--txt) 9%, transparent); }
+#v-comps button.tx-pick:focus-visible { outline: 2px solid var(--txt); outline-offset: 1px; }
+#v-comps button.tx-pick[data-state="open"] { background: var(--wl-accent-soft); }
+button.tx-pick { grid-template-columns: 32px minmax(0, 1fr) auto; }
+button.tx-pick > .tx-pick-name, button.tx-pick > .tx-pick-champ { grid-column: 2; }
+.tx-alts { grid-column: 3; grid-row: 1 / 3; padding: 1px 6px; border-radius: 999px; background: var(--bg); color: var(--mut); font-size: 11px; }
+.pick-swap-menu { min-width: 200px; }
+.pick-swap-menu .pick-swap-label { padding: 4px 8px; color: var(--mut); font-size: 11px; }
+.pick-swap-menu [role=menuitem] { color: var(--txt); }
+.pick-swap-menu [role=menuitem][data-highlighted] { background: var(--wl-accent-soft); }
+.pick-swap-menu [role=menuitem][data-disabled] { color: var(--mut); cursor: default; }
+.pick-swap-portrait .av { display: block; width: 24px; height: 24px; overflow: hidden; border-radius: 4px; }

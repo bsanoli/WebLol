@@ -15,8 +15,11 @@ function draftSummaryHTML(c, { LN, img, esc }) {
       const code = t + (i + 1)
       if (!mine) return `<li class="tx-pick them"><span class="tx-pick-name">${PICKNAME[code]}</span><span class="tx-pick-champ">A definir</span></li>`
       const lane = LN[d.order[d.side][i]], n = c.lanes[lane.k][0]
-      return `<li class="tx-pick" style="--lc:var(${lane.c})">${n ? img(n) : `<span class="av tx-empty">${iconMarkup("champion")}</span>`}
-        <span class="tx-pick-name">${PICKNAME[code]} · ${lane.n}</span><span class="tx-pick-champ">${n ? esc(n) : "Sem campeão"}</span></li>`
+      const alts = c.lanes[lane.k].length - 1
+      return `<li class="tx-pick-item" data-team-control data-swap-lane="${lane.k}"><button type="button" class="tx-pick" style="--lc:var(${lane.c})"
+        aria-label="${PICKNAME[code]} · ${lane.n} · ${n ? esc(n) : "Sem campeão"}${alts > 0 ? ` · ${alts} alternativo${alts > 1 ? "s" : ""}, botão direito para trocar` : ""}"
+        title="${alts > 0 ? "Botão direito para trocar pelo alternativo" : "Sem campeões alternativos nesta lane"}">${n ? img(n) : `<span class="av tx-empty">${iconMarkup("champion")}</span>`}
+        <span class="tx-pick-name">${PICKNAME[code]} · ${lane.n}</span><span class="tx-pick-champ">${n ? esc(n) : "Sem campeão"}</span>${alts > 0 ? `<span class="tx-alts" aria-hidden="true">+${alts}</span>` : ""}</button></li>`
     }).join("")
     return `<section class="tx-side-col ${key}${mine ? " mine" : ""}" aria-label="${DRAFT_SIDE[key]}">
       <h3><span class="side-dot ${key}" aria-hidden="true"></span>${DRAFT_SIDE[key]}${mine ? "<small>Nossa equipe</small>" : ""}</h3>
