@@ -110,13 +110,16 @@ test("Restaura a versão sincronizada somente após confirmação", async ({ pag
 test("Um passo do mapa tático continua salvo após recarregar", async ({ page }) => {
   await page.goto("/camp.html")
   const team = page
+  const sequence = team.getByRole("tab", { name: "Sequência" })
   await team.getByRole("button", { name: "Mapa tático" }).click()
+  await sequence.click()
   await team.getByRole("button", { name: "Novo passo" }).click()
   const step = team.getByRole("textbox", { name: "Nome do passo 1" })
   await step.fill("Entrada pelo rio")
 
   await page.reload()
   await team.getByRole("button", { name: "Mapa tático" }).click()
+  await sequence.click()
   await expect(step).toHaveValue("Entrada pelo rio")
 })
 
@@ -198,6 +201,7 @@ test("Wards em Lumes exibem a visão do ponto e acompanham os passos da jogada",
   await expect(add).toBeChecked()
   await expect(bonus).toHaveCount(1)
   await expect(bonus).toHaveAttribute("data-faelight", "upper-island")
+  await page.getByRole("tab", { name: "Sequência" }).click()
   await page.getByRole("button", { name: "Novo passo" }).click()
 
   await page.getByRole("tab", { name: "Camadas" }).click()

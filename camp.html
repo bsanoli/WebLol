@@ -8,16 +8,16 @@
 <link rel="icon" href="./assets/brand/favicon.ico" sizes="any">
 <link rel="icon" href="./assets/brand/favicon.svg?v=f454a496" type="image/svg+xml">
 <link rel="stylesheet" href="./assets/base.css?v=b239c61f">
-<link rel="stylesheet" href="./assets/team.css?v=92878890">
+<link rel="stylesheet" href="./assets/team.css?v=2282c117">
 <link rel="stylesheet" href="./assets/compositions.css?v=be54e777">
 <link rel="stylesheet" href="./assets/motion.css?v=0e5e7875">
 <link rel="stylesheet" href="./assets/draft-layout.css?v=6cc687a9">
 <link rel="stylesheet" href="./assets/team-controls.css?v=f835c7af">
-  <script type="module" crossorigin src="./assets/camp-DE25pv_A.js?v=cc7d89bb"></script>
-  <link rel="modulepreload" crossorigin href="./assets/icon-dFnSQW2J.js?v=34c4305c">
-  <link rel="modulepreload" crossorigin href="./assets/select-Aqd6_eb0.js?v=9c06feca">
-  <link rel="modulepreload" crossorigin href="./assets/dropdown-menu-CeX5Y-hi.js?v=731687c1">
-  <link rel="stylesheet" crossorigin href="./assets/icon-CIQx-7-q.css?v=0e30be89">
+  <script type="module" crossorigin src="./assets/camp-RUDIgNCi.js?v=0bc95a61"></script>
+  <link rel="modulepreload" crossorigin href="./assets/icon-fxkcrle0.js?v=34c4305c">
+  <link rel="modulepreload" crossorigin href="./assets/select-C26t9bY3.js?v=069681e1">
+  <link rel="modulepreload" crossorigin href="./assets/dropdown-menu-CGbKSoNh.js?v=e8a37b8c">
+  <link rel="stylesheet" crossorigin href="./assets/icon-7_i2Qej8.css?v=c3688b28">
   <link rel="stylesheet" crossorigin href="./assets/dropdown-menu-CZ9TUQ4V.css?v=aa09ab78">
   <link rel="stylesheet" crossorigin href="./assets/camp-Dmc_kLnv.css?v=6fd32b4b">
 </head>
@@ -105,6 +105,17 @@
     <div class="map-edit-toolbar">
      <div class="map-primary-tools">
       <div id="map-modes"></div>
+      <div id="map-arrow-options" role="group" aria-label="Opções de desenho" hidden>
+       <h3 id="map-colors-title">Cor da seta</h3>
+       <div id="cols" role="group" aria-labelledby="map-colors-title"></div>
+       <div class="map-stroke-options">
+        <label for="map-stroke-width-trigger" id="map-stroke-width-label">Espessura</label>
+        <select id="map-stroke-width" aria-labelledby="map-stroke-width-label"><option value="2">Fina</option><option value="3.2" selected>Média</option><option value="5">Grossa</option></select>
+        <label for="map-stroke-style-trigger" id="map-stroke-style-label">Estilo</label>
+        <select id="map-stroke-style" aria-labelledby="map-stroke-style-label"><option value="solid">Contínuo</option><option value="dashed">Tracejado</option></select>
+       </div>
+       <label id="map-arrowhead-option" class="map-check" hidden><input type="checkbox" id="map-stroke-arrowhead"> Ponta de seta</label>
+      </div>
       <div class="map-vision-controls" id="map-perspective" role="group" aria-label="Visão">
        <button type="button" data-slot="button" data-variant="ghost" data-size="icon-sm" data-vision="all" aria-pressed="true" aria-label="Visão geral" data-map-tip="Visão geral"><svg class="icon" aria-hidden="true"><use href="assets/icons.svg#ward"></use></svg></button>
        <button type="button" data-slot="button" data-variant="ghost" data-size="icon-sm" data-vision="b" aria-pressed="false" aria-label="Visão azul" data-map-tip="Visão azul"><svg class="icon" aria-hidden="true"><use href="assets/icons.svg#ward"></use></svg></button>
@@ -137,7 +148,7 @@
         <button data-slot="button" data-variant="outline" data-pre="base">Todos na base</button><button data-slot="button" data-variant="outline" data-pre="lane" title="Fase de rotas (~1:30)">Fase de rotas</button>
        </div>
       </details>
-      <button type="button" data-slot="button" data-variant="outline" id="map-reset" title="Restaura posições e torres e limpa as anotações" disabled><svg class="icon" aria-hidden="true"><use href="assets/icons.svg#reset"></use></svg> Resetar mapa</button>
+      <button type="button" data-slot="button" data-variant="outline" id="map-reset" title="Restaura posições, torres e visão geral e limpa as anotações" disabled><svg class="icon" aria-hidden="true"><use href="assets/icons.svg#reset"></use></svg> Resetar mapa</button>
      </div>
     </div>
    <div class="map-stage-bar" role="group" aria-label="Cursor, arquivos e ajuda">
@@ -165,7 +176,8 @@
      <li>Clique em <b>Reproduzir</b> para ver a sequência.</li>
     </ol>
     <strong>Navegação e atalhos</strong>
-    <p>Role a roda sobre o mapa para ajustar o zoom. Segure <b>Espaço</b> e arraste para navegar. Com <b>Alcance das torres</b> ligado, use <b>Mover</b> para alternar o estado de uma torre.</p>
+    <p>Role a roda sobre o mapa para ajustar o zoom. Segure <b>Espaço</b> e arraste para navegar.</p>
+    <p>Nas visões azul e vermelha, use <b>Mover</b> e clique numa torre para destruí-la ou restaurá-la. Na Visão geral, ligue <b>Alcance das torres</b> para exibir os marcadores.</p>
     <p>Com o mapa em foco, use <kbd>V</kbd> para Mover, <kbd>H</kbd> para Mão, <kbd>Shift+L</kbd> para Seta, <kbd>Shift+P</kbd> para Traço livre e <kbd>B</kbd> ou <kbd>E</kbd> para a Borracha. A Borracha apaga traços, wards e waves.</p>
     <p>Clique com o botão direito em uma área vazia para acessar ferramentas e histórico. Com o mapa em foco, use <kbd>Shift+F10</kbd> para abrir o mesmo menu.</p>
     <p>Para corrigir um passo, selecione-o e ligue o <b>Modo edição</b>. Use <b>Ctrl+Z</b> para desfazer e <b>Ctrl+Y</b> para refazer.</p>
@@ -183,17 +195,6 @@
      <select id="map-ward-type" aria-labelledby="map-ward-type-label"></select>
     </div>
     <p id="map-ward-hint" class="map-ward-hint" hidden></p>
-    <div class="map-group" id="map-arrow-options" hidden>
-     <h3 id="map-colors-title">Cor da seta</h3>
-     <div id="cols" role="group" aria-labelledby="map-colors-title"></div>
-     <div class="map-stroke-options">
-      <label for="map-stroke-width-trigger" id="map-stroke-width-label">Espessura</label>
-      <select id="map-stroke-width" aria-labelledby="map-stroke-width-label"><option value="2">Fina</option><option value="3.2" selected>Média</option><option value="5">Grossa</option></select>
-      <label for="map-stroke-style-trigger" id="map-stroke-style-label">Estilo</label>
-      <select id="map-stroke-style" aria-labelledby="map-stroke-style-label"><option value="solid">Contínuo</option><option value="dashed">Tracejado</option></select>
-     </div>
-     <label id="map-arrowhead-option" class="map-check" hidden><input type="checkbox" id="map-stroke-arrowhead"> Ponta de seta</label>
-    </div>
    </div>
    <div class="map-board-slot">
    <div id="map-viewport" role="region" aria-label="Mapa da jogada" tabindex="0" class="map-viewport">
@@ -215,9 +216,12 @@
     <button id="map-ward-cursor" type="button" aria-description="Use as setas para mover o cursor e Enter ou Espaço para agir." hidden></button>
    </div>
    </div>
-   <div id="map-wave-options" hidden>
-    <span>Clique perto da rota desejada.</span>
-    <output id="map-wave-detected" aria-live="polite"></output>
+   <div class="map-stage-notices">
+    <p id="map-preview-notice" hidden>Prévia tática aproximada da visão da equipe.</p>
+    <div id="map-wave-options" hidden>
+     <span>Clique perto da rota desejada.</span>
+     <output id="map-wave-detected" aria-live="polite"></output>
+    </div>
    </div>
    <div class="map-camera-controls" role="group" aria-label="Câmera do mapa">
     <button type="button" data-slot="button" data-variant="outline" data-size="icon-sm" id="map-zoom-out" aria-label="Diminuir zoom" data-map-tip="Diminuir zoom">−</button>
@@ -235,7 +239,6 @@
      <button type="button" data-slot="button" data-variant="ghost" data-size="sm" data-ward-side="" aria-pressed="false">Sem lado</button>
     </div>
    </div>
-   <p id="map-preview-notice" class="map-ward-hint" hidden>Prévia tática aproximada da visão da equipe.</p>
    <div id="map-context-menu" class="map-context-menu" popover="auto" role="menu" aria-label="Ações do elemento no mapa">
     <div class="map-context-title" aria-hidden="true"></div>
     <div class="map-context-items" role="presentation"></div>
@@ -243,18 +246,14 @@
   </div>
   <aside class="map-sidebar" id="map-sidebar" aria-label="Painel do mapa" tabindex="-1">
    <div id="map-sidebar-tabs"></div>
-   <section class="wl-panel box map-card" role="tabpanel" id="panel-map-layers" aria-labelledby="tab-map-layers" data-map-tab="map-layers" tabindex="0" hidden>
+   <section class="wl-panel box map-card" role="tabpanel" id="panel-map-layers" aria-labelledby="tab-map-layers" data-map-tab="map-layers" tabindex="0">
     <div class="map-display-switches" role="group" aria-label="Camadas do mapa">
      <div id="map-image-control"></div>
      <div id="map-faelight-toggle"></div>
      <div id="map-faelight-additional-toggle"></div>
      <div id="map-tower-range-control"></div>
     </div>
-    <div class="map-champion-size">
-     <label for="map-champion-size">Tamanho dos ícones</label>
-     <span id="map-champion-size-value" aria-hidden="true">100%</span>
-     <input type="range" id="map-champion-size" min="60" max="100" step="5" value="100">
-    </div>
+    <div id="map-champion-size" class="map-champion-size"></div>
    <div class="map-legends">
     <div class="map-faelight-legend" id="map-faelight-legend" role="status" hidden>
      <span>8 Lumes iniciais</span>
@@ -285,7 +284,7 @@
     </div>
     <div id="map-composition-list" class="map-composition-list" role="group" aria-label="Composições para o lado Azul"></div>
    </section>
-   <section class="wl-panel box map-card" role="tabpanel" id="panel-map-sequence" aria-labelledby="tab-map-sequence" data-map-tab="map-sequence" tabindex="0">
+   <section class="wl-panel box map-card" role="tabpanel" id="panel-map-sequence" aria-labelledby="tab-map-sequence" data-map-tab="map-sequence" tabindex="0" hidden>
     <div class="map-actions"><button data-slot="button" data-variant="default" id="sadd"><svg class="icon" aria-hidden="true" focusable="false"><use href="assets/icons.svg#plus"></use></svg> Novo passo</button><button data-slot="button" data-variant="ghost" id="sedit" class="edt" aria-pressed="false" title="Liga/desliga a edição do passo selecionado"><svg class="icon" aria-hidden="true" focusable="false"><use href="assets/icons.svg#edit"></use></svg> Modo edição</button></div>
     <div class="map-group">
      <div class="map-playback"><button data-slot="button" data-variant="outline" data-size="icon" id="sprev" aria-label="Passo anterior"><svg class="icon" aria-hidden="true" focusable="false"><use href="assets/icons.svg#previous"></use></svg></button><button data-slot="button" data-variant="outline" id="splay"><svg class="icon" aria-hidden="true" focusable="false"><use href="assets/icons.svg#play"></use></svg> Reproduzir</button><button data-slot="button" data-variant="outline" data-size="icon" id="snext" aria-label="Próximo passo"><svg class="icon" aria-hidden="true" focusable="false"><use href="assets/icons.svg#next"></use></svg></button></div>

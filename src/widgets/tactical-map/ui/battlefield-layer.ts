@@ -95,14 +95,19 @@ export function mountBattlefield({ read, write, canEdit, getTool, getPerspective
 
   function renderTowers(frame = read()) {
     const interactive = canEdit() && getTool() === "move"
+    const teamVision = getPerspective() !== "all"
     const { style } = wardScene()
     const activeTowers = towers.filter(tower => !frame.destroyedTowers?.includes(tower.id))
     get("map-tower-ranges").innerHTML = showTowers ? activeTowers.map(tower =>
       `<g data-side="${tower.side}"><circle cx="${tower.point[0]}" cy="${tower.point[1]}" r="${mapRadius(towerAttack, style)}"/></g>`).join("") : ""
-    towersHost.innerHTML = showTowers ? towers.map(tower => {
+    towersHost.toggleAttribute("data-team-vision", teamVision)
+    towersHost.innerHTML = showTowers || teamVision ? towers.map(tower => {
       const destroyed = frame.destroyedTowers?.includes(tower.id)
+      const state = destroyed ? "Destruída" : "Ativa"
+      const action = destroyed ? "Restaurar torre" : "Destruir torre"
       return `<button type="button" class="map-piece map-tower" data-side="${tower.side}" data-tower="${tower.id}"
-       style="${at(tower.point)}" aria-pressed="${Boolean(destroyed)}" aria-label="${tower.name}" title="${tower.name} · ${destroyed ? "Destruída" : "750 de alcance de ataque"}"
+       style="${at(tower.point)}" aria-pressed="${Boolean(destroyed)}" aria-label="${tower.name}" aria-description="${state}${interactive ? `. ${action}` : ""}"
+       title="${tower.name} · ${state}${interactive ? ` · ${action}` : ""}"
        ${interactive ? "" : "disabled"}><img src="assets/lol/hud/tower.png" alt=""></button>`
     }).join("") : ""
   }

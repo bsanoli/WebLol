@@ -24,7 +24,7 @@ export function mountMapHistory<Snapshot>({ capture, restore, canEdit }: {
   redoButton.onclick = () => step(redo, undo)
   document.addEventListener("keydown", event => {
     if (!document.getElementById("v-map")!.classList.contains("on") || !canEdit() ||
-      (event.target as Element).closest("input, textarea, select, [contenteditable], [role=dialog]") || !(event.ctrlKey || event.metaKey)) return
+      (event.target as Element).closest("input, textarea, select, [role=slider], [contenteditable], [role=dialog]") || !(event.ctrlKey || event.metaKey)) return
     const key = event.key.toLowerCase()
     if (key !== "z" && key !== "y") return
     event.preventDefault()

@@ -29,17 +29,22 @@ const mapTools: ToolOption[] = [
 export function mountMapVision(onChange: () => void) {
   const options = document.querySelectorAll<HTMLButtonElement>("#map-perspective [data-vision]")
   let perspective: Side | "all" = "all"
+  function setPerspective(next: Side | "all") {
+    if (next === perspective) return
+    perspective = next
+    for (const button of options) button.setAttribute("aria-pressed", String(button.dataset.vision === next))
+    onChange()
+  }
   for (const option of options) {
     option.onclick = () => {
       const value = option.dataset.vision
-      const next = isSide(value) ? value : "all"
-      if (next === perspective) return
-      perspective = next
-      for (const button of options) button.setAttribute("aria-pressed", String(button === option))
-      onChange()
+      setPerspective(isSide(value) && value !== perspective ? value : "all")
     }
   }
-  return () => perspective
+  return {
+    getPerspective: () => perspective,
+    resetPerspective: () => setPerspective("all"),
+  }
 }
 
 export function mountMapTools({ map, canEdit, canMove, currentTool, chooseTool, chooseColor, mountToolGroup }: {
@@ -53,14 +58,49 @@ export function mountMapTools({ map, canEdit, canMove, currentTool, chooseTool, 
 }) {
   const host = document.getElementById("map-modes")!
   const viewport = document.getElementById("map-viewport")!
+  const workspace = document.getElementById("v-map")!
+  const toolbar = host.closest<HTMLElement>(".map-toolbar")!
+  const editToolbar = host.closest<HTMLElement>(".map-edit-toolbar")!
   const colorOptions = document.getElementById("map-arrow-options")!
   const wardOptions = document.getElementById("map-ward-options")!
   const wardHint = document.getElementById("map-ward-hint")!
   const panels: Partial<Record<Tool, HTMLElement>> = { draw: colorOptions, freehand: colorOptions, ward: wardOptions }
+  const drawingButton = () => host.querySelector<HTMLElement>(`[data-tool="${currentTool()}"][aria-controls="map-arrow-options"]`)
+  const activeSelect = () => colorOptions.querySelector('[data-team-trigger="select"][data-state="open"]')
+  let placementFrame = 0
+  function scheduleDrawingPlacement() {
+    if (colorOptions.hidden || placementFrame) return
+    placementFrame = requestAnimationFrame(() => {
+      placementFrame = 0
+      const anchor = drawingButton()
+      if (colorOptions.hidden || !anchor) return
+      const button = anchor.getBoundingClientRect()
+      const parent = editToolbar.getBoundingClientRect()
+      const edge = 8
+      const maxLeft = document.documentElement.clientWidth - colorOptions.offsetWidth - edge
+      const left = Math.max(edge, Math.min(button.left, maxLeft))
+      const top = Math.max(button.bottom, toolbar.getBoundingClientRect().bottom) + 4
+      colorOptions.style.setProperty("--map-drawing-left", `${left - parent.left}px`)
+      colorOptions.style.setProperty("--map-drawing-top", `${top - parent.top}px`)
+    })
+  }
   function setPanelOpen(panel: HTMLElement, open: boolean) {
     panel.hidden = !open
     if (panel === wardOptions) wardHint.hidden = !open
+    if (panel === colorOptions && open) scheduleDrawingPlacement()
   }
+  const placementObserver = new ResizeObserver(scheduleDrawingPlacement)
+  placementObserver.observe(toolbar)
+  placementObserver.observe(editToolbar)
+  placementObserver.observe(viewport)
+  document.addEventListener("pointerdown", event => {
+    if (colorOptions.hidden || !(event.target instanceof Element)) return
+    const listId = activeSelect()?.getAttribute("aria-controls")
+    const list = listId && document.getElementById(listId)
+    if (colorOptions.contains(event.target) || drawingButton()?.contains(event.target) ||
+      (list && list.contains(event.target))) return
+    setPanelOpen(colorOptions, false)
+  }, true)
   const palette = document.getElementById("cols")!
   let renderedTool: Tool | undefined
   palette.innerHTML = colors.map(([color, name], index) => `<button type="button" class="col" data-color="${color}" style="--swatch:${color}" aria-label="${name}" aria-pressed="${index === 0}"></button>`).join("")
@@ -77,12 +117,20 @@ export function mountMapTools({ map, canEdit, canMove, currentTool, chooseTool, 
   viewport.addEventListener("pointerdown", event => {
     if (event.button === 0 && !(event.target as Element).closest("button")) viewport.focus({ preventScroll: true })
   }, true)
-  document.getElementById("v-map")!.addEventListener("keydown", event => {
+  workspace.addEventListener("keydown", event => {
     const target = event.target as Element
+    if (event.key === "Escape" && !event.defaultPrevented && !colorOptions.hidden && !activeSelect()) {
+      setPanelOpen(colorOptions, false)
+      if (colorOptions.contains(target)) {
+        event.preventDefault()
+        drawingButton()?.focus({ preventScroll: true })
+      }
+      return
+    }
     const fromToolbar = host.contains(target)
     if (event.defaultPrevented || event.repeat || event.isComposing || event.ctrlKey || event.metaKey || event.altKey ||
       !canMove() || (!fromToolbar && !viewport.contains(target)) ||
-      target.closest("input, textarea, select, [contenteditable]") ||
+      target.closest("input, textarea, select, [role=slider], [contenteditable]") ||
       document.querySelector('[data-map-menu][open], :popover-open, dialog[open], [role="listbox"][data-state="open"], [role="menu"][data-state="open"], [role="dialog"][data-state="open"]')) return
     const key = `${event.shiftKey ? "Shift+" : ""}${event.key.toUpperCase()}`
     const tool = availableTools().find(option => option.shortcuts?.split(" ").includes(key))
@@ -92,10 +140,12 @@ export function mountMapTools({ map, canEdit, canMove, currentTool, chooseTool, 
       chooseTool(tool.value)
       const nextFocus = fromToolbar ? host.querySelector<HTMLElement>(`[data-tool="${tool.value}"]`) : viewport
       nextFocus?.focus({ preventScroll: true })
+    } else if (panels[tool.value] === colorOptions) {
+      setPanelOpen(colorOptions, true)
     }
   })
 
-  return () => {
+  function render() {
     const tools = availableTools()
     const tool = canMove() ? currentTool() : "hand"
     mountToolGroup(host, tool, tools, value => {
@@ -118,6 +168,13 @@ export function mountMapTools({ map, canEdit, canMove, currentTool, chooseTool, 
     document.getElementById("map-colors-title")!.textContent = tool === "freehand" ? "Cor do traço" : "Cor da seta"
     document.getElementById("map-wave-options")!.hidden = !waveToolSide(tool)
     return tool
+  }
+
+  return {
+    render,
+    showDrawingOptions() {
+      if (canEdit() && panels[currentTool()] === colorOptions) setPanelOpen(colorOptions, true)
+    },
   }
 }
 

@@ -92,7 +92,7 @@ export function mountMapCamera(viewport: HTMLElement, map: HTMLElement, onChange
     const target = event.target instanceof Element ? event.target : null
     const focusedControl = target?.closest(controlSelector)
     if (focusedControl && (focusedControl !== pointerControl || focusedControl.matches("[data-ward-index]"))) return
-    if (target?.closest('input, textarea, select, [contenteditable]:not([contenteditable="false"]), [role="dialog"]') ||
+    if (target?.closest('input, textarea, select, [role="slider"], [contenteditable]:not([contenteditable="false"]), [role="dialog"]') ||
       document.querySelector('[role="listbox"][data-state="open"], [role="menu"][data-state="open"], dialog[open], #map-context-menu:popover-open')) return
     event.preventDefault()
     setSpace(true)

@@ -13,6 +13,7 @@ import { hasArrowhead, mountMapDrawing } from "./map-drawing"
 import { renderMapFallback } from "./map-fallback"
 import { mapQuickTools, mountMapDisclosures, mountMapSidebar, mountMapTools, mountMapVision, waveToolSide } from "./map-tools"
 import { mountChampionLayer } from "./champion-layer"
+import { mountChampionSize } from "./champion-size"
 import { animatePieces } from "./frame-animation"
 import { mountMapHistory } from "./map-history"
 import { mountFaelightLayer } from "./faelight-layer"
@@ -33,8 +34,9 @@ const play=()=>plays().find(p=>p.id===getState().curPlay);
 const clone=o=>JSON.parse(JSON.stringify(o));
 const snapshotFrame=({pos,lines,wards,waves,destroyedTowers})=>clone({pos,lines:lines??[],wards:readWards(wards),waves:readWaves(waves),destroyedTowers:Array.isArray(destroyedTowers)?destroyedTowers:[]});
 const canChangeFrame=()=>!M.playing&&!M.transition;
-const getPerspective = mountMapVision(() => {
+const { getPerspective, resetPerspective } = mountMapVision(() => {
   renderStat();
+  battlefield.renderTowers();
   battlefield.renderSight(visibleFrame());
 });
 const canEdit=canChangeFrame;
@@ -67,6 +69,7 @@ function renderMapImageSwitch(){
 }
 
 const map = $("#map");
+mountChampionSize($("#map-champion-size"), map);
 const viewport = $("#map-viewport");
 mountMapCursorColor($("#mapw"));
 const camera = mountMapCamera(viewport, map, () => drawing.render(), () => canChangeFrame() ? M.tool : "hand", () => {
@@ -115,7 +118,10 @@ const contextMenu = mountMapContextMenu(map, viewport, event => {
 }, () => canEdit() ? [
   ...mapQuickTools.map(tool => ({
     label: tool.label, icon: tool.icon, selected: M.tool === tool.value,
-    run: () => { if (M.tool !== tool.value) selectTool(tool.value, false) },
+    run: () => {
+      if (M.tool !== tool.value) selectTool(tool.value, false);
+      else showDrawingOptions();
+    },
   })),
   ...historyActions.map(({ button, ...action }) => ({
     ...action, disabled: button.disabled, run: () => button.click(),
@@ -138,7 +144,7 @@ mountMapSidebar($("#v-map"));
 mountMapPanel(mountSectionTabs);
 const syncStepPages = mountStepPages();
 
-const renderToolControls = mountMapTools({
+const { render: renderToolControls, showDrawingOptions } = mountMapTools({
   map, canEdit, canMove: canChangeFrame, currentTool: () => M.tool, chooseColor: drawing.setColor, mountToolGroup,
   chooseTool: tool => selectTool(tool, true),
 });
@@ -182,16 +188,20 @@ function writeFrame(changes) {
   refreshMap();
   drawing.render();
 }
-function updateClearMap() {
+function frameHasChanges() {
   const { pos, lines, wards, waves, destroyedTowers } = play().live;
+  return Boolean(lines?.length || readWards(wards).length || readWaves(waves).length || destroyedTowers?.length ||
+    TOKS.some(id => initialPositions[id].some((axis, index) => axis !== pos[id]?.[index])));
+}
+function updateClearMap() {
+  const { lines, wards, waves } = play().live;
   const hasWaves = readWaves(waves).length > 0;
   const hasAnnotations = lines?.length || readWards(wards).length || hasWaves;
   $("#clr").disabled = !canEdit() || !lines?.some(hasArrowhead);
   clearStrokes.disabled = !canEdit() || !lines?.some(line => !hasArrowhead(line));
   clearWaves.disabled = !canEdit() || !hasWaves;
   clearMap.disabled = !canEdit() || !hasAnnotations;
-  resetMap.disabled = !canChangeFrame() || (!hasAnnotations && !destroyedTowers?.length &&
-    TOKS.every(id => initialPositions[id].every((axis, index) => axis === pos[id]?.[index])));
+  resetMap.disabled = !canChangeFrame() || (getPerspective() === "all" && !frameHasChanges());
 }
 $("#clr").onclick=()=>{if(!$("#clr").disabled)commit({lines:play().live.lines.filter(line=>!hasArrowhead(line))})};
 clearStrokes.onclick=()=>{if(!clearStrokes.disabled)commit({lines:play().live.lines.filter(hasArrowhead)})};
@@ -199,9 +209,12 @@ clearWaves.onclick=()=>{if(!clearWaves.disabled)commit({waves:[]})};
 clearMap.onclick=()=>{if(!clearMap.disabled){drawing.reset();wardLayer.clearSelection();commit({lines:[],wards:[],waves:[]})}};
 resetMap.onclick=()=>{
   if (resetMap.disabled) return;
-  drawing.reset();
-  wardLayer.clearSelection();
-  writeFrame(initialFrame());
+  if (frameHasChanges()) {
+    drawing.reset();
+    wardLayer.clearSelection();
+    writeFrame(initialFrame());
+  }
+  resetPerspective();
 };
 document.querySelectorAll("[data-pre]").forEach(b=>b.onclick=()=>{
   if(!canEdit())return;

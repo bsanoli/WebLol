@@ -12,7 +12,7 @@ export function mountMapPanel(mountTabs: (host: Element, label: string, value: s
     for (const panel of panels) panel.hidden = panel.dataset.mapTab !== value
     mountTabs(host, "Painel do mapa", value, tabs, select)
   }
-  select("map-sequence")
+  select("map-layers")
 }
 
 export function mountStepPages() {
