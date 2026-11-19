@@ -8,6 +8,11 @@ export interface UiVersion {
 
 export const UI_VERSIONS: UiVersion[] = [
   {
+    version: "1.54",
+    date: "2026-11-19",
+    changes: ["Ordem do draft: o nome do campeão volta a ficar em uma linha, ao lado do nome do pick."],
+  },
+  {
     version: "1.53",
     date: "2026-11-19",
     changes: ["Composições: ao clicar numa composição, a lista mantém a posição do scroll em vez de voltar ao topo."],

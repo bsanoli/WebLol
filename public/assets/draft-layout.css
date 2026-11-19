@@ -25,6 +25,8 @@
   }
   #v-comps.draft-view .tm > .pk.them { align-items: center; align-content: center; }
   #v-comps.draft-view .tm .pick-choice .pkh { justify-content: flex-start; }
+  /* Pick preenchido não tem ícone: o nome ocupa a coluna do ícone e o resto da linha. */
+  #v-comps.draft-view .tm > .pk .pick-choice > .pkh + .pkn { grid-column: 2 / -1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 }
 
 @media (min-width: 1100px) {
