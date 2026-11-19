@@ -1,5 +1,5 @@
 // @ts-nocheck -- Usa os mesmos helpers de markup do editor legado (img, esc, LN).
-import { iconMarkup } from "@/shared/ui/icon"
+import { iconMarkup, laneIconMarkup } from "@/shared/ui/icon"
 import { DRAFT_SIDE, PICKNAME, compositionPreview, draftOf, sideDot } from "./draft"
 
 /** Picks e bans da comp em formato reduzido: só leitura, um lado por coluna. */
@@ -29,7 +29,20 @@ function draftSummaryHTML(c, { LN, img, esc }) {
   return `<div class="tx-draft-sides">${column("blue")}${column("red")}</div>`
 }
 
-export function tacticsHTML(c, { compositions, general, text, hasTactic, LN, img, esc }) {
+const PRIORITY_LANES = ["top", "jg", "mid", "adc", "sup", "ban"]
+
+/** Opções por posição em formato reduzido: campeões de cada lane em ordem de prioridade, sem notas. */
+function priorityHTML(c, { LN, img, esc }) {
+  return `<ol class="tx-priority">${PRIORITY_LANES.map(k => {
+    const lane = LN[k], list = c.lanes[k]
+    const champs = list.length
+      ? list.map((n, i) => `<li class="tx-prio-champ${i === 0 ? " main" : ""}" title="${i + 1}ª opção · ${esc(n)}">${img(n)}${i === 0 ? `<b>${esc(n)}</b>` : ""}</li>`).join("")
+      : `<li class="tx-prio-empty">Sem campeão</li>`
+    return `<li class="tx-prio-lane" style="--lc:var(${lane.c})"><span class="tx-prio-name">${laneIconMarkup(k)}${lane.n}</span><ol class="tx-prio-champs" aria-label="${lane.n} em ordem de prioridade">${champs}</ol></li>`
+  }).join("")}</ol>`
+}
+
+export function tacticsHTML(c, { compositions, general, text, hasTactic, panel, LN, img, esc }) {
   const mark = has => has ? `<span class="tx-has" title="Tem anotação de tática">${iconMarkup("edit")}</span>` : ""
   const generalTab = `<button type="button" class="dz-tab tx-general${general ? " on" : ""}" data-tactic-general aria-pressed="${general}">
     <b>${iconMarkup("book")}Táticas gerais${mark(hasTactic(null))}</b><span class="mini"><small>Sem composição</small></span></button>`
@@ -52,7 +65,9 @@ export function tacticsHTML(c, { compositions, general, text, hasTactic, LN, img
       <div class="tx-tabs" role="group" aria-label="Escolher a tática">${generalTab}${tabs}</div>
       <div class="tx-draft">${general
         ? `<p class="tx-draft-empty">Selecione uma composição para ver os picks e bans dela aqui.</p>`
-        : draftSummaryHTML(c, { LN, img, esc })}</div>
+        : `<div class="tx-panel-switch" role="group" aria-label="Visão da comp">${[["draft", "Draft"], ["priority", "Picks prioritários"]]
+            .map(([value, label]) => `<button type="button" data-tactic-panel="${value}" aria-pressed="${panel === value}"${panel === value ? ' class="on"' : ""}>${label}</button>`).join("")}</div>
+          ${panel === "priority" ? priorityHTML(c, { LN, img, esc }) : draftSummaryHTML(c, { LN, img, esc })}`}</div>
     </aside>
   </div>`
 }

@@ -235,9 +235,9 @@ function renderEditor(){
     const txScroll = tabsScroll;
     editor.insertAdjacentHTML("beforeend", `<div id="composition-panel" role="tabpanel" aria-labelledby="tab-tactics">${tacticsHTML(c, {
       compositions: S.comps, general: !!S.tacticsGeneral, text: readTactic(S, S.tacticsGeneral ? null : c.id),
-      hasTactic: id => hasTactic(S, id), LN, img, esc,
+      hasTactic: id => hasTactic(S, id), panel: S.tacticsPanel === "priority" ? "priority" : "draft", LN, img, esc,
     })}</div>`);
-    if (!S.tacticsGeneral) editor.querySelectorAll("[data-swap-lane]").forEach(host => {
+    if (!S.tacticsGeneral && S.tacticsPanel !== "priority") editor.querySelectorAll("[data-swap-lane]").forEach(host => {
       const lane = host.dataset.swapLane, list = c.lanes[lane];
       mountPickSwapMenu(host, LN[lane].n, list[0] || "", list.slice(1).map(name => ({ name, portrait: img(name) })), name => {
         const champions = cur().lanes[lane], index = champions.indexOf(name);
@@ -454,6 +454,15 @@ function placePicker(){
 }
 window.matchMedia("(min-width: 1100px)").addEventListener("change",()=>placePicker());
 $("#editor").addEventListener("click",e=>{
+  const panelButton=e.target.closest("[data-tactic-panel]");
+  if (panelButton) {
+    if (S.tacticsPanel !== panelButton.dataset.tacticPanel) {
+      S.tacticsPanel = panelButton.dataset.tacticPanel;
+      save(); renderEditor();
+      $(`#editor [data-tactic-panel="${S.tacticsPanel}"]`)?.focus({ preventScroll: true });
+    }
+    return;
+  }
   const tacticTab=e.target.closest("[data-tactic-comp],[data-tactic-general]");
   if (tacticTab) {
     const general=tacticTab.hasAttribute("data-tactic-general"),id=tacticTab.dataset.tacticComp;

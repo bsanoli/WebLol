@@ -8,6 +8,11 @@ export interface UiVersion {
 
 export const UI_VERSIONS: UiVersion[] = [
   {
+    version: "1.60",
+    date: "2026-11-19",
+    changes: ["Táticas: seletor Draft / Picks prioritários acima da barra do time; Picks prioritários mostra os campeões de cada lane em ordem de prioridade, sem as notas."],
+  },
+  {
     version: "1.59",
     date: "2026-11-19",
     changes: ["Táticas: botão direito num pick abre um menu para trocar o campeão por um dos alternativos da comp; o pick mostra quantos alternativos tem (+1, +2…)."],

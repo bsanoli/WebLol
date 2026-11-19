@@ -62,3 +62,23 @@ button.tx-pick > .tx-pick-name, button.tx-pick > .tx-pick-champ { grid-column: 2
 .pick-swap-menu [role=menuitem][data-highlighted] { background: var(--wl-accent-soft); }
 .pick-swap-menu [role=menuitem][data-disabled] { color: var(--mut); cursor: default; }
 .pick-swap-portrait .av { display: block; width: 24px; height: 24px; overflow: hidden; border-radius: 4px; }
+
+/* Troca entre Draft e Picks prioritários, acima da barra do time */
+.tx-panel-switch { display: inline-flex; gap: 2px; margin-bottom: 10px; padding: 2px; border: 1px solid var(--line); border-radius: var(--wl-control-radius); background: var(--bg); }
+#v-comps .tx-panel-switch button { min-height: 28px; padding: 0 12px; border: 0; border-radius: calc(var(--wl-control-radius) - 2px); background: transparent; color: var(--mut); font-size: 12px; font-weight: 600; cursor: pointer; }
+#v-comps .tx-panel-switch button:hover { color: var(--txt); background: color-mix(in srgb, var(--txt) 8%, transparent); }
+#v-comps .tx-panel-switch button:focus-visible { outline: 2px solid var(--txt); outline-offset: 1px; }
+#v-comps .tx-panel-switch button.on { background: var(--wl-accent-soft); color: var(--wl-accent); }
+
+/* Picks prioritários: opções por posição reduzidas, sem notas */
+.tx-priority { display: grid; gap: 4px; margin: 0; padding: 0; list-style: none; }
+.tx-prio-lane { display: grid; grid-template-columns: 96px minmax(0, 1fr); align-items: center; gap: 8px; min-height: 44px; padding: 4px 8px; border-left: 3px solid var(--lc, var(--line)); border-radius: 4px; background: color-mix(in srgb, var(--txt) 4%, transparent); }
+.tx-prio-name { display: flex; align-items: center; gap: 6px; color: var(--txt); font-size: 12px; font-weight: 600; }
+.tx-prio-name .lane-icon { width: 16px; height: 16px; flex: none; }
+.tx-prio-champs { display: flex; flex-wrap: wrap; align-items: center; gap: 4px; margin: 0; padding: 0; list-style: none; }
+.tx-prio-champ { display: flex; align-items: center; gap: 6px; }
+.tx-prio-champ .av { width: 28px; height: 28px; border-radius: 4px; opacity: .8; }
+.tx-prio-champ.main { margin-right: 6px; }
+.tx-prio-champ.main .av { width: 34px; height: 34px; opacity: 1; box-shadow: 0 0 0 2px var(--lc, var(--line)); }
+.tx-prio-champ.main b { font-size: 13px; }
+.tx-prio-empty { color: var(--mut); font-size: 12px; }
