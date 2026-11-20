@@ -1,7 +1,7 @@
 // Composições nossas e adversárias: criar, trocar, renomear, duplicar, excluir e a barra de confronto.
 import { askName, confirmAction } from "@/shared/ui/dialog-controls"
 import { createCompositionCopy } from "../model/composition"
-import { enemiesOf, isEnemy, oursOf, setEnemyId, settleOwner } from "../model/composition-side"
+import { boardSideOf, enemiesOf, isEnemy, oursOf, setEnemyId, settleOwner } from "../model/composition-side"
 import {
   blank,
   compositionPreview,
@@ -26,6 +26,7 @@ const matchupItem = (c: Composition) => ({
   name: c.name,
   title: c.name,
   preview: compositionPreview(c).map(img).join(""),
+  side: boardSideOf(c, S.comps, S.cur),
   champions: [...Object.values(c.lanes).flat(), ...c.bans],
 })
 
