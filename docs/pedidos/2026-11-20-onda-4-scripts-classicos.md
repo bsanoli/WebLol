@@ -61,4 +61,5 @@ Origem: [Onda 4 do backlog](../auditoria-codebase.md#onda-4-scripts-clássicos-p
 - **Verificado (4d, parte 2):** `npm run verify` (76 testes), typecheck, build, `npm run size` (Shell 83,87 kB de 90) e Playwright (42). **Não exercitado:** login real, login de admin, envio ao Firestore e Administração logada.
 - **Limpeza junto (Knip):** saíram `initializeMotionNav` (`shared/lib/motion.ts`), `LC` (`entities/match/ui/display.ts`) e o tipo `StorageKey`, todos sem uso.
 - **Revisão (change-verifier, 4d parte 2):** sem bloqueios. Dívida registrada: casts duplos na fronteira com `entities/tactical-play` (`newPlay`, `asFramePositions`, `ensureTeamPlays`) e em `match-card.ts` (`DRAFTS`); o helper `$` assume que o elemento existe; `frameElement` ainda é usado em `team-page.ts` e `theme.ts`. Sem testes novos para `stepStatus`, `stepListMarkup`, `toLane` e `host-bridge`.
-- **Pendente (4d):** migração dos bans `lanes.ban` (muda dado salvo; precisa de ADR e decisão do Fabiano).
+- **Mudou (4d, bans, etapa 1):** ADR 0007 (decidida pelo Fabiano: migrar em duas etapas). O site lê `lanes.ban` e `bans` e continua gravando `lanes.ban`; `team-changes` compara e descreve os dois formatos como o mesmo dado. 4 testes novos.
+- **Pendente (4d, bans, etapa 2):** gravar `bans` na raiz, em publicação própria, depois que todos estiverem na etapa 1.
