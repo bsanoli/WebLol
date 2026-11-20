@@ -22,9 +22,22 @@ describe("bans", () => {
     expect(comp?.lanes.top).toEqual(["Ornn"])
   })
 
-  it("grava de volta o mesmo JSON do formato salvo", () => {
+  it("grava no formato atual: bans na raiz, logo depois de lanes, sem lanes.ban", () => {
     const comp = read(structuredClone(saved))
-    expect(JSON.stringify(compositionToSaved(comp as never))).toBe(JSON.stringify(saved))
+    const { ban, ...positions } = saved.lanes
+    const { lanes: _lanes, ...rest } = saved
+    expect(JSON.stringify(compositionToSaved(comp as never))).toBe(
+      JSON.stringify({
+        id: rest.id,
+        name: rest.name,
+        lanes: positions,
+        bans: ban,
+        laneNotes: {},
+        notes: "",
+        updated: 1,
+        team: "mine",
+      }),
+    )
   })
 })
 

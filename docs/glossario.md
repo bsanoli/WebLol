@@ -17,7 +17,7 @@ Este arquivo liga o termo que aparece na tela ao nome que o código usa. Consult
 | Posição (Top, Selva, Meio, Atirador, Suporte) | `position`, tipo `PositionId = "top" \| "jg" \| "mid" \| "adc" \| "sup"` | Função do jogador na partida. Os ids curtos são o formato salvo e continuam. | `lane`, `role`, `DraftLane`, `ROLES`, `LANES`, `RN`, `k` |
 | Rota (Top, Meio, Bot) | `lane` | Caminho físico do mapa, usado em waves e torres do Mapa tático. Não use para posição. | — |
 | Lado azul / Lado vermelho | `side: "blue" \| "red"` | Lado do mapa e do draft. | `DraftSide`, prefixos `b_` e `r_`, `cb`/`cr` |
-| Ban | `ban`, `bans` | Campeão banido no draft. Não é uma posição. No código é a lista `bans`; o formato salvo ainda grava `lanes.ban` até a Onda 4. | `lanes.ban` (só no formato salvo) |
+| Ban | `ban`, `bans` | Campeão banido no draft. Não é uma posição. É a lista `bans` no código e no formato salvo. | `lanes.ban` (formato antigo, só lido) |
 | Pick | `pick` | Campeão escolhido para uma posição. Alternativos ficam na mesma posição, depois do principal. | — |
 | Ordem do draft | `draftOrder` | Sequência das posições em que cada lado escolhe. | `order` |
 | Partida | `match` | Jogo registrado no dataset (Worlds ou SoloQ). | — |
