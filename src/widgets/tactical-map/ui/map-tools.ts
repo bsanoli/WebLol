@@ -1,6 +1,6 @@
 import { isSide, type MapPerspective, type Side } from "../model/battlefield"
 
-type Tool = "move" | "hand" | "draw" | "freehand" | "erase" | "ward" | "wave-b" | "wave-r"
+export type Tool = "move" | "hand" | "draw" | "freehand" | "erase" | "ward" | "wave-b" | "wave-r"
 
 export function waveToolSide(tool: string): Side | undefined {
   if (tool === "wave-b") return "b"

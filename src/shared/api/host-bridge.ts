@@ -70,6 +70,21 @@ export function navigateHost(detail: HostNavigation) {
   window.frameElement?.dispatchEvent(new CustomEvent<HostNavigation>("weblol:navigate", { detail }))
 }
 
+/** A tela está dentro de um iframe do app principal (e não aberta sozinha). */
+export const isEmbedded = () => window.frameElement !== null
+
+/** Avisos sem dados que a tela manda ao app principal. */
+type HostSignal = "weblol:route-ready" | "weblol:analytics-clear"
+
+export function signalHost(name: HostSignal) {
+  window.frameElement?.dispatchEvent(new CustomEvent(name))
+}
+
+/** Entrega ao app principal os dados do painel de análise, que ele desenha na tela. */
+export function sendHostAnalytics<T extends object>(detail: T) {
+  window.frameElement?.dispatchEvent(new CustomEvent<T>("weblol:analytics", { detail }))
+}
+
 /** Funções que o app principal chama nesta janela. */
 export function exposeFrameHandlers(handlers: FrameHandlers) {
   Object.assign(window, handlers)

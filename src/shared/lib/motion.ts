@@ -26,39 +26,3 @@ export function revealContent(element: Element | null, quick = false) {
   animation.addEventListener("finish", cleanup, { once: true })
   animation.addEventListener("cancel", cleanup, { once: true })
 }
-
-/** One observer per persistent navigation; resize also handles wrapping on mobile. */
-function initializeMotionNav(selector: string) {
-  document.querySelectorAll<HTMLElement>(selector).forEach(nav => {
-    nav.classList.add("wl-motion-nav")
-    let pending = 0
-    const update = () => {
-      cancelAnimationFrame(pending)
-      pending = requestAnimationFrame(() => {
-        const active = nav.querySelector<HTMLElement>('button:is([aria-current="page"],[aria-pressed="true"])')
-        if (!active || !active.getClientRects().length) {
-          nav.style.setProperty("--wl-nav-width", "0px")
-          return
-        }
-        const parent = nav.getBoundingClientRect()
-        const rect = active.getBoundingClientRect()
-        nav.style.setProperty("--wl-nav-width", `${rect.width}px`)
-        nav.style.setProperty("--wl-nav-height", `${rect.height}px`)
-        nav.style.setProperty("--wl-nav-x", `${rect.left - parent.left - nav.clientLeft + nav.scrollLeft}px`)
-        nav.style.setProperty("--wl-nav-y", `${rect.bottom - parent.top - nav.clientTop + nav.scrollTop - 2}px`)
-        requestAnimationFrame(() => {
-          nav.dataset.motionReady = ""
-        })
-      })
-    }
-    new MutationObserver(update).observe(nav, {
-      subtree: true,
-      childList: true,
-      attributes: true,
-      attributeFilter: ["aria-current", "aria-pressed"],
-    })
-    new ResizeObserver(update).observe(nav)
-    void document.fonts.ready.then(update)
-    update()
-  })
-}

@@ -1,7 +1,6 @@
-// @ts-nocheck -- Integração legada com o DOM; os módulos extraídos mantêm seus tipos próprios.
-import { navigateHost } from "@/shared/api/host-bridge"
+import { isEmbedded, navigateHost } from "@/shared/api/host-bridge"
 import { createElement } from "react"
-import { createRoot } from "react-dom/client"
+import { createRoot, type Root } from "react-dom/client"
 import { ToggleGroup, ToggleGroupItem } from "@/shared/ui/toggle-group"
 import { Collapsible, CollapsibleContent } from "@/shared/ui/collapsible"
 import { ExistingContent } from "@/shared/ui/dialog-controls"
@@ -18,7 +17,7 @@ import {
   MATCHUP_PAGE_SIZE,
 } from "./build-details"
 import { hydrateBuildTimelines } from "./load-build-timeline"
-import { buildOpponentOptions, championBuild } from "../model/build-statistics"
+import { type Champion, buildOpponentOptions, championBuild } from "../model/build-statistics"
 import { WorldsOpponentSelect } from "./opponent-select"
 import { ico } from "@/entities/champion"
 import { LANES, wrPill, esc, championSlug } from "@/entities/match"
@@ -26,41 +25,33 @@ import DATA from "@dataset/summary"
 import { DATASET } from "@/shared/config/dataset"
 import { enhanceAnalyticsUI, showSort } from "@/shared/lib/analytics-dom"
 import { revealContent } from "@/shared/lib/motion"
+import { showBuildOption } from "./build-options"
+import { positionFilter, toLane, type Lane } from "./position-filter"
+import { $ } from "@/shared/lib/dom"
 
-function showBuildOption(panels: NodeListOf<HTMLElement>, dataKey: "runeView" | "skillPanel", value: string) {
-  for (const panel of panels) {
-    const show = panel.dataset[dataKey] === value
-    const wasHidden = panel.hidden
-    panel.hidden = !show
-    if (show && wasHidden) revealContent(panel, true)
-  }
-}
-
-document.addEventListener("click", event => {
-  const button = event.target.closest?.("[data-rune-tree-option]")
-  if (!button) return
-  const tree = button.closest(".rune-tree")
-  tree.querySelectorAll("[data-rune-tree-option]").forEach(option => {
-    option.setAttribute("aria-pressed", String(option === button))
-  })
-  showBuildOption(tree.querySelectorAll("[data-rune-view]"), "runeView", button.dataset.runeTreeOption)
-})
 const { games: G, champs: C } = DATA
 let buildChampion = "",
   buildQuery = "",
   buildOpponent = ""
-let opponentSelectRoot, buildFiltersRoot
-const buildControlRoots = new Map()
+let opponentSelectRoot: Root | undefined
+let buildFiltersRoot: Root | undefined
+const buildControlRoots = new Map<Element, Root>()
+type Opponent = ReturnType<typeof buildOpponentOptions>[number]
+type BuildFilters = Record<string, string | number | null | undefined>
+type BuildRouteDeps = {
+  publishWorlds: (id: "builds", parts: string[], filters: BuildFilters, replace?: boolean) => void
+  buildsPath: (source: string, parts: string[], filters: BuildFilters) => string
+}
 function disposeBuildControls() {
   for (const root of buildControlRoots.values()) root.unmount()
   buildControlRoots.clear()
 }
 
 // Builds
-let bLane = ""
+let bLane: Lane = ""
 let buildMinGames = 0
 let buildSort = { k: "picks", d: -1 }
-function readBuildMinGames(value) {
+function readBuildMinGames(value: string | null) {
   const count = Number(value)
   return Number.isSafeInteger(count) && count > 0 ? count : 0
 }
@@ -72,40 +63,6 @@ function syncBuildDetailSpan() {
   })
 }
 compactBuilds.addEventListener("change", syncBuildDetailSpan)
-const buildLaneIcon = lane => (lane ? laneIconMarkup(lane) : iconMarkup("layers"))
-function positionFilter(lanes, current, label, showNames, change) {
-  return createElement(
-    ToggleGroup,
-    {
-      type: "single",
-      value: current || "all",
-      spacing: 1,
-      size: "sm",
-      className: "build-lane-tabs",
-      "aria-label": label,
-      onValueChange: value => {
-        if (value) change(value === "all" ? "" : value)
-      },
-    },
-    lanes.map(lane =>
-      createElement(
-        ToggleGroupItem,
-        {
-          key: lane,
-          value: lane || "all",
-          title: lane || "Todas as posições",
-          "aria-label": lane || "Todas as posições",
-          "data-lane": lane,
-          "data-slot": "button",
-          "data-variant": "ghost",
-        },
-        createElement("span", { dangerouslySetInnerHTML: { __html: buildLaneIcon(lane) } }),
-        showNames ? lane || "Todas" : null,
-      ),
-    ),
-  )
-}
-
 function buildsView() {
   const gameSource = DATASET.source === "soloq" ? `de ${DATASET.label}` : "na base"
   return `<section class="builds-page" aria-label="Builds">
@@ -131,16 +88,16 @@ function buildsView() {
   <p id="build-results-count" class="build-results-count" role="status"></p>
   <div class="bcards" id="bc"></div></section>`
 }
-function wireBuilds({ publishWorlds, buildsPath }) {
-  buildFiltersRoot = createRoot(document.getElementById("build-lane-filter"))
-  const q = document.getElementById("bq"),
-    bc = document.getElementById("bc")
-  const minimum = document.getElementById("bmin")
-  const clearAll = document.getElementById("build-clear-all")
-  const resultCount = document.getElementById("build-results-count")
+function wireBuilds({ publishWorlds, buildsPath }: BuildRouteDeps) {
+  buildFiltersRoot = createRoot($("#build-lane-filter"))
+  const q = $<HTMLInputElement>("#bq")
+  const bc = $("#bc")
+  const minimum = $<HTMLInputElement>("#bmin")
+  const clearAll = $("#build-clear-all")
+  const resultCount = $("#build-results-count")
   const hasFilters = () => Boolean(buildQuery || bLane || buildMinGames)
   const list = C.filter(champion => champion.picks > 0)
-  const games = champion => buildGameCount(champion, bLane)
+  const games = (champion: Champion) => buildGameCount(champion, bLane)
   const bySlug = new Map(list.map(champion => [championSlug(champion.name), champion]))
   const detailAnimations = new WeakMap<HTMLElement, ReturnType<typeof animate>>()
   const detailContents = new WeakMap<HTMLElement, { element: HTMLElement; root: ReturnType<typeof createRoot> }>()
@@ -151,16 +108,21 @@ function wireBuilds({ publishWorlds, buildsPath }) {
     const body = bc.querySelector(".builds-table tbody")
     if (!body) return
     const rows = new Map(
-      [...body.querySelectorAll(".build-toggle")].map(button => [button.dataset.buildToggle, button.closest("tr")]),
+      [...body.querySelectorAll<HTMLElement>(".build-toggle")].flatMap(button => {
+        const row = button.closest("tr")
+        return row ? [[button.dataset.buildToggle ?? "", row] as const] : []
+      }),
     )
-    const value = c => (buildSort.k === "wr" ? c.wins / c.picks : buildSort.k === "picks" ? games(c) : c.bans)
+    const value = (c: Champion) =>
+      buildSort.k === "wr" ? c.wins / c.picks : buildSort.k === "picks" ? games(c) : c.bans
     const ordered = list
       .filter(c => rows.has(championSlug(c.name)))
       .sort((a, b) => (value(a) - value(b)) * buildSort.d || games(b) - games(a))
     body.append(
       ...ordered.flatMap(c => {
         const row = rows.get(championSlug(c.name))
-        return [row, row.nextElementSibling]
+        if (!row) return []
+        return row.nextElementSibling ? [row, row.nextElementSibling] : [row]
       }),
     )
     showSort(buildSort)
@@ -174,17 +136,18 @@ function wireBuilds({ publishWorlds, buildsPath }) {
     adversario: buildChampion && buildOpponent,
   })
   const publish = (replace = false) => publishWorlds("builds", parts(), filters(), replace)
-  const mountSkillOptions = container => {
-    for (const host of container.querySelectorAll(".build-skill-options")) {
+  const mountSkillOptions = (container: ParentNode) => {
+    for (const host of container.querySelectorAll<HTMLElement>(".build-skill-options")) {
       if (buildControlRoots.has(host)) continue
-      const options = [...host.querySelectorAll("[data-skill-sequence]")].map(button => ({
-        value: button.dataset.skillSequence,
+      const options = [...host.querySelectorAll<HTMLElement>("[data-skill-sequence]")].map(button => ({
+        value: button.dataset.skillSequence ?? "",
         label: button.textContent,
       }))
-      const panels = host.closest(".build-skills").querySelectorAll("[data-skill-panel]")
+      const panels = host.closest(".build-skills")?.querySelectorAll<HTMLElement>("[data-skill-panel]")
+      if (!panels) continue
       const root = createRoot(host)
       buildControlRoots.set(host, root)
-      const select = value => {
+      const select = (value: string) => {
         if (!value) return
         showBuildOption(panels, "skillPanel", value)
         root.render(
@@ -203,9 +166,7 @@ function wireBuilds({ publishWorlds, buildsPath }) {
                 {
                   key: option.value,
                   value: option.value,
-                  "data-slot": "button",
-                  "data-variant": "outline",
-                  "data-size": "sm",
+                  ...{ "data-slot": "button", "data-variant": "outline", "data-size": "sm" },
                 },
                 option.label,
               ),
@@ -216,15 +177,20 @@ function wireBuilds({ publishWorlds, buildsPath }) {
       select("0")
     }
   }
-  document.querySelector(".build-source-options").onclick = event => {
-    const source = event.target.closest("[data-build-source]")?.dataset.buildSource
+  $(".build-source-options").onclick = event => {
+    const source = (event.target as Element).closest<HTMLElement>("[data-build-source]")?.dataset.buildSource
     if (!source || source === DATASET.source) return
-    const expanded = bc.querySelector('.build-toggle[aria-expanded="true"]')?.dataset.buildToggle
+    const expanded = bc.querySelector<HTMLElement>('.build-toggle[aria-expanded="true"]')?.dataset.buildToggle
     const path = buildsPath(source, expanded ? [expanded] : parts(), filters())
-    if (window.frameElement) navigateHost({ path, focusSource: true })
+    if (isEmbedded()) navigateHost({ path, focusSource: true })
     else location.assign("./#" + path)
   }
-  const championCard = (champion: (typeof C)[number], position: string, pageSlug?: string, opponents = []) => {
+  const championCard = (
+    champion: (typeof C)[number],
+    position: string,
+    pageSlug?: string,
+    opponents: Opponent[] = [],
+  ) => {
     const inlineContext = pageSlug
       ? `<section class="build-context build-context-inline" aria-label="Confrontos da build">${buildMatchups(champion, position)}</section>`
       : ""
@@ -285,13 +251,15 @@ function wireBuilds({ publishWorlds, buildsPath }) {
     if (resultCount.textContent !== countLabel) resultCount.textContent = countLabel
     const selectedChampion = buildChampion ? bySlug.get(buildChampion) : undefined
     const availableLanes = selectedChampion
-      ? LANES.map(([lane]) => lane).filter(lane => buildGameCount(selectedChampion, lane) > 0)
+      ? LANES.map(([lane]) => toLane(lane)).filter(lane => buildGameCount(selectedChampion, lane) > 0)
       : []
-    const defaultLane = availableLanes.reduce(
-      (best, lane) =>
-        !best || buildGameCount(selectedChampion, lane) > buildGameCount(selectedChampion, best) ? lane : best,
-      "",
-    )
+    const defaultLane = selectedChampion
+      ? availableLanes.reduce<Lane>(
+          (best, lane) =>
+            !best || buildGameCount(selectedChampion, lane) > buildGameCount(selectedChampion, best) ? lane : best,
+          "",
+        )
+      : ""
     const champion = selectedChampion && games(selectedChampion) > 0 ? selectedChampion : undefined
     const position = bLane || defaultLane
     const opponents = champion ? buildOpponentOptions(champion, position) : []
@@ -328,19 +296,19 @@ function wireBuilds({ publishWorlds, buildsPath }) {
       buildControlRoots.set(detailLanes, root)
       root.render(
         positionFilter(availableLanes, position, "Posição do campeão", false, lane => {
-          bLane = lane
+          bLane = toLane(lane)
           syncLane()
           draw()
           publish()
           requestAnimationFrame(() =>
-            bc.querySelector('.build-detail-lanes [data-state="on"]')?.focus({ preventScroll: true }),
+            bc.querySelector<HTMLElement>('.build-detail-lanes [data-state="on"]')?.focus({ preventScroll: true }),
           )
         }),
       )
     }
     mountSkillOptions(bc)
     sortBuildRows()
-    const opponentSelect = bc.querySelector("[data-build-opponent]")
+    const opponentSelect = bc.querySelector<HTMLElement>("[data-build-opponent]")
     if (opponentSelect) {
       opponentSelectRoot = createRoot(opponentSelect)
       opponentSelectRoot.render(
@@ -348,7 +316,7 @@ function wireBuilds({ publishWorlds, buildsPath }) {
           opponents,
           value: buildOpponent,
           restoreFocus: restoreOpponentFocus,
-          onChange: value => {
+          onChange: (value: string) => {
             buildOpponent = value
             draw(true)
             publish()
@@ -360,7 +328,7 @@ function wireBuilds({ publishWorlds, buildsPath }) {
     hydrateBuildTimelines(bc)
   }
   const setExpanded = (button: HTMLButtonElement, expanded: boolean) => {
-    const detail = document.getElementById(button.getAttribute("aria-controls")) as HTMLTableRowElement
+    const detail = document.getElementById(button.getAttribute("aria-controls") ?? "") as HTMLTableRowElement
     const cell = detail.cells[0]
     const panel = cell.firstElementChild as HTMLElement
     const startHeight = detail.hidden ? 0 : panel.getBoundingClientRect().height
@@ -372,6 +340,7 @@ function wireBuilds({ publishWorlds, buildsPath }) {
     detail.inert = !expanded
     detail.hidden = false
     const content = detailContents.get(panel)
+    if (!content) return
     flushSync(() =>
       content.root.render(
         createElement(
@@ -415,6 +384,7 @@ function wireBuilds({ publishWorlds, buildsPath }) {
   const updateBuildContext = (html: string, trigger: HTMLButtonElement) => {
     matchupCardAnimation?.cancel()
     const viewport = bc.querySelector<HTMLElement>(".build-context-transition")
+    if (!viewport) return
     const outgoing = viewport.lastElementChild as HTMLElement
     const startHeight = viewport.getBoundingClientRect().height
     const startOpacity = getComputedStyle(outgoing).opacity
@@ -458,16 +428,18 @@ function wireBuilds({ publishWorlds, buildsPath }) {
       contextAnimation = undefined
     })
   }
-  const toggleBuild = toggle => {
-    const previous = bc.querySelector('.build-toggle[aria-expanded="true"]')
+  const toggleBuild = (toggle: HTMLButtonElement) => {
+    const previous = bc.querySelector<HTMLButtonElement>('.build-toggle[aria-expanded="true"]')
     if (previous) setExpanded(previous, false)
     if (previous === toggle) {
       updateBuildContext(highlights, toggle)
       return
     }
-    const champion = bySlug.get(toggle.dataset.buildToggle)
+    const champion = bySlug.get(toggle.dataset.buildToggle ?? "")
+    const panel = (document.getElementById(toggle.getAttribute("aria-controls") ?? "") as HTMLTableRowElement | null)
+      ?.cells[0]?.firstElementChild as HTMLElement | null | undefined
+    if (!champion || !panel) return
     const context = buildMatchups(champion, bLane)
-    const panel = document.getElementById(toggle.getAttribute("aria-controls")).cells[0].firstElementChild
     if (!detailContents.has(panel)) {
       const element = document.createElement("div")
       element.innerHTML = championCard(champion, bLane, toggle.dataset.buildToggle)
@@ -480,12 +452,15 @@ function wireBuilds({ publishWorlds, buildsPath }) {
     enhanceAnalyticsUI()
   }
   bc.onclick = e => {
-    const matchupSummary = e.target.closest(".build-context-side .build-matchup-group > summary")
+    const target = e.target as Element
+    const matchupSummary = target.closest(".build-context-side .build-matchup-group > summary")
     if (matchupSummary) {
       matchupCardAnimation?.cancel()
-      const group = matchupSummary.parentElement
-      const card = group.closest(".build-context-side")
+      const group = matchupSummary.parentElement as HTMLDetailsElement | null
+      const card = group?.closest<HTMLElement>(".build-context-side")
       if (
+        !group ||
+        !card ||
         !group.open ||
         reduceBuildMotion.matches ||
         card.scrollHeight <= card.clientHeight ||
@@ -509,9 +484,9 @@ function wireBuilds({ publishWorlds, buildsPath }) {
       }
       return
     }
-    const page = e.target.closest("[data-show-matchup-page]")
+    const page = target.closest<HTMLElement>("[data-show-matchup-page]")
     if (page) {
-      const hiddenRows = [...page.previousElementSibling.querySelectorAll("li[hidden]")]
+      const hiddenRows = [...(page.previousElementSibling?.querySelectorAll<HTMLElement>("li[hidden]") ?? [])]
       const nextRows = hiddenRows.slice(0, MATCHUP_PAGE_SIZE)
       nextRows.forEach(row => {
         row.hidden = false
@@ -521,62 +496,65 @@ function wireBuilds({ publishWorlds, buildsPath }) {
 
       const remaining = hiddenRows.length - nextRows.length
       if (remaining) {
-        page.firstElementChild.textContent = `Ver mais ${Math.min(MATCHUP_PAGE_SIZE, remaining)}`
+        if (page.firstElementChild)
+          page.firstElementChild.textContent = `Ver mais ${Math.min(MATCHUP_PAGE_SIZE, remaining)}`
       } else {
         page.remove()
       }
       return
     }
-    const more = e.target.closest("[data-show-matchups]")
+    const more = target.closest("[data-show-matchups]")
     if (more) {
-      const list = more.nextElementSibling
+      const list = more.nextElementSibling as HTMLElement
       list.hidden = false
       revealContent(list, true)
       list.querySelector("button")?.focus({ preventScroll: true })
       more.remove()
       return
     }
-    const view = e.target.closest("[data-timeline-view]") as HTMLButtonElement | null
+    const view = target.closest<HTMLButtonElement>("[data-timeline-view]")
     if (view) {
       const section = view.closest(".build-timeline")!
       section.querySelectorAll<HTMLButtonElement>("[data-timeline-view]").forEach(button => {
         button.setAttribute("aria-pressed", String(button === view))
       })
-      section.querySelector<HTMLElement>(".build-timeline-games")!.dataset.view = view.dataset.timelineView
+      section.querySelector<HTMLElement>(".build-timeline-games")!.dataset.view = view.dataset.timelineView ?? ""
       return
     }
-    const sort = e.target.closest(".builds-table thead button[data-k]")
+    const sort = target.closest<HTMLElement>(".builds-table thead button[data-k]")
     if (sort) {
-      const k = sort.dataset.k
+      const k = sort.dataset.k ?? ""
       buildSort = { k, d: buildSort.k === k ? -buildSort.d : -1 }
       sortBuildRows()
       return
     }
-    const highlight = e.target.closest("[data-highlight-build]")
+    const highlight = target.closest<HTMLElement>("[data-highlight-build]")
     const toggle = highlight
-      ? bc.querySelector(`[data-build-toggle="${highlight.dataset.highlightBuild}"]`)
-      : (e.target.closest("[data-build-toggle]") ??
-        (!e.target.closest("button") && e.target.closest(".build-summary-row")?.querySelector("[data-build-toggle]")))
+      ? bc.querySelector<HTMLButtonElement>(`[data-build-toggle="${highlight.dataset.highlightBuild}"]`)
+      : (target.closest<HTMLButtonElement>("[data-build-toggle]") ??
+        (target.closest("button")
+          ? null
+          : target.closest(".build-summary-row")?.querySelector<HTMLButtonElement>("[data-build-toggle]")))
     if (toggle) {
       toggleBuild(toggle)
       if (highlight) toggle.focus({ preventScroll: true })
       toggle.scrollIntoView({ block: "nearest" })
       return
     }
-    const button = e.target.closest("[data-build]")
+    const button = target.closest<HTMLElement>("[data-build]")
     if (!button) return
     const previous = buildChampion
     buildOpponent = ""
     if (button.dataset.buildLane) {
-      bLane = button.dataset.buildLane
+      bLane = toLane(button.dataset.buildLane)
       syncLane()
     }
-    buildChampion = button.dataset.build
+    buildChampion = button.dataset.build ?? ""
     draw()
     publish()
     const next = buildChampion
-      ? bc.querySelector(".build-back button")
-      : bc.querySelector(`[data-build-toggle="${previous}"]`)
+      ? bc.querySelector<HTMLElement>(".build-back button")
+      : bc.querySelector<HTMLElement>(`[data-build-toggle="${previous}"]`)
     ;(next ?? q).focus()
   }
   q.oninput = () => {
@@ -586,9 +564,9 @@ function wireBuilds({ publishWorlds, buildsPath }) {
     publish(true)
   }
   const syncLane = () => {
-    buildFiltersRoot.render(
+    buildFiltersRoot?.render(
       positionFilter(["", ...LANES.map(([lane]) => lane)], bLane, "Filtrar por posição", false, lane => {
-        bLane = lane
+        bLane = toLane(lane)
         buildChampion = ""
         syncLane()
         draw()
@@ -621,11 +599,23 @@ function wireBuilds({ publishWorlds, buildsPath }) {
   draw(false, true)
 }
 
-export function setBuildRoute({ champion, opponent, query, lane, minGames }) {
+export function setBuildRoute({
+  champion,
+  opponent,
+  query,
+  lane,
+  minGames,
+}: {
+  champion: string
+  opponent: string
+  query: string
+  lane: string
+  minGames: string | null
+}) {
   buildChampion = champion
   buildOpponent = champion ? opponent : ""
   buildQuery = query
-  bLane = lane
+  bLane = toLane(lane)
   buildMinGames = readBuildMinGames(minGames)
   return buildMinGames
 }

@@ -13,25 +13,16 @@ const lineLimit = 300
 const legacyLongFiles = {
   "app/config/ui-versions.ts": 528,
   "pages/builds/ui/build-details.ts": 474,
-  "pages/builds/ui/builds-page.ts": 629,
+  "pages/builds/ui/builds-page.ts": 621,
   "pages/team/ui/matchup-bar.tsx": 371,
   "pages/team/ui/team-controls.tsx": 310,
-  "pages/worlds-compositions/ui/compositions-page.ts": 513,
+  "pages/worlds-compositions/ui/compositions-page.ts": 383,
   "shared/ui/arc/blocks/site-header/site-header.tsx": 865,
   "widgets/tactical-map/ui/battlefield-layer.ts": 373,
-  "widgets/tactical-map/ui/tactical-map.ts": 651,
+  "widgets/tactical-map/ui/tactical-map.ts": 648,
   "widgets/tactical-map/ui/ward-layer.ts": 303,
 }
-const legacyNoCheckFiles = new Set([
-  "app/entrypoints/worlds.ts",
-  "pages/builds/ui/builds-page.ts",
-  "pages/worlds-compositions/ui/compositions-page.ts",
-  "pages/worlds-compositions/ui/match-card.ts",
-  "pages/worlds-overview/ui/overview.ts",
-  "widgets/analytics-tooltip/ui/tooltip.ts",
-  "widgets/tactical-map/ui/tactical-map.ts",
-  "widgets/team-knowledge/ui/knowledge.ts",
-])
+const legacyNoCheckFiles = new Set([])
 const violations = new Set()
 
 function describeModule(path) {

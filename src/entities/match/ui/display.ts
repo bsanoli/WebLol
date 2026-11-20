@@ -9,7 +9,6 @@ export const LANES = [
   ["ADC", "--adc"],
   ["Suporte", "--sup"],
 ]
-const LC = Object.fromEntries(LANES)
 
 // Escudos e ligas dos classificados do Worlds 2026.
 // https://lolesports.com/en-GB/news/worlds-2026-primer

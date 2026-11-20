@@ -1,14 +1,15 @@
-// @ts-nocheck -- Integração legada com o DOM; os módulos extraídos mantêm seus tipos próprios.
 import { abilityDetail } from "@/entities/ability"
-import { LOL_DATA, lolAsset } from "@/entities/champion"
+import { type BuildDetail, LOL_DATA, lolAsset } from "@/entities/champion"
 import { effectText } from "../model/effect-text"
 
-const tipEl = () => document.getElementById("tip")
+/** O `#tip` existe em todas as telas que carregam este módulo. */
+const tipEl = () => document.getElementById("tip") as HTMLElement
 const tipSelector = "[data-game-tip], [data-tip]"
 const hoverDelay = 250
 const warmWindow = 300
-let tipTarget, dismissedGameTip
-let definitionTerm
+let tipTarget: HTMLElement | undefined
+let dismissedGameTip: HTMLElement | undefined
+let definitionTerm: HTMLElement | undefined
 let pendingHover: { target: HTMLElement; timer: number } | undefined
 let warmUntil = 0
 
@@ -23,14 +24,14 @@ function hideDefinition() {
   definitionTerm = undefined
   tipEl().querySelector(".effect-definition")?.remove()
 }
-function showDefinition(term) {
+function showDefinition(term: HTMLElement) {
   if (definitionTerm === term) return
   hideDefinition()
   const definition = document.createElement("div")
   definition.id = "effect-definition"
   definition.className = "effect-definition"
   definition.setAttribute("role", "tooltip")
-  definition.textContent = term.dataset.definition
+  definition.textContent = term.dataset.definition ?? ""
   tipEl().append(definition)
   definitionTerm = term
   term.setAttribute("aria-describedby", definition.id)
@@ -53,7 +54,22 @@ export function hideTip() {
   tipEl().hidden = true
   tipTarget = undefined
 }
-function showTip(target, x, y) {
+type TipDetail = { name?: string; description?: string; icon?: string; effects?: BuildDetail["effects"] }
+
+function tipDetail(kind: string | undefined, key: string, slot: string): TipDetail | undefined {
+  if (kind === "rune") return { name: LOL_DATA.runeNames[key], description: LOL_DATA.runeDescriptions[key] }
+  if (kind === "ability") return abilityDetail(key, slot)
+  if (kind === "item") return LOL_DATA.itemDetails[key]
+  if (kind === "spell") return LOL_DATA.spellDetails[key]
+}
+
+const tipAssets: Record<string, Readonly<Partial<Record<string, string>>> | undefined> = {
+  item: LOL_DATA.item,
+  rune: LOL_DATA.rune,
+  spell: LOL_DATA.spell,
+}
+
+function showTip(target: HTMLElement, x = 0, y = 0) {
   cancelPendingHover()
   const el = tipEl()
   const { tip, gameTip } = target.dataset
@@ -67,18 +83,13 @@ function showTip(target, x, y) {
   el.style.maxHeight = ""
   el.textContent = tip ?? ""
   if (gameTip) {
-    const [kind, key, slot] = gameTip.split(":")
-    const detail =
-      kind === "rune"
-        ? { name: LOL_DATA.runeNames[key], description: LOL_DATA.runeDescriptions[key] }
-        : kind === "ability"
-          ? abilityDetail(key, slot)
-          : LOL_DATA[`${kind}Details`][key]
+    const [kind, key = "", slot = ""] = gameTip.split(":")
+    const detail = tipDetail(kind, key, slot)
     const heading = document.createElement("strong")
     heading.id = "game-tip-title"
     heading.className = "game-tip-title"
     el.setAttribute("aria-labelledby", heading.id)
-    const asset = LOL_DATA[kind]?.[key]
+    const asset = kind ? tipAssets[kind]?.[key] : undefined
     const icon = detail?.icon ?? (asset ? lolAsset(asset) : target.querySelector("img")?.src)
     if (icon) {
       const img = document.createElement("img")
@@ -124,7 +135,7 @@ function handleTooltipMouseMove(e: MouseEvent) {
   if (!(e.target instanceof Element)) return
   if (tipEl().contains(e.target)) {
     const term = e.target.closest(".effect-term")
-    if (term) showDefinition(term)
+    if (term instanceof HTMLElement) showDefinition(term)
     return
   }
   if (definitionTerm !== document.activeElement) hideDefinition()
@@ -159,35 +170,38 @@ document.addEventListener("mouseout", e => {
   warmUntil = nextWarmUntil
 })
 document.addEventListener("focusin", e => {
+  if (!(e.target instanceof HTMLElement)) return
   if (tipEl().contains(e.target)) {
     if (e.target.matches(".effect-term")) showDefinition(e.target)
     return
   }
-  const target = e.target.closest(tipSelector)
+  const target = e.target.closest<HTMLElement>(tipSelector)
   if (!target) return
   const { left, bottom } = target.getBoundingClientRect()
   dismissedGameTip = undefined
   showTip(target, left, bottom)
 })
 document.addEventListener("click", e => {
-  const term = e.target.closest?.(".effect-term")
+  if (!(e.target instanceof Element)) return
+  const term = e.target.closest<HTMLElement>(".effect-term")
   if (term && tipEl().contains(term)) {
     showDefinition(term)
     return
   }
-  const target = e.target.closest?.("[data-game-tip]")
+  const target = e.target.closest<HTMLElement>("[data-game-tip]")
   if (target) showTip(target)
 })
 document.addEventListener("focusout", e => {
-  if (!e.relatedTarget || (!tipEl().contains(e.relatedTarget) && e.relatedTarget !== tipTarget)) hideTip()
+  const next = e.relatedTarget as Node | null
+  if (!next || (!tipEl().contains(next) && next !== tipTarget)) hideTip()
 })
 document.addEventListener("keydown", e => {
   const panel = tipEl()
   if (e.key === "Tab" && tipTarget?.dataset.gameTip && !panel.hidden) {
-    const terms = panel.querySelectorAll(".effect-term")
+    const terms = panel.querySelectorAll<HTMLElement>(".effect-term")
     if (!e.shiftKey && e.target === tipTarget && terms.length) {
       e.preventDefault()
-      terms[0].focus()
+      terms[0]?.focus()
       return
     }
     if ((e.shiftKey && e.target === terms[0]) || (!e.shiftKey && e.target === terms[terms.length - 1])) {
@@ -199,7 +213,7 @@ document.addEventListener("keydown", e => {
     }
   }
   if (e.key !== "Escape") return
-  if (panel.contains(e.target)) tipTarget?.focus({ preventScroll: true })
+  if (panel.contains(e.target as Node | null)) tipTarget?.focus({ preventScroll: true })
   if (tipTarget?.dataset.gameTip) dismissedGameTip = tipTarget
   else if (pendingHover) dismissedGameTip = pendingHover.target
   hideTip()
@@ -213,14 +227,15 @@ document.addEventListener(
     }
     hideDefinition()
     const term = document.activeElement
-    if (e.target.contains(term) && term.matches(".effect-term:focus-visible")) {
+    if (term instanceof HTMLElement && tipEl().contains(term) && term.matches(".effect-term:focus-visible")) {
       const { top, bottom } = term.getBoundingClientRect()
-      const panel = e.target.getBoundingClientRect()
+      const panel = tipEl().getBoundingClientRect()
       if (top >= panel.top && bottom <= panel.bottom) showDefinition(term)
     }
   },
   true,
 )
 document.addEventListener("pointerdown", event => {
-  if (tipTarget?.dataset.gameTip && !tipTarget.contains(event.target) && !tipEl().contains(event.target)) hideTip()
+  const clicked = event.target as Node | null
+  if (tipTarget?.dataset.gameTip && !tipTarget.contains(clicked) && !tipEl().contains(clicked)) hideTip()
 })

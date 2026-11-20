@@ -1,6 +1,5 @@
-// @ts-nocheck -- Integração legada com o DOM; os módulos extraídos mantêm seus tipos próprios.
 import { createElement } from "react"
-import { createRoot } from "react-dom/client"
+import { createRoot, type Root } from "react-dom/client"
 import { Checkbox } from "@/shared/ui/checkbox"
 import { Popover, PopoverAnchor, PopoverContent } from "@/shared/ui/popover"
 import { ExistingContent, showDialog } from "@/shared/ui/dialog-controls"
@@ -14,65 +13,18 @@ import { ico } from "@/entities/champion"
 import { LANES, esc, championSlug, teamLogo, teamRegion } from "@/entities/match"
 import { enhanceAnalyticsUI } from "@/shared/lib/analytics-dom"
 import { revealContent } from "@/shared/lib/motion"
-let compActionsRoot, compStageRoot
-const compositionPopovers = []
-function wireFloatingPicker(trigger, picker, search) {
-  const anchor = document.createElement("span")
-  anchor.className = "comp-picker-host"
-  trigger.before(anchor)
-  const root = createRoot(anchor)
-  compositionPopovers.push(root)
-  picker.remove()
-  picker.hidden = false
-  let open = false
-  const setOpen = next => {
-    if (next)
-      for (const other of compositionPopovers) {
-        if (other !== root) other.dismiss?.()
-      }
-    open = next
-    trigger.setAttribute("aria-expanded", String(open))
-    root.render(
-      createElement(
-        Popover,
-        { open, onOpenChange: setOpen },
-        createElement(PopoverAnchor, { virtualRef: { current: trigger } }),
-        createElement(
-          PopoverContent,
-          {
-            align: "start",
-            className: "wl-composition-popover",
-            "aria-label": picker.getAttribute("aria-label"),
-            onOpenAutoFocus: event => {
-              event.preventDefault()
-              search().focus()
-            },
-            onCloseAutoFocus: event => event.preventDefault(),
-            onInteractOutside: event => {
-              if (trigger.contains(event.target)) event.preventDefault()
-            },
-            onEscapeKeyDown: () => trigger.focus(),
-          },
-          createElement(ExistingContent, { element: picker }),
-        ),
-      ),
-    )
-  }
-  root.dismiss = () => {
-    if (open) setOpen(false)
-  }
-  trigger.onclick = () => setOpen(!open)
-  return () => {
-    setOpen(false)
-    trigger.focus()
-  }
-}
-const compChampionLanes = new Map()
+import { $ } from "@/shared/lib/dom"
+import { compPicker, compositionPopovers, wireCompPicker } from "./comp-picker"
+type Game = (typeof DATA.comps)[number]
+type PublishWorlds = (id: "comps", parts: string[], filters: Record<string, string>, replace?: boolean) => void
+let compActionsRoot: Root | undefined
+let compStageRoot: Root | undefined
+const compChampionLanes = new Map<string, Set<string>>()
 for (const game of DATA.comps) {
   for (const [lane, blue, , , red] of game.p) {
-    for (const name of [blue, red]) {
-      if (!compChampionLanes.has(name)) compChampionLanes.set(name, new Set())
-      compChampionLanes.get(name).add(lane)
+    for (const name of [String(blue), String(red)]) {
+      const lanes = compChampionLanes.get(name) ?? new Set<string>()
+      compChampionLanes.set(name, lanes.add(String(lane)))
     }
   }
 }
@@ -82,31 +34,10 @@ const compChampions = new Map(
 let cTeam = "",
   cQ = "",
   cSt = "",
-  cChamps = new Set()
+  cChamps = new Set<string>()
 let cWinsOnly = false
 const teamFilterLabel = () =>
   cTeam ? `${teamLogo(cTeam)}<span class="comp-team-name" title="${esc(cTeam)}">${esc(cTeam)}</span>` : "Todos os times"
-function compPicker({ id, label, value, hint, options, image, search, empty, clear, category }) {
-  return `<div class="comp-picker-field"><span>${label}</span>
-    <button id="${id}" class="comp-picker-trigger" type="button" data-slot="button" data-variant="outline" aria-haspopup="dialog" aria-expanded="false"${hint ? ` aria-describedby="${hint}"` : ""}>
-      <span class="comp-picker-value">${value}</span>${iconMarkup("descending")}
-    </button>
-    <div id="${id}-picker" class="comp-picker" role="group" aria-label="Filtro de ${label.toLowerCase()}" hidden>
-      <input data-slot="input" class="comp-picker-search" type="search" aria-label="${search}" placeholder="${search}">
-      <div class="comp-picker-categories" role="group" aria-label="${category.label}">
-        <button type="button" data-category="" data-slot="button" data-variant="outline" aria-pressed="true">${category.all}</button>
-        ${category.values.map(name => `<button type="button" data-category="${esc(name)}" data-slot="button" data-variant="outline" aria-label="${esc(name)}" title="${esc(name)}" aria-pressed="false">${category.icon ? category.icon(name) : esc(name)}</button>`).join("")}
-      </div>
-      <div class="comp-picker-grid" role="group" aria-label="${label} disponíveis">
-        ${[...options].map(([key, name]) => `<button type="button" data-option="${esc(key)}" data-categories="${esc(category.forName(name).join(","))}" aria-label="${esc(name)}" aria-pressed="false" title="${esc(name)}">${image(name)}<span class="comp-picker-check">${iconMarkup("check")}</span></button>`).join("")}
-      </div>
-      <p class="comp-filter-hint" role="status" hidden>${empty}</p>
-      <div class="comp-picker-actions">
-        <button type="button" data-picker-clear data-slot="button" data-variant="ghost">${iconMarkup("reset")} ${clear}</button>
-      </div>
-    </div>
-  </div>`
-}
 function compsView() {
   const teams = [...new Set(DATA.comps.flatMap(g => [g.b, g.r]))].sort()
   return `<section class="worlds-compositions" aria-labelledby="comps-title">
@@ -128,14 +59,14 @@ function compsView() {
           all: "Todas",
           values: LANES.map(([lane]) => lane),
           icon: laneIconMarkup,
-          forName: name => [...compChampionLanes.get(name)],
+          forName: name => [...(compChampionLanes.get(name) ?? [])],
         },
       })}
       ${compPicker({
         id: "ct",
         label: "Times",
         value: teamFilterLabel(),
-        options: teams.map(team => [team, team]),
+        options: teams.map((team): [string, string] => [team, team]),
         image: teamLogo,
         search: "Buscar time",
         empty: "Nenhum time encontrado.",
@@ -143,8 +74,8 @@ function compsView() {
         category: {
           label: "Região",
           all: "Todas",
-          values: [...new Set(teams.map(teamRegion).filter(Boolean))].sort(),
-          forName: name => [teamRegion(name)],
+          values: [...new Set(teams.flatMap(team => teamRegion(team) ?? []))].sort(),
+          forName: name => [teamRegion(name) ?? ""],
         },
       })}
       <div class="comp-picker-field"><span id="comp-stage-label">Fase</span><div id="comp-stage"></div></div>
@@ -157,70 +88,8 @@ function compsView() {
 
   </section>`
 }
-function wireCompPicker(id, { isSelected, onSelect, onClear }) {
-  const trigger = document.getElementById(id)
-  const picker = document.getElementById(`${id}-picker`)
-  const search = picker.querySelector("input")
-  const grid = picker.querySelector(".comp-picker-grid")
-  const categories = picker.querySelector(".comp-picker-categories")
-  let category = ""
-  const empty = picker.querySelector('[role="status"]')
-  const clear = picker.querySelector("[data-picker-clear]")
-  const options = [...grid.querySelectorAll("button")].map(button => ({
-    button,
-    name: lolKey(button.getAttribute("aria-label")),
-    code: button.querySelector("[data-team]")?.dataset.team || "",
-    categories: button.dataset.categories.split(","),
-  }))
-  const close = wireFloatingPicker(trigger, picker, () => search)
-  const filterOptions = () => {
-    const query = lolKey(search.value)
-    for (const option of options) {
-      const matchesCategory = !category || option.categories.includes(category)
-      option.button.hidden = !matchesCategory || !(option.name.includes(query) || option.code.includes(query))
-    }
-    empty.hidden = options.some(({ button }) => !button.hidden)
-    grid.scrollTop = 0
-  }
-  const setCategory = value => {
-    category = value
-    for (const chip of categories.querySelectorAll("button")) {
-      chip.setAttribute("aria-pressed", String(chip.dataset.category === category))
-    }
-    filterOptions()
-  }
-  categories.onclick = e => {
-    const chip = e.target.closest("button[data-category]")
-    if (chip) setCategory(chip.dataset.category)
-  }
-  search.oninput = filterOptions
-  grid.onclick = e => {
-    const option = e.target.closest("button[data-option]")
-    if (option) onSelect(option.dataset.option)
-  }
-  clear.onclick = () => {
-    if (clear.getAttribute("aria-disabled") !== "true") onClear()
-  }
-  return {
-    trigger,
-    close,
-    resetBrowseFilters() {
-      search.value = ""
-      setCategory("")
-    },
-    sync() {
-      let hasSelection = false
-      for (const { button } of options) {
-        const selected = isSelected(button.dataset.option)
-        button.setAttribute("aria-pressed", String(selected))
-        hasSelection ||= selected
-      }
-      clear.setAttribute("aria-disabled", String(!hasSelection))
-    },
-  }
-}
-function wireComps(publishWorlds) {
-  const order = g => {
+function wireComps(publishWorlds: PublishWorlds) {
+  const order = (g: Game) => {
     const m = g.s.match(/(\d+)/g) || []
     const base = g.s.startsWith("play")
       ? 0
@@ -231,23 +100,24 @@ function wireComps(publishWorlds) {
           : g.s.includes("final")
             ? 400
             : 100
-    return base + (+m[0] || 0) * 10 + (+m[1] || 0) / 100
+    return base + (Number(m[0]) || 0) * 10 + (Number(m[1]) || 0) / 100
   }
   const all = DATA.comps.slice().sort((a, b) => order(b) - order(a) || b.g - a.g)
-  const matchGrid = document.getElementById("cl")
+  const matchGrid = $("#cl")
 
   matchGrid.onclick = event => {
     if (!(event.target instanceof Element)) return
     const button = event.target.closest<HTMLButtonElement>(".match-draft-toggle")
     if (!button) return
-    const card = button.closest(".cg").cloneNode(true) as HTMLElement
-    const panel = card.querySelector<HTMLElement>(".match-draft")
-    const title = panel.querySelector<HTMLElement>(".match-draft-title")
+    const card = button.closest(".cg")?.cloneNode(true) as HTMLElement | undefined
+    const panel = card?.querySelector<HTMLElement>(".match-draft")
+    const title = panel?.querySelector<HTMLElement>(".match-draft-title")
+    const closeButton = card?.querySelector<HTMLButtonElement>(".match-draft-toggle")
+    if (!card || !panel || !title || !closeButton) return
     panel.id = "active-match-draft"
     title.id = "active-match-draft-title"
     panel.setAttribute("aria-labelledby", title.id)
     panel.hidden = false
-    const closeButton = card.querySelector<HTMLButtonElement>(".match-draft-toggle")
     closeButton.removeAttribute("aria-haspopup")
     closeButton.removeAttribute("aria-controls")
     closeButton.classList.remove("worlds-detail-action")
@@ -262,8 +132,7 @@ function wireComps(publishWorlds) {
     controls.append(closeButton)
     const content = document.createElement("div")
     content.append(controls, card)
-    let closeDraft
-    closeDraft = showDialog({
+    const closeDraft: () => void = showDialog({
       title: "Detalhes da partida e draft",
       children: content,
       className: "match-dialog",
@@ -283,17 +152,18 @@ function wireComps(publishWorlds) {
       }
     }
   }
-  const activeChampions = document.getElementById("cc-active")
-  const search = document.getElementById("cq")
+  const activeChampions = $("#cc-active")
+  const search = $<HTMLInputElement>("#cq")
   const stages = [...new Set(all.map(game => game.st))]
-  compStageRoot = createRoot(document.getElementById("comp-stage"))
+  const stageRoot = createRoot($("#comp-stage"))
+  compStageRoot = stageRoot
   const drawStage = () => {
-    compStageRoot.render(
+    stageRoot.render(
       createElement(
         Select,
         {
           value: cSt || "all",
-          onValueChange: value => {
+          onValueChange: (value: string) => {
             cSt = value === "all" ? "" : value
             drawStage()
             updateResults()
@@ -304,8 +174,7 @@ function wireComps(publishWorlds) {
           {
             id: "cs",
             className: "comp-picker-trigger comp-stage-trigger",
-            "data-slot": "button",
-            "data-variant": "outline",
+            ...{ "data-slot": "button", "data-variant": "outline" },
             "aria-labelledby": "comp-stage-label cs",
           },
           createElement(SelectValue),
@@ -329,9 +198,10 @@ function wireComps(publishWorlds) {
     )
   }
   const hasFilters = () => Boolean(cQ || cTeam || cSt || cChamps.size || cWinsOnly)
-  compActionsRoot = createRoot(document.getElementById("comp-filter-actions"))
+  const actionsRoot = createRoot($("#comp-filter-actions"))
+  compActionsRoot = actionsRoot
   const drawActions = () => {
-    compActionsRoot.render([
+    actionsRoot.render([
       createElement(
         "label",
         { key: "wins", className: "comp-wins-label" },
@@ -371,7 +241,7 @@ function wireComps(publishWorlds) {
     activeChampions.hidden = cChamps.size === 0
     activeChampions.innerHTML = [...cChamps]
       .map(slug => {
-        const name = compChampions.get(slug)
+        const name = compChampions.get(slug) ?? slug
         return `<button type="button" data-slot="button" data-variant="outline" data-champion="${slug}" aria-label="Remover ${esc(name)} do filtro">${ico(name)}${esc(name)}${iconMarkup("close")}</button>`
       })
       .join("")
@@ -379,8 +249,8 @@ function wireComps(publishWorlds) {
   const draw = () => {
     drawActions()
     const q = (cQ || "").trim().toLowerCase()
-    const champions = [...cChamps].map(slug => compChampions.get(slug))
-    document.getElementById("cc-hint").textContent = cWinsOnly
+    const champions = [...cChamps].flatMap(slug => compChampions.get(slug) ?? [])
+    $("#cc-hint").textContent = cWinsOnly
       ? "Os campeões selecionados, o time e a busca precisam corresponder ao lado vencedor."
       : "A partida precisa ter todos os campeões selecionados, em qualquer lado."
     const L = all.filter(g => {
@@ -406,7 +276,7 @@ function wireComps(publishWorlds) {
     const countLabel = hasFilters()
       ? `${L.length} ${L.length === 1 ? "jogo encontrado" : "jogos encontrados"}`
       : `${DATA.comps.length} de ${DATA.games} jogos do torneio`
-    document.getElementById("cn").innerHTML = `<strong>${countLabel}</strong>${extra}`
+    $("#cn").innerHTML = `<strong>${countLabel}</strong>${extra}`
     const highlightedChampions = new Set(champions)
     matchGrid.innerHTML =
       L.map((g, index) => compCard(g, q, highlightedChampions, index)).join("") ||
@@ -426,7 +296,7 @@ function wireComps(publishWorlds) {
       replace,
     )
   const updateResults = () => {
-    const count = document.getElementById("cn")
+    const count = $("#cn")
     const previousSummary = count.textContent
     draw()
     if (count.textContent !== previousSummary) revealContent(count, true)
@@ -450,10 +320,10 @@ function wireComps(publishWorlds) {
     },
   })
   const drawTeam = () => {
-    teamPicker.trigger.querySelector(".comp-picker-value").innerHTML = teamFilterLabel()
+    $("#ct .comp-picker-value").innerHTML = teamFilterLabel()
     teamPicker.sync()
   }
-  const selectTeam = team => {
+  const selectTeam = (team: string) => {
     cTeam = team
     drawTeam()
     teamPicker.close()
@@ -465,9 +335,9 @@ function wireComps(publishWorlds) {
     onClear: () => selectTeam(""),
   })
   activeChampions.onclick = e => {
-    const button = e.target.closest("button[data-champion]")
+    const button = (e.target as Element).closest<HTMLElement>("button[data-champion]")
     if (!button) return
-    cChamps.delete(button.dataset.champion)
+    cChamps.delete(button.dataset.champion ?? "")
     updateChampions()
     championPicker.trigger.focus()
   }
@@ -497,7 +367,7 @@ function wireComps(publishWorlds) {
   enhanceAnalyticsUI()
 }
 
-export function setCompositionRoute(query, params) {
+export function setCompositionRoute(query: string, params: URLSearchParams) {
   cQ = query
   cTeam = params.get("time") || ""
   cWinsOnly = params.get("vitorias") === "1"
