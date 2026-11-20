@@ -47,13 +47,13 @@ function positionColumn(side: DraftSide, entry: PositionSide, hint: string, mark
     <div class="tx-pos-cells" data-board-side="${owner}" data-comp-id="${markup.esc(source.id)}">${ROWS.map(lane => positionCell(lane, owner, source, markup)).join("")}</div></div>`
 }
 
-/** Quadro em linhas: azul à esquerda, as posições no meio e vermelho à direita, como na visão Draft. */
+/** Quadro em linhas, espelhado em relação à visão Draft: vermelho à esquerda, as posições no meio e azul à direita. */
 export function positionBoardHTML(sides: Record<DraftSide, PositionSide>, hint: string, markup: PositionMarkup) {
   const labels = ROWS.map(
     lane =>
       `<span class="tx-pos-name ${lane}" style="--lc:var(${markup.slots[lane].c})">${markup.slots[lane].n}</span>`,
   ).join("")
-  return `<div class="tx-pos-board">${positionColumn("blue", sides.blue, hint, markup)}
+  return `<div class="tx-pos-board">${positionColumn("red", sides.red, hint, markup)}
     <div class="tx-pos-names" aria-hidden="true"><span class="tx-pos-names-head"></span>${labels}</div>
-    ${positionColumn("red", sides.red, hint, markup)}</div>`
+    ${positionColumn("blue", sides.blue, hint, markup)}</div>`
 }

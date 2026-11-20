@@ -1699,11 +1699,6 @@
   border-left: 3px solid var(--lc, var(--line));
   background: color-mix(in srgb, var(--lc, var(--line)) 6%, var(--panel, transparent));
 }
-.tx-pos-col.red .tx-pos-slot {
-  flex-direction: row-reverse;
-  border-left: 0;
-  border-right: 3px solid var(--lc, var(--line));
-}
 .tx-pos-slot:hover {
   background: color-mix(in srgb, var(--lc, var(--line)) 14%, var(--panel, transparent));
 }

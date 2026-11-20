@@ -73,9 +73,7 @@ $("#editor").addEventListener("drop", e => {
   if (over && over.dataset.n !== n && ln.dataset.bi == null) {
     idx = arr.indexOf(over.dataset.n ?? "")
     const r = over.getBoundingClientRect()
-    // No lado vermelho da visão Lane a linha é espelhada: a ordem corre da direita para a esquerda.
-    const mirrored = !!over.closest(".tx-pos-col.red")
-    if (mirrored ? e.clientX < r.left + r.width / 2 : e.clientX > r.left + r.width / 2) idx++
+    if (e.clientX > r.left + r.width / 2) idx++
   }
   arr.splice(idx, 0, n)
   setChampions(c, to, arr)

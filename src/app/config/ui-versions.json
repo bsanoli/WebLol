@@ -1,5 +1,12 @@
 [
   {
+    "version": "1.72",
+    "date": "2026-11-20",
+    "changes": [
+      "Táticas, visão Lane: quadro espelhado, com o lado vermelho à esquerda e o azul à direita, e os ícones dos dois lados alinhados à esquerda, logo depois da barra da posição."
+    ]
+  },
+  {
     "version": "1.71",
     "date": "2026-11-20",
     "changes": [
