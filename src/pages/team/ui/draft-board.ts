@@ -1,17 +1,17 @@
 import { iconMarkup } from "@/shared/ui/icon"
 import { DRAFT_PHASES, DRAFT_SIDE, PICKNAME } from "../model/draft-order"
-import { DRAFT_LANES, draftOf, type Composition, type DraftLane } from "../model/local-state"
+import { DRAFT_LANES, draftOf, type Composition, type ChampionSlot, type DraftLane } from "../model/local-state"
+import type { SlotInfo } from "../model/champion-slots"
 import { enemyOrder } from "../model/composition-side"
 
 /** Lado do quadro: o da comp aberta (nós) ou o da comp adversária escolhida. */
 export type BoardSide = "us" | "rival"
 type Team = "B" | "R"
-type Lane = { k: string; n: string; c: string }
 
 export type DraftBoardOptions = {
   active: string
   activeSide: BoardSide
-  LN: Record<string, Lane>
+  slots: Record<ChampionSlot, SlotInfo>
   img: (name: string) => string
   esc: (value: unknown) => string
   pickArt: (name: string) => string
@@ -49,12 +49,12 @@ export function draftTeamHTML(
   order: DraftLane[],
   options: DraftTeamOptions,
 ) {
-  const { active, activeSide, LN, img, esc, pickArt, compact = false, heading = "" } = options
+  const { active, activeSide, slots, img, esc, pickArt, compact = false, heading = "" } = options
   const side = t === "B" ? "b" : "r"
   const editing = (lane: string) => !!source && activeSide === owner && active === lane
 
-  const mini = (name: string, lane: string, index: number) =>
-    `<div class="chip dchip ${index === 0 ? "primary" : "alternative"}" data-team-control draggable="true" data-n="${esc(name)}" data-from="${lane}"${index > 0 ? ` data-champion-slot="${index}" data-champion-name="${esc(name)}"` : ""}><button class="champ-priority" data-priority="${esc(name)}" data-lane="${lane}" data-draft-side="${owner}" aria-label="${index === 0 ? "Principal" : "Tornar principal"}: ${esc(name)} em ${LN[lane].n}" title="${esc(name)} · ${index + 1}ª opção · clique para tornar principal, botão direito para excluir">${img(name)}</button></div>`
+  const mini = (name: string, lane: ChampionSlot, index: number) =>
+    `<div class="chip dchip ${index === 0 ? "primary" : "alternative"}" data-team-control draggable="true" data-n="${esc(name)}" data-from="${lane}"${index > 0 ? ` data-champion-slot="${index}" data-champion-name="${esc(name)}"` : ""}><button class="champ-priority" data-priority="${esc(name)}" data-lane="${lane}" data-draft-side="${owner}" aria-label="${index === 0 ? "Principal" : "Tornar principal"}: ${esc(name)} em ${slots[lane].n}" title="${esc(name)} · ${index + 1}ª opção · clique para tornar principal, botão direito para excluir">${img(name)}</button></div>`
 
   const banSq = (i: number) => {
     const s = slotOf(t, "ban", i),
@@ -70,15 +70,15 @@ export function draftTeamHTML(
     const meta = `<span class="pkh"><b title="${s.code} · ${s.n}º pick">${PICKNAME[s.code]}</b></span>`
     if (!source) {
       const empty = DRAFT_LANES[i]
-      return `<div class="pk ${side} them" data-l="${empty}" data-empty-rival style="--lc:var(${LN[empty].c})"><div class="pick-choice">${meta}${iconMarkup("champion")}<span class="pkn">${LN[empty].n}</span></div></div>`
+      return `<div class="pk ${side} them" data-l="${empty}" data-empty-rival style="--lc:var(${slots[empty].c})"><div class="pick-choice">${meta}${iconMarkup("champion")}<span class="pkn">${slots[empty].n}</span></div></div>`
     }
     const lane = order[i],
-      L = LN[lane],
+      L = slots[lane],
       list = source.lanes[lane as DraftLane],
       main = list[0],
       on = editing(lane)
     const drag = main ? ` draggable="true" data-n="${esc(main)}" data-from="${lane}"` : ""
-    const target = `<button type="button" class="pk-target pick-choice"${drag} data-champion-slot="0" data-champion-name="${esc(main)}" data-draft-target="${lane}" data-draft-side="${owner}" aria-pressed="${on}" aria-label="${PICKNAME[s.code]} · ${L.n}${main ? " · " + esc(main) : " · Escolher campeão"}">
+    const target = `<button type="button" class="pk-target pick-choice"${drag} data-champion-slot="0" data-champion-name="${esc(main)}" data-draft-target="${lane}" data-draft-side="${owner}" aria-pressed="${on}" aria-label="${PICKNAME[s.code]} ${main ? esc(main) : "Escolher campeão"} · ${L.n}">
           ${meta}${main ? "" : iconMarkup("champion-add")}
           <span class="pkn${main ? "" : " pk-empty"}">${main ? esc(main) : "Escolher campeão"}</span>
         </button>`
@@ -99,7 +99,7 @@ export function draftTeamHTML(
     return `<div class="pk ${side} mine${on ? " act" : ""}" data-l="${lane}" data-champion-group="${t}-pick-${i}" style="--lc:var(${L.c})">
         ${pickArt(main)}
         ${target}
-        <div class="pkf"><span class="lane-label"><select data-team-select="lane" data-pick-position="${i}" data-draft-side="${owner}" aria-label="Posição do pick ${t}${i + 1}">${DRAFT_LANES.map(x => `<option value="${x}"${x === lane ? " selected" : ""}>${LN[x].n}</option>`).join("")}</select></span>
+        <div class="pkf"><span class="lane-label"><select data-team-select="lane" data-pick-position="${i}" data-draft-side="${owner}" aria-label="Posição do pick ${t}${i + 1}">${DRAFT_LANES.map(x => `<option value="${x}"${x === lane ? " selected" : ""}>${slots[x].n}</option>`).join("")}</select></span>
         ${main ? mini(main, lane, 0) : ""}
         ${
           list.length > 1
@@ -142,12 +142,12 @@ export function draftTeamHTML(
  * Quadro da Ordem do draft: a comp aberta de um lado e a adversária escolhida do outro.
  * Cada lado leva `data-comp-id`, e as edições de um lado gravam na comp daquele lado.
  */
-export function draftBoardHTML(comp: Composition, rival: Composition | null, options: DraftBoardOptions) {
+export function draftBoardHTML(comp: Composition, enemy: Composition | null, options: DraftBoardOptions) {
   const draft = draftOf(comp),
     us: Team = draft.side === "blue" ? "B" : "R"
   const team = (t: Team) => {
     const owner: BoardSide = t === us ? "us" : "rival"
-    const source = owner === "us" ? comp : rival
+    const source = owner === "us" ? comp : enemy
     const order: DraftLane[] = source
       ? owner === "us"
         ? draft.order[draft.side]

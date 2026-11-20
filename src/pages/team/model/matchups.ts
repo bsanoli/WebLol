@@ -67,10 +67,10 @@ export function adoptEnemies(comps: Composition[]): boolean {
   let changed = false
   const enemies = new Set(comps.filter(isEnemy).map(comp => comp.id))
   for (const ours of comps) {
-    const rival = ours.draft?.enemyId
-    if (isEnemy(ours) || !rival || !enemies.has(rival)) continue
-    if (!matchupsOf(ours).some(item => item.enemy === rival)) {
-      addMatchup(ours, rival)
+    const enemyId = ours.draft?.enemyId
+    if (isEnemy(ours) || !enemyId || !enemies.has(enemyId)) continue
+    if (!matchupsOf(ours).some(item => item.enemy === enemyId)) {
+      addMatchup(ours, enemyId)
       changed = true
     }
   }
