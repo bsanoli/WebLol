@@ -3,7 +3,7 @@
     "version": "1.73",
     "date": "2026-11-20",
     "changes": [
-      "Táticas, visão Lane: os dois lados apontam para o centro. Na esquerda os ícones e o nome do lado ficam à direita; na direita, à esquerda."
+      "Táticas, visão Lane: o lado azul volta para a esquerda e o vermelho para a direita, e os dois lados apontam para o centro. Na esquerda os ícones e o nome do lado ficam à direita; na direita, à esquerda."
     ]
   },
   {

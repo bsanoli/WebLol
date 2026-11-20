@@ -38,7 +38,7 @@ function positionCell(
 
 function positionColumn(side: DraftSide, entry: PositionSide, hint: string, markup: PositionMarkup) {
   const label = DRAFT_SIDE[side],
-    edge = side === "red" ? "left" : "right"
+    edge = side === "blue" ? "left" : "right"
   if (!entry)
     return `<div class="tx-side-col tx-pos-col ${side} ${edge} empty" data-drop-side="${side}" aria-label="${label}">
     <h3><span class="side-dot ${side}" aria-hidden="true"></span>${label}</h3><p class="tx-col-empty">${hint}</p></div>`
@@ -49,7 +49,7 @@ function positionColumn(side: DraftSide, entry: PositionSide, hint: string, mark
 }
 
 /**
- * Quadro em linhas, espelhado em relação à visão Draft: vermelho à esquerda, as posições no meio e azul à direita.
+ * Quadro em linhas: azul à esquerda, as posições no meio e vermelho à direita, como na visão Draft.
  * Os dois lados apontam para o centro: na coluna da esquerda a linha corre da direita para a esquerda.
  */
 export function positionBoardHTML(sides: Record<DraftSide, PositionSide>, hint: string, markup: PositionMarkup) {
@@ -57,7 +57,7 @@ export function positionBoardHTML(sides: Record<DraftSide, PositionSide>, hint: 
     lane =>
       `<span class="tx-pos-name ${lane}" style="--lc:var(${markup.slots[lane].c})">${markup.slots[lane].n}</span>`,
   ).join("")
-  return `<div class="tx-pos-board">${positionColumn("red", sides.red, hint, markup)}
+  return `<div class="tx-pos-board">${positionColumn("blue", sides.blue, hint, markup)}
     <div class="tx-pos-names" aria-hidden="true"><span class="tx-pos-names-head"></span>${labels}</div>
-    ${positionColumn("blue", sides.blue, hint, markup)}</div>`
+    ${positionColumn("red", sides.red, hint, markup)}</div>`
 }
