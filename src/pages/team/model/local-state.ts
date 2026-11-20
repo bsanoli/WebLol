@@ -1,5 +1,5 @@
 import { STORAGE_KEYS } from "@/shared/config/storage-keys"
-import { compositionFromSaved } from "./composition-storage"
+import { compositionFromSaved, hasLegacyBans } from "./composition-storage"
 import { sanitizeComposition } from "./saved-data"
 
 export const KEY = STORAGE_KEYS.teamAreaState
@@ -84,6 +84,15 @@ export type TeamState = {
   curPlay?: string
   plays?: { id: string }[]
   tactics?: unknown
+}
+
+/** O estado guardado no navegador ainda está no formato antigo dos bans (`lanes.ban`)? */
+export function storedStateHasLegacyBans() {
+  try {
+    return hasLegacyBans(JSON.parse(localStorage.getItem(KEY) ?? "null"))
+  } catch {
+    return false
+  }
 }
 
 export function loadTeamState(): TeamState {

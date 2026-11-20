@@ -5,7 +5,7 @@ import { ensureTeamPlays } from "@/entities/tactical-play"
 import { CH } from "../model/champion-catalog"
 import { teamStateToSaved } from "../model/composition-storage"
 import { settleOwner } from "../model/composition-side"
-import { KEY, loadTeamState, uid, type Composition } from "../model/local-state"
+import { KEY, loadTeamState, storedStateHasLegacyBans, uid, type Composition } from "../model/local-state"
 
 export const $ = <T extends HTMLElement = HTMLElement>(selector: string) => document.querySelector(selector) as T
 
@@ -27,6 +27,7 @@ export const img = (name: string) =>
   `<span class="av" aria-hidden="true">${esc(initials(name))}${lolImage(champArt(name)?.portrait, "champ-portrait")}</span>`
 
 /** Estado salvo da Área do time; é carregado uma vez e alterado no lugar. */
+const hadLegacyBans = storedStateHasLegacyBans()
 export const S = loadTeamState()
 export const getState = () => S
 export const plays = () => ensureTeamPlays(S, uid)
@@ -61,6 +62,9 @@ export function save() {
     setSaveStatus("Falha ao salvar", true)
   }
 }
+
+// Composições salvas com `lanes.ban` passam para `bans` na primeira abertura, sem esperar uma edição (ADR 0007).
+if (hadLegacyBans) save()
 
 let toastTimer = 0
 export function toast(message: string, undo?: () => void) {

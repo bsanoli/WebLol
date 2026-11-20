@@ -22,6 +22,12 @@ test("Abre uma composição salva no formato anterior em modo Draft", async ({ p
   })
 
   await page.goto("/camp.html")
+  // Ao abrir, a composição do formato anterior já é regravada com `bans` na raiz (ADR 0007).
+  const migrated = await page.evaluate(
+    () => JSON.parse(localStorage.getItem("lol-comps-time-v1") ?? "null").comps[0] as Record<string, unknown>,
+  )
+  expect(migrated.lanes).not.toHaveProperty("ban")
+  expect(migrated.bans).toEqual([])
   await page.evaluate(() => window.applyWebLolRoute(["composicoes", "comp-antiga"], new URLSearchParams("modo=draft")))
   const team = page
   const matchup = team.getByRole("group", { name: "Confronto do draft" })
