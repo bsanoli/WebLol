@@ -30,8 +30,7 @@ Os termos seguem o [glossário](glossario.md). As regras novas estão em [conven
 
 - O README cita `src/data/ui-versions.ts`, mas o arquivo é `src/app/config/ui-versions.ts`. Também fala em três entradas, quando são quatro HTMLs em dois builds, e não lista os arquivos com `@ts-nocheck`. Corrigido nesta entrega.
 - Antes desta entrega não havia glossário, documento de arquitetura nem registro de decisões.
-- `.ua/knowledge-graph.json` está versionado e desatualizado.
-- `src/components/examples/` está vazia.
+- `.ua/knowledge-graph.json` estava versionado e desatualizado, e `src/components/examples/` estava vazia. Os dois foram removidos na Onda 2.
 - `src/app/config/ui-versions.ts` tem 502 linhas de histórico de versões da interface, misturado com configuração.
 
 ## 3. Tipos e tamanho
@@ -150,7 +149,7 @@ Dividida em duas partes. A **2a** (itens 3, 4 e 5) é aditiva e está implementa
 3. Knip para arquivos, exports e dependências sem uso, com as entradas dos quatro HTMLs e de `public/assets/*.js`.
 4. Oxlint só com as regras que dependem de tipos (`no-floating-promises`, `no-misused-promises`).
 5. `size-limit` com orçamento por entrada e `rollup-plugin-visualizer` sob demanda.
-6. Apagar as branches remotas antigas, `.ua/knowledge-graph.json` e `src/components/examples/`, depois de confirmar com o Bruno.
+6. Apagar as branches remotas antigas, `.ua/knowledge-graph.json` e `src/components/examples/` (feito em 2026-11-20, por decisão do Fabiano, sem confirmação do Bruno).
 
 **Pronta quando** o site publicar sem nenhum arquivo gerado no Git e o CI barrar um bundle acima do orçamento.
 
