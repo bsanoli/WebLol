@@ -1,5 +1,6 @@
 import { STORAGE_KEYS } from "@/shared/config/storage-keys"
 import { compositionFromSaved } from "./composition-storage"
+import { sanitizeComposition } from "./saved-data"
 
 export const KEY = STORAGE_KEYS.teamAreaState
 export const uid = () => Math.random().toString(36).slice(2, 10)
@@ -18,7 +19,9 @@ export type CompositionDraft = {
 export type Composition = {
   id: string
   name: string
-  lanes: Record<"top" | "jg" | "mid" | "adc" | "sup" | "ban", string[]>
+  /** Campeões por posição. Os bans ficam em `bans` (salvos como `lanes.ban`, ver composition-storage.ts). */
+  lanes: Record<DraftLane, string[]>
+  bans: string[]
   laneNotes: Record<string, string>
   notes: string
   updated: number
@@ -56,7 +59,8 @@ export function blank(name = "Nova comp"): Composition {
   return {
     id: uid(),
     name: name || "Nova comp",
-    lanes: { top: [], jg: [], mid: [], adc: [], sup: [], ban: [] },
+    lanes: { top: [], jg: [], mid: [], adc: [], sup: [] },
+    bans: [],
     laneNotes: {},
     notes: "",
     updated: Date.now(),
@@ -70,7 +74,11 @@ export function loadTeamState() {
   } catch {
     S = null
   }
-  if (S && Array.isArray(S.comps)) S.comps = S.comps.map(compositionFromSaved)
+  if (S && Array.isArray(S.comps))
+    S.comps = S.comps
+      .map(compositionFromSaved)
+      .map(sanitizeComposition)
+      .filter(comp => comp !== null)
   if (!S || !Array.isArray(S.comps)) {
     // Comp de exemplo (genérica) para quem ainda não tem as comps de um time
     const c = blank("Comp de exemplo: luta em time")
@@ -89,4 +97,16 @@ export function loadTeamState() {
   }
   if (!S.comps.some(c => c.id === S.cur)) S.cur = S.comps[0].id
   return S
+}
+
+/** Posição de uma lista de campeões da composição: as cinco posições ou `"ban"`. */
+export type ChampionSlot = DraftLane | "ban"
+
+/** Lista de campeões de uma posição ou dos bans. */
+export const championsOf = (comp: Composition, slot: ChampionSlot): string[] =>
+  slot === "ban" ? comp.bans : comp.lanes[slot]
+
+export function setChampions(comp: Composition, slot: ChampionSlot, names: string[]) {
+  if (slot === "ban") comp.bans = names
+  else comp.lanes[slot] = names
 }

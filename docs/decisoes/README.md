@@ -10,6 +10,7 @@ Numere em sequência (`0005-assunto.md`). Uma ADR aceita não muda de conteúdo.
 | [0002](0002-idioma-e-nomes.md) | Código em inglês, tela em português, um termo por conceito | Proposta |
 | [0003](0003-publicacao-por-artefato.md) | Publicar no GitHub Pages por artefato do Actions, sem arquivos gerados no Git | Proposta, depende do Bruno |
 | [0004](0004-ferramentas-de-qualidade.md) | Lint, formatação, código sem uso, CI e ganchos do Claude Code | Proposta |
+| [0005](0005-bans-e-validacao-de-dados.md) | Bans em lista própria no código e validação com Zod Mini | Aceita |
 
 ## Modelo
 

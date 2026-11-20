@@ -1,7 +1,7 @@
 # Onda 3: nomes e tipos da Área do time
 
 - **Tamanho:** G
-- **Situação:** em andamento (3a feita; 3b e 3c pendentes)
+- **Situação:** em andamento (3a e 3b feitas; 3c pendente)
 - **Pedido por:** Fabiano
 - **Data:** 2026-11-20
 
@@ -57,5 +57,8 @@ Proposta de divisão, cada onda com PR próprio:
 
 - **Mudou (3a):** `owner: "ours" | "enemy"` e `draft.enemyId` no código da Área do time; `composition-storage.ts` converte na leitura, no salvar, no backup e na importação, sem mudar o formato salvo; `print-sketch.tsx` e `tactic-notes.tsx` em kebab-case.
 - **Verificado (3a):** `npm run verify`, `npm run build` e Playwright (42) passam; testes de ida e volta byte a byte; no navegador, composição antiga abre com a adversária ligada e continua gravada com `team` e `rival`.
-- **Pendências:** 3b (bans, migração, Zod Mini, ADR 0005) e 3c (dividir `team-page.ts`, `CH`/`LANES`, axe 2.5.3, nomes locais e CSS)
+- **Mudou (3b):** `Composition.bans: string[]` e `lanes` só com as cinco posições; `composition-storage.ts` lê `lanes.ban` como `bans` e grava de volta igual. Zod Mini (`saved-data.ts`) valida as composições do `localStorage`, a versão oficial guardada e o parâmetro `modo`; dado inválido é corrigido ou descartado sem derrubar a tela. ADR 0005.
+- **Desvio do pedido:** o formato salvo **não** migrou. `lanes.ban` continua gravado, porque `public/assets/sync.js` (Onda 4) compara as composições por JSON e lê `lanes.*`; migrar agora quebraria a sincronização e a versão anterior do site. A migração fica para a Onda 4, com ADR própria.
+- **Verificado (3b):** `npm run verify` (51 testes), `npm run build` e Playwright (42) passam; limite do pacote `camp` subiu de 35 para 40 kB por causa do Zod Mini (38,77 kB).
+- **Pendências:** 3c (dividir `team-page.ts`, `CH`/`LANES`, axe 2.5.3, nomes locais e CSS)
 - **Regras registradas:** nenhuma na 3a.

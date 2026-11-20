@@ -19,7 +19,17 @@ import { revealContent } from "@/shared/lib/motion"
 import { CH } from "../model/champion-catalog"
 import { createCompositionCopy } from "../model/composition"
 import WS from "../api/worlds-champion-stats.json"
-import { KEY, uid, blank, loadTeamState, compositionPreview, draftOf } from "../model/local-state"
+import {
+  KEY,
+  uid,
+  blank,
+  loadTeamState,
+  compositionPreview,
+  draftOf,
+  championsOf,
+  setChampions,
+} from "../model/local-state"
+import { parseOfficialBaseline, viewFromMode } from "../model/saved-data"
 import { PICKNAME } from "../model/draft-order"
 import {
   enemiesOf,
@@ -136,10 +146,8 @@ $("#clear-local").onclick = async () => {
   let rawBase, base
   try {
     rawBase = localStorage.getItem(STORAGE_KEYS.officialBaseline)
-    base = JSON.parse(rawBase)
-    if (rawBase !== null && (!Array.isArray(base?.data?.comps) || !Array.isArray(base?.data?.plays))) {
-      throw new Error("Base inválida")
-    }
+    base = parseOfficialBaseline(rawBase)
+    if (base === undefined) throw new Error("Base inválida")
   } catch {
     toast("Não foi possível ler a versão salva do time.")
     return
@@ -239,7 +247,7 @@ const matchupItem = c => ({
   name: c.name,
   title: c.name,
   preview: compositionPreview(c).map(img).join(""),
-  champions: Object.values(c.lanes).flat(),
+  champions: [...Object.values(c.lanes).flat(), ...c.bans],
 })
 
 function renderMatchup() {
@@ -365,7 +373,7 @@ function handleRivalChampionDrop(name, lane) {
   const c = blank(`Adversária ${enemiesOf(S.comps).length + 1}`)
   settleOwner(c, "enemy")
   S.comps.unshift(c)
-  c.lanes[lane] = [name]
+  setChampions(c, lane, [name])
   active = lane
   faceEnemy(ours, c.id)
   activeSide = "rival"
@@ -606,7 +614,7 @@ $("#editor").addEventListener("change", e => {
   )
 })
 function reorderChampion(name, lane, comp = target()) {
-  const champions = comp.lanes[lane],
+  const champions = championsOf(comp, lane),
     index = champions.indexOf(name)
   if (index < 0) return
   champions.splice(index, 1)
@@ -620,7 +628,11 @@ function reorderChampion(name, lane, comp = target()) {
   focusDraftTarget(lane)
 }
 function removeChampion(name, lane, comp = target()) {
-  comp.lanes[lane] = comp.lanes[lane].filter(champion => champion !== name)
+  setChampions(
+    comp,
+    lane,
+    championsOf(comp, lane).filter(champion => champion !== name),
+  )
   touch(comp)
   save()
   renderEditor()
@@ -722,7 +734,11 @@ $("#editor").addEventListener("drop", e => {
       src = drag.comp ? compById(drag.comp) : null
     drag = null
     if (from && src) {
-      src.lanes[from] = src.lanes[from].filter(x => x !== n)
+      setChampions(
+        src,
+        from,
+        championsOf(src, from).filter(x => x !== n),
+      )
       touch(src)
     }
     handleRivalChampionDrop(n, ln.dataset.l)
@@ -733,10 +749,14 @@ $("#editor").addEventListener("drop", e => {
     n = drag.n,
     source = drag.comp ? compById(drag.comp) : null
   if (drag.from && source) {
-    source.lanes[drag.from] = source.lanes[drag.from].filter(x => x !== n)
+    setChampions(
+      source,
+      drag.from,
+      championsOf(source, drag.from).filter(x => x !== n),
+    )
     if (source !== c) touch(source)
   }
-  const arr = c.lanes[to].filter(x => x !== n)
+  const arr = championsOf(c, to).filter(x => x !== n)
   const over = e.target.closest(".chip,.dm")
   let idx = ln.dataset.bi != null ? Math.min(+ln.dataset.bi, arr.length) : arr.length
   if (over && over.dataset.n !== n && ln.dataset.bi == null) {
@@ -745,7 +765,7 @@ $("#editor").addEventListener("drop", e => {
     if (e.clientX > r.left + r.width / 2) idx++
   }
   arr.splice(idx, 0, n)
-  c.lanes[to] = arr
+  setChampions(c, to, arr)
   drag = null
   active = to
   activeSide = c === cur() ? "us" : "rival"
@@ -762,16 +782,20 @@ document.addEventListener("dragend", e => {
   const inside = e.clientX > 0 && e.clientY > 0 && e.clientX < innerWidth && e.clientY < innerHeight
   if (!d || !d.from || !d.comp || !inside) return
   const c = compById(d.comp)
-  if (!c || !c.lanes[d.from]?.includes(d.n)) return
+  if (!c || !championsOf(c, d.from).includes(d.n)) return
   const lane = d.from,
-    before = [...c.lanes[lane]]
-  c.lanes[lane] = before.filter(x => x !== d.n)
+    before = [...championsOf(c, lane)]
+  setChampions(
+    c,
+    lane,
+    before.filter(x => x !== d.n),
+  )
   touch(c)
   save()
   renderEditor()
   renderGrid()
   toast(`${d.n} removido`, () => {
-    c.lanes[lane] = before
+    setChampions(c, lane, before)
     touch(c)
     save()
     renderEditor()
@@ -808,7 +832,7 @@ function renderTarget() {
     rivalSide = c !== us
   $("#grid")
     .querySelectorAll(".ch")
-    .forEach(button => button.setAttribute("aria-pressed", c.lanes[active].includes(button.dataset.n)))
+    .forEach(button => button.setAttribute("aria-pressed", championsOf(c, active).includes(button.dataset.n)))
   // Qual slot recebe o campeão: no lado adversário, os picks seguem a ordem dele.
   const side = rivalSide ? oppositeSide(draftOf(us).side) : draftOf(us).side,
     team = side[0].toUpperCase()
@@ -829,7 +853,7 @@ function renderGrid() {
     c = target(),
     srt = $("#sort").value
   const where = {}
-  for (const l of LANES) for (const n of c.lanes[l.k]) (where[n] = where[n] || []).push(l)
+  for (const l of LANES) for (const n of championsOf(c, l.k)) (where[n] = where[n] || []).push(l)
   const L = CH.filter(
     ch =>
       (!q ||
@@ -847,7 +871,7 @@ function renderGrid() {
     L.map(ch => {
       const w = WS.c[ch.n],
         wh = where[ch.n]
-      return `<button class="ch${wh ? " in" : ""}" aria-pressed="${c.lanes[active].includes(ch.n)}" draggable="true" data-n="${esc(ch.n)}" aria-label="${esc(ch.n)}">${img(ch.n)}
+      return `<button class="ch${wh ? " in" : ""}" aria-pressed="${championsOf(c, active).includes(ch.n)}" draggable="true" data-n="${esc(ch.n)}" aria-label="${esc(ch.n)}">${img(ch.n)}
       ${wh ? `<span class="tag" style="--lc:var(${wh[0].c})">${wh.map(l => l.n.slice(0, 3).toUpperCase()).join("/")}</span>` : ""}
       ${srt !== "az" && w ? `<span class="ws">${srt === "ws" ? w[0] : w[2]}</span>` : ""}
       <span class="nm">${esc(ch.n)}</span></button>`
@@ -859,8 +883,13 @@ $("#grid").onclick = e => {
   if (!ch) return
   const n = ch.dataset.n,
     c = target(),
-    a = c.lanes[active]
-  if (a.includes(n)) c.lanes[active] = a.filter(x => x !== n)
+    a = championsOf(c, active)
+  if (a.includes(n))
+    setChampions(
+      c,
+      active,
+      a.filter(x => x !== n),
+    )
   else a.push(n)
   touch(c)
   save()
@@ -1241,7 +1270,8 @@ $("#imp").onchange = async e => {
       b.laneNotes = c.laneNotes || {}
       if (c.draft) b.draft = c.draft
       b.updated = c.updated || Date.now()
-      for (const l of LANES) b.lanes[l.k] = Array.isArray(c.lanes?.[l.k]) ? c.lanes[l.k].map(String) : []
+      const names = list => (Array.isArray(list) ? list.map(String) : [])
+      for (const l of LANES) setChampions(b, l.k, names(l.k === "ban" ? c.bans : c.lanes?.[l.k]))
       b.id = replace ? c.id || b.id : b.id
       if (c.id) ids.set(c.id, b.id)
       if (c.owner === "enemy" || c.owner === "ours" || c.tacticTeam === "enemy")
@@ -1436,9 +1466,9 @@ async function openTeamView(view, item, params) {
         missing =
           "A composição deste link não está disponível neste navegador. Conecte a pasta do time para carregar a versão oficial."
     }
-    const mode = params?.get("modo")
     // "lane" era a antiga aba Opções por posição; agora abre a Ordem do draft.
-    if (mode) S.view = mode === "taticas" ? "tactics" : "draft"
+    const mode = viewFromMode(params?.get("modo"))
+    if (mode) S.view = mode
   } else if (view === "map" && item) {
     const selected = plays().find(matches)
     if (selected) tacticalMap.selectPlay(selected.id)
