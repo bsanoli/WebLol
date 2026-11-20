@@ -1,0 +1,6 @@
+[
+  { "name": "Shell (index.html)", "path": "dist/assets/index-[A-Za-z0-9_-]*.js", "gzip": true, "limit": "70 kB" },
+  { "name": "Área do time (camp.html)", "path": "dist/assets/camp-[A-Za-z0-9_-]*.js", "gzip": true, "limit": "35 kB" },
+  { "name": "Worlds (worlds.html)", "path": "dist/assets/worlds-[A-Za-z0-9_-]*.js", "gzip": true, "limit": "295 kB" },
+  { "name": "SoloQ (soloq.html)", "path": "dist-soloq/assets/soloq-[A-Za-z0-9_-]*.js", "gzip": true, "limit": "630 kB" }
+]

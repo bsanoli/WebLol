@@ -47,6 +47,14 @@ Versões fixas no `package.json`: Biome 2.6.8, Steiger 0.10.0 com o plugin 0.8.2
 
 ### Onda 2
 
+Implementada em parte (2a) em 2026-11-20. A tabela abaixo é a proposta original; o que mudou na prática:
+
+- **Knip** (`npm run knip`, no CI e no `verify`): arquivos e dependências sem uso são erro. Exports e tipos sem uso são aviso (14 hoje), no mesmo regime de débito da Onda 1. `src/shared/ui/**` fica de fora, por ser a biblioteca de componentes no estilo shadcn, que exporta mais do que o app usa.
+- **Oxlint** (`npm run lint:types`, dentro de `npm run check`): só as três regras de tipos. Achou dois `no-floating-promises` em `tactical-map.ts`, marcados com `void` porque a animação roda sem ser aguardada.
+- **size-limit** (`npm run size`, no CI depois do build): orçamento em `.size-limit.json`, em gzip e por entrada, mede só o arquivo de entrada de cada HTML (não os chunks pré-carregados), cerca de 10% acima do tamanho de 2026-11-20 (Shell 64 kB, Área do time 31 kB, Worlds 268 kB, SoloQ 571 kB). Ao passar do limite, ou o código é reduzido ou o limite sobe com justificativa no pedido.
+- **rollup-plugin-visualizer** (`npm run analyze`): gera `stats.html` (ignorado pelo Git) só no modo `analyze`.
+- Zod e cspell ficam para a Onda 3.
+
 | Ferramenta | Papel |
 | --- | --- |
 | [Knip](https://knip.dev) 6 | Arquivos, exports e dependências sem uso. Declarar como entradas os scripts dos quatro HTMLs e `public/assets/*.js` |

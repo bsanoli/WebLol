@@ -1,0 +1,19 @@
+{
+  "$schema": "https://unpkg.com/knip@6/schema.json",
+  "entry": [
+    "src/app/entrypoints/*.{ts,tsx}",
+    "tests/**/*.ts",
+    "scripts/**/*.mjs",
+    "public/assets/*.js",
+    "steiger.config.ts"
+  ],
+  "project": ["src/**/*.{ts,tsx}", "tests/**/*.ts", "scripts/**/*.mjs", "public/assets/*.js"],
+  "ignoreDependencies": ["tailwindcss"],
+  "ignoreIssues": {
+    "src/shared/ui/**": ["files", "exports", "types", "duplicates"]
+  },
+  "rules": {
+    "exports": "warn",
+    "types": "warn"
+  }
+}
