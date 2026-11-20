@@ -19,7 +19,7 @@ Os termos seguem o [glossário](glossario.md). As regras novas estão em [conven
 | --- | --- | --- |
 | Sinônimos para a composição adversária | `rival` (160 ocorrências), `enemy` (154), `opponent` (142, quase todas em Builds, com outro sentido) | Onda 3 |
 | Lado da composição chamado `team` | `team: "mine" \| "enemy"` em `Composition`, `CompTeam` em `composition-side.ts`, enquanto `team` também é o grupo do WebLol | Onda 3 (3a feita: `owner`/`CompOwner`) |
-| Ban guardado como posição | `lanes: Record<"top" \| "jg" \| "mid" \| "adc" \| "sup" \| "ban", string[]>` | Onda 3 |
+| Ban guardado como posição | `lanes: Record<"top" \| "jg" \| "mid" \| "adc" \| "sup" \| "ban", string[]>` | Onda 3 (3b feita: `bans` no código; o formato salvo `lanes.ban` muda na Onda 4) |
 | Posição com três nomes | `lane`, `role`, `DraftLane`, `ROLES` e `LANES` | Onda 3 |
 | Nomes de uma a três letras | 78 em `public/assets/sync.js`, 78 em `public/assets/shell.js`, 62 em `src/pages/team/ui/team-page.ts`. Em `entities/tactical-play`: `RN`, `TOKS`, `sw`, `PRE`, `cb`, `cr` | Ondas 3 e 4 |
 | Dados em posições de texto ou array | campeões como `"Nome\|Id\|Roles"` (`CH`), `LANES` com `{k, n, c}`, `worlds.json` com chaves `st`, `s`, `g`, `b`, `r`, `bw`, `p` e arrays posicionais | Ondas 3 e 6 |

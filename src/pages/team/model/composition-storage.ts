@@ -1,5 +1,5 @@
 // Conversão entre o formato salvo da composição (`lol-comps-time-v1`, backup e Firestore) e o formato do código.
-// Salvo: `team: "mine" | "enemy"` e `draft.rival`. Código: `owner: "ours" | "enemy"` e `draft.enemyId`.
+// Salvo: `team: "mine" | "enemy"`, `draft.rival` e `lanes.ban`. Código: `owner: "ours" | "enemy"`, `draft.enemyId` e `bans`.
 // Os nomes salvos são contrato e só mudam com migração e ADR (docs/convencoes.md).
 //
 // A conversão preserva a ordem das chaves e a ausência dos campos: a sincronização compara cada composição pelo JSON,
@@ -19,6 +19,29 @@ function renameKeys(source: PlainObject, names: Record<string, string>): PlainOb
 const OWNER_FROM_SAVED: Record<string, string> = { mine: "ours", enemy: "enemy" }
 const OWNER_TO_SAVED: Record<string, string> = { ours: "mine", enemy: "enemy" }
 
+/** Lê `lanes.ban` para `bans` (ou o contrário), deixando `bans` logo depois de `lanes` e preservando a ordem das chaves. */
+function convertBans(comp: PlainObject, direction: "read" | "write"): PlainObject {
+  const isReading = direction === "read"
+  if (!isPlainObject(comp.lanes)) return comp
+  const lanes = comp.lanes
+  if (isReading ? !("ban" in lanes) : !("bans" in comp)) return comp
+  const entries: [string, unknown][] = []
+  for (const [key, value] of Object.entries(comp)) {
+    if (key === "bans") continue
+    if (key !== "lanes") {
+      entries.push([key, value])
+      continue
+    }
+    if (isReading) {
+      const { ban, ...positions } = lanes
+      entries.push(["lanes", positions], ["bans", ban])
+    } else {
+      entries.push(["lanes", { ...lanes, ban: comp.bans }])
+    }
+  }
+  return Object.fromEntries(entries)
+}
+
 function convertComposition(raw: PlainObject, direction: "read" | "write"): PlainObject {
   const isReading = direction === "read"
   const ownerKey = isReading ? "team" : "owner"
@@ -35,7 +58,7 @@ function convertComposition(raw: PlainObject, direction: "read" | "write"): Plai
   if (isPlainObject(raw.draft) && enemyKey in raw.draft) {
     comp = { ...comp, draft: renameKeys(raw.draft, { [enemyKey]: isReading ? "enemyId" : "rival" }) }
   }
-  return comp
+  return convertBans(comp, direction)
 }
 
 export const compositionFromSaved = (raw: unknown) =>

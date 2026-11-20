@@ -58,7 +58,7 @@ export function draftTeamHTML(
 
   const banSq = (i: number) => {
     const s = slotOf(t, "ban", i),
-      name = source?.lanes.ban[i]
+      name = source?.bans[i]
     if (!source)
       return `<div class="bsq" data-l="ban" data-bi="${i}" data-empty-rival title="${s.n}º ban"><span class="bn">${s.n}</span></div>`
     return `<div class="bsq${name ? " has" : ""} mine${editing("ban") ? " act" : ""}" data-l="ban" data-bi="${i}" data-champion-slot="${i}" data-champion-name="${esc(name)}" title="${s.n}º ban">
@@ -74,7 +74,7 @@ export function draftTeamHTML(
     }
     const lane = order[i],
       L = LN[lane],
-      list = source.lanes[lane],
+      list = source.lanes[lane as DraftLane],
       main = list[0],
       on = editing(lane)
     const drag = main ? ` draggable="true" data-n="${esc(main)}" data-from="${lane}"` : ""
@@ -121,7 +121,7 @@ export function draftTeamHTML(
       : `<div class="draft-rival-empty"><p>Arraste um campeão para um card para montar a adversária, ou escolha uma que já existe.</p>
     <div class="draft-rival-actions"><button type="button" data-slot="button" data-variant="default" data-size="sm" data-new-rival>${iconMarkup("plus")} Montar adversária</button>
     <button type="button" data-slot="button" data-variant="outline" data-size="sm" data-choose-rival>Escolher existente</button></div></div>`
-  const extra = source ? source.lanes.ban.slice(5) : []
+  const extra = source ? source.bans.slice(5) : []
   const extraBans =
     source && !compact
       ? `<div data-champion-group="${t}-ban-alternatives"${extra.length ? "" : " hidden"}>${extra.length ? `<div class="lbl">Bans alternativos</div><div class="alts" data-l="ban">${extra.map((name, j) => mini(name, "ban", j + 5)).join("")}</div>` : ""}</div>`
