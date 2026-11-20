@@ -1,7 +1,7 @@
 import { iconMarkup } from "@/shared/ui/icon"
 import { DRAFT_PHASES, DRAFT_SIDE, PICKNAME } from "../model/draft-order"
 import { DRAFT_LANES, draftOf, type Composition, type DraftLane } from "../model/local-state"
-import { rivalOrder } from "../model/composition-side"
+import { enemyOrder } from "../model/composition-side"
 
 /** Lado do quadro: o da comp aberta (nós) ou o da comp adversária escolhida. */
 export type BoardSide = "us" | "rival"
@@ -151,7 +151,7 @@ export function draftBoardHTML(comp: Composition, rival: Composition | null, opt
     const order: DraftLane[] = source
       ? owner === "us"
         ? draft.order[draft.side]
-        : rivalOrder(comp, source)
+        : enemyOrder(comp, source)
       : DRAFT_LANES
     return draftTeamHTML(t, owner, source, order, options)
   }

@@ -2,7 +2,7 @@ import { createRoot } from "react-dom/client"
 import { showDialog } from "@/shared/ui/dialog-controls"
 import type { PrintStore } from "../../api/print-store"
 import type { TacticPrintAttrs } from "../../model/tactic-doc"
-import type { SketchScene } from "./PrintSketch"
+import type { SketchScene } from "./print-sketch"
 
 type SketchResult = Pick<TacticPrintAttrs, "sketch" | "preview">
 
@@ -42,7 +42,7 @@ export async function openPrintSketch({
   const [background, sceneJson, module] = await Promise.all([
     store.load(attrs.src),
     attrs.sketch ? store.load(attrs.sketch) : Promise.resolve(null),
-    import("./PrintSketch"),
+    import("./print-sketch"),
   ])
   if (!background) {
     toast("Este print ainda não chegou ao time.")

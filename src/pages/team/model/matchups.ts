@@ -63,11 +63,11 @@ export function pruneMatchups(comps: Composition[]): string[] {
 }
 
 /** Uma adversária já colocada no draft vira confronto. Devolve true se algo mudou. */
-export function adoptRivals(comps: Composition[]): boolean {
+export function adoptEnemies(comps: Composition[]): boolean {
   let changed = false
   const enemies = new Set(comps.filter(isEnemy).map(comp => comp.id))
   for (const ours of comps) {
-    const rival = ours.draft?.rival
+    const rival = ours.draft?.enemyId
     if (isEnemy(ours) || !rival || !enemies.has(rival)) continue
     if (!matchupsOf(ours).some(item => item.enemy === rival)) {
       addMatchup(ours, rival)

@@ -1,14 +1,14 @@
 import { iconMarkup } from "@/shared/ui/icon"
 import { DRAFT_SIDE } from "../model/draft-order"
 import { compositionPreview, draftOf, type Composition, type DraftLane, type DraftSide } from "../model/local-state"
-import { enemiesOf, isEnemy, oppositeSide, oursOf, rivalOrder, teamOf } from "../model/composition-side"
+import { enemiesOf, isEnemy, oppositeSide, oursOf, enemyOrder, ownerOf } from "../model/composition-side"
 import { opggOf } from "../model/tactics"
 import { draftTeamHTML } from "./draft-board"
 import { allMatchups, findMatchup, matchupKey, matchupTitle, type MatchupEntry } from "../model/matchups"
 
-type ListKey = "mine" | "enemy" | "matchup"
+type ListKey = "ours" | "enemy" | "matchup"
 const NEW_LABEL: Record<ListKey, string> = {
-  mine: "Nova composição nossa",
+  ours: "Nova composição nossa",
   enemy: "Nova adversária",
   matchup: "Novo confronto",
 }
@@ -60,7 +60,7 @@ function tacticBoardHTML(c: Composition, general: boolean, matchup: MatchupEntry
       side = draftOf(ours).side,
       other = oppositeSide(side)
     cols[side] = boardColumn(side, "us", ours, draftOf(ours).order[side], "Nossa", markup)
-    cols[other] = boardColumn(other, "rival", enemy, rivalOrder(ours, enemy), "Adversária", markup)
+    cols[other] = boardColumn(other, "rival", enemy, enemyOrder(ours, enemy), "Adversária", markup)
   } else if (!general) {
     const side = draftOf(c).side,
       enemy = isEnemy(c)
@@ -80,7 +80,7 @@ function tacticBoardHTML(c: Composition, general: boolean, matchup: MatchupEntry
 
 /** Cabeçalho da comp: de quem ela é (só leitura; muda pelo menu ⋯ da Ordem do draft) e, na adversária, o OP.GG do time. */
 function teamToolsHTML(c: Composition, esc: Markup["esc"], matchup: MatchupEntry | null, hidden = false) {
-  const team = matchup ? "enemy" : teamOf(c),
+  const team = matchup ? "enemy" : ownerOf(c),
     link = opggOf(matchup ? matchup.enemy : c)
   const tag = matchup
     ? `<span class="tx-team-tag mine">Confronto</span>`
@@ -124,7 +124,7 @@ export function tacticsHTML(
     enemies = enemiesOf(compositions),
     matchups = allMatchups(compositions)
   const active = general ? null : findMatchup(compositions, matchupId)
-  const shown: ListKey = active ? "matchup" : !general && isEnemy(c) ? "enemy" : "mine"
+  const shown: ListKey = active ? "matchup" : !general && isEnemy(c) ? "enemy" : "ours"
   const matchupRow = ({ ours: o, enemy: e, matchup }: MatchupEntry) => {
     const on = active?.matchup.id === matchup.id,
       title = esc(matchupTitle(o, e))
@@ -172,8 +172,8 @@ export function tacticsHTML(
     </section>
     <aside class="tx-aside" id="tx-aside" aria-label="Composições e draft"${drawer ? "" : " inert"}>
       <div class="tx-tabs">
-        <div class="tx-listtabs" role="tablist" aria-label="Composições">${listTab("mine", "Nossas", ours.length)}${listTab("enemy", "Adversárias", enemies.length)}${listTab("matchup", "Confrontos", matchups.length)}</div>
-        ${panel("mine", ours.map(tab).join(""), "Nenhuma composição ainda.")}${panel("enemy", enemies.map(tab).join(""), "Nenhuma adversária ainda.")}${panel("matchup", matchups.map(matchupRow).join(""), "Nenhum confronto ainda. Junte uma composição nossa a uma adversária.")}
+        <div class="tx-listtabs" role="tablist" aria-label="Composições">${listTab("ours", "Nossas", ours.length)}${listTab("enemy", "Adversárias", enemies.length)}${listTab("matchup", "Confrontos", matchups.length)}</div>
+        ${panel("ours", ours.map(tab).join(""), "Nenhuma composição ainda.")}${panel("enemy", enemies.map(tab).join(""), "Nenhuma adversária ainda.")}${panel("matchup", matchups.map(matchupRow).join(""), "Nenhum confronto ainda. Junte uma composição nossa a uma adversária.")}
       </div>
       <div class="tx-draft">${body}</div>
     </aside>

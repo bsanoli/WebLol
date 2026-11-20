@@ -1,9 +1,9 @@
 import { describe, expect, it } from "vitest"
-import { setRival } from "./composition-side"
+import { setEnemyId } from "./composition-side"
 import { blank, type Composition } from "./local-state"
 import {
   addMatchup,
-  adoptRivals,
+  adoptEnemies,
   allMatchups,
   findMatchup,
   isMatchupKey,
@@ -14,8 +14,8 @@ import {
   resolveCompDrop,
 } from "./matchups"
 
-function comp(id: string, team: "mine" | "enemy" = "mine"): Composition {
-  return Object.assign(blank(id), { id, team })
+function comp(id: string, owner: "ours" | "enemy" = "ours"): Composition {
+  return Object.assign(blank(id), { id, owner })
 }
 
 describe("matchupKey", () => {
@@ -101,14 +101,14 @@ describe("pruneMatchups", () => {
   })
 })
 
-describe("adoptRivals", () => {
+describe("adoptEnemies", () => {
   it("transforma a adversária colocada no draft em confronto", () => {
     const ours = comp("a")
     const enemy = comp("b", "enemy")
-    setRival(ours, enemy.id)
-    expect(adoptRivals([ours, enemy])).toBe(true)
+    setEnemyId(ours, enemy.id)
+    expect(adoptEnemies([ours, enemy])).toBe(true)
     expect(matchupsOf(ours).map(item => item.enemy)).toEqual([enemy.id])
-    expect(adoptRivals([ours, enemy])).toBe(false)
+    expect(adoptEnemies([ours, enemy])).toBe(false)
   })
 })
 

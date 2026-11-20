@@ -1,53 +1,53 @@
 import { draftOf, type Composition, type DraftSide } from "./local-state"
 
-// Lado de cada composição: nossa ou adversária. Comps antigas não têm `team`;
-// as antigas "táticas salvas" guardavam o lado em `tacticTeam`.
-export type CompTeam = "mine" | "enemy"
+// Dono de cada composição: nossa ou adversária. Comps antigas não têm `owner`;
+// as antigas "táticas salvas" guardavam o lado em `tacticTeam` (formato salvo, `"mine" | "enemy"`).
+export type CompOwner = "ours" | "enemy"
 
-type LegacyComposition = Composition & { tactic?: boolean; tacticViews?: unknown; tacticTeam?: CompTeam }
+type LegacyComposition = Composition & { tactic?: boolean; tacticViews?: unknown; tacticTeam?: "mine" | "enemy" }
 
-export function teamOf(comp: Composition): CompTeam {
-  if (comp.team === "enemy" || comp.team === "mine") return comp.team
-  return (comp as LegacyComposition).tacticTeam === "enemy" ? "enemy" : "mine"
+export function ownerOf(comp: Composition): CompOwner {
+  if (comp.owner === "enemy" || comp.owner === "ours") return comp.owner
+  return (comp as LegacyComposition).tacticTeam === "enemy" ? "enemy" : "ours"
 }
 
-export const isEnemy = (comp: Composition) => teamOf(comp) === "enemy"
+export const isEnemy = (comp: Composition) => ownerOf(comp) === "enemy"
 
-/** Grava o lado no formato atual e tira as marcas das antigas táticas salvas. */
-export function settleTeam(comp: Composition, team: CompTeam = teamOf(comp)) {
+/** Grava o dono no formato atual e tira as marcas das antigas táticas salvas. */
+export function settleOwner(comp: Composition, owner: CompOwner = ownerOf(comp)) {
   const legacy = comp as LegacyComposition
-  comp.team = team
+  comp.owner = owner
   delete legacy.tactic
   delete legacy.tacticViews
   delete legacy.tacticTeam
-  if (team === "enemy" && comp.draft?.rival) delete comp.draft.rival
+  if (owner === "enemy" && comp.draft?.enemyId) delete comp.draft.enemyId
 }
 
 export const oursOf = <T extends Composition>(comps: T[]) => comps.filter(comp => !isEnemy(comp))
 export const enemiesOf = <T extends Composition>(comps: T[]) => comps.filter(isEnemy)
 
 /** Comp adversária colocada do outro lado do draft, se ainda existir. */
-export function rivalOf<T extends Composition>(comp: T, comps: T[]): T | null {
-  const id = comp.draft?.rival
+export function enemyCompositionOf<T extends Composition>(comp: T, comps: T[]): T | null {
+  const id = comp.draft?.enemyId
   if (!id || isEnemy(comp)) return null
   return comps.find(item => item.id === id && isEnemy(item)) ?? null
 }
 
-/** Título para listas: a comp nossa que já tem adversária aparece como "Nome x Rival". */
+/** Título para listas: a comp nossa que já tem adversária aparece como "Nome x Adversária". */
 export function compTitle<T extends Composition>(comp: T, comps: T[]) {
-  const rival = rivalOf(comp, comps)
-  return rival ? `${comp.name} x ${rival.name}` : comp.name
+  const enemy = enemyCompositionOf(comp, comps)
+  return enemy ? `${comp.name} x ${enemy.name}` : comp.name
 }
 
-export function setRival(comp: Composition, rivalId: string | null) {
+export function setEnemyId(comp: Composition, enemyId: string | null) {
   const draft = draftOf(comp)
-  if (rivalId) draft.rival = rivalId
-  else delete draft.rival
+  if (enemyId) draft.enemyId = enemyId
+  else delete draft.enemyId
 }
 
 export const oppositeSide = (side: DraftSide): DraftSide => (side === "blue" ? "red" : "blue")
 
-/** Ordem das lanes nos picks da comp adversária, do lado oposto ao nosso. */
-export function rivalOrder(comp: Composition, rival: Composition) {
-  return draftOf(rival).order[oppositeSide(draftOf(comp).side)]
+/** Ordem das posições nos picks da comp adversária, do lado oposto ao nosso. */
+export function enemyOrder(comp: Composition, enemy: Composition) {
+  return draftOf(enemy).order[oppositeSide(draftOf(comp).side)]
 }

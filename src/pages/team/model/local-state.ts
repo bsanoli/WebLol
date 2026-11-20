@@ -1,4 +1,5 @@
 import { STORAGE_KEYS } from "@/shared/config/storage-keys"
+import { compositionFromSaved } from "./composition-storage"
 
 export const KEY = STORAGE_KEYS.teamAreaState
 export const uid = () => Math.random().toString(36).slice(2, 10)
@@ -10,8 +11,8 @@ export type CompositionDraft = {
   order: Record<DraftSide, DraftLane[]>
   /** Plano do draft de cada lado; vai para o bloco de notas da comp na primeira edição. */
   note: Record<DraftSide, string>
-  /** Id da composição adversária colocada do outro lado do draft. */
-  rival?: string
+  /** Id da composição adversária colocada do outro lado do draft (salvo como `rival`). */
+  enemyId?: string
 }
 
 export type Composition = {
@@ -21,8 +22,8 @@ export type Composition = {
   laneNotes: Record<string, string>
   notes: string
   updated: number
-  /** De quem é a comp: da nossa equipe (padrão) ou da equipe adversária. */
-  team?: "mine" | "enemy"
+  /** De quem é a comp: da nossa equipe (padrão) ou da equipe adversária (salvo como `team: "mine" | "enemy"`). */
+  owner?: "ours" | "enemy"
   /** Link do OP.GG do time adversário. */
   opgg?: string
   draft?: CompositionDraft
@@ -44,7 +45,7 @@ export function draftOf(c: Composition): CompositionDraft {
     const saved = (Array.isArray(d.order[side]) ? d.order[side] : []).filter(lane => DRAFT_LANES.includes(lane))
     d.order[side] = [...new Set([...saved, ...DEFAULT_ORDER])].slice(0, 5)
   }
-  if (typeof d.rival !== "string" || !d.rival) delete d.rival
+  if (typeof d.enemyId !== "string" || !d.enemyId) delete d.enemyId
   return d
 }
 
@@ -69,6 +70,7 @@ export function loadTeamState() {
   } catch {
     S = null
   }
+  if (S && Array.isArray(S.comps)) S.comps = S.comps.map(compositionFromSaved)
   if (!S || !Array.isArray(S.comps)) {
     // Comp de exemplo (genérica) para quem ainda não tem as comps de um time
     const c = blank("Comp de exemplo: luta em time")
