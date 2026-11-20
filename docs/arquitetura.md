@@ -54,7 +54,7 @@ Os iframes são da mesma origem, então a comunicação acontece por três camin
 
 | Camada | Slices atuais |
 | --- | --- |
-| `app` | `entrypoints` (main, worlds, team, soloq, analytics-bridge), `config/ui-versions.ts`, `styles` |
+| `app` | `entrypoints` (main, worlds, team, soloq, analytics-bridge), `config/ui-versions.ts` (tipo) e `config/ui-versions.json` (histórico), `styles` |
 | `pages` | `builds`, `team`, `worlds-compositions`, `worlds-overview` |
 | `widgets` | `analytics-tooltip`, `tactical-map`, `team-knowledge`, `tournament-overview` |
 | `features` | `select-theme` |

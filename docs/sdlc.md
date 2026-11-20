@@ -52,7 +52,7 @@ Na dúvida entre dois tamanhos, escolha o maior só se a mudança tocar algo sal
 - O `npm run check` passa sem erros.
 - Os testes da área passam. Uma falha anterior à mudança fica registrada no resumo, com o nome do teste.
 - O código novo segue o glossário e as convenções.
-- A documentação da área foi atualizada, assim como `historico-admin-login.md` e `ui-versions.ts` quando se aplicam.
+- A documentação da área foi atualizada, assim como `historico-admin-login.md` e `ui-versions.json` quando se aplicam.
 - O resumo diz o que mudou, o que foi verificado, o que ficou pendente e quais suposições a pessoa precisa conferir.
 
 ## Como pedir

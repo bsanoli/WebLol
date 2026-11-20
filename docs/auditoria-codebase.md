@@ -31,7 +31,7 @@ Os termos seguem o [glossário](glossario.md). As regras novas estão em [conven
 - O README cita `src/data/ui-versions.ts`, mas o arquivo é `src/app/config/ui-versions.ts`. Também fala em três entradas, quando são quatro HTMLs em dois builds, e não lista os arquivos com `@ts-nocheck`. Corrigido nesta entrega.
 - Antes desta entrega não havia glossário, documento de arquitetura nem registro de decisões.
 - `.ua/knowledge-graph.json` estava versionado e desatualizado, e `src/components/examples/` estava vazia. Os dois foram removidos na Onda 2.
-- `src/app/config/ui-versions.ts` tem 502 linhas de histórico de versões da interface, misturado com configuração.
+- `src/app/config/ui-versions.ts` tinha 502 linhas de histórico de versões da interface, misturado com configuração. Resolvido em 20/11/2026: o histórico foi para `ui-versions.json`.
 
 ## 3. Tipos e tamanho
 

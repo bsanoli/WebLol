@@ -1610,3 +1610,37 @@
   outline: 2px solid var(--wl-accent, var(--gold));
   outline-offset: 1px;
 }
+
+/* O bloco de notas tem altura fixa na tela e rola por dentro, sem esticar a página. */
+@media (min-width: 1100px) {
+  body:has(#v-comps.tactics-view.on) {
+    height: 100dvh;
+  }
+  #v-comps.tactics-view.on,
+  #v-comps.tactics-view #comps,
+  #v-comps.tactics-view #comps > .comp-editor {
+    min-height: 0;
+  }
+  #v-comps.tactics-view #editor,
+  #v-comps.tactics-view #composition-panel,
+  #v-comps.tactics-view .tx {
+    flex: 1 1 0;
+    min-height: 0;
+  }
+  #v-comps.tactics-view .tx-write,
+  #v-comps.tactics-view .tx-notes-host,
+  #v-comps.tactics-view .tx-notes {
+    min-height: 0;
+    overflow: hidden;
+  }
+  #v-comps.tactics-view .tx-notes-body {
+    flex: 1 1 0;
+    min-height: 160px;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    scrollbar-gutter: stable;
+  }
+  #v-comps.tactics-view .tx-aside {
+    overflow-y: auto;
+  }
+}
