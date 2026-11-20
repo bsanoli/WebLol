@@ -2,6 +2,7 @@ import { fileURLToPath, URL } from "node:url"
 import { defineConfig, type Plugin } from "vite"
 import react from "@vitejs/plugin-react"
 import tailwindcss from "@tailwindcss/vite"
+import { visualizer } from "rollup-plugin-visualizer"
 
 const src = (path: string) => fileURLToPath(new URL(`./src/${path}`, import.meta.url))
 
@@ -67,7 +68,13 @@ export default defineConfig(({ command, mode }) => {
     root: src(""),
     publicDir: fileURLToPath(new URL("./public", import.meta.url)),
     base: "./",
-    plugins: [developmentDatasets(), react(), tailwindcss()],
+    plugins: [
+      developmentDatasets(),
+      react(),
+      tailwindcss(),
+      // `npm run analyze` gera stats.html com o peso de cada módulo. Fora desse modo o plugin não entra no build.
+      ...(mode === "analyze" ? [visualizer({ filename: "stats.html", gzipSize: true, template: "treemap" })] : []),
+    ],
     server: {
       port: soloq ? 5174 : 5173,
       strictPort: true,

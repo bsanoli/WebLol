@@ -32,7 +32,7 @@ O [catálogo de agentes e skills](docs/agentes.md) vale para Codex e Claude Code
 - Mantenha componentes e funções no slice enquanto forem usados apenas por ele. Extraia para uma camada compartilhada quando houver consumidores reais com a mesma regra ou comportamento.
 - Revise arquivos JS e TS das camadas FSD a partir de 300 linhas não vazias. Extraia responsabilidades que possam evoluir separadamente. Dados e arquivos gerados ficam fora dessa contagem.
 - Evite introduzir `@ts-nocheck`. Ao refatorar código legado, tipifique os módulos extraídos e valide dados externos nas fronteiras que mudar, como parâmetros da URL e dados do armazenamento.
-- Use `npm run check` para verificar a arquitetura e os tipos. O build também executa esse comando. O tamanho gera aviso, e dependências que violem a direção das camadas ou a API pública de outro slice fazem a verificação falhar.
+- Use `npm run check` para verificar a arquitetura, os tipos e as promessas sem espera (Oxlint). `npm run knip` aponta arquivos e dependências sem uso, e `npm run size` confere o orçamento dos pacotes depois do build. O build também executa esse comando. O tamanho gera aviso, e dependências que violem a direção das camadas ou a API pública de outro slice fazem a verificação falhar.
 
 ## Admin e login
 

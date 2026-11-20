@@ -38,11 +38,17 @@ jobs:
       - name: Skills sincronizadas
         run: node scripts/sincronizar-skills.mjs --check
 
+      - name: Arquivos e dependências sem uso (Knip)
+        run: npm run knip
+
       - name: Testes unitários (Vitest)
         run: npm run test:unit
 
       - name: Build
         run: npm run build
+
+      - name: Orçamento de tamanho dos pacotes (size-limit)
+        run: npm run size
 
       - name: Instalar o navegador do Playwright
         run: npx playwright install --with-deps chromium

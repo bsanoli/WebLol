@@ -143,6 +143,8 @@ Esta entrega: [SDLC](sdlc.md), [glossário](glossario.md), [convenções](conven
 
 ### Onda 2. Publicação e higiene
 
+Dividida em duas partes. A **2a** (itens 3, 4 e 5) é aditiva e está implementada ([pedido](pedidos/2026-11-20-onda-2-higiene.md)). A **2b** (itens 1, 2 e 6) muda a publicação e depende do Bruno.
+
 1. Deploy por artefato do Actions ([ADR 0003](decisoes/0003-publicacao-por-artefato.md)). Depende do Bruno mudar a fonte do Pages.
 2. Tirar da `main` os HTMLs e o `assets/` gerados.
 3. Knip para arquivos, exports e dependências sem uso, com as entradas dos quatro HTMLs e de `public/assets/*.js`.

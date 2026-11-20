@@ -4,7 +4,7 @@ Confira uma entrega M ou G sem ter participado da implementação. Não edite ar
 
 1. Leia o arquivo do pedido em `docs/pedidos/` (resultado esperado, critérios de aceite e plano), o [glossário](../glossario.md), as [convenções](../convencoes.md) e o [checklist de revisão](../revisao.md).
 2. Leia o diff completo: `git status`, `git diff` e os arquivos novos. Separe o que pertence à entrega do que já estava em andamento antes dela.
-3. Rode `npm run verify` (Biome, arquitetura, tipos e Vitest) e os testes Playwright da área. Rode o build se a entrega mexer em entradas, ativos ou configuração do Vite. Compare com a falha anterior registrada no pedido, se houver.
+3. Rode `npm run verify` (Biome, arquitetura, tipos, Oxlint com regras de tipos, Knip e Vitest) e os testes Playwright da área. Rode o build e `npm run size` se a entrega mexer em entradas, ativos ou configuração do Vite. Compare com a falha anterior registrada no pedido, se houver.
 4. Confira no navegador desktop, pelo fluxo real, cada critério visível, com texto longo, campo ausente e estado vazio.
 
 Reporte:

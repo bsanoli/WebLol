@@ -10,3 +10,4 @@ __pycache__/
 .riot-key
 .env
 .env.*
+stats.html

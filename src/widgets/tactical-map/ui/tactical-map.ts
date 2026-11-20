@@ -325,7 +325,7 @@ export function mountTacticalMap({
       (b.onclick = () => {
         if (!canEdit()) return
         history.record()
-        animateTo({ ...snapshotFrame(play().live), pos: preset(b.dataset.pre) })
+        void animateTo({ ...snapshotFrame(play().live), pos: preset(b.dataset.pre) })
       }),
   )
   const history = mountMapHistory({
@@ -534,7 +534,7 @@ export function mountTacticalMap({
     const active = e.target.closest("[data-step-select], [data-lab]")
     const field = active?.matches("[data-lab]")
     const caret = field && [active.selectionStart, active.selectionEnd]
-    goStep(index)
+    void goStep(index)
     if (active) {
       const replacement = $(field ? `[data-lab="${index}"]` : `[data-step-select="${index}"]`)
       replacement?.focus({ preventScroll: true })
