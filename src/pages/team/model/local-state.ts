@@ -67,7 +67,24 @@ export function blank(name = "Nova comp"): Composition {
   }
 }
 
-export function loadTeamState() {
+/** Estado da Área do time guardado no navegador (`lol-comps-time-v1`), já no formato do código. */
+export type TeamState = {
+  comps: Composition[]
+  cur: string
+  view: "draft" | "tactics" | "map"
+  /** Última composição nossa aberta; volta para ela ao sair de uma adversária. */
+  lastComp?: string
+  tacticsMatchup?: string | null
+  tacticsGeneral?: boolean
+  tacticsDrawer?: boolean
+  /** Aba do Conhecimento aberta (`wave` ou `obj`). */
+  kTab?: string
+  curPlay?: string
+  plays?: { id: string }[]
+  tactics?: unknown
+}
+
+export function loadTeamState(): TeamState {
   let S: { comps: Composition[]; cur: string } | null
   try {
     S = JSON.parse(localStorage.getItem(KEY) ?? "null")
@@ -96,7 +113,7 @@ export function loadTeamState() {
     S.cur = c.id
   }
   if (!S.comps.some(c => c.id === S.cur)) S.cur = S.comps[0].id
-  return S
+  return S as TeamState
 }
 
 /** Posição de uma lista de campeões da composição: as cinco posições ou `"ban"`. */

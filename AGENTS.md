@@ -36,4 +36,4 @@ O [catálogo de agentes e skills](docs/agentes.md) vale para Codex e Claude Code
 
 ## Admin e login
 
-Toda mudança em login, contas, times, capitão ou Administração entra em `docs/historico-admin-login.md`, com o pedido, a decisão e o que mudou. Antes de uma mudança importante nessa área, pergunte ao Bruno e registre a escolha dele no mesmo arquivo.
+Toda mudança em login, contas, times, capitão ou Administração entra em `docs/historico-admin-login.md`, com o pedido, a decisão e o que mudou. Nenhuma aprovação precisa passar pelo Bruno (decisão do Fabiano, 20/11/2026), a não ser que a tarefa exija mexer na conta dele (senha, conta admin) ou publicar regras do Firestore. Nesses casos, pare e avise o Fabiano; registre a escolha no mesmo arquivo.

@@ -1,4 +1,5 @@
 import { LOL_DATA } from "@/entities/champion"
+import type { DraftLane } from "./local-state"
 
 /* ===== Campeões (funções do editor e catálogo local da Riot) ===== */
 const BASE = [
@@ -176,12 +177,14 @@ const BASE = [
   "Zoe|Zoe|M",
   "Zyra|Zyra|S",
 ]
-const RL: Record<string, string> = { T: "top", J: "jg", M: "mid", A: "adc", S: "sup" }
-export const CH = BASE.map(s => {
-  const [n, id, r] = s.split("|")
-  return { n, id, r: [...r].map(c => RL[c]) }
+/** Campeão do catálogo: nome, id da imagem e as posições em que costuma jogar. */
+export type CatalogChampion = { n: string; id: string; r: DraftLane[] }
+const RL: Record<string, DraftLane> = { T: "top", J: "jg", M: "mid", A: "adc", S: "sup" }
+export const CH: CatalogChampion[] = BASE.map(s => {
+  const [n = "", id = "", r = ""] = s.split("|")
+  return { n, id, r: [...r].map(c => RL[c]).filter((lane): lane is DraftLane => lane !== undefined) }
 })
-const TAG_ROLE: Record<string, string> = {
+const TAG_ROLE: Record<string, DraftLane> = {
   Fighter: "top",
   Tank: "top",
   Mage: "mid",
@@ -195,5 +198,9 @@ for (const [id, c] of Object.entries(LOL_DATA.champions)) {
     if (c.name === "Nunu & Willump") existing.n = c.name
     continue
   }
-  CH.push({ n: c.name, id, r: [...new Set(c.tags.map(t => TAG_ROLE[t]).filter(Boolean))] })
+  CH.push({
+    n: c.name,
+    id,
+    r: [...new Set(c.tags.map(t => TAG_ROLE[t]).filter((lane): lane is DraftLane => lane !== undefined))],
+  })
 }

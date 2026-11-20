@@ -169,7 +169,7 @@ Renomeações vão em commits próprios, sem mudança de comportamento, de prefe
 
 ### Onda 4. Scripts clássicos para TypeScript
 
-1. Migrar `shell.js` e `sync.js` para slices em `src/` (`features/auth`, `features/team-sync`, `shared/api/firestore`).
+1. ~~Migrar `shell.js` e `sync.js` para slices em `src/`~~ (feito na Onda 4: `features/auth`, `shared/lib/team-changes`, `shared/api/firestore`).
 2. Trocar as variáveis globais entre frames por um contrato tipado de mensagens.
 3. Manter os nomes salvos do Firestore e as rotas.
 

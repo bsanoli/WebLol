@@ -1,7 +1,7 @@
 # Onda 3: nomes e tipos da Área do time
 
 - **Tamanho:** G
-- **Situação:** em andamento (3a e 3b feitas; 3c pendente)
+- **Situação:** em andamento (3a, 3b, 3c-1 e 3c-2 feitas; PR da 3b e da 3c por publicar)
 - **Pedido por:** Fabiano
 - **Data:** 2026-11-20
 
@@ -15,17 +15,17 @@ Origem: [Onda 3 do backlog](../auditoria-codebase.md#onda-3-nomes-e-tipos-da-ár
 
 **Critérios de aceite**
 
-- [ ] O código da Área do time usa `owner: "ours" | "enemy"`, `enemyId` e `bans`, e os nomes antigos (`team: "mine"`, `rival`, `lanes.ban`) só aparecem nos conversores de leitura e escrita. Nomes locais e classes CSS (`rival`, `mine`, `data-empty-rival`) ficam para a 3c, junto com a divisão do arquivo.
-- [ ] Uma composição salva no formato antigo (`lol-comps-time-v1`, com `team`, `draft.rival` e `lanes.ban`) abre igual: mesmos picks, bans, draft, adversária e notas.
-- [ ] Depois de salvar, o formato gravado segue legível pela versão anterior do site até a migração ser decidida (ver suposições).
-- [ ] O backup exportado e a importação de backups antigos continuam funcionando.
-- [ ] A sincronização com o Firestore (versão oficial, envios) não muda de formato.
-- [ ] `team-page.ts` deixa de ser um arquivo único com `@ts-nocheck`: dividido por aba (Composições, Mapa tático, Conhecimento, Gestão), cada parte tipada.
-- [ ] Campeões e posições são objetos tipados no lugar de `CH` e `LANES`.
-- [ ] Os dados lidos de `localStorage`, dos parâmetros da URL e do Firestore passam por validação nas fronteiras alteradas, e dado inválido não derruba a tela.
-- [ ] `PrintSketch.tsx` e `TacticNotes.tsx` passam para kebab-case.
-- [ ] Os dois avisos de axe `label-content-name-mismatch` (picks do draft e seletores do confronto) deixam de ser aceitos em `tests/accessibility.spec.ts`.
-- [ ] `npm run verify`, `npm run build` e a suíte Playwright passam; Área do time conferida no navegador desktop com composição antiga, vazia e com nomes longos.
+- [x] O código da Área do time usa (o `kind: "ours" | "rival"` do `matchup-bar` e `session.side` seguem com `"rival"`, ver Onda 5) `owner: "ours" | "enemy"`, `enemyId` e `bans`, e os nomes antigos (`team: "mine"`, `rival`, `lanes.ban`) só aparecem nos conversores de leitura e escrita. Nomes locais ficam para a 3c; as classes CSS (`rival`, `mine`, `data-empty-rival`) ficam para a Onda 5 (estilos).
+- [x] Uma composição salva no formato antigo (`lol-comps-time-v1`, com `team`, `draft.rival` e `lanes.ban`) abre igual: mesmos picks, bans, draft, adversária e notas.
+- [x] Depois de salvar, o formato gravado segue legível pela versão anterior do site até a migração ser decidida (ver suposições).
+- [x] O backup exportado e a importação de backups antigos continuam funcionando.
+- [x] A sincronização com o Firestore (versão oficial, envios) não muda de formato.
+- [x] `team-page.ts` deixa de ser um arquivo único com `@ts-nocheck`: dividido por responsabilidade (não por aba; Mapa e Conhecimento já eram widgets), cada parte tipada.
+- [x] Campeões e posições são tipados (`CatalogChampion[]` em `CH`, `SLOT_INFO`); o nome `CH` permanece.
+- [x] Os dados lidos de `localStorage`, dos parâmetros da URL e do Firestore passam por validação nas fronteiras alteradas, e dado inválido não derruba a tela.
+- [x] `PrintSketch.tsx` e `TacticNotes.tsx` passam para kebab-case.
+- [x] Os dois avisos de axe `label-content-name-mismatch` (picks do draft e seletores do confronto) deixam de ser aceitos em `tests/accessibility.spec.ts`.
+- [x] `npm run verify`, `npm run build` e a suíte Playwright passam; Área do time conferida no navegador desktop com composição antiga, vazia e com nomes longos.
 
 **Fora do escopo:** `sync.js` e `shell.js` (Onda 4), estilos (Onda 5), `worlds.json` posicional (Onda 6), mudança visual.
 
@@ -60,5 +60,10 @@ Proposta de divisão, cada onda com PR próprio:
 - **Mudou (3b):** `Composition.bans: string[]` e `lanes` só com as cinco posições; `composition-storage.ts` lê `lanes.ban` como `bans` e grava de volta igual. Zod Mini (`saved-data.ts`) valida as composições do `localStorage`, a versão oficial guardada e o parâmetro `modo`; dado inválido é corrigido ou descartado sem derrubar a tela. ADR 0005.
 - **Desvio do pedido:** o formato salvo **não** migrou. `lanes.ban` continua gravado, porque `public/assets/sync.js` (Onda 4) compara as composições por JSON e lê `lanes.*`; migrar agora quebraria a sincronização e a versão anterior do site. A migração fica para a Onda 4, com ADR própria.
 - **Verificado (3b):** `npm run verify` (51 testes), `npm run build` e Playwright (42) passam; limite do pacote `camp` subiu de 35 para 40 kB por causa do Zod Mini (38,77 kB).
-- **Pendências:** 3c (dividir `team-page.ts`, `CH`/`LANES`, axe 2.5.3, nomes locais e CSS)
+- **Mudou (3c-1):** `LANES` e `LN` viraram `SLOT_LIST` e `SLOT_INFO` tipados em `model/champion-slots.ts` (posições e bans). Os dois avisos de axe `label-content-name-mismatch` foram corrigidos e saíram de `tests/accessibility.spec.ts`: o pick agora se chama "First Pick Orianna · Mid", a grade de campeões e os seletores do confronto usam o próprio texto visível como nome (iniciais, tags e prévia ficam fora do nome com `aria-hidden`), e `team.spec.ts` acompanha os novos nomes.
+- **Verificado (3c-1):** axe nas 8 telas sem aviso aceito, `npm run verify`, Playwright; pacote `camp` em 38,16 kB.
+- **Mudou (3c-2):** `team-page.ts` (1.524 linhas, `@ts-nocheck`) virou 13 módulos tipados em `pages/team/ui/`: `team-store` (estado e utilitários), `team-session` (posição e lado em edição, ganchos para evitar import circular), `team-grid` (grade de campeões), `team-comps` (composições e confrontos), `team-editor` (Ordem do draft e Táticas), `team-drag` (arrastar e soltar), `team-matchups` (confrontos e gaveta de Táticas), `team-backup` e `team-restore` (exportar, importar e restaurar), `team-captain` (Gestão), `team-tactic-notes` e a página, que ficou com 236 linhas só com as abas, as rotas e a inicialização. O `CH` virou `CatalogChampion[]` com `DraftLane[]`. Nomes locais `rival` → `enemy`/`boardEnemy`, `handleRivalSelect` → `handleEnemySelect`, props do `matchup-bar` e `mine` em `team-matchups`.
+- **Trava automática:** `npm run check` agora falha para arquivo novo com 300 linhas não vazias ou mais e para `@ts-nocheck` fora de `legacyNoCheckFiles`; os arquivos antigos (`legacyLongFiles`, `legacyNoCheckFiles` em `scripts/check-architecture.mjs`) só podem encolher. Regra registrada em `docs/convencoes.md` e `docs/arquitetura.md`.
+- **Verificado (3c-2):** `npm run verify`, Playwright (42) e axe nas 8 telas passam; a trava reprova arquivo de teste com `@ts-nocheck` e com 306 linhas.
+- **Fica para a Onda 5 (estilos):** as classes e atributos `rival`, `mine`, `us`, `data-empty-rival`, `data-choose-rival`, `.draft-rival-*` e o `.tx-group.mine` sem uso em `tactics.css`, os valores `"us" | "rival"` do lado do quadro e o `kind: "ours" | "rival"` do `matchup-bar`/`focusMatchup`, porque são usados em cerca de 60 seletores de 4 arquivos CSS e nos testes. O `.mine` do quadro significa "lado com composição", não dono, então a troca pede um nome novo e não só `ours`. Os arquivos com `@ts-nocheck` fora da Área do time (8, entre eles `tactical-map`, `knowledge` e `worlds`) seguem nas listas.
 - **Regras registradas:** nenhuma na 3a.

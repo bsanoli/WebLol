@@ -5,11 +5,10 @@
  * já usa o app, então só mudam com migração e ADR. Os nomes das propriedades são os nomes canônicos do
  * glossário. "JSON" quer dizer que o valor passa por `JSON.stringify`; "Texto" é gravado como está.
  *
- * `public/assets/sync.js` e `public/assets/shell.js` rodam sem build e repetem esses nomes. O teste
- * `storage-keys.test.ts` confere que toda chave usada no código está declarada aqui.
+ * O teste `storage-keys.test.ts` confere que toda chave usada no código está declarada aqui.
  */
 export const STORAGE_KEYS = {
-  /** JSON `{ comps, plays, tactics, view, cur, curPlay }`: estado da Área do time. Escrito pela Área do time e pelo `sync.js`. */
+  /** JSON `{ comps, plays, tactics, view, cur, curPlay }`: estado da Área do time. Escrito pela Área do time e por `features/auth`. */
   teamAreaState: "lol-comps-time-v1",
   /** JSON `true`: a pessoa usa a Área do time sem conta, e as alterações valem só nesta visita. */
   guestState: "lol-guest",

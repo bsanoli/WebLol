@@ -1,4 +1,5 @@
 // @ts-nocheck -- Integração legada com o DOM; os módulos extraídos mantêm seus tipos próprios.
+import { navigateHost } from "@/shared/api/host-bridge"
 import { createElement } from "react"
 import { createRoot } from "react-dom/client"
 import { ToggleGroup, ToggleGroupItem } from "@/shared/ui/toggle-group"
@@ -220,8 +221,7 @@ function wireBuilds({ publishWorlds, buildsPath }) {
     if (!source || source === DATASET.source) return
     const expanded = bc.querySelector('.build-toggle[aria-expanded="true"]')?.dataset.buildToggle
     const path = buildsPath(source, expanded ? [expanded] : parts(), filters())
-    if (window.frameElement)
-      window.frameElement.dispatchEvent(new CustomEvent("weblol:navigate", { detail: { path, focusSource: true } }))
+    if (window.frameElement) navigateHost({ path, focusSource: true })
     else location.assign("./#" + path)
   }
   const championCard = (champion: (typeof C)[number], position: string, pageSlug?: string, opponents = []) => {

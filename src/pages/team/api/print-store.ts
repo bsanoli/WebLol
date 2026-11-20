@@ -1,5 +1,6 @@
 // Prints e desenhos das táticas: o app principal guarda cada um à parte (window.weblolImages, em
 // times/{time}/imagens); aberta sozinha, a página guarda só neste navegador.
+import { hostImages } from "@/shared/api/host-bridge"
 import { STORAGE_PREFIXES } from "@/shared/config/storage-keys"
 import { uid } from "../model/local-state"
 
@@ -31,16 +32,4 @@ const localImages: PrintStore = {
   },
 }
 
-function isPrintStore(value: unknown): value is PrintStore {
-  const store = value as PrintStore | undefined
-  return !!store && typeof store.save === "function" && typeof store.load === "function"
-}
-
-export function printStore(): PrintStore {
-  try {
-    const shared = (window.parent as Window & { weblolImages?: unknown }).weblolImages
-    return isPrintStore(shared) ? shared : localImages
-  } catch {
-    return localImages
-  }
-}
+export const printStore = (): PrintStore => hostImages() ?? localImages

@@ -6,7 +6,32 @@ import { parse } from "@babel/parser"
 const sourceRoot = fileURLToPath(new URL("../src/", import.meta.url))
 const layers = ["shared", "entities", "features", "widgets", "pages", "app"]
 const sourceFile = /\.[cm]?[jt]sx?$/
-const lineWarning = 300
+const lineLimit = 300
+// Arquivos que já passavam do limite ou tinham `@ts-nocheck` quando a trava entrou. Eles só podem encolher:
+// o teto de cada um é o tamanho de hoje, e a entrada sai da lista quando o arquivo cumpre a regra.
+// Arquivo novo ou fora das listas precisa ter menos de 300 linhas não vazias e nenhum `@ts-nocheck` (docs/convencoes.md).
+const legacyLongFiles = {
+  "app/config/ui-versions.ts": 528,
+  "pages/builds/ui/build-details.ts": 474,
+  "pages/builds/ui/builds-page.ts": 629,
+  "pages/team/ui/matchup-bar.tsx": 371,
+  "pages/team/ui/team-controls.tsx": 310,
+  "pages/worlds-compositions/ui/compositions-page.ts": 513,
+  "shared/ui/arc/blocks/site-header/site-header.tsx": 865,
+  "widgets/tactical-map/ui/battlefield-layer.ts": 373,
+  "widgets/tactical-map/ui/tactical-map.ts": 651,
+  "widgets/tactical-map/ui/ward-layer.ts": 303,
+}
+const legacyNoCheckFiles = new Set([
+  "app/entrypoints/worlds.ts",
+  "pages/builds/ui/builds-page.ts",
+  "pages/worlds-compositions/ui/compositions-page.ts",
+  "pages/worlds-compositions/ui/match-card.ts",
+  "pages/worlds-overview/ui/overview.ts",
+  "widgets/analytics-tooltip/ui/tooltip.ts",
+  "widgets/tactical-map/ui/tactical-map.ts",
+  "widgets/team-knowledge/ui/knowledge.ts",
+])
 const violations = new Set()
 
 function describeModule(path) {
@@ -78,7 +103,22 @@ const files = readdirSync(sourceRoot, { recursive: true, withFileTypes: true })
 for (const file of files) {
   const code = readFileSync(join(sourceRoot, file), "utf8")
   const lines = code.split(/\r?\n/).filter(line => line.trim()).length
-  if (lines >= lineWarning) console.warn(`Aviso: ${file} tem ${lines} linhas não vazias.`)
+  const cap = legacyLongFiles[file]
+  if (cap === undefined && lines >= lineLimit) {
+    violations.add(
+      `${file}: ${lines} linhas não vazias; divida em módulos por responsabilidade (limite ${lineLimit - 1})`,
+    )
+  } else if (cap !== undefined && lines > cap) {
+    violations.add(`${file}: cresceu de ${cap} para ${lines} linhas; arquivos acima do limite só podem encolher`)
+  } else if (cap !== undefined && lines < lineLimit) {
+    violations.add(`${file}: já cumpre o limite; remova-o de legacyLongFiles em scripts/check-architecture.mjs`)
+  }
+  const hasNoCheck = /^\s*\/\/\s*@ts-nocheck\b/m.test(code)
+  if (hasNoCheck && !legacyNoCheckFiles.has(file)) {
+    violations.add(`${file}: @ts-nocheck não é aceito em arquivo novo; tipifique o módulo`)
+  } else if (!hasNoCheck && legacyNoCheckFiles.has(file)) {
+    violations.add(`${file}: sem @ts-nocheck; remova-o de legacyNoCheckFiles em scripts/check-architecture.mjs`)
+  }
 
   const plugins = []
   if (/\.[cm]?tsx?$/.test(file)) plugins.push("typescript")

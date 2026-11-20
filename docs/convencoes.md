@@ -31,7 +31,7 @@ Os nomes de conceitos vêm do [glossário](glossario.md). A arquitetura segue a 
 
 ## Dados e tipos
 
-- Não introduza `@ts-nocheck`. Ao extrair código de um arquivo com `@ts-nocheck`, o módulo novo sai tipado.
+- Não introduza `@ts-nocheck`. Ao extrair código de um arquivo com `@ts-nocheck`, o módulo novo sai tipado. O `npm run check` falha para `@ts-nocheck` em arquivo que não está na lista `legacyNoCheckFiles` de `scripts/check-architecture.mjs`; ao tipar um arquivo da lista, remova-o dela.
 - Objetos com campos nomeados no lugar de strings ou arrays posicionais (`"Nome|Id|T"`, `[x, y]` sem nome, `{k, n, c}`). Formatos de dataset já publicados se convertem na fronteira.
 - Valide dados externos na fronteira que a mudança tocar: parâmetros da URL, `localStorage`, Firestore e JSON importado. A fronteira devolve o tipo canônico do glossário.
 - Toda chave do `localStorage` é declarada em [`src/shared/config/storage-keys.ts`](../src/shared/config/storage-keys.ts), com o formato do valor, e o código usa `STORAGE_KEYS.<nome canônico>`. Chaves novas seguem `weblol-<área>-<dado>`. O teste `storage-keys.test.ts` falha quando uma chave `lol-` ou `weblol-` aparece no código sem estar declarada.
@@ -41,9 +41,9 @@ Os nomes de conceitos vêm do [glossário](glossario.md). A arquitetura segue a 
 
 - Respeite as camadas FSD e as APIs públicas (`index.ts`) dos slices. O `npm run check` acusa violações.
 - Separe regra e estado em `model`, renderização em `ui` e acesso a dados em `api`.
-- Arquivos de camada com mais de 300 linhas não vazias recebem revisão de responsabilidade antes de crescer mais. Dados e arquivos gerados ficam fora dessa conta.
+- Arquivos de camada com 300 linhas não vazias ou mais são divididos por responsabilidade. O `npm run check` falha para arquivo novo acima do limite e para arquivo da lista `legacyLongFiles` (`scripts/check-architecture.mjs`) que cresça além do tamanho registrado; a entrada sai da lista quando o arquivo cai abaixo de 300. Dados e arquivos gerados ficam fora dessa conta.
 - Código usado por um slice só fica nele. Extraia para `shared` ou `entities` quando houver um segundo consumidor real com a mesma regra.
-- Os scripts clássicos `public/assets/shell.js` e `sync.js` estão congelados para funcionalidades novas. O que for novo entra em `src/`, e o script legado só ganha uma ponte mínima.
+- `public/assets` não tem JavaScript: todo código entra em `src/`, dentro das camadas FSD.
 
 ## Comentários e documentação
 

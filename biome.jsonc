@@ -7,7 +7,6 @@
       "src/**",
       "tests/**",
       "scripts/**",
-      "public/assets/*.js",
       "public/assets/*.css",
       "*.ts",
       "*.json",
@@ -63,20 +62,6 @@
     {
       "includes": ["tests/**"],
       "linter": { "domains": { "playwright": "recommended" } }
-    },
-    {
-      // sync.js e shell.js são scripts clássicos (src/app/entrypoints/main.tsx). As variáveis de nível superior de um
-      // são globais lidas e reatribuídas pelo outro, mas o Biome os analisa como módulos isolados. Renomear, trocar
-      // `let` por `const` ou apagar o que parece sem uso quebra o login e a Administração.
-      "includes": ["public/assets/*.js"],
-      "linter": {
-        "rules": {
-          "style": { "useNamingConvention": "off", "useConst": "off" },
-          "correctness": { "noUnusedVariables": "off" },
-          "complexity": { "noUselessEscapeInRegex": "off", "useOptionalChain": "off" },
-          "suspicious": { "noPrototypeBuiltins": "off" }
-        }
-      }
     }
   ]
 }

@@ -1,6 +1,14 @@
 import { iconMarkup } from "@/shared/ui/icon"
 import { DRAFT_SIDE } from "../model/draft-order"
-import { compositionPreview, draftOf, type Composition, type DraftLane, type DraftSide } from "../model/local-state"
+import {
+  compositionPreview,
+  draftOf,
+  type Composition,
+  type ChampionSlot,
+  type DraftLane,
+  type DraftSide,
+} from "../model/local-state"
+import type { SlotInfo } from "../model/champion-slots"
 import { enemiesOf, isEnemy, oppositeSide, oursOf, enemyOrder, ownerOf } from "../model/composition-side"
 import { opggOf } from "../model/tactics"
 import { draftTeamHTML } from "./draft-board"
@@ -12,9 +20,8 @@ const NEW_LABEL: Record<ListKey, string> = {
   enemy: "Nova adversária",
   matchup: "Novo confronto",
 }
-type Lane = { k: string; n: string; c: string }
 type Markup = {
-  LN: Record<string, Lane>
+  slots: Record<ChampionSlot, SlotInfo>
   img: (name: string) => string
   esc: (value: unknown) => string
   pickArt: (name: string) => string
@@ -27,13 +34,13 @@ function boardColumn(
   source: Composition,
   order: DraftLane[],
   who: string,
-  { LN, img, esc, pickArt }: Markup,
+  { slots, img, esc, pickArt }: Markup,
 ) {
   const heading = `<h3><span class="side-dot ${side}" aria-hidden="true"></span>${DRAFT_SIDE[side]}<small>${who} · ${esc(source.name)}</small></h3>`
   const board = draftTeamHTML(side === "blue" ? "B" : "R", owner, source, order, {
     active: "",
     activeSide: owner,
-    LN,
+    slots,
     img,
     esc,
     pickArt,
@@ -111,7 +118,7 @@ export type TacticsOptions = Markup & {
 
 export function tacticsHTML(
   c: Composition,
-  { compositions, general, hasTactic, matchupId = null, drawer = true, LN, img, esc, pickArt }: TacticsOptions,
+  { compositions, general, hasTactic, matchupId = null, drawer = true, slots, img, esc, pickArt }: TacticsOptions,
 ) {
   const mark = (has: boolean) =>
     has ? `<span class="tx-has" title="Tem anotação de tática">${iconMarkup("edit")}</span>` : ""
@@ -156,7 +163,7 @@ export function tacticsHTML(
       : enemy
         ? "Como jogar contra esta composição: ameaças, picks a negar e como vencer as lutas."
         : "Como jogar com esta composição: rotações, objetivos, lutas e condição de vitória."
-  const body = tacticBoardHTML(c, general, active, { LN, img, esc, pickArt })
+  const body = tacticBoardHTML(c, general, active, { slots, img, esc, pickArt })
   const drawerToggle = `<button type="button" data-slot="button" data-variant="outline" data-size="sm" class="tx-drawer-toggle" data-tactic-drawer
     aria-expanded="${drawer}" aria-controls="tx-aside" title="${drawer ? "Esconder a lista de composições e o draft" : "Mostrar a lista de composições e o draft"}">${iconMarkup("next")}<span>Composições e draft</span></button>`
   return `<div class="tx${drawer ? "" : " drawer-closed"}">

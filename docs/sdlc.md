@@ -11,7 +11,7 @@ Este é o caminho de uma ideia até o código publicado. Vale para Fabiano, Brun
 | Quem | Faz |
 | --- | --- |
 | Fabiano | Descreve pedidos, decide produto e interface, aprova planos e publicações |
-| Bruno | Coautor. Decide sobre login, contas, times, capitão, Administração e dados salvos ([historico-admin-login.md](historico-admin-login.md)) |
+| Bruno | Coautor. Só entra quando a tarefa exige algo na conta dele (senha, conta admin) ou a publicação de regras do Firestore ([historico-admin-login.md](historico-admin-login.md)) |
 | Claude Code e Codex | Interpretam o pedido, planejam, implementam, verificam, registram as regras novas e resumem o que ficou pendente |
 
 ## Tamanho do pedido
@@ -31,7 +31,7 @@ Na dúvida entre dois tamanhos, escolha o maior só se a mudança tocar algo sal
 | Etapa | O que acontece | Portão | Artefato |
 | --- | --- | --- | --- |
 | 1. Pedido | Claude reescreve a mensagem como resultado esperado e critérios de aceite, com os termos do [glossário](glossario.md), e classifica o tamanho. | Em M e G, a pessoa confirma ou corrige a interpretação. Em M, se a mensagem já autoriza a execução (`implemente`, `corrija`, `bora`) e nenhuma dúvida muda a entrega, a interpretação fica registrada e a implementação segue. A dúvida vem como pergunta com opções, a recomendada primeiro. | Seção "Pedido" do [modelo](pedidos/_modelo.md) |
-| 2. Especificação (só G) | Telas e estados (vazio, texto longo, erro, carregando), dados e migração, rotas, impacto nos builds Worlds e SoloQ, termos novos. | Fabiano aprova. Bruno aprova o que tocar admin, login ou dados salvos. | Seção "Especificação" e ADR, se houver decisão |
+| 2. Especificação (só G) | Telas e estados (vazio, texto longo, erro, carregando), dados e migração, rotas, impacto nos builds Worlds e SoloQ, termos novos. | Fabiano aprova. O Bruno só age no que exigir a conta dele ou as regras do Firestore. | Seção "Especificação" e ADR, se houver decisão |
 | 3. Plano | No modo de planejamento: arquivos por camada FSD, testes a criar ou ajustar, riscos. Em G, ondas que possam ser publicadas uma de cada vez. | Aprovação do plano em G. Em M, o plano é mostrado e a implementação segue. | Seção "Plano" |
 | 4. Implementação | Código conforme as [convenções](convencoes.md) e testes junto do código. Os ganchos rodam o Biome no arquivo editado e o `npm run check` no fim do turno. | — | Diff |
 | 5. Verificação | `npm run verify`, testes Playwright da área e conferência no navegador desktop pelo fluxo real. Em M e G, o agente [change-verifier](agentes/change-verifier.md) confere o diff contra o pedido em contexto novo. | Tudo passa ou a falha é anterior e está registrada. | Resumo da verificação |
