@@ -2,3 +2,5 @@
 # Ative uma vez por clone: git config blame.ignoreRevsFile .git-blame-ignore-revs
 # O GitHub lê este arquivo sozinho.
 
+# Reformatação com o Biome (Onda 1)
+0367b22a29394c0483eff472a727360681f95215
