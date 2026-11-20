@@ -14,25 +14,21 @@ statSync(join(distSoloq, "soloq.html"))
 cpSync(join(distSoloq, "assets"), join(dist, "assets"), { recursive: true })
 cpSync(join(distSoloq, "soloq.html"), join(dist, "soloq.html"))
 
-// Sem argumento, grava na raiz do repositório (fonte "Deploy from a branch" do Pages). Com `--out=_site`, grava só
-// nessa pasta, que o workflow deploy.yml publica como artefato (docs/decisoes/0003-publicacao-por-artefato.md).
-// Só `--out=_site` é aceito: a pasta é apagada antes da cópia, e outro valor poderia apagar o repositório.
+// Grava só em `_site/`, a pasta que o workflow deploy.yml publica como artefato
+// (docs/decisoes/0003-publicacao-por-artefato.md). `--out=_site` continua aceito; outro valor é recusado,
+// porque a pasta é apagada antes da cópia.
 const outArgument = process.argv.slice(2).find(argument => argument.startsWith("--out"))
 if (outArgument !== undefined && outArgument !== "--out=_site") {
   console.error(`Argumento não aceito: "${outArgument}". Use --out=_site ou nenhum argumento.`)
   process.exit(1)
 }
-const target = outArgument ? join(root, "_site") : root
+const target = join(root, "_site")
 
-// Confere o build antes de substituir qualquer arquivo servido pelo Pages.
+// Confere o build antes de apagar a pasta de saída.
 for (const path of pages) statSync(join(dist, path))
 
-if (outArgument) {
-  rmSync(target, { recursive: true, force: true })
-  mkdirSync(target, { recursive: true })
-} else {
-  rmSync(join(target, "assets"), { recursive: true, force: true })
-}
+rmSync(target, { recursive: true, force: true })
+mkdirSync(target, { recursive: true })
 for (const path of pages) {
   const source = join(dist, path)
   const destination = join(target, path)

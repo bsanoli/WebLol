@@ -62,7 +62,7 @@ Os scripts clássicos `public/assets/shell.js` e `public/assets/sync.js` ficam f
 
 ## 5. Fluxo de trabalho
 
-- **Publicação:** o Pages serve a raiz da `main`, e cada publicação versiona o build (632 arquivos em `assets/` e os 4 HTMLs). O `soloq.yml` diário faz `git reset --hard` e tenta o push até três vezes. Proposta em [ADR 0003](decisoes/0003-publicacao-por-artefato.md).
+- **Publicação:** o Pages servia a raiz da `main`, e cada publicação versionava o build (632 arquivos em `assets/` e os 4 HTMLs). O `soloq.yml` diário fazia `git reset --hard` e tentava o push até três vezes. Resolvido na Onda 2b pelo deploy por artefato: [ADR 0003](decisoes/0003-publicacao-por-artefato.md).
 - **Verificação:** na linha de base, nenhum workflow rodava `npm run check` ou testes, e não havia lint, formatação nem teste unitário. Desde a Onda 1, o `ci.yml` roda tudo em cada push.
 - **Revisão:** só 6 merges em 159 commits. Há branches remotas antigas: quatro `claude/project-thread-*` e `codex/revisao-ui`.
 - **Agentes:** na linha de base não havia `.claude/settings.json`, e nenhum gancho rodava depois das edições. Desde a Onda 1, o `PostToolUse` roda o Biome no arquivo editado e o `Stop` roda o Biome e o `npm run check`. A configuração dos agentes fica em três lugares (`docs/agentes/`, `.claude/agents/`, `.codex/agents/`). `node scripts/sincronizar-skills.mjs --check` falhava porque `grill-me` e `grilling` não tinham cópia em `.claude/skills/`. Corrigido na Onda 0.

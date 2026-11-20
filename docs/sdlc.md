@@ -103,7 +103,7 @@ Quando a pessoa corrige uma entrega, a correção diz algo sobre o processo. Se 
 | No commit | Biome nos arquivos staged, com as correções automáticas (Lefthook `pre-commit`) | Ativo desde a Onda 1, instalado pelo `npm install` |
 | No push | `npm run check` (arquitetura, tipos e Oxlint com regras de tipos) e Vitest (Lefthook `pre-push`) | Ativo desde a Onda 1; Oxlint desde a Onda 2 |
 | Em todo push para o GitHub | Biome, `npm run check`, `sincronizar-skills --check`, Knip, Vitest, build, `size-limit` e Playwright com axe (`ci.yml`). O PR mostra o resultado do push da branch | Ativo desde a Onda 1 |
-| Na publicação | Build e deploy | Hoje: arquivos gerados na `main`. Proposta: [ADR 0003](decisoes/0003-publicacao-por-artefato.md). |
+| Na publicação | Build e deploy | Deploy por artefato do GitHub Actions a cada push na `main` ([ADR 0003](decisoes/0003-publicacao-por-artefato.md)). |
 
 ## Sessões em paralelo
 

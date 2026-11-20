@@ -78,13 +78,14 @@ A lista completa de coleções, chaves e rotas está nos [nomes salvos do gloss�
 
 ## Publicação
 
-1. `npm run pages:prepare` roda o build e o `scripts/prepare-pages.mjs`, que copia `dist/` e `dist-soloq/` para a raiz e acrescenta `?v=<hash>` aos ativos de `public/`.
-2. Os HTMLs e a pasta `assets/` da raiz entram no commit da `main`.
-3. O GitHub Pages serve a raiz da `main`.
-4. O workflow `.github/workflows/soloq.yml` roda todo dia: coleta as partidas com o segredo `RIOT_API_KEY`, regenera o site e faz push na `main`.
+1. Todo push na `main` (exceto mudanças só de documentação) dispara o workflow `.github/workflows/deploy.yml`.
+2. O workflow roda `npm run build` e o `scripts/prepare-pages.mjs`, que junta `dist/` e `dist-soloq/` em `_site/` e acrescenta `?v=<hash>` aos ativos de `public/`.
+3. `_site/` é publicado no GitHub Pages como artefato. Nada gerado fica no Git.
+4. O workflow `.github/workflows/soloq.yml` roda todo dia: coleta as partidas com o segredo `RIOT_API_KEY`, commita só `src/data/soloq/` na `main` e chama o `deploy.yml`.
+5. `npm run pages:prepare` faz o mesmo build localmente em `_site/`.
 
-A skill [weblol-publicar](../.agents/skills/weblol-publicar/SKILL.md) descreve o passo a passo. A proposta de publicar por artefato do GitHub Actions, sem os arquivos gerados no Git, está na [ADR 0003](decisoes/0003-publicacao-por-artefato.md).
+A skill [weblol-publicar](../.agents/skills/weblol-publicar/SKILL.md) descreve o passo a passo. A decisão está na [ADR 0003](decisoes/0003-publicacao-por-artefato.md).
 
 ## Testes
 
-Os testes Playwright ficam em `tests/` e sobem o Vite na porta 5180 com Chrome desktop. Rode `npm test` para a suíte inteira ou `npx playwright test tests/<arquivo>.spec.ts` para uma área. Ainda não há testes unitários, lint nem formatador. A proposta está na [ADR 0004](decisoes/0004-ferramentas-de-qualidade.md).
+Os testes Playwright ficam em `tests/` e sobem o Vite na porta 5180 com Chrome desktop. Rode `npm test` para a suíte inteira ou `npx playwright test tests/<arquivo>.spec.ts` para uma área. Os testes unitários rodam com `npm run test:unit` (Vitest), e `npm run verify` junta Biome, `check`, Knip e os unitários. As escolhas estão na [ADR 0004](decisoes/0004-ferramentas-de-qualidade.md).
