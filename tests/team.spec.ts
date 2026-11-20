@@ -524,7 +524,7 @@ test("Táticas: visão Lane só com ícones, com as mesmas ações e lembrada ao
   expect(moved.comps.find((c: { id: string }) => c.id === "nossa").lanes.jg).toEqual([])
   expect(moved.comps.find((c: { id: string }) => c.id === "rival").lanes.jg).toEqual(["Vi"])
 
-  // Nos dois lados a ordem corre da esquerda para a direita: soltar à esquerda de um ícone coloca antes dele.
+  // A coluna da esquerda (vermelho) é espelhada: soltar à esquerda de um ícone coloca depois dele na ordem.
   const camille = board.locator('.tx-pos-col.red .tx-pos-slot.top [data-n="Camille"]')
   const box = (await camille.boundingBox())!
   await board
@@ -535,8 +535,8 @@ test("Táticas: visão Lane só com ícones, com as mesmas ações e lembrada ao
   expect(await left("red")).toBeLessThan(await left("blue"))
   expect((await read()).comps.find((c: { id: string }) => c.id === "rival").lanes.top).toEqual([
     "Fiora",
-    "Jax",
     "Camille",
+    "Jax",
   ])
 
   // A escolha da visão fica salva.
