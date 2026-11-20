@@ -55,6 +55,12 @@ function convertComposition(raw: PlainObject, direction: "read" | "write"): Plai
   return isReading ? readLegacyBans(comp) : comp
 }
 
+/** Diz se o estado salvo ainda tem alguma composição com `lanes.ban` (formato antigo, ADR 0007). */
+export const hasLegacyBans = (state: unknown) =>
+  isPlainObject(state) &&
+  Array.isArray(state.comps) &&
+  state.comps.some(comp => isPlainObject(comp) && isPlainObject(comp.lanes) && "ban" in comp.lanes)
+
 export const compositionFromSaved = (raw: unknown) =>
   (isPlainObject(raw) ? convertComposition(raw, "read") : raw) as Composition
 

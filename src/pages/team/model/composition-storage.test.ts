@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest"
-import { compositionFromSaved, compositionToSaved, teamStateToSaved } from "./composition-storage"
+import { compositionFromSaved, compositionToSaved, hasLegacyBans, teamStateToSaved } from "./composition-storage"
 
 const saved = (value: unknown) => JSON.stringify(value)
 
@@ -75,6 +75,19 @@ describe("bans nos dois formatos salvos", () => {
     expect(back.lanes).toEqual({ top: ["Ornn"] })
     expect(back.bans).toEqual(["Zed"])
     expect(Object.keys(back).indexOf("bans")).toBe(Object.keys(back).indexOf("lanes") + 1)
+  })
+})
+
+describe("hasLegacyBans", () => {
+  it("só acusa estado com alguma composição em lanes.ban", () => {
+    expect(hasLegacyBans({ comps: [oursSaved] })).toBe(true)
+    expect(hasLegacyBans({ comps: [{ id: "n", lanes: { top: [] }, bans: [] }, oursSaved] })).toBe(true)
+    expect(hasLegacyBans({ comps: [{ id: "n", lanes: { top: [] }, bans: [] }] })).toBe(false)
+  })
+
+  it("ignora dados que não são um estado salvo", () => {
+    for (const value of [null, "texto", [], {}, { comps: "x" }, { comps: [null, 1, { lanes: [] }] }])
+      expect(hasLegacyBans(value)).toBe(false)
   })
 })
 

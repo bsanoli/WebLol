@@ -20,7 +20,8 @@
 - Melhora: nenhuma versão perde bans; o formato novo pode ser publicado com segurança na etapa 2.
 - Piora: composições antigas só mudam de formato quando são salvas de novo, então os dois formatos convivem por um tempo.
 - Risco aceito: quem ainda usa uma versão anterior à etapa 1 (aba aberta antes do deploy, cache) pode não enxergar os bans de uma composição salva no formato novo; recarregar a página resolve.
-- Pendente: remover a leitura de `lanes.ban` só quando não houver mais dados nele (decisão futura).
+- Regravação ao abrir: se o estado do navegador (`lol-comps-time-v1`) tem alguma composição com `lanes.ban`, a Área do time o regrava uma vez no formato novo, sem esperar uma edição. Dados no Firestore e arquivos de backup antigos não são alterados por isso.
+- Decisão: a leitura de `lanes.ban` fica, porque backups exportados antes da migração continuam no formato antigo e precisam abrir. Só sai se aceitarmos que esses backups deixem de abrir.
 
 ## Alternativas consideradas
 
