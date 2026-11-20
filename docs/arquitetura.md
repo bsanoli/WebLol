@@ -61,7 +61,7 @@ Os iframes são da mesma origem, então a comunicação acontece por três camin
 | `entities` | `ability`, `account`, `champion`, `match`, `tactical-play` |
 | `shared` | `config` (dataset, tema), `lib` (motion, analytics-dom, utils), `ui` (botões, Arc UI, ReUI) |
 
-O `scripts/check-architecture.mjs` (dentro do `npm run check`) confere a direção dos imports, o uso das APIs públicas e avisa quando um arquivo passa de 300 linhas não vazias.
+O `scripts/check-architecture.mjs` (dentro do `npm run check`) confere a direção dos imports, o uso das APIs públicas e falha quando um arquivo novo passa de 299 linhas não vazias ou usa `@ts-nocheck`. Os arquivos antigos ficam nas listas `legacyLongFiles` e `legacyNoCheckFiles` do script e só podem encolher.
 
 ## Dados
 

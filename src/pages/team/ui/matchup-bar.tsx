@@ -13,11 +13,11 @@ export type MatchupBarProps = {
   ours: MatchupItem[]
   enemies: MatchupItem[]
   current: MatchupItem
-  rival: MatchupItem | null
+  enemy: MatchupItem | null
   side: DraftSide
-  rivalOpgg: string
+  enemyOpgg: string
   onSelectOurs: (id: string) => void
-  onSelectRival: (id: string | null) => void
+  onSelectEnemy: (id: string | null) => void
   onSide: (side: DraftSide) => void
   onNew: (owner: CompOwner) => void
   onMove: (id: string) => void
@@ -139,11 +139,7 @@ function CompPicker({
   }
   return (
     <Popover open={open} onOpenChange={setOpen}>
-      <PopoverTrigger
-        className={`matchup-pick ${kind}`}
-        data-matchup={kind}
-        aria-label={`${label}: ${selected ? selected.title : (noneLabel ?? "nenhuma")}. Trocar`}
-      >
+      <PopoverTrigger className={`matchup-pick ${kind}`} data-matchup={kind}>
         <span className="matchup-pick-text">
           <small>
             <span className={`side-dot ${side}`} aria-hidden="true" />
@@ -152,6 +148,7 @@ function CompPicker({
           <b title={selected?.title}>{selected ? selected.title : noneLabel}</b>
         </span>
         {selected && <Preview html={selected.preview} />}
+        <span className="sr-only">Trocar</span>
         <ChevronDown className="matchup-chevron" aria-hidden="true" />
       </PopoverTrigger>
       <PopoverContent
@@ -221,7 +218,7 @@ const compActions = (item: MatchupItem, props: MatchupBarProps, enemy: boolean) 
 ]
 
 function MatchupBar(props: MatchupBarProps) {
-  const { ours, enemies, current, rival, side, rivalOpgg } = props
+  const { ours, enemies, current, enemy, side, enemyOpgg } = props
   const [renaming, setRenaming] = useState<"ours" | "rival" | null>(null)
   const other: DraftSide = side === "blue" ? "red" : "blue"
   const oursBlock = (
@@ -269,13 +266,13 @@ function MatchupBar(props: MatchupBarProps) {
   )
   const rivalBlock = (
     <div key="rival" className={`matchup-team rival ${other}`}>
-      {renaming === "rival" && rival ? (
+      {renaming === "rival" && enemy ? (
         <InlineName
           kind="rival"
           label={`Lado ${other === "blue" ? "azul" : "vermelho"} · Adversária`}
           side={other}
-          item={rival}
-          onSave={name => props.onRenameTo(rival.id, name)}
+          item={enemy}
+          onSave={name => props.onRenameTo(enemy.id, name)}
           onClose={() => setRenaming(null)}
         />
       ) : (
@@ -284,14 +281,14 @@ function MatchupBar(props: MatchupBarProps) {
           label={`Lado ${other === "blue" ? "azul" : "vermelho"} · Adversária`}
           side={other}
           items={enemies}
-          selected={rival}
+          selected={enemy}
           noneLabel="Sem adversária"
           newLabel="Nova adversária"
-          onSelect={props.onSelectRival}
+          onSelect={props.onSelectEnemy}
           onNew={() => props.onNew("enemy")}
         />
       )}
-      {rival && renaming !== "rival" && (
+      {enemy && renaming !== "rival" && (
         <button
           type="button"
           className="matchup-rename"
@@ -299,30 +296,30 @@ function MatchupBar(props: MatchupBarProps) {
           data-slot="button"
           data-variant="ghost"
           data-size="sm"
-          aria-label={`Editar o nome de ${rival.name}`}
+          aria-label={`Editar o nome de ${enemy.name}`}
           title="Editar o nome"
           onClick={() => setRenaming("rival")}
         >
           <Icon name="edit" />
         </button>
       )}
-      {rival && (
+      {enemy && (
         <span className="composition-menu">
-          <ActionMenu label={`Ações de ${rival.name}`} actions={compActions(rival, props, true)} />
+          <ActionMenu label={`Ações de ${enemy.name}`} actions={compActions(enemy, props, true)} />
         </span>
       )}
-      {rival && rivalOpgg && (
+      {enemy && enemyOpgg && (
         <>
           <a
             className="matchup-opgg"
             data-slot="button"
             data-variant="ghost"
             data-size="sm"
-            href={rivalOpgg}
+            href={enemyOpgg}
             target="_blank"
             rel="noopener"
-            title={rivalOpgg}
-            aria-label={`Abrir o OP.GG de ${rival.name}`}
+            title={enemyOpgg}
+            aria-label={`Abrir o OP.GG de ${enemy.name}`}
           >
             <Icon name="link" /> OP.GG
           </a>
@@ -333,15 +330,15 @@ function MatchupBar(props: MatchupBarProps) {
             data-slot="button"
             data-variant="ghost"
             data-size="sm"
-            aria-label={`Editar o link do OP.GG de ${rival.name}`}
+            aria-label={`Editar o link do OP.GG de ${enemy.name}`}
             title="Editar o link do OP.GG"
-            onClick={() => props.onOpgg(rival.id)}
+            onClick={() => props.onOpgg(enemy.id)}
           >
             <Icon name="edit" />
           </button>
         </>
       )}
-      {rival && !rivalOpgg && (
+      {enemy && !enemyOpgg && (
         <button
           type="button"
           className="matchup-opgg"
@@ -349,8 +346,8 @@ function MatchupBar(props: MatchupBarProps) {
           data-slot="button"
           data-variant="ghost"
           data-size="sm"
-          aria-label={`Adicionar o link do OP.GG de ${rival.name}`}
-          onClick={() => props.onOpgg(rival.id)}
+          aria-label={`Adicionar o link do OP.GG de ${enemy.name}`}
+          onClick={() => props.onOpgg(enemy.id)}
         >
           <Icon name="plus" /> OP.GG
         </button>

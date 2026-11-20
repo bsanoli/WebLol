@@ -25,9 +25,9 @@ test("Abre uma composição salva no formato anterior em modo Draft", async ({ p
   await page.evaluate(() => window.applyWebLolRoute(["composicoes", "comp-antiga"], new URLSearchParams("modo=draft")))
   const team = page
   const matchup = team.getByRole("group", { name: "Confronto do draft" })
-  await expect(matchup.getByRole("button", { name: /Nossa: Composição anterior/ })).toBeVisible()
+  await expect(matchup.getByRole("button", { name: /Nossa\s+Composição anterior/ })).toBeVisible()
   await expect(matchup.locator(".matchup-pick.ours .mini .av")).toHaveText(["O", "A"])
-  await expect(team.getByRole("button", { name: /Top.*Ornn/i }).first()).toBeVisible()
+  await expect(team.getByRole("button", { name: /Ornn.*Top/i }).first()).toBeVisible()
   await expect(team.getByRole("tab", { name: "Opções por posição" })).toHaveCount(0)
   await expect(team.locator(".dz-slot #champ-picker")).toBeVisible()
 
@@ -38,7 +38,7 @@ test("Abre uma composição salva no formato anterior em modo Draft", async ({ p
   await matchup.getByRole("button", { name: /Editar o nome de Adversária/ }).click()
   await matchup.getByRole("textbox").fill("Time rival")
   await matchup.getByRole("textbox").press("Enter")
-  await expect(matchup.getByRole("button", { name: /Adversária: Time rival/ })).toBeVisible()
+  await expect(matchup.getByRole("button", { name: /Adversária\s+Time rival/ })).toBeVisible()
   await expect(team.locator(".tm.rival.mine")).toBeVisible()
   const state = await page.evaluate(() => JSON.parse(localStorage.getItem("lol-comps-time-v1")!))
   const rival = state.comps.find((c: { name: string }) => c.name === "Time rival")

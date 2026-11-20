@@ -52,9 +52,6 @@ const screens: Screen[] = [
     route: "/#/time/composicoes",
     frame: "#v-camp",
     ready: frame => frame.getByRole("group", { name: "Confronto do draft" }),
-    // WCAG 2.5.3 (Nome no rótulo): os picks e os seletores do confronto têm `aria-label` com a posição ou o lado
-    // no meio, e o texto visível ("First Pick Orianna", iniciais da prévia) não aparece na mesma ordem.
-    known: { "label-content-name-mismatch": 180 },
   },
   {
     name: "Composições · Táticas",
@@ -62,7 +59,6 @@ const screens: Screen[] = [
     frame: "#v-camp",
     open: frame => frame.getByRole("tab", { name: "Táticas" }).click(),
     ready: frame => frame.locator("#tx-title"),
-    known: { "label-content-name-mismatch": 5 },
   },
   {
     name: "Mapa tático",
