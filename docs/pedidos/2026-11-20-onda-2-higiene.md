@@ -20,7 +20,7 @@
 - [ ] CI verde no GitHub com os dois passos novos.
 - [ ] Um bundle acima do orçamento falha o CI (prova a fazer num push de teste).
 
-**Fora do escopo (2b, depende do Bruno):** deploy por artefato, tirar HTMLs e `assets/` da `main`, apagar branches remotas, `.ua/knowledge-graph.json` e `src/components/examples/`. Corrigir os 14 exports e tipos sem uso que o Knip lista como aviso.
+**Fora do escopo (2b):** deploy por artefato, tirar HTMLs e `assets/` da `main`, apagar branches remotas, `.ua/knowledge-graph.json` e `src/components/examples/`. Corrigir os 14 exports e tipos sem uso que o Knip lista como aviso.
 
 **Suposições:**
 
