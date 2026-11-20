@@ -1,5 +1,12 @@
 [
   {
+    "version": "1.71",
+    "date": "2026-11-20",
+    "changes": [
+      "Táticas: alternador Draft | Lane acima do quadro. A visão Lane mostra só os ícones dos campeões, uma linha por posição com os dois lados frente a frente, e mantém clicar, trocar alternativas e arrastar. O site lembra a última visão."
+    ]
+  },
+  {
     "version": "1.70",
     "date": "2026-11-20",
     "changes": [

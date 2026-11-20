@@ -177,6 +177,16 @@ export function mountMatchups() {
       handleTacticDrawerToggle(drawerToggle)
       return
     }
+    const boardView = eventTarget(e).closest<HTMLElement>("[data-tactic-board]")
+    if (boardView) {
+      const next = boardView.dataset.tacticBoard === "positions" ? "positions" : "draft"
+      if (next === (S.tacticsBoard ?? "draft")) return
+      S.tacticsBoard = next
+      save()
+      renderEditor()
+      $(`#editor [data-tactic-board="${next}"]`)?.focus({ preventScroll: true })
+      return
+    }
     if (eventTarget(e).closest<HTMLElement>("[data-tactic-opgg]")) {
       const link = opggOf(opggTarget())
       if (link) window.open(link, "_blank", "noopener")

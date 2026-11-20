@@ -12,13 +12,13 @@ import type { DraftLane } from "../model/local-state"
 type Drag = { n: string; from: ChampionSlot | null; comp: string | null; el: HTMLElement }
 let drag: Drag | null = null
 document.addEventListener("dragstart", e => {
-  const ch = eventTarget(e).closest<HTMLElement>(".chip,.ch,.dm,.pk-target[data-n]")
+  const ch = eventTarget(e).closest<HTMLElement>(".chip,.ch,.dm,.pk-target[data-n],.tx-pos-ic[data-n]")
   if (!ch) return
   drag = {
     n: ch.dataset.n ?? "",
     from: (ch.dataset.from || null) as ChampionSlot | null,
     comp: ch.closest<HTMLElement>("[data-comp-id]")?.dataset.compId || null,
-    el: ch.closest<HTMLElement>(".pk,.bsq") || ch,
+    el: ch.closest<HTMLElement>(".pk,.bsq,.tx-pos-ic") || ch,
   }
   e.dataTransfer?.setData("text/plain", ch.dataset.n ?? "")
   if (e.dataTransfer) e.dataTransfer.effectAllowed = "move"
@@ -68,12 +68,14 @@ $("#editor").addEventListener("drop", e => {
     if (source !== c) touch(source)
   }
   const arr = championsOf(c, to).filter(x => x !== n)
-  const over = eventTarget(e).closest<HTMLElement>(".chip,.dm")
+  const over = eventTarget(e).closest<HTMLElement>(".chip,.dm,.tx-pos-ic")
   let idx = ln.dataset.bi != null ? Math.min(+ln.dataset.bi, arr.length) : arr.length
   if (over && over.dataset.n !== n && ln.dataset.bi == null) {
     idx = arr.indexOf(over.dataset.n ?? "")
     const r = over.getBoundingClientRect()
-    if (e.clientX > r.left + r.width / 2) idx++
+    // No lado vermelho da visão Lane a linha é espelhada: a ordem corre da direita para a esquerda.
+    const mirrored = !!over.closest(".tx-pos-col.red")
+    if (mirrored ? e.clientX < r.left + r.width / 2 : e.clientX > r.left + r.width / 2) idx++
   }
   arr.splice(idx, 0, n)
   setChampions(c, to, arr)

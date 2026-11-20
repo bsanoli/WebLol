@@ -77,6 +77,8 @@ export type TeamState = {
   tacticsMatchup?: string | null
   tacticsGeneral?: boolean
   tacticsDrawer?: boolean
+  /** Visão do quadro de Táticas: `draft` (cards com arte) ou `positions` (visão Lane, só ícones). */
+  tacticsBoard?: "draft" | "positions"
   /** Aba do Conhecimento aberta (`wave` ou `obj`). */
   kTab?: string
   curPlay?: string

@@ -75,6 +75,7 @@ export function renderEditor() {
         compositions: S.comps,
         general: !!S.tacticsGeneral,
         drawer: S.tacticsDrawer !== false,
+        boardView: S.tacticsBoard === "positions" ? "positions" : "draft",
         hasTactic: id => hasTactic(S, id),
         matchupId: S.tacticsMatchup,
         slots: SLOT_INFO,

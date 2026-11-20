@@ -12,6 +12,7 @@ import type { SlotInfo } from "../model/champion-slots"
 import { enemiesOf, isEnemy, oppositeSide, oursOf, enemyOrder, ownerOf } from "../model/composition-side"
 import { opggOf } from "../model/tactics"
 import { draftTeamHTML } from "./draft-board"
+import { positionBoardHTML, type PositionSide } from "./tactic-position-board"
 import { allMatchups, findMatchup, matchupKey, matchupTitle, type MatchupEntry } from "../model/matchups"
 
 type ListKey = "ours" | "enemy" | "matchup"
@@ -55,29 +56,60 @@ function emptyColumn(side: DraftSide, hint: string) {
     <h3><span class="side-dot ${side}" aria-hidden="true"></span>${DRAFT_SIDE[side]}</h3><p class="tx-col-empty">${hint}</p></div>`
 }
 
-/**
- * Quadro editável da gaveta, sempre com os dois lados; cada lado aceita uma composição arrastada da lista.
- * Com confronto, cada comp fica no lado dela. Com uma comp só, ela ocupa o lado salvo e o outro espera o par.
- */
-function tacticBoardHTML(c: Composition, general: boolean, matchup: MatchupEntry | null, markup: Markup) {
-  const cols: Partial<Record<DraftSide, string>> = {}
+/** Visão do quadro de Táticas: Draft (cards com a arte) ou Lane (só ícones, uma linha por posição). */
+export type TacticBoardView = "draft" | "positions"
+
+/** Quem ocupa cada lado: com confronto, cada comp no seu lado; com uma comp só, ela fica no lado salvo e o outro espera o par. */
+function boardSides(c: Composition, general: boolean, matchup: MatchupEntry | null) {
+  const sides: Record<DraftSide, PositionSide> = { blue: null, red: null }
   let hint = "Arraste uma composição da lista para este lado."
   if (matchup) {
     const { ours, enemy } = matchup,
-      side = draftOf(ours).side,
-      other = oppositeSide(side)
-    cols[side] = boardColumn(side, "us", ours, draftOf(ours).order[side], "Nossa", markup)
-    cols[other] = boardColumn(other, "rival", enemy, enemyOrder(ours, enemy), "Adversária", markup)
+      side = draftOf(ours).side
+    sides[side] = { owner: "us", source: ours, who: "Nossa" }
+    sides[oppositeSide(side)] = { owner: "rival", source: enemy, who: "Adversária" }
   } else if (!general) {
-    const side = draftOf(c).side,
-      enemy = isEnemy(c)
-    cols[side] = boardColumn(side, "us", c, draftOf(c).order[side], enemy ? "Adversária" : "Nossa", markup)
+    const enemy = isEnemy(c)
+    sides[draftOf(c).side] = { owner: "us", source: c, who: enemy ? "Adversária" : "Nossa" }
     hint = enemy
       ? "Arraste uma composição nossa para este lado e monte o confronto."
       : "Arraste uma adversária para este lado e monte o confronto."
   }
-  const col = (side: DraftSide) => cols[side] ?? emptyColumn(side, hint)
-  return `<div class="tx-draft-sides">${col("blue")}${col("red")}</div>${
+  return { sides, hint }
+}
+
+/** Ordem dos picks de cada lado no desenho da Ordem do draft. */
+function pickOrder(side: DraftSide, entry: NonNullable<PositionSide>, matchup: MatchupEntry | null) {
+  return matchup && entry.owner === "rival" ? enemyOrder(matchup.ours, entry.source) : draftOf(entry.source).order[side]
+}
+
+/** Alternador Draft | Lane, acima do quadro. */
+function boardSwitchHTML(view: TacticBoardView) {
+  const btn = (key: TacticBoardView, label: string, title: string) =>
+    `<button type="button" class="tx-scope-btn" data-tactic-board="${key}" aria-pressed="${view === key}" title="${title}">${label}</button>`
+  return `<div class="tx-board-switch" role="group" aria-label="Visão do quadro">${btn("draft", "Draft", "Cards com a arte dos campeões, na ordem do draft")}${btn("positions", "Lane", "Só os ícones, uma linha por posição")}</div>`
+}
+
+/** Quadro editável da gaveta, sempre com os dois lados; cada lado aceita uma composição arrastada da lista. */
+function tacticBoardHTML(
+  c: Composition,
+  general: boolean,
+  matchup: MatchupEntry | null,
+  view: TacticBoardView,
+  markup: Markup,
+) {
+  const { sides, hint } = boardSides(c, general, matchup)
+  const col = (side: DraftSide) => {
+    const entry = sides[side]
+    return entry
+      ? boardColumn(side, entry.owner, entry.source, pickOrder(side, entry, matchup), entry.who, markup)
+      : emptyColumn(side, hint)
+  }
+  const board =
+    view === "positions"
+      ? positionBoardHTML(sides, hint, markup)
+      : `<div class="tx-draft-sides">${col("blue")}${col("red")}</div>`
+  return `${boardSwitchHTML(view)}${board}${
     general
       ? ""
       : `
@@ -114,11 +146,24 @@ export type TacticsOptions = Markup & {
   hasTactic: (id: string | null) => boolean
   /** Confronto aberto (id), quando a tática em edição é a dele. */
   matchupId?: string | null
+  /** Visão do quadro; Draft quando não há escolha salva. */
+  boardView?: TacticBoardView
 }
 
 export function tacticsHTML(
   c: Composition,
-  { compositions, general, hasTactic, matchupId = null, drawer = true, slots, img, esc, pickArt }: TacticsOptions,
+  {
+    compositions,
+    general,
+    hasTactic,
+    matchupId = null,
+    drawer = true,
+    boardView = "draft",
+    slots,
+    img,
+    esc,
+    pickArt,
+  }: TacticsOptions,
 ) {
   const mark = (has: boolean) =>
     has ? `<span class="tx-has" title="Tem anotação de tática">${iconMarkup("edit")}</span>` : ""
@@ -163,7 +208,7 @@ export function tacticsHTML(
       : enemy
         ? "Como jogar contra esta composição: ameaças, picks a negar e como vencer as lutas."
         : "Como jogar com esta composição: rotações, objetivos, lutas e condição de vitória."
-  const body = tacticBoardHTML(c, general, active, { slots, img, esc, pickArt })
+  const body = tacticBoardHTML(c, general, active, boardView, { slots, img, esc, pickArt })
   const drawerToggle = `<button type="button" data-slot="button" data-variant="outline" data-size="sm" class="tx-drawer-toggle" data-tactic-drawer
     aria-expanded="${drawer}" aria-controls="tx-aside" title="${drawer ? "Esconder a lista de composições e o draft" : "Mostrar a lista de composições e o draft"}">${iconMarkup("next")}<span>Composições e draft</span></button>`
   return `<div class="tx${drawer ? "" : " drawer-closed"}">

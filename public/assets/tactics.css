@@ -561,7 +561,8 @@
 .tx-team-tools[inert] {
   visibility: hidden;
 }
-.tx-scope {
+.tx-scope,
+.tx-board-switch {
   display: inline-flex;
   flex: none;
   gap: 2px;
@@ -1643,4 +1644,137 @@
   #v-comps.tactics-view .tx-aside {
     overflow-y: auto;
   }
+}
+
+/* Quadro de Táticas: alternador Draft | Lane e a visão Lane (só ícones, uma linha por posição) */
+.tx-board-switch {
+  margin: 0 0 10px;
+}
+.tx-pos-board {
+  --tx-pos-row: 44px;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  grid-template-rows: auto repeat(6, minmax(var(--tx-pos-row), auto));
+  column-gap: 8px;
+  row-gap: 4px;
+}
+/* Cada coluna usa as linhas do quadro (subgrid): uma linha que quebra cresce nos dois lados e no nome. */
+.tx-pos-col,
+.tx-pos-names {
+  display: grid;
+  grid-row: 1 / -1;
+  grid-template-rows: subgrid;
+  row-gap: 4px;
+}
+.tx-pos-cells {
+  display: contents;
+}
+.tx-pos-col.empty .tx-col-empty {
+  grid-row: 2 / -1;
+  min-height: 0;
+}
+.tx-pos-names-head {
+  padding-top: 6px;
+}
+.tx-pos-name {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 4px;
+  color: var(--lc, var(--mut));
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+}
+.tx-pos-slot {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  align-content: center;
+  gap: 4px;
+  min-width: 0;
+  padding: 4px 6px;
+  cursor: pointer;
+  border-left: 3px solid var(--lc, var(--line));
+  background: color-mix(in srgb, var(--lc, var(--line)) 6%, var(--panel, transparent));
+}
+.tx-pos-col.red .tx-pos-slot {
+  flex-direction: row-reverse;
+  border-left: 0;
+  border-right: 3px solid var(--lc, var(--line));
+}
+.tx-pos-slot:hover {
+  background: color-mix(in srgb, var(--lc, var(--line)) 14%, var(--panel, transparent));
+}
+.tx-pos-slot.drop {
+  outline: 2px dashed var(--wl-accent, var(--gold));
+  outline-offset: -2px;
+}
+#v-comps .tx-pos-ic,
+#v-comps .tx-pos-add {
+  display: inline-grid;
+  place-items: center;
+  flex: none;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  color: var(--mut);
+  cursor: pointer;
+}
+#v-comps .tx-pos-ic .av {
+  display: grid;
+  place-items: center;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  font-size: 10px;
+}
+#v-comps .tx-pos-ic .av img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+#v-comps .tx-pos-ic.main {
+  width: 36px;
+  height: 36px;
+  box-shadow: 0 0 0 2px var(--lc, var(--line));
+}
+#v-comps .tx-pos-ic.alt,
+#v-comps .tx-pos-ic.ban {
+  width: 28px;
+  height: 28px;
+  opacity: 0.85;
+}
+#v-comps .tx-pos-ic.ban {
+  cursor: grab;
+  filter: grayscale(0.6);
+}
+#v-comps .tx-pos-ic:hover {
+  opacity: 1;
+  filter: none;
+  transform: translateY(-1px);
+  box-shadow: 0 0 0 2px var(--txt);
+}
+#v-comps .tx-pos-add {
+  width: 28px;
+  height: 28px;
+  border: 1px dashed var(--line);
+}
+#v-comps .tx-pos-add .icon {
+  width: 14px;
+  height: 14px;
+}
+#v-comps .tx-pos-add:hover {
+  border-color: var(--txt);
+  color: var(--txt);
+}
+#v-comps .tx-pos-ic:focus-visible,
+#v-comps .tx-pos-add:focus-visible {
+  outline: 2px solid var(--txt);
+  outline-offset: 2px;
+}
+#v-comps .tx-pos-ic.dragging {
+  opacity: 0.35;
 }

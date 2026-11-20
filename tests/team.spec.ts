@@ -481,6 +481,67 @@ test("Táticas: monta picks na gaveta e arrasta uma adversária para criar o con
   expect(state.comps.find((c: { id: string }) => c.id === "nossa").matchups).toHaveLength(1)
 })
 
+test("Táticas: visão Lane só com ícones, com as mesmas ações e lembrada ao recarregar", async ({ page }) => {
+  await page.setViewportSize({ width: 1440, height: 1080 })
+  await page.addInitScript(() => {
+    if (localStorage.getItem("lol-comps-time-v1")) return
+    const lanes = () => ({ top: [], jg: [], mid: [], adc: [], sup: [] })
+    localStorage.setItem(
+      "lol-comps-time-v1",
+      JSON.stringify({
+        cur: "nossa",
+        view: "tactics",
+        comps: [
+          { id: "nossa", name: "Nossa base", team: "mine", lanes: { ...lanes(), top: ["Ornn", "Gnar"], jg: ["Vi"] } },
+          { id: "rival", name: "Time rival", team: "enemy", lanes: { ...lanes(), top: ["Jax", "Fiora", "Camille"] } },
+        ],
+      }),
+    )
+  })
+  await page.goto("/camp.html")
+  await page.evaluate(() => window.applyWebLolRoute(["composicoes", "nossa"], new URLSearchParams("modo=taticas")))
+  const board = page.locator(".tx-draft")
+  await page.getByRole("tab", { name: /Adversárias/ }).click()
+  await page.locator('[data-tactic-comp="rival"]').dragTo(board.locator("[data-drop-side=red]"))
+  await expect(page.locator("#tx-title")).toContainText("Nossa base x Time rival")
+
+  // O alternador fica acima do quadro; Lane troca os cards com arte por linhas de ícones.
+  await board.getByRole("button", { name: "Lane" }).click()
+  await expect(board.getByRole("button", { name: "Lane" })).toHaveAttribute("aria-pressed", "true")
+  await expect(board.locator(".pk")).toHaveCount(0)
+  await expect(board.locator(".tx-pos-slot")).toHaveCount(12)
+  const read = () => page.evaluate(() => JSON.parse(localStorage.getItem("lol-comps-time-v1")!))
+
+  // Clicar numa alternativa a torna principal.
+  await board.locator('.tx-pos-col.blue .tx-pos-slot.top [data-priority="Gnar"]').click()
+  expect((await read()).comps.find((c: { id: string }) => c.id === "nossa").lanes.top).toEqual(["Gnar", "Ornn"])
+
+  // Arrastar entre os lados move o campeão para a outra comp.
+  await board
+    .locator('.tx-pos-col.blue .tx-pos-slot.jg [data-n="Vi"]')
+    .dragTo(board.locator(".tx-pos-col.red .tx-pos-slot.jg"))
+  const moved = await read()
+  expect(moved.comps.find((c: { id: string }) => c.id === "nossa").lanes.jg).toEqual([])
+  expect(moved.comps.find((c: { id: string }) => c.id === "rival").lanes.jg).toEqual(["Vi"])
+
+  // No lado vermelho a linha é espelhada: soltar à esquerda de um ícone coloca depois dele na ordem.
+  const camille = board.locator('.tx-pos-col.red .tx-pos-slot.top [data-n="Camille"]')
+  const box = (await camille.boundingBox())!
+  await board
+    .locator('.tx-pos-col.red .tx-pos-slot.top [data-n="Jax"]')
+    .dragTo(camille, { targetPosition: { x: 3, y: box.height / 2 } })
+  expect((await read()).comps.find((c: { id: string }) => c.id === "rival").lanes.top).toEqual([
+    "Fiora",
+    "Camille",
+    "Jax",
+  ])
+
+  // A escolha da visão fica salva.
+  await page.reload()
+  await page.evaluate(() => window.applyWebLolRoute(["composicoes", "nossa"], new URLSearchParams("modo=taticas")))
+  await expect(page.locator(".tx-draft").getByRole("button", { name: "Lane" })).toHaveAttribute("aria-pressed", "true")
+})
+
 test("Ordem do draft: arrastar campeões entre cards, criar a adversária e remover soltando fora", async ({ page }) => {
   await page.addInitScript(() => {
     localStorage.setItem(
