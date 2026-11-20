@@ -1,7 +1,7 @@
 // @ts-nocheck -- Integração legada com o DOM e dados locais.
 
 import { iconMarkup, laneIconMarkup } from "@/shared/ui/icon"
-import DATA from "@dataset/summary"
+import type DATA from "@dataset/summary"
 import DRAFTS from "@dataset/drafts"
 
 import { ico } from "@/entities/champion"

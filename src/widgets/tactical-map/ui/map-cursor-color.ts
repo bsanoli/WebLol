@@ -1,3 +1,4 @@
+import { STORAGE_KEYS } from "@/shared/config/storage-keys"
 import moveCursor from "./cursors/move.svg?raw"
 import openHandCursor from "./cursors/hand.svg?raw"
 import closedHandCursor from "./cursors/hand-closed.svg?raw"
@@ -14,8 +15,8 @@ const shapes = [
   { property: "--map-cursor-hand-closed", svg: closedHandCursor, hotspot: [12, 13], fallback: "grabbing" },
 ]
 const artworkSize = 24
-const colorKey = "weblol-map-cursor-color"
-const sizeKey = "weblol-map-cursor-size"
+const colorKey = STORAGE_KEYS.mapCursorColor
+const sizeKey = STORAGE_KEYS.mapCursorSize
 
 export function mountMapCursorColor(layout: HTMLElement) {
   const palette = layout.querySelector<HTMLElement>("#map-cursor-colors")!

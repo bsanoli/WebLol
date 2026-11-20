@@ -5,3 +5,8 @@ test-results/
 playwright-report/
 /public/assets/icons.svg
 __pycache__/
+
+# Chaves e segredos locais
+.riot-key
+.env
+.env.*

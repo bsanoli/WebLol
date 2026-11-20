@@ -12,6 +12,7 @@ import {
   mountSectionTabs,
   mountToolGroup,
 } from "./team-controls"
+import { STORAGE_KEYS } from "@/shared/config/storage-keys"
 import { initializeTheme } from "@/shared/config/theme"
 import { revealContent } from "@/shared/lib/motion"
 
@@ -133,7 +134,7 @@ localSave.addEventListener("keydown", event => {
 $("#clear-local").onclick = async () => {
   let rawBase, base
   try {
-    rawBase = localStorage.getItem("lol-base")
+    rawBase = localStorage.getItem(STORAGE_KEYS.officialBaseline)
     base = JSON.parse(rawBase)
     if (rawBase !== null && (!Array.isArray(base?.data?.comps) || !Array.isArray(base?.data?.plays))) {
       throw new Error("Base inválida")
@@ -159,7 +160,7 @@ $("#clear-local").onclick = async () => {
   if (choice !== "restore") return
 
   try {
-    if (localStorage.getItem("lol-base") !== rawBase) {
+    if (localStorage.getItem(STORAGE_KEYS.officialBaseline) !== rawBase) {
       toast("A versão do time mudou. Abra a restauração novamente.")
       return
     }
@@ -828,7 +829,7 @@ function renderGrid() {
     srt = $("#sort").value
   const where = {}
   for (const l of LANES) for (const n of c.lanes[l.k]) (where[n] = where[n] || []).push(l)
-  let L = CH.filter(
+  const L = CH.filter(
     ch =>
       (!q ||
         ch.n

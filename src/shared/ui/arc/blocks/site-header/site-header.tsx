@@ -517,7 +517,7 @@ export const SiteHeader = forwardRef<HTMLElement, SiteHeaderProps>(function Site
       ref={setRefs}
       className={[styles.header, sticky ? styles.sticky : "", className].filter(Boolean).join(" ")}
       data-variant={variant}
-      data-scrolled={scrolled || menuOpen || !!open ? "" : undefined}
+      data-scrolled={scrolled || menuOpen || open ? "" : undefined}
     >
       <div className={styles.inner} onPointerLeave={onRegionPointerLeave} onPointerEnter={onRegionPointerEnter}>
         <div className={styles.bar}>

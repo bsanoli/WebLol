@@ -36,6 +36,9 @@ jobs:
           SOLOQ_MINUTES: "110"
         run: python3 -u scripts/soloq.py
       - name: Gerar o site e publicar
+        env:
+          # Os ganchos do Lefthook são para quem edita; a CI já verifica a main.
+          LEFTHOOK: "0"
         run: |
           npm ci --no-audit --no-fund
           cp -r src/data/soloq "$RUNNER_TEMP/soloq"

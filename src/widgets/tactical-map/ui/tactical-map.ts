@@ -50,7 +50,7 @@ export function mountTacticalMap({
   const resetMap = $("#map-reset")
   const initialPositions = initialFrame().pos
   const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)")
-  let M = { tool: "move", sel: -1, playing: false }
+  const M = { tool: "move", sel: -1, playing: false }
   const plays = () => ensureTeamPlays(getState(), uid)
   const play = () => plays().find(p => p.id === getState().curPlay)
   const clone = o => JSON.parse(JSON.stringify(o))

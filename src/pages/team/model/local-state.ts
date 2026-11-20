@@ -1,4 +1,6 @@
-export const KEY = "lol-comps-time-v1"
+import { STORAGE_KEYS } from "@/shared/config/storage-keys"
+
+export const KEY = STORAGE_KEYS.teamAreaState
 export const uid = () => Math.random().toString(36).slice(2, 10)
 
 export type DraftSide = "blue" | "red"

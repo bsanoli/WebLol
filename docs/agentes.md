@@ -40,4 +40,6 @@ node scripts/sincronizar-skills.mjs
 node scripts/sincronizar-skills.mjs --check
 ```
 
+No Claude Code, os ganchos de `.claude/settings.json` rodam o Biome no arquivo editado e, no fim do turno, o Biome e o `npm run check`. No Codex, esses ganchos não rodam, e a verificação fica com o Lefthook e o CI ([verificação automática](sdlc.md#verificação-automática)).
+
 Os adaptadores são arquivos comuns, compatíveis com checkouts Windows sem suporte a links simbólicos. Após atualizar o catálogo, abra uma nova sessão na raiz. No Codex, confira as skills no seletor `$`. No Claude Code, confira a importação em `/memory` e as skills no menu `/`. Para conferir um perfil, peça uma revisão curta com o agente pelo nome. As ferramentas disponíveis dependem da sessão.

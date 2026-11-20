@@ -1,3 +1,5 @@
+import { STORAGE_KEYS } from "./storage-keys"
+
 export const palettes = [
   { id: "weblol", label: "WebLol" },
   { id: "black-gold", label: "weblol2" },
@@ -15,7 +17,7 @@ export const palettes = [
 export type PaletteId = (typeof palettes)[number]["id"]
 
 // Keep the stored preference from when themes were only available in Composições.
-const paletteKey = "weblol-composition-palette"
+const paletteKey = STORAGE_KEYS.palette
 const previousPalettes = new Map([
   ["turquoise", "tokyo-night"],
   ["violet", "dracula"],

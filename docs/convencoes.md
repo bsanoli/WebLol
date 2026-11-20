@@ -33,7 +33,7 @@ Os nomes de conceitos vêm do [glossário](glossario.md). A arquitetura segue a 
 - Não introduza `@ts-nocheck`. Ao extrair código de um arquivo com `@ts-nocheck`, o módulo novo sai tipado.
 - Objetos com campos nomeados no lugar de strings ou arrays posicionais (`"Nome|Id|T"`, `[x, y]` sem nome, `{k, n, c}`). Formatos de dataset já publicados se convertem na fronteira.
 - Valide dados externos na fronteira que a mudança tocar: parâmetros da URL, `localStorage`, Firestore e JSON importado. A fronteira devolve o tipo canônico do glossário.
-- Toda chave de armazenamento é declarada em um só lugar do slice que a usa, com o comentário do que guarda. Chaves novas seguem `weblol-<área>-<dado>`. O [glossário](glossario.md#nomes-salvos-contratos) lista as existentes.
+- Toda chave do `localStorage` é declarada em [`src/shared/config/storage-keys.ts`](../src/shared/config/storage-keys.ts), com o formato do valor, e o código usa `STORAGE_KEYS.<nome canônico>`. Chaves novas seguem `weblol-<área>-<dado>`. O teste `storage-keys.test.ts` falha quando uma chave `lol-` ou `weblol-` aparece no código sem estar declarada.
 - Mudar o nome ou o formato de algo salvo exige migração, teste da migração e uma ADR.
 
 ## Estrutura
@@ -55,6 +55,24 @@ Os nomes de conceitos vêm do [glossário](glossario.md). A arquitetura segue a 
 - Use os tokens `--wl-*` e os equivalentes do Tailwind. Cor nova entra como token com papel semântico, não como hexadecimal solto.
 - Espaçamentos e alturas em múltiplos de 8 px, com ajustes de 4 px. Bordas de 1 px são a exceção.
 - Componente React novo usa Tailwind ou CSS module do próprio slice. Os arquivos globais em `public/assets/*.css` só recebem ajustes no que já está lá.
+
+## Verificação automática
+
+O Biome formata e aponta problemas, o Steiger confere as fronteiras do FSD, o Vitest testa as regras de `model/` e o axe confere a acessibilidade nos testes Playwright. Os ganchos do Claude Code, o Lefthook e o CI rodam essas ferramentas sozinhos. A tabela da [verificação automática no SDLC](sdlc.md#verificação-automática) diz quando cada um roda.
+
+| Comando | O que faz |
+| --- | --- |
+| `npm run lint` | Biome: formatação e lint, sem alterar arquivos |
+| `npm run lint:fix` | Biome com as correções automáticas |
+| `npm run check` | Arquitetura (`check-architecture.mjs` e Steiger) e tipos |
+| `npm run test:unit` | Vitest, nos arquivos `*.test.ts` de `src/` |
+| `npm run verify` | As três verificações rápidas acima, em sequência |
+| `npm test` | Playwright, incluindo o axe |
+
+- **Erro barra, aviso é dívida.** Regras com violações anteriores à Onda 1 estão como aviso, listadas na [auditoria](auditoria-codebase.md#avisos-que-ainda-não-barram). Corrija os avisos do trecho que você mudou e não crie avisos novos. Quando uma regra chegar a zero, ela vira erro no `biome.jsonc` ou no `steiger.config.ts`.
+- **Violação de acessibilidade conhecida só diminui.** `KNOWN_VIOLATIONS`, em `tests/accessibility.spec.ts`, lista, por tela, as regras do axe que já falhavam e o máximo de elementos. Não acrescente regras nem aumente números. Quando corrigir uma, baixe o número ou tire a linha.
+- **Regra de teste nova fica junto do código.** O teste unitário de `model/foo.ts` é `model/foo.test.ts`.
+- **Pular um gancho é exceção.** `LEFTHOOK=0 git commit` só em emergência, com o motivo na mensagem do commit. O CI roda as mesmas verificações e vai acusar o problema.
 
 ## Commits
 

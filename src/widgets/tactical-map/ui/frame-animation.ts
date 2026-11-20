@@ -19,7 +19,7 @@ export function animatePieces(
         return
       }
       const t = Math.max(0, Math.min(1, (now - start) / duration))
-      const progress = t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2
+      const progress = t < 0.5 ? 2 * t * t : 1 - (-2 * t + 2) ** 2 / 2
       const pos = Object.fromEntries(
         Object.entries(to.pos).map(([id, end]) => {
           const origin = from.pos[id] ?? end

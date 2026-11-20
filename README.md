@@ -36,6 +36,21 @@ npm run dev
 
 Abra [http://127.0.0.1:5173/](http://127.0.0.1:5173/). Se a porta 5173 estiver ocupada, o Vite informa o conflito.
 
+O `npm ci` também instala os ganchos do Git pelo Lefthook: o commit formata os arquivos staged com o Biome e aplica as correções seguras dele, e o push roda `npm run check` e os testes unitários. Antes de abrir um PR, rode:
+
+```sh
+npm run verify
+npm test
+```
+
+O `verify` roda o Biome, a arquitetura, os tipos e o Vitest. O `npm test` roda o Playwright com o axe e na primeira vez pede `npx playwright install chromium`. O CI roda tudo isso em cada push. As [convenções](docs/convencoes.md#verificação-automática) explicam os comandos e o que fazer com os avisos.
+
+O commit que reformatou o projeto com o Biome está em `.git-blame-ignore-revs`. Para o `git blame` pular esse commit:
+
+```sh
+git config blame.ignoreRevsFile .git-blame-ignore-revs
+```
+
 A interface usa React, TypeScript, Tailwind CSS e componentes shadcn/ui. O Vite compila quatro entradas de `src/` em dois builds: `index.html`, `worlds.html` e `camp.html` no build normal, e `soloq.html` com `--mode soloq`, que usa os dados de `src/data/soloq/`. Os dados do Worlds e o catálogo da Riot ficam em JSON, em `src/data/`. A [arquitetura](docs/arquitetura.md) explica como o shell e os iframes se comunicam.
 
 Use TypeScript para código novo da aplicação. As exceções são `public/assets/shell.js` e `public/assets/sync.js`, que compartilham o estado legado de autenticação e sincronização, e os utilitários Node existentes em `scripts/*.mjs`. Nove arquivos legados ainda têm a verificação de tipos desativada com `@ts-nocheck`, listados na [auditoria](docs/auditoria-codebase.md#3-tipos-e-tamanho). O código novo passa pelo `typecheck` normal.

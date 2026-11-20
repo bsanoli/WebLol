@@ -1,10 +1,11 @@
 import { useState } from "react"
 import { createRoot } from "react-dom/client"
 
+import { STORAGE_KEYS } from "@/shared/config/storage-keys"
 import { Label } from "@/shared/ui/label"
 import { Slider } from "@/shared/ui/slider"
 
-const sizeKey = "weblol-map-champion-size"
+const sizeKey = STORAGE_KEYS.mapChampionSize
 const min = 60
 const max = 100
 const step = 1
