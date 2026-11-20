@@ -26,19 +26,20 @@ import {
   isEnemy,
   oppositeSide,
   oursOf,
-  rivalOf,
-  rivalOrder,
-  setRival,
-  settleTeam,
-  teamOf,
+  enemyCompositionOf,
+  enemyOrder,
+  setEnemyId,
+  settleOwner,
+  ownerOf,
 } from "../model/composition-side"
+import { compositionFromSaved, compositionToSaved, teamStateToSaved } from "../model/composition-storage"
 import { draftBoardHTML } from "./draft-board"
 import { mountMatchupBar } from "./matchup-bar"
 import { mountTeamNavigation } from "./team-navigation"
 import { tacticsHTML } from "./tactics"
 import { bindTacticDrop } from "./tactic-drop"
 import {
-  adoptRivals,
+  adoptEnemies,
   addMatchup,
   allMatchups,
   findMatchup,
@@ -112,7 +113,7 @@ function setSaveStatus(message, failed = false) {
 
 function save() {
   try {
-    localStorage.setItem(KEY, JSON.stringify(S))
+    localStorage.setItem(KEY, JSON.stringify(teamStateToSaved(S)))
     setSaveStatus("Salvo neste navegador")
   } catch {
     setSaveStatus("Falha ao salvar", true)
@@ -217,7 +218,7 @@ function toast(m, undo) {
 
 /* ===== Comps: nossas e adversárias ===== */
 const compById = id => S.comps.find(c => c.id === id)
-const rival = () => rivalOf(cur(), S.comps)
+const rival = () => enemyCompositionOf(cur(), S.comps)
 // Comp que recebe as edições do quadro e da grade de campeões.
 function target() {
   if (S.view !== "map" && activeSide === "rival") {
@@ -231,7 +232,7 @@ function target() {
 const compOf = el => compById(el?.closest?.("[data-comp-id]")?.dataset.compId) || cur()
 const touch = (comp = cur()) => {
   comp.updated = Date.now()
-  settleTeam(comp)
+  settleOwner(comp)
 }
 const matchupItem = c => ({
   id: c.id,
@@ -266,7 +267,7 @@ function renderMatchup() {
       renderGrid()
       $(`#editor [data-side-option="${side}"]`)?.focus({ preventScroll: true })
     },
-    onNew: team => newComp(team),
+    onNew: owner => newComp(owner),
     onMove: moveComp,
     onOpgg: id => void editOpggLink(compById(id)),
     onRename: id => void renameComp(id),
@@ -279,7 +280,7 @@ const focusMatchup = kind =>
   requestAnimationFrame(() => $(`#editor [data-matchup="${kind}"]`)?.focus({ preventScroll: true }))
 // Põe a adversária no draft da comp nossa e registra o confronto (a tática dele fica em Táticas › Confrontos).
 function faceEnemy(ours, enemyId) {
-  setRival(ours, enemyId)
+  setEnemyId(ours, enemyId)
   if (enemyId) addMatchup(ours, enemyId)
   touch(ours)
 }
@@ -306,20 +307,20 @@ function keepOurCompositionInDraft() {
   if (S.view !== "draft") return
   const c = cur()
   if (c && !isEnemy(c)) return
-  const facing = c && oursOf(S.comps).find(x => x.draft?.rival === c.id)
+  const facing = c && oursOf(S.comps).find(x => x.draft?.enemyId === c.id)
   const next = facing || S.comps.find(x => x.id === S.lastComp && !isEnemy(x)) || oursOf(S.comps)[0]
   if (next) {
     S.cur = next.id
     activeSide = facing ? "rival" : "us"
   }
 }
-function newComp(team = "mine") {
-  const enemy = team === "enemy",
+function newComp(owner = "ours") {
+  const enemy = owner === "enemy",
     count = (enemy ? enemiesOf(S.comps) : oursOf(S.comps)).length + 1
   const faceIt = enemy && S.view === "draft" && !isEnemy(cur())
   const name = enemy ? `Adversária ${count}` : `Comp ${count}`
   const c = blank(name)
-  settleTeam(c, team)
+  settleOwner(c, owner)
   S.comps.unshift(c)
   active = "top"
   if (faceIt) {
@@ -362,7 +363,7 @@ function handleRivalChampionDrop(name, lane) {
   const ours = cur()
   if (!ours || isEnemy(ours) || rival()) return
   const c = blank(`Adversária ${enemiesOf(S.comps).length + 1}`)
-  settleTeam(c, "enemy")
+  settleOwner(c, "enemy")
   S.comps.unshift(c)
   c.lanes[lane] = [name]
   active = lane
@@ -409,7 +410,7 @@ async function deleteComp(id) {
     return false
   writeTactic(S, c.id, c.name, "", Date.now(), [])
   S.comps = S.comps.filter(x => x.id !== c.id)
-  for (const x of S.comps) if (x.draft?.rival === c.id) setRival(x, null)
+  for (const x of S.comps) if (x.draft?.enemyId === c.id) setEnemyId(x, null)
   dropMatchupTactics()
   if (!S.comps.length) S.comps.push(blank())
   if (!compById(S.cur))
@@ -431,7 +432,7 @@ function moveComp(id) {
   const c = compById(id)
   if (!c) return
   const toEnemy = !isEnemy(c)
-  settleTeam(c, toEnemy ? "enemy" : "mine")
+  settleOwner(c, toEnemy ? "enemy" : "ours")
   touch(c)
   if (toEnemy) {
     if (id === S.cur) {
@@ -443,7 +444,7 @@ function moveComp(id) {
       }
     }
   } else {
-    for (const x of S.comps) if (x.draft?.rival === id) setRival(x, null)
+    for (const x of S.comps) if (x.draft?.enemyId === id) setEnemyId(x, null)
     dropMatchupTactics()
     if (id === S.cur) S.lastComp = id
     if (!rival()) activeSide = "us"
@@ -467,7 +468,7 @@ function pickArt(name) {
 
 function renderEditor() {
   if (S.view !== "tactics") S.view = "draft"
-  if (adoptRivals(S.comps)) save(false)
+  if (adoptEnemies(S.comps)) save(false)
   if (S.tacticsMatchup && !findMatchup(S.comps, S.tacticsMatchup)) S.tacticsMatchup = null
   keepOurCompositionInDraft()
   const editor = $("#editor")
@@ -535,7 +536,7 @@ function renderEditor() {
       "beforeend",
       `<div id="composition-panel" role="tabpanel" aria-labelledby="tab-draft"><div class="draft-no-ours" role="status">
       <p>Nenhuma composição nossa ainda. Crie uma para montar o draft contra as adversárias.</p>
-      <button type="button" data-slot="button" data-variant="default" data-size="sm" data-comp-new="mine">${iconMarkup("plus")} Nova composição nossa</button></div></div>`,
+      <button type="button" data-slot="button" data-variant="default" data-size="sm" data-comp-new="ours">${iconMarkup("plus")} Nova composição nossa</button></div></div>`,
     )
     editor.dataset.motionComposition = c.id
     editor.dataset.motionView = view
@@ -589,7 +590,7 @@ $("#editor").addEventListener("change", e => {
   const rivalSide = e.target.dataset.draftSide === "rival",
     owner = rivalSide ? rival() : cur()
   if (!owner) return
-  const order = rivalSide ? rivalOrder(cur(), owner) : draftOf(owner).order[draftOf(owner).side],
+  const order = rivalSide ? enemyOrder(cur(), owner) : draftOf(owner).order[draftOf(owner).side],
     i = Number(e.target.dataset.pickPosition)
   const lane = e.target.value,
     j = order.indexOf(lane)
@@ -811,7 +812,7 @@ function renderTarget() {
   // Qual slot recebe o campeão: no lado adversário, os picks seguem a ordem dele.
   const side = rivalSide ? oppositeSide(draftOf(us).side) : draftOf(us).side,
     team = side[0].toUpperCase()
-  const order = rivalSide ? rivalOrder(us, c) : draftOf(us).order[side]
+  const order = rivalSide ? enemyOrder(us, c) : draftOf(us).order[side]
   const pos = LANES.find(p => p.k === active)
   const slot = active === "ban" || !pos ? "Bans" : `${PICKNAME[team + (order.indexOf(active) + 1)]} · ${pos.n}`
   const heading = $("#target")
@@ -1005,7 +1006,7 @@ function handleOpenDraft() {
   S.view = "draft"
   S.tacticsGeneral = false
   if (isEnemy(c)) {
-    const facing = oursOf(S.comps).find(x => rivalOf(x, S.comps) === c)
+    const facing = oursOf(S.comps).find(x => enemyCompositionOf(x, S.comps) === c)
     const ours = facing || S.comps.find(x => x.id === S.lastComp && !isEnemy(x)) || oursOf(S.comps)[0]
     if (ours) {
       if (!facing) faceEnemy(ours, c.id)
@@ -1022,7 +1023,7 @@ function handleOpenDraft() {
 function openMatchup(id) {
   const entry = findMatchup(S.comps, id)
   if (!entry) return
-  setRival(entry.ours, entry.enemy.id)
+  setEnemyId(entry.ours, entry.enemy.id)
   S.cur = entry.ours.id
   S.lastComp = entry.ours.id
   S.tacticsGeneral = false
@@ -1050,7 +1051,7 @@ async function handleNewMatchup() {
     )?.trim()
     if (!name) return
     const created = blank(name)
-    settleTeam(created, "enemy")
+    settleOwner(created, "enemy")
     S.comps.unshift(created)
     enemyId = created.id
   }
@@ -1106,7 +1107,7 @@ async function handleMatchupDelete(id) {
     return
   removeMatchup(entry.ours, id)
   writeTactic(S, matchupKey(id), "", "", Date.now(), [])
-  if (entry.ours.draft?.rival === entry.enemy.id) setRival(entry.ours, null)
+  if (entry.ours.draft?.enemyId === entry.enemy.id) setEnemyId(entry.ours, null)
   if (S.tacticsMatchup === id) S.tacticsMatchup = null
   touch(entry.ours)
   save()
@@ -1182,7 +1183,7 @@ $("#editor").addEventListener("click", e => {
     return
   }
   const create = e.target.closest("[data-comp-new]")
-  if (create) void newComp(create.dataset.compNew || "mine")
+  if (create) void newComp(create.dataset.compNew || "ours")
 })
 window.matchMedia("(min-width: 1100px)").addEventListener("change", e => {
   if (e.matches) closePicker?.()
@@ -1193,7 +1194,13 @@ function downloadTeamBackup() {
   const blob = new Blob(
     [
       JSON.stringify(
-        { app: "lol-comps-time", version: 1, exported: new Date().toISOString(), comps: S.comps, plays: S.plays },
+        {
+          app: "lol-comps-time",
+          version: 1,
+          exported: new Date().toISOString(),
+          comps: S.comps.map(compositionToSaved),
+          plays: S.plays,
+        },
         null,
         2,
       ),
@@ -1227,7 +1234,8 @@ $("#imp").onchange = async e => {
     if (!choice) return
     const replace = choice === "replace"
     const ids = new Map()
-    const clean = comps.map(c => {
+    const clean = comps.map(saved => {
+      const c = compositionFromSaved(saved)
       const b = blank(c.name)
       b.notes = c.notes || ""
       b.laneNotes = c.laneNotes || {}
@@ -1236,13 +1244,13 @@ $("#imp").onchange = async e => {
       for (const l of LANES) b.lanes[l.k] = Array.isArray(c.lanes?.[l.k]) ? c.lanes[l.k].map(String) : []
       b.id = replace ? c.id || b.id : b.id
       if (c.id) ids.set(c.id, b.id)
-      if (c.team === "enemy" || c.team === "mine" || c.tacticTeam === "enemy")
-        settleTeam(b, c.team === "mine" ? "mine" : "enemy")
+      if (c.owner === "enemy" || c.owner === "ours" || c.tacticTeam === "enemy")
+        settleOwner(b, c.owner === "ours" ? "ours" : "enemy")
       if (typeof c.opgg === "string" && c.opgg) setOpgg(b, normalizeOpggLink(c.opgg) || "")
       return b
     })
     // Ao juntar, as comps ganham ids novos; a adversária de cada draft acompanha.
-    for (const b of clean) if (b.draft?.rival) setRival(b, ids.get(b.draft.rival) || null)
+    for (const b of clean) if (b.draft?.enemyId) setEnemyId(b, ids.get(b.draft.enemyId) || null)
     // Confrontos (e as táticas deles) vão junto; ao juntar, ganham ids novos para não colidir.
     clean.forEach((b, i) => {
       const list = Array.isArray(comps[i].matchups) ? comps[i].matchups : []

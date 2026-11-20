@@ -2,7 +2,7 @@ import { useId, useState } from "react"
 import { ChevronDown } from "lucide-react"
 import { Input } from "@/shared/ui/input"
 import { Popover, PopoverContent, PopoverTrigger } from "@/shared/ui/popover"
-import type { CompTeam } from "../model/composition-side"
+import type { CompOwner } from "../model/composition-side"
 import type { DraftSide } from "../model/local-state"
 import { ActionMenu, Icon, keepFocusOutsideFrame, renderControl, useTeamOverlay } from "./team-controls"
 
@@ -19,7 +19,7 @@ export type MatchupBarProps = {
   onSelectOurs: (id: string) => void
   onSelectRival: (id: string | null) => void
   onSide: (side: DraftSide) => void
-  onNew: (team: CompTeam) => void
+  onNew: (owner: CompOwner) => void
   onMove: (id: string) => void
   onOpgg: (id: string) => void
   onRename: (id: string) => void
@@ -244,7 +244,7 @@ function MatchupBar(props: MatchupBarProps) {
           selected={current}
           newLabel="Nova composição nossa"
           onSelect={id => id && props.onSelectOurs(id)}
-          onNew={() => props.onNew("mine")}
+          onNew={() => props.onNew("ours")}
         />
       )}
       {renaming !== "ours" && (
