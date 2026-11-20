@@ -41,10 +41,10 @@ function positionColumn(side: DraftSide, entry: PositionSide, hint: string, mark
     edge = side === "blue" ? "left" : "right"
   if (!entry)
     return `<div class="tx-side-col tx-pos-col ${side} ${edge} empty" data-drop-side="${side}" aria-label="${label}">
-    <h3><span class="side-dot ${side}" aria-hidden="true"></span>${label}</h3><p class="tx-col-empty">${hint}</p></div>`
+    <h3>${label}</h3><p class="tx-col-empty">${hint}</p></div>`
   const { owner, source, who } = entry
   return `<div class="tx-side-col tx-pos-col ${side} ${edge}" data-drop-side="${side}" aria-label="${label}">
-    <h3><span class="side-dot ${side}" aria-hidden="true"></span>${label}<small>${who} · ${markup.esc(source.name)}</small></h3>
+    <h3>${label}<small>${who} · ${markup.esc(source.name)}</small></h3>
     <div class="tx-pos-cells" data-board-side="${owner}" data-comp-id="${markup.esc(source.id)}">${ROWS.map(lane => positionCell(lane, owner, source, markup)).join("")}</div></div>`
 }
 

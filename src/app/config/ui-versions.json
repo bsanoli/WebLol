@@ -1,5 +1,13 @@
 [
   {
+    "version": "1.75",
+    "date": "2026-11-20",
+    "changes": [
+      "Táticas: na visão Lane saem a linha colorida e a bolinha de cada lado, e Nossa/Adversária e o nome da composição ficam junto ao centro, no mesmo tamanho de letra do lado. Na visão Draft, o cabeçalho do lado azul também fica junto ao centro.",
+      "Ordem do draft: na barra de confronto, a barrinha colorida do time da esquerda passa para a borda direita, junto ao centro."
+    ]
+  },
+  {
     "version": "1.74",
     "date": "2026-11-20",
     "changes": [

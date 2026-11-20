@@ -987,6 +987,15 @@
 #v-comps .matchup > .matchup-team:first-child .matchup-pick {
   flex-direction: row-reverse;
 }
+.matchup > .matchup-team:first-child {
+  padding: 4px 8px 4px 4px;
+  border-left-width: 1px;
+  border-left-color: var(--line);
+  border-right: var(--wl-accent-bar) solid var(--wl-side-blue);
+}
+.matchup > .matchup-team.red:first-child {
+  border-right-color: var(--wl-side-red);
+}
 #v-comps .matchup > .matchup-team:first-child .matchup-pick {
   text-align: right;
 }
@@ -1730,10 +1739,26 @@
   border-left: 0;
   box-shadow: inset -3px 0 0 var(--lc, var(--line));
 }
-.tx-pos-col.left h3 {
+.tx-pos-col.left h3,
+.tx-draft-sides > .tx-side-col.blue h3 {
   flex-direction: row-reverse;
 }
-.tx-pos-col.left h3 small {
+/* Visão Lane sem a cor do lado: sem a linha de cima nem a bolinha; o nome da comp no mesmo tamanho do lado. */
+.tx-side-col.tx-pos-col {
+  border-top: 0;
+}
+.tx-side-col.tx-pos-col h3 small {
+  margin: 0;
+  padding: 0 0 0 8px;
+  font-size: 13px;
+}
+.tx-side-col.tx-pos-col.left h3 small {
+  margin: 0;
+  padding: 0 8px 0 0;
+  text-align: right;
+}
+.tx-pos-col.left h3 small,
+.tx-draft-sides > .tx-side-col.blue h3 small {
   margin-left: 0;
   margin-right: auto;
   padding-left: 0;
