@@ -56,4 +56,4 @@ Sessão Chromium isolada, dados de teste locais. Acesso ao Google/Firebase bloqu
 - No mobile, nossa equipe aparece primeiro e o catálogo abre em diálogo nativo; biblioteca fica depois do editor.
 - Header global e fluxo de conta continuam existentes. Seleção tem borda e estado `aria-pressed`, além da cor; o catálogo usa contorno no retrato e um ponto junto ao nome.
 
-Gere os arquivos estáticos da raiz com `npm run pages:prepare` antes de publicar pelo GitHub Pages.
+O workflow `deploy.yml` gera e publica o site a cada push na `main`; não há arquivos estáticos para gerar à mão.

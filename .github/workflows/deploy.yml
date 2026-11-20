@@ -1,11 +1,23 @@
 # Publica o site no GitHub Pages por artefato (docs/decisoes/0003-publicacao-por-artefato.md).
 # Precisa de Settings › Pages › Source = "GitHub Actions", que só o admin do repositório muda.
-# Por enquanto roda só sob demanda. Depois do primeiro deploy conferido, o push na `main` passa a disparar.
+# Roda a cada push na `main` (menos mudanças só de documentação), sob demanda e quando o soloq.yml o chama.
 name: Deploy
 
 on:
+  push:
+    branches: [main]
+    paths-ignore:
+      - "docs/**"
+      - "**/*.md"
+      - ".agents/**"
+      - ".claude/**"
   workflow_dispatch:
   workflow_call:
+    inputs:
+      ref:
+        description: Commit ou branch a publicar. Vazio usa o commit que disparou o workflow.
+        type: string
+        default: ""
 
 permissions:
   contents: read
@@ -23,6 +35,8 @@ jobs:
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@v7
+        with:
+          ref: ${{ inputs.ref }}
 
       - uses: actions/setup-node@v7
         with:

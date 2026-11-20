@@ -1,6 +1,6 @@
 # 0003. Publicar no GitHub Pages por artefato do GitHub Actions
 
-- **Situação:** em transição. `deploy.yml` e `prepare-pages.mjs --out=_site` entraram na Onda 2b; faltam o Bruno trocar a fonte do Pages, o primeiro deploy conferido e a remoção dos arquivos gerados. Depende do Bruno: o repositório `bsanoli/WebLol` é dele, e só quem tem permissão de admin muda a configuração do Pages. Fabiano tem permissão de escrita.
+- **Situação:** decidida e aplicada na Onda 2b. O Bruno trocou a fonte do Pages, o primeiro deploy foi conferido no endereço público e os arquivos gerados saíram da `main`. Depende do Bruno: o repositório `bsanoli/WebLol` é dele, e só quem tem permissão de admin muda a configuração do Pages. Fabiano tem permissão de escrita.
 - **Data:** 2026-11-19
 - **Decidido por:** Bruno, Fabiano (a confirmar)
 
@@ -33,7 +33,9 @@ O GitHub Pages serve a raiz da `main`. Para publicar, cada pessoa roda `npm run 
 - O deploy fica reproduzível: sempre o mesmo Node, as mesmas dependências e um commit conhecido.
 - Para voltar uma versão, basta reverter o commit ou rodar de novo o deploy de um commit anterior.
 - O site depende do GitHub Actions estar no ar, o que é gratuito para repositório público.
-- Na transição, o primeiro deploy por artefato precisa ser conferido no endereço público antes de apagar os arquivos da raiz.
+- Na transição, o primeiro deploy por artefato foi conferido no endereço público antes de apagar os arquivos da raiz.
+- O ambiente `github-pages` costuma aceitar deploy só a partir da `main`: rodar o `deploy.yml` à mão em outra branch pode ser recusado.
+- O `deploy.yml` roda `npm run build`: se um dado novo do SoloQ quebrar o build, só o job `deploy` do `soloq.yml` falha e o site fica na versão anterior.
 
 ## Alternativas consideradas
 

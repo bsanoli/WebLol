@@ -9,7 +9,7 @@ O [catálogo de agentes e skills](docs/agentes.md) vale para Codex e Claude Code
 - Em mudanças maiores, use agentes especializados quando a divisão ajudar e a sessão permitir. Em edições paralelas, atribua responsabilidades e arquivos distintos. Quem coordena a tarefa integra as mudanças e verifica o resultado.
 - Em cards e linhas equivalentes, mantenha títulos, ícones, métricas e ações nas mesmas posições relativas. Valide o alinhamento com textos longos, quebra de linha e campos opcionais.
 - Em páginas de detalhe, use o estilo compacto e sem borda de “Ver página” para voltar à lista, com o chevron à esquerda do rótulo.
-- Trabalhe nos arquivos fonte em `src/` e `public/`. Os HTMLs e `assets/` da raiz são gerados para o GitHub Pages.
+- Trabalhe nos arquivos fonte em `src/` e `public/`. O site é gerado e publicado pelo workflow `deploy.yml`; os HTMLs e `assets/` da raiz são ignorados no Git.
 - Toda implementação no WebLol deve seguir a arquitetura Feature-Sliced Design. Consulte a skill [feature-sliced-design](.agents/skills/feature-sliced-design/SKILL.md) para decidir fronteiras entre módulos, organizar dependências ou migrar código. Respeite as responsabilidades das camadas, a direção dos imports e as APIs públicas dos slices, inclusive em correções pontuais.
 - Faça commit ou push quando o usuário pedir a respectiva ação. Para publicar no GitHub Pages, use a skill [weblol-publicar](.agents/skills/weblol-publicar/SKILL.md).
 

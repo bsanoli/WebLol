@@ -12,3 +12,10 @@ __pycache__/
 .env.*
 stats.html
 /_site/
+
+# Gerados pelo build e publicados pelo deploy.yml (ADR 0003)
+/assets/
+/index.html
+/camp.html
+/worlds.html
+/soloq.html

@@ -79,7 +79,7 @@ Os ícones de Conhecimento em `public/assets/lol/hud/` vêm do CommunityDragon 1
 
 ## GitHub Pages
 
-O GitHub Pages serve a raiz da branch `main`. Rode `npm run pages:prepare` para gerar o build e atualizar `index.html`, `camp.html`, `worlds.html`, `soloq.html` e `assets/` na raiz. Inclua esses arquivos no commit que vai para a `main`. Edite os arquivos fonte em `src/` e `public/`. A [ADR 0003](docs/decisoes/0003-publicacao-por-artefato.md) troca isso por deploy pelo GitHub Actions. O workflow `deploy.yml` já existe e roda sob demanda (`node scripts/prepare-pages.mjs --out=_site` monta o site numa pasta). Enquanto a fonte do Pages for a `main`, continue publicando como acima.
+O GitHub Pages publica um artefato gerado pelo workflow `deploy.yml` (Settings › Pages › Source = GitHub Actions). Todo push na `main` dispara o build e o deploy; não há arquivos gerados no Git. Edite os arquivos fonte em `src/` e `public/`. Para ver o resultado do deploy, use a aba Actions. Para montar o site localmente em `_site/` (ignorado no Git), rode `npm run pages:prepare`. A decisão está na [ADR 0003](docs/decisoes/0003-publicacao-por-artefato.md).
 
 ## Sistema visual
 
