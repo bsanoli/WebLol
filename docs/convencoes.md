@@ -43,7 +43,7 @@ Os nomes de conceitos vêm do [glossário](glossario.md). A arquitetura segue a 
 - Separe regra e estado em `model`, renderização em `ui` e acesso a dados em `api`.
 - Arquivos de camada com 300 linhas não vazias ou mais são divididos por responsabilidade. O `npm run check` falha para arquivo novo acima do limite e para arquivo da lista `legacyLongFiles` (`scripts/check-architecture.mjs`) que cresça além do tamanho registrado; a entrada sai da lista quando o arquivo cai abaixo de 300. Dados e arquivos gerados ficam fora dessa conta.
 - Código usado por um slice só fica nele. Extraia para `shared` ou `entities` quando houver um segundo consumidor real com a mesma regra.
-- Os scripts clássicos `public/assets/shell.js` e `sync.js` estão congelados para funcionalidades novas. O que for novo entra em `src/`, e o script legado só ganha uma ponte mínima.
+- `public/assets` não tem JavaScript: todo código entra em `src/`, dentro das camadas FSD.
 
 ## Comentários e documentação
 

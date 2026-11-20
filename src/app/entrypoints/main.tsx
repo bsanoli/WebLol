@@ -7,12 +7,11 @@ import { AccountAvatar } from "@/entities/account"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/shared/ui/card"
 import { Popover, PopoverContent, PopoverTrigger } from "@/shared/ui/popover"
 import { ThemePicker } from "@/features/select-theme"
-import { confirmAction, showDialog } from "@/shared/ui/dialog-controls"
 import "../styles/index.css"
 import { connectAnalytics } from "./analytics-bridge"
-import { iconMarkup } from "@/shared/ui/icon"
 import { initializeTheme } from "@/shared/config/theme"
 import { UI_VERSIONS } from "../config/ui-versions"
+import { exposeHostGlobals, session, startPanel, startSignup } from "@/features/auth"
 
 const sections = [
   { value: "worlds", label: "Worlds", href: "#/worlds" },
@@ -135,7 +134,7 @@ function App() {
                 variant="default"
                 className="signup-trigger"
                 title="Criar conta ou entrar com seu Riot ID"
-                onClick={() => (window as unknown as { startSignup?: () => void }).startSignup?.()}
+                onClick={() => startSignup()}
               >
                 Entrar ou criar conta
               </Button>
@@ -214,16 +213,6 @@ function App() {
   )
 }
 
-function loadClassicScript(path: string): Promise<void> {
-  return new Promise((resolve, reject) => {
-    const script = document.createElement("script")
-    script.src = path
-    script.onload = () => resolve()
-    script.onerror = () => reject(new Error(path))
-    document.body.append(script)
-  })
-}
-
 const root = createRoot(document.getElementById("app")!)
 flushSync(() => root.render(<App />))
 
@@ -231,10 +220,9 @@ connectAnalytics(document.getElementById("v-worlds") as HTMLIFrameElement)
 
 async function start() {
   try {
-    // The classic shell still looks up this helper by its global name.
-    Object.assign(window, { iconMarkup, UI_VERSIONS, confirmAction, showDialog })
-    await loadClassicScript("./assets/sync.js")
-    await loadClassicScript("./assets/shell.js")
+    session.uiVersions = UI_VERSIONS
+    exposeHostGlobals()
+    await startPanel()
   } catch {
     const error = document.getElementById("screen-error")!
     error.textContent = "Não foi possível iniciar o painel. Recarregue a página para tentar novamente."

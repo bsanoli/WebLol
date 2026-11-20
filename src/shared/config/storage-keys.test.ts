@@ -9,8 +9,7 @@ const NOT_STORAGE_KEYS: Record<string, string> = {
   "weblol-42ef7": "id do projeto no Firebase",
 }
 
-// Código que roda no navegador: `src/` (sem dados gerados, testes e este registro) e os scripts de
-// `public/assets/`, que rodam sem build e por isso repetem os nomes das chaves.
+// Código que roda no navegador: `src/` (sem dados gerados, testes e este registro).
 const sources = {
   ...import.meta.glob<string>(
     ["../../**/*.{ts,tsx,js}", "!../../data/**", "!../../**/*.test.ts", "!./storage-keys.ts"],
@@ -20,7 +19,6 @@ const sources = {
       eager: true,
     },
   ),
-  ...import.meta.glob<string>("../../../public/assets/*.js", { query: "?raw", import: "default", eager: true }),
 }
 /** O glob devolve caminhos relativos a este arquivo; a mensagem de erro mostra o caminho a partir da raiz. */
 const fromRoot = (path: string) => new URL(path, "file:///raiz/src/shared/config/").pathname.replace("/raiz/", "")
@@ -28,9 +26,9 @@ const files = Object.entries(sources).map(([path, text]) => ({ path: fromRoot(pa
 const registry = new Set<string>([...Object.values(STORAGE_KEYS), ...Object.values(STORAGE_PREFIXES)])
 
 describe("STORAGE_KEYS", () => {
-  it("lê o código do app e os scripts de public/assets", () => {
+  it("lê o código do app", () => {
     expect(files.some(file => file.path === "src/pages/team/model/local-state.ts")).toBe(true)
-    expect(files.some(file => file.path === "public/assets/sync.js")).toBe(true)
+    expect(files.some(file => file.path === "src/features/auth/model/identity.ts")).toBe(true)
   })
 
   it("declara toda chave `lol-` e `weblol-` escrita no código", () => {

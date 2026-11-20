@@ -1,3 +1,4 @@
+import { exposeFrameHandlers, navigateHost } from "@/shared/api/host-bridge"
 import { initializeTheme } from "@/shared/config/theme"
 import { viewFromMode } from "../model/saved-data"
 import { uid, compositionPreview } from "../model/local-state"
@@ -92,12 +93,13 @@ function publishTeamRoute(
   if (includeItem && view === "comps")
     path += "/" + encodeURIComponent(S.cur) + "?modo=" + (S.view === "tactics" ? "taticas" : "draft")
   if (includeItem && view === "map") path += "/" + encodeURIComponent(S.curPlay ?? "")
-  window.frameElement?.dispatchEvent(new CustomEvent("weblol:navigate", { detail: { path, onCopy } }))
+  navigateHost({ path, onCopy })
 }
 
 /* ===== Gestão do time (todo o time vê; só o capitão e admins agem; os dados vêm do app principal) ===== */
 let wantCaptain = false // link para a gestão aberto antes de o time carregar
-;(window as any).weblolTeamChanged = () => {
+exposeFrameHandlers({ weblolTeamChanged })
+function weblolTeamChanged() {
   syncTeamSendButton($("#team-send"))
   const ok = hasCaptainAccess()
   renderTeamNavigation(currentTeamView, ok)
@@ -113,13 +115,12 @@ let wantCaptain = false // link para a gestão aberto antes de o time carregar
     }
   }
 }
-const teamWindow = window as unknown as {
-  applyWebLolRoute: (route: string[], params?: URLSearchParams) => Promise<boolean>
-}
-teamWindow.applyWebLolRoute = ([page, item], params) => {
-  const view = (Object.keys(teamPages) as TeamView[]).find(key => teamPages[key] === page) || "comps"
-  return openTeamView(view, item, params)
-}
+exposeFrameHandlers({
+  applyWebLolRoute([page, item], params) {
+    const view = (Object.keys(teamPages) as TeamView[]).find(key => teamPages[key] === page) || "comps"
+    return openTeamView(view, item, params)
+  },
+})
 
 async function openTeamView(view: TeamView, item?: string, params?: URLSearchParams) {
   const request = ++routeRequest

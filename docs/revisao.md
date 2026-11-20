@@ -27,7 +27,7 @@ Não reporte como achado o que o lint, o formatador ou o `npm run check` já apo
 - Imports respeitam as camadas e as APIs públicas.
 - Regra em `model`, renderização em `ui`, acesso a dados em `api`.
 - Nenhum arquivo de camada passou de 300 linhas não vazias sem revisão de responsabilidade.
-- Nada novo em `public/assets/shell.js` ou `sync.js` além de uma ponte mínima.
+- Nenhum JavaScript novo em `public/assets`; o código entra em `src/`.
 
 **Nomes e tipos**
 - Termos do [glossário](glossario.md) e regras das [convenções](convencoes.md).

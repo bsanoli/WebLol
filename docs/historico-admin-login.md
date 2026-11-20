@@ -2,9 +2,18 @@
 
 Registro de tudo o que muda em login, contas, times, capitão e Administração.
 Regra do Bruno (13/11/2026): toda alteração nessa área entra aqui, com o pedido, a decisão tomada e o que mudou.
-Mudança importante só é feita depois de perguntar ao Bruno, e a escolha dele também fica registrada aqui.
+Desde 20/11/2026 (decisão do Fabiano), nenhuma mudança precisa de aprovação do Bruno, a não ser que exija mexer na conta dele (senha, conta admin) ou publicar regras do Firestore. Nesses casos a escolha dele fica registrada aqui.
 
 Formato de cada entrada: data, pedido (palavras do Bruno), decisão (quem escolheu e o quê), o que mudou, commit e regras do Firestore.
+
+---
+
+## 20/11/2026 — login, contas e Administração em TypeScript (Onda 4b e 4c)
+
+- **Pedido:** "Seguir para 4b" e "pode seguir" (Fabiano). Refatoração sem mudança de comportamento; nenhuma regra do Firestore foi alterada nem publicada.
+- **Decisão do Fabiano:** a 4c não depende do Bruno; só avisar quando algo exigir a conta dele (senha, conta admin) ou publicar regras do Firestore.
+- **O que mudou:** o código de `shell.js` e `sync.js` (login, reconexão, passo do time, rotas, Administração, sincronização) foi para `src/features/auth`, e `public/assets` ficou sem JavaScript. Nomes de chaves locais, coleções e campos não mudaram.
+- **Não testado:** login real, login de admin e envio ao Firestore (só navegação, diálogo de login e modo sem usuário).
 
 ---
 

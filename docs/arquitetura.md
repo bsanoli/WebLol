@@ -8,7 +8,7 @@ Este documento é um mapa de como o WebLol funciona hoje. Para decidir onde fica
 flowchart LR
   subgraph Shell["index.html · app/entrypoints/main.tsx"]
     Header["Cabeçalho e navegação"]
-    Legacy["public/assets/sync.js + shell.js<br/>login, times, envios, Firestore"]
+    Legacy["features/auth<br/>login, times, envios, Firestore"]
     Admin["Administração (#v-admin)"]
   end
   Shell -- "iframe #v-worlds" --> Worlds["worlds.html<br/>Worlds e Builds Worlds"]
@@ -19,9 +19,9 @@ flowchart LR
   Team <--> Storage
 ```
 
-- **Shell** (`src/index.html`, `src/app/entrypoints/main.tsx`): desenha o cabeçalho e as seções (Worlds, Builds, Área do time, Administração). Também carrega os scripts clássicos `sync.js` e `shell.js` com `loadClassicScript` e mostra um iframe por área.
+- **Shell** (`src/index.html`, `src/app/entrypoints/main.tsx`): desenha o cabeçalho e as seções (Worlds, Builds, Área do time, Administração). Também inicia `features/auth` (`startPanel`) e mostra um iframe por área.
 - **Iframes**: cada área é uma página Vite própria. O shell troca a visível conforme a rota em `location.hash`.
-- **Scripts clássicos** (`public/assets/sync.js` e `shell.js`): login por Riot ID, times, capitão, envios, versão oficial, backups e acesso ao Firestore. Ficam fora do Vite, do TypeScript e do FSD, e estão congelados para funcionalidades novas (veja as [convenções](convencoes.md#estrutura)).
+- **`features/auth`** (antes `sync.js` e `shell.js`): login por Riot ID, times, capitão, envios, versão oficial, rotas e Administração, em TypeScript. O acesso ao Firestore fica em `shared/api/firestore.ts`. `public/assets` não tem mais JavaScript.
 
 ## Entradas e builds
 
@@ -45,10 +45,10 @@ Os iframes são da mesma origem, então a comunicação acontece por três camin
    | `weblol:navigate` | iframe → shell | Pedir uma troca de rota |
    | `weblol:route-ready` | iframe → shell | Avisar que a rota foi aplicada |
    | `weblol:analytics`, `weblol:analytics-clear` | iframe → shell | Mostrar e limpar o tooltip de análise (`analytics-bridge.tsx`) |
-   | `weblol:close-account` | `shell.js` → cabeçalho React | Fechar o menu da conta |
+   | `weblol:close-account` | `features/auth` → cabeçalho React | Fechar o menu da conta |
 
-2. **Funções globais**: o shell chama `frame.contentWindow.applyWebLolRoute(...)` para aplicar a rota no iframe e `weblolTeamChanged()` para avisar que o time mudou. A Área do time lê do `window.parent` as funções `captainAccess`, `canManageTeam`, `TEAM_NAME`, `renderCaptainPanel` e `weblolImages`, definidas em `shell.js`. O shell expõe `startSignup` para o botão Entrar.
-3. **Armazenamento compartilhado**: `sync.js` grava o estado do time em `localStorage["lol-comps-time-v1"]`, que a Área do time lê e escreve. O `sync.js` escuta o evento `storage` dessa chave para atualizar o status. Depois de sincronizar, trocar de time ou sair, o `reloadCamp()` recarrega o iframe da Área do time por `srcdoc`.
+2. **Funções globais**: o shell chama `frame.contentWindow.applyWebLolRoute(...)` para aplicar a rota no iframe e `weblolTeamChanged()` para avisar que o time mudou. A Área do time lê do `window.parent` as funções `captainAccess`, `canManageTeam`, `TEAM_NAME`, `renderCaptainPanel` e `weblolImages`, definidas em `features/auth` (`exposeHostGlobals`) e tipadas em `shared/api/host-bridge.ts`. O botão Entrar chama `startSignup`.
+3. **Armazenamento compartilhado**: `features/auth` grava o estado do time em `localStorage["lol-comps-time-v1"]`, que a Área do time lê e escreve. Ela escuta o evento `storage` dessa chave para atualizar o status. Depois de sincronizar, trocar de time ou sair, o `reloadCamp()` recarrega o iframe da Área do time por `srcdoc`.
 
 ## Camadas (Feature-Sliced Design)
 
@@ -59,7 +59,7 @@ Os iframes são da mesma origem, então a comunicação acontece por três camin
 | `widgets` | `analytics-tooltip`, `tactical-map`, `team-knowledge`, `tournament-overview` |
 | `features` | `select-theme` |
 | `entities` | `ability`, `account`, `champion`, `match`, `tactical-play` |
-| `shared` | `config` (dataset, tema), `lib` (motion, analytics-dom, utils), `ui` (botões, Arc UI, ReUI) |
+| `shared` | `api` (ponte com o app principal), `config` (dataset, tema), `lib` (motion, analytics-dom, utils), `ui` (botões, Arc UI, ReUI) |
 
 O `scripts/check-architecture.mjs` (dentro do `npm run check`) confere a direção dos imports, o uso das APIs públicas e falha quando um arquivo novo passa de 299 linhas não vazias ou usa `@ts-nocheck`. Os arquivos antigos ficam nas listas `legacyLongFiles` e `legacyNoCheckFiles` do script e só podem encolher.
 
@@ -71,8 +71,8 @@ O `scripts/check-architecture.mjs` (dentro do `npm run check`) confere a direç�
 | Partidas SoloQ dos pros | `src/data/soloq/` | `scripts/soloq.py`, todo dia pelo workflow `soloq.yml` |
 | Catálogo e imagens da Riot | `src/data/lol.json`, `public/assets/lol/` | `scripts/download-lol-assets.py` (Data Dragon) |
 | Ícones da interface | `public/assets/icons.svg` (ignorado no Git) | `scripts/build-icons.mjs` antes do `dev` e do `build` |
-| Times, contas, envios e versão oficial | Firestore, regras em `firestore.rules` | `sync.js` e `shell.js` |
-| Estado local da Área do time e preferências | `localStorage` e IndexedDB | Área do time, Mapa tático, `sync.js` |
+| Times, contas, envios e versão oficial | Firestore, regras em `firestore.rules` | `features/auth` |
+| Estado local da Área do time e preferências | `localStorage` e IndexedDB | Área do time, Mapa tático, `features/auth` |
 
 A lista completa de coleções, chaves e rotas está nos [nomes salvos do glossário](glossario.md#nomes-salvos-contratos). A versão oficial de cada time é assinada pelo admin, e os envios e backups são criptografados no navegador para a chave do admin. O histórico dessa área fica em [historico-admin-login.md](historico-admin-login.md).
 
