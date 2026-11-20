@@ -2,7 +2,7 @@
 
 - **Situação:** Onda 1 aceita e implementada em 2026-11-20 ([pedido](../pedidos/2026-11-20-onda-1-verificacao.md)). Onda 2 proposta.
 - **Data:** 2026-11-19
-- **Decidido por:** Fabiano. Bruno a confirmar.
+- **Decidido por:** Fabiano.
 
 ## Contexto
 

@@ -65,7 +65,6 @@ Resposta à pergunta "Começo a Onda 1 (ferramentas de verificação) aqui?", de
 - **Verificado:** veja o resumo da entrega, com os comandos e os resultados.
 - **Pendências:**
   - Ver o CI rodar no GitHub no primeiro push e conferir que um erro de tipo, de formatação ou de arquitetura falha a execução.
-  - Bruno confirmar a ADR 0004.
   - Corrigir os avisos listados na [auditoria](../auditoria-codebase.md#avisos-que-ainda-não-barram) nas ondas seguintes.
   - Pôr o hash do commit de reformatação em `.git-blame-ignore-revs` quando os commits forem criados.
 - **Regras registradas:** chaves do `localStorage` só no registro, verificado por `storage-keys.test.ts` ([convenções](../convencoes.md#dados-e-tipos)). Política de avisos e de violações conhecidas do axe ([convenções](../convencoes.md#verificação-automática)).
