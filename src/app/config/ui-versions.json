@@ -1,5 +1,12 @@
 [
   {
+    "version": "1.76",
+    "date": "2026-11-20",
+    "changes": [
+      "Táticas, visão Lane: o cabeçalho de cada lado mostra só Nossa/Adversária e o nome da composição, sem o \"Lado azul\" ou \"Lado vermelho\"."
+    ]
+  },
+  {
     "version": "1.75",
     "date": "2026-11-20",
     "changes": [
