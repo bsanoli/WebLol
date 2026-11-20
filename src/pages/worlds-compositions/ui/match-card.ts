@@ -1,5 +1,3 @@
-// @ts-nocheck -- Integração legada com o DOM e dados locais.
-
 import { iconMarkup, laneIconMarkup } from "@/shared/ui/icon"
 import type DATA from "@dataset/summary"
 import DRAFTS from "@dataset/drafts"
@@ -15,9 +13,14 @@ type Draft = {
 }
 // Champion order per team comes from Rift Graphs. First pick is checked separately
 // against Games of Legends, ChainCC or Liquipedia because it can start on either side.
-const drafts: Partial<Record<string, Draft>> = DRAFTS
+// O JSON guarda `firstPick` como texto; o formato é fixo ("blue" ou "red").
+const drafts = DRAFTS as unknown as Partial<Record<string, Draft>>
 
-function compDraft(game: (typeof DATA.comps)[number], panelId: string) {
+type Game = (typeof DATA.comps)[number]
+/** Rota, depois campeão, jogador e KDA do lado azul e do vermelho. */
+type LaneCells = [string, string, string, string, string, string, string]
+
+function compDraft(game: Game, panelId: string) {
   const draft = drafts[`${game.s}:${game.g}`]
   if (!draft) return ""
 
@@ -100,25 +103,27 @@ function compDraft(game: (typeof DATA.comps)[number], panelId: string) {
   </section>`
 }
 
-export function compCard(g, q, champions, index: number) {
+export function compCard(g: Game, q: string, champions: Set<string>, index: number) {
   const panelId = `match-draft-${index}`
   const draft = compDraft(g, panelId)
-  const hl = (text, selected = false) =>
+  const hl = (text: string, selected = false) =>
     selected || (q && text.toLowerCase().includes(q)) ? `<mark>${esc(text)}</mark>` : esc(text)
-  const team = (name, color, won) => `<div class="match-team" data-side="${color}">
+  const team = (name: string, color: string, won: boolean) => `<div class="match-team" data-side="${color}">
     <span class="match-team-crest" aria-hidden="true">${teamLogo(name)}</span>
     <div class="match-team-label">
       <strong class="match-team-name" title="${esc(name)}">${esc(name)}</strong>
       <small class="match-team-result"${won ? " data-winner" : ""}>${won ? "Vitória" : "Derrota"}</small>
     </div>
   </div>`
-  const side = (champion, player, kda, right) => {
+  const side = (champion: string, player: string, kda: string, right: boolean) => {
     const pick = `<td class="match-pick"><div class="match-champion">
       ${ico(champion)}<div><strong>${hl(champion, champions.has(champion))}</strong><small>${hl(player)}</small></div>
     </div></td>`
     const score = `<td class="match-kda" data-tip="Abates / Mortes / Assistências de ${esc(player)}">${kda}</td>`
     return right ? score + pick : pick + score
   }
+  const laneRow = ([lane, blueChampion, bluePlayer, blueKda, redChampion, redPlayer, redKda]: LaneCells) =>
+    `<tr>${side(blueChampion, bluePlayer, blueKda, false)}<td class="match-lane">${laneIconMarkup(lane, true)}</td>${side(redChampion, redPlayer, redKda, true)}</tr>`
   return `<article class="wl-panel cg">
     <div class="match-card-header">
       <h3 class="match-game">${esc(g.st)} <span aria-hidden="true">·</span> Jogo ${g.g}</h3>
@@ -140,7 +145,7 @@ export function compCard(g, q, champions, index: number) {
           <th scope="col" aria-label="KDA do lado vermelho">KDA</th>
           <th scope="col" aria-label="Campeão e jogador do lado vermelho">Campeão</th>
         </tr></thead>
-        <tbody>${g.p.map(([l, cb, pb, kb, cr, pr, kr]) => `<tr>${side(cb, pb, kb, false)}<td class="match-lane">${laneIconMarkup(l, true)}</td>${side(cr, pr, kr, true)}</tr>`).join("")}</tbody>
+        <tbody>${g.p.map(row => laneRow(row.map(String) as LaneCells)).join("")}</tbody>
       </table>
     </div>
     ${draft}

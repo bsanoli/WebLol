@@ -4,12 +4,14 @@ import { idbGet } from "@/shared/api/local-keys"
 import { $, toast } from "@/shared/lib/dom"
 import { closeModal } from "../ui/login-dialog"
 import { stepId } from "../ui/login-steps"
+import { renderAdmin } from "../ui/admin"
 import { setSync, updateStatus } from "../ui/status"
 import { enterTeam, logout } from "../ui/team-step"
 import { GKEY, isSignedInAs, KEY, lsGet, preview, UKEY, user } from "./identity"
 import { clearTeamData, loadAdminKey, loadMembership } from "./membership"
 import { openRoute, startRouter, writeRoute, routeRoots } from "./router"
 import { session } from "./session"
+import { bindUiHooks } from "./ui-hooks"
 import { listenToCampChanges, readOfficial, sync } from "./sync"
 
 const MINUTE = 60_000
@@ -86,6 +88,7 @@ async function pollTeam() {
 
 /** Chamada uma vez pelo `app` depois que o HTML do painel existe. */
 export async function startPanel() {
+  bindUiHooks({ renderAdmin: () => void renderAdmin(), setSync, updateStatus })
   startRouter()
   listenToCampChanges()
   $("#logout").onclick = () => void logout()

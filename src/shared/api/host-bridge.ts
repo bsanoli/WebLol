@@ -11,7 +11,7 @@ export type HostNavigation = {
   onCopy?: () => void
 }
 
-export type HostImageSave = { id: string; shared: boolean; error?: string }
+type HostImageSave = { id: string; shared: boolean; error?: string }
 
 /** Prints e desenhos das táticas: o app principal guarda no navegador e, com time, no Firestore. */
 export type HostImages = {
@@ -36,7 +36,7 @@ export type FrameHandlers = {
 }
 
 /** Janela pai, ou `null` quando a tela roda sozinha ou o acesso é bloqueado. */
-export function hostWindow(): (Window & HostGlobals) | null {
+function hostWindow(): (Window & HostGlobals) | null {
   try {
     return window.parent !== window ? (window.parent as Window & HostGlobals) : null
   } catch {
@@ -68,6 +68,21 @@ export const hostTeamName = () => fromHost(host => host.TEAM_NAME?.(), "")
 /** Pede ao app principal para abrir um destino (rota, cópia de link). Fora de um iframe, não faz nada. */
 export function navigateHost(detail: HostNavigation) {
   window.frameElement?.dispatchEvent(new CustomEvent<HostNavigation>("weblol:navigate", { detail }))
+}
+
+/** A tela está dentro de um iframe do app principal (e não aberta sozinha). */
+export const isEmbedded = () => window.frameElement !== null
+
+/** Avisos sem dados que a tela manda ao app principal. */
+type HostSignal = "weblol:route-ready" | "weblol:analytics-clear"
+
+export function signalHost(name: HostSignal) {
+  window.frameElement?.dispatchEvent(new CustomEvent(name))
+}
+
+/** Entrega ao app principal os dados do painel de análise, que ele desenha na tela. */
+export function sendHostAnalytics<T extends object>(detail: T) {
+  window.frameElement?.dispatchEvent(new CustomEvent<T>("weblol:analytics", { detail }))
 }
 
 /** Funções que o app principal chama nesta janela. */

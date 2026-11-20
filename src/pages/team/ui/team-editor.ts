@@ -20,7 +20,7 @@ import type { ActiveSide } from "./team-session"
 import { $, eventTarget, champArt, compById, cur, esc, img, S, save, toast, touch } from "./team-store"
 import { mountTacticNotesIn } from "./team-tactic-notes"
 // Arte em alta (1215×717) direto do Data Dragon; se não carregar, usa a cópia local menor.
-export function pickArt(name: string) {
+function pickArt(name: string) {
   const local = name ? champArt(name)?.splash : ""
   if (!local) return ""
   const id = local.match(/splash\/(.+)\.webp$/)?.[1]
@@ -128,7 +128,7 @@ export function renderEditor() {
   else if (previousView !== view) revealContent(editor, true)
   else showPickFeedback?.()
 }
-export const focusDraftTarget = (lane: string, side: ActiveSide = session.side) =>
+const focusDraftTarget = (lane: string, side: ActiveSide = session.side) =>
   $(`#editor [data-draft-target="${lane}"][data-draft-side="${side}"]`)?.focus({ preventScroll: true })
 $("#v-comps").addEventListener("input", e => {
   if (eventTarget(e).id !== "cname") return
@@ -167,7 +167,7 @@ $("#editor").addEventListener("change", e => {
     $(`[data-pick-position="${i}"][data-draft-side="${side}"] + .team-select button`)?.focus({ preventScroll: true }),
   )
 })
-export function reorderChampion(name: string, lane: ChampionSlot, comp: Composition = target()) {
+function reorderChampion(name: string, lane: ChampionSlot, comp: Composition = target()) {
   const champions = championsOf(comp, lane),
     index = champions.indexOf(name)
   if (index < 0) return
@@ -181,7 +181,7 @@ export function reorderChampion(name: string, lane: ChampionSlot, comp: Composit
   renderGrid()
   focusDraftTarget(lane)
 }
-export function removeChampion(name: string, lane: ChampionSlot, comp: Composition = target()) {
+function removeChampion(name: string, lane: ChampionSlot, comp: Composition = target()) {
   setChampions(
     comp,
     lane,
@@ -247,7 +247,7 @@ $("#editor").addEventListener("click", e => {
   if (ln && S.view === "tactics") openTacticsPicker()
 })
 // Em Táticas o seletor abre em diálogo e mostra o slot escolhido.
-export function openTacticsPicker() {
+function openTacticsPicker() {
   openPicker()
   renderGrid()
   renderTarget()

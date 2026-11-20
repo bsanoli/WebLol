@@ -3,6 +3,7 @@ import type { Change } from "@/shared/lib/team-changes"
 import { dbDel, dbGet, dbList } from "@/shared/api/firestore"
 import { ADMINS } from "@/shared/config/admins"
 import { dispId, safeName } from "@/shared/lib/account-id"
+import { parseOfficial, parseSubmission } from "./external-data"
 import { teamPath } from "./identity"
 import { session, type MemberRow, type Official, type Team } from "./session"
 
@@ -34,16 +35,16 @@ async function readSubmissions(rows: EnvelopeRow[]) {
   const done = new Set((session.off?.log || []).map(entry => entry.sid))
   const found: (Submission | BrokenSubmission)[] = []
   for (const row of rows) {
-    try {
-      const sent = { ...JSON.parse(String(row.json)), doc: row.id } as Submission
-      if (done.has(sent.id)) {
-        await dbDel(teamPath("envios"), row.id).catch(() => {})
-        continue
-      }
-      found.push(sent)
-    } catch {
+    const parsed = parseSubmission(row.json)
+    if (!parsed) {
       found.push({ id: row.id, doc: row.id, from: row.from || "", isBroken: true })
+      continue
     }
+    if (done.has(parsed.id)) {
+      await dbDel(teamPath("envios"), row.id).catch(() => {})
+      continue
+    }
+    found.push({ ...parsed, doc: row.id })
   }
   return found.sort((a, b) => ("at" in a ? a.at : 0) - ("at" in b ? b.at : 0))
 }
@@ -51,7 +52,7 @@ async function readSubmissions(rows: EnvelopeRow[]) {
 async function readTeamVersion(team: Team): Promise<AdminTeam> {
   try {
     const doc = await dbGet(`times/${team.id}/dados`, "oficial")
-    return { ...team, off: doc ? (JSON.parse(String(doc.json)) as Official) : null }
+    return { ...team, off: doc ? parseOfficial(doc.json) : null }
   } catch {
     return { ...team, off: null }
   }

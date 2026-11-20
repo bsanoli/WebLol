@@ -1,4 +1,3 @@
-// @ts-nocheck -- Integração legada com o DOM e dados locais.
 import { revealContent } from "@/shared/lib/motion"
 import { WAVE_HTML } from "./wave-guide"
 
@@ -73,7 +72,7 @@ const OBJ = [
     p: "Voltou para 20:00 na temporada 2026 (patch 26.1).",
   },
 ]
-const CAMPS = [
+const CAMPS: [string, string, string, number][] = [
   ["Buffs (Azul / Vermelho)", "0:55", "5:00", 300],
   ["Scuttle (caranguejo do rio)", "2:55", "2:30", 150],
   ["Lobos / Aves (Raptors)", "0:55", "2:15", 135],
@@ -93,7 +92,7 @@ function parseGameTime(value: string) {
   const seconds = Number(parts[2] ?? 0)
   return seconds < 60 ? Number(parts[1]) * 60 + seconds : null
 }
-const fmt = s => `${Math.floor(s / 60)}:${String(s % 60).padStart(2, "0")}`
+const fmt = (s: number) => `${Math.floor(s / 60)}:${String(s % 60).padStart(2, "0")}`
 
 function respawnCalculator(id: string, name: string, seconds: number) {
   return `<div class="calc">
@@ -104,8 +103,23 @@ function respawnCalculator(id: string, name: string, seconds: number) {
   </div>`
 }
 /* ===== Conhecimento: controle de wave ===== */
-export function mountKnowledge({ getState, save, publishTeamRoute, mountSectionTabs }) {
-  const $ = selector => document.querySelector(selector)
+type SectionTabOption = { value: string; label: string; icon?: string }
+type KnowledgeDeps = {
+  getState: () => { kTab?: string }
+  save: () => void
+  publishTeamRoute: (view: "know") => void
+  mountSectionTabs: (
+    host: Element,
+    label: string,
+    value: string,
+    options: SectionTabOption[],
+    change: (value: string) => void,
+  ) => void
+}
+
+export function mountKnowledge({ getState, save, publishTeamRoute, mountSectionTabs }: KnowledgeDeps) {
+  const $ = <T extends HTMLElement = HTMLElement>(selector: string) => document.querySelector(selector) as T
+  const calcInput = (event: Event) => (event.target as Element).closest<HTMLInputElement>("[data-o]")
   function renderKnow() {
     const S = getState()
     const kt = S.kTab || "obj"
@@ -159,7 +173,7 @@ export function mountKnowledge({ getState, save, publishTeamRoute, mountSectionT
     }
     know.dataset.activeTab = kt
     mountSectionTabs(
-      know.querySelector(".ktabs"),
+      know.querySelector(".ktabs") as Element,
       "Seção de conhecimento",
       kt,
       [
@@ -168,7 +182,7 @@ export function mountKnowledge({ getState, save, publishTeamRoute, mountSectionT
       ],
       value => {
         S.kTab = value
-        save(false)
+        save()
         renderKnow()
         publishTeamRoute("know")
       },
@@ -178,24 +192,28 @@ export function mountKnowledge({ getState, save, publishTeamRoute, mountSectionT
     if (previousTab && previousTab !== kt) revealContent($("#panel-" + kt))
   }
   $("#know").addEventListener("input", event => {
-    const input = event.target.closest("[data-o]")
+    const input = calcInput(event)
     if (!input) return
     const time = parseGameTime(input.value)
+    const calc = input.parentElement
+    const result = calc?.querySelector(".r")
+    if (!calc || !result) return
     if (time != null || !input.value.trim()) {
       input.removeAttribute("aria-invalid")
-      input.parentElement.querySelector(".calc-error").textContent = ""
+      const error = calc.querySelector(".calc-error")
+      if (error) error.textContent = ""
     }
-    const result = input.parentElement.querySelector(".r")
     const next = time == null ? "—" : fmt(time + Number(input.dataset.o))
     if (result.textContent === next) return
     result.textContent = next
     if (time != null) revealContent(result, true)
   })
   $("#know").addEventListener("focusout", event => {
-    const input = event.target.closest("[data-o]")
+    const input = calcInput(event)
     if (!input || !input.value.trim() || parseGameTime(input.value) != null) return
     input.setAttribute("aria-invalid", "true")
-    input.parentElement.querySelector(".calc-error").textContent = "Use minutos e segundos, como 12:30."
+    const error = input.parentElement?.querySelector(".calc-error")
+    if (error) error.textContent = "Use minutos e segundos, como 12:30."
   })
 
   return renderKnow

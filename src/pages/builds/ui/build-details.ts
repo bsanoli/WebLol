@@ -340,7 +340,7 @@ type Matchup = [opponent: string, games: number, wins: number, ...stats: number[
 const matchups: Record<string, Record<string, (string | number)[][]>> = DATA.matchups
 export const MATCHUP_PAGE_SIZE = 5
 
-export function orderedMatchups(position: string, champion: string) {
+function orderedMatchups(position: string, champion: string) {
   return (matchups[position]?.[champion] ?? [])
     .filter(
       (row): row is Matchup =>

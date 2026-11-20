@@ -48,6 +48,26 @@ describe("compositionFromSaved", () => {
   })
 })
 
+describe("bans nos dois formatos salvos", () => {
+  const newFormat = { id: "n", name: "Nova", team: "mine", lanes: { top: ["Ornn"] }, bans: ["Zed"], updated: 1 }
+
+  it("lê bans no formato novo e no atual como a mesma lista", () => {
+    expect(compositionFromSaved(newFormat)).toMatchObject({ bans: ["Zed"] })
+    expect(compositionFromSaved(oursSaved)).toMatchObject({ bans: ["Zed"] })
+  })
+
+  it("com os dois presentes, vale lanes.ban (o site antigo grava só ele)", () => {
+    const both = { ...newFormat, lanes: { top: [], ban: ["Ahri"] } }
+    expect(compositionFromSaved(both)).toMatchObject({ bans: ["Ahri"] })
+  })
+
+  it("continua gravando em lanes.ban (etapa 1 da migração)", () => {
+    const back = compositionToSaved(compositionFromSaved(newFormat)) as unknown as Record<string, unknown>
+    expect(back.lanes).toEqual({ top: ["Ornn"], ban: ["Zed"] })
+    expect(back).not.toHaveProperty("bans")
+  })
+})
+
 describe("ida e volta", () => {
   it.each([oursSaved, enemySaved, { id: "x", name: "Antiga", lanes: {} }, { id: "y", team: "outro" }])(
     "devolve o mesmo JSON, com a mesma ordem das chaves (%#)",

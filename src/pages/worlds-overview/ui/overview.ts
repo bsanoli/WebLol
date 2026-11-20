@@ -1,4 +1,3 @@
-// @ts-nocheck -- Integração legada com o DOM; os módulos extraídos mantêm seus tipos próprios.
 import { iconMarkup, laneIconMarkup } from "@/shared/ui/icon"
 import DATA from "@dataset/summary"
 import { lolAsset, lolChampion } from "@/entities/champion"
@@ -27,8 +26,9 @@ export function renderKpis() {
   // KPIs
   const topBan = [...C].sort((a, b) => b.bans - a.bans)[0],
     topPick = [...C].sort((a, b) => b.picks - a.picks)[0]
-  if (topBan && topPick)
-    document.getElementById("kpis").innerHTML = [
+  const kpis = document.getElementById("kpis")
+  if (kpis && topBan && topPick)
+    kpis.innerHTML = [
       [G, "jogos"],
       [C.length, "campeões usados"],
       [topBan.name, `mais banido · ${pct(topBan.bans / G)}`],
@@ -47,16 +47,19 @@ function championSummaries() {
   })
 }
 
+const laneStats = (champion: (typeof C)[number], lane: string) =>
+  (champion.lanes as Record<string, { picks: number } | undefined>)[lane]
+
 function overview() {
   const lanes = LANES.map(([lane]) => {
     const id = lane.toLowerCase()
-    const champions = C.filter(c => c.lanes[lane])
-      .sort((a, b) => b.lanes[lane].picks - a.lanes[lane].picks)
+    const champions = C.filter(c => laneStats(c, lane))
+      .sort((a, b) => (laneStats(b, lane)?.picks ?? 0) - (laneStats(a, lane)?.picks ?? 0))
       .slice(0, 5)
     const rows = champions
       .map(c => {
         const name = esc(c.name)
-        const games = c.lanes[lane].picks
+        const games = laneStats(c, lane)?.picks ?? 0
         return `<tr>
         <th scope="row"><span class="lane-champion">${ico(c.name)}<span title="${name}">${name}</span></span></th>
         <td data-tip="${name} jogou ${games} vezes de ${lane}">${games}</td>
@@ -77,10 +80,12 @@ function overview() {
   return `<div id="analytics-root"></div><section class="lane-overview"><h2>Mais escolhidos por posição</h2><p class="hint">A taxa de vitória considera todos os jogos do campeão.</p><div class="lane-grid">${lanes}</div></section>`
 }
 
-function wireLaneOverview(view, go) {
-  view.querySelector(".lane-grid").onclick = event => {
-    const card = event.target.closest(".lane-card")
-    if (!card || event.ctrlKey || event.metaKey || event.shiftKey || event.altKey) return
+function wireLaneOverview(view: ParentNode, go: (lane: string) => void) {
+  const grid = view.querySelector<HTMLElement>(".lane-grid")
+  if (!grid) return
+  grid.onclick = event => {
+    const card = (event.target as Element).closest<HTMLElement>(".lane-card")
+    if (!card?.dataset.go || event.ctrlKey || event.metaKey || event.shiftKey || event.altKey) return
     event.preventDefault()
     go(card.dataset.go)
     window.scrollTo({ top: 0, behavior: "instant" })

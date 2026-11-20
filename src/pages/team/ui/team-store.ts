@@ -21,7 +21,7 @@ const initials = (name: string) =>
     .join("")
     .slice(0, 2)
     .toUpperCase() || name.slice(0, 2)
-export const byName = (name: string) => CH.find(champion => champion.n === name)
+const byName = (name: string) => CH.find(champion => champion.n === name)
 export const champArt = (name: string) => lolChampion(byName(name)?.id || name)
 export const img = (name: string) =>
   `<span class="av" aria-hidden="true">${esc(initials(name))}${lolImage(champArt(name)?.portrait, "champ-portrait")}</span>`

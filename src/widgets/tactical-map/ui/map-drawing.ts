@@ -1,7 +1,7 @@
 import type { MapPoint } from "../model/faelights"
 
 type StrokeKind = "arrow" | "freehand" | "freehand-arrow"
-type Line = { c: string; pts: MapPoint[]; kind?: StrokeKind; width?: number; dashed?: boolean }
+export type Line = { c: string; pts: MapPoint[]; kind?: StrokeKind; width?: number; dashed?: boolean }
 
 export const hasArrowhead = (line: Line) => line.kind !== "freehand"
 

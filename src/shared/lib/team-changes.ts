@@ -1,11 +1,13 @@
 // Diferenças entre a Área do time local e a versão oficial: o que entra num envio e como aparece na lista.
 // Os itens seguem o formato salvo (`team`, `draft.rival`, `lanes.*`): é o que o Firestore guarda.
+// Os bans vêm em `lanes.ban` (formato atual) ou em `bans` (formato novo, ADR 0007); os dois contam como o mesmo dado.
 export type ItemKind = "comp" | "play" | "tactic"
 export type ChangeOp = "add" | "edit" | "del"
 export type SharedItem = {
   id: string
   name?: string
   lanes?: Record<string, string[]>
+  bans?: string[]
   notes?: string
   team?: string
   tacticTeam?: string
@@ -39,8 +41,21 @@ export const shared = (state?: Partial<SharedData> | null): SharedData => ({
 })
 
 // Campos que mudam sozinhos (jogada ao vivo, data de edição) não contam como alteração.
+/** Posições da composição com os bans como `ban`, venham de `lanes.ban` ou de `bans`. */
+function savedPositions(item: SharedItem) {
+  const lanes = item.lanes || {}
+  return item.bans && !("ban" in lanes) ? { ...lanes, ban: item.bans } : lanes
+}
+
+/** Leva os bans de `bans` para `lanes.ban`, para comparar composições gravadas nos dois formatos. */
+function withBansInLanes(item: SharedItem): SharedItem {
+  if (!item.bans) return item
+  const { bans: _bans, ...rest } = item
+  return { ...rest, lanes: savedPositions(item) }
+}
+
 const normItem = (kind: ItemKind, item: SharedItem) => {
-  const copy = { ...item }
+  const copy = { ...(kind === "comp" ? withBansInLanes(item) : item) }
   if (kind === "play") delete copy.live
   else delete copy.updated
   return JSON.stringify(copy)
@@ -103,7 +118,7 @@ function describeNew(change: Change) {
   const { after } = change
   if (!after) return ""
   if (change.kind === "comp") {
-    const lanes = Object.entries(after.lanes || {})
+    const lanes = Object.entries(savedPositions(after))
       .map(([lane, champions]) =>
         champions.length ? `<b>${lane.toUpperCase()}</b> ${escapeHtml(champions.join(", "))}` : "",
       )
@@ -116,9 +131,11 @@ function describeNew(change: Change) {
 }
 
 function describeComp(a: SharedItem, b: SharedItem, out: string[]) {
-  for (const lane of Object.keys({ ...a.lanes, ...b.lanes })) {
-    const now = a.lanes?.[lane] || []
-    const before = b.lanes?.[lane] || []
+  const lanesNow = savedPositions(a)
+  const lanesBefore = savedPositions(b)
+  for (const lane of Object.keys({ ...lanesNow, ...lanesBefore })) {
+    const now = lanesNow[lane] || []
+    const before = lanesBefore[lane] || []
     const added = now.filter(x => !before.includes(x))
     const removed = before.filter(x => !now.includes(x))
     if (added.length || removed.length)

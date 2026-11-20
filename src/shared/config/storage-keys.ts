@@ -45,5 +45,3 @@ export const STORAGE_PREFIXES = {
   /** Texto (data URL): print de tática guardado neste navegador, em `lol-img-<id>`. */
   screenshotCache: "lol-img-",
 } as const
-
-export type StorageKey = (typeof STORAGE_KEYS)[keyof typeof STORAGE_KEYS]

@@ -53,7 +53,7 @@ git config blame.ignoreRevsFile .git-blame-ignore-revs
 
 A interface usa React, TypeScript, Tailwind CSS e componentes shadcn/ui. O Vite compila quatro entradas de `src/` em dois builds: `index.html`, `worlds.html` e `camp.html` no build normal, e `soloq.html` com `--mode soloq`, que usa os dados de `src/data/soloq/`. Os dados do Worlds e o catálogo da Riot ficam em JSON, em `src/data/`. A [arquitetura](docs/arquitetura.md) explica como o shell e os iframes se comunicam.
 
-Use TypeScript para código novo da aplicação. As exceções são `public/assets/shell.js` e `public/assets/sync.js`, que compartilham o estado legado de autenticação e sincronização, e os utilitários Node existentes em `scripts/*.mjs`. Nove arquivos legados ainda têm a verificação de tipos desativada com `@ts-nocheck`, listados na [auditoria](docs/auditoria-codebase.md#3-tipos-e-tamanho). O código novo passa pelo `typecheck` normal.
+Use TypeScript para código novo da aplicação. A exceção são os utilitários Node em `scripts/*.mjs`. Nenhum arquivo usa `@ts-nocheck`, e o `check:architecture` proíbe novos.
 
 ## Documentação
 

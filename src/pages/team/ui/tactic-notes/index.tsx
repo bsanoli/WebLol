@@ -1,7 +1,6 @@
 import { createRoot, type Root } from "react-dom/client"
 import { TacticNotes, type TacticNotesProps } from "./tactic-notes"
 
-export type { NoteChampion } from "./champion-mention"
 export type { TacticNotesProps }
 
 const roots = new WeakMap<Element, Root>()

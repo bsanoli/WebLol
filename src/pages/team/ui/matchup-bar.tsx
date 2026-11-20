@@ -7,7 +7,7 @@ import type { DraftSide } from "../model/local-state"
 import { ActionMenu, Icon, keepFocusOutsideFrame, renderControl, useTeamOverlay } from "./team-controls"
 
 /** Composição como aparece nas listas da barra: nome, prévia (HTML dos retratos) e campeões para a busca. */
-export type MatchupItem = { id: string; name: string; title: string; preview: string; champions: string[] }
+type MatchupItem = { id: string; name: string; title: string; preview: string; champions: string[] }
 
 export type MatchupBarProps = {
   ours: MatchupItem[]

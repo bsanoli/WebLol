@@ -1,15 +1,15 @@
-// @ts-nocheck -- Integração legada com o DOM e dados locais.
 import { askName, confirmAction } from "@/shared/ui/dialog-controls"
 import { iconMarkup } from "@/shared/ui/icon"
 import { TOKS, blankPlay, ensureTeamPlays, initialFrame, preset } from "@/entities/tactical-play"
-import { readWards } from "../model/wards"
-import { readWaves } from "../model/battlefield"
+import { readWards, type Ward } from "../model/wards"
+import { readWaves, type Wave } from "../model/battlefield"
+import type { MapPoint } from "../model/faelights"
 import { mountBattlefield } from "./battlefield-layer"
 import { mountMapCamera } from "./map-camera"
 import { mountMapCompositions } from "./map-compositions"
 import { mountMapContextMenu } from "./map-context-menu"
 import { mountMapCursorColor } from "./map-cursor-color"
-import { hasArrowhead, mountMapDrawing } from "./map-drawing"
+import { hasArrowhead, mountMapDrawing, type Line } from "./map-drawing"
 import { renderMapFallback } from "./map-fallback"
 import {
   mapQuickTools,
@@ -18,6 +18,7 @@ import {
   mountMapTools,
   mountMapVision,
   waveToolSide,
+  type Tool,
 } from "./map-tools"
 import { mountChampionLayer } from "./champion-layer"
 import { mountChampionSize } from "./champion-size"
@@ -26,8 +27,24 @@ import { mountMapHistory } from "./map-history"
 import { mountFaelightLayer } from "./faelight-layer"
 import { mountWardLayer } from "./ward-layer"
 import { mountMapPanel, mountStepPages } from "./map-panel"
+import { $ } from "@/shared/lib/dom"
+import { mountMapImage } from "./map-image"
+import { playOptionsMarkup, stepListMarkup, stepStatus } from "./step-markup"
+import {
+  asFramePositions,
+  clone,
+  type Frame,
+  type FrameChanges,
+  type HistorySnapshot,
+  type MapComposition,
+  type MapDeps,
+  type MapSession,
+  type Play,
+  type Step,
+  type TeamState,
+} from "./map-session"
 
-export function mountTacticalMap({
+export function mountTacticalMap<Comp extends MapComposition>({
   getState,
   save,
   publishTeamRoute,
@@ -42,19 +59,27 @@ export function mountTacticalMap({
   mountToolGroup,
   mountSectionTabs,
   clearTeamControls,
-}) {
-  const $ = selector => document.querySelector(selector)
-  const clearMap = $("#map-clear-all")
-  const clearWaves = $("#map-clear-waves")
-  const clearStrokes = $("#map-clear-strokes")
-  const resetMap = $("#map-reset")
+}: MapDeps<Comp>) {
+  const state = () => getState() as TeamState<Comp>
+  const clearMap = $<HTMLButtonElement>("#map-clear-all")
+  const clearWaves = $<HTMLButtonElement>("#map-clear-waves")
+  const clearStrokes = $<HTMLButtonElement>("#map-clear-strokes")
+  const resetMap = $<HTMLButtonElement>("#map-reset")
   const initialPositions = initialFrame().pos
   const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)")
-  const M = { tool: "move", sel: -1, playing: false }
-  const plays = () => ensureTeamPlays(getState(), uid)
-  const play = () => plays().find(p => p.id === getState().curPlay)
-  const clone = o => JSON.parse(JSON.stringify(o))
-  const snapshotFrame = ({ pos, lines, wards, waves, destroyedTowers }) =>
+  const M: MapSession = {
+    tool: "move",
+    sel: -1,
+    playing: false,
+    edit: false,
+    transition: null,
+    frame: null,
+    playback: null,
+  }
+  const plays = () => ensureTeamPlays(getState(), uid) as Play[]
+  const play = () => plays().find(p => p.id === getState().curPlay) as Play
+  const newPlay = (name?: string) => blankPlay(uid, name) as unknown as Play
+  const snapshotFrame = ({ pos, lines, wards, waves, destroyedTowers }: Pick<Frame, "pos"> & Partial<Frame>): Frame =>
     clone({
       pos,
       lines: lines ?? [],
@@ -75,32 +100,7 @@ export function mountTacticalMap({
   const canEdit = canChangeFrame
   const visibleFrame = () => M.frame ?? play().live
 
-  renderMapFallback($("#schem"))
-  function setMapImg() {
-    const image = $("#mapimg")
-    const syncMapImage = () => {
-      image.toggleAttribute("data-map-visible", getState().useImg !== false && image.complete && image.naturalWidth > 0)
-      wardLayer.render()
-      battlefield.render()
-      battlefield.renderTowers()
-    }
-    if (getState().useImg !== false) {
-      const source = "assets/lol/map/summoners-rift-realista.jpeg"
-      image.onload = syncMapImage
-      image.onerror = syncMapImage
-      if (image.getAttribute("src") !== source) image.src = source
-    }
-    syncMapImage()
-  }
-  function renderMapImageSwitch() {
-    mountMapSwitch($("#map-image-control"), "Usar mapa realista", getState().useImg !== false, checked => {
-      getState().useImg = checked
-      save(false)
-      setMapImg()
-      renderMapImageSwitch()
-    })
-  }
-
+  renderMapFallback(document.querySelector<SVGSVGElement>("#schem")!)
   const map = $("#map")
   mountChampionSize($("#map-champion-size"), map)
   const viewport = $("#map-viewport")
@@ -125,12 +125,17 @@ export function mountTacticalMap({
     point: pt,
     portrait: img,
     champion: (side, role) =>
-      getState().comps.find(comp => comp.id === (side === "b" ? play().cb : play().cr))?.lanes?.[role]?.[0],
+      state().comps.find(comp => comp.id === (side === "b" ? play().cb : play().cr))?.lanes?.[role]?.[0],
   })
   const renderTokens = champions.render,
     placeTokens = champions.place
   const compositions = mountMapCompositions({
-    read: () => getState().comps.map(comp => ({ id: comp.id, name: comp.name, champions: compositionPreview(comp) })),
+    read: () =>
+      state().comps.map(comp => ({
+        id: comp.id,
+        name: comp.name,
+        champions: compositionPreview(comp).filter((name): name is string => Boolean(name)),
+      })),
     selected: side => (side === "b" ? play().cb : play().cr),
     choose: (side, id) => {
       if (!canEdit()) return
@@ -171,8 +176,8 @@ export function mountTacticalMap({
     onPlaced,
   })
   const historyActions = [
-    { label: "Desfazer", icon: "undo", button: $("#undo"), startsHistory: true },
-    { label: "Refazer", icon: "redo", button: $("#redo") },
+    { label: "Desfazer", icon: "undo", button: $<HTMLButtonElement>("#undo"), startsHistory: true },
+    { label: "Refazer", icon: "redo", button: $<HTMLButtonElement>("#redo") },
   ]
   const contextMenu = mountMapContextMenu(
     map,
@@ -213,7 +218,7 @@ export function mountTacticalMap({
     onAvailabilityChange: refreshMap,
   })
   const zoomFields = ["#map-stroke-width", "#map-stroke-style"]
-  zoomFields.forEach(selector => mountTeamSelect($(selector)))
+  zoomFields.forEach(selector => mountTeamSelect($<HTMLSelectElement>(selector)))
   function renderTowerSwitch() {
     mountMapSwitch($("#map-tower-range-control"), "Alcance das torres", battlefield.showTowers, checked => {
       battlefield.toggleTowers(checked)
@@ -235,7 +240,7 @@ export function mountTacticalMap({
     mountToolGroup,
     chooseTool: tool => selectTool(tool, true),
   })
-  function selectTool(tool, focusCursor) {
+  function selectTool(tool: Tool, focusCursor: boolean) {
     M.tool = tool
     drawing.reset()
     wardLayer.clearSelection()
@@ -263,10 +268,10 @@ export function mountTacticalMap({
     battlefield.render()
     updateClearMap()
   }
-  function commit(changes) {
+  function commit(changes: FrameChanges) {
     if (canEdit()) writeFrame(changes)
   }
-  function writeFrame(changes) {
+  function writeFrame(changes: FrameChanges) {
     if (!canChangeFrame()) return
     history.record()
     Object.assign(play().live, changes)
@@ -285,18 +290,19 @@ export function mountTacticalMap({
         TOKS.some(id => initialPositions[id].some((axis, index) => axis !== pos[id]?.[index])),
     )
   }
+  const clearArrows = $<HTMLButtonElement>("#clr")
   function updateClearMap() {
     const { lines, wards, waves } = play().live
     const hasWaves = readWaves(waves).length > 0
     const hasAnnotations = lines?.length || readWards(wards).length || hasWaves
-    $("#clr").disabled = !canEdit() || !lines?.some(hasArrowhead)
+    clearArrows.disabled = !canEdit() || !lines?.some(hasArrowhead)
     clearStrokes.disabled = !canEdit() || !lines?.some(line => !hasArrowhead(line))
     clearWaves.disabled = !canEdit() || !hasWaves
     clearMap.disabled = !canEdit() || !hasAnnotations
     resetMap.disabled = !canChangeFrame() || (getPerspective() === "all" && !frameHasChanges())
   }
-  $("#clr").onclick = () => {
-    if (!$("#clr").disabled) commit({ lines: play().live.lines.filter(line => !hasArrowhead(line)) })
+  clearArrows.onclick = () => {
+    if (!clearArrows.disabled) commit({ lines: play().live.lines.filter(line => !hasArrowhead(line)) })
   }
   clearStrokes.onclick = () => {
     if (!clearStrokes.disabled) commit({ lines: play().live.lines.filter(hasArrowhead) })
@@ -320,18 +326,21 @@ export function mountTacticalMap({
     }
     resetPerspective()
   }
-  document.querySelectorAll("[data-pre]").forEach(
+  document.querySelectorAll<HTMLElement>("[data-pre]").forEach(
     b =>
       (b.onclick = () => {
         if (!canEdit()) return
         history.record()
-        void animateTo({ ...snapshotFrame(play().live), pos: preset(b.dataset.pre) })
+        void animateTo({
+          ...snapshotFrame(play().live),
+          pos: asFramePositions(preset(b.dataset.pre as Parameters<typeof preset>[0])),
+        })
       }),
   )
-  const history = mountMapHistory({
+  const history = mountMapHistory<HistorySnapshot>({
     canEdit: canChangeFrame,
     capture: () => ({
-      pid: getState().curPlay,
+      pid: state().curPlay,
       live: clone(play().live),
       step: M.edit ? play().steps[M.sel] : undefined,
     }),
@@ -339,13 +348,13 @@ export function mountTacticalMap({
       const p = plays().find(candidate => candidate.id === pid)
       if (!p) return
       const stepIndex = step ? p.steps.indexOf(step) : -1
-      const previous = { pid, live: stepIndex >= 0 ? snapshotFrame(step) : p.live, step }
+      const previous = { pid, live: step && stepIndex >= 0 ? snapshotFrame(step) : p.live, step }
       p.live = live
-      if (getState().curPlay !== pid) {
-        getState().curPlay = pid
+      if (state().curPlay !== pid) {
+        state().curPlay = pid
         M.sel = -1
       }
-      if (stepIndex >= 0) {
+      if (step && stepIndex >= 0) {
         M.sel = stepIndex
         Object.assign(step, snapshotFrame(live))
       }
@@ -360,30 +369,13 @@ export function mountTacticalMap({
   // jogadas
   function renderPlays(highlightStep = false) {
     const p = play()
-    $("#psel").innerHTML = plays()
-      .map(
-        x =>
-          `<option value="${x.id}"${x.id === p.id ? " selected" : ""} data-description="${x.steps.length} ${x.steps.length === 1 ? "passo" : "passos"}">${esc(x.name)}</option>`,
-      )
-      .join("")
-    mountTeamSelect($("#psel"))
+    $<HTMLSelectElement>("#psel").innerHTML = playOptionsMarkup(plays(), p.id, esc)
+    mountTeamSelect($<HTMLSelectElement>("#psel"))
     compositions.render()
     const steps = $("#steps")
     clearTeamControls(steps)
-    steps.innerHTML =
-      p.steps
-        .map((step, index) => {
-          const number = index + 1
-          const current = index === M.sel
-          const name = esc(step.label || `Passo ${number}`)
-          return `<li data-i="${index}"${current ? ' class="on"' : ""}${current && highlightStep ? " data-step-highlight" : ""}>
-      <button type="button" class="map-step-select" data-slot="button" data-variant="ghost" data-size="icon-sm" data-step-select="${index}" aria-label="Selecionar passo ${number}"${current ? ' aria-current="step"' : ""}>${number}</button>
-      <input ${canEdit() ? "" : "readonly"} data-slot="input" data-lab="${index}" value="${name}" aria-label="Nome do passo ${number}" title="Renomear passo">
-      <button ${canEdit() ? "" : "disabled"} data-slot="button" data-variant="destructive" data-size="icon-sm" data-sdel="${index}" aria-label="Apagar passo ${number}">${iconMarkup("close")}</button>
-    </li>`
-        })
-        .join("") || '<li class="none" data-team-control></li>'
-    if (!p.steps.length) mountMapEmpty(steps.firstElementChild)
+    steps.innerHTML = stepListMarkup(p.steps, M.sel, highlightStep, canEdit(), esc)
+    if (!p.steps.length && steps.firstElementChild) mountMapEmpty(steps.firstElementChild)
     syncStepPages(p.steps.length, M.sel)
     renderStat()
     drawMapTools()
@@ -394,7 +386,7 @@ export function mountTacticalMap({
   }
   $("#psel").onchange = () => {
     stopPlayback()
-    getState().curPlay = $("#psel").value
+    state().curPlay = $<HTMLSelectElement>("#psel").value
     M.sel = -1
     wardLayer.clearSelection()
     drawing.reset()
@@ -405,9 +397,9 @@ export function mountTacticalMap({
   $("#pnew").onclick = async () => {
     const n = await askName("Nova jogada", "Jogada " + (plays().length + 1))
     if (n === undefined) return
-    const p = blankPlay(uid, n || undefined)
-    getState().plays.push(p)
-    getState().curPlay = p.id
+    const p = newPlay(n || undefined)
+    state().plays.push(p)
+    state().curPlay = p.id
     M.sel = -1
     save()
     renderPlays()
@@ -424,7 +416,7 @@ export function mountTacticalMap({
   $("#pdel").onclick = async () => {
     const p = play()
     if (!(await confirmAction(`Excluir a jogada "${p.name}"?`, "Excluir jogada"))) return
-    getState().plays = getState().plays.filter(x => x.id !== p.id)
+    state().plays = state().plays.filter(x => x.id !== p.id)
     plays()
     M.sel = -1
     save()
@@ -440,32 +432,32 @@ export function mountTacticalMap({
     save(false)
     flashStep()
   }
-  let tFl
+  let tFl: ReturnType<typeof setTimeout> | undefined
   function flashStep() {
-    const el = $("#sstat .ok")
+    const el = document.querySelector<HTMLElement>("#sstat .ok")
     if (!el) return
-    el.style.opacity = 1
+    el.style.opacity = "1"
     clearTimeout(tFl)
-    tFl = setTimeout(() => (el.style.opacity = 0), 900)
+    tFl = setTimeout(() => (el.style.opacity = "0"), 900)
   }
   function renderStat() {
     updateClearMap()
     history.update()
     const editingAllowed = canEdit()
-    $("#splay").disabled = Boolean(M.transition && !M.playing)
+    $<HTMLButtonElement>("#splay").disabled = Boolean(M.transition && !M.playing)
     const preview = getPerspective() !== "all"
     $("#map-preview-notice").hidden = !preview
-    document.querySelectorAll("#sadd,#sedit,[data-pre],#pnew,#pren,#pdel").forEach(button => {
+    document.querySelectorAll<HTMLButtonElement>("#sadd,#sedit,[data-pre],#pnew,#pren,#pdel").forEach(button => {
       button.disabled = !editingAllowed
     })
     compositions.setDisabled(!editingAllowed)
     $("#steps")
-      .querySelectorAll("[data-lab]")
+      .querySelectorAll<HTMLInputElement>("[data-lab]")
       .forEach(field => {
         field.readOnly = !editingAllowed
       })
     $("#steps")
-      .querySelectorAll("[data-sdel]")
+      .querySelectorAll<HTMLButtonElement>("[data-sdel]")
       .forEach(button => {
         button.disabled = !editingAllowed
       })
@@ -474,20 +466,10 @@ export function mountTacticalMap({
     const button = $("#sedit")
     const status = $("#sstat")
     button.classList.toggle("on", !!M.edit)
-    button.setAttribute("aria-pressed", M.edit)
+    button.setAttribute("aria-pressed", String(M.edit))
     status.classList.toggle("ed", !!editingStep)
 
-    let icon = ""
-    let message = steps.length ? "" : "Salve o mapa em <b>Novo passo</b>."
-    if (M.playing) {
-      icon = "play"
-      message = "Reproduzindo..."
-    } else if (M.edit) {
-      icon = "edit"
-      message = editingStep
-        ? `Editando o <b>passo ${M.sel + 1}</b>. <span class="ok">${iconMarkup("check")} salvo</span>`
-        : "Selecione um passo para editar."
-    }
+    const { icon, message } = stepStatus({ steps, sel: M.sel, playing: M.playing, edit: M.edit })
     status.innerHTML = `${icon ? iconMarkup(icon) : ""}<span>${message}</span>`
     status.hidden = !message
   }
@@ -508,17 +490,19 @@ export function mountTacticalMap({
     if (M.edit && M.sel < 0) toast("Agora clique no passo que quer editar")
   }
   $("#steps").addEventListener("input", e => {
-    const i = e.target.dataset.lab
+    const field = e.target as HTMLInputElement
+    const i = field.dataset.lab
     if (i == null || !canEdit()) return
-    play().steps[+i].label = e.target.value
+    play().steps[+i].label = field.value
     save(false)
   })
   $("#steps").onclick = async e => {
-    const d = e.target.closest("[data-sdel]")
+    const target = e.target as Element
+    const d = target.closest<HTMLElement>("[data-sdel]")
     const p = play()
     if (d) {
       if (!canEdit()) return
-      const i = +d.dataset.sdel
+      const i = Number(d.dataset.sdel)
       if (!(await confirmAction(`Apagar o passo ${i + 1}?`, "Apagar passo"))) return
       p.steps.splice(i, 1)
       if (M.sel === i) M.sel = -1
@@ -527,21 +511,25 @@ export function mountTacticalMap({
       renderPlays()
       return
     }
-    const li = e.target.closest("li[data-i]")
+    const li = target.closest<HTMLElement>("li[data-i]")
     if (!li || M.playing || M.transition) return
     const index = Number(li.dataset.i)
     if (index === M.sel) return
-    const active = e.target.closest("[data-step-select], [data-lab]")
-    const field = active?.matches("[data-lab]")
-    const caret = field && [active.selectionStart, active.selectionEnd]
+    const active = target.closest<HTMLElement>("[data-step-select], [data-lab]")
+    const caret =
+      active instanceof HTMLInputElement && active.matches("[data-lab]")
+        ? ([active.selectionStart, active.selectionEnd] as const)
+        : null
     void goStep(index)
     if (active) {
-      const replacement = $(field ? `[data-lab="${index}"]` : `[data-step-select="${index}"]`)
+      const replacement = document.querySelector<HTMLInputElement>(
+        caret ? `[data-lab="${index}"]` : `[data-step-select="${index}"]`,
+      )
       replacement?.focus({ preventScroll: true })
       if (caret) replacement?.setSelectionRange(...caret)
     }
   }
-  function goStep(i) {
+  function goStep(i: number) {
     const p = play()
     if (i < 0 || i >= p.steps.length) return
     M.sel = i
@@ -552,16 +540,16 @@ export function mountTacticalMap({
   }
   $("#sprev").onclick = () => !M.playing && !M.transition && goStep(M.sel - 1)
   $("#snext").onclick = () => !M.playing && !M.transition && goStep(M.sel + 1)
-  const stepSpeed = $("#spd")
+  const stepSpeed = $<HTMLInputElement>("#spd")
   stepSpeed.oninput = () => {
     const seconds = Number(stepSpeed.value).toLocaleString("pt-BR")
     $("#spdv").textContent = `${seconds} s`
     stepSpeed.setAttribute("aria-valuetext", `${seconds} ${stepSpeed.valueAsNumber === 1 ? "segundo" : "segundos"}`)
   }
-  function animateTo(target) {
+  function animateTo(target: Frame): Promise<void> {
     const p = play(),
       from = snapshotFrame(p.live)
-    const duration = Number($("#spd").value) * 1000
+    const duration = Number(stepSpeed.value) * 1000
     const transition = {}
     M.transition = transition
     renderStat()
@@ -585,7 +573,7 @@ export function mountTacticalMap({
     }
     if (reducedMotion.matches) {
       finish()
-      return M.playing ? new Promise(resolve => setTimeout(resolve, duration)) : Promise.resolve()
+      return M.playing ? new Promise<void>(resolve => setTimeout(resolve, duration)) : Promise.resolve()
     }
     return animatePieces(
       from,
@@ -593,7 +581,7 @@ export function mountTacticalMap({
       duration,
       () => M.transition === transition && play() === p,
       pieces => {
-        Object.assign(M.frame, pieces)
+        if (M.frame) Object.assign(M.frame, pieces)
         placeTokens(pieces.pos)
         battlefield.render()
       },
@@ -629,7 +617,7 @@ export function mountTacticalMap({
     M.sel = 0
     renderPlays(true)
     for (let i = 1; i < p.steps.length; i++) {
-      await new Promise(resolve => setTimeout(resolve, 450))
+      await new Promise<void>(resolve => setTimeout(resolve, 450))
       if (M.playback !== playback) return
       M.sel = i
       renderPlays(true)
@@ -640,22 +628,30 @@ export function mountTacticalMap({
     renderPlays()
   }
 
-  for (const image of $("#v-map").querySelectorAll("img[data-src]")) {
-    image.src = image.dataset.src
+  for (const image of $("#v-map").querySelectorAll<HTMLImageElement>("img[data-src]")) {
+    image.src = image.dataset.src ?? ""
     delete image.dataset.src
   }
-  renderMapImageSwitch()
-  setMapImg()
+  mountMapImage({
+    getState: state,
+    save,
+    mountMapSwitch,
+    onChange: () => {
+      wardLayer.render()
+      battlefield.render()
+      battlefield.renderTowers()
+    },
+  })
 
   return {
     renderPlays,
-    selectPlay(id) {
-      if (getState().curPlay === id) return
+    selectPlay(id: string) {
+      if (state().curPlay === id) return
       stopPlayback()
       M.sel = -1
       drawing.reset()
       wardLayer.clearSelection()
-      getState().curPlay = id
+      state().curPlay = id
     },
   }
 }

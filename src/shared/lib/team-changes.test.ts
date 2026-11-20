@@ -87,3 +87,20 @@ suite("describe", () => {
     expect(shared({ comps: [comp("a")], other: 1 } as never)).toEqual({ comps: [comp("a")], plays: [], tactics: [] })
   })
 })
+
+suite("bans nos dois formatos", () => {
+  const old = comp("a")
+  const novo = { ...comp("a"), lanes: { top: ["Ornn"], jng: [], mid: ["Orianna"], adc: [], sup: [] }, bans: ["Zed"] }
+
+  it("a mesma composição nos dois formatos não conta como alteração", () => {
+    expect(diff({ comps: [novo] }, { comps: [old] })).toEqual([])
+    expect(diff({ comps: [old] }, { comps: [novo] })).toEqual([])
+  })
+
+  it("mudar um ban entre formatos aparece como alteração descrita", () => {
+    const changed = { ...novo, bans: ["Ahri"] }
+    const [change] = diff({ comps: [changed] }, { comps: [old] })
+    expect(change?.op).toBe("edit")
+    expect(describe(change!)).toContain("BAN")
+  })
+})
