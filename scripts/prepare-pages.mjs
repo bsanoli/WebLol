@@ -1,5 +1,5 @@
 import { createHash } from "node:crypto"
-import { cpSync, existsSync, readFileSync, rmSync, statSync, writeFileSync } from "node:fs"
+import { cpSync, existsSync, mkdirSync, readFileSync, rmSync, statSync, writeFileSync } from "node:fs"
 import { join } from "node:path"
 import { fileURLToPath } from "node:url"
 
@@ -14,15 +14,28 @@ statSync(join(distSoloq, "soloq.html"))
 cpSync(join(distSoloq, "assets"), join(dist, "assets"), { recursive: true })
 cpSync(join(distSoloq, "soloq.html"), join(dist, "soloq.html"))
 
-// The GitHub Pages source is the repository root. These paths are generated.
-// Check the build before replacing any of the files served by Pages.
+// Sem argumento, grava na raiz do repositório (fonte "Deploy from a branch" do Pages). Com `--out=_site`, grava só
+// nessa pasta, que o workflow deploy.yml publica como artefato (docs/decisoes/0003-publicacao-por-artefato.md).
+// Só `--out=_site` é aceito: a pasta é apagada antes da cópia, e outro valor poderia apagar o repositório.
+const outArgument = process.argv.slice(2).find(argument => argument.startsWith("--out"))
+if (outArgument !== undefined && outArgument !== "--out=_site") {
+  console.error(`Argumento não aceito: "${outArgument}". Use --out=_site ou nenhum argumento.`)
+  process.exit(1)
+}
+const target = outArgument ? join(root, "_site") : root
+
+// Confere o build antes de substituir qualquer arquivo servido pelo Pages.
 for (const path of pages) statSync(join(dist, path))
 
-const assets = join(root, "assets")
-if (existsSync(assets)) rmSync(assets, { recursive: true })
+if (outArgument) {
+  rmSync(target, { recursive: true, force: true })
+  mkdirSync(target, { recursive: true })
+} else {
+  rmSync(join(target, "assets"), { recursive: true, force: true })
+}
 for (const path of pages) {
   const source = join(dist, path)
-  const destination = join(root, path)
+  const destination = join(target, path)
   if (path.endsWith(".html")) {
     writeFileSync(destination, versionPublicAssets(readFileSync(source, "utf8").replace(/\r+\n/g, "\n")))
   } else {

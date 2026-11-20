@@ -1,6 +1,6 @@
 # 0003. Publicar no GitHub Pages por artefato do GitHub Actions
 
-- **Situação:** proposta. Depende do Bruno: o repositório `bsanoli/WebLol` é dele, e só quem tem permissão de admin muda a configuração do Pages. Fabiano tem permissão de escrita.
+- **Situação:** em transição. `deploy.yml` e `prepare-pages.mjs --out=_site` entraram na Onda 2b; faltam o Bruno trocar a fonte do Pages, o primeiro deploy conferido e a remoção dos arquivos gerados. Depende do Bruno: o repositório `bsanoli/WebLol` é dele, e só quem tem permissão de admin muda a configuração do Pages. Fabiano tem permissão de escrita.
 - **Data:** 2026-11-19
 - **Decidido por:** Bruno, Fabiano (a confirmar)
 
