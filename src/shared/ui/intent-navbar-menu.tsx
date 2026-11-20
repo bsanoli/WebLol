@@ -8,7 +8,11 @@ type NavigationLink = { label: string; href?: string; current?: boolean }
 
 // Intent UI navbar-01 uses MenuTrigger, NavbarItem and Menu for its category dropdown.
 // WebLol supplies the trigger appearance and the hover opening mode.
-export function IntentNavbarMenu({ links, children, ...trigger }: {
+export function IntentNavbarMenu({
+  links,
+  children,
+  ...trigger
+}: {
   links: NavigationLink[]
   children: ReactNode
   className: string
@@ -44,9 +48,13 @@ export function IntentNavbarMenu({ links, children, ...trigger }: {
     }
 
     owner.querySelectorAll("iframe").forEach(listenInFrame)
-    owner.addEventListener("load", event => {
-      if (event.target instanceof HTMLIFrameElement) listenInFrame(event.target)
-    }, { capture: true, signal })
+    owner.addEventListener(
+      "load",
+      event => {
+        if (event.target instanceof HTMLIFrameElement) listenInFrame(event.target)
+      },
+      { capture: true, signal },
+    )
     return () => controller.abort()
   }, [isOpen, stopTimers])
 
@@ -71,8 +79,12 @@ export function IntentNavbarMenu({ links, children, ...trigger }: {
 
   return (
     <MenuTrigger isOpen={isOpen} onOpenChange={toggle}>
-      <Button {...trigger} ref={button} data-open={mode ? "" : undefined}
-        onPointerEnter={enter} onPointerLeave={leave}
+      <Button
+        {...trigger}
+        ref={button}
+        data-open={mode ? "" : undefined}
+        onPointerEnter={enter}
+        onPointerLeave={leave}
         onKeyDown={event => {
           if (mode !== "hover" || (event.key !== "ArrowDown" && event.key !== "Enter" && event.key !== " ")) return
           event.preventDefault()
@@ -82,16 +94,35 @@ export function IntentNavbarMenu({ links, children, ...trigger }: {
             const menuId = button.current?.getAttribute("aria-controls")
             if (menuId) document.getElementById(menuId)?.querySelector<HTMLElement>('[role="menuitem"]')?.focus()
           })
-        }}>
+        }}
+      >
         {children}
       </Button>
-      <Popover placement="bottom start" offset={8} isNonModal={mode === "hover"} className={styles.popover}
-        data-intent-navbar-menu="" onPointerEnter={stopTimers} onPointerLeave={leave}>
+      <Popover
+        placement="bottom start"
+        offset={8}
+        isNonModal={mode === "hover"}
+        className={styles.popover}
+        data-intent-navbar-menu=""
+        onPointerEnter={stopTimers}
+        onPointerLeave={leave}
+      >
         <Menu className={styles.menu} autoFocus={mode === "hover" ? false : undefined} items={links}>
-          {link => <MenuItem id={link.href ?? link.label} href={link.href} textValue={link.label} className={styles.item}
-            render={link.current ? props => "href" in props ? <a {...props} aria-current="page" /> : <div {...props} /> : undefined}>
-            {link.label}
-          </MenuItem>}
+          {link => (
+            <MenuItem
+              id={link.href ?? link.label}
+              href={link.href}
+              textValue={link.label}
+              className={styles.item}
+              render={
+                link.current
+                  ? props => ("href" in props ? <a {...props} aria-current="page" /> : <div {...props} />)
+                  : undefined
+              }
+            >
+              {link.label}
+            </MenuItem>
+          )}
         </Menu>
       </Popover>
     </MenuTrigger>

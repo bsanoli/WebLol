@@ -9,7 +9,7 @@ type HostWindow = Window & { captainAccess?: () => boolean }
 
 function hostWindow(): HostWindow | null {
   try {
-    return window.parent !== window ? window.parent as HostWindow : null
+    return window.parent !== window ? (window.parent as HostWindow) : null
   } catch {
     return null
   }
@@ -26,7 +26,7 @@ function hostElement(id: string): HTMLElement | null {
 function hostSendButton(): HTMLButtonElement | null {
   const button = hostElement("send")
   // instanceof não serve entre janelas: cada uma tem o próprio HTMLButtonElement.
-  return button?.tagName === "BUTTON" ? button as HTMLButtonElement : null
+  return button?.tagName === "BUTTON" ? (button as HTMLButtonElement) : null
 }
 
 function isCaptain() {

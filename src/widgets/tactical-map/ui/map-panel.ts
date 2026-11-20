@@ -5,7 +5,15 @@ const tabs = [
   { value: "map-play", label: "Jogada" },
 ]
 
-export function mountMapPanel(mountTabs: (host: Element, label: string, value: string, options: typeof tabs, change: (value: string) => void) => void) {
+export function mountMapPanel(
+  mountTabs: (
+    host: Element,
+    label: string,
+    value: string,
+    options: typeof tabs,
+    change: (value: string) => void,
+  ) => void,
+) {
   const host = document.getElementById("map-sidebar-tabs")!
   const panels = Array.from(document.querySelectorAll<HTMLElement>("[data-map-tab]"))
   function select(value: string) {
@@ -22,7 +30,10 @@ export function mountStepPages() {
   const previous = document.getElementById("map-steps-prev")!
   const next = document.getElementById("map-steps-next")!
   const output = document.getElementById("map-steps-page")!
-  let page = 0, capacity = 1, total = 0, selected = -1
+  let page = 0,
+    capacity = 1,
+    total = 0,
+    selected = -1
 
   function render() {
     const pages = Math.max(1, Math.ceil(total / capacity))

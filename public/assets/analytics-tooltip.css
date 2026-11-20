@@ -12,13 +12,38 @@
   font-size: 13px;
   line-height: 1.5;
 }
-#tip .game-tip-title { display: flex; align-items: center; gap: 8px; color: var(--gold); font-size: 15px; }
-#tip.game-tip img { width: 30px; height: 30px; object-fit: contain; }
-#tip .game-tip-description p { margin: 8px 0; color: var(--ink); overflow-wrap: anywhere; }
-#tip.ability-tip .game-tip-title { font-weight: 700; }
-#tip.ability-tip kbd { color: var(--muted); font: inherit; font-size: 12px; font-weight: 500; }
-#tip.ability-tip .game-tip-description p { font-weight: 400; }
-#tip.ability-tip .game-tip-description b { font-weight: 600; }
+#tip .game-tip-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--gold);
+  font-size: 15px;
+}
+#tip.game-tip img {
+  width: 30px;
+  height: 30px;
+  object-fit: contain;
+}
+#tip .game-tip-description p {
+  margin: 8px 0;
+  color: var(--ink);
+  overflow-wrap: anywhere;
+}
+#tip.ability-tip .game-tip-title {
+  font-weight: 700;
+}
+#tip.ability-tip kbd {
+  color: var(--muted);
+  font: inherit;
+  font-size: 12px;
+  font-weight: 500;
+}
+#tip.ability-tip .game-tip-description p {
+  font-weight: 400;
+}
+#tip.ability-tip .game-tip-description b {
+  font-weight: 600;
+}
 #tip .effect-heading {
   display: flex;
   flex-wrap: wrap;
@@ -29,9 +54,17 @@
   border-top: 1px solid var(--line);
   color: var(--gold);
 }
-#tip .effect-heading > .icon { width: 14px; height: 14px; }
-#tip .effect-heading + p { margin-top: 3px; }
-#tip .effect-heading small { color: var(--muted); font-size: 11px; }
+#tip .effect-heading > .icon {
+  width: 14px;
+  height: 14px;
+}
+#tip .effect-heading + p {
+  margin-top: 3px;
+}
+#tip .effect-heading small {
+  color: var(--muted);
+  font-size: 11px;
+}
 #tip .effect-term {
   display: inline;
   border: 0;
@@ -44,10 +77,19 @@
   text-underline-offset: 3px;
   cursor: help;
 }
-#tip .effect-term[data-tone="damage"] { color: var(--wl-danger); }
-#tip .effect-term[data-tone="magic"] { color: var(--wl-info); }
-#tip .effect-term[data-tone="recovery"] { color: var(--wl-success); }
-#tip .effect-term:focus-visible { outline: 2px solid currentColor; outline-offset: 2px; }
+#tip .effect-term[data-tone="damage"] {
+  color: var(--wl-danger);
+}
+#tip .effect-term[data-tone="magic"] {
+  color: var(--wl-info);
+}
+#tip .effect-term[data-tone="recovery"] {
+  color: var(--wl-success);
+}
+#tip .effect-term:focus-visible {
+  outline: 2px solid currentColor;
+  outline-offset: 2px;
+}
 #tip .effect-definition {
   position: fixed;
   box-sizing: border-box;
@@ -57,5 +99,5 @@
   border-radius: var(--wl-control-radius);
   background: var(--wl-raised);
   color: var(--ink);
-  box-shadow: 0 4px 14px rgb(0 0 0 / .3);
+  box-shadow: 0 4px 14px rgb(0 0 0 / 0.3);
 }

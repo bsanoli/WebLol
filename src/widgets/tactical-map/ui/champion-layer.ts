@@ -7,9 +7,21 @@ type Positions = Record<string, MapPoint>
 type Side = "b" | "r"
 type Role = keyof typeof RN
 const directions = new Map<string, MapPoint>([
-  ["ArrowLeft", [-1, 0]], ["ArrowRight", [1, 0]], ["ArrowUp", [0, -1]], ["ArrowDown", [0, 1]],
+  ["ArrowLeft", [-1, 0]],
+  ["ArrowRight", [1, 0]],
+  ["ArrowUp", [0, -1]],
+  ["ArrowDown", [0, 1]],
 ])
-export function mountChampionLayer({ map, read, write, preview, canMove, point, champion, portrait }: {
+export function mountChampionLayer({
+  map,
+  read,
+  write,
+  preview,
+  canMove,
+  point,
+  champion,
+  portrait,
+}: {
   map: HTMLElement
   read: () => Positions
   write: (positions: Positions) => void
@@ -53,7 +65,8 @@ export function mountChampionLayer({ map, read, write, preview, canMove, point, 
     const token = (event.target as Element).closest<HTMLButtonElement>(".tok")
     const direction = directions.get(event.key)
     if (!token || !direction || !canMove() || event.ctrlKey || event.altKey || event.metaKey) return
-    const id = token.dataset.t!, current = read()[id]
+    const id = token.dataset.t!,
+      current = read()[id]
     if (!current) return
     event.preventDefault()
     const step = event.shiftKey ? 5 : 1
@@ -72,7 +85,7 @@ export function mountChampionLayer({ map, read, write, preview, canMove, point, 
   map.addEventListener("pointermove", event => {
     if (!drag || drag.pointer !== event.pointerId || !canMove()) return
     const here = point(event)
-    if (!drag.position && Math.hypot(here[0] - drag.start[0], here[1] - drag.start[1]) < .3) return
+    if (!drag.position && Math.hypot(here[0] - drag.start[0], here[1] - drag.start[1]) < 0.3) return
     drag.position = here
     const positions = { ...read(), [drag.id]: here }
     place(positions)
@@ -83,7 +96,10 @@ export function mountChampionLayer({ map, read, write, preview, canMove, point, 
     const change = drag
     drag = undefined
     if (change.position && canMove()) write({ ...read(), [change.id]: change.position })
-    else { place(); preview(read()) }
+    else {
+      place()
+      preview(read())
+    }
   })
   map.addEventListener("lostpointercapture", event => {
     if (!drag || drag.pointer !== event.pointerId) return
@@ -92,7 +108,11 @@ export function mountChampionLayer({ map, read, write, preview, canMove, point, 
     preview(read())
   })
 
-  return { render, place, setInteractive(enabled: boolean) {
-    for (const { button } of tokens) button.tabIndex = enabled ? 0 : -1
-  } }
+  return {
+    render,
+    place,
+    setInteractive(enabled: boolean) {
+      for (const { button } of tokens) button.tabIndex = enabled ? 0 : -1
+    },
+  }
 }

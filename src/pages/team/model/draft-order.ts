@@ -8,8 +8,16 @@ export const DRAFT_PHASES = [
 
 /** Nome de cada pick pela ordem do draft (no lugar de B1, R1...). */
 export const PICKNAME: Record<string, string> = {
-  B1: "First Pick", B2: "Dupla B2/B3", B3: "Dupla B2/B3", B4: "Dupla B4/B5", B5: "Dupla B4/B5",
-  R1: "Dupla R1/R2", R2: "Dupla R1/R2", R3: "Solo R3", R4: "Solo R4", R5: "Last Pick",
+  B1: "First Pick",
+  B2: "Dupla B2/B3",
+  B3: "Dupla B2/B3",
+  B4: "Dupla B4/B5",
+  B5: "Dupla B4/B5",
+  R1: "Dupla R1/R2",
+  R2: "Dupla R1/R2",
+  R3: "Solo R3",
+  R4: "Solo R4",
+  R5: "Last Pick",
 }
 
 export const DRAFT_SIDE = { blue: "Lado azul", red: "Lado vermelho" } as const

@@ -14,9 +14,41 @@ export const clamp = (value: number, max = 100) => Math.min(max, Math.max(0, val
 export const mapRadius = (units: number, style: MapStyle) => units / (style === "minimap" ? 148.5 : 150)
 
 const routes = {
-  top: [[11, 87], [9, 73], [10, 55], [8, 35], [9, 21], [12, 12], [19, 8], [30, 8], [49, 8.5], [70, 8.5], [88, 11]],
-  mid: [[11, 87], [24, 76], [35, 66], [49, 50], [65, 34], [77, 24], [88, 11]],
-  adc: [[11, 87], [26, 91], [47, 91], [69, 92], [82, 91], [90, 87], [93, 79], [93, 64], [91, 45], [92, 28], [88, 11]],
+  top: [
+    [11, 87],
+    [9, 73],
+    [10, 55],
+    [8, 35],
+    [9, 21],
+    [12, 12],
+    [19, 8],
+    [30, 8],
+    [49, 8.5],
+    [70, 8.5],
+    [88, 11],
+  ],
+  mid: [
+    [11, 87],
+    [24, 76],
+    [35, 66],
+    [49, 50],
+    [65, 34],
+    [77, 24],
+    [88, 11],
+  ],
+  adc: [
+    [11, 87],
+    [26, 91],
+    [47, 91],
+    [69, 92],
+    [82, 91],
+    [90, 87],
+    [93, 79],
+    [93, 64],
+    [91, 45],
+    [92, 28],
+    [88, 11],
+  ],
 } satisfies Record<string, MapPoint[]>
 export const isLane = (value: unknown): value is Lane => typeof value === "string" && Object.hasOwn(routes, value)
 
@@ -32,7 +64,8 @@ const routeMetrics = (lane: Lane, style: MapStyle) => {
   let length = 0
   const segments = points.slice(1).map(([x, y], index) => {
     const [ax, ay] = points[index]
-    const dx = x - ax, dy = y - ay
+    const dx = x - ax,
+      dy = y - ay
     const [originalX, originalY] = routes[lane][index + 1]
     const [originalStartX, originalStartY] = routes[lane][index]
     const size = Math.hypot(originalX - originalStartX, originalY - originalStartY)
@@ -82,18 +115,72 @@ export function readWaves(value: unknown): Wave[] {
   if (!Array.isArray(value)) return []
   const slots = new Map<ReturnType<typeof waveKey>, Wave>()
   for (const wave of value) {
-    if (typeof wave?.id === "string" && isSide(wave.side) && isLane(wave.lane) &&
-      Number.isFinite(wave.progress) && wave.progress >= 0 && wave.progress <= 1) slots.set(waveKey(wave), wave)
+    if (
+      typeof wave?.id === "string" &&
+      isSide(wave.side) &&
+      isLane(wave.lane) &&
+      Number.isFinite(wave.progress) &&
+      wave.progress >= 0 &&
+      wave.progress <= 1
+    )
+      slots.set(waveKey(wave), wave)
   }
   return [...slots.values()]
 }
 
-const blueTowers: MapPoint[] = [[7.5, 29.8], [11, 54.6], [8.7, 70.8], [39.9, 56.9], [34.4, 67.3], [25.2, 74.2], [71, 92.5], [47, 89.4], [29.5, 90.6], [12.4, 84.3], [15.4, 87.5]]
-const redTowers: MapPoint[] = [[29.6, 6.9], [53.8, 10], [70.8, 8.3], [60.5, 42.5], [66, 32], [75, 24.9], [93.3, 69.2], [89.7, 44.4], [91.7, 28], [84.9, 12.1], [87.8, 15.2]]
-const towerNames = ["externa do topo", "interna do topo", "do inibidor do topo", "externa do meio", "interna do meio", "do inibidor do meio", "externa da rota inferior", "interna da rota inferior", "do inibidor da rota inferior", "do Nexus (primeira)", "do Nexus (segunda)"]
+const blueTowers: MapPoint[] = [
+  [7.5, 29.8],
+  [11, 54.6],
+  [8.7, 70.8],
+  [39.9, 56.9],
+  [34.4, 67.3],
+  [25.2, 74.2],
+  [71, 92.5],
+  [47, 89.4],
+  [29.5, 90.6],
+  [12.4, 84.3],
+  [15.4, 87.5],
+]
+const redTowers: MapPoint[] = [
+  [29.6, 6.9],
+  [53.8, 10],
+  [70.8, 8.3],
+  [60.5, 42.5],
+  [66, 32],
+  [75, 24.9],
+  [93.3, 69.2],
+  [89.7, 44.4],
+  [91.7, 28],
+  [84.9, 12.1],
+  [87.8, 15.2],
+]
+const towerNames = [
+  "externa do topo",
+  "interna do topo",
+  "do inibidor do topo",
+  "externa do meio",
+  "interna do meio",
+  "do inibidor do meio",
+  "externa da rota inferior",
+  "interna da rota inferior",
+  "do inibidor da rota inferior",
+  "do Nexus (primeira)",
+  "do Nexus (segunda)",
+]
 
-export const towers = ([["b", blueTowers], ["r", redTowers]] as const).flatMap(([side, points]) =>
-  points.map((point, index) => ({ id: side + index, side, point, name: `Torre ${towerNames[index]} — ${sideLabel[side]}` })))
+export const towers = (
+  [
+    ["b", blueTowers],
+    ["r", redTowers],
+  ] as const
+).flatMap(([side, points]) =>
+  points.map((point, index) => ({
+    id: side + index,
+    side,
+    point,
+    name: `Torre ${towerNames[index]} — ${sideLabel[side]}`,
+  })),
+)
 export const towerAttack = 750
 export const towerSight = 1350
 export const minionSight = 1200

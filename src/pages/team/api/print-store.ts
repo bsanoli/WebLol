@@ -14,11 +14,19 @@ const LOCAL_PREFIX = "lol-img-"
 const localImages: PrintStore = {
   async save(data) {
     const id = "local-" + uid()
-    try { localStorage.setItem(LOCAL_PREFIX + id, data) } catch { /* sem espaço: a imagem vale só nesta sessão */ }
+    try {
+      localStorage.setItem(LOCAL_PREFIX + id, data)
+    } catch {
+      /* sem espaço: a imagem vale só nesta sessão */
+    }
     return { id, shared: false }
   },
   async load(id) {
-    try { return localStorage.getItem(LOCAL_PREFIX + id) } catch { return null }
+    try {
+      return localStorage.getItem(LOCAL_PREFIX + id)
+    } catch {
+      return null
+    }
   },
 }
 

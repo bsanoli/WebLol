@@ -43,9 +43,12 @@ function developmentDatasets(): Plugin {
       const worlds = datasets.worlds[name]
       const soloq = datasets.soloq[name]
       if (!worlds || !soloq) return
-      const exports = name === "builds"
-        ? "export const { champions, games, itemNames, runeNames } = data;"
-        : name === "build-timeline" ? "export const { games } = data;" : ""
+      const exports =
+        name === "builds"
+          ? "export const { champions, games, itemNames, runeNames } = data;"
+          : name === "build-timeline"
+            ? "export const { games } = data;"
+            : ""
       return `
         const data = (await (document.body.dataset.dataset === "soloq"
           ? import("/${soloq}")

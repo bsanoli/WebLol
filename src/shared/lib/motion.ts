@@ -13,10 +13,13 @@ export function revealContent(element: Element | null, quick = false) {
   const tokens = getComputedStyle(document.documentElement)
   const duration = parseFloat(tokens.getPropertyValue(quick ? "--wl-motion-normal" : "--wl-motion-panel")) || 240
   const distance = tokens.getPropertyValue("--wl-motion-distance").trim() || "6px"
-  const animation = element.animate([
-    { opacity: .35, translate: `0 ${distance}` },
-    { opacity: 1, translate: "0 0" },
-  ], { duration, easing: tokens.getPropertyValue("--wl-motion-ease").trim() || "ease-out" })
+  const animation = element.animate(
+    [
+      { opacity: 0.35, translate: `0 ${distance}` },
+      { opacity: 1, translate: "0 0" },
+    ],
+    { duration, easing: tokens.getPropertyValue("--wl-motion-ease").trim() || "ease-out" },
+  )
   byElement.set(element, animation)
   running.add(animation)
   const cleanup = () => running.delete(animation)
@@ -43,11 +46,15 @@ export function initializeMotionNav(selector: string) {
         nav.style.setProperty("--wl-nav-height", `${rect.height}px`)
         nav.style.setProperty("--wl-nav-x", `${rect.left - parent.left - nav.clientLeft + nav.scrollLeft}px`)
         nav.style.setProperty("--wl-nav-y", `${rect.bottom - parent.top - nav.clientTop + nav.scrollTop - 2}px`)
-        requestAnimationFrame(() => { nav.dataset.motionReady = "" })
+        requestAnimationFrame(() => {
+          nav.dataset.motionReady = ""
+        })
       })
     }
     new MutationObserver(update).observe(nav, {
-      subtree: true, childList: true, attributes: true,
+      subtree: true,
+      childList: true,
+      attributes: true,
       attributeFilter: ["aria-current", "aria-pressed"],
     })
     new ResizeObserver(update).observe(nav)

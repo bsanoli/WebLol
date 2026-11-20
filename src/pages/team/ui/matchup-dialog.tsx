@@ -17,39 +17,83 @@ function OptionLabel({ item }: { item: Option }) {
   return (
     <span className="mx-opt">
       <b title={item.name}>{item.name}</b>
-      {item.preview
-        ? <span className="mx-opt-preview" aria-hidden="true" dangerouslySetInnerHTML={{ __html: item.preview }} />
-        : <small className="mx-opt-empty">vazia</small>}
+      {item.preview ? (
+        <span className="mx-opt-preview" aria-hidden="true" dangerouslySetInnerHTML={{ __html: item.preview }} />
+      ) : (
+        <small className="mx-opt-empty">vazia</small>
+      )}
     </span>
   )
 }
 
-function MatchupForm({ ours, enemies, initialOurs, onDone }: {
-  ours: Option[]; enemies: Option[]; initialOurs: string; onDone: (choice?: MatchupChoice) => void
+function MatchupForm({
+  ours,
+  enemies,
+  initialOurs,
+  onDone,
+}: {
+  ours: Option[]
+  enemies: Option[]
+  initialOurs: string
+  onDone: (choice?: MatchupChoice) => void
 }) {
   const [ourId, setOurId] = useState(initialOurs)
   const [enemyId, setEnemyId] = useState("")
-  const field = (label: string, value: string, set: (id: string) => void, options: Option[], placeholder: string, extra?: Option) => (
-    <label className="grid gap-2" data-slot="field">{label}
+  const field = (
+    label: string,
+    value: string,
+    set: (id: string) => void,
+    options: Option[],
+    placeholder: string,
+    extra?: Option,
+  ) => (
+    <label className="grid gap-2" data-slot="field">
+      {label}
       <Select value={value} onValueChange={set}>
-        <SelectTrigger className="w-full" aria-label={label}><SelectValue placeholder={placeholder} /></SelectTrigger>
+        <SelectTrigger className="w-full" aria-label={label}>
+          <SelectValue placeholder={placeholder} />
+        </SelectTrigger>
         <SelectContent position="popper" align="start" sideOffset={4} className="p-2">
           <SelectGroup className="grid gap-1">
-            {extra && <SelectItem value={extra.id} className={ITEM_CLASS}>{extra.name}</SelectItem>}
-            {options.map(item => <SelectItem key={item.id} value={item.id} textValue={item.name} className={ITEM_CLASS}><OptionLabel item={item} /></SelectItem>)}
+            {extra && (
+              <SelectItem value={extra.id} className={ITEM_CLASS}>
+                {extra.name}
+              </SelectItem>
+            )}
+            {options.map(item => (
+              <SelectItem key={item.id} value={item.id} textValue={item.name} className={ITEM_CLASS}>
+                <OptionLabel item={item} />
+              </SelectItem>
+            ))}
           </SelectGroup>
         </SelectContent>
       </Select>
     </label>
   )
   return (
-    <form className="grid gap-4" onSubmit={event => { event.preventDefault(); if (ourId && enemyId) onDone({ ours: ourId, enemy: enemyId }) }}>
-      <p className="m-0 text-sm text-muted-foreground">Junte uma composição nossa a uma adversária para anotar a tática desse confronto. As duas continuam existindo separadas.</p>
+    <form
+      className="grid gap-4"
+      onSubmit={event => {
+        event.preventDefault()
+        if (ourId && enemyId) onDone({ ours: ourId, enemy: enemyId })
+      }}
+    >
+      <p className="m-0 text-sm text-muted-foreground">
+        Junte uma composição nossa a uma adversária para anotar a tática desse confronto. As duas continuam existindo
+        separadas.
+      </p>
       {field("Nossa composição", ourId, setOurId, ours, "Escolha a nossa composição")}
-      {field("Adversária", enemyId, setEnemyId, enemies, "Escolha a adversária", { id: NEW_ENEMY, name: "+ Nova adversária…" })}
+      {field("Adversária", enemyId, setEnemyId, enemies, "Escolha a adversária", {
+        id: NEW_ENEMY,
+        name: "+ Nova adversária…",
+      })}
       <div className="flex justify-end gap-2">
-        <Button type="button" variant="outline" onClick={() => onDone()}>Cancelar</Button>
-        <Button type="submit" disabled={!ourId || !enemyId}>Criar confronto</Button>
+        <Button type="button" variant="outline" onClick={() => onDone()}>
+          Cancelar
+        </Button>
+        <Button type="submit" disabled={!ourId || !enemyId}>
+          Criar confronto
+        </Button>
       </div>
     </form>
   )
@@ -73,12 +117,23 @@ export function askMatchup(ours: Option[], enemies: Option[], initialOurs: strin
         resolve(choice)
       })
     }
-    root.render(<Dialog open onOpenChange={open => { if (!open) finish() }}>
-      <DialogContent className="wl-panel" aria-describedby={undefined} showCloseButton={false}
-        onCloseAutoFocus={event => event.preventDefault()}>
-        <DialogTitle>Novo confronto</DialogTitle>
-        <MatchupForm ours={ours} enemies={enemies} initialOurs={initialOurs} onDone={finish} />
-      </DialogContent>
-    </Dialog>)
+    root.render(
+      <Dialog
+        open
+        onOpenChange={open => {
+          if (!open) finish()
+        }}
+      >
+        <DialogContent
+          className="wl-panel"
+          aria-describedby={undefined}
+          showCloseButton={false}
+          onCloseAutoFocus={event => event.preventDefault()}
+        >
+          <DialogTitle>Novo confronto</DialogTitle>
+          <MatchupForm ours={ours} enemies={enemies} initialOurs={initialOurs} onDone={finish} />
+        </DialogContent>
+      </Dialog>,
+    )
   })
 }

@@ -11,9 +11,13 @@ const sections = [
   { value: "cap", label: "Gestão do time", icon: "team" },
 ] as const
 
-type TeamView = typeof sections[number]["value"]
+type TeamView = (typeof sections)[number]["value"]
 
-function TeamNavigation({ current, showManagement, onSelect }: {
+function TeamNavigation({
+  current,
+  showManagement,
+  onSelect,
+}: {
   current: TeamView
   showManagement: boolean
   onSelect: (view: TeamView) => void
@@ -23,8 +27,11 @@ function TeamNavigation({ current, showManagement, onSelect }: {
 
   return (
     <LayoutGroup id="team-navigation">
-      <nav className="team-navigation" aria-label="Ferramentas do time"
-        onPointerOver={hover.onPointerOver} onPointerLeave={hover.clear}
+      <nav
+        className="team-navigation"
+        aria-label="Ferramentas do time"
+        onPointerOver={hover.onPointerOver}
+        onPointerLeave={hover.clear}
         onKeyDown={event => {
           if (event.key !== "ArrowLeft" && event.key !== "ArrowRight") return
           const buttons = Array.from(event.currentTarget.querySelectorAll("button"))
@@ -33,17 +40,30 @@ function TeamNavigation({ current, showManagement, onSelect }: {
           event.preventDefault()
           const direction = event.key === "ArrowRight" ? 1 : -1
           buttons[(index + direction + buttons.length) % buttons.length].focus()
-        }}>
+        }}
+      >
         <NavigationHover target={hover.target?.isConnected ? hover.target : null} />
         {sections.map(({ value, label, icon }) => {
           if (value === "cap" && !showManagement) return null
           const active = current === value
           return (
-            <button key={value} type="button" data-nav-item="" data-current={active ? "" : undefined}
-              aria-pressed={active} className={`${styles.navItem} ${styles.accentItem}`}
-              onClick={() => onSelect(value)}>
-              {active && <motion.span className={styles.indicator} layoutId="current"
-                transition={reduced ? { duration: 0 } : motionTokens.spring.morph} aria-hidden="true" />}
+            <button
+              key={value}
+              type="button"
+              data-nav-item=""
+              data-current={active ? "" : undefined}
+              aria-pressed={active}
+              className={`${styles.navItem} ${styles.accentItem}`}
+              onClick={() => onSelect(value)}
+            >
+              {active && (
+                <motion.span
+                  className={styles.indicator}
+                  layoutId="current"
+                  transition={reduced ? { duration: 0 } : motionTokens.spring.morph}
+                  aria-hidden="true"
+                />
+              )}
               <svg className="icon" aria-hidden="true" focusable="false">
                 <use href={`assets/icons.svg#${icon}`} />
               </svg>

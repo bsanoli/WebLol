@@ -21,8 +21,12 @@ function PrintView({ node, updateAttributes, deleteNode, selected, extension }: 
   useEffect(() => {
     let alive = true
     setData(undefined)
-    void store.load(shown).then(value => { if (alive) setData(value) })
-    return () => { alive = false }
+    void store.load(shown).then(value => {
+      if (alive) setData(value)
+    })
+    return () => {
+      alive = false
+    }
   }, [store, shown])
 
   const handleDraw = async () => {
@@ -36,24 +40,38 @@ function PrintView({ node, updateAttributes, deleteNode, selected, extension }: 
     }
   }
 
-  return <NodeViewWrapper className={`tx-print-node${selected ? " is-selected" : ""}`} data-drag-handle>
-    {data === null
-      ? <p className="tx-print-missing">Este print ainda não chegou ao time. Ele aparece aqui quando quem o adicionou sincronizar com o time.</p>
-      : <button type="button" className="tx-print-image" onClick={() => void handleDraw()} disabled={!data}
+  return (
+    <NodeViewWrapper className={`tx-print-node${selected ? " is-selected" : ""}`} data-drag-handle>
+      {data === null ? (
+        <p className="tx-print-missing">
+          Este print ainda não chegou ao time. Ele aparece aqui quando quem o adicionou sincronizar com o time.
+        </p>
+      ) : (
+        <button
+          type="button"
+          className="tx-print-image"
+          onClick={() => void handleDraw()}
+          disabled={!data}
           aria-label={attrs.preview ? "Abrir o desenho deste print" : "Desenhar sobre este print"}
-          title={attrs.preview ? "Abrir o desenho" : "Desenhar por cima"}>
-          {data ? <img src={data} alt={attrs.preview ? "Print com desenho" : "Print da tática"} draggable={false} />
-            : <span className="tx-print-loading">Carregando print…</span>}
-        </button>}
-    <div className="tx-print-tools" contentEditable={false}>
-      <Button type="button" variant="outline" size="sm" onClick={() => void handleDraw()} disabled={!data || busy}>
-        <PencilLine aria-hidden="true" /> {attrs.preview ? "Editar desenho" : "Desenhar"}
-      </Button>
-      <Button type="button" variant="ghost" size="sm" onClick={deleteNode} aria-label="Remover print">
-        <Trash2 aria-hidden="true" /> Remover
-      </Button>
-    </div>
-  </NodeViewWrapper>
+          title={attrs.preview ? "Abrir o desenho" : "Desenhar por cima"}
+        >
+          {data ? (
+            <img src={data} alt={attrs.preview ? "Print com desenho" : "Print da tática"} draggable={false} />
+          ) : (
+            <span className="tx-print-loading">Carregando print…</span>
+          )}
+        </button>
+      )}
+      <div className="tx-print-tools" contentEditable={false}>
+        <Button type="button" variant="outline" size="sm" onClick={() => void handleDraw()} disabled={!data || busy}>
+          <PencilLine aria-hidden="true" /> {attrs.preview ? "Editar desenho" : "Desenhar"}
+        </Button>
+        <Button type="button" variant="ghost" size="sm" onClick={deleteNode} aria-label="Remover print">
+          <Trash2 aria-hidden="true" /> Remover
+        </Button>
+      </div>
+    </NodeViewWrapper>
+  )
 }
 
 /** Print dentro do texto: guarda só ids; a imagem, a cena do desenho e a prévia ficam à parte. */
@@ -80,23 +98,28 @@ export const TacticPrint = Node.create<PrintNodeOptions>({
   },
 
   parseHTML() {
-    return [{
-      tag: "figure[data-tactic-print]",
-      getAttrs: element => ({
-        src: element.getAttribute("data-src") ?? "",
-        sketch: element.getAttribute("data-sketch"),
-        preview: element.getAttribute("data-preview"),
-      }),
-    }]
+    return [
+      {
+        tag: "figure[data-tactic-print]",
+        getAttrs: element => ({
+          src: element.getAttribute("data-src") ?? "",
+          sketch: element.getAttribute("data-sketch"),
+          preview: element.getAttribute("data-preview"),
+        }),
+      },
+    ]
   },
 
   renderHTML({ node, HTMLAttributes }) {
-    return ["figure", mergeAttributes(HTMLAttributes, {
-      "data-tactic-print": "",
-      "data-src": node.attrs.src,
-      "data-sketch": node.attrs.sketch,
-      "data-preview": node.attrs.preview,
-    })]
+    return [
+      "figure",
+      mergeAttributes(HTMLAttributes, {
+        "data-tactic-print": "",
+        "data-src": node.attrs.src,
+        "data-sketch": node.attrs.sketch,
+        "data-preview": node.attrs.preview,
+      }),
+    ]
   },
 
   addNodeView() {

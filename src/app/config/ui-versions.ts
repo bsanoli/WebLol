@@ -11,7 +11,7 @@ export const UI_VERSIONS: UiVersion[] = [
     version: "1.69",
     date: "2026-11-19",
     changes: [
-      "Táticas: \"Táticas gerais\" saiu da gaveta e virou o alternador Esta composição | Gerais no cabeçalho do bloco de notas.",
+      'Táticas: "Táticas gerais" saiu da gaveta e virou o alternador Esta composição | Gerais no cabeçalho do bloco de notas.',
       "Ordem do draft: cada card é um destino de arraste e só ele é destacado. Dá para mover um campeão de um card para outro (num card ocupado ele entra como alternativa), entre os lados, e arrastar para fora dos cards remove o campeão, com Desfazer. O lado adversário vazio mostra os cards reais para soltar o primeiro campeão.",
       "Táticas: o quadro da gaveta usa o desenho da Ordem do draft, mais compacto, e dá para montar picks e bans ali escolhendo campeões. Mostra sempre os dois lados; arrastar uma composição da lista para o lado desejado a posiciona ali e, com o par aberto, monta o confronto.",
       "Táticas: nova aba Confrontos na gaveta. Cada confronto (nossa x adversária) tem a própria tática, abre o draft dos dois lados e pode ser excluído sem apagar as composições. Escolher uma adversária no draft também cria o confronto.",
@@ -42,22 +42,30 @@ export const UI_VERSIONS: UiVersion[] = [
   {
     version: "1.67",
     date: "2026-11-19",
-    changes: ["Táticas: no cabeçalho da tática salva, seletor Minha equipe | Equipe adversária e botão OP.GG (clique abre o OP.GG do time; botão direito troca o link)."],
+    changes: [
+      "Táticas: no cabeçalho da tática salva, seletor Minha equipe | Equipe adversária e botão OP.GG (clique abre o OP.GG do time; botão direito troca o link).",
+    ],
   },
   {
     version: "1.66",
     date: "2026-11-19",
-    changes: ["Correção: ao sair da aba Táticas com uma tática aberta, Opções por posição e Ordem do draft voltam para uma composição da aba quando a tática não está aplicada a ela."],
+    changes: [
+      "Correção: ao sair da aba Táticas com uma tática aberta, Opções por posição e Ordem do draft voltam para uma composição da aba quando a tática não está aplicada a ela.",
+    ],
   },
   {
     version: "1.65",
     date: "2026-11-19",
-    changes: ["Táticas: opções Aplicar em Opções por posição e/ou Ordem do draft na linha Draft | Lane; a tática salva só aparece nessas abas quando a opção está marcada."],
+    changes: [
+      "Táticas: opções Aplicar em Opções por posição e/ou Ordem do draft na linha Draft | Lane; a tática salva só aparece nessas abas quando a opção está marcada.",
+    ],
   },
   {
     version: "1.64",
     date: "2026-11-19",
-    changes: ["Táticas, visão Lane: arraste o ícone de um campeão para a esquerda ou a direita para mudar a ordem dos picks e bans."],
+    changes: [
+      "Táticas, visão Lane: arraste o ícone de um campeão para a esquerda ou a direita para mudar a ordem dos picks e bans.",
+    ],
   },
   {
     version: "1.63",
@@ -67,42 +75,59 @@ export const UI_VERSIONS: UiVersion[] = [
   {
     version: "1.62",
     date: "2026-11-19",
-    changes: ["Táticas: prints junto do texto da tática. Cole com Ctrl+V, arraste a imagem ou use Adicionar print; clique na miniatura para ampliar."],
+    changes: [
+      "Táticas: prints junto do texto da tática. Cole com Ctrl+V, arraste a imagem ou use Adicionar print; clique na miniatura para ampliar.",
+    ],
   },
   {
     version: "1.61",
     date: "2026-11-19",
-    changes: ["Táticas: \"Picks prioritários\" virou \"Lane\", com clique no alternativo para torná-lo principal e bans só com ícones do mesmo tamanho.", "Táticas: botões Salvar tática e Nova tática. A tática salva fica no topo da lista, tem seletor reduzido de campeões (ícones e busca) e aparece em Opções por posição ou na Ordem do draft quando a parte Lane ou Draft foi preenchida."],
+    changes: [
+      'Táticas: "Picks prioritários" virou "Lane", com clique no alternativo para torná-lo principal e bans só com ícones do mesmo tamanho.',
+      "Táticas: botões Salvar tática e Nova tática. A tática salva fica no topo da lista, tem seletor reduzido de campeões (ícones e busca) e aparece em Opções por posição ou na Ordem do draft quando a parte Lane ou Draft foi preenchida.",
+    ],
   },
   {
     version: "1.60",
     date: "2026-11-19",
-    changes: ["Táticas: seletor Draft / Picks prioritários acima da barra do time; Picks prioritários mostra os campeões de cada lane em ordem de prioridade, sem as notas."],
+    changes: [
+      "Táticas: seletor Draft / Picks prioritários acima da barra do time; Picks prioritários mostra os campeões de cada lane em ordem de prioridade, sem as notas.",
+    ],
   },
   {
     version: "1.59",
     date: "2026-11-19",
-    changes: ["Táticas: botão direito num pick abre um menu para trocar o campeão por um dos alternativos da comp; o pick mostra quantos alternativos tem (+1, +2…)."],
+    changes: [
+      "Táticas: botão direito num pick abre um menu para trocar o campeão por um dos alternativos da comp; o pick mostra quantos alternativos tem (+1, +2…).",
+    ],
   },
   {
     version: "1.58",
     date: "2026-11-19",
-    changes: ["Composições: nova aba Táticas, com um campo grande de texto à esquerda e, à direita, as comps do time e os picks e bans da comp escolhida em formato reduzido. Há também Táticas gerais, sem composição."],
+    changes: [
+      "Composições: nova aba Táticas, com um campo grande de texto à esquerda e, à direita, as comps do time e os picks e bans da comp escolhida em formato reduzido. Há também Táticas gerais, sem composição.",
+    ],
   },
   {
     version: "1.57",
     date: "2026-11-19",
-    changes: ["Builds (página do campeão): em Compras jogo a jogo, cada partida mostra abaixo do KDA os feitiços, a runa principal e a árvore secundária usados nela, na SoloQ e no Worlds."],
+    changes: [
+      "Builds (página do campeão): em Compras jogo a jogo, cada partida mostra abaixo do KDA os feitiços, a runa principal e a árvore secundária usados nela, na SoloQ e no Worlds.",
+    ],
   },
   {
     version: "1.56",
     date: "2026-11-19",
-    changes: ["Builds: SoloQ passa a ser a fonte principal. Fica à esquerda no seletor SoloQ | Worlds e abre por padrão ao entrar em Builds."],
+    changes: [
+      "Builds: SoloQ passa a ser a fonte principal. Fica à esquerda no seletor SoloQ | Worlds e abre por padrão ao entrar em Builds.",
+    ],
   },
   {
     version: "1.55",
     date: "2026-11-19",
-    changes: ["As abas Worlds, SoloQ e Área do time sempre conferem se há versão nova ao abrir, para as correções aparecerem sem esperar o cache do navegador."],
+    changes: [
+      "As abas Worlds, SoloQ e Área do time sempre conferem se há versão nova ao abrir, para as correções aparecerem sem esperar o cache do navegador.",
+    ],
   },
   {
     version: "1.54",
@@ -117,7 +142,9 @@ export const UI_VERSIONS: UiVersion[] = [
   {
     version: "1.52",
     date: "2026-11-19",
-    changes: ["Ordem do draft: saiu o ícone pequeno do campeão ao lado esquerdo do nome no pick; a foto de fundo continua."],
+    changes: [
+      "Ordem do draft: saiu o ícone pequeno do campeão ao lado esquerdo do nome no pick; a foto de fundo continua.",
+    ],
   },
   {
     version: "1.51",
@@ -283,7 +310,7 @@ export const UI_VERSIONS: UiVersion[] = [
     version: "1.28",
     date: "2026-11-13",
     changes: [
-      "Menu da conta (só admin): novo campo \"Ver como\" para ver o site como um usuário sem admin ou como quem não tem conta. É só uma simulação: nada é enviado, e as comps do admin voltam ao sair dessa visão.",
+      'Menu da conta (só admin): novo campo "Ver como" para ver o site como um usuário sem admin ou como quem não tem conta. É só uma simulação: nada é enviado, e as comps do admin voltam ao sair dessa visão.',
     ],
   },
   {
@@ -326,9 +353,7 @@ export const UI_VERSIONS: UiVersion[] = [
   {
     version: "1.22",
     date: "2026-11-13",
-    changes: [
-      "Composições: saiu a opção Participaram do Worlds do catálogo de campeões.",
-    ],
+    changes: ["Composições: saiu a opção Participaram do Worlds do catálogo de campeões."],
   },
   {
     version: "1.21",
@@ -349,8 +374,8 @@ export const UI_VERSIONS: UiVersion[] = [
     date: "2026-11-13",
     changes: [
       "Worlds e SoloQ abrem sem usuário nem time. O login e a escolha de time só aparecem ao entrar na Área do time.",
-      "Área do time: novo botão \"Entrar sem usuário\" no login. As comps e alterações feitas ficam só até recarregar a página.",
-      "Administração > Times: coluna \"Versão das comps\" com a versão atual de cada time, quantas comps tem, quando e por quem foi publicada.",
+      'Área do time: novo botão "Entrar sem usuário" no login. As comps e alterações feitas ficam só até recarregar a página.',
+      'Administração > Times: coluna "Versão das comps" com a versão atual de cada time, quantas comps tem, quando e por quem foi publicada.',
     ],
   },
   {
@@ -450,13 +475,13 @@ export const UI_VERSIONS: UiVersion[] = [
     version: "1.7",
     date: "2026-11-09",
     changes: [
-      "Composições: a escolha da comp voltou a ser uma coluna de botões à esquerda de \"Monte o plano\", com o nome da comp e os campeões principais.",
-      "Ordem do draft: as anotações (plano do draft, anotações da comp e obs. das lanes) ficam no mesmo painel recolhível ao lado de \"Monte o plano\". A caixa de comentários do rodapé saiu.",
+      'Composições: a escolha da comp voltou a ser uma coluna de botões à esquerda de "Monte o plano", com o nome da comp e os campeões principais.',
+      'Ordem do draft: as anotações (plano do draft, anotações da comp e obs. das lanes) ficam no mesmo painel recolhível ao lado de "Monte o plano". A caixa de comentários do rodapé saiu.',
       "Ordem do draft: a barra Lado azul / Lado vermelho foi para o centro da linha dos bans.",
       "Ordem do draft: picks e bans têm numeração própria (1º a 10º cada).",
       "Ordem do draft: o card do pick tem as informações no canto, a lane logo abaixo e os campeões maiores.",
-      "Composições: as anotações viraram um painel recolhível ao lado de \"Monte o plano\".",
-      "Administração: novo item \"Versões da interface\" com este histórico.",
+      'Composições: as anotações viraram um painel recolhível ao lado de "Monte o plano".',
+      'Administração: novo item "Versões da interface" com este histórico.',
     ],
   },
   {
@@ -485,7 +510,7 @@ export const UI_VERSIONS: UiVersion[] = [
     date: "2026-11-09",
     changes: [
       "Login só com o Riot ID: não precisa mais escolher a pasta do OneDrive.",
-      "Administração: botões \"Importar da pasta\" e \"Baixar backup completo\"; lista de usuários por aparelho.",
+      'Administração: botões "Importar da pasta" e "Baixar backup completo"; lista de usuários por aparelho.',
     ],
   },
   {
@@ -493,7 +518,7 @@ export const UI_VERSIONS: UiVersion[] = [
     date: "2026-11-09",
     changes: [
       "Login com Riot ID (nome + #TAG) e admin com senha.",
-      "Botão \"Enviar para aprovação\" e aba Administração para aprovar ou recusar envios.",
+      'Botão "Enviar para aprovação" e aba Administração para aprovar ou recusar envios.',
     ],
   },
   {

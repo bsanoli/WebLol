@@ -1,0 +1,82 @@
+// Formatação e lint do WebLol. Decisão: docs/decisoes/0004-ferramentas-de-qualidade.md
+{
+  "$schema": "./node_modules/@biomejs/biome/configuration_schema.json",
+  "vcs": { "enabled": true, "clientKind": "git", "useIgnoreFile": true },
+  "files": {
+    "includes": [
+      "src/**",
+      "tests/**",
+      "scripts/**",
+      "public/assets/*.js",
+      "public/assets/*.css",
+      "*.ts",
+      "*.json",
+      "*.jsonc",
+      // Dados gerados pelos scripts de coleta.
+      "!src/data",
+      "!**/*.html",
+      "!**/*.svg",
+      "!package-lock.json",
+      "!skills-lock.json"
+    ]
+  },
+  "formatter": { "indentStyle": "space", "indentWidth": 2, "lineWidth": 120, "lineEnding": "lf" },
+  "javascript": {
+    "formatter": {
+      "quoteStyle": "double",
+      "semicolons": "asNeeded",
+      "arrowParentheses": "asNeeded",
+      "trailingCommas": "all"
+    }
+  },
+  "css": { "parser": { "tailwindDirectives": true, "cssModules": true } },
+  "assist": { "enabled": false },
+  "linter": {
+    "enabled": true,
+    "domains": { "playwright": "none" },
+    "rules": {
+      "preset": "recommended",
+      // Nomes, como em docs/convencoes.md. Começam como aviso; a Onda 3 corrige o código existente.
+      "style": {
+        "useNamingConvention": { "level": "warn", "options": { "strictCase": false } },
+        "useFilenamingConvention": { "level": "warn", "options": { "filenameCases": ["kebab-case"] } }
+      },
+      "nursery": { "useConsistentBooleanName": "warn" },
+      // Débito anterior à Onda 1: regras do preset que já tinham violações no código.
+      // Ficam como aviso até zerar e então voltam a ser erro (docs/auditoria-codebase.md, "Avisos do Biome").
+      "suspicious": {
+        "useIterableCallbackReturn": "warn",
+        "noImplicitAnyLet": "warn",
+        "noAssignInExpressions": "warn",
+        "noArrayIndexKey": "warn"
+      },
+      "security": { "noDangerouslySetInnerHtml": "warn" },
+      "correctness": { "useExhaustiveDependencies": "warn" },
+      "a11y": {
+        "useSemanticElements": "warn",
+        "noLabelWithoutControl": "warn",
+        "useValidAnchor": "warn"
+      }
+    }
+  },
+  "overrides": [
+    {
+      "includes": ["tests/**"],
+      "linter": { "domains": { "playwright": "recommended" } }
+    },
+    {
+      // sync.js e shell.js são scripts clássicos (src/app/entrypoints/main.tsx). As variáveis de nível superior de um
+      // são globais lidas e reatribuídas pelo outro, mas o Biome os analisa como módulos isolados. Renomear, trocar
+      // `let` por `const` ou apagar o que parece sem uso quebra o login e a Administração.
+      "includes": ["public/assets/*.js"],
+      "linter": {
+        "rules": {
+          "style": { "useNamingConvention": "off", "useConst": "off" },
+          "correctness": { "noUnusedVariables": "off" },
+          "complexity": { "noUselessEscapeInRegex": "off", "useOptionalChain": "off" },
+          "suspicious": { "noPrototypeBuiltins": "off" }
+        }
+      }
+    }
+  ]
+}

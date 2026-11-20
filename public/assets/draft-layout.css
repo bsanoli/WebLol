@@ -1,7 +1,11 @@
 /* Ordem do draft no estilo drafter.lol (tela larga):
    picks em faixas nas laterais, bans acima dos picks e, no centro,
    os nomes dos lados, as comps do time e o catálogo de campeões. */
-.dz-center, .dz-names, .dz-tabs { display: none; }
+.dz-center,
+.dz-names,
+.dz-tabs {
+  display: none;
+}
 
 @media (min-width: 1000px) {
   #v-comps.draft-view .tm > .pk .pick-choice {
@@ -23,22 +27,51 @@
     height: var(--wl-icon-size);
     justify-self: center;
   }
-  #v-comps.draft-view .tm > .pk.them { align-items: center; align-content: center; }
-  #v-comps.draft-view .tm .pick-choice .pkh { justify-content: flex-start; }
+  #v-comps.draft-view .tm > .pk.them {
+    align-items: center;
+    align-content: center;
+  }
+  #v-comps.draft-view .tm .pick-choice .pkh {
+    justify-content: flex-start;
+  }
   /* Pick preenchido não tem ícone: o nome ocupa a coluna do ícone e o resto da linha. */
-  #v-comps.draft-view .tm > .pk .pick-choice > .pkh + .pkn { grid-column: 2 / -1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  #v-comps.draft-view .tm > .pk .pick-choice > .pkh + .pkn {
+    grid-column: 2 / -1;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
 }
 
 @media (min-width: 1100px) {
-  body:has(#v-comps.draft-view.on) { height: 100dvh; }
+  body:has(#v-comps.draft-view.on) {
+    height: 100dvh;
+  }
   #v-comps.draft-view.on,
   #v-comps.draft-view #comps,
-  #v-comps.draft-view #editor { min-height: 0; }
-  #v-comps.draft-view #editor { flex: 1 1 0; }
-  #v-comps.draft-view #comps { grid-template-columns: minmax(0, 1fr); grid-template-rows: auto minmax(0, 1fr); }
-  #v-comps.draft-view #comps .comp-library { display: none; }
-  #v-comps.draft-view .comp-editor { grid-column: 1 / -1; grid-row: auto; }
-  #v-comps.draft-view .draft-toolbar-top, #v-comps.draft-view .dseq-row { display: flex; justify-content: center; margin: 0; }
+  #v-comps.draft-view #editor {
+    min-height: 0;
+  }
+  #v-comps.draft-view #editor {
+    flex: 1 1 0;
+  }
+  #v-comps.draft-view #comps {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: auto minmax(0, 1fr);
+  }
+  #v-comps.draft-view #comps .comp-library {
+    display: none;
+  }
+  #v-comps.draft-view .comp-editor {
+    grid-column: 1 / -1;
+    grid-row: auto;
+  }
+  #v-comps.draft-view .draft-toolbar-top,
+  #v-comps.draft-view .dseq-row {
+    display: flex;
+    justify-content: center;
+    margin: 0;
+  }
 
   #v-comps.draft-view .dz {
     display: grid;
@@ -49,66 +82,277 @@
     flex: 1;
     min-height: 0;
   }
-  #v-comps.draft-view .tm { display: flex; flex-direction: column; gap: 6px; grid-row: auto; min-width: 0; margin: 0; order: 0; }
-  #v-comps.draft-view .tm > .draft-phase { display: none; }
-  #v-comps.draft-view .tm > .draft-phase + .pk + .pk + .pk { margin-bottom: 4px; }
-  #v-comps.draft-view .draft-bans { display: flex; align-items: center; gap: 6px; min-height: 52px; }
-  #v-comps.draft-view .tm.r .draft-bans { flex-direction: row-reverse; }
-  #v-comps.draft-view .draft-bans .bsq { width: 44px; height: 44px; flex: none; }
-  #v-comps.draft-view .draft-bans .bans { gap: var(--wl-space-1); }
+  #v-comps.draft-view .tm {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    grid-row: auto;
+    min-width: 0;
+    margin: 0;
+    order: 0;
+  }
+  #v-comps.draft-view .tm > .draft-phase {
+    display: none;
+  }
+  #v-comps.draft-view .tm > .draft-phase + .pk + .pk + .pk {
+    margin-bottom: 4px;
+  }
+  #v-comps.draft-view .draft-bans {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    min-height: 52px;
+  }
+  #v-comps.draft-view .tm.r .draft-bans {
+    flex-direction: row-reverse;
+  }
+  #v-comps.draft-view .draft-bans .bsq {
+    width: 44px;
+    height: 44px;
+    flex: none;
+  }
+  #v-comps.draft-view .draft-bans .bans {
+    gap: var(--wl-space-1);
+  }
 
   /* Faixas dos picks */
   #v-comps.draft-view .tm > .pk {
-    flex: 1 1 0; min-height: 92px; position: relative; overflow: hidden;
-    display: flex; flex-direction: column; justify-content: space-between; align-items: flex-start;
-    gap: var(--wl-space-2); padding: var(--wl-space-2); border-radius: 0;
+    flex: 1 1 0;
+    min-height: 92px;
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: var(--wl-space-2);
+    padding: var(--wl-space-2);
+    border-radius: 0;
   }
-  #v-comps.draft-view .tm.r > .pk { align-items: flex-end; text-align: right; border-left-width: 1px; border-left-color: var(--line); border-right: var(--wl-accent-bar) solid var(--wl-side-red); }
-  #v-comps.draft-view .tm > .pk.mine .pick-splash { inset: 0; width: 100%; opacity: 1; object-position: center 22%; }
+  #v-comps.draft-view .tm.r > .pk {
+    align-items: flex-end;
+    text-align: right;
+    border-left-width: 1px;
+    border-left-color: var(--line);
+    border-right: var(--wl-accent-bar) solid var(--wl-side-red);
+  }
+  #v-comps.draft-view .tm > .pk.mine .pick-splash {
+    inset: 0;
+    width: 100%;
+    opacity: 1;
+    object-position: center 22%;
+  }
   #v-comps.draft-view .tm > .pk.mine:has(.pick-splash)::before {
-    background: linear-gradient(to top, color-mix(in srgb, var(--bg) 88%, transparent) 0%, transparent 45%),
-                linear-gradient(to bottom, color-mix(in srgb, var(--bg) 70%, transparent) 0%, transparent 38%);
+    background:
+      linear-gradient(to top, color-mix(in srgb, var(--bg) 88%, transparent) 0%, transparent 45%),
+      linear-gradient(to bottom, color-mix(in srgb, var(--bg) 70%, transparent) 0%, transparent 38%);
   }
-  #v-comps.draft-view .tm > .pk.mine .pkf { order: -1; flex: none; flex-direction: row; align-items: center; max-width: 100%; width: auto; flex-wrap: wrap; gap: 4px; }
-  #v-comps.draft-view .tm.r > .pk.mine .pkf { justify-content: flex-end; }
-  #v-comps.draft-view .tm > .pk .pick-choice { flex: none; }
-  #v-comps.draft-view .tm.r .pick-choice { direction: rtl; text-align: right; }
-  #v-comps.draft-view .tm.r .pick-choice > * { direction: ltr; }
-  #v-comps.draft-view .tm.r .pick-choice .pkh { justify-content: flex-end; }
-  #v-comps.draft-view .tm > .pk.mine .pkn:not(.pk-empty) { font-size: 20px; text-shadow: 0 1px 4px #000; }
-  #v-comps.draft-view .tm > .pk.them { justify-content: flex-end; }
-  #v-comps.draft-view .tm > .pk { min-height: 0; }
+  #v-comps.draft-view .tm > .pk.mine .pkf {
+    order: -1;
+    flex: none;
+    flex-direction: row;
+    align-items: center;
+    max-width: 100%;
+    width: auto;
+    flex-wrap: wrap;
+    gap: 4px;
+  }
+  #v-comps.draft-view .tm.r > .pk.mine .pkf {
+    justify-content: flex-end;
+  }
+  #v-comps.draft-view .tm > .pk .pick-choice {
+    flex: none;
+  }
+  #v-comps.draft-view .tm.r .pick-choice {
+    direction: rtl;
+    text-align: right;
+  }
+  #v-comps.draft-view .tm.r .pick-choice > * {
+    direction: ltr;
+  }
+  #v-comps.draft-view .tm.r .pick-choice .pkh {
+    justify-content: flex-end;
+  }
+  #v-comps.draft-view .tm > .pk.mine .pkn:not(.pk-empty) {
+    font-size: 20px;
+    text-shadow: 0 1px 4px #000;
+  }
+  #v-comps.draft-view .tm > .pk.them {
+    justify-content: flex-end;
+  }
+  #v-comps.draft-view .tm > .pk {
+    min-height: 0;
+  }
 
   /* Centro */
-  #v-comps.draft-view .dz-center { overflow: auto; display: flex; flex-direction: column; gap: 10px; min-width: 0; }
-  #v-comps.draft-view .dz-names { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; }
-  #v-comps.draft-view .dz-names .tmh { display: flex; flex-direction: column; gap: 2px; padding: 0; margin: 0; background: none; font-size: 22px; line-height: 1.1; }
-  #v-comps.draft-view .dz-names .tmh:first-child { color: #6ea2ff; align-items: flex-start; }
-  #v-comps.draft-view .dz-names .tmh:last-child { color: #ff6b7d; align-items: flex-end; text-align: right; }
-  #v-comps.draft-view .dz-names .tmh span { font-size: 12px; font-weight: 500; color: var(--mut); opacity: 1; }
-  #v-comps.draft-view .dz-tabs { display: flex; flex-wrap: wrap; gap: 6px; padding: 6px; border: 1px solid var(--line); border-radius: var(--wl-card-radius); background: var(--panel2, var(--bg)); max-height: 192px; overflow: auto; overscroll-behavior: contain; }
-  .dz-tab { display: flex; flex-direction: column; align-items: flex-start; gap: 4px; min-width: 0; max-width: 190px; padding: 6px 9px; border: 1px solid transparent; border-radius: var(--wl-control-radius); background: transparent; color: var(--txt); text-align: left; cursor: pointer; }
-  .dz-tab:hover { background: var(--wl-accent-soft); }
-  .dz-tab.on { border-color: var(--wl-accent); background: var(--wl-accent-soft); }
-  .dz-tab b { font-size: 12px; max-width: 100%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  #v-comps .dz-tab .mini { display: flex; flex-wrap: nowrap; gap: 3px; margin: 0; }
-  #v-comps .dz-tab .mini .av { width: 26px; height: 26px; flex: none; border-radius: var(--wl-control-radius); }
-  .dz-tab .mini small { color: var(--mut); font-size: 11px; }
-  .dz-tab.dz-new { align-self: stretch; justify-content: center; align-items: center; min-width: 40px; border: 1px dashed var(--line); }
-  #v-comps.draft-view .dz-slot { flex: 1 1 auto; display: flex; min-height: 0; }
-  #v-comps.draft-view .dz-slot .champ-picker { flex: 1; display: flex; flex-direction: column; min-width: 0; min-height: 0; margin: 0; position: static; }
-  #v-comps.draft-view .dz-slot .picker-heading { display: none; }
-  #v-comps.draft-view .dz-slot #target { margin-top: 0; }
-  #v-comps.draft-view .dz-slot #target small, #v-comps.draft-view .dz-slot #target label, #v-comps.draft-view .dz-slot .filter-heading { display: none; }
-  #v-comps.draft-view .dz-slot #target { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 6px 10px; }
-  #v-comps.draft-view .dz-slot .gtools { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; padding-block: 4px; }
-  #v-comps.draft-view .dz-slot .gtools label { margin: 0; font-size: 12px; }
-  #v-comps.draft-view .dz-slot .roles { padding-block: 2px; gap: 2px; }
-  #v-comps.draft-view .dz-slot .worlds-filter { padding-block: 2px; }
-  #v-comps.draft-view .dz-slot .champ-picker > * { flex: none; }
-  #v-comps.draft-view .dz-slot .champ-picker > #grid { flex: 1 1 0; }
-  #v-comps.draft-view .dz-slot #grid { flex: 1 1 0; max-height: none; min-height: var(--wl-space-8); overflow: auto; overscroll-behavior: contain; }
-  #v-comps.draft-view > .comp-workspace ~ * .draft-help, #v-comps.draft-view .draft-help { text-align: center; }
+  #v-comps.draft-view .dz-center {
+    overflow: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    min-width: 0;
+  }
+  #v-comps.draft-view .dz-names {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 12px;
+  }
+  #v-comps.draft-view .dz-names .tmh {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    padding: 0;
+    margin: 0;
+    background: none;
+    font-size: 22px;
+    line-height: 1.1;
+  }
+  #v-comps.draft-view .dz-names .tmh:first-child {
+    color: #6ea2ff;
+    align-items: flex-start;
+  }
+  #v-comps.draft-view .dz-names .tmh:last-child {
+    color: #ff6b7d;
+    align-items: flex-end;
+    text-align: right;
+  }
+  #v-comps.draft-view .dz-names .tmh span {
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--mut);
+    opacity: 1;
+  }
+  #v-comps.draft-view .dz-tabs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    padding: 6px;
+    border: 1px solid var(--line);
+    border-radius: var(--wl-card-radius);
+    background: var(--panel2, var(--bg));
+    max-height: 192px;
+    overflow: auto;
+    overscroll-behavior: contain;
+  }
+  .dz-tab {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+    min-width: 0;
+    max-width: 190px;
+    padding: 6px 9px;
+    border: 1px solid transparent;
+    border-radius: var(--wl-control-radius);
+    background: transparent;
+    color: var(--txt);
+    text-align: left;
+    cursor: pointer;
+  }
+  .dz-tab:hover {
+    background: var(--wl-accent-soft);
+  }
+  .dz-tab.on {
+    border-color: var(--wl-accent);
+    background: var(--wl-accent-soft);
+  }
+  .dz-tab b {
+    font-size: 12px;
+    max-width: 100%;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  #v-comps .dz-tab .mini {
+    display: flex;
+    flex-wrap: nowrap;
+    gap: 3px;
+    margin: 0;
+  }
+  #v-comps .dz-tab .mini .av {
+    width: 26px;
+    height: 26px;
+    flex: none;
+    border-radius: var(--wl-control-radius);
+  }
+  .dz-tab .mini small {
+    color: var(--mut);
+    font-size: 11px;
+  }
+  .dz-tab.dz-new {
+    align-self: stretch;
+    justify-content: center;
+    align-items: center;
+    min-width: 40px;
+    border: 1px dashed var(--line);
+  }
+  #v-comps.draft-view .dz-slot {
+    flex: 1 1 auto;
+    display: flex;
+    min-height: 0;
+  }
+  #v-comps.draft-view .dz-slot .champ-picker {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    min-height: 0;
+    margin: 0;
+    position: static;
+  }
+  #v-comps.draft-view .dz-slot .picker-heading {
+    display: none;
+  }
+  #v-comps.draft-view .dz-slot #target {
+    margin-top: 0;
+  }
+  #v-comps.draft-view .dz-slot #target small,
+  #v-comps.draft-view .dz-slot #target label,
+  #v-comps.draft-view .dz-slot .filter-heading {
+    display: none;
+  }
+  #v-comps.draft-view .dz-slot #target {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    padding: 6px 10px;
+  }
+  #v-comps.draft-view .dz-slot .gtools {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 6px;
+    padding-block: 4px;
+  }
+  #v-comps.draft-view .dz-slot .gtools label {
+    margin: 0;
+    font-size: 12px;
+  }
+  #v-comps.draft-view .dz-slot .roles {
+    padding-block: 2px;
+    gap: 2px;
+  }
+  #v-comps.draft-view .dz-slot .worlds-filter {
+    padding-block: 2px;
+  }
+  #v-comps.draft-view .dz-slot .champ-picker > * {
+    flex: none;
+  }
+  #v-comps.draft-view .dz-slot .champ-picker > #grid {
+    flex: 1 1 0;
+  }
+  #v-comps.draft-view .dz-slot #grid {
+    flex: 1 1 0;
+    max-height: none;
+    min-height: var(--wl-space-8);
+    overflow: auto;
+    overscroll-behavior: contain;
+  }
+  #v-comps.draft-view > .comp-workspace ~ * .draft-help,
+  #v-comps.draft-view .draft-help {
+    text-align: center;
+  }
 }
 
 .draft-ban-remove[data-slot="button"] {
@@ -133,61 +377,195 @@
 }
 
 /* Lane do time ao lado de "Ordenar por" (substitui o quadro de destino) */
-#target[hidden] { display: none !important; }
-#champ-picker .gtools { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 6px 8px; }
-#champ-picker .gtools > label:first-child { grid-column: 1 / -1; }
-#champ-picker .gtools select, #champ-picker .gtools input { width: 100%; }
-#lane-target-tool select { color: var(--wl-accent); font-weight: 700; }
+#target[hidden] {
+  display: none !important;
+}
+#champ-picker .gtools {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 6px 8px;
+}
+#champ-picker .gtools > label:first-child {
+  grid-column: 1 / -1;
+}
+#champ-picker .gtools select,
+#champ-picker .gtools input {
+  width: 100%;
+}
+#lane-target-tool select {
+  color: var(--wl-accent);
+  font-weight: 700;
+}
 
 /* Opções do pick: só o retrato (sem nota e sem ⋯) */
-#v-comps .pk .dchip { position: relative; margin: 0; }
-#v-comps .pk .dchip .champ-priority { display: inline-flex; padding: 0; min-height: 0; border: 0; background: none; cursor: pointer; }
-#v-comps .pk .dchip .av { width: 34px; height: 34px; border-radius: var(--wl-control-radius); border: 1px solid #fff4; }
-#v-comps .pk .dchip.primary .av { border: 2px solid var(--wl-accent); }
-#v-comps .pk .draft-alternatives-label { display: none; }
-.chip-menu { z-index: 50; padding: var(--wl-space-1); border: 1px solid var(--line); border-radius: var(--wl-control-radius); background: var(--panel); box-shadow: 0 8px 24px #0008; }
-.chip-menu [role=menuitem] { display: flex; align-items: center; gap: var(--wl-space-2); padding: var(--wl-space-1) var(--wl-space-2); min-height: var(--wl-button-height-sm); color: var(--wl-danger); cursor: pointer; border-radius: var(--wl-control-radius); }
-.chip-menu [data-highlighted] { background: var(--wl-danger-soft); outline: none; }
+#v-comps .pk .dchip {
+  position: relative;
+  margin: 0;
+}
+#v-comps .pk .dchip .champ-priority {
+  display: inline-flex;
+  padding: 0;
+  min-height: 0;
+  border: 0;
+  background: none;
+  cursor: pointer;
+}
+#v-comps .pk .dchip .av {
+  width: 34px;
+  height: 34px;
+  border-radius: var(--wl-control-radius);
+  border: 1px solid #fff4;
+}
+#v-comps .pk .dchip.primary .av {
+  border: 2px solid var(--wl-accent);
+}
+#v-comps .pk .draft-alternatives-label {
+  display: none;
+}
+.chip-menu {
+  z-index: 50;
+  padding: var(--wl-space-1);
+  border: 1px solid var(--line);
+  border-radius: var(--wl-control-radius);
+  background: var(--panel);
+  box-shadow: 0 8px 24px #0008;
+}
+.chip-menu [role="menuitem"] {
+  display: flex;
+  align-items: center;
+  gap: var(--wl-space-2);
+  padding: var(--wl-space-1) var(--wl-space-2);
+  min-height: var(--wl-button-height-sm);
+  color: var(--wl-danger);
+  cursor: pointer;
+  border-radius: var(--wl-control-radius);
+}
+.chip-menu [data-highlighted] {
+  background: var(--wl-danger-soft);
+  outline: none;
+}
 
 /* Nome dos lados vira o seletor do lado do time */
-.side-pick { display: flex; flex-direction: column; align-items: inherit; gap: 2px; padding: 4px 8px; margin-block: calc(-1 * var(--wl-space-1)); border: 1px solid transparent; border-radius: var(--wl-control-radius); background: none; color: inherit; font: inherit; text-align: inherit; cursor: pointer; }
-.side-pick:hover { border-color: currentColor; }
-.side-pick.on { border-color: color-mix(in srgb, currentColor 55%, transparent); background: color-mix(in srgb, currentColor 10%, transparent); }
-.side-pick span { font-size: 12px; font-weight: 500; color: var(--mut); }
-.side-pick.on span { color: var(--wl-accent); }
-@media (min-width: 1100px) { #v-comps.draft-view .draft-toolbar-top { display: none; } }
-#v-comps .pkh b { white-space: nowrap; }
+.side-pick {
+  display: flex;
+  flex-direction: column;
+  align-items: inherit;
+  gap: 2px;
+  padding: 4px 8px;
+  margin-block: calc(-1 * var(--wl-space-1));
+  border: 1px solid transparent;
+  border-radius: var(--wl-control-radius);
+  background: none;
+  color: inherit;
+  font: inherit;
+  text-align: inherit;
+  cursor: pointer;
+}
+.side-pick:hover {
+  border-color: currentColor;
+}
+.side-pick.on {
+  border-color: color-mix(in srgb, currentColor 55%, transparent);
+  background: color-mix(in srgb, currentColor 10%, transparent);
+}
+.side-pick span {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--mut);
+}
+.side-pick.on span {
+  color: var(--wl-accent);
+}
+@media (min-width: 1100px) {
+  #v-comps.draft-view .draft-toolbar-top {
+    display: none;
+  }
+}
+#v-comps .pkh b {
+  white-space: nowrap;
+}
 
 /* Comps do centro: colunas esticam e ocupam toda a largura do campo */
 @media (min-width: 1100px) {
-  #v-comps.draft-view .dz-tabs { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); align-content: start; }
-  #v-comps .dz-tab { max-width: none; width: 100%; }
-  #v-comps .dz-tab .mini { display: grid; grid-template-columns: repeat(5, minmax(0, 36px)); gap: 4px; width: 100%; }
-  #v-comps .dz-tab .mini .av { width: 100%; height: auto; aspect-ratio: 1; }
-  #v-comps .dz-tab.dz-new { min-height: 56px; }
+  #v-comps.draft-view .dz-tabs {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    align-content: start;
+  }
+  #v-comps .dz-tab {
+    max-width: none;
+    width: 100%;
+  }
+  #v-comps .dz-tab .mini {
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 36px));
+    gap: 4px;
+    width: 100%;
+  }
+  #v-comps .dz-tab .mini .av {
+    width: 100%;
+    height: auto;
+    aspect-ratio: 1;
+  }
+  #v-comps .dz-tab.dz-new {
+    min-height: 56px;
+  }
 }
 
 /* Catálogo: Ordenar por e Lane do time compactos */
 #champ-picker .gtools .team-select [data-team-trigger="select"],
 #champ-picker .gtools select,
-#champ-picker .gtools input { min-height: 30px; height: 30px; padding-block: 2px; padding-inline: 8px; font-size: 12px; }
-#champ-picker .gtools .team-select { margin-top: 2px; }
-#champ-picker .gtools .team-select [data-team-trigger="select"] .lane-icon { width: 14px; height: 14px; }
-#champ-picker #gfoot[hidden] { display: none; }
+#champ-picker .gtools input {
+  min-height: 30px;
+  height: 30px;
+  padding-block: 2px;
+  padding-inline: 8px;
+  font-size: 12px;
+}
+#champ-picker .gtools .team-select {
+  margin-top: 2px;
+}
+#champ-picker .gtools .team-select [data-team-trigger="select"] .lane-icon {
+  width: 14px;
+  height: 14px;
+}
+#champ-picker #gfoot[hidden] {
+  display: none;
+}
 
 /* Área das comps: exatamente duas fileiras visíveis, o resto pela rolagem */
 @media (min-width: 1100px) {
-  #v-comps.draft-view .dz-tabs { grid-auto-rows: 66px; max-height: calc(66px * 2 + 6px + 12px + 2px); scroll-snap-type: y mandatory; scroll-padding: 6px; }
-  #v-comps .dz-tab { height: 66px; overflow: hidden; scroll-snap-align: start; }
-  #v-comps .dz-tab .mini { grid-template-columns: repeat(5, 30px); }
-  #v-comps .dz-tab .mini .av { width: 30px; height: 30px; }
-  #v-comps .dz-tab.dz-new { min-height: 0; }
+  #v-comps.draft-view .dz-tabs {
+    grid-auto-rows: 66px;
+    max-height: calc(66px * 2 + 6px + 12px + 2px);
+    scroll-snap-type: y mandatory;
+    scroll-padding: 6px;
+  }
+  #v-comps .dz-tab {
+    height: 66px;
+    overflow: hidden;
+    scroll-snap-align: start;
+  }
+  #v-comps .dz-tab .mini {
+    grid-template-columns: repeat(5, 30px);
+  }
+  #v-comps .dz-tab .mini .av {
+    width: 30px;
+    height: 30px;
+  }
+  #v-comps .dz-tab.dz-new {
+    min-height: 0;
+  }
 }
 
 /* Pick: rótulo + nome sempre abaixo das alternativas (sem quebrar em coluna ao lado) */
 @media (min-width: 1100px) {
-  #v-comps.draft-view .tm > .pk.mine { flex-wrap: nowrap; }
-  #v-comps.draft-view .tm > .pk.mine .pk-target { order: 2; }
+  #v-comps.draft-view .tm > .pk.mine {
+    flex-wrap: nowrap;
+  }
+  #v-comps.draft-view .tm > .pk.mine .pk-target {
+    order: 2;
+  }
   #v-comps.draft-view #composition-notes[open] {
     max-height: min(25dvh, 160px);
     overflow: auto;
@@ -195,15 +573,44 @@
 }
 
 @media (min-width: 1100px) and (max-height: 820px) {
-  #v-comps.draft-view .draft-bans { min-height: var(--wl-space-8); }
-  #v-comps.draft-view .draft-bans .bsq { width: var(--wl-space-8); height: var(--wl-space-8); }
-  #v-comps.draft-view .tm > .pk { gap: 0; padding: var(--wl-space-1) var(--wl-space-2); }
-  #v-comps.draft-view .tm > .pk .pkf { flex-wrap: nowrap; }
-  #v-comps.draft-view .pkf .draft-alternatives { min-width: 0; overflow-x: auto; }
-  #v-comps.draft-view .tm > .pk .pkn { font-size: var(--wl-label-size); }
+  #v-comps.draft-view .draft-bans {
+    min-height: var(--wl-space-8);
+  }
+  #v-comps.draft-view .draft-bans .bsq {
+    width: var(--wl-space-8);
+    height: var(--wl-space-8);
+  }
+  #v-comps.draft-view .tm > .pk {
+    gap: 0;
+    padding: var(--wl-space-1) var(--wl-space-2);
+  }
+  #v-comps.draft-view .tm > .pk .pkf {
+    flex-wrap: nowrap;
+  }
+  #v-comps.draft-view .pkf .draft-alternatives {
+    min-width: 0;
+    overflow-x: auto;
+  }
+  #v-comps.draft-view .tm > .pk .pkn {
+    font-size: var(--wl-label-size);
+  }
 }
 
 /* Lado da comp ao lado do nome */
-.side-dot { display: inline-block; flex: none; width: 8px; height: 8px; margin-right: 6px; border-radius: 50%; vertical-align: 1px; }
-.side-dot.blue { background: var(--wl-side-blue, #3b82f6); box-shadow: 0 0 0 2px color-mix(in srgb, var(--wl-side-blue, #3b82f6) 30%, transparent); }
-.side-dot.red { background: var(--wl-side-red, #ef4444); box-shadow: 0 0 0 2px color-mix(in srgb, var(--wl-side-red, #ef4444) 30%, transparent); }
+.side-dot {
+  display: inline-block;
+  flex: none;
+  width: 8px;
+  height: 8px;
+  margin-right: 6px;
+  border-radius: 50%;
+  vertical-align: 1px;
+}
+.side-dot.blue {
+  background: var(--wl-side-blue, #3b82f6);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--wl-side-blue, #3b82f6) 30%, transparent);
+}
+.side-dot.red {
+  background: var(--wl-side-red, #ef4444);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--wl-side-red, #ef4444) 30%, transparent);
+}

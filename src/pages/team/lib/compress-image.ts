@@ -6,8 +6,14 @@ function loadBitmap(file: Blob): Promise<HTMLImageElement> {
   return new Promise((resolve, reject) => {
     const url = URL.createObjectURL(file)
     const image = new Image()
-    image.onload = () => { URL.revokeObjectURL(url); resolve(image) }
-    image.onerror = () => { URL.revokeObjectURL(url); reject(new Error("Imagem inválida")) }
+    image.onload = () => {
+      URL.revokeObjectURL(url)
+      resolve(image)
+    }
+    image.onerror = () => {
+      URL.revokeObjectURL(url)
+      reject(new Error("Imagem inválida"))
+    }
     image.src = url
   })
 }

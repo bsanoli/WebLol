@@ -21,20 +21,39 @@ const mimeOf = (dataURL: string) => (/^data:([^;,]+)/.exec(dataURL)?.[1] ?? "ima
 /** Cena inicial: o print travado na origem e, por cima, os riscos já salvos. */
 function initialElements({ srcId, size, scene }: Pick<PrintSketchProps, "srcId" | "size" | "scene">) {
   if (scene?.elements.length) return scene.elements
-  return convertToExcalidrawElements([{
-    type: "image", fileId: srcId as FileId, x: 0, y: 0, width: size.width, height: size.height, locked: true, status: "saved",
-  }])
+  return convertToExcalidrawElements([
+    {
+      type: "image",
+      fileId: srcId as FileId,
+      x: 0,
+      y: 0,
+      width: size.width,
+      height: size.height,
+      locked: true,
+      status: "saved",
+    },
+  ])
 }
 
 export function PrintSketch({ srcId, background, size, scene, onSave, onCancel }: PrintSketchProps) {
   const api = useRef<ExcalidrawImperativeAPI | null>(null)
   const [saving, setSaving] = useState(false)
-  const initialData = useMemo(() => ({
-    elements: initialElements({ srcId, size, scene }),
-    files: { [srcId]: { id: srcId as FileId, dataURL: background as BinaryFileData["dataURL"], mimeType: mimeOf(background), created: Date.now() } },
-    appState: { viewBackgroundColor: "#ffffff", currentItemStrokeColor: "#e03131", currentItemStrokeWidth: 2 },
-    scrollToContent: true,
-  }), [srcId, size, scene, background])
+  const initialData = useMemo(
+    () => ({
+      elements: initialElements({ srcId, size, scene }),
+      files: {
+        [srcId]: {
+          id: srcId as FileId,
+          dataURL: background as BinaryFileData["dataURL"],
+          mimeType: mimeOf(background),
+          created: Date.now(),
+        },
+      },
+      appState: { viewBackgroundColor: "#ffffff", currentItemStrokeColor: "#e03131", currentItemStrokeWidth: 2 },
+      scrollToContent: true,
+    }),
+    [srcId, size, scene, background],
+  )
 
   const handleSave = async () => {
     const current = api.current
@@ -43,7 +62,10 @@ export function PrintSketch({ srcId, background, size, scene, onSave, onCancel }
     try {
       const elements = current.getSceneElements()
       const image = await exportToBlob({
-        elements, files: current.getFiles(), mimeType: "image/png", exportPadding: 0,
+        elements,
+        files: current.getFiles(),
+        mimeType: "image/png",
+        exportPadding: 0,
         appState: { exportBackground: true, viewBackgroundColor: "#ffffff", exportWithDarkMode: false },
       })
       await onSave({ scene: { v: 1, elements }, image })
@@ -52,22 +74,44 @@ export function PrintSketch({ srcId, background, size, scene, onSave, onCancel }
     }
   }
 
-  return <div className="tx-sketch">
-    <header className="tx-sketch-head">
-      <h2>Desenhar no print</h2>
-      <p>O print fica travado no fundo. Os riscos continuam editáveis quando você reabrir.</p>
-      <div className="tx-sketch-actions">
-        <Button type="button" variant="ghost" onClick={onCancel} disabled={saving}>Cancelar</Button>
-        <Button type="button" onClick={() => void handleSave()} disabled={saving}>{saving ? "Salvando…" : "Salvar desenho"}</Button>
+  return (
+    <div className="tx-sketch">
+      <header className="tx-sketch-head">
+        <h2>Desenhar no print</h2>
+        <p>O print fica travado no fundo. Os riscos continuam editáveis quando você reabrir.</p>
+        <div className="tx-sketch-actions">
+          <Button type="button" variant="ghost" onClick={onCancel} disabled={saving}>
+            Cancelar
+          </Button>
+          <Button type="button" onClick={() => void handleSave()} disabled={saving}>
+            {saving ? "Salvando…" : "Salvar desenho"}
+          </Button>
+        </div>
+      </header>
+      <div className="tx-sketch-canvas">
+        <Excalidraw
+          excalidrawAPI={value => {
+            api.current = value
+          }}
+          initialData={initialData}
+          theme="dark"
+          langCode="pt-BR"
+          UIOptions={{
+            canvasActions: {
+              loadScene: false,
+              saveToActiveFile: false,
+              export: false,
+              saveAsImage: false,
+              toggleTheme: false,
+            },
+            tools: { image: false },
+          }}
+        >
+          <MainMenu>
+            <MainMenu.DefaultItems.Help />
+          </MainMenu>
+        </Excalidraw>
       </div>
-    </header>
-    <div className="tx-sketch-canvas">
-      <Excalidraw excalidrawAPI={value => { api.current = value }} initialData={initialData}
-        theme="dark" langCode="pt-BR" UIOptions={{ canvasActions: { loadScene: false, saveToActiveFile: false, export: false, saveAsImage: false, toggleTheme: false }, tools: { image: false } }}>
-        <MainMenu>
-          <MainMenu.DefaultItems.Help />
-        </MainMenu>
-      </Excalidraw>
     </div>
-  </div>
+  )
 }

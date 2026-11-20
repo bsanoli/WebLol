@@ -8,7 +8,15 @@ import { ContextMenu } from "radix-ui"
 import { Switch } from "@/shared/ui/arc/switch/switch"
 import { Empty, EmptyDescription, EmptyHeader } from "@/shared/ui/empty"
 
-import { DropdownMenu, DropdownMenuContent, DropdownMenuGroup, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/shared/ui/dropdown-menu"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuGroup,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/shared/ui/dropdown-menu"
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from "@/shared/ui/select"
 
 const roots = new WeakMap<Element, Root>()
@@ -30,39 +38,74 @@ export function clearTeamControls(region: Element) {
 }
 
 export function Icon({ name }: { name: string }) {
-  return <svg className="icon" aria-hidden="true"><use href={`assets/icons.svg#${name}`} /></svg>
+  return (
+    <svg className="icon" aria-hidden="true">
+      <use href={`assets/icons.svg#${name}`} />
+    </svg>
+  )
 }
 
 export function mountDraftChampionMenu(host: HTMLElement, name: string, remove: () => void) {
   const button = host.querySelector("button")!
   const { priority, lane } = button.dataset
   const html = button.innerHTML
-  renderControl(host, <ContextMenu.Root>
-    <ContextMenu.Trigger asChild>
-      <button type="button" className={button.className} data-priority={priority} data-lane={lane}
-        aria-label={button.getAttribute("aria-label") ?? name} title={button.title}
-        dangerouslySetInnerHTML={{ __html: html }} />
-    </ContextMenu.Trigger>
-    <ContextMenu.Portal>
-      <ContextMenu.Content className="chip-menu" aria-label={name}>
-        <ContextMenu.Item data-slot="dropdown-menu-item" data-variant="destructive"
-          onSelect={() => queueMicrotask(remove)}>
-          <Icon name="trash" /> Excluir {name}
-        </ContextMenu.Item>
-      </ContextMenu.Content>
-    </ContextMenu.Portal>
-  </ContextMenu.Root>)
+  renderControl(
+    host,
+    <ContextMenu.Root>
+      <ContextMenu.Trigger asChild>
+        <button
+          type="button"
+          className={button.className}
+          data-priority={priority}
+          data-lane={lane}
+          aria-label={button.getAttribute("aria-label") ?? name}
+          title={button.title}
+          dangerouslySetInnerHTML={{ __html: html }}
+        />
+      </ContextMenu.Trigger>
+      <ContextMenu.Portal>
+        <ContextMenu.Content className="chip-menu" aria-label={name}>
+          <ContextMenu.Item
+            data-slot="dropdown-menu-item"
+            data-variant="destructive"
+            onSelect={() => queueMicrotask(remove)}
+          >
+            <Icon name="trash" /> Excluir {name}
+          </ContextMenu.Item>
+        </ContextMenu.Content>
+      </ContextMenu.Portal>
+    </ContextMenu.Root>,
+  )
 }
 
 export function mountMapEmpty(host: Element) {
-  renderControl(host, <Empty className="map-empty">
-    <EmptyHeader><EmptyDescription>Nenhum passo ainda.</EmptyDescription></EmptyHeader>
-  </Empty>)
+  renderControl(
+    host,
+    <Empty className="map-empty">
+      <EmptyHeader>
+        <EmptyDescription>Nenhum passo ainda.</EmptyDescription>
+      </EmptyHeader>
+    </Empty>,
+  )
 }
 
-export function mountMapSwitch(host: Element, label: string, checked: boolean, onCheckedChange: (checked: boolean) => void, disabled = false) {
-  renderControl(host, <Switch className="map-check" label={label}
-    checked={checked} disabled={disabled} onCheckedChange={onCheckedChange} />)
+export function mountMapSwitch(
+  host: Element,
+  label: string,
+  checked: boolean,
+  onCheckedChange: (checked: boolean) => void,
+  disabled = false,
+) {
+  renderControl(
+    host,
+    <Switch
+      className="map-check"
+      label={label}
+      checked={checked}
+      disabled={disabled}
+      onCheckedChange={onCheckedChange}
+    />,
+  )
 }
 
 export type MenuAction = {
@@ -89,28 +132,31 @@ export function keepFocusOutsideFrame(event: Event) {
   if (!document.hasFocus()) event.preventDefault()
 }
 
-export function ActionMenu({ label, heading, actions }: {
-  label: string
-  heading?: string
-  actions: MenuAction[]
-}) {
+export function ActionMenu({ label, heading, actions }: { label: string; heading?: string; actions: MenuAction[] }) {
   const { open, setOpen } = useTeamOverlay()
   return (
     <DropdownMenu open={open} onOpenChange={setOpen} modal={false}>
       <DropdownMenuTrigger data-team-trigger="icon" aria-label={label}>
         <MoreHorizontal aria-hidden="true" />
       </DropdownMenuTrigger>
-      <DropdownMenuContent className="team-menu" align="end" collisionPadding={8}
-        onCloseAutoFocus={keepFocusOutsideFrame}>
+      <DropdownMenuContent
+        className="team-menu"
+        align="end"
+        collisionPadding={8}
+        onCloseAutoFocus={keepFocusOutsideFrame}
+      >
         <DropdownMenuGroup>
           {heading && <DropdownMenuLabel>{heading}</DropdownMenuLabel>}
           {actions.map(({ label, icon, disabled, destructive, run }) => (
             <Fragment key={label}>
               {destructive && <DropdownMenuSeparator />}
-              <DropdownMenuItem disabled={disabled}
+              <DropdownMenuItem
+                disabled={disabled}
                 variant={destructive ? "destructive" : "default"}
-                onSelect={() => queueMicrotask(run)}>
-                {icon}{label}
+                onSelect={() => queueMicrotask(run)}
+              >
+                {icon}
+                {label}
               </DropdownMenuItem>
             </Fragment>
           ))}
@@ -130,36 +176,60 @@ function TeamSelect({ field }: { field: HTMLSelectElement }) {
   const compact = field.hasAttribute("data-pick-position")
 
   function renderLabel(option: HTMLOptionElement) {
-    return <>
-      {lanes && option.value !== "ban" && <img className="lane-icon" src={`assets/lanes/${option.value}.svg`} alt="" />}
-      <span className="team-select-label">{option.dataset.label ?? option.text}</span>
-    </>
+    return (
+      <>
+        {lanes && option.value !== "ban" && (
+          <img className="lane-icon" src={`assets/lanes/${option.value}.svg`} alt="" />
+        )}
+        <span className="team-select-label">{option.dataset.label ?? option.text}</span>
+      </>
+    )
   }
 
   return (
-    <Select open={open} value={selected ? String(selected.index) : ""} disabled={field.disabled || options.length === 0}
+    <Select
+      open={open}
+      value={selected ? String(selected.index) : ""}
+      disabled={field.disabled || options.length === 0}
       onOpenChange={nextOpen => {
-        if (nextOpen) setPortalContainer(field.closest<HTMLElement>('[role="dialog"], #v-map:fullscreen, #v-map.map-expanded') ?? undefined)
+        if (nextOpen)
+          setPortalContainer(
+            field.closest<HTMLElement>('[role="dialog"], #v-map:fullscreen, #v-map.map-expanded') ?? undefined,
+          )
         setOpen(nextOpen)
       }}
       onValueChange={value => {
         field.selectedIndex = Number(value)
         refresh()
         queueMicrotask(() => field.dispatchEvent(new Event("change", { bubbles: true })))
-      }}>
-      <SelectTrigger id={field.id ? `${field.id}-trigger` : undefined}
-        size={compact ? "sm" : "default"} data-team-trigger="select"
+      }}
+    >
+      <SelectTrigger
+        id={field.id ? `${field.id}-trigger` : undefined}
+        size={compact ? "sm" : "default"}
+        data-team-trigger="select"
         aria-label={field.getAttribute("aria-label") ?? undefined}
-        aria-labelledby={field.getAttribute("aria-labelledby") ?? undefined}>
+        aria-labelledby={field.getAttribute("aria-labelledby") ?? undefined}
+      >
         <SelectValue>{selected ? renderLabel(selected) : "Sem opções"}</SelectValue>
       </SelectTrigger>
-      <SelectContent className="team-select-panel" position="popper" align="start" sideOffset={4}
-        collisionPadding={8} portalContainer={portalContainer}
-        onCloseAutoFocus={keepFocusOutsideFrame}>
+      <SelectContent
+        className="team-select-panel"
+        position="popper"
+        align="start"
+        sideOffset={4}
+        collisionPadding={8}
+        portalContainer={portalContainer}
+        onCloseAutoFocus={keepFocusOutsideFrame}
+      >
         <SelectGroup>
           {options.map(option => (
-            <SelectItem key={option.value} value={String(option.index)} disabled={option.disabled}
-              textValue={option.dataset.label ?? option.text}>
+            <SelectItem
+              key={option.value}
+              value={String(option.index)}
+              disabled={option.disabled}
+              textValue={option.dataset.label ?? option.text}
+            >
               <span className="team-select-option">
                 {renderLabel(option)}
                 {option.dataset.description && <small>{option.dataset.description}</small>}
@@ -186,27 +256,73 @@ export function mountTeamSelect(field: HTMLSelectElement) {
 }
 type SectionOption = { value: string; label: string; icon?: string; image?: string; panel?: string }
 
-export function mountSectionTabs(host: Element, label: string, value: string, options: SectionOption[],
-  change: (value: string) => void, variant: "underline" | "navigation" = "underline") {
-  renderControl(host, <Tabs value={value} onValueChange={change} activationMode="manual" data-variant={variant}>
-    <TabsList aria-label={label} slidingHover={variant === "navigation"}>
-      {options.map(option => <TabsTrigger key={option.value} value={option.value}
-        id={`tab-${option.value}`} aria-controls={option.panel ?? `panel-${option.value}`}>
-        {option.icon && <Icon name={option.icon} />}{option.label}
-      </TabsTrigger>)}
-    </TabsList>
-  </Tabs>)
+export function mountSectionTabs(
+  host: Element,
+  label: string,
+  value: string,
+  options: SectionOption[],
+  change: (value: string) => void,
+  variant: "underline" | "navigation" = "underline",
+) {
+  renderControl(
+    host,
+    <Tabs value={value} onValueChange={change} activationMode="manual" data-variant={variant}>
+      <TabsList aria-label={label} slidingHover={variant === "navigation"}>
+        {options.map(option => (
+          <TabsTrigger
+            key={option.value}
+            value={option.value}
+            id={`tab-${option.value}`}
+            aria-controls={option.panel ?? `panel-${option.value}`}
+          >
+            {option.icon && <Icon name={option.icon} />}
+            {option.label}
+          </TabsTrigger>
+        ))}
+      </TabsList>
+    </Tabs>,
+  )
 }
 
-export function mountToolGroup(host: Element, value: string, options: (SectionOption & { shortcuts?: string })[],
-  change: (value: string) => void, disabled = false) {
-  renderControl(host, <ToggleGroup type="single" value={value} spacing={1} disabled={disabled}
-    className="map-modes seg" aria-label="Modo da ferramenta"
-    onValueChange={next => change(next || value)}>
-    {options.map(option => <ToggleGroupItem key={option.value} value={option.value}
-      data-slot="button" data-variant="ghost" data-tool={option.value} aria-label={option.label} aria-controls={option.panel}
-      aria-keyshortcuts={option.shortcuts} data-map-tip={option.shortcuts ? `${option.label} (${option.shortcuts.replaceAll(" ", " / ")})` : option.label}>
-      {option.image ? <img className="map-tool-image" src={option.image} alt="" /> : option.icon && <Icon name={option.icon} />}
-    </ToggleGroupItem>)}
-  </ToggleGroup>)
+export function mountToolGroup(
+  host: Element,
+  value: string,
+  options: (SectionOption & { shortcuts?: string })[],
+  change: (value: string) => void,
+  disabled = false,
+) {
+  renderControl(
+    host,
+    <ToggleGroup
+      type="single"
+      value={value}
+      spacing={1}
+      disabled={disabled}
+      className="map-modes seg"
+      aria-label="Modo da ferramenta"
+      onValueChange={next => change(next || value)}
+    >
+      {options.map(option => (
+        <ToggleGroupItem
+          key={option.value}
+          value={option.value}
+          data-slot="button"
+          data-variant="ghost"
+          data-tool={option.value}
+          aria-label={option.label}
+          aria-controls={option.panel}
+          aria-keyshortcuts={option.shortcuts}
+          data-map-tip={
+            option.shortcuts ? `${option.label} (${option.shortcuts.replaceAll(" ", " / ")})` : option.label
+          }
+        >
+          {option.image ? (
+            <img className="map-tool-image" src={option.image} alt="" />
+          ) : (
+            option.icon && <Icon name={option.icon} />
+          )}
+        </ToggleGroupItem>
+      ))}
+    </ToggleGroup>,
+  )
 }

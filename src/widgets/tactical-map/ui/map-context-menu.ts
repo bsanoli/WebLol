@@ -17,8 +17,12 @@ type ContextAction = {
   run: () => void
 }
 
-export function mountMapContextMenu(map: HTMLElement, viewport: HTMLElement,
-  resolve: (event: MouseEvent | KeyboardEvent) => ContextAction | undefined, quickActions: () => MenuItem[]) {
+export function mountMapContextMenu(
+  map: HTMLElement,
+  viewport: HTMLElement,
+  resolve: (event: MouseEvent | KeyboardEvent) => ContextAction | undefined,
+  quickActions: () => MenuItem[],
+) {
   const menu = document.querySelector<HTMLElement>("#map-context-menu")!
   const items = menu.querySelector<HTMLElement>(".map-context-items")!
   const title = menu.querySelector<HTMLElement>(".map-context-title")!
@@ -56,9 +60,9 @@ export function mountMapContextMenu(map: HTMLElement, viewport: HTMLElement,
     if (marker) {
       const board = map.getBoundingClientRect()
       const diameter = Math.max(marker.width, marker.height) + 8
-      ring.style.left = `${(marker.left + marker.width / 2 - board.left) / board.width * 100}%`
-      ring.style.top = `${(marker.top + marker.height / 2 - board.top) / board.height * 100}%`
-      ring.style.width = ring.style.height = `${diameter / board.width * 100}%`
+      ring.style.left = `${((marker.left + marker.width / 2 - board.left) / board.width) * 100}%`
+      ring.style.top = `${((marker.top + marker.height / 2 - board.top) / board.height) * 100}%`
+      ring.style.width = ring.style.height = `${(diameter / board.width) * 100}%`
       ring.hidden = false
     }
     next?.highlight?.(true)
@@ -117,8 +121,12 @@ export function mountMapContextMenu(map: HTMLElement, viewport: HTMLElement,
     const enabled = Array.from(items.querySelectorAll<HTMLButtonElement>("button:not(:disabled)"))
     const index = enabled.indexOf(event.target as HTMLButtonElement)
     const offset = event.key === "ArrowDown" ? 1 : -1
-    const next = event.key === "Home" ? 0 : event.key === "End" ? enabled.length - 1 :
-      (index + offset + enabled.length) % enabled.length
+    const next =
+      event.key === "Home"
+        ? 0
+        : event.key === "End"
+          ? enabled.length - 1
+          : (index + offset + enabled.length) % enabled.length
     enabled[next]?.focus()
   })
   return { close }

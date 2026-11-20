@@ -7,9 +7,7 @@ export function AccountAvatar({ user }: { user: string }) {
 
   return (
     <Avatar size="sm" aria-hidden="true">
-      <AvatarFallback>
-        {initials || <UserRound data-icon="inline-start" />}
-      </AvatarFallback>
+      <AvatarFallback>{initials || <UserRound data-icon="inline-start" />}</AvatarFallback>
     </Avatar>
   )
 }

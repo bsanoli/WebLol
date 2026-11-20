@@ -10,7 +10,10 @@ interface AnalyticsPayload {
 }
 export function connectAnalytics(frame: HTMLIFrameElement) {
   let root: Root | undefined
-  const release = () => { root?.unmount(); root = undefined }
+  const release = () => {
+    root?.unmount()
+    root = undefined
+  }
   frame.addEventListener("weblol:analytics-clear", release)
   frame.addEventListener("load", release)
   frame.addEventListener("weblol:analytics", event => {

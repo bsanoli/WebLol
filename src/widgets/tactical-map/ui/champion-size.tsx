@@ -45,7 +45,9 @@ function ChampionSize({ initial, apply }: { initial: number; apply: (size: numbe
             apply(size)
           }}
           onValueCommit={([size]) => {
-            try { localStorage.setItem(sizeKey, String(size)) } catch {}
+            try {
+              localStorage.setItem(sizeKey, String(size))
+            } catch {}
           }}
           min={min}
           max={max}

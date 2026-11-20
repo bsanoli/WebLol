@@ -17,13 +17,17 @@ export function CountUp({ value }: { value: number }) {
     const animation = animate(0, value, {
       duration: 0.65,
       ease: [0.22, 1, 0.36, 1],
-      onUpdate: current => { visual.textContent = formatNumber.format(Math.round(current)) },
+      onUpdate: current => {
+        visual.textContent = formatNumber.format(Math.round(current))
+      },
     })
     const finish = () => {
       animation.stop()
       visual.textContent = label
     }
-    const handleMotionChange = () => { if (preference.matches) finish() }
+    const handleMotionChange = () => {
+      if (preference.matches) finish()
+    }
     preference.addEventListener("change", handleMotionChange)
     return () => {
       finish()
@@ -31,8 +35,12 @@ export function CountUp({ value }: { value: number }) {
     }
   }, [label, value])
 
-  return <span className="metric-count">
-    <span className="metric-count-label">{label}</span>
-    <span className="metric-count-visual" ref={visualRef} aria-hidden="true">{label}</span>
-  </span>
+  return (
+    <span className="metric-count">
+      <span className="metric-count-label">{label}</span>
+      <span className="metric-count-visual" ref={visualRef} aria-hidden="true">
+        {label}
+      </span>
+    </span>
+  )
 }

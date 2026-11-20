@@ -4,16 +4,21 @@ test("Abre uma composição salva no formato anterior em modo Draft", async ({ p
   await page.setViewportSize({ width: 1920, height: 1080 })
   await page.addInitScript(() => {
     if (localStorage.getItem("lol-comps-time-v1")) return
-    localStorage.setItem("lol-comps-time-v1", JSON.stringify({
-      cur: "comp-antiga",
-      comps: [{
-        id: "comp-antiga",
-        name: "Composição anterior",
-        lanes: { top: ["Ornn"], jg: [], mid: ["Ahri"], adc: [], sup: [], ban: [] },
-        notes: "Plano salvo",
-        laneNotes: {},
-      }],
-    }))
+    localStorage.setItem(
+      "lol-comps-time-v1",
+      JSON.stringify({
+        cur: "comp-antiga",
+        comps: [
+          {
+            id: "comp-antiga",
+            name: "Composição anterior",
+            lanes: { top: ["Ornn"], jg: [], mid: ["Ahri"], adc: [], sup: [], ban: [] },
+            notes: "Plano salvo",
+            laneNotes: {},
+          },
+        ],
+      }),
+    )
   })
 
   await page.goto("/camp.html")
@@ -51,7 +56,10 @@ test("Abre uma composição salva no formato anterior em modo Draft", async ({ p
   const swapped = await page.evaluate(() => JSON.parse(localStorage.getItem("lol-comps-time-v1")!))
   expect(swapped.comps.find((c: { id: string }) => c.id === "comp-antiga").draft.side).toBe("red")
 
-  for (const viewport of [{ width: 1920, height: 1024 }, { width: 1280, height: 720 }]) {
+  for (const viewport of [
+    { width: 1920, height: 1024 },
+    { width: 1280, height: 720 },
+  ]) {
     await page.setViewportSize(viewport)
     await expect(team.locator(".dz .tm > .pk").last()).toBeInViewport({ ratio: 1 })
     expect(await page.evaluate(() => document.documentElement.scrollHeight)).toBeLessThanOrEqual(viewport.height)
@@ -70,7 +78,9 @@ test("Abre uma composição salva no formato anterior em modo Draft", async ({ p
   await page.getByRole("alertdialog").getByRole("button", { name: "Excluir confronto" }).click()
   await expect(team.locator("[data-tactic-matchup]")).toHaveCount(0)
   const after = await page.evaluate(() => JSON.parse(localStorage.getItem("lol-comps-time-v1")!))
-  expect(after.comps.map((c: { name: string }) => c.name)).toEqual(expect.arrayContaining(["Composição anterior", "Time rival"]))
+  expect(after.comps.map((c: { name: string }) => c.name)).toEqual(
+    expect.arrayContaining(["Composição anterior", "Time rival"]),
+  )
   expect(after.comps.find((c: { id: string }) => c.id === "comp-antiga").matchups ?? []).toHaveLength(0)
 })
 
@@ -82,7 +92,7 @@ test("Duplica e salva uma composição do formato anterior sem alterar a origina
     laneNotes: { top: "Iniciar a luta" },
     notes: "Plano salvo",
   }
-  await page.addInitScript((composition) => {
+  await page.addInitScript(composition => {
     const key = "lol-comps-time-v1"
     if (!localStorage.getItem(key)) {
       localStorage.setItem(key, JSON.stringify({ comps: [composition], cur: composition.id }))
@@ -112,9 +122,11 @@ test("Restaura a versão sincronizada somente após confirmação", async ({ pag
   await page.addInitScript(() => {
     if (localStorage.getItem("lol-base")) return
     const original = {
-      id: "comp", name: "Versão do time",
+      id: "comp",
+      name: "Versão do time",
       lanes: { top: [], jg: [], mid: [], adc: [], sup: [], ban: [] },
-      notes: "", laneNotes: {},
+      notes: "",
+      laneNotes: {},
     }
     localStorage.setItem("lol-base", JSON.stringify({ version: 7, data: { comps: [original], plays: [] } }))
     localStorage.setItem("lol-comps-time-v1", JSON.stringify({ comps: [original], cur: "comp" }))
@@ -221,7 +233,9 @@ test("Wards em Lumes exibem a visão do ponto e acompanham os passos da jogada",
   await cursor.press("ArrowRight")
   await cursor.press("Enter")
   await expect(page.getByRole("radio", { name: "Mover", exact: true })).toBeChecked()
-  await expect(wardLayer.getByRole("img", { name: "Sentinela Invisível, 900 unidades de visão, Azul", exact: true })).toHaveCount(1)
+  await expect(
+    wardLayer.getByRole("img", { name: "Sentinela Invisível, 900 unidades de visão, Azul", exact: true }),
+  ).toHaveCount(1)
   await expect(wardLayer.locator(".ward-vision-range")).toHaveAttribute("r", "6")
   await expect(bonus).toHaveCount(0)
 
@@ -264,7 +278,7 @@ test("Wards em Lumes exibem a visão do ponto e acompanham os passos da jogada",
   await page.reload()
   await page.getByRole("button", { name: "Mapa tático" }).click()
   await expect(bonus).toHaveCount(2)
-  const extraWard = wardLayer.locator('.ward-marker').last()
+  const extraWard = wardLayer.locator(".ward-marker").last()
   const position = await extraWard.getAttribute("transform")
   await page.getByRole("tab", { name: "Camadas" }).click()
   await additional.click()
@@ -295,12 +309,12 @@ test("O tipo da ward define seu alcance dentro e fora dos Lumes", async ({ page 
   const add = page.getByRole("radio", { name: "Colocar ward", exact: true })
   const type = page.getByRole("combobox", { name: "Tipo de ward" })
   const chooseType = async (label: string) => {
-    if (await add.getAttribute("aria-checked") !== "true") await add.click()
+    if ((await add.getAttribute("aria-checked")) !== "true") await add.click()
     await type.click()
     await page.getByRole("option", { name: label }).click()
   }
   const place = async (x: number, y: number) => {
-    if (await add.getAttribute("aria-checked") !== "true") await add.click()
+    if ((await add.getAttribute("aria-checked")) !== "true") await add.click()
     const map = (await page.locator("#map").boundingBox())!
     await page.mouse.click(map.x + map.width * x, map.y + map.height * y)
   }
@@ -308,19 +322,19 @@ test("O tipo da ward define seu alcance dentro e fora dos Lumes", async ({ page 
   const range = (kind: string) => wards.locator(`.ward-vision-range[data-ward-type="${kind}"]`)
   const bonus = wards.locator(".ward-vision-bonus")
   await chooseType("Sentinela de Controle")
-  await place(.42, .38)
+  await place(0.42, 0.38)
   await expect(range("control")).toHaveAttribute("r", String(900 / 148.5))
   await chooseType("Alteração Vidente")
-  await place(.58, .58)
+  await place(0.58, 0.58)
   await expect(range("farsight")).toHaveAttribute("r", String(500 / 148.5))
   await expect(bonus).toHaveCount(0)
 
-  await place(.226, .225)
+  await place(0.226, 0.225)
   await expect(range("farsight").last()).toHaveAttribute("r", String(625 / 148.5))
   await expect(bonus).toHaveCount(1)
   const bonusShape = await bonus.getAttribute("d")
   await chooseType("Sentinela de Controle")
-  await place(.226, .225)
+  await place(0.226, 0.225)
   await expect(range("control").last()).toHaveAttribute("r", String(1125 / 148.5))
   await expect(range("farsight")).toHaveCount(1)
   await expect(bonus).toHaveAttribute("d", bonusShape!)
@@ -351,8 +365,8 @@ test("Limpar tudo apaga as anotações em uma única ação reversível", async 
 
   await team.getByRole("radio", { name: "Desenhar seta" }).click()
   const map = (await team.locator("#map").boundingBox())!
-  const x = map.x + map.width * .45
-  const y = map.y + map.height * .36
+  const x = map.x + map.width * 0.45
+  const y = map.y + map.height * 0.36
   const tokens = team.locator("#map .tok")
   const positions = await tokens.evaluateAll(nodes => nodes.map(node => node.getAttribute("style")))
   await page.mouse.move(x, y)
@@ -361,14 +375,19 @@ test("Limpar tudo apaga as anotações em uma única ação reversível", async 
   await page.mouse.up()
   await expect(clear).toBeEnabled()
   const canvas = team.locator("#cv")
-  const hasArrow = () => canvas.evaluate((node: HTMLCanvasElement) =>
-    node.getContext("2d")!.getImageData(0, 0, node.width, node.height).data.some((value, i) => i % 4 === 3 && value > 0))
+  const hasArrow = () =>
+    canvas.evaluate((node: HTMLCanvasElement) =>
+      node
+        .getContext("2d")!
+        .getImageData(0, 0, node.width, node.height)
+        .data.some((value, i) => i % 4 === 3 && value > 0),
+    )
   expect(await hasArrow()).toBe(true)
 
   await team.getByRole("radio", { name: "Colocar ward" }).click()
   await expect(team.locator("#mapimg")).toHaveAttribute("data-map-visible", "")
   const wardMap = (await team.locator("#map").boundingBox())!
-  await page.mouse.click(wardMap.x + wardMap.width * .234, wardMap.y + wardMap.height * .236)
+  await page.mouse.click(wardMap.x + wardMap.width * 0.234, wardMap.y + wardMap.height * 0.236)
   const ward = team.locator("#map-wards .ward-marker")
   await team.getByRole("tab", { name: "Camadas" }).click()
   const legend = team.locator("#map-ward-types")
@@ -399,13 +418,17 @@ test("Táticas: monta picks na gaveta e arrasta uma adversária para criar o con
   await page.addInitScript(() => {
     if (localStorage.getItem("lol-comps-time-v1")) return
     const lanes = () => ({ top: [], jg: [], mid: [], adc: [], sup: [], ban: [] })
-    localStorage.setItem("lol-comps-time-v1", JSON.stringify({
-      cur: "nossa", view: "tactics",
-      comps: [
-        { id: "nossa", name: "Nossa base", team: "mine", lanes: lanes() },
-        { id: "rival", name: "Time rival", team: "enemy", lanes: lanes() },
-      ],
-    }))
+    localStorage.setItem(
+      "lol-comps-time-v1",
+      JSON.stringify({
+        cur: "nossa",
+        view: "tactics",
+        comps: [
+          { id: "nossa", name: "Nossa base", team: "mine", lanes: lanes() },
+          { id: "rival", name: "Time rival", team: "enemy", lanes: lanes() },
+        ],
+      }),
+    )
   })
   await page.goto("/camp.html")
   await page.evaluate(() => window.applyWebLolRoute(["composicoes", "nossa"], new URLSearchParams("modo=taticas")))
@@ -432,11 +455,14 @@ test("Táticas: monta picks na gaveta e arrasta uma adversária para criar o con
   const picker = page.getByRole("dialog", { name: "Campeões" })
   await picker.locator("#grid .ch").first().click()
   await expect(board.locator(".pk .pkn").first()).not.toHaveText("Escolher campeão")
-  await picker.getByRole("button", { name: /Fechar/ }).first().click()
+  await picker
+    .getByRole("button", { name: /Fechar/ })
+    .first()
+    .click()
 
   // Arrastar a adversária para o lado vermelho cria o confronto, com a nossa no azul.
   await page.getByRole("tab", { name: /Adversárias/ }).click()
-  await page.locator("[data-tactic-comp=\"rival\"]").dragTo(board.locator("[data-drop-side=red]"))
+  await page.locator('[data-tactic-comp="rival"]').dragTo(board.locator("[data-drop-side=red]"))
   await expect(page.locator("#tx-title")).toContainText("Nossa base x Time rival")
   await expect(board.locator(".tx-side-col")).toHaveCount(2)
   await expect(board.locator(".tx-side-col.empty")).toHaveCount(0)
@@ -446,30 +472,56 @@ test("Táticas: monta picks na gaveta e arrasta uma adversária para criar o con
 
 test("Ordem do draft: arrastar campeões entre cards, criar a adversária e remover soltando fora", async ({ page }) => {
   await page.addInitScript(() => {
-    localStorage.setItem("lol-comps-time-v1", JSON.stringify({
-      cur: "c1",
-      comps: [{ id: "c1", name: "Nossa", lanes: { top: ["Ornn"], jg: [], mid: ["Ahri"], adc: [], sup: [], ban: [] }, notes: "", laneNotes: {} }],
-    }))
+    localStorage.setItem(
+      "lol-comps-time-v1",
+      JSON.stringify({
+        cur: "c1",
+        comps: [
+          {
+            id: "c1",
+            name: "Nossa",
+            lanes: { top: ["Ornn"], jg: [], mid: ["Ahri"], adc: [], sup: [], ban: [] },
+            notes: "",
+            laneNotes: {},
+          },
+        ],
+      }),
+    )
   })
   await page.goto("/camp.html")
   await page.evaluate(() => window.applyWebLolRoute(["composicoes", "c1"], new URLSearchParams("modo=draft")))
-  const drag = (from: string, to: string | null) => page.evaluate(([f, t]) => {
-    const src = document.querySelector(f as string)!, dt = new DataTransfer()
-    src.dispatchEvent(new DragEvent("dragstart", { bubbles: true, dataTransfer: dt }))
-    if (t) {
-      const dst = document.querySelector(t)!
-      dst.dispatchEvent(new DragEvent("dragover", { bubbles: true, cancelable: true, dataTransfer: dt }))
-      dst.dispatchEvent(new DragEvent("drop", { bubbles: true, cancelable: true, dataTransfer: dt }))
-    }
-    document.dispatchEvent(new DragEvent("dragend", { bubbles: true, clientX: t ? 0 : 400, clientY: t ? 0 : 400, dataTransfer: dt }))
-  }, [from, to])
-  const lanes = () => page.evaluate(() => JSON.parse(localStorage.getItem("lol-comps-time-v1")!).comps.find((c: { id: string }) => c.id === "c1").lanes)
+  const drag = (from: string, to: string | null) =>
+    page.evaluate(
+      ([f, t]) => {
+        const src = document.querySelector(f as string)!,
+          dt = new DataTransfer()
+        src.dispatchEvent(new DragEvent("dragstart", { bubbles: true, dataTransfer: dt }))
+        if (t) {
+          const dst = document.querySelector(t)!
+          dst.dispatchEvent(new DragEvent("dragover", { bubbles: true, cancelable: true, dataTransfer: dt }))
+          dst.dispatchEvent(new DragEvent("drop", { bubbles: true, cancelable: true, dataTransfer: dt }))
+        }
+        document.dispatchEvent(
+          new DragEvent("dragend", { bubbles: true, clientX: t ? 0 : 400, clientY: t ? 0 : 400, dataTransfer: dt }),
+        )
+      },
+      [from, to],
+    )
+  const lanes = () =>
+    page.evaluate(
+      () =>
+        JSON.parse(localStorage.getItem("lol-comps-time-v1")!).comps.find((c: { id: string }) => c.id === "c1").lanes,
+    )
 
   // Card vazio do lado adversário é destino: cria a adversária com o campeão naquela rota.
   await expect(page.locator(".tm.rival [data-empty-rival]")).toHaveCount(10)
   await drag('.tm.us .pk[data-l="mid"] .pk-target', '.tm.rival .pk[data-l="sup"]')
   await expect(page.locator(".tm.rival.mine")).toBeVisible()
-  const afterCreate = await page.evaluate(() => JSON.parse(localStorage.getItem("lol-comps-time-v1")!).comps.find((c: { team?: string }) => c.team === "enemy").lanes)
+  const afterCreate = await page.evaluate(
+    () =>
+      JSON.parse(localStorage.getItem("lol-comps-time-v1")!).comps.find((c: { team?: string }) => c.team === "enemy")
+        .lanes,
+  )
   expect(afterCreate.sup).toEqual(["Ahri"])
   expect((await lanes()).mid).toEqual([])
 

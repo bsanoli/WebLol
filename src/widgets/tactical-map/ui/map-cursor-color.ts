@@ -39,7 +39,9 @@ export function mountMapCursorColor(layout: HTMLElement) {
     button.onclick = () => {
       activeColor = color
       apply()
-      try { localStorage.setItem(colorKey, activeColor.id) } catch {}
+      try {
+        localStorage.setItem(colorKey, activeColor.id)
+      } catch {}
     }
     return button
   })
@@ -49,19 +51,28 @@ export function mountMapCursorColor(layout: HTMLElement) {
     button.onclick = () => {
       activeSize = Number(button.dataset.cursorSize)
       apply()
-      try { localStorage.setItem(sizeKey, String(activeSize)) } catch {}
+      try {
+        localStorage.setItem(sizeKey, String(activeSize))
+      } catch {}
     }
   }
 
   function apply() {
     for (const { property, svg, hotspot, fallback } of shapes) {
-      const artwork = svg.replace('width="24" height="24"', `width="${activeSize}" height="${activeSize}"`)
-        .replaceAll("#49fa60", activeColor.fill).replaceAll("#d5ffdd", activeColor.highlight)
-      const scaledHotspot = hotspot.map(coordinate => Math.round(coordinate * activeSize / artworkSize)).join(" ")
-      layout.style.setProperty(property, `url("data:image/svg+xml,${encodeURIComponent(artwork)}") ${scaledHotspot}, ${fallback}`)
+      const artwork = svg
+        .replace('width="24" height="24"', `width="${activeSize}" height="${activeSize}"`)
+        .replaceAll("#49fa60", activeColor.fill)
+        .replaceAll("#d5ffdd", activeColor.highlight)
+      const scaledHotspot = hotspot.map(coordinate => Math.round((coordinate * activeSize) / artworkSize)).join(" ")
+      layout.style.setProperty(
+        property,
+        `url("data:image/svg+xml,${encodeURIComponent(artwork)}") ${scaledHotspot}, ${fallback}`,
+      )
     }
     colorButtons.forEach((button, index) => button.setAttribute("aria-pressed", String(colors[index] === activeColor)))
-    sizeButtons.forEach(button => button.setAttribute("aria-pressed", String(Number(button.dataset.cursorSize) === activeSize)))
+    sizeButtons.forEach(button =>
+      button.setAttribute("aria-pressed", String(Number(button.dataset.cursorSize) === activeSize)),
+    )
   }
 
   apply()

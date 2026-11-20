@@ -5,6 +5,8 @@ import { revealContent } from "@/shared/lib/motion"
 // https://www.reactbits.dev/animations/animated-content
 export function AnimatedRankingRow(props: ComponentPropsWithoutRef<"li">) {
   const row = useRef<HTMLLIElement>(null)
-  useLayoutEffect(() => { revealContent(row.current, true) }, [])
+  useLayoutEffect(() => {
+    revealContent(row.current, true)
+  }, [])
   return <li {...props} ref={row} />
 }

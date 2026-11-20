@@ -21,12 +21,15 @@ export const LOL_DATA: {
   spellDetails: CatalogLookup<BuildDetail>
   map: string
 } = catalog
-export const lolKey = (name: string) => name.toLowerCase().replace(/[^a-z0-9]/g, "");
-const lolChampions = new Map(Object.entries(LOL_DATA.champions).flatMap(([id, champion]) =>
-  [[lolKey(id), champion], [lolKey(champion.name), champion]]));
-export const lolChampion = (name: string) => lolChampions.get(lolKey(name));
-export const lolAsset = (path: string) => `assets/${path}`;
+export const lolKey = (name: string) => name.toLowerCase().replace(/[^a-z0-9]/g, "")
+const lolChampions = new Map(
+  Object.entries(LOL_DATA.champions).flatMap(([id, champion]) => [
+    [lolKey(id), champion],
+    [lolKey(champion.name), champion],
+  ]),
+)
+export const lolChampion = (name: string) => lolChampions.get(lolKey(name))
+export const lolAsset = (path: string) => `assets/${path}`
 // Visible labels or initials already identify every image in these panels.
-export const lolImage = (path: string | undefined, className = "") => path
-  ? `<img alt="" class="${className}" loading="lazy" src="${lolAsset(path)}" onerror="this.remove()">`
-  : "";
+export const lolImage = (path: string | undefined, className = "") =>
+  path ? `<img alt="" class="${className}" loading="lazy" src="${lolAsset(path)}" onerror="this.remove()">` : ""

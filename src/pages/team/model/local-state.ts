@@ -1,5 +1,5 @@
-export const KEY="lol-comps-time-v1";
-export const uid=()=>Math.random().toString(36).slice(2,10);
+export const KEY = "lol-comps-time-v1"
+export const uid = () => Math.random().toString(36).slice(2, 10)
 
 export type DraftSide = "blue" | "red"
 export type DraftLane = "top" | "jg" | "mid" | "adc" | "sup"
@@ -60,18 +60,29 @@ export function blank(name = "Nova comp"): Composition {
   }
 }
 
-export function loadTeamState(){
-  let S: { comps: Composition[]; cur: string } | null;
-  try{S=JSON.parse(localStorage.getItem(KEY) ?? "null")}catch{S=null}
-  if(!S||!Array.isArray(S.comps)){
-    // Comp de exemplo (genérica) para quem ainda não tem as comps de um time
-    const c=blank("Comp de exemplo: luta em time");
-    c.lanes.top=["Ornn","Sion"];c.lanes.jg=["Sejuani","Vi"];c.lanes.mid=["Orianna","Azir"];
-    c.lanes.adc=["Jinx","Aphelios"];c.lanes.sup=["Braum","Rell"];
-    c.notes="Comp de exemplo. Entre com seu usuário e escolha um time para ver e editar as comps do seu time.";
-    S={comps:[c],cur:c.id};
+export function loadTeamState() {
+  let S: { comps: Composition[]; cur: string } | null
+  try {
+    S = JSON.parse(localStorage.getItem(KEY) ?? "null")
+  } catch {
+    S = null
   }
-  if(!S.comps.length){const c=blank();S.comps.push(c);S.cur=c.id}
-  if(!S.comps.some(c=>c.id===S.cur))S.cur=S.comps[0].id;
-  return S;
+  if (!S || !Array.isArray(S.comps)) {
+    // Comp de exemplo (genérica) para quem ainda não tem as comps de um time
+    const c = blank("Comp de exemplo: luta em time")
+    c.lanes.top = ["Ornn", "Sion"]
+    c.lanes.jg = ["Sejuani", "Vi"]
+    c.lanes.mid = ["Orianna", "Azir"]
+    c.lanes.adc = ["Jinx", "Aphelios"]
+    c.lanes.sup = ["Braum", "Rell"]
+    c.notes = "Comp de exemplo. Entre com seu usuário e escolha um time para ver e editar as comps do seu time."
+    S = { comps: [c], cur: c.id }
+  }
+  if (!S.comps.length) {
+    const c = blank()
+    S.comps.push(c)
+    S.cur = c.id
+  }
+  if (!S.comps.some(c => c.id === S.cur)) S.cur = S.comps[0].id
+  return S
 }

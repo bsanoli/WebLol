@@ -5,10 +5,20 @@ export function confirmedFinalSeries(games: readonly FinalGame[]) {
   const first = final[0]
   if (!first?.s || !first.b || !first.r || first.b === first.r || final.length < 3 || final.length > 5) return
 
-  const wins = new Map([[first.b, 0], [first.r, 0]])
+  const wins = new Map([
+    [first.b, 0],
+    [first.r, 0],
+  ])
   for (const [index, game] of final.entries()) {
-    if (game.s !== first.s || game.g !== index + 1 || game.b === game.r ||
-        !wins.has(game.b) || !wins.has(game.r) || typeof game.bw !== "boolean") return
+    if (
+      game.s !== first.s ||
+      game.g !== index + 1 ||
+      game.b === game.r ||
+      !wins.has(game.b) ||
+      !wins.has(game.r) ||
+      typeof game.bw !== "boolean"
+    )
+      return
     const winner = game.bw ? game.b : game.r
     const count = (wins.get(winner) ?? 0) + 1
     wins.set(winner, count)

@@ -2,7 +2,19 @@ import { EditorContent, useEditor, useEditorState, type Editor } from "@tiptap/r
 import StarterKit from "@tiptap/starter-kit"
 import { TaskItem, TaskList } from "@tiptap/extension-list"
 import { Placeholder } from "@tiptap/extensions"
-import { Bold, Heading2, Heading3, ImagePlus, Italic, List, ListChecks, ListOrdered, Redo2, Undo2, type LucideIcon } from "lucide-react"
+import {
+  Bold,
+  Heading2,
+  Heading3,
+  ImagePlus,
+  Italic,
+  List,
+  ListChecks,
+  ListOrdered,
+  Redo2,
+  Undo2,
+  type LucideIcon,
+} from "lucide-react"
 import { useEffect, useMemo, useRef } from "react"
 import type { EditorView } from "@tiptap/pm/view"
 import { Button } from "@/shared/ui/button"
@@ -30,11 +42,22 @@ const imagesOf = (files: FileList | File[] | null | undefined) =>
 type ToolProps = { label: string; icon: LucideIcon; active?: boolean; disabled?: boolean; onClick: () => void }
 
 function Tool({ label, icon: Icon, active, disabled, onClick }: ToolProps) {
-  return <Button type="button" variant="ghost" size="icon-sm" className="tx-tool" aria-label={label} title={label}
-    aria-pressed={active === undefined ? undefined : active} disabled={disabled}
-    onMouseDown={event => event.preventDefault()} onClick={onClick}>
-    <Icon aria-hidden="true" />
-  </Button>
+  return (
+    <Button
+      type="button"
+      variant="ghost"
+      size="icon-sm"
+      className="tx-tool"
+      aria-label={label}
+      title={label}
+      aria-pressed={active === undefined ? undefined : active}
+      disabled={disabled}
+      onMouseDown={event => event.preventDefault()}
+      onClick={onClick}
+    >
+      <Icon aria-hidden="true" />
+    </Button>
+  )
 }
 
 function Toolbar({ editor, onAddPrint }: { editor: Editor; onAddPrint: () => void }) {
@@ -53,30 +76,59 @@ function Toolbar({ editor, onAddPrint }: { editor: Editor; onAddPrint: () => voi
     }),
   })
   const run = () => editor.chain().focus()
-  return <div className="tx-toolbar" role="toolbar" aria-label="Formatação da tática">
-    <div className="tx-tool-group">
-      <Tool label="Negrito (Ctrl+B)" icon={Bold} active={state.bold} onClick={() => run().toggleBold().run()} />
-      <Tool label="Itálico (Ctrl+I)" icon={Italic} active={state.italic} onClick={() => run().toggleItalic().run()} />
+  return (
+    <div className="tx-toolbar" role="toolbar" aria-label="Formatação da tática">
+      <div className="tx-tool-group">
+        <Tool label="Negrito (Ctrl+B)" icon={Bold} active={state.bold} onClick={() => run().toggleBold().run()} />
+        <Tool label="Itálico (Ctrl+I)" icon={Italic} active={state.italic} onClick={() => run().toggleItalic().run()} />
+      </div>
+      <div className="tx-tool-group">
+        <Tool
+          label="Título"
+          icon={Heading2}
+          active={state.h2}
+          onClick={() => run().toggleHeading({ level: 2 }).run()}
+        />
+        <Tool
+          label="Subtítulo"
+          icon={Heading3}
+          active={state.h3}
+          onClick={() => run().toggleHeading({ level: 3 }).run()}
+        />
+      </div>
+      <div className="tx-tool-group">
+        <Tool label="Lista" icon={List} active={state.bullet} onClick={() => run().toggleBulletList().run()} />
+        <Tool
+          label="Lista numerada"
+          icon={ListOrdered}
+          active={state.ordered}
+          onClick={() => run().toggleOrderedList().run()}
+        />
+        <Tool
+          label="Lista de tarefas"
+          icon={ListChecks}
+          active={state.task}
+          onClick={() => run().toggleTaskList().run()}
+        />
+      </div>
+      <div className="tx-tool-group">
+        <Button
+          type="button"
+          variant="outline"
+          size="sm"
+          className="tx-tool-print"
+          onMouseDown={event => event.preventDefault()}
+          onClick={onAddPrint}
+        >
+          <ImagePlus aria-hidden="true" /> Adicionar print
+        </Button>
+      </div>
+      <div className="tx-tool-group tx-tool-history">
+        <Tool label="Desfazer (Ctrl+Z)" icon={Undo2} disabled={!state.undo} onClick={() => run().undo().run()} />
+        <Tool label="Refazer (Ctrl+Shift+Z)" icon={Redo2} disabled={!state.redo} onClick={() => run().redo().run()} />
+      </div>
     </div>
-    <div className="tx-tool-group">
-      <Tool label="Título" icon={Heading2} active={state.h2} onClick={() => run().toggleHeading({ level: 2 }).run()} />
-      <Tool label="Subtítulo" icon={Heading3} active={state.h3} onClick={() => run().toggleHeading({ level: 3 }).run()} />
-    </div>
-    <div className="tx-tool-group">
-      <Tool label="Lista" icon={List} active={state.bullet} onClick={() => run().toggleBulletList().run()} />
-      <Tool label="Lista numerada" icon={ListOrdered} active={state.ordered} onClick={() => run().toggleOrderedList().run()} />
-      <Tool label="Lista de tarefas" icon={ListChecks} active={state.task} onClick={() => run().toggleTaskList().run()} />
-    </div>
-    <div className="tx-tool-group">
-      <Button type="button" variant="outline" size="sm" className="tx-tool-print" onMouseDown={event => event.preventDefault()} onClick={onAddPrint}>
-        <ImagePlus aria-hidden="true" /> Adicionar print
-      </Button>
-    </div>
-    <div className="tx-tool-group tx-tool-history">
-      <Tool label="Desfazer (Ctrl+Z)" icon={Undo2} disabled={!state.undo} onClick={() => run().undo().run()} />
-      <Tool label="Refazer (Ctrl+Shift+Z)" icon={Redo2} disabled={!state.redo} onClick={() => run().redo().run()} />
-    </div>
-  </div>
+  )
 }
 
 /** Bloco de notas da tática: texto rico, `@campeão` e prints com desenho por cima. */
@@ -105,7 +157,8 @@ export function TacticNotes(props: TacticNotesProps) {
     const editor = editorRef.current
     if (!editor || !files.length) return
     const nodes = []
-    let localOnly = false, failed = ""
+    let localOnly = false,
+      failed = ""
     for (const file of files) {
       try {
         const result = await store.save(await compressImage(file))
@@ -116,63 +169,81 @@ export function TacticNotes(props: TacticNotesProps) {
         failed = error instanceof Error ? error.message : "erro"
       }
     }
-    if (!nodes.length) { toast(`Não consegui adicionar o print (${failed}).`); return }
+    if (!nodes.length) {
+      toast(`Não consegui adicionar o print (${failed}).`)
+      return
+    }
     const chain = editor.chain().focus()
     if (at === undefined) chain.insertContent(nodes).run()
     else chain.insertContentAt(at, nodes).run()
-    toast(failed ? "Não consegui enviar o print ao time agora. Ele será reenviado na próxima sincronização."
-      : localOnly ? "Print salvo neste navegador. Ele vai para o time quando você sincronizar com um time."
-        : nodes.length > 1 ? `${nodes.length} prints adicionados` : "Print adicionado")
+    toast(
+      failed
+        ? "Não consegui enviar o print ao time agora. Ele será reenviado na próxima sincronização."
+        : localOnly
+          ? "Print salvo neste navegador. Ele vai para o time quando você sincronizar com um time."
+          : nodes.length > 1
+            ? `${nodes.length} prints adicionados`
+            : "Print adicionado",
+    )
   }
 
-  const extensions = useMemo(() => [
-    StarterKit.configure({ heading: { levels: [2, 3] }, link: false, code: false, codeBlock: false }),
-    TaskList,
-    TaskItem.configure({
-      nested: true,
-      a11y: { checkboxLabel: (node, checked) => `${checked ? "Desmarcar" : "Marcar"} tarefa: ${node.textContent || "tarefa vazia"}` },
-    }),
-    Placeholder.configure({ placeholder: "Escreva a tática… Use @ para citar um campeão e cole prints com Ctrl+V." }),
-    championMention(props.champions),
-    TacticPrint.configure({
-      store: { save: data => latest.current.store.save(data), load: id => latest.current.store.load(id) },
-      sketch: attrs => latest.current.sketch(attrs),
-    }),
-  ], [props.champions])
+  const extensions = useMemo(
+    () => [
+      StarterKit.configure({ heading: { levels: [2, 3] }, link: false, code: false, codeBlock: false }),
+      TaskList,
+      TaskItem.configure({
+        nested: true,
+        a11y: {
+          checkboxLabel: (node, checked) =>
+            `${checked ? "Desmarcar" : "Marcar"} tarefa: ${node.textContent || "tarefa vazia"}`,
+        },
+      }),
+      Placeholder.configure({ placeholder: "Escreva a tática… Use @ para citar um campeão e cole prints com Ctrl+V." }),
+      championMention(props.champions),
+      TacticPrint.configure({
+        store: { save: data => latest.current.store.save(data), load: id => latest.current.store.load(id) },
+        sketch: attrs => latest.current.sketch(attrs),
+      }),
+    ],
+    [props.champions],
+  )
 
-  const editor = useEditor({
-    extensions,
-    // Se o editor for recriado (outras extensões), começa do último conteúdo emitido, não do documento da montagem.
-    content: JSON.parse(emitted.current) as TacticDoc,
-    editorProps: {
-      attributes: {
-        class: "tx-notes-content",
-        role: "textbox",
-        "aria-multiline": "true",
-        "aria-labelledby": props.labelledBy,
+  const editor = useEditor(
+    {
+      extensions,
+      // Se o editor for recriado (outras extensões), começa do último conteúdo emitido, não do documento da montagem.
+      content: JSON.parse(emitted.current) as TacticDoc,
+      editorProps: {
+        attributes: {
+          class: "tx-notes-content",
+          role: "textbox",
+          "aria-multiline": "true",
+          "aria-labelledby": props.labelledBy,
+        },
+        handlePaste: (_view, event) => {
+          const files = imagesOf(event.clipboardData?.files)
+          if (!files.length) return false
+          event.preventDefault()
+          void insertPrints(files)
+          return true
+        },
+        handleDrop: (view: EditorView, event, _slice, moved) => {
+          if (moved) return false
+          const files = imagesOf(event.dataTransfer?.files)
+          if (!files.length) return false
+          event.preventDefault()
+          const at = view.posAtCoords({ left: event.clientX, top: event.clientY })?.pos
+          void insertPrints(files, at)
+          return true
+        },
       },
-      handlePaste: (_view, event) => {
-        const files = imagesOf(event.clipboardData?.files)
-        if (!files.length) return false
-        event.preventDefault()
-        void insertPrints(files)
-        return true
-      },
-      handleDrop: (view: EditorView, event, _slice, moved) => {
-        if (moved) return false
-        const files = imagesOf(event.dataTransfer?.files)
-        if (!files.length) return false
-        event.preventDefault()
-        const at = view.posAtCoords({ left: event.clientX, top: event.clientY })?.pos
-        void insertPrints(files, at)
-        return true
+      onUpdate: () => {
+        window.clearTimeout(timer.current)
+        timer.current = window.setTimeout(flush, SAVE_DELAY)
       },
     },
-    onUpdate: () => {
-      window.clearTimeout(timer.current)
-      timer.current = window.setTimeout(flush, SAVE_DELAY)
-    },
-  }, [extensions])
+    [extensions],
+  )
   editorRef.current = editor
 
   // Mudança vinda de fora (outro membro do time): troca o conteúdo se a pessoa não estiver digitando.
@@ -192,15 +263,23 @@ export function TacticNotes(props: TacticNotesProps) {
     }
   }, [])
 
-  return <div className="tx-notes">
-    {editor && <Toolbar editor={editor} onAddPrint={() => fileInput.current?.click()} />}
-    <input ref={fileInput} type="file" accept="image/*" multiple hidden onChange={event => {
-      const files = imagesOf(event.currentTarget.files)
-      event.currentTarget.value = ""
-      void insertPrints(files)
-    }} />
-    <EditorContent editor={editor} className="tx-notes-body" />
-    <p className="tx-notes-hint">Clique num print para desenhar por cima. Arraste imagens para dentro do texto.</p>
-  </div>
+  return (
+    <div className="tx-notes">
+      {editor && <Toolbar editor={editor} onAddPrint={() => fileInput.current?.click()} />}
+      <input
+        ref={fileInput}
+        type="file"
+        accept="image/*"
+        multiple
+        hidden
+        onChange={event => {
+          const files = imagesOf(event.currentTarget.files)
+          event.currentTarget.value = ""
+          void insertPrints(files)
+        }}
+      />
+      <EditorContent editor={editor} className="tx-notes-body" />
+      <p className="tx-notes-hint">Clique num print para desenhar por cima. Arraste imagens para dentro do texto.</p>
+    </div>
+  )
 }
-
