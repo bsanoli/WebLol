@@ -1,6 +1,13 @@
 import { DRAFT_SIDE } from "./draft-order"
 import { draftOf, type Composition } from "./local-state"
-import { collectImageIds, docFromLegacy, docWithCompNotes, plainTextOf, readTacticDoc, type TacticDoc } from "./tactic-doc"
+import {
+  collectImageIds,
+  docFromLegacy,
+  docWithCompNotes,
+  plainTextOf,
+  readTacticDoc,
+  type TacticDoc,
+} from "./tactic-doc"
 // Táticas do time: texto livre, geral ou ligado a uma composição.
 // Cada tática é um item próprio em `tactics`, sincronizado como as comps e jogadas.
 export const GENERAL_TACTIC = "geral"
@@ -38,11 +45,18 @@ export function readTactic(state: TacticsState, compId: string | null): string {
 }
 
 /** Grava o texto; uma tática vazia sai da lista para não gerar envio sem conteúdo. */
-export function writeTactic(state: TacticsState, compId: string | null, compName: string, text: string, now: number, images?: string[]) {
+export function writeTactic(
+  state: TacticsState,
+  compId: string | null,
+  compName: string,
+  text: string,
+  now: number,
+  images?: string[],
+) {
   const list = ensureTactics(state)
   const id = tacticId(compId)
   const index = list.findIndex(item => item.id === id)
-  const keptImages = images ?? (index >= 0 ? list[index].images ?? [] : [])
+  const keptImages = images ?? (index >= 0 ? (list[index].images ?? []) : [])
   if (!text.trim() && !keptImages.length) {
     if (index >= 0) list.splice(index, 1)
     return
@@ -64,7 +78,9 @@ export function readTacticImages(state: TacticsState, compId: string | null): st
 function pendingCompNotes(comp: Composition | undefined) {
   if (!comp) return null
   const note = comp.draft?.note
-  const draft = (["blue", "red"] as const).map(side => ({ label: DRAFT_SIDE[side], text: note?.[side] ?? "" })).filter(item => item.text.trim())
+  const draft = (["blue", "red"] as const)
+    .map(side => ({ label: DRAFT_SIDE[side], text: note?.[side] ?? "" }))
+    .filter(item => item.text.trim())
   return comp.notes?.trim() || draft.length ? { general: comp.notes ?? "", draft } : null
 }
 
@@ -85,15 +101,23 @@ export function clearCompNotes(comp: Composition): boolean {
 }
 
 /** Grava o documento, o texto puro derivado dele e os ids das imagens referenciadas. */
-export function writeTacticDocument(state: TacticsState, compId: string | null, compName: string, doc: TacticDoc, now: number) {
-  const text = plainTextOf(doc), images = collectImageIds(doc)
+export function writeTacticDocument(
+  state: TacticsState,
+  compId: string | null,
+  compName: string,
+  doc: TacticDoc,
+  now: number,
+) {
+  const text = plainTextOf(doc),
+    images = collectImageIds(doc)
   writeTactic(state, compId, compName, text, now, images)
   const item = ensureTactics(state).find(entry => entry.id === tacticId(compId))
   if (item) item.doc = doc
 }
 
 export const hasTactic = (state: TacticsState, compId: string | null) =>
-  !!readTactic(state, compId).trim() || readTacticImages(state, compId).length > 0 ||
+  !!readTactic(state, compId).trim() ||
+  readTacticImages(state, compId).length > 0 ||
   (!!compId && !!pendingCompNotes(state.comps?.find(comp => comp.id === compId)))
 
 /** Link do OP.GG do time. Aceita só http(s); sem protocolo, assume https. Vazio apaga. */

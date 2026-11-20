@@ -74,24 +74,26 @@ Este arquivo liga o termo que aparece na tela ao nome que o código usa. Consult
 
 Estes nomes ficam como estão até uma migração com ADR. O nome canônico é o que o código usa depois da fronteira. Se a migração acontecer, a chave nova segue o prefixo `weblol-` e o formato `weblol-<área>-<dado>`.
 
+As chaves do `localStorage` e o formato de cada valor estão declarados em [`src/shared/config/storage-keys.ts`](../src/shared/config/storage-keys.ts), com o nome canônico como propriedade (`STORAGE_KEYS.teamAreaState`).
+
 ### Navegador
 
 | Chave | Onde | Guarda | Nome canônico |
 | --- | --- | --- | --- |
 | `lol-comps-time-v1` | `localStorage` | Estado da Área do time (composições, jogadas) | `teamAreaState` |
-| `lol-guest` | `localStorage` | Estado temporário do visitante | `guestState` |
+| `lol-guest` | `localStorage` | Uso da Área do time sem conta, com alterações só nesta visita | `guestState` |
 | `lol-user` | `localStorage` | Conta conectada | `account` |
-| `lol-team` | `localStorage` | Time da conta | `team` |
+| `lol-team` | `localStorage` | Time da conta, ou `__guest__` sem time | `team` |
 | `lol-base` | `localStorage` | Cópia da versão oficial usada para calcular as mudanças pendentes | `officialBaseline` |
-| `lol-sent` | `localStorage` | Último envio | `lastSubmission` |
+| `lol-sent` | `localStorage` | Mudanças já enviadas para aprovação | `lastSubmission` |
 | `lol-admin-fp` | `localStorage` | Impressão digital da chave do admin | `adminKeyFingerprint` |
 | `lol-admin-view-team` | `localStorage` | Time que o admin está vendo | `adminViewedTeam` |
-| `lol-preview`, `lol-preview-backup` | `localStorage` | Modo "Ver como" e cópia do estado real | `previewAs` |
+| `lol-preview`, `lol-preview-backup` | `localStorage` | Modo "Ver como" e cópia do estado real | `previewAs`, `previewBackup` |
 | `lol-img-<id>`, `lol-img-pendentes` | `localStorage` | Prints locais e fila de envio | `screenshotCache`, `pendingScreenshots` |
-| `lol-comps-time` | `localStorage` | Chave antiga da Área do time, lida só na migração | — |
 | `lol-time` | IndexedDB | Chaves do admin neste computador | `adminKeyStore` |
-| `weblol-composition-palette` | `localStorage` | Tema do editor de composições | — |
-| `weblol-map-cursor-size`, `weblol-map-cursor-color`, `weblol-map-champion-size` | `localStorage` | Preferências do Mapa tático | — |
+| `weblol-composition-palette` | `localStorage` | Paleta escolhida no seletor de tema (o nome é de quando ela valia só em Composições) | `palette` |
+| `weblol-map-cursor-size`, `weblol-map-cursor-color`, `weblol-map-champion-size` | `localStorage` | Preferências do Mapa tático | `mapCursorSize`, `mapCursorColor`, `mapChampionSize` |
+| `lol-comps-time` | Arquivo exportado | Campo `app` do backup baixado em Composições | — |
 
 ### Firestore
 

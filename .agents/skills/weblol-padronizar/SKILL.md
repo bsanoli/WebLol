@@ -41,7 +41,7 @@ Aplique a regra no trabalho em andamento. Código legado fora da tarefa entra no
 
 ## 5. Automatizar o que se repete
 
-Uma regra violada duas vezes vira verificação automática sempre que der. Proponha a verificação com o arquivo e o comando, por exemplo uma regra `noRestrictedImports` no Biome, um plugin GritQL, uma regra do Steiger ou um teste. Implemente se a ferramenta já estiver instalada. Senão, acrescente o item à Onda 1 do backlog. Na regra registrada, anote "Verificado por …".
+Uma regra violada duas vezes vira verificação automática sempre que der. Proponha a verificação com o arquivo e o comando, por exemplo uma regra `noRestrictedImports` no Biome, um plugin GritQL, uma regra do Steiger ou um teste. Implemente se a ferramenta já estiver instalada (Biome, Steiger, Vitest e axe estão desde a Onda 1). Senão, acrescente o item à onda do backlog que traz a ferramenta. Na regra registrada, anote "Verificado por …".
 
 ## Resumo
 

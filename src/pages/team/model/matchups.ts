@@ -46,7 +46,7 @@ export function allMatchups(comps: Composition[]): MatchupEntry[] {
 }
 
 export const findMatchup = (comps: Composition[], id: string | null | undefined) =>
-  id ? allMatchups(comps).find(entry => entry.matchup.id === id) ?? null : null
+  id ? (allMatchups(comps).find(entry => entry.matchup.id === id) ?? null) : null
 
 /** Remove confrontos cujo par não existe mais e devolve os ids removidos (para apagar as táticas). */
 export function pruneMatchups(comps: Composition[]): string[] {
@@ -69,27 +69,41 @@ export function adoptRivals(comps: Composition[]): boolean {
   for (const ours of comps) {
     const rival = ours.draft?.rival
     if (isEnemy(ours) || !rival || !enemies.has(rival)) continue
-    if (!matchupsOf(ours).some(item => item.enemy === rival)) { addMatchup(ours, rival); changed = true }
+    if (!matchupsOf(ours).some(item => item.enemy === rival)) {
+      addMatchup(ours, rival)
+      changed = true
+    }
   }
   return changed
 }
 
 export type DraftSideKey = "blue" | "red"
 /** `place`: comp que muda de lado no draft. `matchup`: par a abrir. `open`: comp a abrir quando falta o par. */
-export type CompDrop = { place: { id: string; side: DraftSideKey }; matchup: { ours: string; enemy: string } | null; open: string }
+export type CompDrop = {
+  place: { id: string; side: DraftSideKey }
+  matchup: { ours: string; enemy: string } | null
+  open: string
+}
 
 /**
  * O que acontece ao soltar uma comp num lado do quadro da gaveta de Táticas.
  * A comp solta fica nesse lado; a comp do time oposto, aberta (ou do confronto aberto), vira o par dela.
  */
-export function resolveCompDrop(comps: Composition[], openId: string | null, openMatchupId: string | null, droppedId: string, side: DraftSideKey): CompDrop | null {
+export function resolveCompDrop(
+  comps: Composition[],
+  openId: string | null,
+  openMatchupId: string | null,
+  droppedId: string,
+  side: DraftSideKey,
+): CompDrop | null {
   const dropped = comps.find(comp => comp.id === droppedId)
   if (!dropped) return null
   const matchup = findMatchup(comps, openMatchupId)
   const open = matchup ? [matchup.ours, matchup.enemy] : comps.filter(comp => comp.id === openId)
   const partner = open.find(comp => comp.id !== dropped.id && isEnemy(comp) !== isEnemy(dropped)) ?? null
   if (!partner) return { place: { id: dropped.id, side }, matchup: null, open: dropped.id }
-  const ours = isEnemy(dropped) ? partner : dropped, enemy = isEnemy(dropped) ? dropped : partner
+  const ours = isEnemy(dropped) ? partner : dropped,
+    enemy = isEnemy(dropped) ? dropped : partner
   // O lado do confronto fica guardado na comp nossa; a adversária fica no lado oposto.
   const oursSide: DraftSideKey = isEnemy(dropped) ? (side === "blue" ? "red" : "blue") : side
   return { place: { id: ours.id, side: oursSide }, matchup: { ours: ours.id, enemy: enemy.id }, open: ours.id }

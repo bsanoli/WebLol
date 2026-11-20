@@ -175,12 +175,25 @@ const BASE = [
   "Zilean|Zilean|S",
   "Zoe|Zoe|M",
   "Zyra|Zyra|S",
-];
-const RL: Record<string, string>={T:"top",J:"jg",M:"mid",A:"adc",S:"sup"};
-export const CH=BASE.map(s=>{const[n,id,r]=s.split("|");return{n,id,r:[...r].map(c=>RL[c])}});
-const TAG_ROLE: Record<string, string>={Fighter:"top",Tank:"top",Mage:"mid",Assassin:"mid",Marksman:"adc",Support:"sup"};
-for(const [id,c] of Object.entries(LOL_DATA.champions)){
-  const existing=CH.find(x=>x.id===id);
-  if(existing){if(c.name==="Nunu & Willump")existing.n=c.name;continue}
-  CH.push({n:c.name,id,r:[...new Set(c.tags.map(t=>TAG_ROLE[t]).filter(Boolean))]});
+]
+const RL: Record<string, string> = { T: "top", J: "jg", M: "mid", A: "adc", S: "sup" }
+export const CH = BASE.map(s => {
+  const [n, id, r] = s.split("|")
+  return { n, id, r: [...r].map(c => RL[c]) }
+})
+const TAG_ROLE: Record<string, string> = {
+  Fighter: "top",
+  Tank: "top",
+  Mage: "mid",
+  Assassin: "mid",
+  Marksman: "adc",
+  Support: "sup",
+}
+for (const [id, c] of Object.entries(LOL_DATA.champions)) {
+  const existing = CH.find(x => x.id === id)
+  if (existing) {
+    if (c.name === "Nunu & Willump") existing.n = c.name
+    continue
+  }
+  CH.push({ n: c.name, id, r: [...new Set(c.tags.map(t => TAG_ROLE[t]).filter(Boolean))] })
 }

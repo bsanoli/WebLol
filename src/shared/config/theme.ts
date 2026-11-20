@@ -1,3 +1,5 @@
+import { STORAGE_KEYS } from "./storage-keys"
+
 export const palettes = [
   { id: "weblol", label: "WebLol" },
   { id: "black-gold", label: "weblol2" },
@@ -15,16 +17,22 @@ export const palettes = [
 export type PaletteId = (typeof palettes)[number]["id"]
 
 // Keep the stored preference from when themes were only available in Composições.
-const paletteKey = "weblol-composition-palette"
+const paletteKey = STORAGE_KEYS.palette
 const previousPalettes = new Map([
-  ["turquoise", "tokyo-night"], ["violet", "dracula"], ["pink", "catppuccin"],
-  ["lime", "monokai"], ["silver", "nord"], ["amber", "solarized"],
+  ["turquoise", "tokyo-night"],
+  ["violet", "dracula"],
+  ["pink", "catppuccin"],
+  ["lime", "monokai"],
+  ["silver", "nord"],
+  ["amber", "solarized"],
 ])
 
 export function initializeTheme(): PaletteId {
   let stored = window.frameElement?.ownerDocument.documentElement.dataset.palette
   if (!stored) {
-    try { stored = localStorage.getItem(paletteKey) ?? undefined } catch {}
+    try {
+      stored = localStorage.getItem(paletteKey) ?? undefined
+    } catch {}
   }
   const id = stored && (previousPalettes.get(stored) ?? stored)
   const palette = palettes.find(option => option.id === id)?.id ?? "weblol"
@@ -38,5 +46,7 @@ export function selectTheme(palette: PaletteId) {
     const root = frame.contentDocument?.documentElement
     if (root) root.dataset.palette = palette
   }
-  try { localStorage.setItem(paletteKey, palette) } catch {}
+  try {
+    localStorage.setItem(paletteKey, palette)
+  } catch {}
 }

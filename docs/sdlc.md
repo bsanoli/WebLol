@@ -33,8 +33,8 @@ Na dúvida entre dois tamanhos, escolha o maior só se a mudança tocar algo sal
 | 1. Pedido | Claude reescreve a mensagem como resultado esperado e critérios de aceite, com os termos do [glossário](glossario.md), e classifica o tamanho. | Em M e G, a pessoa confirma ou corrige a interpretação. Em M, se a mensagem já autoriza a execução (`implemente`, `corrija`, `bora`) e nenhuma dúvida muda a entrega, a interpretação fica registrada e a implementação segue. A dúvida vem como pergunta com opções, a recomendada primeiro. | Seção "Pedido" do [modelo](pedidos/_modelo.md) |
 | 2. Especificação (só G) | Telas e estados (vazio, texto longo, erro, carregando), dados e migração, rotas, impacto nos builds Worlds e SoloQ, termos novos. | Fabiano aprova. Bruno aprova o que tocar admin, login ou dados salvos. | Seção "Especificação" e ADR, se houver decisão |
 | 3. Plano | No modo de planejamento: arquivos por camada FSD, testes a criar ou ajustar, riscos. Em G, ondas que possam ser publicadas uma de cada vez. | Aprovação do plano em G. Em M, o plano é mostrado e a implementação segue. | Seção "Plano" |
-| 4. Implementação | Código conforme as [convenções](convencoes.md) e testes junto do código. Os ganchos rodam a verificação rápida no arquivo editado (Onda 1). | — | Diff |
-| 5. Verificação | `npm run check`, testes Playwright da área e conferência no navegador desktop pelo fluxo real. Em M e G, o agente [change-verifier](agentes/change-verifier.md) confere o diff contra o pedido em contexto novo. | Tudo passa ou a falha é anterior e está registrada. | Resumo da verificação |
+| 4. Implementação | Código conforme as [convenções](convencoes.md) e testes junto do código. Os ganchos rodam o Biome no arquivo editado e o `npm run check` no fim do turno. | — | Diff |
+| 5. Verificação | `npm run verify`, testes Playwright da área e conferência no navegador desktop pelo fluxo real. Em M e G, o agente [change-verifier](agentes/change-verifier.md) confere o diff contra o pedido em contexto novo. | Tudo passa ou a falha é anterior e está registrada. | Resumo da verificação |
 | 6. Revisão e publicação | Checklist de [revisão](revisao.md). "publique" aciona a skill [weblol-publicar](../.agents/skills/weblol-publicar/SKILL.md). Em G, um PR. | Pedido explícito de publicação | Commit, push e PR |
 | 7. Aprendizado | Cada correção feita pela pessoa vira regra no lugar certo (veja o [ciclo de padronização](#ciclo-de-padronização)). | — | Glossário, convenções, ADR, skill ou verificação |
 
@@ -98,10 +98,11 @@ Quando a pessoa corrige uma entrega, a correção diz algo sobre o processo. Se 
 
 | Quando | O que roda | Situação |
 | --- | --- | --- |
-| A cada edição de arquivo pela sessão | Biome no arquivo editado (gancho `PostToolUse` do Claude Code) | Onda 1 ([ADR 0004](decisoes/0004-ferramentas-de-qualidade.md)) |
-| Antes de a sessão encerrar o turno | Biome, Steiger e `npm run check` (gancho `Stop`) | Onda 1 |
-| Antes do commit e do push | Biome nos arquivos staged e `npm run check` (Lefthook) | Hoje é manual. Onda 1. |
-| No push e no PR | Biome, `npm run check`, Steiger, Vitest, build, Playwright com axe e `sincronizar-skills --check` | Onda 1 (`ci.yml`) |
+| A cada edição de arquivo pela sessão | Biome no arquivo editado em `src/`, `tests/` ou `scripts/` (gancho `PostToolUse` do Claude Code) | Ativo desde a Onda 1 ([ADR 0004](decisoes/0004-ferramentas-de-qualidade.md)) |
+| Antes de a sessão encerrar o turno | Biome e `npm run check`, que inclui o Steiger (gancho `Stop`) | Ativo desde a Onda 1 |
+| No commit | Biome nos arquivos staged, com as correções automáticas (Lefthook `pre-commit`) | Ativo desde a Onda 1, instalado pelo `npm install` |
+| No push | `npm run check` e Vitest (Lefthook `pre-push`) | Ativo desde a Onda 1 |
+| Em todo push para o GitHub | Biome, `npm run check`, `sincronizar-skills --check`, Vitest, build e Playwright com axe (`ci.yml`). O PR mostra o resultado do push da branch | Ativo desde a Onda 1 |
 | Na publicação | Build e deploy | Hoje: arquivos gerados na `main`. Proposta: [ADR 0003](decisoes/0003-publicacao-por-artefato.md). |
 
 ## Sessões em paralelo

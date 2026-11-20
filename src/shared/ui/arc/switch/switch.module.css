@@ -12,7 +12,7 @@
   --control-thumb-shadow: 0 1px 2px #0004;
   --duration-fast: 160ms;
   --duration-standard: 240ms;
-  --ease-standard: cubic-bezier(.22, 1, .36, 1);
+  --ease-standard: cubic-bezier(0.22, 1, 0.36, 1);
   display: inline-flex;
   min-height: var(--control-height-md);
   align-items: center;
@@ -26,14 +26,67 @@
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
 }
-.switch:disabled { cursor: not-allowed; opacity: .5; }
+.switch:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
 /* Fixed box: the thumb moves inside it with transforms, so nothing around the switch shifts. The track crossfades between the two fills. */
-.track { position: relative; box-sizing: border-box; display: flex; flex: 0 0 auto; width: 42px; height: 24px; align-items: center; padding: 3px; border-radius: var(--radius-pill); background: var(--control-track); isolation: isolate; transition: background-color var(--duration-fast) var(--ease-standard); }
-.track::before { content: ""; position: absolute; inset: 0; z-index: -1; border-radius: inherit; background: var(--control-on); opacity: 0; transition: opacity var(--duration-standard) var(--ease-standard); }
-.switch[data-state="checked"] .track::before { opacity: 1; }
-.thumb { flex: 0 0 auto; width: 18px; height: 18px; border-radius: var(--radius-pill); background: var(--control-thumb); box-shadow: var(--control-thumb-shadow); will-change: transform; transition: background-color var(--duration-standard) var(--ease-standard); }
-.switch[data-state="checked"] .thumb { background: var(--control-thumb-on); }
-@media (hover: hover) and (pointer: fine) { .switch[data-state="unchecked"]:hover:not(:disabled) .track { background: var(--control-track-hover); } }
-.switch:focus-visible { outline: 2px solid var(--wl-accent); outline-offset: 2px; }
-.label { line-height: 1.5; }
-@media (prefers-reduced-motion: reduce) { .track, .track::before, .thumb { transition: none; } }
+.track {
+  position: relative;
+  box-sizing: border-box;
+  display: flex;
+  flex: 0 0 auto;
+  width: 42px;
+  height: 24px;
+  align-items: center;
+  padding: 3px;
+  border-radius: var(--radius-pill);
+  background: var(--control-track);
+  isolation: isolate;
+  transition: background-color var(--duration-fast) var(--ease-standard);
+}
+.track::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  border-radius: inherit;
+  background: var(--control-on);
+  opacity: 0;
+  transition: opacity var(--duration-standard) var(--ease-standard);
+}
+.switch[data-state="checked"] .track::before {
+  opacity: 1;
+}
+.thumb {
+  flex: 0 0 auto;
+  width: 18px;
+  height: 18px;
+  border-radius: var(--radius-pill);
+  background: var(--control-thumb);
+  box-shadow: var(--control-thumb-shadow);
+  will-change: transform;
+  transition: background-color var(--duration-standard) var(--ease-standard);
+}
+.switch[data-state="checked"] .thumb {
+  background: var(--control-thumb-on);
+}
+@media (hover: hover) and (pointer: fine) {
+  .switch[data-state="unchecked"]:hover:not(:disabled) .track {
+    background: var(--control-track-hover);
+  }
+}
+.switch:focus-visible {
+  outline: 2px solid var(--wl-accent);
+  outline-offset: 2px;
+}
+.label {
+  line-height: 1.5;
+}
+@media (prefers-reduced-motion: reduce) {
+  .track,
+  .track::before,
+  .thumb {
+    transition: none;
+  }
+}

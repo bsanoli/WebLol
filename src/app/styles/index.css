@@ -1,9 +1,16 @@
 @import "tailwindcss";
 
 @layer components {
-  [data-slot="table-container"] { width: 100%; overflow-x: auto; }
-  [data-slot="table-container"] > [data-slot="table"] { width: 100%; }
-  [data-slot="table-head"] { text-align: start; }
+  [data-slot="table-container"] {
+    width: 100%;
+    overflow-x: auto;
+  }
+  [data-slot="table-container"] > [data-slot="table"] {
+    width: 100%;
+  }
+  [data-slot="table-head"] {
+    text-align: start;
+  }
 }
 
 @theme inline {
@@ -48,11 +55,17 @@
   --radius-lg: var(--wl-panel-radius);
 }
 
-.screen-message { @apply fixed left-1/2 top-1/2 z-10 w-max max-w-[90vw] -translate-x-1/2 -translate-y-1/2 rounded-lg border border-border bg-card p-5 text-sm text-foreground shadow-lg; }
+.screen-message {
+  @apply fixed left-1/2 top-1/2 z-10 w-max max-w-[90vw] -translate-x-1/2 -translate-y-1/2 rounded-lg border border-border bg-card p-5 text-sm text-foreground shadow-lg;
+}
 @media (prefers-reduced-motion: no-preference) {
   #screen-loading:not([hidden]) {
     animation: screen-loading-in var(--wl-motion-normal) var(--wl-motion-ease) var(--wl-motion-fast) backwards;
     pointer-events: none;
   }
-  @keyframes screen-loading-in { from { opacity: 0; } }
+  @keyframes screen-loading-in {
+    from {
+      opacity: 0;
+    }
+  }
 }

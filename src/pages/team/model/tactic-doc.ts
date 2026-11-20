@@ -18,8 +18,10 @@ export const TACTIC_PRINT = "tacticPrint"
 const paragraph = (text: string): TacticDocNode =>
   text ? { type: "paragraph", content: [{ type: "text", text }] } : { type: "paragraph" }
 
-export const printNode = (src: string): TacticDocNode =>
-  ({ type: TACTIC_PRINT, attrs: { src, sketch: null, preview: null } })
+export const printNode = (src: string): TacticDocNode => ({
+  type: TACTIC_PRINT,
+  attrs: { src, sketch: null, preview: null },
+})
 
 /** Valida o documento vindo do armazenamento; qualquer coisa estranha vira nulo. */
 export function readTacticDoc(value: unknown): TacticDoc | null {
@@ -36,7 +38,11 @@ export function docFromLegacy(text: string, images: string[]): TacticDoc {
   return { type: "doc", content }
 }
 
-const heading = (text: string): TacticDocNode => ({ type: "heading", attrs: { level: 3 }, content: [{ type: "text", text }] })
+const heading = (text: string): TacticDocNode => ({
+  type: "heading",
+  attrs: { level: 3 },
+  content: [{ type: "text", text }],
+})
 
 export type CompNotes = { general: string; draft: { label: string; text: string }[] }
 
@@ -50,7 +56,10 @@ export function docWithCompNotes(doc: TacticDoc, notes: CompNotes): TacticDoc {
   section("Plano geral", notes.general)
   for (const { label, text } of notes.draft) section(`Plano do draft · ${label}`, text)
   if (!blocks.length) return doc
-  const rest = doc.content.length === 1 && doc.content[0].type === "paragraph" && !doc.content[0].content?.length ? [] : doc.content
+  const rest =
+    doc.content.length === 1 && doc.content[0].type === "paragraph" && !doc.content[0].content?.length
+      ? []
+      : doc.content
   return { type: "doc", content: [...blocks, ...rest, ...(rest.length ? [] : [paragraph("")])] }
 }
 
@@ -74,7 +83,10 @@ export function plainTextOf(doc: TacticDoc): string {
     if (BLOCKS.has(node.type) && !node.content?.some(child => BLOCKS.has(child.type))) out.push("\n")
   }
   doc.content.forEach(visit)
-  return out.join("").replace(/\n{3,}/g, "\n\n").trim()
+  return out
+    .join("")
+    .replace(/\n{3,}/g, "\n\n")
+    .trim()
 }
 
 /** Ids de todas as imagens referenciadas (print original, cena do desenho e prévia). */

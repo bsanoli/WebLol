@@ -31,11 +31,17 @@ test("Builds alterna de Worlds para SoloQ", async ({ page }) => {
 
 test("Histórico de compras exibe carregamento, erro e recupera com nova tentativa", async ({ page }) => {
   let releaseFailure = () => {}
-  const failureReady = new Promise<void>(resolve => { releaseFailure = resolve })
-  await page.route("**/data/worlds-2026-build-timeline.json", async route => {
-    await failureReady
-    await route.fulfill({ status: 503 })
-  }, { times: 1 })
+  const failureReady = new Promise<void>(resolve => {
+    releaseFailure = resolve
+  })
+  await page.route(
+    "**/data/worlds-2026-build-timeline.json",
+    async route => {
+      await failureReady
+      await route.fulfill({ status: 503 })
+    },
+    { times: 1 },
+  )
 
   await page.goto("/#/builds/ahri?fonte=worlds", { waitUntil: "domcontentloaded" })
   const builds = page.frameLocator("#v-worlds")

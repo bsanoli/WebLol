@@ -8,6 +8,12 @@ Formato de cada entrada: data, pedido (palavras do Bruno), decisão (quem escolh
 
 ---
 
+## 20/11/2026 — formatação automática e registro das chaves locais (Onda 1)
+
+- **Pedido:** "Sim, Onda 1" (ferramentas de verificação, Fabiano). Não muda login, contas nem regras do Firestore.
+- **Decisão do Fabiano:** o Biome formata `public/assets/sync.js` e `shell.js`, mas sem correções que renomeiem ou apaguem variáveis, porque os dois compartilham globais.
+- **O que mudou:** só a formatação desses dois arquivos. As chaves de conta e de admin passaram a constar em `src/shared/config/storage-keys.ts`, e um teste confere que os nomes usados no `sync.js` continuam lá. Nenhum nome de chave mudou.
+
 ## 19/11/2026 — composições nossas e adversárias na aprovação do capitão
 
 - **Pedido:** "quero poder diferenciar uma composição do meu time e uma composição do adversario" e "poder selecionar e diferenciar lado e composição adversaria" na Ordem do draft.

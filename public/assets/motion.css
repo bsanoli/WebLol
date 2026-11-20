@@ -4,7 +4,7 @@
   --wl-motion-normal: 180ms;
   --wl-motion-panel: 240ms;
   --wl-motion-chart: 420ms;
-  --wl-motion-ease: cubic-bezier(.22, 1, .36, 1);
+  --wl-motion-ease: cubic-bezier(0.22, 1, 0.36, 1);
   --wl-motion-distance: 6px;
 }
 
@@ -13,18 +13,29 @@
   transition-duration: var(--wl-motion-fast);
   transition-timing-function: var(--wl-motion-ease);
 }
-button:not(:disabled,[aria-disabled=true]):active { opacity: .78; }
+button:not(:disabled, [aria-disabled="true"]):active {
+  opacity: 0.78;
+}
 
 /* Animate the content, not the iframe: transforms on frames affect fixed UI. */
-section.view.on, #v-admin.on > .wrap {
+section.view.on,
+#v-admin.on > .wrap {
   animation: wl-reveal var(--wl-motion-panel) var(--wl-motion-ease);
 }
 @keyframes wl-reveal {
-  from { opacity: 0; translate: 0 var(--wl-motion-distance); }
-  to { opacity: 1; translate: 0 0; }
+  from {
+    opacity: 0;
+    translate: 0 var(--wl-motion-distance);
+  }
+  to {
+    opacity: 1;
+    translate: 0 0;
+  }
 }
 
-.wl-motion-nav { position: relative; }
+.wl-motion-nav {
+  position: relative;
+}
 .wl-motion-nav::after {
   content: "";
   position: absolute;
@@ -38,7 +49,8 @@ section.view.on, #v-admin.on > .wrap {
   pointer-events: none;
 }
 .wl-motion-nav[data-motion-ready]::after {
-  transition: transform var(--wl-motion-panel) var(--wl-motion-ease),
+  transition:
+    transform var(--wl-motion-panel) var(--wl-motion-ease),
     width var(--wl-motion-panel) var(--wl-motion-ease);
 }
 
@@ -62,7 +74,8 @@ section.view.on, #v-admin.on > .wrap {
   z-index: -1;
 }
 .wl-motion-pill.wl-motion-nav[data-motion-ready]::after {
-  transition: transform var(--wl-motion-panel) var(--wl-motion-ease),
+  transition:
+    transform var(--wl-motion-panel) var(--wl-motion-ease),
     width var(--wl-motion-panel) var(--wl-motion-ease),
     height var(--wl-motion-panel) var(--wl-motion-ease);
 }
@@ -74,8 +87,12 @@ section.view.on, #v-admin.on > .wrap {
   animation: wl-step-highlight var(--wl-motion-panel) var(--wl-motion-ease);
 }
 @keyframes wl-step-highlight {
-  from { background-color: color-mix(in srgb, var(--wl-accent) 24%, var(--panel2)); }
-  to { background-color: var(--panel2); }
+  from {
+    background-color: color-mix(in srgb, var(--wl-accent) 24%, var(--panel2));
+  }
+  to {
+    background-color: var(--panel2);
+  }
 }
 
 /* Native discrete transitions retain the top layer until the exit finishes.
@@ -83,59 +100,91 @@ section.view.on, #v-admin.on > .wrap {
 dialog {
   opacity: 0;
   translate: 0 var(--wl-motion-distance);
-  scale: .985;
-  transition: opacity var(--wl-motion-normal) var(--wl-motion-ease),
+  scale: 0.985;
+  transition:
+    opacity var(--wl-motion-normal) var(--wl-motion-ease),
     translate var(--wl-motion-panel) var(--wl-motion-ease),
     scale var(--wl-motion-panel) var(--wl-motion-ease),
     display var(--wl-motion-panel) allow-discrete,
     overlay var(--wl-motion-panel) allow-discrete;
 }
-dialog[open] { opacity: 1; translate: 0 0; scale: 1; }
-dialog:not([open]) { pointer-events: none; }
+dialog[open] {
+  opacity: 1;
+  translate: 0 0;
+  scale: 1;
+}
+dialog:not([open]) {
+  pointer-events: none;
+}
 dialog::backdrop {
   opacity: 0;
-  transition: opacity var(--wl-motion-normal) ease,
+  transition:
+    opacity var(--wl-motion-normal) ease,
     display var(--wl-motion-panel) allow-discrete,
     overlay var(--wl-motion-panel) allow-discrete;
 }
-dialog[open]::backdrop { opacity: 1; }
+dialog[open]::backdrop {
+  opacity: 1;
+}
 @starting-style {
-  dialog[open] { opacity: 0; translate: 0 var(--wl-motion-distance); scale: .985; }
-  dialog[open]::backdrop { opacity: 0; }
+  dialog[open] {
+    opacity: 0;
+    translate: 0 var(--wl-motion-distance);
+    scale: 0.985;
+  }
+  dialog[open]::backdrop {
+    opacity: 0;
+  }
 }
 
 /* Details covers mouse, keyboard, Escape and programmatic outside dismissal. */
 details::details-content {
   opacity: 0;
-  transition: opacity var(--wl-motion-normal) var(--wl-motion-ease),
+  transition:
+    opacity var(--wl-motion-normal) var(--wl-motion-ease),
     content-visibility var(--wl-motion-normal) allow-discrete;
 }
-details[open]::details-content { opacity: 1; }
+details[open]::details-content {
+  opacity: 1;
+}
 .palette::details-content {
   translate: 0 calc(-1 * var(--wl-motion-distance));
-  transition: opacity var(--wl-motion-normal) var(--wl-motion-ease),
+  transition:
+    opacity var(--wl-motion-normal) var(--wl-motion-ease),
     translate var(--wl-motion-normal) var(--wl-motion-ease),
     content-visibility var(--wl-motion-normal) allow-discrete;
 }
-.palette[open]::details-content { translate: 0 0; }
+.palette[open]::details-content {
+  translate: 0 0;
+}
 /* Outgoing menu content stays visible briefly, but cannot receive a click. */
-details:not([open])::details-content { pointer-events: none; }
-.palette > summary::after { transition: transform var(--wl-motion-normal) var(--wl-motion-ease); }
-.palette[open] > summary::after { transform: rotate(225deg); }
+details:not([open])::details-content {
+  pointer-events: none;
+}
+.palette > summary::after {
+  transition: transform var(--wl-motion-normal) var(--wl-motion-ease);
+}
+.palette[open] > summary::after {
+  transform: rotate(225deg);
+}
 @supports (interpolate-size: allow-keywords) {
   details:not(.palette)::details-content {
     interpolate-size: allow-keywords;
     block-size: 0;
     overflow: clip;
-    transition: block-size var(--wl-motion-panel) var(--wl-motion-ease),
+    transition:
+      block-size var(--wl-motion-panel) var(--wl-motion-ease),
       opacity var(--wl-motion-normal) var(--wl-motion-ease),
       content-visibility var(--wl-motion-panel) allow-discrete;
   }
-  details:not(.palette)[open]::details-content { block-size: auto; }
+  details:not(.palette)[open]::details-content {
+    block-size: auto;
+  }
 
   /* Keep long matchup lists visible while their height recedes. */
   .build-matchup-group:not([open])::details-content {
-    transition: block-size var(--wl-motion-panel) var(--build-matchup-close-ease, ease-in-out),
+    transition:
+      block-size var(--wl-motion-panel) var(--build-matchup-close-ease, ease-in-out),
       opacity var(--wl-motion-panel) var(--build-matchup-close-ease, ease-in-out),
       content-visibility var(--wl-motion-panel) allow-discrete;
   }
@@ -143,23 +192,38 @@ details:not([open])::details-content { pointer-events: none; }
 
 #tip {
   opacity: 1;
-  transition: opacity var(--wl-motion-fast) ease, display var(--wl-motion-fast) allow-discrete;
+  transition:
+    opacity var(--wl-motion-fast) ease,
+    display var(--wl-motion-fast) allow-discrete;
 }
-#tip[hidden] { opacity: 0; }
-@starting-style { #tip:not([hidden]) { opacity: 0; } }
+#tip[hidden] {
+  opacity: 0;
+}
+@starting-style {
+  #tip:not([hidden]) {
+    opacity: 0;
+  }
+}
 .toast {
   translate: 0 var(--wl-motion-distance);
-  scale: .98;
-  transition: opacity var(--wl-motion-fast) ease,
-    translate var(--wl-motion-fast) var(--wl-motion-ease), scale var(--wl-motion-fast) var(--wl-motion-ease);
+  scale: 0.98;
+  transition:
+    opacity var(--wl-motion-fast) ease,
+    translate var(--wl-motion-fast) var(--wl-motion-ease),
+    scale var(--wl-motion-fast) var(--wl-motion-ease);
 }
 .toast.on {
   translate: 0 0;
   scale: 1;
   transition-duration: var(--wl-motion-panel);
 }
-.saved, .sstat .ok { transition: opacity var(--wl-motion-normal) ease; }
-#sync-label { transition: color var(--wl-motion-fast) ease; }
+.saved,
+.sstat .ok {
+  transition: opacity var(--wl-motion-normal) ease;
+}
+#sync-label {
+  transition: color var(--wl-motion-fast) ease;
+}
 
 /* Grow stacked segments together, preserving their relative proportions.
    The track, text and final numeric value remain stationary and readable. */
@@ -171,11 +235,18 @@ details:not([open])::details-content { pointer-events: none; }
   transform: scaleX(0);
   transition: transform var(--wl-motion-chart) var(--wl-motion-ease);
 }
-.ranked-bars [data-bar-visible=true] .chart-fill { transform: scaleX(1); }
+.ranked-bars [data-bar-visible="true"] .chart-fill {
+  transform: scaleX(1);
+}
 
 @media (prefers-reduced-motion: reduce) {
-  .ranked-bars .chart-fill { transform: none; }
-  *, *::before, *::after, details::details-content {
+  .ranked-bars .chart-fill {
+    transform: none;
+  }
+  *,
+  *::before,
+  *::after,
+  details::details-content {
     animation: none !important;
     transition: none !important;
     scroll-behavior: auto !important;

@@ -6,7 +6,11 @@ export type NoteChampion = { name: string; portrait: string }
 type MentionItem = NoteChampion
 type MentionCommand = { id: string; label: string }
 
-const normalize = (value: string) => value.toLowerCase().normalize("NFD").replace(/[^a-z0-9]/g, "")
+const normalize = (value: string) =>
+  value
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[^a-z0-9]/g, "")
 
 function findChampions(champions: NoteChampion[], query: string) {
   const q = normalize(query)
@@ -75,9 +79,20 @@ function createSuggestionMenu() {
     onKeyDown({ event }: SuggestionKeyDownProps) {
       const count = props?.items.length ?? 0
       if (!count) return false
-      if (event.key === "ArrowDown") { index = (index + 1) % count; draw(); return true }
-      if (event.key === "ArrowUp") { index = (index + count - 1) % count; draw(); return true }
-      if (event.key === "Enter" || event.key === "Tab") { choose(index); return true }
+      if (event.key === "ArrowDown") {
+        index = (index + 1) % count
+        draw()
+        return true
+      }
+      if (event.key === "ArrowUp") {
+        index = (index + count - 1) % count
+        draw()
+        return true
+      }
+      if (event.key === "Enter" || event.key === "Tab") {
+        choose(index)
+        return true
+      }
       return false
     },
     onExit() {
@@ -98,8 +113,12 @@ export function championMention(champions: NoteChampion[]) {
     renderHTML: ({ options, node }) => {
       const name = String(node.attrs.label ?? node.attrs.id ?? "")
       const portrait = portraits.get(String(node.attrs.id))
-      return ["span", { ...options.HTMLAttributes, "data-champion": node.attrs.id },
-        ...(portrait ? [["img", { src: portrait, alt: "", class: "tx-mention-icon" }]] : []), name]
+      return [
+        "span",
+        { ...options.HTMLAttributes, "data-champion": node.attrs.id },
+        ...(portrait ? [["img", { src: portrait, alt: "", class: "tx-mention-icon" }]] : []),
+        name,
+      ]
     },
     suggestion: {
       char: "@",

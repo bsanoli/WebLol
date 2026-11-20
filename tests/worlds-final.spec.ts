@@ -9,7 +9,9 @@ test("Confirma a final mesmo quando as equipes trocam de lado", () => {
     { s: "final-1", st: "Final", g: 4, b: "Bilibili Gaming", r: "Gen.G", bw: true },
   ]
   expect(confirmedFinalSeries([...games].reverse())).toEqual({
-    winner: "Bilibili Gaming", runnerUp: "Gen.G", score: [3, 1],
+    winner: "Bilibili Gaming",
+    runnerUp: "Gen.G",
+    score: [3, 1],
   })
   expect(confirmedFinalSeries(games.slice(0, 3))).toBeUndefined()
   expect(confirmedFinalSeries([...games.slice(0, 3), { ...games[3], g: 3 }])).toBeUndefined()

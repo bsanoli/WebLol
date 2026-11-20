@@ -1,7 +1,7 @@
 import { iconMarkup } from "@/shared/ui/icon"
 import { gameIconMarkup } from "./game-icon"
 
-export const WAVE_HTML=`
+export const WAVE_HTML = `
 <p class="knowledge-intro">Técnicas de controle de wave para a temporada 2026. Os tempos seguem os patches 26.1 e 26.9.</p>
 
 <h2 class="ks">Números da wave em 2026</h2>
@@ -88,4 +88,4 @@ export const WAVE_HTML=`
 <tr><td style="color:var(--red)">Ir para objetivo sem prio</td><td>O inimigo chega primeiro e você briga em desvantagem.</td></tr>
 <tr><td style="color:var(--red)">Esquecer o canhão</td><td>Canhão vivo muda quem empurra. Conte as waves: 3ª wave e depois a cada 3 no começo.</td></tr>
 </table>
-<p style="color:var(--mut);font-size:12px;margin-top:18px">Fontes: <a style="color:var(--acc)" href="https://www.riftpatchnotes.com/lol/system/minions" target="_blank">riftpatchnotes — Minions (26.1, 26.9, 26.10)</a> · <a style="color:var(--acc)" href="https://www.leagueoflegends.com/news/dev/dev-2026-season-one-gameplay-preview/" target="_blank">Riot — /dev 2026 Season One</a> · <a style="color:var(--acc)" href="https://www.nerfplz.com/2026/10/minions-in-lol-10-rules-wave-plays-by.html" target="_blank">nerfplz — Minions in LoL</a></p>`;
+<p style="color:var(--mut);font-size:12px;margin-top:18px">Fontes: <a style="color:var(--acc)" href="https://www.riftpatchnotes.com/lol/system/minions" target="_blank">riftpatchnotes — Minions (26.1, 26.9, 26.10)</a> · <a style="color:var(--acc)" href="https://www.leagueoflegends.com/news/dev/dev-2026-season-one-gameplay-preview/" target="_blank">Riot — /dev 2026 Season One</a> · <a style="color:var(--acc)" href="https://www.nerfplz.com/2026/10/minions-in-lol-10-rules-wave-plays-by.html" target="_blank">nerfplz — Minions in LoL</a></p>`

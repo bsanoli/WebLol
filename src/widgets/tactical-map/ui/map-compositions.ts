@@ -2,7 +2,12 @@ import { isSide, sideLabel, type Side } from "../model/battlefield"
 
 type Composition = { id: string; name: string; champions: string[] }
 
-export function mountMapCompositions({ read, selected, choose, portrait }: {
+export function mountMapCompositions({
+  read,
+  selected,
+  choose,
+  portrait,
+}: {
   read: () => Composition[]
   selected: (side: Side) => string | undefined
   choose: (side: Side, id: string) => void
@@ -75,8 +80,11 @@ export function mountMapCompositions({ read, selected, choose, portrait }: {
     syncSelection()
   }
 
-  return { render, setDisabled(value: boolean) {
-    disabled = value
-    syncSelection()
-  } }
+  return {
+    render,
+    setDisabled(value: boolean) {
+      disabled = value
+      syncSelection()
+    },
+  }
 }

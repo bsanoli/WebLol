@@ -30,7 +30,7 @@ test("Abre Camadas com ícones em 60% e mantém o tamanho escolhido", async ({ p
   const thumb = (await slider.boundingBox())!
   await page.mouse.move(thumb.x + thumb.width / 2, thumb.y + thumb.height / 2)
   await page.mouse.down()
-  await page.mouse.move(track.x + track.width * .43, track.y + track.height / 2, { steps: 6 })
+  await page.mouse.move(track.x + track.width * 0.43, track.y + track.height / 2, { steps: 6 })
   await expect(slider).toHaveAttribute("aria-valuetext", "77%")
   expect(await scale()).toBe("0.77")
   await page.mouse.move(track.x + track.width - 1, track.y + track.height / 2, { steps: 6 })
@@ -62,7 +62,7 @@ test("Edita o lado da ward junto à peça sem alterar a câmera", async ({ page 
   const blue = team.getByRole("button", { name: "Mover Sentinela Invisível — Azul" })
   const red = team.getByRole("button", { name: "Mover Sentinela Invisível — Vermelho" })
   await team.getByRole("radio", { name: "Colocar ward" }).click()
-  const edge = await mapPoint(team, .98, .91)
+  const edge = await mapPoint(team, 0.98, 0.91)
   await page.mouse.click(edge.x, edge.y)
   await team.getByRole("radio", { name: "Mover", exact: true }).click()
 
@@ -95,7 +95,7 @@ test("Edita o lado da ward junto à peça sem alterar a câmera", async ({ page 
   await expect(blue).toBeFocused()
   await expect(editor).toBeHidden()
   await blue.press("Enter")
-  const outside = await mapPoint(team, .5, .5)
+  const outside = await mapPoint(team, 0.5, 0.5)
   await page.mouse.click(outside.x, outside.y)
   await expect(editor).toBeHidden()
   await blue.press("Enter")
@@ -115,7 +115,7 @@ test("Edita o lado da ward junto à peça sem alterar a câmera", async ({ page 
   await expect(exitFullscreen).toBeVisible()
 
   const ward = (await blue.boundingBox())!
-  await drag(page, { x: ward.x + ward.width / 2, y: ward.y + ward.height / 2 }, await mapPoint(team, .82, .75))
+  await drag(page, { x: ward.x + ward.width / 2, y: ward.y + ward.height / 2 }, await mapPoint(team, 0.82, 0.75))
   await expect(editor).toBeHidden()
   await expect(team.locator(".ward-vision-range")).toHaveAttribute("cx", "82")
 })
@@ -134,9 +134,9 @@ test("Atalhos alternam ferramentas e a Borracha apaga uma ward antes do traço s
   await expect(tool("Traço livre")).toBeChecked()
   await viewport.press("Shift+l")
   await expect(tool("Desenhar seta")).toBeChecked()
-  await drag(page, await mapPoint(page, .33, .35), await mapPoint(page, .53, .35))
+  await drag(page, await mapPoint(page, 0.33, 0.35), await mapPoint(page, 0.53, 0.35))
   await tool("Colocar ward").click()
-  let intersection = await mapPoint(page, .43, .35)
+  let intersection = await mapPoint(page, 0.43, 0.35)
   await page.mouse.click(intersection.x, intersection.y)
 
   await tool("Colocar ward").click()
@@ -148,7 +148,7 @@ test("Atalhos alternam ferramentas e a Borracha apaga uma ward antes do traço s
   await expect(tool("Borracha")).toBeChecked()
   const ward = page.getByRole("button", { name: "Apagar Sentinela Invisível — Azul" })
   const clearArrows = page.locator("#clr")
-  intersection = await mapPoint(page, .43, .35)
+  intersection = await mapPoint(page, 0.43, 0.35)
   await page.mouse.click(intersection.x, intersection.y)
   await expect(ward).toHaveCount(0)
   await expect(clearArrows).toBeEnabled()
@@ -196,13 +196,13 @@ test("Atalhos alternam ferramentas e a Borracha apaga uma ward antes do traço s
   await expect(tool("Borracha")).toBeChecked()
   await viewport.press("Shift+l")
   await expect(tool("Desenhar seta")).toBeChecked()
-  await drag(page, await mapPoint(page, .33, .35), await mapPoint(page, .53, .35))
+  await drag(page, await mapPoint(page, 0.33, 0.35), await mapPoint(page, 0.53, 0.35))
   await expect(clearArrows).toBeEnabled()
   await visionButton(page, "vermelha").click()
   await expect(tool("Desenhar seta")).toBeChecked()
   await viewport.press("b")
   await expect(tool("Borracha")).toBeChecked()
-  const redIntersection = await mapPoint(page, .43, .35)
+  const redIntersection = await mapPoint(page, 0.43, 0.35)
   await page.mouse.click(redIntersection.x, redIntersection.y)
   await expect(clearArrows).toBeDisabled()
 })
@@ -212,7 +212,11 @@ test("Reabre opções da barra, guarda cor e tamanho do cursor e oferece ferrame
   await page.goto("/camp.html")
   await page.getByRole("button", { name: "Mapa tático" }).click()
   const tool = (name: string) => page.getByRole("radio", { name, exact: true })
-  for (const [name, panelId] of [["Desenhar seta", "map-arrow-options"], ["Traço livre", "map-arrow-options"], ["Colocar ward", "map-ward-options"]]) {
+  for (const [name, panelId] of [
+    ["Desenhar seta", "map-arrow-options"],
+    ["Traço livre", "map-arrow-options"],
+    ["Colocar ward", "map-ward-options"],
+  ]) {
     const panel = page.locator(`#${panelId}`)
     await tool(name).click()
     await expect(panel).toBeVisible()
@@ -234,7 +238,7 @@ test("Reabre opções da barra, guarda cor e tamanho do cursor e oferece ferrame
 
   const viewport = page.getByRole("region", { name: "Mapa da jogada" })
   const quickMenu = page.getByRole("menu", { name: "Ferramentas do mapa", exact: true })
-  const empty = await mapPoint(page, .54, .46)
+  const empty = await mapPoint(page, 0.54, 0.46)
   await page.mouse.click(empty.x, empty.y, { button: "right" })
   await expect(quickMenu.getByRole("menuitem", { name: "Desfazer", exact: true })).toBeDisabled()
   await expect(quickMenu.getByRole("menuitemradio")).toHaveCount(5)
@@ -250,7 +254,7 @@ test("Reabre opções da barra, guarda cor e tamanho do cursor e oferece ferrame
   await expect(arrow).toBeFocused()
   await arrow.press("Enter")
   await expect(tool("Desenhar seta")).toBeChecked()
-  await drag(page, await mapPoint(page, .37, .41), await mapPoint(page, .57, .41))
+  await drag(page, await mapPoint(page, 0.37, 0.41), await mapPoint(page, 0.57, 0.41))
   const clearArrows = page.getByRole("button", { name: "Limpar setas", exact: true })
   await expect(clearArrows).toBeEnabled()
   await viewport.press("Shift+F10")
@@ -289,14 +293,27 @@ test("Setas retas e curvas encaixam o traço na ponta", async ({ page }) => {
     let path: [number, number][] = []
     let strokeEnd: [number, number] | undefined
     const { beginPath, moveTo, lineTo, stroke, fill } = context
-    context.beginPath = function () { path = []; beginPath.call(this) }
-    context.moveTo = function (x, y) { path.push([x, y]); moveTo.call(this, x, y) }
-    context.lineTo = function (x, y) { path.push([x, y]); lineTo.call(this, x, y) }
-    context.stroke = function () { strokeEnd = path.at(-1); stroke.call(this) }
+    context.beginPath = function () {
+      path = []
+      beginPath.call(this)
+    }
+    context.moveTo = function (x, y) {
+      path.push([x, y])
+      moveTo.call(this, x, y)
+    }
+    context.lineTo = function (x, y) {
+      path.push([x, y])
+      lineTo.call(this, x, y)
+    }
+    context.stroke = function () {
+      strokeEnd = path.at(-1)
+      stroke.call(this)
+    }
     context.fill = function () {
       if (path.length === 3) {
         const [tip, a, b] = path
-        const x = tip[0] - (a[0] + b[0]) / 2, y = tip[1] - (a[1] + b[1]) / 2
+        const x = tip[0] - (a[0] + b[0]) / 2,
+          y = tip[1] - (a[1] + b[1]) / 2
         const angle = Math.atan2(y, x)
         node.dataset.arrowAngle = String(angle)
         if (strokeEnd) {
@@ -310,7 +327,7 @@ test("Setas retas e curvas encaixam o traço na ponta", async ({ page }) => {
   for (const zoom of [1, 1.25]) {
     if (zoom > 1) await page.getByRole("button", { name: "Aumentar zoom" }).click()
     for (const length of [14, 42]) {
-      const end = await mapPoint(page, .55, .51)
+      const end = await mapPoint(page, 0.55, 0.51)
       await page.mouse.move(end.x - length, end.y - length)
       await page.mouse.down()
       await page.mouse.move(end.x - length, end.y - 4, { steps: 5 })
@@ -322,13 +339,13 @@ test("Setas retas e curvas encaixam o traço na ponta", async ({ page }) => {
       await page.mouse.up()
       const saved = Number(await canvas.getAttribute("data-arrow-angle"))
       expect(Number(await canvas.getAttribute("data-shaft-inset"))).toBeGreaterThan(4)
-      expect(Math.abs(saved - preview)).toBeLessThan(.25)
-      expect(Math.abs(saved)).toBeLessThan(.45)
+      expect(Math.abs(saved - preview)).toBeLessThan(0.25)
+      expect(Math.abs(saved)).toBeLessThan(0.45)
     }
   }
   await page.getByRole("radio", { name: "Desenhar seta", exact: true }).click()
-  const start = await mapPoint(page, .37, .39)
-  const end = await mapPoint(page, .57, .39)
+  const start = await mapPoint(page, 0.37, 0.39)
+  const end = await mapPoint(page, 0.57, 0.39)
   await page.mouse.move(start.x, start.y)
   await page.mouse.down()
   await page.mouse.move(end.x, end.y, { steps: 5 })
@@ -336,8 +353,8 @@ test("Setas retas e curvas encaixam o traço na ponta", async ({ page }) => {
   await page.mouse.up()
   expect(Number(await canvas.getAttribute("data-shaft-inset"))).toBeGreaterThan(4)
 
-  const clickStart = await mapPoint(page, .39, .44)
-  const clickEnd = await mapPoint(page, .59, .37)
+  const clickStart = await mapPoint(page, 0.39, 0.44)
+  const clickEnd = await mapPoint(page, 0.59, 0.37)
   await page.mouse.click(clickStart.x, clickStart.y)
   await page.mouse.click(clickEnd.x, clickEnd.y)
   expect(Number(await canvas.getAttribute("data-shaft-inset"))).toBeGreaterThan(4)
@@ -401,7 +418,7 @@ test("Aviso de visão e menus de ferramenta preservam a área e a câmera do map
   await expect(ward).toBeFocused()
   await ward.click()
   await expect(wardOptions).toBeVisible()
-  const wardPoint = await mapPoint(team, .55, .52)
+  const wardPoint = await mapPoint(team, 0.55, 0.52)
   await page.mouse.click(wardPoint.x, wardPoint.y)
   await expect(wardOptions).toBeHidden()
   await expect(team.getByRole("button", { name: "Mover Sentinela de Controle — Vermelho" })).toBeVisible()
@@ -410,8 +427,8 @@ test("Aviso de visão e menus de ferramenta preservam a área e a câmera do map
   await arrow.click()
   await expect(options).toBeVisible()
   await expect(options.getByRole("checkbox", { name: "Ponta de seta" })).toBeHidden()
-  const start = await mapPoint(team, .39, .44)
-  const end = await mapPoint(team, .59, .37)
+  const start = await mapPoint(team, 0.39, 0.44)
+  const end = await mapPoint(team, 0.59, 0.37)
   await page.mouse.click(start.x, start.y)
   await expect(options).toBeHidden()
   await expect(arrow).toBeChecked()
@@ -426,7 +443,8 @@ test("Aviso de visão e menus de ferramenta preservam a área e a câmera do map
   const narrow = await bounds()
   await arrow.click()
   await expect(options).toBeVisible()
-  const panel = (await options.boundingBox())!, anchor = (await arrow.boundingBox())!
+  const panel = (await options.boundingBox())!,
+    anchor = (await arrow.boundingBox())!
   expect(panel.y).toBeGreaterThanOrEqual(anchor.y + anchor.height)
   expect(panel.x).toBeGreaterThanOrEqual(0)
   expect(panel.x + panel.width).toBeLessThanOrEqual(800)
@@ -505,25 +523,27 @@ test("Projeta as waves nas curvas do mapa realista e mantém o progresso salvo",
   const top = page.getByRole("button", { name: "Wave — Topo — Azul" })
   const bot = page.getByRole("button", { name: "Wave — Inferior — Azul" })
   const mid = page.getByRole("button", { name: "Wave — Meio — Azul" })
-  const wavePoint = (wave: ReturnType<Page["locator"]>) => wave.evaluate(node =>
-    [parseFloat(node.style.left), parseFloat(node.style.top)].map(axis => Math.round(axis * 10) / 10))
+  const wavePoint = (wave: ReturnType<Page["locator"]>) =>
+    wave.evaluate(node =>
+      [parseFloat(node.style.left), parseFloat(node.style.top)].map(axis => Math.round(axis * 10) / 10),
+    )
   const expectPoint = async (wave: ReturnType<Page["locator"]>, x: number, y: number) => {
     const [actualX, actualY] = await wavePoint(wave)
-    expect(Math.hypot(actualX - x, actualY - y)).toBeLessThan(.2)
+    expect(Math.hypot(actualX - x, actualY - y)).toBeLessThan(0.2)
   }
 
   const placeWave = page.getByRole("radio", { name: "Colocar wave azul", exact: true })
   await placeWave.click()
-  const topCorner = await mapPoint(page, .15, .14)
+  const topCorner = await mapPoint(page, 0.15, 0.14)
   await page.mouse.move(topCorner.x, topCorner.y)
   await expectPoint(page.locator("#map-wave-preview"), 15, 14)
   await page.mouse.click(topCorner.x, topCorner.y)
   await expect(page.getByRole("radio", { name: "Mover", exact: true })).toBeChecked()
   await placeWave.click()
-  const botCorner = await mapPoint(page, .855, .835)
+  const botCorner = await mapPoint(page, 0.855, 0.835)
   await page.mouse.click(botCorner.x, botCorner.y)
   await placeWave.click()
-  const midPoint = await mapPoint(page, .49, .5)
+  const midPoint = await mapPoint(page, 0.49, 0.5)
   await page.mouse.click(midPoint.x, midPoint.y)
   await expectPoint(top, 15, 14)
   await expectPoint(bot, 85.5, 83.5)
@@ -539,7 +559,10 @@ test("Projeta as waves nas curvas do mapa realista e mantém o progresso salvo",
   await page.getByRole("radio", { name: "Mover", exact: true }).click()
   await page.getByRole("tab", { name: "Sequência" }).click()
   await page.getByRole("button", { name: "Novo passo" }).click()
-  for (const [wave, x, y] of [[top, .49, .085], [bot, .47, .91]] as const) {
+  for (const [wave, x, y] of [
+    [top, 0.49, 0.085],
+    [bot, 0.47, 0.91],
+  ] as const) {
     const marker = (await wave.boundingBox())!
     await drag(page, { x: marker.x + marker.width / 2, y: marker.y + marker.height / 2 }, await mapPoint(page, x, y))
     await expectPoint(wave, x * 100, y * 100)
@@ -557,7 +580,7 @@ test("Projeta as waves nas curvas do mapa realista e mantém o progresso salvo",
   await page.getByRole("button", { name: "Reproduzir" }).click()
   await expect(page.getByRole("button", { name: "Reproduzir" })).toBeVisible()
   expect([await wavePoint(top), await wavePoint(bot)]).toEqual(straight)
-});
+})
 
 async function choose(team: Page | FrameLocator, field: string, option: string) {
   await team.getByRole("combobox", { name: field, exact: true }).click()
@@ -600,7 +623,7 @@ test("Desenha no zoom, limpa apenas setas e mantém a câmera em tela cheia", as
   const area = (await viewport.boundingBox())!
   expect(area.x + area.width - (cameraAtFit!.x + cameraAtFit!.width)).toBeCloseTo(8)
   expect(area.y + area.height - (cameraAtFit!.y + cameraAtFit!.height)).toBeCloseTo(8)
-  const anchor = await mapPoint(team, .50, .44)
+  const anchor = await mapPoint(team, 0.5, 0.44)
   await page.mouse.move(anchor.x, anchor.y)
   await page.mouse.wheel(0, -120)
   await expect(zoom).toHaveText("127%")
@@ -608,7 +631,7 @@ test("Desenha no zoom, limpa apenas setas e mantém a câmera em tela cheia", as
   const toolsAtZoom = (await mover.boundingBox())!
   expect(toolsAtZoom.x).toBeCloseTo(toolsAtFit.x, 1)
   expect(toolsAtZoom.y).toBeCloseTo(toolsAtFit.y, 1)
-  const afterZoom = await mapPoint(team, .50, .44)
+  const afterZoom = await mapPoint(team, 0.5, 0.44)
   expect(Math.abs(afterZoom.x - anchor.x)).toBeLessThan(1)
   expect(Math.abs(afterZoom.y - anchor.y)).toBeLessThan(1)
   await team.getByRole("button", { name: "Ajustar", exact: true }).click()
@@ -638,20 +661,20 @@ test("Desenha no zoom, limpa apenas setas e mantém a câmera em tela cheia", as
   await brush.click()
   await choose(team, "Espessura", "Grossa")
   await choose(team, "Estilo", "Tracejado")
-  await drag(page, await mapPoint(team, .47, .47), await mapPoint(team, .60, .56))
+  await drag(page, await mapPoint(team, 0.47, 0.47), await mapPoint(team, 0.6, 0.56))
   await expect(clearAll).toBeEnabled()
   await expect(clearArrows).toBeDisabled()
   await brush.click()
   const arrowhead = team.getByRole("checkbox", { name: "Ponta de seta" })
   await expect(arrowhead).not.toBeChecked()
   await arrowhead.check()
-  await drag(page, await mapPoint(team, .49, .48), await mapPoint(team, .62, .59))
+  await drag(page, await mapPoint(team, 0.49, 0.48), await mapPoint(team, 0.62, 0.59))
   await expect(clearArrows).toBeEnabled()
 
   await team.getByRole("radio", { name: "Desenhar seta" }).click()
   await expect(arrowhead).toBeHidden()
-  const start = await mapPoint(team, .41, .38)
-  const end = await mapPoint(team, .60, .40)
+  const start = await mapPoint(team, 0.41, 0.38)
+  const end = await mapPoint(team, 0.6, 0.4)
   await page.mouse.click(start.x, start.y)
   await page.mouse.click(end.x, end.y)
   await clearArrows.click()
@@ -664,7 +687,7 @@ test("Desenha no zoom, limpa apenas setas e mantém a câmera em tela cheia", as
   await team.getByRole("button", { name: "Tela cheia", exact: true }).click()
   await expect(team.getByRole("button", { name: "Sair da tela cheia" })).toBeVisible()
   await expect(zoom).toHaveText("150%")
-  const center = await mapPoint(team, .5, .5)
+  const center = await mapPoint(team, 0.5, 0.5)
   await page.mouse.move(center.x, center.y)
   await page.mouse.wheel(0, -120)
   await expect(zoom).toHaveText("191%")
@@ -691,15 +714,18 @@ test("Move wards e waves, alterna a visão aliada e restaura o estado das torres
 
   await page.getByRole("radio", { name: "Colocar ward" }).click()
   await choose(page, "Lado da ward", "Vermelho")
-  const start = await mapPoint(page, .35, .25)
+  const start = await mapPoint(page, 0.35, 0.25)
   await page.mouse.click(start.x, start.y)
   await page.getByRole("radio", { name: "Mover", exact: true }).click()
   const ward = page.getByRole("button", { name: "Mover Sentinela Invisível — Vermelho" })
   await expect(ward).toBeVisible()
   const lightBox = (await light.boundingBox())!
   const wardBox = (await ward.boundingBox())!
-  await drag(page, { x: wardBox.x + wardBox.width / 2, y: wardBox.y + wardBox.height / 2 },
-    { x: lightBox.x + lightBox.width / 2, y: lightBox.y + lightBox.height / 2 })
+  await drag(
+    page,
+    { x: wardBox.x + wardBox.width / 2, y: wardBox.y + wardBox.height / 2 },
+    { x: lightBox.x + lightBox.width / 2, y: lightBox.y + lightBox.height / 2 },
+  )
   await expect(page.locator("#map-wards .ward-vision-bonus")).toHaveAttribute("data-faelight", "upper-island")
   await ward.press("ArrowRight")
   await expect(page.locator("#map-wards .ward-vision-bonus")).toHaveCount(0)
@@ -709,13 +735,13 @@ test("Move wards e waves, alterna a visão aliada e restaura o estado das torres
   const placeWave = page.getByRole("radio", { name: "Colocar wave azul", exact: true })
   const placeRedWave = page.getByRole("radio", { name: "Colocar wave vermelha", exact: true })
   await placeWave.click()
-  const location = await mapPoint(page, .45, .11)
+  const location = await mapPoint(page, 0.45, 0.11)
   await page.mouse.click(location.x, location.y)
   await placeWave.click()
-  const middle = await mapPoint(page, .57, .48)
+  const middle = await mapPoint(page, 0.57, 0.48)
   await page.mouse.click(middle.x, middle.y)
   await placeWave.click()
-  const bottom = await mapPoint(page, .44, .92)
+  const bottom = await mapPoint(page, 0.44, 0.92)
   await page.mouse.click(bottom.x, bottom.y)
   const waves = page.locator("#map-waves .map-wave")
   await expect(waves).toHaveCount(3)
@@ -723,7 +749,10 @@ test("Move wards e waves, alterna a visão aliada e restaura o estado das torres
   await placeRedWave.click()
   await expect(placeRedWave).toBeChecked()
   await page.mouse.click(bottom.x + 30, bottom.y)
-  for (const [x, y] of [[.45, .11], [.57, .48]]) {
+  for (const [x, y] of [
+    [0.45, 0.11],
+    [0.57, 0.48],
+  ]) {
     await placeRedWave.click()
     const point = await mapPoint(page, x, y)
     await page.mouse.click(point.x, point.y)
@@ -743,7 +772,11 @@ test("Move wards e waves, alterna a visão aliada e restaura o estado das torres
   await expect(waves).toHaveCount(6)
   const wave = page.getByRole("button", { name: "Wave — Topo — Azul" })
   const waveBox = (await wave.boundingBox())!
-  await drag(page, { x: waveBox.x + waveBox.width / 2, y: waveBox.y + waveBox.height / 2 }, await mapPoint(page, .58, .48))
+  await drag(
+    page,
+    { x: waveBox.x + waveBox.width / 2, y: waveBox.y + waveBox.height / 2 },
+    await mapPoint(page, 0.58, 0.48),
+  )
   expect(Math.abs(Number.parseFloat(await wave.evaluate(button => button.style.top)) - 8.5)).toBeLessThan(2)
   const topWave = await wave.getAttribute("style")
 
@@ -807,12 +840,16 @@ test("Paredes e arbustos recortam a visão do campeão conforme sua posição", 
   const champion = page.getByRole("button", { name: "Azul TOP" })
   const coverage = page.locator("#tactical-fog [data-champion-sight]").first()
   const brush = page.locator("#map-vision-mask [data-active-brush][data-side=b]")
-  const contains = (x: number, y: number) => coverage.evaluate((path: SVGPathElement, point) =>
-    path.isPointInFill(new DOMPoint(point.x, point.y)), { x, y })
+  const contains = (x: number, y: number) =>
+    coverage.evaluate((path: SVGPathElement, point) => path.isPointInFill(new DOMPoint(point.x, point.y)), { x, y })
 
   async function moveChampion(x: number, y: number) {
     const bounds = (await champion.boundingBox())!
-    await drag(page, { x: bounds.x + bounds.width / 2, y: bounds.y + bounds.height / 2 }, await mapPoint(page, x / 100, y / 100))
+    await drag(
+      page,
+      { x: bounds.x + bounds.width / 2, y: bounds.y + bounds.height / 2 },
+      await mapPoint(page, x / 100, y / 100),
+    )
     await expect(coverage).toHaveAttribute("data-origin-x", String(x))
     await expect(coverage).toHaveAttribute("data-origin-y", String(y))
   }
@@ -887,8 +924,8 @@ test("Move campeões nas duas visões e reseta a visão e o quadro em edição",
   await tower.click()
   for (const name of ["Colocar ward", "Colocar wave azul", "Desenhar seta"]) {
     await page.getByRole("radio", { name, exact: true }).click()
-    const start = await mapPoint(page, .40, .34)
-    if (name === "Desenhar seta") await drag(page, start, await mapPoint(page, .56, .40))
+    const start = await mapPoint(page, 0.4, 0.34)
+    if (name === "Desenhar seta") await drag(page, start, await mapPoint(page, 0.56, 0.4))
     else await page.mouse.click(start.x, start.y)
   }
   await page.getByRole("tab", { name: "Sequência" }).click()
@@ -904,7 +941,7 @@ test("Move campeões nas duas visões e reseta a visão e o quadro em edição",
   const blueBox = (await blue.boundingBox())!
   await page.mouse.move(blueBox.x + blueBox.width / 2, blueBox.y + blueBox.height / 2)
   await page.mouse.down()
-  const target = await mapPoint(page, .22, .38)
+  const target = await mapPoint(page, 0.22, 0.38)
   await page.mouse.move(target.x, target.y, { steps: 6 })
   await expect(coverage).toHaveAttribute("data-origin-x", "22")
   await page.mouse.up()
@@ -916,12 +953,15 @@ test("Move campeões nas duas visões e reseta a visão e o quadro em edição",
   await blue.press("ArrowRight")
   const edited = await positions()
   await page.getByRole("button", { name: "Aumentar zoom" }).click()
-  const cameraCenter = () => page.locator("#map-viewport").evaluate(viewport => {
-    const view = viewport.getBoundingClientRect()
-    const board = viewport.querySelector("#map")!.getBoundingClientRect()
-    return [(view.left + view.width / 2 - board.left) / board.width,
-      (view.top + view.height / 2 - board.top) / board.height]
-  })
+  const cameraCenter = () =>
+    page.locator("#map-viewport").evaluate(viewport => {
+      const view = viewport.getBoundingClientRect()
+      const board = viewport.querySelector("#map")!.getBoundingClientRect()
+      return [
+        (view.left + view.width / 2 - board.left) / board.width,
+        (view.top + view.height / 2 - board.top) / board.height,
+      ]
+    })
   const camera = await cameraCenter()
   await reset.click()
   await expect(reset).toBeDisabled()
@@ -932,10 +972,12 @@ test("Move campeões nas duas visões e reseta a visão e o quadro em edição",
   await expect(preview).toBeHidden()
   await expect(fog).toHaveCount(0)
   await expect(page.locator("#map-zoom-value")).toHaveText("125%")
-  await expect.poll(async () => {
-    const center = await cameraCenter()
-    return Math.max(...center.map((axis, index) => Math.abs(axis - camera[index])))
-  }).toBeLessThan(0.003)
+  await expect
+    .poll(async () => {
+      const center = await cameraCenter()
+      return Math.max(...center.map((axis, index) => Math.abs(axis - camera[index])))
+    })
+    .toBeLessThan(0.003)
   await page.getByRole("button", { name: "Desfazer", exact: true }).click()
   await expect(general).toHaveAttribute("aria-pressed", "true")
   expect(await positions()).toEqual(edited)
@@ -999,7 +1041,10 @@ test("Navega pelo menu superior e coloca waves nas três rotas com o mapa inteir
   await expect(team.getByRole("heading", { name: "Mapa tático" })).toHaveCount(0)
 
   const placeWave = team.getByRole("radio", { name: "Colocar wave azul", exact: true })
-  for (const [lane, x, y] of [["Topo", .42, .09], ["Inferior", .54, .91]] as const) {
+  for (const [lane, x, y] of [
+    ["Topo", 0.42, 0.09],
+    ["Inferior", 0.54, 0.91],
+  ] as const) {
     await placeWave.click()
     const target = await mapPoint(team, x, y)
     await page.mouse.move(target.x, target.y)
@@ -1023,8 +1068,12 @@ test("Navega pelo menu superior e coloca waves nas três rotas com o mapa inteir
   const beforePanel = (await viewport.boundingBox())!
   expect(beforePanel.y + beforePanel.height).toBeLessThanOrEqual(620)
   await panel.click()
-  await expect(team.getByRole("tablist", { name: "Painel do mapa" }).getByRole("tab"))
-    .toHaveText(["Camadas", "Composições", "Sequência", "Jogada"])
+  await expect(team.getByRole("tablist", { name: "Painel do mapa" }).getByRole("tab")).toHaveText([
+    "Camadas",
+    "Composições",
+    "Sequência",
+    "Jogada",
+  ])
   await team.getByRole("tab", { name: "Sequência" }).press("Home")
   const layers = team.getByRole("tab", { name: "Camadas" })
   await expect(layers).toBeFocused()
@@ -1038,11 +1087,15 @@ test("Navega pelo menu superior e coloca waves nas três rotas com o mapa inteir
   await team.getByRole("button", { name: "Aumentar zoom" }).click()
   await expect(team.locator("#map-zoom-value")).toHaveText("125%")
   await team.getByRole("button", { name: "Ajustar", exact: true }).click()
-  expect(await team.locator("html").evaluate(node => node.scrollHeight)).toBe(await team.locator("html").evaluate(node => node.clientHeight))
+  expect(await team.locator("html").evaluate(node => node.scrollHeight)).toBe(
+    await team.locator("html").evaluate(node => node.clientHeight),
+  )
 
   await page.setViewportSize(size)
   await nav.press("ArrowDown")
-  await expect(page.getByRole("menuitem", { name: "Composições", exact: true }).filter({ visible: true }).last()).toBeFocused()
+  await expect(
+    page.getByRole("menuitem", { name: "Composições", exact: true }).filter({ visible: true }).last(),
+  ).toBeFocused()
   const knowledge = page.getByRole("menuitem", { name: "Conhecimento", exact: true })
   await knowledge.click()
   await expect(team.getByRole("heading", { name: "Conhecimento", exact: true })).toBeVisible()
@@ -1068,22 +1121,38 @@ test("Arquivos, paginação e zoom usam o espaço do mapa sem rolagem", async ({
   expect((await download).suggestedFilename()).toMatch(/^comps-time-.*\.json$/)
   const chooser = page.waitForEvent("filechooser")
   await team.getByRole("button", { name: "Importar", exact: true }).click()
-  const pos = await team.locator("#map .tok").evaluateAll(tokens => Object.fromEntries(tokens.map(token => {
-    const element = token as HTMLElement
-    return [element.dataset.t, [parseFloat(element.style.left), parseFloat(element.style.top)]]
-  })))
+  const pos = await team.locator("#map .tok").evaluateAll(tokens =>
+    Object.fromEntries(
+      tokens.map(token => {
+        const element = token as HTMLElement
+        return [element.dataset.t, [parseFloat(element.style.left), parseFloat(element.style.top)]]
+      }),
+    ),
+  )
   const frame = { pos, lines: [] }
   await (await chooser).setFiles({
-    name: "estrategia.json", mimeType: "application/json",
-    buffer: Buffer.from(JSON.stringify({
-      comps: [
-        { name: "Composição importada com nome longo para testar o espaço do painel", lanes: { top: ["Garen"], jg: ["Vi"], mid: ["Ahri"], adc: ["Jinx"], sup: ["Leona"] } },
-        { name: "Formação vermelha", lanes: { top: ["Darius"] } },
-        { name: "Composição vazia" },
-      ],
-      plays: [{ id: "paginated", name: "Jogada longa", live: frame,
-        steps: Array.from({ length: 30 }, (_, i) => ({ label: "Estratégia " + (i + 1), ...frame })) }],
-    })),
+    name: "estrategia.json",
+    mimeType: "application/json",
+    buffer: Buffer.from(
+      JSON.stringify({
+        comps: [
+          {
+            name: "Composição importada com nome longo para testar o espaço do painel",
+            lanes: { top: ["Garen"], jg: ["Vi"], mid: ["Ahri"], adc: ["Jinx"], sup: ["Leona"] },
+          },
+          { name: "Formação vermelha", lanes: { top: ["Darius"] } },
+          { name: "Composição vazia" },
+        ],
+        plays: [
+          {
+            id: "paginated",
+            name: "Jogada longa",
+            live: frame,
+            steps: Array.from({ length: 30 }, (_, i) => ({ label: "Estratégia " + (i + 1), ...frame })),
+          },
+        ],
+      }),
+    ),
   })
   await team.getByRole("button", { name: "Substituir", exact: true }).click()
   await team.getByRole("tab", { name: "Sequência" }).click()
@@ -1106,14 +1175,19 @@ test("Arquivos, paginação e zoom usam o espaço do mapa sem rolagem", async ({
   await expect(team.getByRole("button", { name: "Azul TOP - Garen", exact: true })).toBeVisible()
   await team.getByRole("button", { name: "Vermelho", exact: true }).click()
   const redList = team.getByRole("group", { name: "Composições para o lado Vermelho", exact: true })
-  await expect(redList.getByRole("button", { name: "Só o ícone da rota", exact: true })).toHaveAttribute("aria-pressed", "true")
+  await expect(redList.getByRole("button", { name: "Só o ícone da rota", exact: true })).toHaveAttribute(
+    "aria-pressed",
+    "true",
+  )
   await redList.getByRole("button", { name: "Formação vermelha", exact: true }).click()
   await expect(team.getByRole("button", { name: "Vermelho TOP - Darius", exact: true })).toBeVisible()
   await team.getByRole("button", { name: "Azul", exact: true }).click()
   await expect(blueComp).toHaveAttribute("aria-pressed", "true")
 
-  const board = team.locator("#map"), viewport = team.locator("#map-viewport")
-  const before = (await board.boundingBox())!, available = (await viewport.boundingBox())!
+  const board = team.locator("#map"),
+    viewport = team.locator("#map-viewport")
+  const before = (await board.boundingBox())!,
+    available = (await viewport.boundingBox())!
   expect(available.width).toBeGreaterThan(before.width)
   await team.getByRole("button", { name: "Aumentar zoom" }).click()
   const after = (await board.boundingBox())!

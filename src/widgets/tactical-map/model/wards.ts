@@ -8,7 +8,7 @@ export const wardTypes = [
   { id: "farsight", label: "Alteração Vidente", sight: 500 },
 ] as const
 
-type WardType = typeof wardTypes[number]["id"]
+type WardType = (typeof wardTypes)[number]["id"]
 export type Ward = { point: MapPoint; type?: WardType; faelightId?: string; side?: Side }
 
 export function getWardType(id: unknown) {
@@ -21,10 +21,12 @@ const faelightsById = new Map(faelights.map(spot => [spot.id, spot]))
 
 export function readWards(value: unknown): Ward[] {
   if (!Array.isArray(value)) return []
-  return value.filter((ward): ward is Ward => (
-    Array.isArray(ward?.point) && ward.point.length === 2 &&
-    ward.point.every((axis: unknown) => typeof axis === "number" && axis >= 0 && axis <= 100)
-  ))
+  return value.filter(
+    (ward): ward is Ward =>
+      Array.isArray(ward?.point) &&
+      ward.point.length === 2 &&
+      ward.point.every((axis: unknown) => typeof axis === "number" && axis >= 0 && axis <= 100),
+  )
 }
 
 export function wardOnMap(ward: Ward, scene: WardScene) {
@@ -52,9 +54,16 @@ function nearestIndex(target: MapPoint, points: readonly MapPoint[], radius: num
 }
 
 export function placeWard(ward: Ward, point: MapPoint, scene: WardScene): Ward {
-  const available = faelights.filter(spot => !spot.additional || (scene.additionalFaelights &&
-    (scene.showAdditionalFaelights !== false || ward.faelightId === spot.id)))
-  const hit = nearestIndex(point, available.map(spot => spot[scene.style]), 2.2)
+  const available = faelights.filter(
+    spot =>
+      !spot.additional ||
+      (scene.additionalFaelights && (scene.showAdditionalFaelights !== false || ward.faelightId === spot.id)),
+  )
+  const hit = nearestIndex(
+    point,
+    available.map(spot => spot[scene.style]),
+    2.2,
+  )
   const spot = available[hit]
   return { point: spot?.minimap ?? point, type: ward.type, side: ward.side, faelightId: spot?.id }
 }
@@ -63,7 +72,11 @@ export function addWard(wards: Ward[], point: MapPoint, scene: WardScene, type: 
   const current = wards.map(ward => wardOnMap(ward, scene).point)
   const ward = placeWard({ point, type, side }, point, scene)
   const placement = wardOnMap(ward, scene).point
-  const overlap = nearestIndex(placement, current.map((p, i) => wards[i].side === side ? p : [Infinity, Infinity]), 0.6)
+  const overlap = nearestIndex(
+    placement,
+    current.map((p, i) => (wards[i].side === side ? p : [Infinity, Infinity])),
+    0.6,
+  )
   const previous = wards[overlap]
   if (previous && previous.faelightId === ward.faelightId && getWardType(previous.type).id === type) return wards
   return [...wards.filter((_, index) => index !== overlap), ward]

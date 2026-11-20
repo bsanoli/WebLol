@@ -1,0 +1,15 @@
+# Ganchos do Git (Lefthook), instalados pelo `npm install` (script `prepare`).
+# Decisão: docs/decisoes/0004-ferramentas-de-qualidade.md. Para pular uma vez: LEFTHOOK=0 git commit ...
+pre-commit:
+  jobs:
+    - name: biome
+      glob: "*.{js,mjs,cjs,ts,tsx,jsx,json,jsonc,css}"
+      run: node node_modules/@biomejs/biome/bin/biome check --write --no-errors-on-unmatched --files-ignore-unknown=true --colors=off {staged_files}
+      stage_fixed: true
+
+pre-push:
+  jobs:
+    - name: arquitetura e tipos
+      run: npm run check
+    - name: testes unitários
+      run: npm run test:unit

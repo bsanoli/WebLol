@@ -33,13 +33,21 @@ function imageSize(dataURL: string) {
 }
 
 /** Abre o Excalidraw sobre o print. Salvar grava a cena e a prévia como imagens novas e devolve os ids. */
-export async function openPrintSketch({ attrs, store, compressImage, toast }: OpenSketchOptions): Promise<SketchResult | null> {
+export async function openPrintSketch({
+  attrs,
+  store,
+  compressImage,
+  toast,
+}: OpenSketchOptions): Promise<SketchResult | null> {
   const [background, sceneJson, module] = await Promise.all([
     store.load(attrs.src),
     attrs.sketch ? store.load(attrs.sketch) : Promise.resolve(null),
     import("./PrintSketch"),
   ])
-  if (!background) { toast("Este print ainda não chegou ao time."); return null }
+  if (!background) {
+    toast("Este print ainda não chegou ao time.")
+    return null
+  }
   const size = await imageSize(background)
   const { PrintSketch } = module
 
@@ -53,21 +61,33 @@ export async function openPrintSketch({ attrs, store, compressImage, toast }: Op
       children: host,
       className: "wl-panel tx-sketch-dialog",
       dismissible: false,
-      onClose: () => { queueMicrotask(() => root.unmount()); resolve(result) },
+      onClose: () => {
+        queueMicrotask(() => root.unmount())
+        resolve(result)
+      },
     })
     const handleSave = async ({ scene, image }: { scene: SketchScene; image: Blob }) => {
       try {
         const preview = await store.save(await compressImage(image))
         const sketch = await store.save(JSON.stringify(scene))
         result = { sketch: sketch.id, preview: preview.id }
-        if (preview.error || sketch.error) toast("Não consegui enviar o desenho ao time agora. Ele será reenviado na próxima sincronização.")
+        if (preview.error || sketch.error)
+          toast("Não consegui enviar o desenho ao time agora. Ele será reenviado na próxima sincronização.")
         else toast("Desenho salvo")
         close()
       } catch (error) {
         toast(`Não consegui salvar o desenho (${error instanceof Error ? error.message : "erro"}).`)
       }
     }
-    root.render(<PrintSketch srcId={attrs.src} background={background} size={size} scene={readScene(sceneJson)}
-      onSave={handleSave} onCancel={close} />)
+    root.render(
+      <PrintSketch
+        srcId={attrs.src}
+        background={background}
+        size={size}
+        scene={readScene(sceneJson)}
+        onSave={handleSave}
+        onCancel={close}
+      />,
+    )
   })
 }

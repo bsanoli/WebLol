@@ -1,0 +1,61 @@
+# Verificação automática do WebLol (docs/decisoes/0004-ferramentas-de-qualidade.md).
+# Roda em todo push, de qualquer branch. O PR mostra o resultado do push da própria branch.
+name: CI
+
+on:
+  push:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verificar:
+    name: Verificar
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: npm
+
+      - name: Instalar dependências
+        run: npm ci
+
+      - name: Formato e lint (Biome)
+        run: npx biome ci .
+
+      - name: Arquitetura e tipos
+        run: npm run check
+
+      - name: Skills sincronizadas
+        run: node scripts/sincronizar-skills.mjs --check
+
+      - name: Testes unitários (Vitest)
+        run: npm run test:unit
+
+      - name: Build
+        run: npm run build
+
+      - name: Instalar o navegador do Playwright
+        run: npx playwright install --with-deps chromium
+
+      - name: Testes de tela e acessibilidade (Playwright)
+        run: npm test
+
+      - name: Guardar o relatório do Playwright
+        if: failure()
+        uses: actions/upload-artifact@v7
+        with:
+          name: playwright
+          path: |
+            test-results/
+            playwright-report/
+          retention-days: 7

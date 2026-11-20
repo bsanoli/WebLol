@@ -1,8 +1,8 @@
 # 0004. Adotar ferramentas de verificação que funcionem com o TypeScript 7
 
-- **Situação:** proposta
+- **Situação:** Onda 1 aceita e implementada em 2026-11-20 ([pedido](../pedidos/2026-11-20-onda-1-verificacao.md)). Onda 2 proposta.
 - **Data:** 2026-11-19
-- **Decidido por:** Fabiano, Bruno (a confirmar)
+- **Decidido por:** Fabiano. Bruno a confirmar.
 
 ## Contexto
 
@@ -27,10 +27,23 @@ Preferir ferramentas que não dependem do compilador TypeScript, em duas ondas d
 | [Biome](https://biomejs.dev) 2.6 | Formatação e lint de TS, JSX, CSS e JSON. Regras de nomes (`useNamingConvention`, `useFilenamingConvention`, `useConsistentBooleanName`), de hooks do React e de imports proibidos. Regras próprias por plugins GritQL | A reformatação inicial vai num commit isolado, listado em `.git-blame-ignore-revs` |
 | [Steiger](https://github.com/feature-sliced/steiger) 0.10 com `@feature-sliced/steiger-plugin` | Linter oficial do FSD: direção das camadas, API pública, cross-imports, nomes de segmentos | Ainda em beta: versão fixa. Roda ao lado de `scripts/check-architecture.mjs`, que guarda o aviso de 300 linhas |
 | [Vitest](https://vitest.dev) 5 | Testes das regras puras em `model/` | Usa a configuração do Vite 8 |
-| [@axe-core/playwright](https://playwright.dev/docs/accessibility-testing) 4.14 | WCAG 2.2 AA nos testes Playwright existentes | Tags `wcag2a`, `wcag2aa`, `wcag21aa`, `wcag22aa` |
+| [@axe-core/playwright](https://playwright.dev/docs/accessibility-testing) 4.14 | WCAG 2.2 AA nos testes Playwright existentes | Tags `wcag2a`, `wcag2aa`, `wcag21a`, `wcag21aa`, `wcag22aa` |
 | [Lefthook](https://lefthook.dev) 2 | Ganchos do Git: Biome nos arquivos staged no `pre-commit`, `npm run check` no `pre-push` | Binário nativo no Windows, sem lint-staged |
 | GitHub Actions `ci.yml` | `npm ci`, Biome, `npm run check`, Steiger, Vitest, build, Playwright e `sincronizar-skills --check` em push e pull request | Ações em `actions/checkout@v7` e `actions/setup-node@v7` |
 | [Ganchos do Claude Code](https://code.claude.com/docs/en/hooks) em `.claude/settings.json` | `PostToolUse` em edições de `src/`: Biome no arquivo. `Stop`: Biome, Steiger e `npm run check` | Código de saída 2 devolve o erro ao agente. No Windows, chamar `node node_modules/@biomejs/biome/bin/biome` em vez de `npx`, e ler o JSON da entrada com Node em vez de `jq` |
+
+#### Como a Onda 1 ficou
+
+Versões fixas no `package.json`: Biome 2.6.8, Steiger 0.10.0 com o plugin 0.8.2, Vitest 5.1.1, Lefthook 2.2.2 e @axe-core/playwright 4.14.0. Diferenças em relação à tabela acima:
+
+- **Avisos antes de erros.** As regras de nomes do Biome, as regras do preset que já tinham violações no código e 5 das 17 regras do Steiger (as que já tinham violações) começam como aviso; as outras 12 já barram. Elas sobem para erro quando o código daquela regra estiver limpo. A lista está na [auditoria](../auditoria-codebase.md#avisos-que-ainda-não-barram).
+- **axe com violações conhecidas.** `tests/accessibility.spec.ts` passa as oito telas principais pelo axe e só aceita as violações listadas em `known`, por tela e com o máximo de elementos. Uma regra nova, uma tela nova ou mais elementos fazem o teste falhar.
+- **CI em todo push e sob demanda (`workflow_dispatch`), sem `pull_request`.** O PR mostra o resultado do push da própria branch, então rodar nos dois eventos repetiria o mesmo trabalho.
+- **`PostToolUse` em `src/`, `tests/` e `scripts/`**, fora `src/data/`, que é gerado. Erros voltam ao agente com código 2, e avisos voltam como contexto.
+- **`Stop` barra uma vez.** Se o Biome ou o `npm run check` falharem, o turno continua para o agente corrigir. Se falharem de novo, o gancho só informa, para não prender a sessão.
+- **`sync.js` e `shell.js` ficam fora das correções automáticas que renomeiam, trocam `let` por `const` ou apagam variáveis.** Eles rodam como scripts clássicos e compartilham variáveis globais; o Biome os analisa como módulos isolados e quebraria o login e a Administração. Só a formatação vale para eles.
+- **`pre-push` também roda o Vitest**, que leva poucos segundos.
+- **Registro das chaves locais** em `src/shared/config/storage-keys.ts`, com um teste que falha quando o código escreve uma chave `lol-` ou `weblol-` fora do registro.
 
 ### Onda 2
 
@@ -53,9 +66,9 @@ Preferir ferramentas que não dependem do compilador TypeScript, em duas ondas d
 ## Consequências
 
 - Formatação, nomes, fronteiras do FSD e acessibilidade passam a ser barrados por máquina, para os dois agentes e para as pessoas.
-- O primeiro commit do Biome reformata o projeto todo. Ele precisa entrar depois do trabalho de Táticas em andamento, para não gerar conflitos.
+- O primeiro commit do Biome reformata o projeto todo. Ele entra depois do trabalho de Táticas (commit 9990e74), num commit só de formatação listado em `.git-blame-ignore-revs`.
 - O CI deixa cada push alguns minutos mais lento.
-- Steiger, Knip e oxlint-tsgolint ainda não foram testados com o TypeScript 7 deste projeto. A compatibilidade foi deduzida das dependências de cada pacote. A Onda 1 começa por um teste de cada ferramenta.
+- O Steiger 0.10 funciona com o TypeScript 7 deste projeto, testado na Onda 1. Knip e oxlint-tsgolint ainda não foram testados, e a compatibilidade foi deduzida das dependências de cada pacote.
 - Quando saírem o TypeScript 7.1 e o suporte do typescript-eslint, reavaliar ESLint, eslint-plugin-boundaries e dependency-cruiser.
 
 ## Alternativas consideradas

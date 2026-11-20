@@ -21,4 +21,4 @@ export const motionTokens = {
   stagger: { char: 0.016, word: 0.04, line: 0.08, item: 0.035 },
   /** Blur radii in px for text and content crossfades. Keep blur small and brief. */
   blur: { subtle: 2, soft: 4, text: 8 },
-} as const;
+} as const

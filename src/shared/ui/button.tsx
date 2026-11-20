@@ -1,4 +1,4 @@
-import * as React from "react"
+import type * as React from "react"
 import { Slot } from "radix-ui"
 
 type ButtonProps = React.ComponentProps<"button"> & {
@@ -7,23 +7,11 @@ type ButtonProps = React.ComponentProps<"button"> & {
   asChild?: boolean
 }
 
-function Button({
-  variant = "default",
-  size = "default",
-  asChild = false,
-  type = "button",
-  ...props
-}: ButtonProps) {
+function Button({ variant = "default", size = "default", asChild = false, type = "button", ...props }: ButtonProps) {
   const Comp = asChild ? Slot.Root : "button"
 
   return (
-    <Comp
-      type={asChild ? undefined : type}
-      data-slot="button"
-      data-variant={variant}
-      data-size={size}
-      {...props}
-    />
+    <Comp type={asChild ? undefined : type} data-slot="button" data-variant={variant} data-size={size} {...props} />
   )
 }
 

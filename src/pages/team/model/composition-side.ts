@@ -45,7 +45,7 @@ export function setRival(comp: Composition, rivalId: string | null) {
   else delete draft.rival
 }
 
-export const oppositeSide = (side: DraftSide): DraftSide => side === "blue" ? "red" : "blue"
+export const oppositeSide = (side: DraftSide): DraftSide => (side === "blue" ? "red" : "blue")
 
 /** Ordem das lanes nos picks da comp adversária, do lado oposto ao nosso. */
 export function rivalOrder(comp: Composition, rival: Composition) {

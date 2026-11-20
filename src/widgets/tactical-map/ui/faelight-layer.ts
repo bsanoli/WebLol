@@ -1,9 +1,20 @@
 import { faelights } from "../model/faelights"
 
-export function mountFaelightLayer({ getState, save, mountMapSwitch, onAvailabilityChange }: {
+export function mountFaelightLayer({
+  getState,
+  save,
+  mountMapSwitch,
+  onAvailabilityChange,
+}: {
   getState: () => { showFaelights?: boolean; additionalFaelights?: boolean }
   save: () => void
-  mountMapSwitch: (host: Element, label: string, checked: boolean, change: (checked: boolean) => void, disabled?: boolean) => void
+  mountMapSwitch: (
+    host: Element,
+    label: string,
+    checked: boolean,
+    change: (checked: boolean) => void,
+    disabled?: boolean,
+  ) => void
   onAvailabilityChange: () => void
 }) {
   const layer = document.querySelector<HTMLElement>("#map-faelights")!
@@ -12,7 +23,9 @@ export function mountFaelightLayer({ getState, save, mountMapSwitch, onAvailabil
   const legend = document.querySelector<HTMLElement>("#map-faelight-additional-legend")!
   const fullLegend = document.querySelector<HTMLElement>("#map-faelight-legend")!
   let previewPlacement = false
-  const renderVisibility = () => { layer.hidden = getState().showFaelights !== true && !previewPlacement }
+  const renderVisibility = () => {
+    layer.hidden = getState().showFaelights !== true && !previewPlacement
+  }
 
   for (const { location, minimap, realistic, additional } of faelights) {
     const marker = document.createElement("span")
@@ -33,13 +46,19 @@ export function mountFaelightLayer({ getState, save, mountMapSwitch, onAvailabil
     layer.toggleAttribute("data-additional", additional)
     layer.toggleAttribute("data-additional-visible", additional && visible)
     legend.hidden = !additional || !visible
-    mountMapSwitch(additionalToggle, "Lumes adicionais", additional && visible, next => {
-      if (getState().showFaelights !== true) return
-      getState().additionalFaelights = next
-      save()
-      renderAdditional()
-      onAvailabilityChange()
-    }, !visible)
+    mountMapSwitch(
+      additionalToggle,
+      "Lumes adicionais",
+      additional && visible,
+      next => {
+        if (getState().showFaelights !== true) return
+        getState().additionalFaelights = next
+        save()
+        renderAdditional()
+        onAvailabilityChange()
+      },
+      !visible,
+    )
   }
 
   function renderToggle() {

@@ -1,0 +1,6 @@
+# Texto sempre com LF no repositório e no checkout, como o Biome formata.
+* text=auto eol=lf
+*.png binary
+*.jpg binary
+*.webp binary
+*.woff2 binary

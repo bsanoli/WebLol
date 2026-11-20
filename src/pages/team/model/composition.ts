@@ -1,4 +1,4 @@
-import type { Composition } from "./local-state";
+import type { Composition } from "./local-state"
 
 export function createCompositionCopy(source: Composition, id: string, updated: number): Composition {
   return {
@@ -6,5 +6,5 @@ export function createCompositionCopy(source: Composition, id: string, updated: 
     id,
     name: `${source.name} (cópia)`,
     updated,
-  };
+  }
 }

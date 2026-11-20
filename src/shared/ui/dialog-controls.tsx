@@ -4,7 +4,14 @@ import { createRoot } from "react-dom/client"
 import { Button } from "@/shared/ui/button"
 import { Input } from "@/shared/ui/input"
 import { Dialog, DialogContent, DialogTitle } from "@/shared/ui/dialog"
-import { AlertDialog, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogTitle } from "@/shared/ui/alert-dialog"
+import {
+  AlertDialog,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogTitle,
+} from "@/shared/ui/alert-dialog"
 
 export function ExistingContent({ element }: { element: HTMLElement }) {
   const host = useRef<HTMLDivElement>(null)
@@ -16,7 +23,13 @@ export function ExistingContent({ element }: { element: HTMLElement }) {
 }
 
 export function showDialog({
-  title, children, className, id, initialFocus, onClose, dismissible = true,
+  title,
+  children,
+  className,
+  id,
+  initialFocus,
+  onClose,
+  dismissible = true,
 }: {
   title: string
   children: HTMLElement
@@ -39,21 +52,40 @@ export function showDialog({
     if (trigger instanceof HTMLElement && trigger.isConnected) trigger.focus({ preventScroll: true })
     onClose?.()
   }
-  flushSync(() => root.render(<Dialog open onOpenChange={open => { if (!open) close() }}>
-    <DialogContent className={className} aria-describedby={undefined} showCloseButton={false}
-      onEscapeKeyDown={event => { if (!dismissible) event.preventDefault() }}
-      onInteractOutside={event => { if (!dismissible) event.preventDefault() }}
-      onOpenAutoFocus={event => {
-        const field = initialFocus?.()
-        if (!field) return
-        event.preventDefault()
-        field.focus()
-      }}
-      onCloseAutoFocus={event => event.preventDefault()}>
-      <DialogTitle className="sr-only">{title}</DialogTitle>
-      <div id={id}><ExistingContent element={children} /></div>
-    </DialogContent>
-  </Dialog>))
+  flushSync(() =>
+    root.render(
+      <Dialog
+        open
+        onOpenChange={open => {
+          if (!open) close()
+        }}
+      >
+        <DialogContent
+          className={className}
+          aria-describedby={undefined}
+          showCloseButton={false}
+          onEscapeKeyDown={event => {
+            if (!dismissible) event.preventDefault()
+          }}
+          onInteractOutside={event => {
+            if (!dismissible) event.preventDefault()
+          }}
+          onOpenAutoFocus={event => {
+            const field = initialFocus?.()
+            if (!field) return
+            event.preventDefault()
+            field.focus()
+          }}
+          onCloseAutoFocus={event => event.preventDefault()}
+        >
+          <DialogTitle className="sr-only">{title}</DialogTitle>
+          <div id={id}>
+            <ExistingContent element={children} />
+          </div>
+        </DialogContent>
+      </Dialog>,
+    ),
+  )
   return close
 }
 
@@ -76,18 +108,27 @@ export function askChoice<T extends string>(title: string, description: ReactNod
         resolve(value)
       })
     }
-    root.render(<AlertDialog open onOpenChange={open => { if (!open) finish() }}>
-      <AlertDialogContent className="wl-panel" onCloseAutoFocus={event => event.preventDefault()}>
-        <AlertDialogTitle>{title}</AlertDialogTitle>
-        <AlertDialogDescription>{description}</AlertDialogDescription>
-        <AlertDialogFooter>
-          <AlertDialogCancel>Cancelar</AlertDialogCancel>
-          {choices.map(({ label, value, destructive }) =>
-            <Button key={value} variant={destructive ? "destructive" : "default"}
-              onClick={() => finish(value)}>{label}</Button>)}
-        </AlertDialogFooter>
-      </AlertDialogContent>
-    </AlertDialog>)
+    root.render(
+      <AlertDialog
+        open
+        onOpenChange={open => {
+          if (!open) finish()
+        }}
+      >
+        <AlertDialogContent className="wl-panel" onCloseAutoFocus={event => event.preventDefault()}>
+          <AlertDialogTitle>{title}</AlertDialogTitle>
+          <AlertDialogDescription>{description}</AlertDialogDescription>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            {choices.map(({ label, value, destructive }) => (
+              <Button key={value} variant={destructive ? "destructive" : "default"} onClick={() => finish(value)}>
+                {label}
+              </Button>
+            ))}
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>,
+    )
   })
 }
 
@@ -112,23 +153,40 @@ export function askName(title: string, initial: string, label = "Nome da jogada"
         resolve(value)
       })
     }
-    root.render(<Dialog open onOpenChange={open => { if (!open) finish() }}>
-      <DialogContent className="wl-panel" aria-describedby={undefined} showCloseButton={false}
-        onCloseAutoFocus={event => event.preventDefault()}>
-        <DialogTitle>{title}</DialogTitle>
-        <form className="grid gap-4" onSubmit={event => {
-          event.preventDefault()
-          finish(String(new FormData(event.currentTarget).get("name")).trim())
-        }}>
-          <label className="grid gap-2" data-slot="field">{label}
-            <Input name="name" defaultValue={initial} onFocus={event => event.currentTarget.select()} />
-          </label>
-          <div className="flex justify-end gap-2">
-            <Button type="button" variant="outline" onClick={() => finish()}>Cancelar</Button>
-            <Button type="submit">Salvar</Button>
-          </div>
-        </form>
-      </DialogContent>
-    </Dialog>)
+    root.render(
+      <Dialog
+        open
+        onOpenChange={open => {
+          if (!open) finish()
+        }}
+      >
+        <DialogContent
+          className="wl-panel"
+          aria-describedby={undefined}
+          showCloseButton={false}
+          onCloseAutoFocus={event => event.preventDefault()}
+        >
+          <DialogTitle>{title}</DialogTitle>
+          <form
+            className="grid gap-4"
+            onSubmit={event => {
+              event.preventDefault()
+              finish(String(new FormData(event.currentTarget).get("name")).trim())
+            }}
+          >
+            <label className="grid gap-2" data-slot="field">
+              {label}
+              <Input name="name" defaultValue={initial} onFocus={event => event.currentTarget.select()} />
+            </label>
+            <div className="flex justify-end gap-2">
+              <Button type="button" variant="outline" onClick={() => finish()}>
+                Cancelar
+              </Button>
+              <Button type="submit">Salvar</Button>
+            </div>
+          </form>
+        </DialogContent>
+      </Dialog>,
+    )
   })
 }

@@ -66,29 +66,46 @@ function App() {
       setRole(document.body.dataset.accountRole ?? "")
     }
     const observer = new MutationObserver(updateNavigation)
-    observer.observe(document.body, { attributes: true, attributeFilter: ["class", "data-current-screen", "data-account-name", "data-account-role", "data-team-management"] })
+    observer.observe(document.body, {
+      attributes: true,
+      attributeFilter: [
+        "class",
+        "data-current-screen",
+        "data-account-name",
+        "data-account-role",
+        "data-team-management",
+      ],
+    })
     updateNavigation()
     return () => observer.disconnect()
   }, [])
 
   const navigationItems = (isAdmin ? sections : publicSections).map(section => {
-    if (section.value === "worlds") return {
-      ...section,
-      links: worldsLinks.map(link => ({ ...link, current: link.value === current })),
-    }
-    if (section.value === "camp") return {
-      ...section,
-      links: canViewManagement ? [...teamLinks, { label: "Gestão do time", href: "#/time/gestao" }] : teamLinks,
-    }
+    if (section.value === "worlds")
+      return {
+        ...section,
+        links: worldsLinks.map(link => ({ ...link, current: link.value === current })),
+      }
+    if (section.value === "camp")
+      return {
+        ...section,
+        links: canViewManagement ? [...teamLinks, { label: "Gestão do time", href: "#/time/gestao" }] : teamLinks,
+      }
     return section
   })
 
   return (
     <>
-      <a className="skip-link" href="#screens" onClick={event => {
-        event.preventDefault()
-        document.getElementById("screens")?.focus()
-      }}>Ir para o conteúdo</a>
+      <a
+        className="skip-link"
+        href="#screens"
+        onClick={event => {
+          event.preventDefault()
+          document.getElementById("screens")?.focus()
+        }}
+      >
+        Ir para o conteúdo
+      </a>
       <SiteHeader
         id="top"
         variant="simple"
@@ -97,7 +114,15 @@ function App() {
         brand={{
           name: "WebLol, página inicial",
           href: "#/worlds",
-          mark: <img src="./assets/brand/weblol-logo-horizontal-transparent.png" alt="" width="1200" height="185" className="h-auto w-[120px]" />,
+          mark: (
+            <img
+              src="./assets/brand/weblol-logo-horizontal-transparent.png"
+              alt=""
+              width="1200"
+              height="185"
+              className="h-auto w-[120px]"
+            />
+          ),
         }}
         items={navigationItems}
         current={current === "comps" ? "worlds" : current}
@@ -105,28 +130,53 @@ function App() {
         secondaryAction={null}
         toolbar={
           <div className="header-actions">
-            {!user && <Button variant="default" className="signup-trigger" title="Criar conta ou entrar com seu Riot ID"
-              onClick={() => (window as unknown as { startSignup?: () => void }).startSignup?.()}>Entrar ou criar conta</Button>}
+            {!user && (
+              <Button
+                variant="default"
+                className="signup-trigger"
+                title="Criar conta ou entrar com seu Riot ID"
+                onClick={() => (window as unknown as { startSignup?: () => void }).startSignup?.()}
+              >
+                Entrar ou criar conta
+              </Button>
+            )}
             <ThemePicker initialPalette={initialPalette} />
             <Popover open={accountOpen} onOpenChange={setAccountOpen}>
               <PopoverTrigger asChild>
-                <Button variant="ghost" size={user ? "default" : "icon"} className="account-trigger"
-                  aria-label={user ? `Conta de ${user}` : "Conta"} title={user || "Conta"}>
+                <Button
+                  variant="ghost"
+                  size={user ? "default" : "icon"}
+                  className="account-trigger"
+                  aria-label={user ? `Conta de ${user}` : "Conta"}
+                  title={user || "Conta"}
+                >
                   <AccountAvatar user={user} />
                   {user && <span className="account-name">{user}</span>}
                 </Button>
               </PopoverTrigger>
-              <PopoverContent forceMount id="header-tools" className="toolbar" align="end" sideOffset={12} aria-label="Conta e sincronização"
-                hidden={!accountOpen} onCloseAutoFocus={event => {
+              <PopoverContent
+                forceMount
+                id="header-tools"
+                className="toolbar"
+                align="end"
+                sideOffset={12}
+                aria-label="Conta e sincronização"
+                hidden={!accountOpen}
+                onCloseAutoFocus={event => {
                   if (document.querySelector(".shell-login-dialog")) event.preventDefault()
-                }}>
-                {user && <div className="account-details">
-                  <strong>{user}</strong>
-                  {role && <small>{role}</small>}
-                </div>}
+                }}
+              >
+                {user && (
+                  <div className="account-details">
+                    <strong>{user}</strong>
+                    {role && <small>{role}</small>}
+                  </div>
+                )}
                 <Button id="sync" variant="outline">
                   <Icon name="reset" />
-                  <span id="sync-label" aria-live="polite">Verificando sincronização…</span>
+                  <span id="sync-label" aria-live="polite">
+                    Verificando sincronização…
+                  </span>
                 </Button>
                 <Button id="send" hidden />
                 <Button id="logout" variant="ghost" title="Sair ou trocar usuário">
@@ -145,14 +195,18 @@ function App() {
           <div className="wrap">
             <Card>
               <CardHeader>
-                <CardTitle><h1 className="font-display text-[length:var(--wl-title-size)] font-bold">Administração</h1></CardTitle>
+                <CardTitle>
+                  <h1 className="font-display text-[length:var(--wl-title-size)] font-bold">Administração</h1>
+                </CardTitle>
                 <CardDescription>Revise os envios e publique a versão oficial do time.</CardDescription>
               </CardHeader>
               <CardContent id="admin" />
             </Card>
           </div>
         </section>
-        <div id="screen-loading" role="status" hidden className="screen-message">Carregando esta área…</div>
+        <div id="screen-loading" role="status" hidden className="screen-message">
+          Carregando esta área…
+        </div>
         <div id="screen-error" role="status" hidden className="screen-message" />
       </main>
       <div className="toast" id="toast" role="status" />

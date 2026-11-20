@@ -1,9 +1,15 @@
 import { iconMarkup } from "@/shared/ui/icon"
 
-export const sortIcons = `<span class="sort-asc">${iconMarkup("ascending")}</span><span class="sort-desc">${iconMarkup("descending")}</span>`;
+export const sortIcons = `<span class="sort-asc">${iconMarkup("ascending")}</span><span class="sort-desc">${iconMarkup("descending")}</span>`
 
-export const LANES=[["Top","--top"],["Jungle","--jungle"],["Mid","--midlane"],["ADC","--adc"],["Suporte","--sup"]];
-export const LC=Object.fromEntries(LANES);
+export const LANES = [
+  ["Top", "--top"],
+  ["Jungle", "--jungle"],
+  ["Mid", "--midlane"],
+  ["ADC", "--adc"],
+  ["Suporte", "--sup"],
+]
+export const LC = Object.fromEntries(LANES)
 
 // Escudos e ligas dos classificados do Worlds 2026.
 // https://lolesports.com/en-GB/news/worlds-2026-primer
@@ -27,24 +33,42 @@ const teams = [
   ["Top Esports", "tes", "LPL"],
   ["Team Liquid", "tl", "LCS"],
   ["Team Secret Whales", "tsw", "LCP"],
-];
-const teamByName = new Map(teams.flatMap(([name, code, region]) => {
-  const team = {code, region};
-  return [[name.toLowerCase(), team], [code, team]] as const;
-}));
-export const teamRegion = (name: string) => teamByName.get(name.toLowerCase())?.region;
-export const teamCode = (name: string) => teamByName.get(name.toLowerCase())?.code.toUpperCase() ?? name;
+]
+const teamByName = new Map(
+  teams.flatMap(([name, code, region]) => {
+    const team = { code, region }
+    return [
+      [name.toLowerCase(), team],
+      [code, team],
+    ] as const
+  }),
+)
+export const teamRegion = (name: string) => teamByName.get(name.toLowerCase())?.region
+export const teamCode = (name: string) => teamByName.get(name.toLowerCase())?.code.toUpperCase() ?? name
 
 export function teamLogo(team: string) {
-  const code = teamByName.get(team.toLowerCase())?.code;
-  return code ? `<img class="team-logo" data-team="${code}" src="assets/worlds-teams/${code}.png" width="32" height="32" loading="lazy" alt="">` : "";
+  const code = teamByName.get(team.toLowerCase())?.code
+  return code
+    ? `<img class="team-logo" data-team="${code}" src="assets/worlds-teams/${code}.png" width="32" height="32" loading="lazy" alt="">`
+    : ""
 }
 
-export const pct=(x: number)=>Math.round(x*100)+"%";
-export const wrPill=(w: number,n: number)=>{if(!n)return '<span class="wr" aria-label="Sem jogos">—</span>';const r=w/n;return `<span class="wr ${r>=.55?'g':r<=.45?'b':''}" data-tip="Win rate: ${w} vitórias e ${n-w} derrotas em ${n} jogos">${pct(r)}</span>`};
+export const pct = (x: number) => Math.round(x * 100) + "%"
+export const wrPill = (w: number, n: number) => {
+  if (!n) return '<span class="wr" aria-label="Sem jogos">—</span>'
+  const r = w / n
+  return `<span class="wr ${r >= 0.55 ? "g" : r <= 0.45 ? "b" : ""}" data-tip="Win rate: ${w} vitórias e ${n - w} derrotas em ${n} jogos">${pct(r)}</span>`
+}
 
-export const esc=(s: unknown)=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c] ?? c));
-export const championSlug = (name: string) => name.normalize("NFD").replace(/\p{M}/gu, "").toLowerCase()
-  .replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+export const esc = (s: unknown) =>
+  String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c] ?? c)
+export const championSlug = (name: string) =>
+  name
+    .normalize("NFD")
+    .replace(/\p{M}/gu, "")
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-|-$/g, "")
 
-export const kdaOf = (kills: number, deaths: number, assists: number) => deaths ? (kills + assists) / deaths : kills + assists;
+export const kdaOf = (kills: number, deaths: number, assists: number) =>
+  deaths ? (kills + assists) / deaths : kills + assists
