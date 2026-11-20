@@ -982,6 +982,26 @@
 .matchup-pick.ours .matchup-pick-text small {
   color: var(--wl-accent);
 }
+/* O time da esquerda fica espelhado: lado e nome da comp junto ao centro, ações na borda de fora. */
+.matchup > .matchup-team:first-child,
+#v-comps .matchup > .matchup-team:first-child .matchup-pick {
+  flex-direction: row-reverse;
+}
+#v-comps .matchup > .matchup-team:first-child .matchup-pick {
+  text-align: right;
+}
+.matchup > .matchup-team:first-child .matchup-pick-text {
+  align-items: flex-end;
+}
+.matchup > .matchup-team:first-child .matchup-pick-text small {
+  display: inline-flex;
+  flex-direction: row-reverse;
+  align-items: center;
+}
+.matchup > .matchup-team:first-child .matchup-pick-text small .side-dot {
+  margin-left: 4px;
+  margin-right: 0;
+}
 #v-comps .matchup-preview {
   display: flex;
   flex: none;
