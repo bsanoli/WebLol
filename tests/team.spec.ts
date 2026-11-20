@@ -19,27 +19,59 @@ test("Abre uma composição salva no formato anterior em modo Draft", async ({ p
   await page.goto("/camp.html")
   await page.evaluate(() => window.applyWebLolRoute(["composicoes", "comp-antiga"], new URLSearchParams("modo=draft")))
   const team = page
-  const draft = team.getByRole("group", { name: "Composições do time" })
-  await expect(draft.getByRole("button", { name: /Composição anterior/ })).toBeVisible()
-  await expect(draft.locator(".dz-tab.on .mini .av")).toHaveText(["O", "A"])
+  const matchup = team.getByRole("group", { name: "Confronto do draft" })
+  await expect(matchup.getByRole("button", { name: /Nossa: Composição anterior/ })).toBeVisible()
+  await expect(matchup.locator(".matchup-pick.ours .mini .av")).toHaveText(["O", "A"])
   await expect(team.getByRole("button", { name: /Top.*Ornn/i }).first()).toBeVisible()
-
-  const toolbar = team.locator(".composition-toolbar")
-  await expect(toolbar).toBeVisible()
-  const draftPosition = await toolbar.boundingBox()
-  await toolbar.getByRole("tab", { name: "Opções por posição" }).click()
-  await expect(team.locator(".comp-library")).toBeVisible()
-  await expect(team.locator(".comp-library .ci.on .mini .av")).toHaveText(["O", "A"])
-  await expect(team.locator("#comps > #champ-picker")).toBeVisible()
-  expect(await toolbar.boundingBox()).toEqual(draftPosition)
-  await toolbar.getByRole("tab", { name: "Ordem do draft" }).click()
+  await expect(team.getByRole("tab", { name: "Opções por posição" })).toHaveCount(0)
   await expect(team.locator(".dz-slot #champ-picker")).toBeVisible()
-  expect(await toolbar.boundingBox()).toEqual(draftPosition)
+
+  // Sem adversária, o outro lado pede uma; ao criar uma nova adversária ela ocupa esse lado.
+  await expect(team.locator(".tm.rival .draft-rival-empty")).toBeVisible()
+  await matchup.locator(".matchup-pick.rival").click()
+  await page.getByRole("button", { name: /Nova adversária/ }).click()
+  await matchup.getByRole("button", { name: /Editar o nome de Adversária/ }).click()
+  await matchup.getByRole("textbox").fill("Time rival")
+  await matchup.getByRole("textbox").press("Enter")
+  await expect(matchup.getByRole("button", { name: /Adversária: Time rival/ })).toBeVisible()
+  await expect(team.locator(".tm.rival.mine")).toBeVisible()
+  const state = await page.evaluate(() => JSON.parse(localStorage.getItem("lol-comps-time-v1")!))
+  const rival = state.comps.find((c: { name: string }) => c.name === "Time rival")
+  expect(rival.team).toBe("enemy")
+  expect(state.comps.find((c: { id: string }) => c.id === "comp-antiga").draft.rival).toBe(rival.id)
+  expect(state.comps.find((c: { id: string }) => c.id === "comp-antiga").matchups).toHaveLength(1)
+
+  // Trocar lados: a barra e o quadro se invertem e a comp nossa vai para a direita.
+  await expect(team.getByText("Editando:")).toBeVisible()
+  await expect(team.getByText("Lane do time")).toHaveCount(0)
+  await expect(matchup.locator(".matchup-swap svg use")).toHaveAttribute("href", /#swap$/)
+  await expect(matchup.getByRole("button", { name: /OP\.GG/ })).toBeVisible()
+  await matchup.getByRole("button", { name: /Trocar lados/ }).click()
+  await expect(matchup.locator(".matchup-team").last()).toHaveClass(/ours/)
+  const swapped = await page.evaluate(() => JSON.parse(localStorage.getItem("lol-comps-time-v1")!))
+  expect(swapped.comps.find((c: { id: string }) => c.id === "comp-antiga").draft.side).toBe("red")
+
   for (const viewport of [{ width: 1920, height: 1024 }, { width: 1280, height: 720 }]) {
     await page.setViewportSize(viewport)
     await expect(team.locator(".dz .tm > .pk").last()).toBeInViewport({ ratio: 1 })
     expect(await page.evaluate(() => document.documentElement.scrollHeight)).toBeLessThanOrEqual(viewport.height)
   }
+
+  // Confrontos: a adversária escolhida no draft vira uma linha na aba Confrontos, com tática própria.
+  await team.getByRole("tab", { name: "Táticas" }).click()
+  await team.getByRole("tab", { name: /Confrontos/ }).click()
+  const row = team.locator("[data-tactic-matchup]")
+  await expect(row).toHaveCount(1)
+  await expect(row).toHaveAttribute("title", "Composição anterior x Time rival")
+  await row.click()
+  await expect(team.locator("#tx-title")).toContainText("Composição anterior x Time rival")
+  await team.getByRole("tab", { name: /Confrontos/ }).click()
+  await team.locator("[data-matchup-delete]").click()
+  await page.getByRole("alertdialog").getByRole("button", { name: "Excluir confronto" }).click()
+  await expect(team.locator("[data-tactic-matchup]")).toHaveCount(0)
+  const after = await page.evaluate(() => JSON.parse(localStorage.getItem("lol-comps-time-v1")!))
+  expect(after.comps.map((c: { name: string }) => c.name)).toEqual(expect.arrayContaining(["Composição anterior", "Time rival"]))
+  expect(after.comps.find((c: { id: string }) => c.id === "comp-antiga").matchups ?? []).toHaveLength(0)
 })
 
 test("Duplica e salva uma composição do formato anterior sem alterar a original", async ({ page }) => {
@@ -360,4 +392,94 @@ test("Limpar tudo apaga as anotações em uma única ação reversível", async 
   await expect(vision).toHaveCount(1)
   expect(await hasArrow()).toBe(true)
   await expect(clear).toBeEnabled()
+})
+
+test("Táticas: monta picks na gaveta e arrasta uma adversária para criar o confronto", async ({ page }) => {
+  await page.setViewportSize({ width: 1440, height: 1080 })
+  await page.addInitScript(() => {
+    if (localStorage.getItem("lol-comps-time-v1")) return
+    const lanes = () => ({ top: [], jg: [], mid: [], adc: [], sup: [], ban: [] })
+    localStorage.setItem("lol-comps-time-v1", JSON.stringify({
+      cur: "nossa", view: "tactics",
+      comps: [
+        { id: "nossa", name: "Nossa base", team: "mine", lanes: lanes() },
+        { id: "rival", name: "Time rival", team: "enemy", lanes: lanes() },
+      ],
+    }))
+  })
+  await page.goto("/camp.html")
+  await page.evaluate(() => window.applyWebLolRoute(["composicoes", "nossa"], new URLSearchParams("modo=taticas")))
+
+  // O alternador do cabeçalho troca entre a tática da comp e as gerais.
+  await expect(page.locator(".tx-aside [data-tactic-general]")).toHaveCount(0)
+  const scopeX = () => page.locator(".tx-scope").evaluate(el => Math.round(el.getBoundingClientRect().left))
+  const xComp = await scopeX()
+  await page.getByRole("button", { name: "Gerais" }).click()
+  await expect(page.locator("#tx-title")).toHaveText("Táticas gerais")
+  expect(await scopeX()).toBe(xComp)
+  await expect(page.getByRole("button", { name: "Gerais" })).toHaveAttribute("aria-pressed", "true")
+  await page.getByRole("button", { name: "Esta composição" }).click()
+  await expect(page.locator("#tx-title")).toContainText("Nossa base")
+
+  // Sempre dois lados: a comp aberta ocupa o dela e o outro espera o par.
+  const board = page.locator(".tx-draft")
+  await expect(board.locator(".tx-side-col")).toHaveCount(2)
+  await expect(board.locator(".tx-side-col.empty")).toHaveCount(1)
+  await expect(board.locator(".tx-side-col .pk")).toHaveCount(5)
+
+  // Clicar num pick abre o seletor e o campeão escolhido aparece no card.
+  await board.locator(".pk-target").first().click()
+  const picker = page.getByRole("dialog", { name: "Campeões" })
+  await picker.locator("#grid .ch").first().click()
+  await expect(board.locator(".pk .pkn").first()).not.toHaveText("Escolher campeão")
+  await picker.getByRole("button", { name: /Fechar/ }).first().click()
+
+  // Arrastar a adversária para o lado vermelho cria o confronto, com a nossa no azul.
+  await page.getByRole("tab", { name: /Adversárias/ }).click()
+  await page.locator("[data-tactic-comp=\"rival\"]").dragTo(board.locator("[data-drop-side=red]"))
+  await expect(page.locator("#tx-title")).toContainText("Nossa base x Time rival")
+  await expect(board.locator(".tx-side-col")).toHaveCount(2)
+  await expect(board.locator(".tx-side-col.empty")).toHaveCount(0)
+  const state = await page.evaluate(() => JSON.parse(localStorage.getItem("lol-comps-time-v1")!))
+  expect(state.comps.find((c: { id: string }) => c.id === "nossa").matchups).toHaveLength(1)
+})
+
+test("Ordem do draft: arrastar campeões entre cards, criar a adversária e remover soltando fora", async ({ page }) => {
+  await page.addInitScript(() => {
+    localStorage.setItem("lol-comps-time-v1", JSON.stringify({
+      cur: "c1",
+      comps: [{ id: "c1", name: "Nossa", lanes: { top: ["Ornn"], jg: [], mid: ["Ahri"], adc: [], sup: [], ban: [] }, notes: "", laneNotes: {} }],
+    }))
+  })
+  await page.goto("/camp.html")
+  await page.evaluate(() => window.applyWebLolRoute(["composicoes", "c1"], new URLSearchParams("modo=draft")))
+  const drag = (from: string, to: string | null) => page.evaluate(([f, t]) => {
+    const src = document.querySelector(f as string)!, dt = new DataTransfer()
+    src.dispatchEvent(new DragEvent("dragstart", { bubbles: true, dataTransfer: dt }))
+    if (t) {
+      const dst = document.querySelector(t)!
+      dst.dispatchEvent(new DragEvent("dragover", { bubbles: true, cancelable: true, dataTransfer: dt }))
+      dst.dispatchEvent(new DragEvent("drop", { bubbles: true, cancelable: true, dataTransfer: dt }))
+    }
+    document.dispatchEvent(new DragEvent("dragend", { bubbles: true, clientX: t ? 0 : 400, clientY: t ? 0 : 400, dataTransfer: dt }))
+  }, [from, to])
+  const lanes = () => page.evaluate(() => JSON.parse(localStorage.getItem("lol-comps-time-v1")!).comps.find((c: { id: string }) => c.id === "c1").lanes)
+
+  // Card vazio do lado adversário é destino: cria a adversária com o campeão naquela rota.
+  await expect(page.locator(".tm.rival [data-empty-rival]")).toHaveCount(10)
+  await drag('.tm.us .pk[data-l="mid"] .pk-target', '.tm.rival .pk[data-l="sup"]')
+  await expect(page.locator(".tm.rival.mine")).toBeVisible()
+  const afterCreate = await page.evaluate(() => JSON.parse(localStorage.getItem("lol-comps-time-v1")!).comps.find((c: { team?: string }) => c.team === "enemy").lanes)
+  expect(afterCreate.sup).toEqual(["Ahri"])
+  expect((await lanes()).mid).toEqual([])
+
+  // Card para card, no mesmo lado.
+  await drag('.tm.us .pk[data-l="top"] .pk-target', '.tm.us .pk[data-l="jg"]')
+  expect(await lanes()).toMatchObject({ top: [], jg: ["Ornn"] })
+
+  // Soltar fora remove, e Desfazer restaura.
+  await drag('.tm.us .pk[data-l="jg"] .pk-target', null)
+  expect((await lanes()).jg).toEqual([])
+  await page.getByRole("button", { name: "Desfazer" }).click()
+  expect((await lanes()).jg).toEqual(["Ornn"])
 })

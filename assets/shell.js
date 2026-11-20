@@ -1,6 +1,7 @@
 /* ================= capitão / admin: publicar e aprovar ================= */
 async function publish(approved,rejected,label){
   if(!TEAM||!canPublish()){writeRoute(routeRoots.admin);openRoute();return toast(user()?.admin?"Desbloqueie o admin primeiro":"Só o capitão publica a versão oficial do time")}
+  await flushImages();
   let r;try{r=await readOfficial()}catch(e){r={err:"sem conexão"}}if(r.err)return toast("Erro lendo a versão oficial: "+r.err);
   const cur=r.off;
   const v=cur.version+1,at=Date.now();

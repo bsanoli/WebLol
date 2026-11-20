@@ -77,8 +77,8 @@
   color: var(--muted);
   font-size: var(--wl-label-size);
 }
-.build-timeline .build-icon { width: var(--wl-space-6); height: var(--wl-space-6); border-radius: var(--wl-space-1); border: 1px solid var(--line); }
-.build-timeline .build-icon-trigger { cursor: pointer; border-radius: var(--wl-space-1); transition: box-shadow 150ms ease; }
+.build-timeline .build-icon { width: var(--wl-space-6); height: var(--wl-space-6); border-radius: var(--wl-control-radius); border: 1px solid var(--line); }
+.build-timeline .build-icon-trigger { cursor: pointer; border-radius: var(--wl-control-radius); transition: box-shadow 150ms ease; }
 .build-timeline .build-icon-trigger:hover, .build-timeline .build-icon-trigger:focus-visible { box-shadow: 0 0 0 1px var(--gold); }
 .build-timeline-games { margin: 0; padding: 0; list-style: none; }
 .build-timeline-game:focus-visible { outline: 2px solid var(--gold); outline-offset: -2px; }

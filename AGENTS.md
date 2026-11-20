@@ -13,6 +13,14 @@ O [catálogo de agentes e skills](docs/agentes.md) vale para Codex e Claude Code
 - Toda implementação no WebLol deve seguir a arquitetura Feature-Sliced Design. Consulte a skill [feature-sliced-design](.agents/skills/feature-sliced-design/SKILL.md) para decidir fronteiras entre módulos, organizar dependências ou migrar código. Respeite as responsabilidades das camadas, a direção dos imports e as APIs públicas dos slices, inclusive em correções pontuais.
 - Faça commit ou push quando o usuário pedir a respectiva ação. Para publicar no GitHub Pages, use a skill [weblol-publicar](.agents/skills/weblol-publicar/SKILL.md).
 
+## Processo
+
+- Siga o [processo de desenvolvimento](docs/sdlc.md). No início de cada tarefa, use a skill [weblol-pedido](.agents/skills/weblol-pedido/SKILL.md) para classificar o tamanho (P, M ou G) e decidir se para antes de editar.
+- Nomeie conceitos pelo [glossário](docs/glossario.md) e escreva código pelas [convenções](docs/convencoes.md). Chaves locais, campos salvos, coleções e rotas são contratos e só mudam com migração e ADR.
+- Quando a pessoa corrigir uma entrega de um jeito que pode se repetir, ou escrever `regra:`, `termo:` ou `decisão:`, use a skill [weblol-padronizar](.agents/skills/weblol-padronizar/SKILL.md).
+- Em entregas M e G, peça a verificação ao agente [change-verifier](docs/agentes/change-verifier.md) antes do resumo final.
+- A [arquitetura](docs/arquitetura.md) explica as entradas, os iframes e as camadas. O [backlog de refatoração](docs/auditoria-codebase.md#backlog-por-ondas) diz o que vem a seguir.
+
 ## Design e acessibilidade
 
 - Toda criação ou alteração de interface deve aplicar os princípios de Gestalt e atender aos critérios aplicáveis da [WCAG 2.2 nível AA](https://www.w3.org/TR/WCAG22/), do layout da tela ao espaçamento interno de cada controle.

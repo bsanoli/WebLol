@@ -1,21 +1,19 @@
 import { Tabs, TabsList, TabsTrigger } from "@/shared/ui/arc/tabs/tabs"
 import { ToggleGroup, ToggleGroupItem } from "@/shared/ui/toggle-group"
-import { Fragment, useEffect, useId, useReducer, useState } from "react"
+import { Fragment, useEffect, useReducer, useState } from "react"
 import type { ReactNode } from "react"
 import { createRoot, type Root } from "react-dom/client"
-import { ArrowDown, ArrowUp, MoreHorizontal } from "lucide-react"
+import { MoreHorizontal } from "lucide-react"
 import { ContextMenu } from "radix-ui"
 import { Switch } from "@/shared/ui/arc/switch/switch"
 import { Empty, EmptyDescription, EmptyHeader } from "@/shared/ui/empty"
 
 import { DropdownMenu, DropdownMenuContent, DropdownMenuGroup, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/shared/ui/dropdown-menu"
-import { Input } from "@/shared/ui/input"
-import { Popover, PopoverContent, PopoverTrigger } from "@/shared/ui/popover"
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from "@/shared/ui/select"
 
 const roots = new WeakMap<Element, Root>()
 
-function renderControl(host: Element, control: ReactNode) {
+export function renderControl(host: Element, control: ReactNode) {
   let root = roots.get(host)
   if (!root) {
     root = createRoot(host)
@@ -31,7 +29,7 @@ export function clearTeamControls(region: Element) {
   }
 }
 
-function Icon({ name }: { name: string }) {
+export function Icon({ name }: { name: string }) {
   return <svg className="icon" aria-hidden="true"><use href={`assets/icons.svg#${name}`} /></svg>
 }
 
@@ -56,34 +54,6 @@ export function mountDraftChampionMenu(host: HTMLElement, name: string, remove: 
   </ContextMenu.Root>)
 }
 
-type PickSwapOption = { name: string; portrait: string }
-
-/** Botão direito num pick da aba Táticas: troca o campeão por um dos alternativos da comp. */
-export function mountPickSwapMenu(host: HTMLElement, lane: string, current: string, options: PickSwapOption[], swap: (name: string) => void) {
-  const button = host.querySelector("button")!
-  const html = button.innerHTML
-  const style = button.getAttribute("style") ?? ""
-  const color = /--lc:\s*([^;]+)/.exec(style)?.[1]
-  renderControl(host, <ContextMenu.Root>
-    <ContextMenu.Trigger asChild>
-      <button type="button" className={button.className} style={color ? { ["--lc" as string]: color } : undefined}
-        data-draft-target={button.dataset.draftTarget} aria-pressed={button.getAttribute("aria-pressed") === null ? undefined : button.getAttribute("aria-pressed") === "true"}
-        aria-label={button.getAttribute("aria-label") ?? current} title={button.title}
-        dangerouslySetInnerHTML={{ __html: html }} />
-    </ContextMenu.Trigger>
-    <ContextMenu.Portal>
-      <ContextMenu.Content className="chip-menu pick-swap-menu" aria-label={`Trocar ${current || lane}`}>
-        <ContextMenu.Label className="pick-swap-label">Trocar por alternativo</ContextMenu.Label>
-        {options.length ? options.map(option => (
-          <ContextMenu.Item key={option.name} data-slot="dropdown-menu-item" onSelect={() => queueMicrotask(() => swap(option.name))}>
-            <span className="pick-swap-portrait" dangerouslySetInnerHTML={{ __html: option.portrait }} />{option.name}
-          </ContextMenu.Item>
-        )) : <ContextMenu.Item data-slot="dropdown-menu-item" disabled>Nenhum alternativo nesta lane</ContextMenu.Item>}
-      </ContextMenu.Content>
-    </ContextMenu.Portal>
-  </ContextMenu.Root>)
-}
-
 export function mountMapEmpty(host: Element) {
   renderControl(host, <Empty className="map-empty">
     <EmptyHeader><EmptyDescription>Nenhum passo ainda.</EmptyDescription></EmptyHeader>
@@ -95,7 +65,7 @@ export function mountMapSwitch(host: Element, label: string, checked: boolean, o
     checked={checked} disabled={disabled} onCheckedChange={onCheckedChange} />)
 }
 
-type MenuAction = {
+export type MenuAction = {
   label: string
   icon: ReactNode
   disabled?: boolean
@@ -104,7 +74,7 @@ type MenuAction = {
 }
 
 // A click in the parent shell blurs this iframe without dispatching a pointer event here.
-function useTeamOverlay() {
+export function useTeamOverlay() {
   const [open, setOpen] = useState(false)
   useEffect(() => {
     if (!open) return
@@ -115,11 +85,11 @@ function useTeamOverlay() {
   return { open, setOpen }
 }
 
-function keepFocusOutsideFrame(event: Event) {
+export function keepFocusOutsideFrame(event: Event) {
   if (!document.hasFocus()) event.preventDefault()
 }
 
-function ActionMenu({ label, heading, actions }: {
+export function ActionMenu({ label, heading, actions }: {
   label: string
   heading?: string
   actions: MenuAction[]
@@ -148,54 +118,6 @@ function ActionMenu({ label, heading, actions }: {
       </DropdownMenuContent>
     </DropdownMenu>
   )
-}
-
-export function mountCompositionMenu(host: Element, name: string, duplicate: () => void, remove: () => void) {
-  renderControl(host, <ActionMenu label={`Ações de ${name}`} actions={[
-    { label: "Duplicar", icon: <Icon name="duplicate" />, run: duplicate },
-    { label: "Excluir", icon: <Icon name="trash" />, destructive: true, run: remove },
-  ]} />)
-}
-
-export function mountChampionMenu(host: Element, name: string, index: number, count: number,
-  move: (direction: number) => void, remove: () => void) {
-  renderControl(host, <ActionMenu label={`Opções de ${name}`} heading={`${index + 1}ª opção · ${name}`} actions={[
-    { label: "Mover antes", icon: <ArrowUp />, disabled: index === 0, run: () => move(-1) },
-    { label: "Mover depois", icon: <ArrowDown />, disabled: index === count - 1, run: () => move(1) },
-    { label: `Remover ${name}`, icon: <Icon name="trash" />, destructive: true, run: remove },
-  ]} />)
-}
-
-function LaneNote({ label, initialNote, onEdit }: {
-  label: string
-  initialNote: string
-  onEdit: (note: string) => void
-}) {
-  const { open, setOpen } = useTeamOverlay()
-  const inputId = useId()
-  const [note, setNote] = useState(initialNote)
-
-  return (
-    <Popover open={open} onOpenChange={setOpen}>
-      <PopoverTrigger data-team-trigger="note" data-has-note={note.trim() ? "" : undefined}
-        aria-label={label} title={note.trim() ? note : "Adicionar observação"}>
-        <Icon name="edit" />
-        <span className="pick-note-preview">{note || "Nota"}</span>
-      </PopoverTrigger>
-      <PopoverContent className="team-note-popover" align="end" collisionPadding={8} aria-label={label}
-        onCloseAutoFocus={keepFocusOutsideFrame}>
-        <label htmlFor={inputId}>{label}</label>
-        <Input id={inputId} value={note} placeholder="Plano para esta posição" onChange={event => {
-          setNote(event.target.value)
-          onEdit(event.target.value)
-        }} />
-      </PopoverContent>
-    </Popover>
-  )
-}
-
-export function mountLaneNote(host: Element, label: string, note: string, onEdit: (note: string) => void) {
-  renderControl(host, <LaneNote label={label} initialNote={note} onEdit={onEdit} />)
 }
 
 function TeamSelect({ field }: { field: HTMLSelectElement }) {

@@ -8,6 +8,25 @@ Formato de cada entrada: data, pedido (palavras do Bruno), decisão (quem escolh
 
 ---
 
+## 19/11/2026 — composições nossas e adversárias na aprovação do capitão
+
+- **Pedido:** "quero poder diferenciar uma composição do meu time e uma composição do adversario" e "poder selecionar e diferenciar lado e composição adversaria" na Ordem do draft.
+- **Decisão do Fabiano:** cada composição tem `team` (nossa ou adversária) e a nossa guarda em `draft.rival` a adversária que enfrenta. Não muda login, contas nem regras do Firestore.
+- **O que mudou:**
+  - Na aprovação do capitão, a composição mostra "Lado alterado: nossa → adversária" (ou o contrário) e "Adversária do draft alterada".
+  - "Obs. das lanes alteradas" saiu do resumo, porque as anotações por lane não são mais editáveis.
+  - Editar um pick da adversária no draft altera a composição adversária, que entra no envio como "Comp alterada".
+
+
+## 19/11/2026 — bloco de notas e desenho nos prints das táticas
+
+- **Pedido:** "a ideia dessa tela seria para usar como bloco de notas [...] quero poder tambem inserir imagens dentro do bloco, para conseguir desenhar e anotar por cima".
+- **Decisão do Fabiano:** sincronia igual à de hoje (aprovação do capitão), com os prints e desenhos guardados à parte em `imagens`. Não muda login, contas nem regras do Firestore.
+- **O que mudou:**
+  - A tática ganhou o campo `doc` (texto rico com os prints dentro). `text` e `images` continuam e são derivados do `doc`.
+  - Cada desenho salvo cria dois documentos em `imagens`: a cena (JSON) e a prévia (WebP). Os anteriores ficam sem uso, porque a regra só permite criar.
+  - Na aprovação do capitão, a tática passa a mostrar também "Prints ou desenhos alterados" e "Formatação da tática alterada".
+
 ## 19/11/2026 — prints das táticas no banco do time
 
 - **Pedido:** "permita colocar prints dentro do campo de escrever tática".

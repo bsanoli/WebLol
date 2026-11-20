@@ -36,9 +36,23 @@ npm run dev
 
 Abra [http://127.0.0.1:5173/](http://127.0.0.1:5173/). Se a porta 5173 estiver ocupada, o Vite informa o conflito.
 
-A interface usa React, TypeScript, Tailwind CSS e componentes shadcn/ui. O Vite compila as três entradas em `src/` (`index.html`, `worlds.html` e `camp.html`). Os dados do Worlds e o catálogo da Riot ficam em JSON, em `src/data/`.
+A interface usa React, TypeScript, Tailwind CSS e componentes shadcn/ui. O Vite compila quatro entradas de `src/` em dois builds: `index.html`, `worlds.html` e `camp.html` no build normal, e `soloq.html` com `--mode soloq`, que usa os dados de `src/data/soloq/`. Os dados do Worlds e o catálogo da Riot ficam em JSON, em `src/data/`. A [arquitetura](docs/arquitetura.md) explica como o shell e os iframes se comunicam.
 
-Use TypeScript para código novo da aplicação. As exceções são `public/assets/shell.js` e `public/assets/sync.js`, que compartilham o estado legado de autenticação e sincronização, e os utilitários Node existentes em `scripts/*.mjs`. As entradas legadas `worlds.ts` e `team.ts` ainda têm verificação de tipos desativada durante a migração. Os módulos extraídos delas, incluindo as builds, passam pelo `typecheck` normal.
+Use TypeScript para código novo da aplicação. As exceções são `public/assets/shell.js` e `public/assets/sync.js`, que compartilham o estado legado de autenticação e sincronização, e os utilitários Node existentes em `scripts/*.mjs`. Nove arquivos legados ainda têm a verificação de tipos desativada com `@ts-nocheck`, listados na [auditoria](docs/auditoria-codebase.md#3-tipos-e-tamanho). O código novo passa pelo `typecheck` normal.
+
+## Documentação
+
+| Documento | Para quê |
+| --- | --- |
+| [Processo de desenvolvimento](docs/sdlc.md) | Tamanhos de pedido, etapas, portões e atalhos para pedir nas sessões |
+| [Glossário](docs/glossario.md) | Termo da tela, nome no código e nomes salvos |
+| [Convenções](docs/convencoes.md) | Como nomear, tipar, estruturar e commitar |
+| [Arquitetura](docs/arquitetura.md) | Entradas, builds, iframes, camadas FSD, dados e publicação |
+| [Checklist de revisão](docs/revisao.md) | Severidades e o que conferir num diff |
+| [Decisões](docs/decisoes/README.md) | ADRs |
+| [Auditoria do codebase](docs/auditoria-codebase.md) | Diagnóstico e backlog de refatoração por ondas |
+| [Agentes e skills](docs/agentes.md) | Perfis e skills do Codex e do Claude Code |
+| [Pedidos](docs/pedidos/_modelo.md) | Modelo dos pedidos M e G registrados em `docs/pedidos/` |
 
 Para conferir a versão compilada, execute `npm run build` e `npm run preview`. Na prévia, é possível consultar o Worlds sem entrar. Na área do time, use seu Riot ID para acessar a sincronização com o Firestore.
 
@@ -50,7 +64,7 @@ Os ícones de Conhecimento em `public/assets/lol/hud/` vêm do CommunityDragon 1
 
 ## GitHub Pages
 
-O GitHub Pages serve a raiz da branch `main`. Rode `npm run pages:prepare` para gerar o build e atualizar `index.html`, `camp.html`, `worlds.html` e `assets/` na raiz. Inclua esses arquivos no commit que vai para a `main`. Edite os arquivos fonte em `src/` e `public/`.
+O GitHub Pages serve a raiz da branch `main`. Rode `npm run pages:prepare` para gerar o build e atualizar `index.html`, `camp.html`, `worlds.html`, `soloq.html` e `assets/` na raiz. Inclua esses arquivos no commit que vai para a `main`. Edite os arquivos fonte em `src/` e `public/`. A [ADR 0003](docs/decisoes/0003-publicacao-por-artefato.md) propõe publicar pelo GitHub Actions, sem arquivos gerados no Git.
 
 ## Sistema visual
 
@@ -71,4 +85,4 @@ Use `size="sm"` (ou `data-size="sm"` no HTML) para controles compactos. Os botõ
 
 ## Versões da interface
 
-A aba Administração tem um item recolhível "Versões da interface". A cada mudança visível na interface, acrescente uma versão no topo de `src/data/ui-versions.ts`, dizendo o que mudou.
+A aba Administração tem um item recolhível "Versões da interface". A cada mudança visível na interface, acrescente uma versão no topo de `src/app/config/ui-versions.ts`, dizendo o que mudou.

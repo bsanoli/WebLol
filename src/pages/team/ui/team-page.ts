@@ -3,21 +3,29 @@ import { askChoice, askName, confirmAction, showDialog } from "@/shared/ui/dialo
 import { iconMarkup, laneIconMarkup } from "@/shared/ui/icon"
 import { lolAsset, lolChampion, lolImage } from "@/entities/champion"
 import { ensureTeamPlays } from "@/entities/tactical-play"
-import { clearTeamControls, mountChampionMenu, mountCompositionMenu, mountDraftChampionMenu, mountLaneNote, mountPickSwapMenu, mountMapEmpty, mountMapSwitch, mountTeamSelect, mountSectionTabs, mountToolGroup } from "./team-controls"
+import { clearTeamControls, mountDraftChampionMenu, mountMapEmpty, mountMapSwitch, mountTeamSelect, mountSectionTabs, mountToolGroup } from "./team-controls"
 import { initializeTheme } from "@/shared/config/theme"
 import { revealContent } from "@/shared/lib/motion"
 
 import { CH } from "../model/champion-catalog"
 import { createCompositionCopy } from "../model/composition"
 import WS from "../api/worlds-champion-stats.json"
-import { KEY, uid, blank, loadTeamState } from "../model/local-state"
-import { DRAFT_SIDE, PICKNAME, compositionPreview, draftHTML, draftOf, sideDot } from "./draft"
+import { KEY, uid, blank, loadTeamState, compositionPreview, draftOf } from "../model/local-state"
+import { PICKNAME } from "../model/draft-order"
+import { enemiesOf, isEnemy, oppositeSide, oursOf, rivalOf, rivalOrder, setRival, settleTeam, teamOf } from "../model/composition-side"
+import { draftBoardHTML } from "./draft-board"
+import { mountMatchupBar } from "./matchup-bar"
 import { mountTeamNavigation } from "./team-navigation"
-import { tacticGridHTML, tacticsHTML } from "./tactics"
-import { createSavedTactic, ensureTactics, hasTactic, isSavedTactic, itemsForView, setTacticView, tacticShownIn, setTacticTeam, setTacticOpgg, tacticOpggOf, normalizeOpggLink, readTactic, readTacticImages, writeTactic } from "../model/tactics"
+import { tacticsHTML } from "./tactics"
+import { bindTacticDrop } from "./tactic-drop"
+import { adoptRivals, addMatchup, allMatchups, findMatchup, isMatchupKey, matchupKey, matchupTitle, matchupsOf, pruneMatchups, removeMatchup, resolveCompDrop } from "../model/matchups"
+import { askMatchup, NEW_ENEMY } from "./matchup-dialog"
+import { clearCompNotes, ensureTactics, hasTactic, normalizeOpggLink, opggOf, readTacticDocument, setOpgg, writeTactic, writeTacticDocument } from "../model/tactics"
 import { compressImage } from "../lib/compress-image"
+import { printStore } from "../api/print-store"
+import { openPrintSketch } from "./print-sketch"
 import { capturePickFeedback } from "./pick-feedback"
-
+import { mountTeamSendButton, syncTeamSendButton } from "./team-send-button"
 initializeTheme()
 
 const LANES=[
@@ -120,62 +128,174 @@ $("#clear-local").onclick=async()=>{
   window.location.reload();
 };
 let active="top";
+// Lado do quadro em edição: a comp aberta ("us") ou a adversária escolhida ("rival").
+let activeSide="us";
 
-function toast(m){const t=$("#toast");t.textContent=m;t.classList.add("on");setTimeout(()=>t.classList.remove("on"),2200)}
+let toastTimer=0;
+function toast(m,undo){
+  const t=$("#toast");t.textContent=m;
+  if(undo){
+    const b=document.createElement("button");b.type="button";b.className="toast-action";b.textContent="Desfazer";
+    b.setAttribute("data-slot","button");b.setAttribute("data-variant","ghost");b.setAttribute("data-size","sm");
+    b.addEventListener("click",()=>{undo();t.classList.remove("on")});
+    t.append(" ",b);
+  }
+  t.classList.toggle("has-action",!!undo);t.classList.add("on");
+  clearTimeout(toastTimer);toastTimer=setTimeout(()=>t.classList.remove("on"),undo?6000:2200);
+}
 
-/* ===== Lista de comps ===== */
-function renderList(){
-  const q=$("#csearch").value.toLowerCase();
-  const matches=itemsForView(S.comps,"lane").filter(c=>!q||c.name.toLowerCase().includes(q)||Object.values(c.lanes).flat().some(n=>n.toLowerCase().includes(q)));
-  const selected=cur();
-  $("#draft-comp").innerHTML=[selected,...matches.filter(c=>c!==selected)]
-    .map(c=>`<option value="${esc(c.id)}">${esc(c.name)}</option>`).join("");
-  const list=$("#clist");
-  clearTeamControls(list);
-  list.innerHTML=matches
-   .map(c=>{const firsts=compositionPreview(c);
-     return `<div class="composition-item"><button class="ci${c.id===S.cur?" on":""}" aria-pressed="${c.id===S.cur}" data-id="${c.id}" title="${esc(c.name)}"><b>${isSavedTactic(c)?iconMarkup("book"):sideDot(c)}${esc(c.name)}</b>
-      <span class="mini">${firsts.map(img).join("")||'<small style="color:var(--mut)">vazia</small>'}</span></button><span class="composition-menu" data-team-control></span></div>`}).join("")||'<p class="composition-empty" role="status">Nenhuma composição encontrada. Tente outro nome ou campeão.</p>';
-  list.querySelectorAll(".composition-menu").forEach((host,index)=>{
-    const {id,name}=matches[index];
-    mountCompositionMenu(host,name,()=>{
-      duplicateComposition(id);
-      $("#clist .ci.on")?.focus({preventScroll:true});
-    },async()=>{
-      if(await deleteComp(id)) ($("#clist .ci.on")||$("#clist .ci")||$("#new")).focus({preventScroll:true});
-    });
+/* ===== Comps: nossas e adversárias ===== */
+const compById=id=>S.comps.find(c=>c.id===id);
+const rival=()=>rivalOf(cur(),S.comps);
+// Comp que recebe as edições do quadro e da grade de campeões.
+function target(){
+  if(S.view!=="map"&&activeSide==="rival"){const r=rival();if(r)return r;activeSide="us";}
+  return cur();
+}
+// Comp do lado do quadro onde está o elemento; fora do quadro, a comp aberta.
+const compOf=el=>compById(el?.closest?.("[data-comp-id]")?.dataset.compId)||cur();
+const touch=(comp=cur())=>{comp.updated=Date.now();settleTeam(comp)};
+const matchupItem=c=>({id:c.id,name:c.name,title:c.name,preview:compositionPreview(c).map(img).join(""),champions:Object.values(c.lanes).flat()});
+
+function renderMatchup(){
+  const host=$("#editor .matchup-bar");
+  if(!host)return;
+  const c=cur(),r=rival();
+  mountMatchupBar(host,{
+    ours:oursOf(S.comps).map(matchupItem),enemies:enemiesOf(S.comps).map(matchupItem),
+    current:matchupItem(c),rival:r?matchupItem(r):null,side:draftOf(c).side,rivalOpgg:r?opggOf(r):"",
+    onSelectOurs:id=>{selectComp(id);focusMatchup("ours")},
+    onSelectRival:handleRivalSelect,
+    onSide:side=>{draftOf(cur()).side=side;touch();save();renderEditor();renderGrid();$(`#editor [data-side-option="${side}"]`)?.focus({preventScroll:true})},
+    onNew:team=>newComp(team),
+    onMove:moveComp,
+    onOpgg:id=>void editOpggLink(compById(id)),
+    onRename:id=>void renameComp(id),
+    onRenameTo:handleRenameTo,
+    onDuplicate:duplicateComposition,
+    onDelete:id=>void deleteComp(id),
   });
 }
-function selectComp(id){S.cur=id;if(!isSavedTactic(S.comps.find(c=>c.id===id)))S.lastComp=id;save(false);renderAll();publishTeamRoute("comps")}
-$("#clist").onclick = event => {
-  const item = event.target.closest(".ci");
-  if (!item || item.dataset.id === S.cur) return;
-  selectComp(item.dataset.id);
-  $("#clist .ci[aria-pressed=true]")?.focus({ preventScroll: true });
-};
-$("#draft-comp").onchange=e=>selectComp(e.target.value);
-$("#csearch").oninput=renderList;
-$("#new").onclick=()=>{const c=blank("Comp "+(S.comps.length+1));S.comps.unshift(c);S.cur=c.id;active="top";save();renderAll();publishTeamRoute("comps");setTimeout(()=>{$("#cname").focus();$("#cname").select()},0)};
+const focusMatchup=kind=>requestAnimationFrame(()=>$(`#editor [data-matchup="${kind}"]`)?.focus({preventScroll:true}));
+// Põe a adversária no draft da comp nossa e registra o confronto (a tática dele fica em Táticas › Confrontos).
+function faceEnemy(ours,enemyId){
+  setRival(ours,enemyId);
+  if(enemyId)addMatchup(ours,enemyId);
+  touch(ours);
+}
+function handleRivalSelect(id){
+  faceEnemy(cur(),id);
+  activeSide=id?"rival":"us";
+  save();renderEditor();renderGrid();focusMatchup("rival");
+  toast(id?`Adversária: ${compById(id)?.name}`:"Adversária removida do draft");
+}
+function selectComp(id){
+  S.cur=id;
+  if(!isEnemy(compById(id)))S.lastComp=id;
+  if(!rival())activeSide="us";
+  save(false);renderAll();publishTeamRoute("comps");
+}
+// Na Ordem do draft, a comp aberta é sempre nossa; uma adversária aberta em Táticas
+// leva à comp nossa que a enfrenta (ou à última usada).
+function keepOurCompositionInDraft(){
+  if(S.view!=="draft")return;
+  const c=cur();
+  if(c&&!isEnemy(c))return;
+  const facing=c&&oursOf(S.comps).find(x=>x.draft?.rival===c.id);
+  const next=facing||S.comps.find(x=>x.id===S.lastComp&&!isEnemy(x))||oursOf(S.comps)[0];
+  if(next){S.cur=next.id;activeSide=facing?"rival":"us";}
+}
+function newComp(team="mine"){
+  const enemy=team==="enemy",count=(enemy?enemiesOf(S.comps):oursOf(S.comps)).length+1;
+  const faceIt=enemy&&S.view==="draft"&&!isEnemy(cur());
+  const name=enemy?`Adversária ${count}`:`Comp ${count}`;
+  const c=blank(name);settleTeam(c,team);S.comps.unshift(c);active="top";
+  if(faceIt){faceEnemy(cur(),c.id);activeSide="rival";}
+  else{S.cur=c.id;S.tacticsGeneral=false;if(!enemy)S.lastComp=c.id;activeSide="us";}
+  save();renderAll();publishTeamRoute("comps");
+  if(faceIt){focusMatchup("rival");toast(`Adversária "${name}" criada. Para trocar o nome, use o lápis no card do lado.`);}
+  else setTimeout(()=>{$("#cname").focus();$("#cname").select()},0);
+}
+// Nome editado direto no card do lado.
+function handleRenameTo(id,value){
+  const c=compById(id),name=String(value||"").trim();
+  if(!c||!name||name===c.name)return;
+  c.name=name;touch(c);save();
+  if(id===S.cur){$("#cname").value=name;$("#cname").title=name;}
+  renderEditor();
+}
+// Campeão solto no lado adversário vazio: cria a adversária já com ele, na rota mais provável.
+function handleRivalChampionDrop(name,lane){
+  const ours=cur();
+  if(!ours||isEnemy(ours)||rival())return;
+  const c=blank(`Adversária ${enemiesOf(S.comps).length+1}`);settleTeam(c,"enemy");S.comps.unshift(c);
+  c.lanes[lane]=[name];active=lane;
+  faceEnemy(ours,c.id);activeSide="rival";
+  save();renderAll();publishTeamRoute("comps");
+  toast(`Adversária "${c.name}" criada com ${name}`);
+}
+async function renameComp(id){
+  const c=compById(id);if(!c)return;
+  const name=(await askName("Renomear composição",c.name,"Nome da composição"))?.trim();
+  if(!name||name===c.name)return;
+  c.name=name;touch(c);save();
+  if(id===S.cur){$("#cname").value=name;$("#cname").title=name;}
+  renderEditor();focusMatchup(id===S.cur?"ours":"rival");
+}
 function duplicateComposition(id: string) {
-  const source = S.comps.find(comp => comp.id === id);
+  const source = compById(id);
   if (!source) return;
-
   const copy = createCompositionCopy(source, uid(), Date.now());
   S.comps.unshift(copy);
-  S.cur = copy.id;
+  // Na Ordem do draft, a cópia de uma adversária vira a adversária do quadro.
+  if (isEnemy(copy) && S.view === "draft" && !isEnemy(cur())) { faceEnemy(cur(), copy.id); activeSide = "rival"; }
+  else S.cur = copy.id;
   save();
   renderAll();
   publishTeamRoute("comps");
+  focusMatchup(isEnemy(copy) && S.view === "draft" ? "rival" : "ours");
 }
-async function deleteComp(id){const c=S.comps.find(c=>c.id===id);if(!c || !await confirmAction(`Excluir a comp "${c.name}"?`, "Excluir composição"))return false;S.comps=S.comps.filter(x=>x.id!==c.id);if(!S.comps.length)S.comps.push(blank());if(!S.comps.some(x=>x.id===S.cur))S.cur=S.comps[0].id;save();renderAll();publishTeamRoute("comps");return true};
+async function deleteComp(id){
+  const c=compById(id);
+  if(!c||!await confirmAction(`Excluir a comp "${c.name}"? As táticas dela também saem.`,"Excluir composição"))return false;
+  writeTactic(S,c.id,c.name,"",Date.now(),[]);
+  S.comps=S.comps.filter(x=>x.id!==c.id);
+  for(const x of S.comps)if(x.draft?.rival===c.id)setRival(x,null);
+  dropMatchupTactics();
+  if(!S.comps.length)S.comps.push(blank());
+  if(!compById(S.cur))S.cur=(S.comps.find(x=>x.id===S.lastComp&&!isEnemy(x))||oursOf(S.comps)[0]||S.comps[0]).id;
+  if(!rival())activeSide="us";
+  save();renderAll();publishTeamRoute("comps");
+  focusMatchup("ours");
+  return true;
+}
+
+function dropMatchupTactics(){
+  for(const id of pruneMatchups(S.comps))writeTactic(S,matchupKey(id),"","",Date.now(),[]);
+  if(S.tacticsMatchup&&!findMatchup(S.comps,S.tacticsMatchup))S.tacticsMatchup=null;
+}
+// Passa a comp de uma lista para a outra (menu ⋯ da barra de confronto).
+function moveComp(id){
+  const c=compById(id);if(!c)return;
+  const toEnemy=!isEnemy(c);
+  settleTeam(c,toEnemy?"enemy":"mine");touch(c);
+  if(toEnemy){
+    if(id===S.cur){
+      const next=S.comps.find(x=>x.id===S.lastComp&&!isEnemy(x))||oursOf(S.comps)[0];
+      if(next){S.cur=next.id;faceEnemy(next,id);activeSide="rival";}
+    }
+  }else{
+    for(const x of S.comps)if(x.draft?.rival===id)setRival(x,null);
+    dropMatchupTactics();
+    if(id===S.cur)S.lastComp=id;
+    if(!rival())activeSide="us";
+  }
+  save();renderAll();publishTeamRoute("comps");
+  focusMatchup(toEnemy&&rival()?.id===id?"rival":"ours");
+  toast(toEnemy?`"${c.name}" agora é adversária`:`"${c.name}" agora é nossa`);
+}
 
 /* ===== Editor ===== */
-function optionHTML(n,l,i){
-  return `<div class="chip ${i===0?"primary":"alternative"}" draggable="true" data-n="${esc(n)}" data-from="${l}">
-    <button class="champ-priority" data-champion-slot="${i}" data-champion-name="${esc(n)}" data-priority="${esc(n)}" data-lane="${l}" aria-label="Priorizar ${esc(n)} em ${LN[l].n}" title="${i+1}ª opção · tornar principal">${img(n)}${i===0?`<span><small>Principal</small><b>${esc(n)}</b></span>`:""}</button>
-    <span class="option-menu" data-team-control data-option-index="${i}"></span>
-  </div>`;
-}
 // Arte em alta (1215×717) direto do Data Dragon; se não carregar, usa a cópia local menor.
 function pickArt(name){
   const local=name?champArt(name)?.splash:"";
@@ -185,121 +305,72 @@ function pickArt(name){
   return `<img alt="" class="pick-splash" loading="lazy" src="https://ddragon.leagueoflegends.com/cdn/img/champion/splash/${id}_0.jpg" onerror="this.onerror=()=>this.remove();this.src='assets/${local}'">`;
 }
 
-function renderDraftLaneNotes(c){
-  const list=$("#notes-lanes");
-  if(!list)return;
-  list.innerHTML=LANES.filter(lane=>c.laneNotes[lane.k]?.trim())
-    .map(lane=>`<li><b>${lane.n}</b> ${esc(c.laneNotes[lane.k])}</li>`).join("");
-  list.hidden=!list.childElementCount;
-}
-
-// Destaca "Anotações da composição" quando o painel tem algo escrito.
-function hasCompNotes(c,dv){
-  if(c.notes?.trim()) return true;
-  if(!dv) return false;
-  const d=draftOf(c);
-  return !!d.note[d.side]?.trim() || LANES.some(lane=>c.laneNotes[lane.k]?.trim());
-}
-const markCompNotes=()=>$("#composition-notes")?.classList.toggle("has-notes",hasCompNotes(cur(),S.view==="draft"));
-// Fora da aba Táticas, uma tática salva só fica aberta se estiver aplicada àquela aba;
-// senão volta para a última comp usada (ou a primeira comp da lista).
-function keepCompositionForView(){
-  if(S.view==="tactics")return;
-  const c=cur();
-  if(!isSavedTactic(c)||tacticShownIn(c,S.view==="draft"?"draft":"lane"))return;
-  const next=S.comps.find(x=>x.id===S.lastComp&&!isSavedTactic(x))||S.comps.find(x=>!isSavedTactic(x));
-  if(next){S.cur=next.id;save();}
-}
 function renderEditor(){
-  keepCompositionForView();
-  const previousComposition = $("#editor").dataset.motionComposition;
-  const c=cur(),dv=S.view==="draft",tv=S.view==="tactics";
-  const view = tv ? "tactics" : dv ? "draft" : "lanes";
-  const previousView = $("#editor").dataset.motionView;
-  const notesOpen=$("#composition-notes")?.open;
-  $("#v-comps").classList.toggle("draft-view",dv);
-  $("#v-comps").classList.toggle("tactics-view",tv);
-  $("#draft-comp").hidden=true;
-  const notes=`<details id="composition-notes" ${notesOpen?"open":""} class="${hasCompNotes(c,dv)?"has-notes":""}"><summary>Anotações da composição<span class="notes-flag" aria-label="tem anotação" title="Esta comp tem anotação">${iconMarkup("edit")}</span></summary><label class="control-label" for="notes">Plano geral</label><textarea id="notes" placeholder="Plano de jogo, condição de vitória…">${esc(c.notes)}</textarea>${dv?`<label class="control-label" for="dnote">Plano do draft · ${DRAFT_SIDE[draftOf(c).side]}</label><textarea id="dnote">${esc(draftOf(c).note[draftOf(c).side])}</textarea><ul id="notes-lanes" class="draft-lane-notes" aria-label="Observações por posição" hidden></ul>`:""}</details>`;
+  if(S.view!=="tactics")S.view="draft";
+  if(adoptRivals(S.comps))save(false);
+  if(S.tacticsMatchup&&!findMatchup(S.comps,S.tacticsMatchup))S.tacticsMatchup=null;
+  keepOurCompositionInDraft();
   const editor = $("#editor");
+  const previousComposition = editor.dataset.motionComposition;
+  const previousView = editor.dataset.motionView;
+  const c=cur(),tv=S.view==="tactics",view=S.view;
+  $("#v-comps").classList.toggle("draft-view",!tv);
+  $("#v-comps").classList.toggle("tactics-view",tv);
   const showPickFeedback = previousComposition === c.id && previousView === view
     ? capturePickFeedback(editor) : undefined;
   const nameInput = $("#cname");
   nameInput.value = c.name;
   nameInput.title = c.name;
-  mountSectionTabs($(".editor-controls .vtog"), "Modo da composição", S.view || "lanes", [
-    { value: "lanes", label: "Opções por posição", panel: "composition-panel" },
+  mountSectionTabs($(".editor-controls .vtog"), "Modo da composição", S.view, [
     { value: "draft", label: "Ordem do draft", panel: "composition-panel" },
     { value: "tactics", label: "Táticas", panel: "composition-panel" },
   ], value => {
     S.view = value;
     save(false);
-    renderEditor();
-    renderList();
+    renderAll();
     publishTeamRoute("comps");
   }, "navigation");
-  const catalog=$("#champ-picker"),gridScroll=$("#grid").scrollTop,tabsScroll=editor.querySelector(".dz-tabs, .tx-tabs")?.scrollTop||0;
+  const catalog=$("#champ-picker"),gridScroll=$("#grid").scrollTop,tabsScroll=editor.querySelector(".tx-tabs")?.scrollTop||0;
   if (editor.contains(catalog)) $("#comps").append(catalog);
   clearTeamControls(editor);
   editor.replaceChildren();
   if (tv) {
-    const txScroll = tabsScroll;
     editor.insertAdjacentHTML("beforeend", `<div id="composition-panel" role="tabpanel" aria-labelledby="tab-tactics">${tacticsHTML(c, {
-      compositions: S.comps, general: !!S.tacticsGeneral, text: readTactic(S, S.tacticsGeneral ? null : c.id),
-      images: readTacticImages(S, S.tacticsGeneral ? null : c.id),
-      hasTactic: id => hasTactic(S, id), panel: tacticPanel(), active, query: tacticQuery, champions: CH, LN, img, esc,
+      compositions: S.comps, general: !!S.tacticsGeneral, drawer: S.tacticsDrawer !== false,
+      hasTactic: id => hasTactic(S, id), matchupId: S.tacticsMatchup, LN, img, esc, pickArt,
     })}</div>`);
-    if (!S.tacticsGeneral && tacticPanel() === "draft") editor.querySelectorAll("[data-swap-lane]").forEach(host => {
-      const lane = host.dataset.swapLane, list = c.lanes[lane];
-      mountPickSwapMenu(host, LN[lane].n, list[0] || "", list.slice(1).map(name => ({ name, portrait: img(name) })), name => {
-        const champions = cur().lanes[lane], index = champions.indexOf(name);
-        if (index < 1) return;
-        champions.splice(index, 1);
-        champions.unshift(name);
-        touch(); save(); renderEditor(); renderList();
-        toast(`${name} agora é o principal em ${LN[lane].n}`);
-      });
-    });
-    loadPrintThumbnails(editor);
+    mountTacticNotesIn(editor, S.tacticsGeneral ? null : S.tacticsMatchup ? matchupKey(S.tacticsMatchup) : c.id);
     const txTabs = editor.querySelector(".tx-tabs");
-    if (txTabs) txTabs.scrollTop = txScroll;
+    if (txTabs) txTabs.scrollTop = tabsScroll;
     editor.dataset.motionComposition = c.id;
     editor.dataset.motionView = view;
     if (previousView !== view) revealContent(editor, true);
+    if (closePicker) renderTarget();
+    return;
+  }
+  if (isEnemy(c)) {
+    // Só há adversárias: a Ordem do draft precisa de uma comp nossa.
+    editor.insertAdjacentHTML("beforeend", `<div id="composition-panel" role="tabpanel" aria-labelledby="tab-draft"><div class="draft-no-ours" role="status">
+      <p>Nenhuma composição nossa ainda. Crie uma para montar o draft contra as adversárias.</p>
+      <button type="button" data-slot="button" data-variant="default" data-size="sm" data-comp-new="mine">${iconMarkup("plus")} Nova composição nossa</button></div></div>`);
+    editor.dataset.motionComposition = c.id;
+    editor.dataset.motionView = view;
     return;
   }
   editor.insertAdjacentHTML("beforeend", `
-  <div id="composition-panel" role="tabpanel" aria-labelledby="tab-${dv ? "draft" : "lanes"}">
-  ${notes}<button data-slot="button" data-variant="default" type="button" class="jump-picker" data-picker>${iconMarkup("plus")} Adicionar campeão</button>
-  ${dv?draftHTML(c, { active, compositions: itemsForView(S.comps,"draft"), LN, img, esc, pickArt }):LANES.map(l=>`<div class="lane${active===l.k?" act":""}${l.k==="ban"?" ban-strip":""}" data-l="${l.k}" style="--lc:var(${l.c})">
-  ${l.k==="ban"?"":pickArt(c.lanes[l.k][0])}
-  <button class="ln lane-label" data-draft-target="${l.k}" aria-pressed="${active===l.k}">${laneIconMarkup(l.k)}${l.n}</button>
-  <div class="chips" data-champion-group="${l.k}">${c.lanes[l.k].map((n,i)=>optionHTML(n,l.k,i)).join("")||'<span class="empty">Adicionar campeão</span>'}</div>
-<span class="lane-note" data-team-control data-note-lane="${l.k}"></span></div>`).join("")}
-  <p class="help">${dv?"Selecione o retrato para torná-lo principal. Para remover, abra o menu do retrato com o botão direito ou Shift+F10.":"Selecione o retrato para priorizar. Arraste ou use o menu ⋯ para reordenar."}</p></div>`);
-  editor.querySelectorAll(".option-menu").forEach(host=>{
-    const {n,from}=host.closest(".chip").dataset;
-    mountChampionMenu(host,n,Number(host.dataset.optionIndex),c.lanes[from].length,
-      direction=>reorderChampion(n,from,direction),()=>removeChampion(n,from));
-  });
+  <div id="composition-panel" role="tabpanel" aria-labelledby="tab-draft">
+  <div class="matchup-bar" data-team-control></div>
+  <button data-slot="button" data-variant="default" type="button" class="jump-picker" data-picker>${iconMarkup("plus")} Adicionar campeão</button>
+  ${draftBoardHTML(c, rival(), { active, activeSide, LN, img, esc, pickArt })}
+  <p class="help">Selecione o retrato para torná-lo principal. Para remover, abra o menu do retrato com o botão direito ou Shift+F10.</p></div>`);
+  renderMatchup();
   editor.querySelectorAll(".dchip").forEach(host=>{
     const {n,from}=host.dataset;
-    mountDraftChampionMenu(host,n,()=>removeChampion(n,from));
-  });
-  editor.querySelectorAll(".lane-note").forEach(host=>{
-    const lane=LN[host.dataset.noteLane];
-    mountLaneNote(host,`Observação de ${lane.n}`,c.laneNotes[lane.k]||"",value=>{
-      c.laneNotes[lane.k]=value;
-      renderDraftLaneNotes(c);
-      markCompNotes();
-      touch();save();
-    });
+    mountDraftChampionMenu(host,n,()=>removeChampion(n,from,compOf(host)));
   });
   editor.querySelectorAll("select[data-pick-position]").forEach(mountTeamSelect);
-  renderDraftLaneNotes(c);
   placePicker();
   $("#grid").scrollTop=gridScroll;
-  const tabs=editor.querySelector(".dz-tabs");if(tabs)tabs.scrollTop=tabsScroll;
   renderTarget();
   editor.dataset.motionComposition = c.id;
   editor.dataset.motionView = view;
@@ -307,99 +378,101 @@ function renderEditor(){
   else if (previousView !== view) revealContent(editor, true);
   else showPickFeedback?.();
 }
-const touch=()=>{cur().updated=Date.now()};
+const focusDraftTarget=(lane,side=activeSide)=>$(`#editor [data-draft-target="${lane}"][data-draft-side="${side}"]`)?.focus({preventScroll:true});
 $("#v-comps").addEventListener("input",e=>{
+  if(e.target.id!=="cname")return;
   const c=cur();
-  if(e.target.id==="cname"){
-    c.name=e.target.value;
-    e.target.title=c.name;
-    touch();save();renderList();
-  }
-  else if(e.target.id==="notes"){c.notes=e.target.value;touch();save();markCompNotes()}
-  else if(e.target.id==="tactics-text"){
-    const general=!!S.tacticsGeneral;
-    writeTactic(S,general?null:c.id,c.name,e.target.value,Date.now());save();
-    const tab=$(general?"#editor [data-tactic-general]":`#editor [data-tactic-comp="${CSS.escape(c.id)}"]`);
-    const has=!!e.target.value.trim(),mark=tab?.querySelector(".tx-has");
-    if(has&&!mark)tab?.querySelector("b")?.insertAdjacentHTML("beforeend",`<span class="tx-has" title="Tem anotação de tática">${iconMarkup("edit")}</span>`);
-    else if(!has)mark?.remove();
-  }
-  else if(e.target.id==="dnote"){const d=draftOf(c);d.note[d.side]=e.target.value;touch();save();markCompNotes()}
+  c.name=e.target.value;
+  e.target.title=c.name;
+  touch();save();
+  if(S.view==="tactics"){
+    const label=$(`#editor [data-tactic-comp="${CSS.escape(c.id)}"] b`)?.firstChild;
+    if(label)label.textContent=c.name;
+    if(S.tacticsMatchup||allMatchups(S.comps).some(x=>x.enemy===c))renderEditor();
+    else{const title=$("#tx-title")?.firstChild;if(title&&!S.tacticsGeneral)title.textContent=`Táticas · ${c.name}`;}
+  } else renderMatchup();
 });
 $("#editor").addEventListener("change",e=>{
   if(!e.target.matches("select[data-pick-position]"))return;
-  const d=draftOf(cur()),order=d.order[d.side],i=Number(e.target.dataset.pickPosition);
+  const rivalSide=e.target.dataset.draftSide==="rival",owner=rivalSide?rival():cur();
+  if(!owner)return;
+  const order=rivalSide?rivalOrder(cur(),owner):draftOf(owner).order[draftOf(owner).side],i=Number(e.target.dataset.pickPosition);
   const lane=e.target.value,j=order.indexOf(lane);
   [order[i],order[j]]=[lane,order[i]];
-  active=lane;touch();save();renderEditor();renderList();
-  requestAnimationFrame(()=>$(`[data-pick-position="${i}"] + .team-select button`)?.focus({preventScroll:true}));
+  active=lane;activeSide=rivalSide?"rival":"us";touch(owner);save();renderEditor();
+  const side=rivalSide?"rival":"us";
+  requestAnimationFrame(()=>$(`[data-pick-position="${i}"][data-draft-side="${side}"] + .team-select button`)?.focus({preventScroll:true}));
 });
-function reorderChampion(name,lane,direction){
-  const champions=cur().lanes[lane],index=champions.indexOf(name);
-  if(direction===undefined){
-    champions.splice(index,1);
-    champions.unshift(name);
-  }else{
-    const next=index+direction;
-    [champions[index],champions[next]]=[champions[next],champions[index]];
-  }
-  active=lane;touch();save();renderEditor();renderList();renderGrid();
-  if(S.view==="draft"){
-    $(`[data-draft-target="${lane}"]`)?.focus({preventScroll:true});
-  }else{
-    const button=[...document.querySelectorAll("[data-priority]")].find(b=>b.dataset.priority===name&&b.dataset.lane===lane);
-    button?.focus({preventScroll:true});
-  }
+function reorderChampion(name,lane,comp=target()){
+  const champions=comp.lanes[lane],index=champions.indexOf(name);
+  if(index<0)return;
+  champions.splice(index,1);
+  champions.unshift(name);
+  active=lane;activeSide=comp===cur()?"us":"rival";touch(comp);save();renderEditor();renderGrid();
+  focusDraftTarget(lane);
 }
-function removeChampion(name,lane){
-  const c=cur();
-  c.lanes[lane]=c.lanes[lane].filter(champion=>champion!==name);
-  touch();save();renderEditor();renderList();renderGrid();
-  $(`[data-draft-target="${lane}"]`)?.focus({preventScroll:true});
+function removeChampion(name,lane,comp=target()){
+  comp.lanes[lane]=comp.lanes[lane].filter(champion=>champion!==name);
+  touch(comp);save();renderEditor();renderGrid();
+  focusDraftTarget(lane,comp===cur()?"us":"rival");
 }
 $("#editor").addEventListener("click",e=>{
   if(e.target.closest("[data-picker]")){ openPicker(); return }
+  if(e.target.closest("[data-new-rival]")){ newComp("enemy"); return }
+  if(e.target.closest("[data-choose-rival]")){ $("#editor .matchup-bar [data-matchup=\"rival\"]")?.click(); return }
   const priority=e.target.closest("[data-priority]");
-  if(priority){reorderChampion(priority.dataset.priority,priority.dataset.lane);return}
+  if(priority){reorderChampion(priority.dataset.priority,priority.dataset.lane,compOf(priority));return}
   const rm=e.target.closest("[data-rm]");
-  if(rm){removeChampion(rm.dataset.rm,rm.closest("[data-l]").dataset.l);return}
+  if(rm){removeChampion(rm.dataset.rm,rm.closest("[data-l]").dataset.l,compOf(rm));return}
 
-  const sideButton=e.target.closest("button[data-side]");
-  if(sideButton){
-    const side=sideButton.dataset.side;
-    const group=sideButton.closest(".dside") ? ".dside" : ".dz-names";
-    draftOf(cur()).side=side;
-    touch();save();renderEditor();renderList();
-    $(`${group} button[data-side="${side}"]`)?.focus({preventScroll:true});
-    return;
-  }
-  const target=e.target.closest("[data-draft-target]");
-  if(target){
-    active=target.dataset.draftTarget;
-    renderEditor();
-    $(`[data-draft-target="${active}"]`).focus({preventScroll:true});
+  const draftTarget=e.target.closest("[data-draft-target]");
+  if(draftTarget){
+    active=draftTarget.dataset.draftTarget;
+    activeSide=draftTarget.dataset.draftSide||"us";
+    if(S.view==="tactics"){renderEditor();openTacticsPicker();return}
+    renderEditor();renderGrid();
+    focusDraftTarget(active);
     return;
   }
   if(e.target.closest("details,[data-team-control]")||["INPUT","TEXTAREA","SELECT","OPTION"].includes(e.target.tagName))return;
-  const ln=e.target.closest("[data-l]");if(ln&&ln.dataset.l!==active){active=ln.dataset.l;renderEditor()}
+  const ln=e.target.closest("[data-comp-id] [data-l]");
+  const side=ln?.closest("[data-board-side]")?.dataset.boardSide;
+  if(ln&&(ln.dataset.l!==active||side!==activeSide)){active=ln.dataset.l;activeSide=side||"us";renderEditor();renderGrid()}
+  if(ln&&S.view==="tactics")openTacticsPicker();
 });
+// Em Táticas o seletor abre em diálogo e mostra o slot escolhido.
+function openTacticsPicker(){openPicker();renderGrid();renderTarget()}
 // arrastar e soltar
 let drag=null;
-document.addEventListener("dragstart",e=>{const ch=e.target.closest(".chip,.ch,.dm,.tx-prio-champ");if(!ch)return;drag={n:ch.dataset.n,from:ch.dataset.from||null};e.dataTransfer.setData("text/plain",ch.dataset.n);e.dataTransfer.effectAllowed="move"});
-$("#editor").addEventListener("dragover",e=>{const ln=e.target.closest("[data-l]");if(!ln||!drag)return;e.preventDefault();document.querySelectorAll(".drop").forEach(x=>x!==ln&&x.classList.remove("drop"));ln.classList.add("drop")});
+document.addEventListener("dragstart",e=>{const ch=e.target.closest(".chip,.ch,.dm,.pk-target[data-n]");if(!ch)return;drag={n:ch.dataset.n,from:ch.dataset.from||null,comp:ch.closest("[data-comp-id]")?.dataset.compId||null,el:ch.closest(".pk,.bsq")||ch};e.dataTransfer.setData("text/plain",ch.dataset.n);e.dataTransfer.effectAllowed="move";if(drag.from)requestAnimationFrame(()=>drag?.el.classList.add("dragging"))});
+$("#editor").addEventListener("dragover",e=>{const ln=e.target.closest("[data-comp-id] [data-l],[data-empty-rival][data-l]");if(!ln||!drag)return;e.preventDefault();document.querySelectorAll(".drop").forEach(x=>x!==ln&&x.classList.remove("drop"));ln.classList.add("drop")});
 $("#editor").addEventListener("dragleave",e=>{const ln=e.target.closest("[data-l]");if(ln&&!ln.contains(e.relatedTarget))ln.classList.remove("drop")});
 $("#editor").addEventListener("drop",e=>{
-  const ln=e.target.closest("[data-l]");if(!ln||!drag)return;e.preventDefault();
-  const to=ln.dataset.l,c=cur(),n=drag.n;
-  if(drag.from)c.lanes[drag.from]=c.lanes[drag.from].filter(x=>x!==n);
+  const ln=e.target.closest("[data-comp-id] [data-l],[data-empty-rival][data-l]");if(!ln||!drag)return;e.preventDefault();
+  if(ln.hasAttribute("data-empty-rival")){
+    const n=drag.n,from=drag.from,src=drag.comp?compById(drag.comp):null;drag=null;
+    if(from&&src){src.lanes[from]=src.lanes[from].filter(x=>x!==n);touch(src)}
+    handleRivalChampionDrop(n,ln.dataset.l);return;
+  }
+  const to=ln.dataset.l,c=compOf(ln),n=drag.n,source=drag.comp?compById(drag.comp):null;
+  if(drag.from&&source){source.lanes[drag.from]=source.lanes[drag.from].filter(x=>x!==n);if(source!==c)touch(source)}
   const arr=c.lanes[to].filter(x=>x!==n);
-  const over=e.target.closest(".chip,.dm,.tx-prio-champ");let idx=ln.dataset.bi!=null?Math.min(+ln.dataset.bi,arr.length):arr.length;
+  const over=e.target.closest(".chip,.dm");let idx=ln.dataset.bi!=null?Math.min(+ln.dataset.bi,arr.length):arr.length;
   if(over&&over.dataset.n!==n&&ln.dataset.bi==null){idx=arr.indexOf(over.dataset.n);const r=over.getBoundingClientRect();if(e.clientX>r.left+r.width/2)idx++}
-  arr.splice(idx,0,n);c.lanes[to]=arr;drag=null;active=to;touch();save();renderEditor();renderList();renderGrid();
+  arr.splice(idx,0,n);c.lanes[to]=arr;drag=null;active=to;activeSide=c===cur()?"us":"rival";touch(c);save();renderEditor();renderGrid();
 });
-document.addEventListener("dragend",()=>{drag=null;document.querySelectorAll(".drop").forEach(x=>x.classList.remove("drop"))});
+// Campeão arrastado de um card e solto fora dos cards: sai da lista, com Desfazer. Cancelar (Esc) ou soltar fora da janela não remove.
+document.addEventListener("dragend",e=>{
+  const d=drag;drag=null;
+  document.querySelectorAll(".drop,.dragging").forEach(x=>x.classList.remove("drop","dragging"));
+  const inside=e.clientX>0&&e.clientY>0&&e.clientX<innerWidth&&e.clientY<innerHeight;
+  if(!d||!d.from||!d.comp||!inside)return;
+  const c=compById(d.comp);if(!c||!c.lanes[d.from]?.includes(d.n))return;
+  const lane=d.from,before=[...c.lanes[lane]];
+  c.lanes[lane]=before.filter(x=>x!==d.n);touch(c);save();renderEditor();renderGrid();
+  toast(`${d.n} removido`,()=>{c.lanes[lane]=before;touch(c);save();renderEditor();renderGrid()});
+});
 
-/* ===== Visão de draft (ordem de picks e bans) ===== */
 /* ===== Grade de campeões ===== */
 let role="all";
 const ROLEBTN=[{k:"all",n:"Todos"},...LANES.filter(l=>l.k!=="ban")];
@@ -407,20 +480,22 @@ $("#roles").innerHTML=ROLEBTN.map(({k,n})=>`<button data-slot="button" data-vari
 $("#roles").onclick=e=>{const b=e.target.closest("button");if(!b)return;role=b.dataset.r;document.querySelectorAll("#roles button").forEach(x=>{x.classList.toggle("on",x===b);x.setAttribute("aria-pressed",String(x===b))});resetGrid()};
 const resetGrid=()=>{renderGrid();$("#grid").scrollTop=0};$("#search").oninput=resetGrid;$("#sort").onchange=resetGrid;
 function renderTarget(){
-  const c=cur();
+  const c=target(),us=cur(),rivalSide=c!==us;
   $("#grid").querySelectorAll(".ch").forEach(button => button.setAttribute("aria-pressed", c.lanes[active].includes(button.dataset.n)));
-  // A lane de destino fica ao lado de "Ordenar por"; o quadro de destino acima saiu.
-  const draft=S.view==="draft",d=draftOf(c),us=d.side[0].toUpperCase();
-  const label=pos=>draft&&pos.k!=="ban"?`${PICKNAME[us+(d.order[d.side].indexOf(pos.k)+1)]} · ${pos.n}`:pos.n;
-  $("#target").replaceChildren();$("#target").hidden=true;
-  const slot=$("#lane-target-slot");
-  clearTeamControls(slot);
-  slot.innerHTML=`<select id="pick-target" data-team-select="lane" aria-labelledby="lane-target-label">${LANES.map(pos=>`<option value="${pos.k}" ${pos.k===active?"selected":""}>${label(pos)}</option>`).join("")}</select>`;
-  mountTeamSelect($("#pick-target"));
+  // Qual slot recebe o campeão: no lado adversário, os picks seguem a ordem dele.
+  const side=rivalSide?oppositeSide(draftOf(us).side):draftOf(us).side,team=side[0].toUpperCase();
+  const order=rivalSide?rivalOrder(us,c):draftOf(us).order[side];
+  const pos=LANES.find(p=>p.k===active);
+  const slot=active==="ban"||!pos?"Bans":`${PICKNAME[team+(order.indexOf(active)+1)]} · ${pos.n}`;
+  const heading=$("#target");
+  heading.hidden=false;
+  heading.className=`draft-editing-target ${side}`;
+  heading.setAttribute("aria-live","polite");
+  heading.textContent=`Editando: ${slot} · ${c.name}`;
 }
-$("#lane-target-slot").addEventListener("change",e=>{if(e.target.id!=="pick-target")return;active=e.target.value;renderEditor();requestAnimationFrame(()=>$("#pick-target-trigger")?.focus({preventScroll:true}))});
 function renderGrid(){
-  const q=$("#search").value.toLowerCase().replace(/[^a-z]/g,""),c=cur(),srt=$("#sort").value;
+  if(S.view==="tactics"&&!closePicker)return;
+  const q=$("#search").value.toLowerCase().replace(/[^a-z]/g,""),c=target(),srt=$("#sort").value;
   const where={};for(const l of LANES)for(const n of c.lanes[l.k])(where[n]=where[n]||[]).push(l);
   let L=CH.filter(ch=>(!q||ch.n.toLowerCase().replace(/[^a-z]/g,"").includes(q))&&(role==="all"||ch.r.includes(role)));
   if(srt==="ws")L.sort((a,b)=>((WS.c[b.n]||[0])[0]-(WS.c[a.n]||[0])[0])||a.n.localeCompare(b.n));
@@ -434,9 +509,9 @@ function renderGrid(){
   $("#gfoot").textContent="";
 }
 $("#grid").onclick=e=>{
-  const ch=e.target.closest(".ch");if(!ch)return;const n=ch.dataset.n,c=cur(),a=c.lanes[active];
+  const ch=e.target.closest(".ch");if(!ch)return;const n=ch.dataset.n,c=target(),a=c.lanes[active];
   if(a.includes(n))c.lanes[active]=a.filter(x=>x!==n);else a.push(n);
-  touch();save();renderEditor();renderList();renderGrid();
+  touch(c);save();renderEditor();renderGrid();
   [...$("#grid").querySelectorAll(".ch")].find(button=>button.dataset.n===n)?.focus({preventScroll:true});
 };
 
@@ -466,186 +541,185 @@ function placePicker(){
   else if(catalog.parentElement!==$("#comps"))$("#comps").append(catalog);
 }
 window.matchMedia("(min-width: 1100px)").addEventListener("change",()=>placePicker());
-/* ===== Táticas salvas ===== */
-let tacticQuery = "";
-const tacticPanel = () => S.tacticsPanel === "lane" || S.tacticsPanel === "priority" ? "lane" : "draft";
-// "Salvar tática" copia os picks e o texto da comp (ou o texto geral) para uma tática própria; "Nova tática" começa vazia.
-async function createTactic(source, copyText = false) {
-  const text = copyText ? readTactic(S, source ? source.id : null) : "";
-  const images = copyText ? readTacticImages(S, source ? source.id : null) : [];
-  const suggested = source ? `Tática · ${source.name}` : copyText ? "Tática geral" : "Nova tática";
-  const name = (await askName("Nome da tática", suggested, "Nome da tática"))?.trim();
-  if (!name) return;
-  const item = createSavedTactic(source, uid(), name, Date.now());
-  S.comps.unshift(item);
-  if (text.trim() || images.length) writeTactic(S, item.id, item.name, text, Date.now(), images);
-  S.tacticsGeneral = false;
-  S.cur = item.id;
-  active = tacticPanel() === "draft" ? draftOf(item).order[draftOf(item).side][0] : "top";
-  save(); renderAll(); publishTeamRoute("comps");
-  toast(copyText ? `Tática "${name}" salva` : `Tática "${name}" criada`);
-  $("#editor .tx-tabs [aria-pressed=true]")?.focus({ preventScroll: true });
-}
-async function deleteTactic() {
-  const item = cur();
-  if (!isSavedTactic(item) || !await confirmAction(`Excluir a tática "${item.name}"?`, "Excluir tática")) return;
-  writeTactic(S, item.id, item.name, "", Date.now(), []);
-  S.comps = S.comps.filter(x => x.id !== item.id);
-  if (!S.comps.some(x => !isSavedTactic(x))) S.comps.push(blank());
-  S.cur = (S.comps.find(x => !isSavedTactic(x)) || S.comps[0]).id;
-  save(); renderAll(); publishTeamRoute("comps");
-  $("#editor [data-tactic-new]")?.focus({ preventScroll: true });
-}
-function toggleTacticChampion(name) {
-  const c = cur(), list = c.lanes[active];
-  if (!isSavedTactic(c)) return;
-  if (list.includes(name)) c.lanes[active] = list.filter(x => x !== name);
-  else if (active !== "ban" || list.length < 5) list.push(name);
-  else { toast("Os 5 bans já estão preenchidos"); return; }
-  touch(); save(); renderEditor(); renderList();
-  $(`#editor [data-tactic-champ="${CSS.escape(name)}"]`)?.focus({ preventScroll: true });
-}
+/* ===== Táticas ===== */
 // Botão direito no OP.GG troca o link; sem link, o clique esquerdo também pede.
-async function editOpggLink() {
-  const item=cur(),value=await askName("Link do OP.GG do time",tacticOpggOf(item),"Endereço (deixe vazio para remover)");
+// Na tática de um confronto, o OP.GG é o da adversária dele.
+const opggTarget=()=>S.tacticsMatchup?findMatchup(S.comps,S.tacticsMatchup)?.enemy||cur():cur();
+async function editOpggLink(target) {
+  const item=target||cur(),value=await askName("Link do OP.GG do time adversário",opggOf(item),"Endereço (deixe vazio para remover)");
   if (value===undefined) return;
   const link=normalizeOpggLink(value);
   if (link===null) { toast("Link inválido. Cole o endereço completo do OP.GG."); return; }
-  setTacticOpgg(item,link);touch();save();renderEditor();
+  setOpgg(item,link);touch(item);save();renderEditor();
   toast(link?"Link do OP.GG salvo":"Link do OP.GG removido");
-  $("#editor [data-tactic-opgg]")?.focus({ preventScroll: true });
+  ($("#editor [data-tactic-opgg]")||$("#editor [data-matchup-opgg]"))?.focus({ preventScroll: true });
 }
 $("#editor").addEventListener("contextmenu", e => {
   if (!e.target.closest("[data-tactic-opgg]")) return;
   e.preventDefault();
-  void editOpggLink();
+  void editOpggLink(opggTarget());
 });
-/* ===== Prints das táticas ===== */
-// O app principal guarda cada print à parte (window.weblolImages); aberto sozinho, fica só neste navegador.
-const localImages = {
-  async save(data) { const id = "local-" + uid(); try { localStorage.setItem("lol-img-" + id, data) } catch {} return { id, shared: false } },
-  async load(id) { try { return localStorage.getItem("lol-img-" + id) } catch { return null } },
-};
-const printStore = () => { try { return (window.parent as any)?.weblolImages || localImages } catch { return localImages } };
-const tacticKey = () => S.tacticsGeneral ? null : cur().id;
-function loadPrintThumbnails(root) {
-  root.querySelectorAll("img[data-print-src]").forEach(image => {
-    void printStore().load(image.dataset.printSrc).then(data => {
-      if (data) image.src = data;
-      else image.closest(".tx-print")?.classList.add("missing");
-    });
-  });
+/* ===== Bloco de notas das táticas ===== */
+// O editor (Tiptap) vive num elemento próprio que sobrevive às re-renderizações do #editor;
+// trocar de tática recria o editor com o documento dela.
+let notesHost = null, noteChampionList = null;
+const noteChampions = () => noteChampionList ||= CH.map(ch => ({ name: ch.n, portrait: champArt(ch.n)?.portrait ? lolAsset(champArt(ch.n).portrait) : "" }));
+function markTacticTab(compId) {
+  const tab = $(compId === null ? "#editor [data-tactic-general]" : isMatchupKey(compId) ? `#editor [data-tactic-matchup="${CSS.escape(compId.slice(3))}"]` : `#editor .tx-tabs [data-tactic-comp="${CSS.escape(compId)}"]`);
+  const has = hasTactic(S, compId), mark = tab?.querySelector(".tx-has");
+  if (has && !mark) tab?.querySelector("b")?.insertAdjacentHTML("beforeend", `<span class="tx-has" title="Tem anotação de tática">${iconMarkup("edit")}</span>`);
+  else if (!has) mark?.remove();
 }
-async function addPrints(files) {
-  const images = [...files].filter(file => file.type.startsWith("image/"));
-  if (!images.length) return;
-  const key = tacticKey(), name = cur().name, ids = [];
-  let localOnly = false, failed = "";
-  for (const file of images) {
-    try {
-      const result = await printStore().save(await compressImage(file));
-      ids.push(result.id);
-      if (!result.shared) localOnly = true;
-      if (result.error) failed = result.error;
-    } catch (error) { failed = error.message || "erro"; }
+function handleTacticNotesChange(compId, doc) {
+  const entry = isMatchupKey(compId) ? findMatchup(S.comps, compId.slice(3)) : null;
+  const comp = compId === null || entry ? null : compById(compId);
+  if (compId !== null && !comp && !entry) return;
+  writeTacticDocument(S, compId, entry ? matchupTitle(entry.ours, entry.enemy) : comp?.name || "", doc, Date.now());
+  // As anotações antigas da comp já estão no documento gravado.
+  if (comp && clearCompNotes(comp)) touch(comp);
+  save();
+  markTacticTab(compId);
+}
+function mountTacticNotesIn(root, compId) {
+  const slot = root.querySelector("[data-tactic-notes-slot]");
+  if (!slot) return;
+  const key = compId ?? "geral";
+  if (!notesHost) {
+    notesHost = document.createElement("div");
+    notesHost.className = "tx-notes-host";
+    notesHost.innerHTML = `<p class="tx-notes-loading">Carregando o bloco de notas…</p>`;
   }
-  if (!ids.length) { toast(`Não consegui adicionar o print (${failed}).`); return; }
-  writeTactic(S, key, name, readTactic(S, key), Date.now(), [...readTacticImages(S, key), ...ids]);
-  save(); renderEditor();
-  toast(failed ? "O print ficou só neste navegador: não consegui enviá-lo ao time." : localOnly ? "Print salvo neste navegador." : ids.length > 1 ? `${ids.length} prints adicionados` : "Print adicionado");
+  slot.replaceWith(notesHost);
+  const store = printStore();
+  const props = {
+    doc: readTacticDocument(S, compId), labelledBy: "tx-title", champions: noteChampions(), store, compressImage, toast,
+    sketch: attrs => openPrintSketch({ attrs, store, compressImage, toast }),
+    onChange: doc => handleTacticNotesChange(compId, doc),
+  };
+  void import("./tactic-notes").then(({ mountTacticNotes }) => {
+    if (notesHost.isConnected) mountTacticNotes(notesHost, key, props);
+  }).catch(() => toast("Não consegui abrir o bloco de notas. Recarregue a página."));
 }
-function removePrint(id) {
-  const key = tacticKey();
-  writeTactic(S, key, cur().name, readTactic(S, key), Date.now(), readTacticImages(S, key).filter(x => x !== id));
-  save(); renderEditor();
-  $("#tx-print-file")?.closest("label")?.focus?.({ preventScroll: true });
+function handleTacticDrawerToggle(button) {
+  const open = S.tacticsDrawer === false;
+  S.tacticsDrawer = open;
+  save();
+  const tx = button.closest(".tx"), aside = $("#tx-aside");
+  tx?.classList.toggle("drawer-closed", !open);
+  aside?.toggleAttribute("inert", !open);
+  button.setAttribute("aria-expanded", String(open));
+  button.title = open ? "Esconder a lista de composições e o draft" : "Mostrar a lista de composições e o draft";
 }
-async function openPrint(id) {
-  const data = await printStore().load(id);
-  if (!data) { toast("Este print não está disponível neste navegador."); return; }
-  const image = document.createElement("img");
-  image.src = data; image.alt = "Print da tática"; image.className = "tx-print-full";
-  showDialog({ title: "Print da tática", children: image, className: "wl-panel tx-print-dialog" });
-}
-$("#editor").addEventListener("change", e => { if (e.target.id === "tx-print-file") { void addPrints(e.target.files); e.target.value = ""; } });
-$("#editor").addEventListener("paste", e => {
-  if (e.target.id !== "tactics-text") return;
-  const files = [...(e.clipboardData?.files || [])].filter(file => file.type.startsWith("image/"));
-  if (!files.length) return;
-  e.preventDefault();
-  void addPrints(files);
-});
-$("#editor").addEventListener("dragover", e => { if (e.target.id === "tactics-text" && e.dataTransfer?.types.includes("Files")) e.preventDefault(); });
-$("#editor").addEventListener("drop", e => {
-  if (e.target.id !== "tactics-text" || !e.dataTransfer?.files.length) return;
-  e.preventDefault();
-  void addPrints(e.dataTransfer.files);
-});
-$("#editor").addEventListener("input", e => {
-  if (e.target.id !== "tx-search") return;
-  tacticQuery = e.target.value;
-  const grid = $("#editor .tx-grid");
-  if (grid) grid.innerHTML = tacticGridHTML(cur(), { champions: CH, query: tacticQuery, active, LN, img, esc });
-});
-$("#editor").addEventListener("click",e=>{
-  const panelButton=e.target.closest("[data-tactic-panel]");
-  if (panelButton) {
-    if (S.tacticsPanel !== panelButton.dataset.tacticPanel) {
-      S.tacticsPanel = panelButton.dataset.tacticPanel;
-      save(); renderEditor();
-      $(`#editor [data-tactic-panel="${S.tacticsPanel}"]`)?.focus({ preventScroll: true });
+// "Editar na Ordem do draft": numa adversária, abre a comp nossa que a enfrenta (ou a coloca contra a última usada).
+function handleOpenDraft() {
+  const c = cur();
+  S.view = "draft";
+  S.tacticsGeneral = false;
+  if (isEnemy(c)) {
+    const facing = oursOf(S.comps).find(x => rivalOf(x, S.comps) === c);
+    const ours = facing || S.comps.find(x => x.id === S.lastComp && !isEnemy(x)) || oursOf(S.comps)[0];
+    if (ours) {
+      if (!facing) faceEnemy(ours, c.id);
+      S.cur = ours.id;
+      activeSide = "rival";
     }
-    return;
+  } else activeSide = S.tacticsMatchup ? "rival" : "us";
+  save(); renderAll(); publishTeamRoute("comps");
+  requestAnimationFrame(() => $("#editor .matchup-bar [data-matchup]")?.focus({ preventScroll: true }));
+}
+// Abre o confronto: a comp nossa com a adversária do outro lado e a tática própria dele.
+function openMatchup(id) {
+  const entry = findMatchup(S.comps, id);
+  if (!entry) return;
+  setRival(entry.ours, entry.enemy.id);
+  S.cur = entry.ours.id; S.lastComp = entry.ours.id;
+  S.tacticsGeneral = false; S.tacticsMatchup = id; S.view = "tactics";
+  save(); renderAll(); publishTeamRoute("comps");
+  $("#editor [data-tactic-matchup][aria-pressed=true]")?.focus({ preventScroll: true });
+}
+async function handleNewMatchup() {
+  const ours = oursOf(S.comps), enemies = enemiesOf(S.comps);
+  if (!ours.length) { toast("Crie uma composição nossa antes de montar um confronto"); return; }
+  const option = x => ({ id: x.id, name: x.name, preview: compositionPreview(x).map(img).join("") });
+  const choice = await askMatchup(ours.map(option), enemies.map(option), isEnemy(cur()) ? ours[0].id : cur().id);
+  if (!choice) return;
+  let enemyId = choice.enemy;
+  if (enemyId === NEW_ENEMY) {
+    const name = (await askName("Nova composição adversária", `Adversária ${enemies.length + 1}`, "Nome da composição adversária"))?.trim();
+    if (!name) return;
+    const created = blank(name); settleTeam(created, "enemy"); S.comps.unshift(created);
+    enemyId = created.id;
   }
-  const printOpen=e.target.closest("[data-print-open]");
-  if (printOpen) { void openPrint(printOpen.dataset.printOpen); return; }
-  const printRemove=e.target.closest("[data-print-remove]");
-  if (printRemove) { removePrint(printRemove.dataset.printRemove); return; }
-  const teamButton=e.target.closest("[data-tactic-team]");
-  if (teamButton) {
-    setTacticTeam(cur(),teamButton.dataset.tacticTeam);touch();save();renderEditor();
-    $(`#editor [data-tactic-team="${teamButton.dataset.tacticTeam}"]`)?.focus({ preventScroll: true });
-    return;
-  }
+  openMatchupBetween(choice.ours, enemyId);
+}
+// Cria o confronto entre uma comp nossa e uma adversária (ou abre o que já existe).
+function openMatchupBetween(oursId, enemyId) {
+  const mine = compById(oursId), existed = matchupsOf(mine).some(x => x.enemy === enemyId);
+  const entry = addMatchup(mine, enemyId); touch(mine);
+  openMatchup(entry.id);
+  toast(existed ? "Esse confronto já existia. Abri ele." : "Confronto criado");
+}
+// Comp solta num lado do quadro da gaveta: fica nesse lado; a do time oposto, se estiver aberta, vira o par (confronto).
+function handleCompDrop(id, side) {
+  const result = resolveCompDrop(S.comps, S.tacticsGeneral ? null : S.cur, S.tacticsGeneral ? null : S.tacticsMatchup, id, side);
+  if (!result) return;
+  const placed = compById(result.place.id);
+  if (placed) { draftOf(placed).side = result.place.side; touch(placed); }
+  if (result.matchup) { openMatchupBetween(result.matchup.ours, result.matchup.enemy); return; }
+  S.tacticsGeneral = false; S.tacticsMatchup = null;
+  if (result.open !== S.cur) selectComp(result.open); else { save(); renderEditor(); }
+}
+bindTacticDrop($("#editor"), handleCompDrop);
+async function handleMatchupDelete(id) {
+  const entry = findMatchup(S.comps, id);
+  if (!entry) return;
+  const title = matchupTitle(entry.ours, entry.enemy);
+  if (!await confirmAction(`Excluir o confronto "${title}"? As composições ficam; só a tática dele é apagada.`, "Excluir confronto")) return;
+  removeMatchup(entry.ours, id);
+  writeTactic(S, matchupKey(id), "", "", Date.now(), []);
+  if (entry.ours.draft?.rival === entry.enemy.id) setRival(entry.ours, null);
+  if (S.tacticsMatchup === id) S.tacticsMatchup = null;
+  touch(entry.ours); save(); renderAll(); publishTeamRoute("comps");
+  $("#editor [data-tx-list=matchup]")?.click();
+  $("#editor [data-tx-list=matchup]")?.focus({ preventScroll: true });
+  toast(`Confronto "${title}" excluído`);
+}
+$("#editor").addEventListener("click",e=>{
+  const mxOpen=e.target.closest("[data-tactic-matchup]");
+  if (mxOpen) { if (mxOpen.dataset.tacticMatchup !== S.tacticsMatchup || S.tacticsGeneral) openMatchup(mxOpen.dataset.tacticMatchup); return; }
+  const mxDelete=e.target.closest("[data-matchup-delete]");
+  if (mxDelete) { void handleMatchupDelete(mxDelete.dataset.matchupDelete); return; }
+  if (e.target.closest("[data-matchup-new]")) { void handleNewMatchup(); return; }
+  const drawerToggle=e.target.closest("[data-tactic-drawer]");
+  if (drawerToggle) { handleTacticDrawerToggle(drawerToggle); return; }
   if (e.target.closest("[data-tactic-opgg]")) {
-    const link=tacticOpggOf(cur());
+    const link=opggOf(opggTarget());
     if (link) window.open(link,"_blank","noopener");
-    else void editOpggLink();
+    else void editOpggLink(opggTarget());
     return;
   }
-  const viewToggle=e.target.closest("[data-tactic-view]");
-  if (viewToggle) {
-    const c=cur(),panel=viewToggle.dataset.tacticView,on=viewToggle.getAttribute("aria-checked")!=="true";
-    setTacticView(c,panel,on);touch();save();renderEditor();renderList();
-    $(`#editor [data-tactic-view="${panel}"]`)?.focus({ preventScroll: true });
-    toast(on?`Tática aparece em ${panel==="lane"?"Opções por posição":"Ordem do draft"}`:`Tática saiu de ${panel==="lane"?"Opções por posição":"Ordem do draft"}`);
+  if (e.target.closest("[data-open-draft]")) { handleOpenDraft(); return; }
+  const listTab=e.target.closest("[data-tx-list]");
+  if (listTab) {
+    const wrap=listTab.closest(".tx-tabs");
+    wrap.querySelectorAll("[data-tx-list]").forEach(b=>{const on=b===listTab;b.setAttribute("aria-selected",String(on));b.tabIndex=on?0:-1});
+    wrap.querySelectorAll(".tx-group").forEach(g=>{g.hidden=g.id!==`tx-list-${listTab.dataset.txList}`});
     return;
   }
-  const champ=e.target.closest("[data-tactic-champ]");
-  if (champ) { toggleTacticChampion(champ.dataset.tacticChamp); return; }
-  if (e.target.closest("[data-tactic-new]")) { void createTactic(null); return; }
-  if (e.target.closest("[data-tactic-save]")) { void createTactic(S.tacticsGeneral ? null : cur(), true); return; }
-  if (e.target.closest("[data-tactic-delete]")) { void deleteTactic(); return; }
   const tacticTab=e.target.closest("[data-tactic-comp],[data-tactic-general]");
   if (tacticTab) {
     const general=tacticTab.hasAttribute("data-tactic-general"),id=tacticTab.dataset.tacticComp;
-    if (general===!!S.tacticsGeneral && (general || id===S.cur)) return;
-    S.tacticsGeneral=general;
+    const fromMatchup=!!S.tacticsMatchup;
+    if (general===!!S.tacticsGeneral && (general || id===S.cur) && !fromMatchup) return;
+    S.tacticsGeneral=general;S.tacticsMatchup=null;
     if (general) { save(); renderEditor(); }
     else if (id!==S.cur) selectComp(id);
-    else { save(); renderEditor(); renderList(); }
-    $("#editor .tx-tabs [aria-pressed=true]")?.focus({ preventScroll: true });
+    else { save(); renderEditor(); }
+    (tacticTab.closest(".tx-scope")?$("#editor .tx-scope [aria-pressed=true]"):$("#editor .tx-tabs [aria-pressed=true]"))?.focus({ preventScroll: true });
     return;
   }
-  const tab=e.target.closest("[data-comp-tab]");
-  if (tab) {
-    if (tab.dataset.compTab !== S.cur) {
-      selectComp(tab.dataset.compTab);
-      $('#editor [data-comp-tab][aria-pressed=true]')?.focus({ preventScroll: true });
-    }
-    return;
-  }
-  if(e.target.closest("[data-comp-new]"))$("#new").click();
+  const create=e.target.closest("[data-comp-new]");
+  if (create) void newComp(create.dataset.compNew || "mine");
 });
 window.matchMedia("(min-width: 1100px)").addEventListener("change",e=>{if(e.matches)closePicker?.()});
 
@@ -666,7 +740,13 @@ $("#imp").onchange=async e=>{
     ]);
     if (!choice) return;
     const replace = choice === "replace";
-    const clean=comps.map(c=>{const b=blank(c.name);b.notes=c.notes||"";b.laneNotes=c.laneNotes||{};if(c.draft)b.draft=c.draft;b.updated=c.updated||Date.now();for(const l of LANES)b.lanes[l.k]=Array.isArray(c.lanes?.[l.k])?c.lanes[l.k].map(String):[];b.id=replace?(c.id||b.id):b.id;return b});
+    const ids=new Map();
+    const clean=comps.map(c=>{const b=blank(c.name);b.notes=c.notes||"";b.laneNotes=c.laneNotes||{};if(c.draft)b.draft=c.draft;b.updated=c.updated||Date.now();for(const l of LANES)b.lanes[l.k]=Array.isArray(c.lanes?.[l.k])?c.lanes[l.k].map(String):[];b.id=replace?(c.id||b.id):b.id;if(c.id)ids.set(c.id,b.id);
+      if(c.team==="enemy"||c.team==="mine"||c.tacticTeam==="enemy")settleTeam(b,c.team==="mine"?"mine":"enemy");if(typeof c.opgg==="string"&&c.opgg)setOpgg(b,normalizeOpggLink(c.opgg)||"");return b});
+    // Ao juntar, as comps ganham ids novos; a adversária de cada draft acompanha.
+    for(const b of clean)if(b.draft?.rival)setRival(b,ids.get(b.draft.rival)||null);
+    // Confrontos (e as táticas deles) vão junto; ao juntar, ganham ids novos para não colidir.
+    clean.forEach((b,i)=>{const list=Array.isArray(comps[i].matchups)?comps[i].matchups:[];for(const m of list){const enemy=ids.get(m?.enemy);if(!enemy)continue;const made=addMatchup(b,enemy,Number(m.updated)||Date.now());if(replace&&typeof m.id==="string")made.id=m.id}});
     S.comps=replace?clean:[...clean,...S.comps];S.cur=S.comps[0].id;
     if(Array.isArray(d.plays)){const ps=d.plays.filter(p=>p&&p.live&&Array.isArray(p.steps)).map(p=>({...p,id:replace?(p.id||uid()):uid()}));S.plays=replace?ps:[...plays(),...ps];plays()}
     if (currentTeamView === "map") tacticalMap.renderPlays();
@@ -716,7 +796,7 @@ function publishTeamRoute(view, {includeItem = true, onCopy = undefined} = {}) {
   $("#route-note").hidden=true;
   let path="/time/"+teamPages[view];
   if(view==="know")path+="/"+(guides[S.kTab]||guides.obj);
-  if(includeItem && view==="comps")path+="/"+encodeURIComponent(S.cur)+"?modo="+(S.view==="draft"?"draft":S.view==="tactics"?"taticas":"lane");
+  if(includeItem && view==="comps")path+="/"+encodeURIComponent(S.cur)+"?modo="+(S.view==="tactics"?"taticas":"draft");
   if(includeItem && view==="map")path+="/"+encodeURIComponent(S.curPlay);
   window.frameElement?.dispatchEvent(new CustomEvent("weblol:navigate",{detail:{path, onCopy}}));
 }
@@ -732,6 +812,7 @@ function renderCaptain() {
   host?.renderCaptainPanel?.($("#cap"));
 }
 (window as any).weblolTeamChanged = () => {
+  syncTeamSendButton($("#team-send"));
   const ok = hasCaptainAccess();
   renderTeamNavigation(currentTeamView, ok);
   if (ok && wantCaptain) { wantCaptain = false; void openTeamView("cap"); return; }
@@ -776,11 +857,12 @@ async function openTeamView(view, item, params) {
   if(view==="comps"){
     if(item){
       const comp=S.comps.find(matches);
-      if(comp){S.cur=comp.id;$("#csearch").value=""}
+      if(comp){S.cur=comp.id;if(!isEnemy(comp))S.lastComp=comp.id}
       else missing="A composição deste link não está disponível neste navegador. Conecte a pasta do time para carregar a versão oficial.";
     }
     const mode=params?.get("modo");
-    if(mode==="draft"||mode==="lane"||mode==="taticas")S.view=mode==="draft"?"draft":mode==="taticas"?"tactics":"lanes";
+    // "lane" era a antiga aba Opções por posição; agora abre a Ordem do draft.
+    if(mode)S.view=mode==="taticas"?"tactics":"draft";
   } else if(view==="map" && item){
     const selected=plays().find(matches);
     if(selected) tacticalMap.selectPlay(selected.id);
@@ -817,11 +899,13 @@ function wireCopyButton(button: HTMLButtonElement, view: "comps" | "map") {
   };
 }
 wireCopyButton($("#copy-comp"), "comps");
+mountTeamSendButton($("#team-send"));
 wireCopyButton($("#copy-play"), "map");
 
 /* ===== Início ===== */
 S = loadTeamState();
 ensureTactics(S);
-function renderAll(){keepCompositionForView();renderList();renderEditor();renderGrid()}
+if(S.view!=="tactics")S.view="draft";
+function renderAll(){renderEditor();renderGrid()}
 plays();
 if (!usesParentNavigation) void openTeamView("comps");

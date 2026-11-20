@@ -107,9 +107,14 @@ function describe(c){ // resumo legível do que mudou
       if(add.length||rem.length)out.push(`<b>${l.toUpperCase()}</b>: ${add.length?"+ "+esc(add.join(", ")):""}${add.length&&rem.length?" · ":""}${rem.length?"− "+esc(rem.join(", ")):""}`);
       else if(A.join()!==B.join())out.push(`<b>${l.toUpperCase()}</b>: ordem de prioridade mudou (${esc(A.join(" > "))})`)}
     if((a.notes||"")!==(b.notes||""))out.push("Anotações alteradas");
-    if(JSON.stringify(a.laneNotes||{})!==JSON.stringify(b.laneNotes||{}))out.push("Obs. das lanes alteradas");
-    if(JSON.stringify(a.draft||{})!==JSON.stringify(b.draft||{}))out.push("Ordem do draft alterada");
-  }else if(c.kind==="tactic"){if((a.text||"")!==(b.text||""))out.push("Texto da tática alterado")
+    const team=x=>x.team||(x.tacticTeam==="enemy"?"enemy":"mine"),TN={mine:"nossa",enemy:"adversária"};
+    if(team(a)!==team(b))out.push(`Lado alterado: ${TN[team(b)]} → ${TN[team(a)]}`);
+    const {rival:ra,...da}=a.draft||{},{rival:rb,...db}=b.draft||{};
+    if((ra||"")!==(rb||""))out.push("Adversária do draft alterada");
+    if(JSON.stringify(da)!==JSON.stringify(db))out.push("Ordem do draft alterada");
+  }else if(c.kind==="tactic"){if((a.text||"")!==(b.text||""))out.push("Texto da tática alterado");
+    if(JSON.stringify(a.images||[])!==JSON.stringify(b.images||[]))out.push("Prints ou desenhos alterados");
+    else if((a.text||"")===(b.text||"")&&JSON.stringify(a.doc||null)!==JSON.stringify(b.doc||null))out.push("Formatação da tática alterada")
   }else{if((a.steps||[]).length!==(b.steps||[]).length)out.push(`Passos: ${(b.steps||[]).length} → ${(a.steps||[]).length}`);else out.push("Posições/passos alterados");
     if(a.cb!==b.cb||a.cr!==b.cr)out.push("Comps das bolinhas alteradas")}
   return out.join("<br>");
@@ -220,6 +225,7 @@ async function sync(opts={}){
   let r;try{await fb();r=await readOfficial()}catch(e){r={err:"net"}}
   NET=!r.err;
   if(r.err){const m={net:"Sem conexão com o banco do time",bad:"Versão oficial do time ilegível",noteam:"Sem time"}[r.err];setSync(m,"bad");updateStatus(true);return}
+  void flushImages();
   OFF=r.off;const base=lsGet(BKEY),S=local()||{};
   let changed=false,notes=[];
   if(!base){
@@ -281,6 +287,7 @@ async function sendChanges(){
   if(preview())return toast("Você está vendo como outra pessoa: nada foi enviado. Volte para a visão de admin no menu da conta.",5000);
   const u=user(),base=lsGet(BKEY);if(!TEAM||!base)return toast("Sem conexão com o banco do time");
   const sent=lsGet(SKEY,[]),ch=pending().filter(c=>!sent.includes(c.h));if(!ch.length)return;
+  await flushImages();
   const sub={id:uid(),from:u.id,at:Date.now(),baseVersion:base.version,changes:ch};
   try{await dbSet(teamPath("envios"),sub.id,{from:meKey(),at:sub.at,json:JSON.stringify(sub)});
     lsSet(SKEY,[...sent,...ch.map(c=>c.h)].slice(-500));toast(`${ch.length} alteração(ões) enviada(s) para o capitão aprovar`)}
@@ -291,16 +298,22 @@ addEventListener("storage",e=>{if(e.key===KEY)updateStatus()});
 
 /* ================= prints das táticas ================= */
 // Cada print fica num documento próprio em times/{time}/imagens/{id}, fora dos dados do time (limite de 1 MB).
-// Sem time (ou se o envio falhar) o print fica só neste navegador.
-const IMGKEY="lol-img-",imgCache=new Map();
+// Sem time (ou se o envio falhar) o print fica neste navegador numa fila e é reenviado com o mesmo id
+// ao sincronizar, enviar ou publicar, para que todo o time consiga vê-lo.
+const IMGKEY="lol-img-",IMGPEND="lol-img-pendentes",imgCache=new Map();
 function imgLocal(id,data){try{if(data)localStorage.setItem(IMGKEY+id,data);else return localStorage.getItem(IMGKEY+id)}catch(e){return null}}
+const imgPending=()=>{const l=lsGet(IMGPEND,[]);return Array.isArray(l)?l.filter(x=>typeof x==="string"):[]};
+function setImgPending(ids){lsSet(IMGPEND,[...new Set(ids)].slice(-300))}
+const canShareImages=()=>!!(TEAM&&user()&&!user().solo);
+async function uploadImage(id,data){await dbSet(teamPath("imagens"),id,{data,at:Date.now(),by:meId()})}
+let imgFlushing=null;
 window.weblolImages={
   async save(data){
     const id=Date.now().toString(36)+Math.random().toString(36).slice(2,8);
     imgCache.set(id,data);imgLocal(id,data);
-    if(!TEAM||!user()||user().solo)return{id,shared:false};
-    try{await dbSet(teamPath("imagens"),id,{data,at:Date.now(),by:meId()});return{id,shared:true}}
-    catch(e){return{id,shared:false,error:e.message}}
+    if(!canShareImages()){setImgPending([...imgPending(),id]);return{id,shared:false}}
+    try{await uploadImage(id,data);return{id,shared:true}}
+    catch(e){setImgPending([...imgPending(),id]);return{id,shared:false,error:e.message}}
   },
   async load(id){
     if(imgCache.has(id))return imgCache.get(id);
@@ -309,4 +322,25 @@ window.weblolImages={
     if(data)imgCache.set(id,data);
     return data;
   },
+  // Reenvia os prints que ficaram só neste navegador. Devolve quantos continuam pendentes.
+  flush(){
+    if(imgFlushing)return imgFlushing;
+    imgFlushing=(async()=>{
+      const ids=imgPending();if(!ids.length||!canShareImages())return ids.length;
+      const left=[];
+      for(const id of ids){
+        const data=imgCache.get(id)||imgLocal(id);
+        if(!data)continue; // apagado deste navegador: não há o que enviar
+        try{await uploadImage(id,data)}
+        catch(e){if(e?.code==="permission-denied"&&await dbGet(teamPath("imagens"),id).catch(()=>null))continue;left.push(id)}
+      }
+      setImgPending([...left,...imgPending().filter(id=>!ids.includes(id))]);
+      return imgPending().length;
+    })().finally(()=>{imgFlushing=null});
+    return imgFlushing;
+  },
 };
+async function flushImages(){
+  const left=await window.weblolImages.flush().catch(()=>imgPending().length);
+  if(left)toast(`${left} print(s) ainda não chegaram ao time. Tente sincronizar de novo.`,5000);
+}

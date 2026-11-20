@@ -8,6 +8,38 @@ export interface UiVersion {
 
 export const UI_VERSIONS: UiVersion[] = [
   {
+    version: "1.69",
+    date: "2026-11-19",
+    changes: [
+      "Táticas: \"Táticas gerais\" saiu da gaveta e virou o alternador Esta composição | Gerais no cabeçalho do bloco de notas.",
+      "Ordem do draft: cada card é um destino de arraste e só ele é destacado. Dá para mover um campeão de um card para outro (num card ocupado ele entra como alternativa), entre os lados, e arrastar para fora dos cards remove o campeão, com Desfazer. O lado adversário vazio mostra os cards reais para soltar o primeiro campeão.",
+      "Táticas: o quadro da gaveta usa o desenho da Ordem do draft, mais compacto, e dá para montar picks e bans ali escolhendo campeões. Mostra sempre os dois lados; arrastar uma composição da lista para o lado desejado a posiciona ali e, com o par aberto, monta o confronto.",
+      "Táticas: nova aba Confrontos na gaveta. Cada confronto (nossa x adversária) tem a própria tática, abre o draft dos dois lados e pode ser excluído sem apagar as composições. Escolher uma adversária no draft também cria o confronto.",
+      "Composições: o botão Trocar lados ganhou ícone; a lista de composições mantém nome e campeões na mesma linha; a nossa com adversária aparece como Nome x Adversária.",
+      "Composições: o link do OP.GG da adversária pode ser cadastrado e editado na barra de confronto e pelo menu ⋯ (Link do OP.GG…).",
+      "Composições: cada composição é nossa ou adversária. A barra de confronto no topo da Ordem do draft espelha o quadro (azul à esquerda, vermelho à direita), troca a nossa e a adversária e tem o botão Trocar lados.",
+      "Composições: Nova composição nossa e Nova adversária são o primeiro item de cada lista. Para mudar de lista, use o menu ⋯ (Mover para adversárias / Mover para nossas).",
+      "Ordem do draft: saíram os nomes repetidos acima do quadro, o campo Lane do time e os títulos Picks · Fase 1/2; o título Editando mostra o slot em edição.",
+      "Ordem do draft: a adversária escolhida ocupa o outro lado, com picks e bans editáveis ali mesmo; o seletor de campeões preenche o lado que estiver em edição.",
+      "Composições: a aba Opções por posição saiu. Links antigos para ela abrem a Ordem do draft.",
+      "Táticas: a gaveta lista Táticas gerais, Nossas composições e Composições adversárias, com o resumo dos dois lados do draft e o botão Editar na Ordem do draft.",
+      "Táticas: saíram o Aplicar em, a troca Draft | Lane e a tática salva; toda composição tem o próprio bloco de notas. O Plano geral e o Plano do draft antigos entram no início das notas.",
+      "Táticas: o OP.GG aparece só nas composições adversárias.",
+      "Táticas: a gaveta tem as abas Nossas | Adversárias com linhas compactas, e o resumo do draft não deixa mais espaço vazio embaixo.",
+    ],
+  },
+  {
+    version: "1.68",
+    date: "2026-11-19",
+    changes: [
+      "Táticas: o texto virou bloco de notas com negrito, itálico, títulos, listas, lista de tarefas e campeões citados com @.",
+      "Táticas: os prints ficam dentro do texto; clique em um para desenhar por cima (setas, formas, texto), e os riscos continuam editáveis.",
+      "Táticas: a coluna da direita virou a gaveta Táticas e picks, que abre e fecha pelo botão no cabeçalho.",
+      "Composições: Enviar para aprovação e Publicar minhas alterações aparecem na linha do nome da composição, sem abrir o menu da conta.",
+      "Táticas: prints que não chegaram ao time são reenviados ao sincronizar, enviar ou publicar.",
+    ],
+  },
+  {
     version: "1.67",
     date: "2026-11-19",
     changes: ["Táticas: no cabeçalho da tática salva, seletor Minha equipe | Equipe adversária e botão OP.GG (clique abre o OP.GG do time; botão direito troca o link)."],

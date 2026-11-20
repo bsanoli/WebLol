@@ -1,149 +1,123 @@
-// @ts-nocheck -- Usa os mesmos helpers de markup do editor legado (img, esc, LN).
-import { iconMarkup, laneIconMarkup } from "@/shared/ui/icon"
-import { DRAFT_SIDE, PICKNAME, compositionPreview, draftOf, sideDot } from "./draft"
-import { isSavedTactic, tacticOpggOf, tacticShownIn, tacticTeamOf } from "../model/tactics"
+import { iconMarkup } from "@/shared/ui/icon"
+import { DRAFT_SIDE } from "../model/draft-order"
+import { compositionPreview, draftOf, type Composition, type DraftLane, type DraftSide } from "../model/local-state"
+import { enemiesOf, isEnemy, oppositeSide, oursOf, rivalOrder, teamOf } from "../model/composition-side"
+import { opggOf } from "../model/tactics"
+import { draftTeamHTML } from "./draft-board"
+import { allMatchups, findMatchup, matchupKey, matchupTitle, type MatchupEntry } from "../model/matchups"
 
-/** Picks e bans em formato reduzido, um lado por coluna. Numa tática salva os slots escolhem o alvo do seletor. */
-function draftSummaryHTML(c, { LN, img, esc, editable, active }) {
-  const d = draftOf(c)
-  const column = key => {
-    const t = key === "blue" ? "B" : "R", mine = d.side === key
-    const bans = [0, 1, 2, 3, 4].map(i => {
-      const n = mine ? c.lanes.ban[i] : null
-      const inner = n ? img(n) : ""
-      return editable && mine
-        ? `<button type="button" class="tx-ban${n ? " has" : ""}${active === "ban" ? " act" : ""}" data-draft-target="ban" aria-pressed="${active === "ban"}" aria-label="${n ? `Ban: ${esc(n)}` : `${i + 1}º ban vazio`} · escolher bans" title="${n ? esc(n) : `${i + 1}º ban`}">${inner}</button>`
-        : `<span class="tx-ban${n ? " has" : ""}" title="${n ? esc(n) : `${i + 1}º ban`}">${inner}</span>`
-    }).join("")
-    const picks = [0, 1, 2, 3, 4].map(i => {
-      const code = t + (i + 1)
-      if (!mine) return `<li class="tx-pick them"><span class="tx-pick-name">${PICKNAME[code]}</span><span class="tx-pick-champ">A definir</span></li>`
-      const lane = LN[d.order[d.side][i]], n = c.lanes[lane.k][0]
-      const alts = c.lanes[lane.k].length - 1
-      const on = editable && active === lane.k
-      return `<li class="tx-pick-item" data-team-control data-swap-lane="${lane.k}"><button type="button" class="tx-pick${on ? " act" : ""}" style="--lc:var(${lane.c})"${editable ? ` data-draft-target="${lane.k}" aria-pressed="${on}"` : ""}
-        aria-label="${PICKNAME[code]} · ${lane.n} · ${n ? esc(n) : "Sem campeão"}${alts > 0 ? ` · ${alts} alternativo${alts > 1 ? "s" : ""}, botão direito para trocar` : ""}"
-        title="${alts > 0 ? "Botão direito para trocar pelo alternativo" : "Sem campeões alternativos nesta lane"}">${n ? img(n) : `<span class="av tx-empty">${iconMarkup("champion")}</span>`}
-        <span class="tx-pick-name">${PICKNAME[code]} · ${lane.n}</span><span class="tx-pick-champ">${n ? esc(n) : "Sem campeão"}</span>${alts > 0 ? `<span class="tx-alts" aria-hidden="true">+${alts}</span>` : ""}</button></li>`
-    }).join("")
-    const heading = editable
-      ? `<button type="button" class="tx-side-pick" data-side="${key}" aria-pressed="${mine}" title="${mine ? "Nosso time está neste lado" : "Colocar nosso time neste lado"}"><span class="side-dot ${key}" aria-hidden="true"></span>${DRAFT_SIDE[key]}${mine ? "<small>Nossa equipe</small>" : ""}</button>`
-      : `<span class="side-dot ${key}" aria-hidden="true"></span>${DRAFT_SIDE[key]}${mine ? "<small>Nossa equipe</small>" : ""}`
-    return `<section class="tx-side-col ${key}${mine ? " mine" : ""}" aria-label="${DRAFT_SIDE[key]}">
-      <h3>${heading}</h3>
-      <div class="tx-bans" role="group" aria-label="Bans">${bans}</div>
-      <ol class="tx-picks">${picks}</ol></section>`
+type ListKey = "mine" | "enemy" | "matchup"
+const NEW_LABEL: Record<ListKey, string> = { mine: "Nova composição nossa", enemy: "Nova adversária", matchup: "Novo confronto" }
+type Lane = { k: string; n: string; c: string }
+type Markup = { LN: Record<string, Lane>; img: (name: string) => string; esc: (value: unknown) => string; pickArt: (name: string) => string }
+
+/** Coluna do quadro: cabeçalho do lado e, abaixo, os picks e bans no mesmo desenho da Ordem do draft, só que compacto. */
+function boardColumn(side: DraftSide, owner: "us" | "rival", source: Composition, order: DraftLane[], who: string, { LN, img, esc, pickArt }: Markup) {
+  const heading = `<h3><span class="side-dot ${side}" aria-hidden="true"></span>${DRAFT_SIDE[side]}<small>${who} · ${esc(source.name)}</small></h3>`
+  const board = draftTeamHTML(side === "blue" ? "B" : "R", owner, source, order, { active: "", activeSide: owner, LN, img, esc, pickArt, compact: true })
+  return `<div class="tx-side-col ${side}" data-drop-side="${side}" aria-label="${DRAFT_SIDE[side]}">${heading}${board}</div>`
+}
+
+/** Lado sem comp: convida a soltar uma composição aqui. */
+function emptyColumn(side: DraftSide, hint: string) {
+  return `<div class="tx-side-col ${side} empty" data-drop-side="${side}" aria-label="${DRAFT_SIDE[side]}">
+    <h3><span class="side-dot ${side}" aria-hidden="true"></span>${DRAFT_SIDE[side]}</h3><p class="tx-col-empty">${hint}</p></div>`
+}
+
+/**
+ * Quadro editável da gaveta, sempre com os dois lados; cada lado aceita uma composição arrastada da lista.
+ * Com confronto, cada comp fica no lado dela. Com uma comp só, ela ocupa o lado salvo e o outro espera o par.
+ */
+function tacticBoardHTML(c: Composition, general: boolean, matchup: MatchupEntry | null, markup: Markup) {
+  const cols: Partial<Record<DraftSide, string>> = {}
+  let hint = "Arraste uma composição da lista para este lado."
+  if (matchup) {
+    const { ours, enemy } = matchup, side = draftOf(ours).side, other = oppositeSide(side)
+    cols[side] = boardColumn(side, "us", ours, draftOf(ours).order[side], "Nossa", markup)
+    cols[other] = boardColumn(other, "rival", enemy, rivalOrder(ours, enemy), "Adversária", markup)
+  } else if (!general) {
+    const side = draftOf(c).side, enemy = isEnemy(c)
+    cols[side] = boardColumn(side, "us", c, draftOf(c).order[side], enemy ? "Adversária" : "Nossa", markup)
+    hint = enemy ? "Arraste uma composição nossa para este lado e monte o confronto." : "Arraste uma adversária para este lado e monte o confronto."
   }
-  return `<div class="tx-draft-sides">${column("blue")}${column("red")}</div>`
+  const col = (side: DraftSide) => cols[side] ?? emptyColumn(side, hint)
+  return `<div class="tx-draft-sides">${col("blue")}${col("red")}</div>${general ? "" : `
+    <button type="button" data-slot="button" data-variant="outline" data-size="sm" class="tx-open-draft" data-open-draft>${iconMarkup("next")} Editar na Ordem do draft</button>`}`
 }
 
-const LANE_ORDER = ["top", "jg", "mid", "adc", "sup", "ban"]
-
-/** Visão Lane: opções por posição reduzidas, sem notas. Clicar num alternativo torna-o principal. */
-function laneHTML(c, { LN, img, esc, editable, active }) {
-  return `<ol class="tx-priority">${LANE_ORDER.map(k => {
-    const lane = LN[k], list = c.lanes[k], ban = k === "ban"
-    const champs = list.length
-      ? list.map((n, i) => {
-        const main = i === 0 && !ban
-        const label = ban ? `Ban: ${esc(n)}` : main ? `Principal em ${lane.n}: ${esc(n)}` : `Tornar ${esc(n)} principal em ${lane.n}`
-        const content = img(n)
-        return `<li class="tx-prio-champ${main ? " main" : ""}" draggable="true" data-n="${esc(n)}" data-from="${k}" title="Arraste para mudar a ordem">${ban || main
-          ? `<span class="tx-prio-static" title="${esc(n)}" aria-label="${label}">${content}</span>`
-          : `<button type="button" class="tx-prio-alt" data-priority="${esc(n)}" data-lane="${k}" aria-label="${label}" title="${i + 1}ª opção · clique para tornar principal">${content}</button>`}</li>`
-      }).join("")
-      : `<li class="tx-prio-empty">${ban ? "Sem bans" : "Sem campeão"}</li>`
-    const on = editable && active === k
-    const name = editable
-      ? `<button type="button" class="tx-prio-name${on ? " act" : ""}" data-draft-target="${k}" aria-pressed="${on}" title="Escolher campeões para ${lane.n}">${ban ? "" : laneIconMarkup(k)}${lane.n}</button>`
-      : `<span class="tx-prio-name">${ban ? "" : laneIconMarkup(k)}${lane.n}</span>`
-    return `<li class="tx-prio-lane${ban ? " bans" : ""}${on ? " act" : ""}" style="--lc:var(${lane.c})">${name}<ol class="tx-prio-champs" data-l="${k}" aria-label="${lane.n} em ordem de prioridade">${champs}</ol></li>`
-  }).join("")}</ol>`
-}
-
-/** Seletor reduzido de campeões da tática: só os ícones e a busca por nome. */
-export function tacticGridHTML(c, { champions, query, active, LN, img, esc }) {
-  const q = query.toLowerCase().replace(/[^a-z]/g, "")
-  const list = champions.filter(ch => !q || ch.n.toLowerCase().replace(/[^a-z]/g, "").includes(q))
-  return list.map(ch => {
-    const on = c.lanes[active].includes(ch.n)
-    return `<button type="button" class="tx-ch${on ? " on" : ""}" data-tactic-champ="${esc(ch.n)}" aria-pressed="${on}" aria-label="${esc(ch.n)}" title="${esc(ch.n)}">${img(ch.n)}</button>`
-  }).join("") || `<p class="tx-grid-empty" role="status">Nenhum campeão encontrado.</p>`
-}
-
-/** Prints anexados à tática: miniaturas carregadas depois (as imagens ficam guardadas à parte). */
-function printsHTML(images, esc) {
-  const items = images.map((id, i) => `<li class="tx-print">
-      <button type="button" class="tx-print-open" data-print-open="${esc(id)}" aria-label="Abrir print ${i + 1}" title="Abrir print ${i + 1}"><img alt="" data-print-src="${esc(id)}"></button>
-      <button type="button" class="tx-print-remove" data-print-remove="${esc(id)}" aria-label="Remover print ${i + 1}" title="Remover print">${iconMarkup("close")}</button></li>`).join("")
-  return `<div class="tx-prints">
-    ${images.length ? `<ul class="tx-print-list" aria-label="Prints da tática">${items}</ul>` : ""}
-    <div class="tx-print-actions">
-      <label class="tx-print-add" data-slot="button" data-variant="outline" data-size="sm">${iconMarkup("plus")} Adicionar print<input type="file" id="tx-print-file" accept="image/*" multiple></label>
-      <span class="tx-print-hint">ou cole com Ctrl+V, ou arraste a imagem para o texto</span>
-    </div>
-  </div>`
-}
-
-/** Cabeçalho da tática salva: de quem é a tática e o OP.GG do time. */
-function teamToolsHTML(c, esc) {
-  const team = tacticTeamOf(c), link = tacticOpggOf(c)
-  const toggle = `<div class="tx-panel-switch tx-team" role="group" aria-label="De quem é a tática">${[["mine", "Minha equipe"], ["enemy", "Equipe adversária"]]
-    .map(([value, label]) => `<button type="button" data-tactic-team="${value}" aria-pressed="${team === value}" class="${team === value ? `on ${value}` : ""}">${label}</button>`).join("")}</div>`
-  const opgg = `<button type="button" data-slot="button" data-variant="outline" data-size="sm" class="tx-opgg${link ? " has" : ""}" data-tactic-opgg
+/** Cabeçalho da comp: de quem ela é (só leitura; muda pelo menu ⋯ da Ordem do draft) e, na adversária, o OP.GG do time. */
+function teamToolsHTML(c: Composition, esc: Markup["esc"], matchup: MatchupEntry | null, hidden = false) {
+  const team = matchup ? "enemy" : teamOf(c), link = opggOf(matchup ? matchup.enemy : c)
+  const tag = matchup ? `<span class="tx-team-tag mine">Confronto</span>` : `<span class="tx-team-tag ${team}">${team === "enemy" ? "Adversária" : "Nossa"}</span>`
+  const opgg = team === "enemy" ? `<button type="button" data-slot="button" data-variant="outline" data-size="sm" class="tx-opgg${link ? " has" : ""}" data-tactic-opgg
     aria-label="${link ? "Abrir o OP.GG do time. Botão direito para trocar o link" : "Adicionar o link do OP.GG do time"}"
-    title="${link ? `${esc(link)}\nBotão direito: trocar o link` : "Clique para colocar o link do OP.GG"}">${iconMarkup("link")} OP.GG</button>`
-  return `<div class="tx-team-tools">${toggle}${opgg}</div>`
+    title="${link ? `${esc(link)}
+Botão direito: trocar o link` : "Clique para colocar o link do OP.GG"}">${iconMarkup("link")} ${link ? "OP.GG" : "+ OP.GG"}</button>` : ""
+  // Em Táticas gerais as ferramentas ficam invisíveis, mas ocupam o lugar: o alternador não muda de posição.
+  return `<div class="tx-team-tools"${hidden ? " inert aria-hidden=\"true\"" : ""}>${tag}${opgg}</div>`
 }
 
-export function tacticsHTML(c, { compositions, general, text, images = [], hasTactic, panel, active, query, champions, LN, img, esc }) {
-  const mark = has => has ? `<span class="tx-has" title="Tem anotação de tática">${iconMarkup("edit")}</span>` : ""
-  const tab = (x, on) => `<button type="button" class="dz-tab${on ? " on" : ""}${isSavedTactic(x) ? " tx-saved" : ""}" data-tactic-comp="${esc(x.id)}" aria-pressed="${on}" title="${esc(x.name)}">
-      <b>${isSavedTactic(x) ? iconMarkup("book") : sideDot(x)}${esc(x.name)}${mark(hasTactic(x.id))}${isSavedTactic(x) && tacticTeamOf(x) === "enemy" ? `<small class="tx-enemy-tag">Adversária</small>` : ""}</b><span class="mini">${compositionPreview(x).map(img).join("") || `<small>${isSavedTactic(x) ? "Tática sem picks" : "vazia"}</small>`}</span></button>`
-  const generalTab = `<button type="button" class="dz-tab tx-general${general ? " on" : ""}" data-tactic-general aria-pressed="${general}">
-    <b>${iconMarkup("book")}Táticas gerais${mark(hasTactic(null))}</b><span class="mini"><small>Sem composição</small></span></button>`
-  const newTab = `<button type="button" class="dz-tab dz-new tx-new" data-tactic-new aria-label="Nova tática" title="Nova tática">${iconMarkup("plus")}<span>Nova tática</span></button>`
-  const saved = compositions.filter(isSavedTactic), comps = compositions.filter(x => !isSavedTactic(x))
-  const tabs = [...saved, ...comps].map(x => tab(x, !general && x.id === c.id)).join("")
-  const editable = !general && isSavedTactic(c)
-  const title = general ? "Táticas gerais" : `${editable ? "Tática" : "Táticas"} · ${esc(c.name)}`
+export type TacticsOptions = Markup & {
+  compositions: Composition[]
+  general: boolean
+  drawer?: boolean
+  hasTactic: (id: string | null) => boolean
+  /** Confronto aberto (id), quando a tática em edição é a dele. */
+  matchupId?: string | null
+}
+
+export function tacticsHTML(c: Composition, { compositions, general, hasTactic, matchupId = null, drawer = true, LN, img, esc, pickArt }: TacticsOptions) {
+  const mark = (has: boolean) => has ? `<span class="tx-has" title="Tem anotação de tática">${iconMarkup("edit")}</span>` : ""
+  const tab = (x: Composition) => {
+    const on = !general && !active && x.id === c.id
+    return `<button type="button" class="dz-tab${on ? " on" : ""}" data-tactic-comp="${esc(x.id)}" draggable="true" aria-pressed="${on}" title="${esc(x.name)}">
+      <b>${esc(x.name)}${mark(hasTactic(x.id))}</b><span class="mini">${compositionPreview(x).map(img).join("") || "<small>vazia</small>"}</span></button>`
+  }
+  const ours = oursOf(compositions), enemies = enemiesOf(compositions), matchups = allMatchups(compositions)
+  const active = general ? null : findMatchup(compositions, matchupId)
+  const shown: ListKey = active ? "matchup" : !general && isEnemy(c) ? "enemy" : "mine"
+  const matchupRow = ({ ours: o, enemy: e, matchup }: MatchupEntry) => {
+    const on = active?.matchup.id === matchup.id, title = esc(matchupTitle(o, e))
+    return `<div class="tx-mx-row"><button type="button" class="dz-tab${on ? " on" : ""}" data-tactic-matchup="${esc(matchup.id)}" aria-pressed="${on}" title="${title}">
+      <b>${title}${mark(hasTactic(matchupKey(matchup.id)))}</b></button>
+      <button type="button" class="tx-mx-del" data-matchup-delete="${esc(matchup.id)}" aria-label="Excluir o confronto ${title}" title="Excluir o confronto (as composições ficam)">${iconMarkup("trash")}</button></div>`
+  }
+  const footer = (team: ListKey) => `<button type="button" class="tx-new" data-slot="button" data-variant="ghost" data-size="sm" ${team === "matchup" ? "data-matchup-new" : `data-comp-new="${team}"`}>${iconMarkup("plus")} ${NEW_LABEL[team]}</button>`
+  const panel = (team: ListKey, items: string, empty: string) => `<div class="tx-group ${team}" id="tx-list-${team}" role="tabpanel" aria-labelledby="tx-listtab-${team}"${team === shown ? "" : " hidden"}>
+    ${footer(team)}${items || `<p class="tx-group-empty">${empty}</p>`}</div>`
+  const listTab = (team: ListKey, label: string, count: number) => `<button type="button" role="tab" class="tx-listtab ${team}" id="tx-listtab-${team}" data-tx-list="${team}" aria-controls="tx-list-${team}" aria-selected="${team === shown}" tabindex="${team === shown ? 0 : -1}">${label}<small>${count}</small></button>`
+  const scope = `<div class="tx-scope" role="group" aria-label="Tática aberta">
+    <button type="button" class="tx-scope-btn" data-tactic-comp="${esc(c.id)}" aria-pressed="${!general}" title="Táticas da composição aberta">Esta composição</button>
+    <button type="button" class="tx-scope-btn" data-tactic-general aria-pressed="${general}" title="Ideias de jogo que valem para qualquer composição"><b>Gerais${mark(hasTactic(null))}</b></button></div>`
+  const enemy = !general && !active && isEnemy(c)
+  const title = general ? "Táticas gerais" : `Táticas · ${esc(active ? matchupTitle(active.ours, active.enemy) : c.name)}`
   const hint = general
     ? "Ideias de jogo que valem para qualquer composição."
-    : editable
-      ? "Tática salva: escreva o plano, monte os picks em Draft ou em Lane e marque em quais abas ela deve aparecer."
+    : active
+      ? "Como jogar com a nossa composição contra esta adversária: o que muda nos picks, bans e lutas."
+    : enemy
+      ? "Como jogar contra esta composição: ameaças, picks a negar e como vencer as lutas."
       : "Como jogar com esta composição: rotações, objetivos, lutas e condição de vitória."
-  const action = editable
-    ? `<button type="button" data-slot="button" data-variant="ghost" data-size="sm" class="tx-action" data-tactic-delete>${iconMarkup("trash")} Excluir tática</button>`
-    : `<button type="button" data-slot="button" data-variant="outline" data-size="sm" class="tx-action" data-tactic-save>${iconMarkup("check")} Salvar tática</button>`
-  const applyHTML = editable ? `<div class="tx-apply" role="group" aria-label="Aplicar a tática em outras abas"><span>Aplicar em</span>${[["lane", "Opções por posição"], ["draft", "Ordem do draft"]]
-    .map(([value, label]) => { const on = tacticShownIn(c, value); return `<button type="button" role="checkbox" class="tx-apply-option${on ? " on" : ""}" data-tactic-view="${value}" aria-checked="${on}"><span class="tx-check" aria-hidden="true">${on ? iconMarkup("check") : ""}</span>${label}</button>` }).join("")}</div>` : ""
-  const switcher = general ? "" : `<div class="tx-panel-switch" role="group" aria-label="Visão da comp">${[["draft", "Draft"], ["lane", "Lane"]]
-    .map(([value, label]) => `<button type="button" data-tactic-panel="${value}" aria-pressed="${panel === value}"${panel === value ? ' class="on"' : ""}>${label}</button>`).join("")}</div>`
-  const body = general
-    ? `<p class="tx-draft-empty">Selecione uma composição para ver os picks e bans dela aqui, ou salve este texto como uma tática.</p>`
-    : panel === "lane" ? laneHTML(c, { LN, img, esc, editable, active }) : draftSummaryHTML(c, { LN, img, esc, editable, active })
-  const picker = editable ? `<div class="tx-picker">
-      <div class="tx-picker-head"><span>Campeões para <b>${active === "ban" ? "Bans" : LN[active].n}</b></span>
-        <input data-slot="input" id="tx-search" type="search" placeholder="Buscar campeão" aria-label="Buscar campeão pelo nome" value="${esc(query)}"></div>
-      <div class="tx-grid" role="group" aria-label="Campeões">${tacticGridHTML(c, { champions, query, active, LN, img, esc })}</div>
-    </div>` : ""
-  return `<div class="tx">
+  const body = tacticBoardHTML(c, general, active, { LN, img, esc, pickArt })
+  const drawerToggle = `<button type="button" data-slot="button" data-variant="outline" data-size="sm" class="tx-drawer-toggle" data-tactic-drawer
+    aria-expanded="${drawer}" aria-controls="tx-aside" title="${drawer ? "Esconder a lista de composições e o draft" : "Mostrar a lista de composições e o draft"}">${iconMarkup("next")}<span>Composições e draft</span></button>`
+  return `<div class="tx${drawer ? "" : " drawer-closed"}">
     <section class="tx-write">
       <div class="tx-head">
-        <div class="tx-head-text"><label class="tx-title" for="tactics-text">${title}</label>
+        <div class="tx-head-text"><h2 class="tx-title" id="tx-title">${title}</h2>
         <p class="tx-hint">${hint}</p></div>
-        ${editable ? teamToolsHTML(c, esc) : ""}
+        ${teamToolsHTML(c, esc, active, general)}
+        ${scope}
+        ${drawerToggle}
       </div>
-      <textarea id="tactics-text" placeholder="Escreva a tática…">${esc(text)}</textarea>
-      ${printsHTML(images, esc)}
+      <div class="tx-notes-slot" data-tactic-notes-slot><p class="tx-notes-loading">Carregando o bloco de notas…</p></div>
     </section>
-    <aside class="tx-aside" aria-label="Táticas, composições e draft">
-      <div class="tx-tabs" role="group" aria-label="Escolher a tática">${generalTab}${newTab}${tabs}</div>
-      <div class="tx-draft">
-        <div class="tx-panel-row">${switcher}${applyHTML}${action}</div>
-        ${body}
-        ${picker}
+    <aside class="tx-aside" id="tx-aside" aria-label="Composições e draft"${drawer ? "" : " inert"}>
+      <div class="tx-tabs">
+        <div class="tx-listtabs" role="tablist" aria-label="Composições">${listTab("mine", "Nossas", ours.length)}${listTab("enemy", "Adversárias", enemies.length)}${listTab("matchup", "Confrontos", matchups.length)}</div>
+        ${panel("mine", ours.map(tab).join(""), "Nenhuma composição ainda.")}${panel("enemy", enemies.map(tab).join(""), "Nenhuma adversária ainda.")}${panel("matchup", matchups.map(matchupRow).join(""), "Nenhum confronto ainda. Junte uma composição nossa a uma adversária.")}
       </div>
+      <div class="tx-draft">${body}</div>
     </aside>
   </div>`
 }

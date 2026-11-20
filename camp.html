@@ -7,20 +7,25 @@
 <title>Comps do Time</title>
 <link rel="icon" href="./assets/brand/favicon.ico" sizes="any">
 <link rel="icon" href="./assets/brand/favicon.svg?v=f454a496" type="image/svg+xml">
-<link rel="stylesheet" href="./assets/base.css?v=6d8c148b">
-<link rel="stylesheet" href="./assets/team.css?v=c38832bc">
-<link rel="stylesheet" href="./assets/compositions.css?v=331e2fbf">
+<link rel="stylesheet" href="./assets/base.css?v=dbae76e5">
+<link rel="stylesheet" href="./assets/team.css?v=aa620ba5">
+<link rel="stylesheet" href="./assets/compositions.css?v=2b9de0d4">
 <link rel="stylesheet" href="./assets/motion.css?v=836d9022">
-<link rel="stylesheet" href="./assets/draft-layout.css?v=e5214365">
+<link rel="stylesheet" href="./assets/draft-layout.css?v=b0889ac2">
 <link rel="stylesheet" href="./assets/team-controls.css?v=27553820">
-<link rel="stylesheet" href="./assets/tactics.css?v=65548059">
-  <script type="module" crossorigin src="./assets/camp-6kkmwQgI.js"></script>
-  <link rel="modulepreload" crossorigin href="./assets/icon-DP-HUlc6.js">
-  <link rel="modulepreload" crossorigin href="./assets/select-lq2HhRSs.js">
-  <link rel="modulepreload" crossorigin href="./assets/dropdown-menu-BKCg7Po8.js">
-  <link rel="stylesheet" crossorigin href="./assets/icon-7_i2Qej8.css">
-  <link rel="stylesheet" crossorigin href="./assets/dropdown-menu-D3gs5jiL.css">
-  <link rel="stylesheet" crossorigin href="./assets/camp-Dmc_kLnv.css">
+<link rel="stylesheet" href="./assets/tactics.css?v=91f01c51">
+  <script type="module" crossorigin src="./assets/camp-DRNkdng0.js"></script>
+  <link rel="modulepreload" crossorigin href="./assets/rolldown-runtime-COiEfhsA.js">
+  <link rel="modulepreload" crossorigin href="./assets/jsx-runtime-CldxteV5.js">
+  <link rel="modulepreload" crossorigin href="./assets/button-YN4D8W-j.js">
+  <link rel="modulepreload" crossorigin href="./assets/client-CrvQcqas.js">
+  <link rel="modulepreload" crossorigin href="./assets/floating-ui.dom-vtOd0C_f.js">
+  <link rel="modulepreload" crossorigin href="./assets/icon-DLctftxV.js">
+  <link rel="modulepreload" crossorigin href="./assets/select-Dt1r1jnn.js">
+  <link rel="modulepreload" crossorigin href="./assets/dropdown-menu-DDOu8c3T.js">
+  <link rel="stylesheet" crossorigin href="./assets/icon-CVJNjsuy.css">
+  <link rel="stylesheet" crossorigin href="./assets/dropdown-menu-BSzxz0E0.css">
+  <link rel="stylesheet" crossorigin href="./assets/camp-D3n6OZQU.css">
 </head>
 <body>
 <header>
@@ -63,18 +68,9 @@
           <button data-slot="button" data-variant="outline" data-size="sm" type="button" id="clear-local">Restaurar dados locais…</button>
         </div>
       </details>
+      <button data-slot="button" data-variant="default" data-size="sm" type="button" id="team-send"></button>
     </div>
   </div>
-  <div class="wl-panel box comp-library">
-    <h2>Composições salvas</h2>
-    <div class="library-search"><label class="control-label" for="csearch">Filtrar composições</label><input data-slot="input" id="csearch" placeholder="Nome ou campeão"></div>
-    <div id="clist"></div>
-    <select id="draft-comp" aria-label="Escolher composição" hidden></select>
-    <div class="cbtns">
-      <button data-slot="button" data-variant="default" id="new"><svg class="icon" aria-hidden="true" focusable="false"><use href="assets/icons.svg#plus"></use></svg> Nova composição</button>
-    </div>
-  </div>
-
   <div class="wl-panel box comp-editor">
     <div id="editor"></div>
   </div>
@@ -89,7 +85,6 @@
         <option value="ws">Mais jogados no Worlds 2026</option>
         <option value="wsb">Mais banidos no Worlds 2026</option>
       </select></div>
-      <div class="team-select-field" id="lane-target-tool"><label id="lane-target-label" for="pick-target-trigger">Lane do time</label><span id="lane-target-slot"></span></div>
     </div>
     <div class="filter-heading">Filtrar catálogo por posição</div><div class="roles" id="roles"></div>
     <div id="grid"></div>

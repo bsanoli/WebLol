@@ -61,9 +61,9 @@
   #v-comps.draft-view .tm > .pk {
     flex: 1 1 0; min-height: 92px; position: relative; overflow: hidden;
     display: flex; flex-direction: column; justify-content: space-between; align-items: flex-start;
-    gap: var(--wl-space-2); padding: var(--wl-space-2); border-radius: var(--wl-card-radius);
+    gap: var(--wl-space-2); padding: var(--wl-space-2); border-radius: 0;
   }
-  #v-comps.draft-view .tm.r > .pk { align-items: flex-end; text-align: right; border-left-width: 1px; border-right: 5px solid var(--wl-side-red); }
+  #v-comps.draft-view .tm.r > .pk { align-items: flex-end; text-align: right; border-left-width: 1px; border-left-color: var(--line); border-right: var(--wl-accent-bar) solid var(--wl-side-red); }
   #v-comps.draft-view .tm > .pk.mine .pick-splash { inset: 0; width: 100%; opacity: 1; object-position: center 22%; }
   #v-comps.draft-view .tm > .pk.mine:has(.pick-splash)::before {
     background: linear-gradient(to top, color-mix(in srgb, var(--bg) 88%, transparent) 0%, transparent 45%),
@@ -92,7 +92,7 @@
   .dz-tab.on { border-color: var(--wl-accent); background: var(--wl-accent-soft); }
   .dz-tab b { font-size: 12px; max-width: 100%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   #v-comps .dz-tab .mini { display: flex; flex-wrap: nowrap; gap: 3px; margin: 0; }
-  #v-comps .dz-tab .mini .av { width: 26px; height: 26px; flex: none; border-radius: 4px; }
+  #v-comps .dz-tab .mini .av { width: 26px; height: 26px; flex: none; border-radius: var(--wl-control-radius); }
   .dz-tab .mini small { color: var(--mut); font-size: 11px; }
   .dz-tab.dz-new { align-self: stretch; justify-content: center; align-items: center; min-width: 40px; border: 1px dashed var(--line); }
   #v-comps.draft-view .dz-slot { flex: 1 1 auto; display: flex; min-height: 0; }
@@ -142,7 +142,7 @@
 /* Opções do pick: só o retrato (sem nota e sem ⋯) */
 #v-comps .pk .dchip { position: relative; margin: 0; }
 #v-comps .pk .dchip .champ-priority { display: inline-flex; padding: 0; min-height: 0; border: 0; background: none; cursor: pointer; }
-#v-comps .pk .dchip .av { width: 34px; height: 34px; border-radius: 6px; border: 1px solid #fff4; }
+#v-comps .pk .dchip .av { width: 34px; height: 34px; border-radius: var(--wl-control-radius); border: 1px solid #fff4; }
 #v-comps .pk .dchip.primary .av { border: 2px solid var(--wl-accent); }
 #v-comps .pk .draft-alternatives-label { display: none; }
 .chip-menu { z-index: 50; padding: var(--wl-space-1); border: 1px solid var(--line); border-radius: var(--wl-control-radius); background: var(--panel); box-shadow: 0 8px 24px #0008; }
@@ -150,7 +150,7 @@
 .chip-menu [data-highlighted] { background: var(--wl-danger-soft); outline: none; }
 
 /* Nome dos lados vira o seletor do lado do time */
-.side-pick { display: flex; flex-direction: column; align-items: inherit; gap: 2px; padding: 4px 8px; margin-block: calc(-1 * var(--wl-space-1)); border: 1px solid transparent; border-radius: var(--wl-control-radius, 8px); background: none; color: inherit; font: inherit; text-align: inherit; cursor: pointer; }
+.side-pick { display: flex; flex-direction: column; align-items: inherit; gap: 2px; padding: 4px 8px; margin-block: calc(-1 * var(--wl-space-1)); border: 1px solid transparent; border-radius: var(--wl-control-radius); background: none; color: inherit; font: inherit; text-align: inherit; cursor: pointer; }
 .side-pick:hover { border-color: currentColor; }
 .side-pick.on { border-color: color-mix(in srgb, currentColor 55%, transparent); background: color-mix(in srgb, currentColor 10%, transparent); }
 .side-pick span { font-size: 12px; font-weight: 500; color: var(--mut); }

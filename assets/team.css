@@ -21,7 +21,7 @@ nav{display:flex;gap:6px}
 .cbtns{display:flex;gap:6px;padding:8px;border-top:1px solid var(--line);flex-wrap:wrap}
 /* editor */
 #cname{width:100%;font-size:18px;font-weight:600;margin-bottom:10px}
-.lane{border:1px solid var(--line);border-left:4px solid var(--lc);border-radius:var(--wl-card-radius);padding:8px 10px;margin-bottom:8px;background:var(--bg);cursor:pointer;transition:.15s}
+.lane{border:1px solid var(--line);border-left:var(--wl-accent-bar) solid var(--lc);border-radius:0;padding:8px 10px;margin-bottom:8px;background:var(--bg);cursor:pointer;transition:.15s}
 .lane.act{border-color:var(--lc);box-shadow:0 0 0 1px var(--lc) inset;background:var(--panel)}
 .lane.drop,.bsq.drop{background:var(--panel2)}
 .lane.drop,.pk.drop,.bsq.drop{outline:2px dashed var(--gold)}
@@ -188,7 +188,7 @@ nav{display:flex;gap:6px}
 .map-piece:not(:disabled),.map-ward-target{pointer-events:auto}
 .map-piece img{width:80%;height:auto;pointer-events:none}
 .map-wave{width:4.5%;min-width:var(--wl-space-6);aspect-ratio:1;border:1.5px dashed #c3cbd3;border-radius:50%;background:#303a44;box-shadow:0 1px 4px #0009;cursor:grab}
-.map-wave::after{content:"";position:absolute;bottom:-1px;width:var(--wl-space-2);height:3px;border-radius:999px;background:var(--map-side);box-shadow:0 0 0 1px #1c232c}
+.map-wave::after{content:"";position:absolute;bottom:-1px;width:var(--wl-space-2);height:3px;border-radius: var(--wl-control-radius);background:var(--map-side);box-shadow:0 0 0 1px #1c232c}
 .map-wave .map-wave-caster{width:76%;aspect-ratio:1;object-fit:contain;border-radius:50%}
 #map[data-tool="erase"] :is(.map-wave,.map-ward-target){cursor:inherit}
 #map[data-tool="erase"] .map-ward-target{width:5.2%}
@@ -269,7 +269,7 @@ nav{display:flex;gap:6px}
 .vtog{display:flex;gap:6px;margin-bottom:10px}
 .dside{display:flex;align-items:center;gap:6px;margin-bottom:6px;font-size:12px;color:var(--mut);flex-wrap:wrap}
 .dph{font-size:11px;text-transform:uppercase;letter-spacing:1px;color:var(--gold);margin:12px 0 5px}
-.drow{display:flex;align-items:center;gap:8px;flex-wrap:wrap;border:1px solid var(--line);border-left:4px solid var(--tc);border-radius:var(--wl-control-radius);padding:6px 8px;margin-bottom:5px;background:var(--bg)}
+.drow{display:flex;align-items:center;gap:8px;flex-wrap:wrap;border:1px solid var(--line);border-left:var(--wl-accent-bar) solid var(--tc);border-radius:0;padding:6px 8px;margin-bottom:5px;background:var(--bg)}
 .drow.lane{border-left-color:var(--tc)}
 .drow.them{opacity:.45;cursor:default}
 .drow .dn{font-size:11px;color:var(--mut);min-width:16px}
@@ -309,7 +309,7 @@ nav{display:flex;gap:6px}
 .bsq .dm,.bsq .dm .av{width:100%;height:100%;border-radius:var(--wl-control-radius)}
 .bsq.has .av{filter:grayscale(1) brightness(.75)}
 .bsq.has::after{content:"";position:absolute;inset:0;background:linear-gradient(to top right,transparent 46%,var(--ban) 46%,var(--ban) 54%,transparent 54%);pointer-events:none}
-.pk{position:relative;isolation:isolate;min-width:0;min-height:120px;border-radius:var(--wl-control-radius);padding:10px;border:1px solid var(--line);background:var(--bg)}
+.pk{position:relative;isolation:isolate;min-width:0;min-height:120px;border-radius:0;padding:10px;border:1px solid var(--line);background:var(--bg)}
 .pk.mine{cursor:pointer;background:var(--panel2);--art-direction:to right}
 .pk.r{text-align:right}
 .pk.r.mine{--art-direction:to left}
@@ -318,15 +318,13 @@ nav{display:flex;gap:6px}
 .pk.mine:has(.pk-art)::before{content:"";z-index:-1;background:linear-gradient(var(--art-direction),#0b0f17 0%,#0b0f17ec 34%,#0b0f1740 75%,#0b0f1726),linear-gradient(to top,#0b0f17bd,transparent 50%)}
 .pk.b {
   --pick-accent: var(--wl-side-blue-text);
-  border-inline-start: 5px solid var(--wl-side-blue);
-  border-start-start-radius: 2px;
-  border-end-start-radius: 2px;
+  border-inline-start: var(--wl-accent-bar) solid var(--wl-side-blue);
+  border-radius: 0;
 }
 .pk.r {
   --pick-accent: var(--wl-side-red-text);
-  border-inline-end: 5px solid var(--wl-side-red);
-  border-start-end-radius: 2px;
-  border-end-end-radius: 2px;
+  border-inline-end: var(--wl-accent-bar) solid var(--wl-side-red);
+  border-radius: 0;
 }
 .pk.act{outline:2px solid var(--gold);outline-offset:-2px}
 .pk.drop{outline:2px dashed var(--gold);outline-offset:0}

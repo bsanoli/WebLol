@@ -16,6 +16,7 @@ for (const directory of directories.filter((entry) => entry.isDirectory())) {
   const header = input.match(/^---\r?\n([\s\S]*?)\r?\n---(?:\r?\n|$)/)?.[1];
   const sourceName = header?.match(/^name: (.+)$/m)?.[1];
   const description = header?.match(/^description: (.+)$/m)?.[1];
+  const manualOnly = /^disable-model-invocation: true$/m.test(header ?? "");
   if (
     !/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(name) ||
     sourceName !== name ||
@@ -31,6 +32,7 @@ for (const directory of directories.filter((entry) => entry.isDirectory())) {
     "---",
     `name: ${name}`,
     `description: ${description}`,
+    ...(manualOnly ? ["disable-model-invocation: true"] : []),
     "---",
     "",
     marker,

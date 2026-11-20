@@ -1,4 +1,6 @@
-import { blank, type Composition } from "./local-state"
+import { DRAFT_SIDE } from "./draft-order"
+import { draftOf, type Composition } from "./local-state"
+import { collectImageIds, docFromLegacy, docWithCompNotes, plainTextOf, readTacticDoc, type TacticDoc } from "./tactic-doc"
 // Táticas do time: texto livre, geral ou ligado a uma composição.
 // Cada tática é um item próprio em `tactics`, sincronizado como as comps e jogadas.
 export const GENERAL_TACTIC = "geral"
@@ -9,10 +11,12 @@ export type Tactic = {
   name: string
   text: string
   images?: string[]
+  /** Documento do editor de texto; táticas antigas só têm `text` e `images`. */
+  doc?: TacticDoc
   updated: number
 }
 
-type TacticsState = { tactics?: unknown; tacticsGeneral?: unknown }
+type TacticsState = { tactics?: unknown; tacticsGeneral?: unknown; comps?: Composition[] }
 
 const tacticId = (compId: string | null) => (compId ? `comp-${compId}` : GENERAL_TACTIC)
 
@@ -56,36 +60,41 @@ export function readTacticImages(state: TacticsState, compId: string | null): st
   return Array.isArray(images) ? images.filter(id => typeof id === "string") : []
 }
 
+/** Anotações antigas da comp que ainda não entraram no bloco de notas. */
+function pendingCompNotes(comp: Composition | undefined) {
+  if (!comp) return null
+  const note = comp.draft?.note
+  const draft = (["blue", "red"] as const).map(side => ({ label: DRAFT_SIDE[side], text: note?.[side] ?? "" })).filter(item => item.text.trim())
+  return comp.notes?.trim() || draft.length ? { general: comp.notes ?? "", draft } : null
+}
+
+/** Documento da tática; uma tática antiga e as anotações antigas da comp são convertidas na leitura, sem gravar nada. */
+export function readTacticDocument(state: TacticsState, compId: string | null): TacticDoc {
+  const item = ensureTactics(state).find(entry => entry.id === tacticId(compId))
+  const doc = readTacticDoc(item?.doc) ?? docFromLegacy(item?.text ?? "", readTacticImages(state, compId))
+  const notes = compId ? pendingCompNotes(state.comps?.find(comp => comp.id === compId)) : null
+  return notes ? docWithCompNotes(doc, notes) : doc
+}
+
+/** Depois que o bloco de notas gravou as anotações antigas, elas saem da comp para não aparecer duas vezes. */
+export function clearCompNotes(comp: Composition): boolean {
+  if (!pendingCompNotes(comp)) return false
+  comp.notes = ""
+  draftOf(comp).note = { blue: "", red: "" }
+  return true
+}
+
+/** Grava o documento, o texto puro derivado dele e os ids das imagens referenciadas. */
+export function writeTacticDocument(state: TacticsState, compId: string | null, compName: string, doc: TacticDoc, now: number) {
+  const text = plainTextOf(doc), images = collectImageIds(doc)
+  writeTactic(state, compId, compName, text, now, images)
+  const item = ensureTactics(state).find(entry => entry.id === tacticId(compId))
+  if (item) item.doc = doc
+}
+
 export const hasTactic = (state: TacticsState, compId: string | null) =>
-  !!readTactic(state, compId).trim() || readTacticImages(state, compId).length > 0
-
-// Táticas salvas: ficam na lista de comps com a marca `tactic`, mas não são composições.
-// Aparecem em Opções por posição ou na Ordem do draft só quando essa opção está marcada na tática.
-export type TacticPanel = "draft" | "lane"
-export type TacticTeam = "mine" | "enemy"
-type TacticItem = Composition & { tactic?: boolean; tacticViews?: Partial<Record<TacticPanel, boolean>>; tacticTeam?: TacticTeam; opgg?: string }
-
-export const isSavedTactic = (item: unknown): boolean => (item as TacticItem | undefined)?.tactic === true
-
-/** Cria a tática salva a partir de uma comp (cópia dos picks) ou vazia. */
-export function createSavedTactic(source: Composition | null, id: string, name: string, now: number): TacticItem {
-  const base = source ? structuredClone(source) as TacticItem : blank(name) as TacticItem
-  return { ...base, id, name, updated: now, tactic: true, tacticViews: {} }
-}
-
-/** Liga ou desliga a tática em Opções por posição ("lane") ou na Ordem do draft ("draft"). */
-export function setTacticView(item: Composition, panel: TacticPanel, on: boolean) {
-  const tactic = item as TacticItem
-  if (!tactic.tactic) return
-  tactic.tacticViews = { ...tactic.tacticViews, [panel]: on }
-}
-
-/** De quem é a tática salva: da nossa equipe (padrão) ou da equipe adversária. */
-export const tacticTeamOf = (item: Composition): TacticTeam => (item as TacticItem).tacticTeam === "enemy" ? "enemy" : "mine"
-
-export function setTacticTeam(item: Composition, team: TacticTeam) {
-  if (isSavedTactic(item)) (item as TacticItem).tacticTeam = team
-}
+  !!readTactic(state, compId).trim() || readTacticImages(state, compId).length > 0 ||
+  (!!compId && !!pendingCompNotes(state.comps?.find(comp => comp.id === compId)))
 
 /** Link do OP.GG do time. Aceita só http(s); sem protocolo, assume https. Vazio apaga. */
 export function normalizeOpggLink(value: string): string | null {
@@ -99,18 +108,9 @@ export function normalizeOpggLink(value: string): string | null {
   }
 }
 
-export const tacticOpggOf = (item: Composition) => (item as TacticItem).opgg || ""
+export const opggOf = (comp: Composition) => comp.opgg || ""
 
-export function setTacticOpgg(item: Composition, link: string) {
-  if (!isSavedTactic(item)) return
-  if (link) (item as TacticItem).opgg = link
-  else delete (item as TacticItem).opgg
-}
-
-export const tacticShownIn = (item: Composition, panel: TacticPanel) => !!(item as TacticItem).tacticViews?.[panel]
-
-/** Comps que aparecem numa visão do editor: táticas salvas primeiro, só se preenchidas naquela visão. */
-export function itemsForView<T extends Composition>(items: T[], panel: TacticPanel): T[] {
-  const tactics = items.filter(item => isSavedTactic(item) && (item as TacticItem).tacticViews?.[panel])
-  return [...tactics, ...items.filter(item => !isSavedTactic(item))]
+export function setOpgg(comp: Composition, link: string) {
+  if (link) comp.opgg = link
+  else delete comp.opgg
 }

@@ -83,7 +83,7 @@
   height: var(--skill-cell);
   padding: 0;
   border: 1px solid transparent;
-  border-radius: var(--wl-space-1);
+  border-radius: var(--wl-control-radius);
   background: color-mix(in srgb, currentColor 12%, transparent);
   cursor: pointer;
 }
@@ -102,8 +102,8 @@
 .build-skill-sequence-label { margin: 0 0 var(--wl-space-1); }
 .build-skills .build-ability { position: relative; width: min(100%, var(--skill-cell)); height: var(--skill-cell); }
 .build-skills .build-ability:hover { box-shadow: 0 0 0 1px var(--gold); }
-.build-skills .build-ability .build-icon { width: 100%; height: 100%; border-radius: var(--wl-space-1); }
+.build-skills .build-ability .build-icon { width: 100%; height: 100%; border-radius: var(--wl-control-radius); }
 .build-ability b {
-  position: absolute; right: 0; bottom: 0; min-width: var(--wl-space-3); border-radius: var(--wl-space-1) 0 var(--wl-space-1) 0;
+  position: absolute; right: 0; bottom: 0; min-width: var(--wl-space-3); border-radius: var(--wl-control-radius);
   background: #101017; color: #fff; font-size: 10px; line-height: var(--wl-space-3); text-align: center;
 }
