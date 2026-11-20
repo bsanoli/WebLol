@@ -21,7 +21,7 @@ import { $, cur, compById, img, S, save, toast, touch } from "./team-store"
 // Comp do lado do quadro onde está o elemento; fora do quadro, a comp aberta.
 export const compOf = (el: Element | null | undefined) =>
   compById((el?.closest?.("[data-comp-id]") as HTMLElement | null)?.dataset.compId) || cur()
-export const matchupItem = (c: Composition) => ({
+const matchupItem = (c: Composition) => ({
   id: c.id,
   name: c.name,
   title: c.name,
@@ -63,7 +63,7 @@ export function renderMatchup() {
     onDelete: id => void deleteComp(id),
   })
 }
-export const focusMatchup = (kind: "ours" | "rival") =>
+const focusMatchup = (kind: "ours" | "rival") =>
   requestAnimationFrame(() => $(`#editor [data-matchup="${kind}"]`)?.focus({ preventScroll: true }))
 // Põe a adversária no draft da comp nossa e registra o confronto (a tática dele fica em Táticas › Confrontos).
 export function faceEnemy(ours: Composition, enemyId: string | null) {
@@ -71,7 +71,7 @@ export function faceEnemy(ours: Composition, enemyId: string | null) {
   if (enemyId) addMatchup(ours, enemyId)
   touch(ours)
 }
-export function handleEnemySelect(id: string | null) {
+function handleEnemySelect(id: string | null) {
   faceEnemy(cur(), id)
   session.side = id ? "rival" : "us"
   save()
@@ -133,7 +133,7 @@ export function newComp(owner: "ours" | "enemy" = "ours") {
     }, 0)
 }
 // Nome editado direto no card do lado.
-export function handleRenameTo(id: string, value: unknown) {
+function handleRenameTo(id: string, value: unknown) {
   const c = compById(id),
     name = String(value || "").trim()
   if (!c || !name || name === c.name) return
@@ -162,7 +162,7 @@ export function handleEnemyChampionDrop(name: string, lane: DraftLane) {
   hooks.publishRoute("comps")
   toast(`Adversária "${c.name}" criada com ${name}`)
 }
-export async function renameComp(id: string) {
+async function renameComp(id: string) {
   const c = compById(id)
   if (!c) return
   const name = (await askName("Renomear composição", c.name, "Nome da composição"))?.trim()
@@ -177,7 +177,7 @@ export async function renameComp(id: string) {
   hooks.renderEditor()
   focusMatchup(id === S.cur ? "ours" : "rival")
 }
-export function duplicateComposition(id: string) {
+function duplicateComposition(id: string) {
   const source = compById(id)
   if (!source) return
   const copy = createCompositionCopy(source, uid(), Date.now())
@@ -192,7 +192,7 @@ export function duplicateComposition(id: string) {
   hooks.publishRoute("comps")
   focusMatchup(isEnemy(copy) && S.view === "draft" ? "rival" : "ours")
 }
-export async function deleteComp(id: string) {
+async function deleteComp(id: string) {
   const c = compById(id)
   if (!c || !(await confirmAction(`Excluir a comp "${c.name}"? As táticas dela também saem.`, "Excluir composição")))
     return false
@@ -211,12 +211,12 @@ export async function deleteComp(id: string) {
   return true
 }
 
-export function dropMatchupTactics() {
+function dropMatchupTactics() {
   for (const id of pruneMatchups(S.comps)) writeTactic(S, matchupKey(id), "", "", Date.now(), [])
   if (S.tacticsMatchup && !findMatchup(S.comps, S.tacticsMatchup)) S.tacticsMatchup = null
 }
 // Passa a comp de uma lista para a outra (menu ⋯ da barra de confronto).
-export function moveComp(id: string) {
+function moveComp(id: string) {
   const c = compById(id)
   if (!c) return
   const toEnemy = !isEnemy(c)

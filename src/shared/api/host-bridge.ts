@@ -11,7 +11,7 @@ export type HostNavigation = {
   onCopy?: () => void
 }
 
-export type HostImageSave = { id: string; shared: boolean; error?: string }
+type HostImageSave = { id: string; shared: boolean; error?: string }
 
 /** Prints e desenhos das táticas: o app principal guarda no navegador e, com time, no Firestore. */
 export type HostImages = {
@@ -36,7 +36,7 @@ export type FrameHandlers = {
 }
 
 /** Janela pai, ou `null` quando a tela roda sozinha ou o acesso é bloqueado. */
-export function hostWindow(): (Window & HostGlobals) | null {
+function hostWindow(): (Window & HostGlobals) | null {
   try {
     return window.parent !== window ? (window.parent as Window & HostGlobals) : null
   } catch {

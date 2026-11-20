@@ -1,4 +1,4 @@
-export const ROLES = ["top", "jg", "mid", "adc", "sup"] as const
+const ROLES = ["top", "jg", "mid", "adc", "sup"] as const
 export const RN = { top: "TOP", jg: "JG", mid: "MID", adc: "ADC", sup: "SUP" }
 export const TOKS = [...ROLES.map(r => "b_" + r), ...ROLES.map(r => "r_" + r)]
 export const sw = ([x, y]: number[]) => [y, x] // espelha lado azul -> vermelho

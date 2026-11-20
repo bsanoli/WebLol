@@ -1,7 +1,7 @@
 # Onda 4: scripts clássicos para TypeScript
 
 - **Tamanho:** G
-- **Situação:** em andamento (4a, 4b e 4c feitas no código; 4d pendente)
+- **Situação:** em andamento (4a, 4b e 4c mergeadas (PR #14); 4d em andamento)
 - **Pedido por:** Fabiano
 - **Data:** 2026-11-20
 
@@ -56,4 +56,6 @@ Origem: [Onda 4 do backlog](../auditoria-codebase.md#onda-4-scripts-clássicos-p
 - **Mudou (4b parte 3 e 4c):** `features/auth` (`model`: sessão, identidade, adesão ao time, sincronização, imagens, rota, partida; `ui`: login, passo do time, status, Administração) passou a ser dono do estado (`TEAM`, `MEMB`, `OFF`, `ADMIN`, `KEYS`, `FB`). A regra de alterações do time foi para `shared/lib/team-changes.ts`, porque uma feature não importa de outra. `public/assets/sync.js`, `public/assets/shell.js` e `app/classic-globals.ts` foram removidos: `public/assets` não tem mais JavaScript. No `window` ficam só cinco nomes que os iframes leem (`captainAccess`, `canManageTeam`, `TEAM_NAME`, `renderCaptainPanel`, `weblolImages`), definidos em `shared/api/host-bridge.ts`. Coleções, campos, chaves locais, IndexedDB e rotas não mudaram.
 - **Revisão (change-verifier):** corrigidos o duplo clique nos botões do capitão, o `fb()` fora do `try` na senha de login e o `teamPath` sem time ativo (agora lança erro). Ficam para a 4d: dependências `model → ui` em `model/sync.ts`, validação dos dados externos em `admin-data.ts` e `migrate.ts`, e exports sem uso no Knip.
 - **Verificado (4c):** `npm run check`, Knip, Vitest (72), build e Playwright (42). No navegador: troca entre as rotas worlds, builds, composicoes, time e admin, redirecionamento de visitante da Administração para o time, abertura do diálogo de login e "Entrar sem usuário". **Não exercitado:** login real com Riot ID e senha, login de admin, envio ao Firestore e Administração logada.
+- **Mudou (4d, parte 1):** `features/auth/model/sync.ts` não importa mais de `ui/`: pede a tela por `model/ui-hooks.ts`, ligado em `startPanel`. `model/external-data.ts` valida com Zod Mini a versão oficial e os envios vindos do Firestore (`parseOfficial`, `parseSubmission`), com 4 testes; envio inválido aparece como quebrado na Administração, e a migração não sobrescreve uma versão oficial ilegível. Exports sem uso no Knip removidos (Knip limpo).
+- **Pendente (4d):** migração dos bans `lanes.ban` (muda dado salvo; precisa de ADR e decisão), `@ts-nocheck` restantes (8 arquivos de `pages`, `widgets` e `app/entrypoints/worlds.ts`) e `worlds.ts` com mensagens tipadas no lugar de `frameElement`.
 - **Pendente:** `worlds.ts` (`@ts-nocheck`) ainda usa `frameElement` e `applyWebLolRoute` direto; entra quando o arquivo for tipado. 4d (limpeza final: migração dos bans `lanes.ban` com ADR e `@ts-nocheck` restantes).

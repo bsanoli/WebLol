@@ -1,5 +1,5 @@
 /** Arrastar uma comp da lista da gaveta de Táticas e soltar num dos lados do quadro. O tipo próprio não colide com o arrastar de campeões. */
-export const COMP_DRAG_TYPE = "text/x-weblol-comp"
+const COMP_DRAG_TYPE = "text/x-weblol-comp"
 
 export function bindTacticDrop(editor: HTMLElement, onDrop: (compId: string, side: "blue" | "red") => void) {
   const zone = (event: Event) => (event.target as Element | null)?.closest?.<HTMLElement>("[data-drop-side]") ?? null

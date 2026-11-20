@@ -3,6 +3,7 @@ import { dbDel, dbGet, dbList, dbSet, getJ } from "@/shared/api/firestore"
 import { ADMINS } from "@/shared/config/admins"
 import { dispId, safeName } from "@/shared/lib/account-id"
 import { unseal, verifyObj } from "@/shared/lib/admin-crypto"
+import { parseOfficial } from "./external-data"
 import { loadAdminKey } from "./membership"
 import { session, type Official } from "./session"
 
@@ -44,7 +45,9 @@ export async function migrateToTeams() {
       await dbSet("membros", key, { team: teamId, status: "ativo", riotId: id, at: Date.now() })
   const official = old || emptyOfficial()
   const current = await dbGet(`times/${teamId}/dados`, "oficial")
-  const currentData = current ? (JSON.parse(String(current.json)) as Official).data : null
+  const parsedCurrent = current ? parseOfficial(current.json) : null
+  if (current && !parsedCurrent) throw new Error("A versão oficial atual não pôde ser lida; nada foi alterado.")
+  const currentData = parsedCurrent?.data ?? null
   if (!currentData || (!currentData.comps.length && !currentData.plays.length))
     await dbSet(`times/${teamId}/dados`, "oficial", {
       json: JSON.stringify({ ...official, label: official.label || "Versão inicial do time" }),

@@ -10,7 +10,7 @@ import {
 } from "./tactic-doc"
 // Táticas do time: texto livre, geral ou ligado a uma composição.
 // Cada tática é um item próprio em `tactics`, sincronizado como as comps e jogadas.
-export const GENERAL_TACTIC = "geral"
+const GENERAL_TACTIC = "geral"
 
 export type Tactic = {
   id: string
@@ -40,7 +40,7 @@ export function ensureTactics(state: TacticsState): Tactic[] {
 }
 
 /** Texto da tática geral (compId nulo) ou da tática de uma composição. */
-export function readTactic(state: TacticsState, compId: string | null): string {
+function readTactic(state: TacticsState, compId: string | null): string {
   return ensureTactics(state).find(item => item.id === tacticId(compId))?.text ?? ""
 }
 
@@ -69,7 +69,7 @@ export function writeTactic(
 }
 
 /** Ids dos prints anexados à tática; as imagens ficam guardadas à parte. */
-export function readTacticImages(state: TacticsState, compId: string | null): string[] {
+function readTacticImages(state: TacticsState, compId: string | null): string[] {
   const images = ensureTactics(state).find(item => item.id === tacticId(compId))?.images
   return Array.isArray(images) ? images.filter(id => typeof id === "string") : []
 }

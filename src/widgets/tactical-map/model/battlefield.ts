@@ -50,7 +50,7 @@ const routes = {
     [88, 11],
   ],
 } satisfies Record<string, MapPoint[]>
-export const isLane = (value: unknown): value is Lane => typeof value === "string" && Object.hasOwn(routes, value)
+const isLane = (value: unknown): value is Lane => typeof value === "string" && Object.hasOwn(routes, value)
 
 const realisticRoutes: Record<Lane, MapPoint[]> = {
   top: [...routes.top.slice(0, 4), [11, 21], [15, 14], [20, 10], ...routes.top.slice(7)],

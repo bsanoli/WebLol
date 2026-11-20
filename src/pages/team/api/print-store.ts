@@ -4,7 +4,7 @@ import { hostImages } from "@/shared/api/host-bridge"
 import { STORAGE_PREFIXES } from "@/shared/config/storage-keys"
 import { uid } from "../model/local-state"
 
-export type SavedImage = { id: string; shared: boolean; error?: string }
+type SavedImage = { id: string; shared: boolean; error?: string }
 
 export type PrintStore = {
   save(data: string): Promise<SavedImage>

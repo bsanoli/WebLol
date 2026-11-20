@@ -5,13 +5,13 @@ import { dbGet, dbSet, fb, ONLINE } from "@/shared/api/firestore"
 import { STORAGE_KEYS } from "@/shared/config/storage-keys"
 import { normId } from "@/shared/lib/account-id"
 import { toast } from "@/shared/lib/dom"
-import { renderAdmin } from "../ui/admin"
-import { setSync, updateStatus } from "../ui/status"
 import { openRoute, routeRoots, writeRoute } from "./router"
+import { parseOfficial } from "./external-data"
 import { flushImages } from "./images"
 import { BKEY, canPublish, KEY, lsGet, lsSet, local, meKey, preview, SKEY, teamPath, user, pending } from "./identity"
 import { loadMembership } from "./membership"
 import { session, type LogEntry, type Official } from "./session"
+import { uiHooks } from "./ui-hooks"
 
 /** Alteração com a origem anotada, como entra num envio ou na publicação. */
 export type SentChange = Change & { sid: string; from: string }
@@ -35,11 +35,8 @@ export async function readOfficial(): Promise<OfficialRead> {
   if (!session.team) return { err: "noteam" }
   const doc = await dbGet(teamPath("dados"), "oficial")
   if (!doc) return { off: emptyOfficial() }
-  try {
-    return { off: JSON.parse(String(doc.json)) as Official }
-  } catch {
-    return { err: "bad" }
-  }
+  const off = parseOfficial(doc.json)
+  return off ? { off } : { err: "bad" }
 }
 
 /** Grava a versão oficial na cópia local, mantendo o estado "ao vivo" das jogadas. */
@@ -56,9 +53,9 @@ function writeLocal(data: SharedData, official: Official) {
 }
 
 export async function sync(options: { reload?: boolean } = {}) {
-  if (!ONLINE) return setSync("Banco online não configurado", "warn")
+  if (!ONLINE) return uiHooks.setSync("Banco online não configurado", "warn")
   if (!user() || user()?.solo || !session.team) {
-    updateStatus()
+    uiHooks.updateStatus()
     return
   }
   let result: OfficialRead
@@ -75,8 +72,8 @@ export async function sync(options: { reload?: boolean } = {}) {
       bad: "Versão oficial do time ilegível",
       noteam: "Sem time",
     }
-    setSync(messages[result.err], "bad")
-    updateStatus(true)
+    uiHooks.setSync(messages[result.err], "bad")
+    uiHooks.updateStatus(true)
     return
   }
   void flushImages()
@@ -107,18 +104,18 @@ export async function sync(options: { reload?: boolean } = {}) {
   }
   if (shouldReload && options.reload !== false) session.reloadCamp()
   for (const note of notes) toast(note, 5000)
-  updateStatus()
+  uiHooks.updateStatus()
 }
 
 export async function refreshTeam() {
-  setSync("Sincronizando com o time…", "")
+  uiHooks.setSync("Sincronizando com o time…", "")
   try {
     await loadMembership()
   } catch {
     // sem rede: o `sync` abaixo mostra o aviso
   }
   await sync()
-  if (session.currentScreen === "admin") void renderAdmin()
+  if (session.currentScreen === "admin") void uiHooks.renderAdmin()
   if (session.net && session.off) toast("Sincronizado")
 }
 
@@ -150,7 +147,7 @@ export async function sendChanges() {
   } catch (error) {
     toast(`Não consegui enviar para o banco do time: ${(error as Error).message}`)
   }
-  updateStatus()
+  uiHooks.updateStatus()
 }
 
 const logEntry = (v: number, at: number, change: SentChange, status: LogEntry["status"]): LogEntry => ({
@@ -203,12 +200,12 @@ export async function publish(approved: SentChange[], rejected: SentChange[], la
     return toast(`Não consegui publicar: ${(error as Error).message}`)
   }
   await sync()
-  void renderAdmin()
+  void uiHooks.renderAdmin()
   toast(`Versão oficial v${official.version} do ${session.team.name} publicada`)
 }
 
 export function listenToCampChanges() {
   addEventListener("storage", event => {
-    if (event.key === STORAGE_KEYS.teamAreaState) updateStatus()
+    if (event.key === STORAGE_KEYS.teamAreaState) uiHooks.updateStatus()
   })
 }

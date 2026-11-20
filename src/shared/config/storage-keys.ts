@@ -46,4 +46,4 @@ export const STORAGE_PREFIXES = {
   screenshotCache: "lol-img-",
 } as const
 
-export type StorageKey = (typeof STORAGE_KEYS)[keyof typeof STORAGE_KEYS]
+type StorageKey = (typeof STORAGE_KEYS)[keyof typeof STORAGE_KEYS]

@@ -28,7 +28,7 @@ export function revealContent(element: Element | null, quick = false) {
 }
 
 /** One observer per persistent navigation; resize also handles wrapping on mobile. */
-export function initializeMotionNav(selector: string) {
+function initializeMotionNav(selector: string) {
   document.querySelectorAll<HTMLElement>(selector).forEach(nav => {
     nav.classList.add("wl-motion-nav")
     let pending = 0
