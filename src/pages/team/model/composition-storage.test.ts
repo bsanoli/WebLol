@@ -11,6 +11,15 @@ const oursSaved = {
   draft: { side: "blue", rival: "b", note: { blue: "", red: "" } },
   updated: 1,
 }
+const newOursSaved = {
+  id: "a",
+  name: "Nossa",
+  team: "mine",
+  lanes: { top: ["Ornn"] },
+  bans: ["Zed"],
+  draft: { side: "blue", rival: "b", note: { blue: "", red: "" } },
+  updated: 1,
+}
 const enemySaved = { id: "b", name: "Deles", team: "enemy", lanes: { top: [] }, updated: 2 }
 
 describe("compositionFromSaved", () => {
@@ -61,15 +70,16 @@ describe("bans nos dois formatos salvos", () => {
     expect(compositionFromSaved(both)).toMatchObject({ bans: ["Ahri"] })
   })
 
-  it("continua gravando em lanes.ban (etapa 1 da migração)", () => {
-    const back = compositionToSaved(compositionFromSaved(newFormat)) as unknown as Record<string, unknown>
-    expect(back.lanes).toEqual({ top: ["Ornn"], ban: ["Zed"] })
-    expect(back).not.toHaveProperty("bans")
+  it("grava bans na raiz, sem lanes.ban (etapa 2 da migração)", () => {
+    const back = compositionToSaved(compositionFromSaved(oursSaved)) as unknown as Record<string, unknown>
+    expect(back.lanes).toEqual({ top: ["Ornn"] })
+    expect(back.bans).toEqual(["Zed"])
+    expect(Object.keys(back).indexOf("bans")).toBe(Object.keys(back).indexOf("lanes") + 1)
   })
 })
 
 describe("ida e volta", () => {
-  it.each([oursSaved, enemySaved, { id: "x", name: "Antiga", lanes: {} }, { id: "y", team: "outro" }])(
+  it.each([newOursSaved, enemySaved, { id: "x", name: "Antiga", lanes: {} }, { id: "y", team: "outro" }])(
     "devolve o mesmo JSON, com a mesma ordem das chaves (%#)",
     original => {
       const back = compositionToSaved(compositionFromSaved(original))
@@ -83,6 +93,6 @@ describe("ida e volta", () => {
       cur: "a",
       view: "draft",
     }
-    expect(saved(teamStateToSaved(state))).toBe(saved({ comps: [oursSaved, enemySaved], cur: "a", view: "draft" }))
+    expect(saved(teamStateToSaved(state))).toBe(saved({ comps: [newOursSaved, enemySaved], cur: "a", view: "draft" }))
   })
 })

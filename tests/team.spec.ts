@@ -108,10 +108,21 @@ test("Duplica e salva uma composição do formato anterior sem alterar a origina
   const state = await page.evaluate(() => JSON.parse(localStorage.getItem("lol-comps-time-v1")!))
   expect(state.cur).not.toBe(original.id)
   expect(state.comps).toHaveLength(2)
+  const { ban: _ban, ...copyLanes } = original.lanes
   expect(state.comps).toMatchObject([
-    { ...original, id: state.cur, name: "Composição anterior (cópia)", updated: expect.any(Number) },
-    original,
+    {
+      ...original,
+      lanes: copyLanes,
+      bans: [],
+      id: state.cur,
+      name: "Composição anterior (cópia)",
+      updated: expect.any(Number),
+    },
+    // A original muda só de formato (bans na raiz), não de conteúdo.
+    { ...original, lanes: copyLanes, bans: [] },
   ])
+  expect(state.comps[0].lanes).not.toHaveProperty("ban")
+  expect(state.comps[1].lanes).not.toHaveProperty("ban")
   expect(state.comps[0].draft).toEqual(state.comps[1].draft)
 
   await page.reload()

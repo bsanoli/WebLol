@@ -1,6 +1,6 @@
 // Diferenças entre a Área do time local e a versão oficial: o que entra num envio e como aparece na lista.
 // Os itens seguem o formato salvo (`team`, `draft.rival`, `lanes.*`): é o que o Firestore guarda.
-// Os bans vêm em `lanes.ban` (formato atual) ou em `bans` (formato novo, ADR 0007); os dois contam como o mesmo dado.
+// Os bans vêm em `bans` (formato atual) ou em `lanes.ban` (formato antigo, ADR 0007); os dois contam como o mesmo dado.
 export type ItemKind = "comp" | "play" | "tactic"
 export type ChangeOp = "add" | "edit" | "del"
 export type SharedItem = {
@@ -40,7 +40,6 @@ export const shared = (state?: Partial<SharedData> | null): SharedData => ({
   tactics: clone(state?.tactics || []),
 })
 
-// Campos que mudam sozinhos (jogada ao vivo, data de edição) não contam como alteração.
 /** Posições da composição com os bans como `ban`, venham de `lanes.ban` ou de `bans`. */
 function savedPositions(item: SharedItem) {
   const lanes = item.lanes || {}
@@ -54,6 +53,7 @@ function withBansInLanes(item: SharedItem): SharedItem {
   return { ...rest, lanes: savedPositions(item) }
 }
 
+// Campos que mudam sozinhos (jogada ao vivo, data de edição) não contam como alteração.
 const normItem = (kind: ItemKind, item: SharedItem) => {
   const copy = { ...(kind === "comp" ? withBansInLanes(item) : item) }
   if (kind === "play") delete copy.live

@@ -1,5 +1,6 @@
 // Conversão entre o formato salvo da composição (`lol-comps-time-v1`, backup e Firestore) e o formato do código.
-// Salvo: `team: "mine" | "enemy"`, `draft.rival` e `lanes.ban`. Código: `owner: "ours" | "enemy"`, `draft.enemyId` e `bans`.
+// Salvo: `team: "mine" | "enemy"` e `draft.rival` (os bans já são `bans`; `lanes.ban` só é lido).
+// Código: `owner: "ours" | "enemy"` e `draft.enemyId`.
 // Os nomes salvos são contrato e só mudam com migração e ADR (docs/convencoes.md).
 //
 // A conversão preserva a ordem das chaves e a ausência dos campos: a sincronização compara cada composição pelo JSON,
@@ -19,25 +20,18 @@ function renameKeys(source: PlainObject, names: Record<string, string>): PlainOb
 const OWNER_FROM_SAVED: Record<string, string> = { mine: "ours", enemy: "enemy" }
 const OWNER_TO_SAVED: Record<string, string> = { ours: "mine", enemy: "enemy" }
 
-/** Lê `lanes.ban` para `bans` (ou o contrário), deixando `bans` logo depois de `lanes` e preservando a ordem das chaves. */
-function convertBans(comp: PlainObject, direction: "read" | "write"): PlainObject {
-  const isReading = direction === "read"
-  if (!isPlainObject(comp.lanes)) return comp
-  const lanes = comp.lanes
-  if (isReading ? !("ban" in lanes) : !("bans" in comp)) return comp
+/**
+ * Lê `lanes.ban` (formato antigo) como `bans`, logo depois de `lanes` e preservando a ordem das chaves.
+ * O formato salvo atual já é `bans` na raiz; `lanes.ban` só é lido, nunca mais gravado (ADR 0007).
+ */
+function readLegacyBans(comp: PlainObject): PlainObject {
+  if (!isPlainObject(comp.lanes) || !("ban" in comp.lanes)) return comp
+  const { ban, ...positions } = comp.lanes
   const entries: [string, unknown][] = []
   for (const [key, value] of Object.entries(comp)) {
     if (key === "bans") continue
-    if (key !== "lanes") {
-      entries.push([key, value])
-      continue
-    }
-    if (isReading) {
-      const { ban, ...positions } = lanes
-      entries.push(["lanes", positions], ["bans", ban])
-    } else {
-      entries.push(["lanes", { ...lanes, ban: comp.bans }])
-    }
+    if (key === "lanes") entries.push(["lanes", positions], ["bans", ban])
+    else entries.push([key, value])
   }
   return Object.fromEntries(entries)
 }
@@ -58,7 +52,7 @@ function convertComposition(raw: PlainObject, direction: "read" | "write"): Plai
   if (isPlainObject(raw.draft) && enemyKey in raw.draft) {
     comp = { ...comp, draft: renameKeys(raw.draft, { [enemyKey]: isReading ? "enemyId" : "rival" }) }
   }
-  return convertBans(comp, direction)
+  return isReading ? readLegacyBans(comp) : comp
 }
 
 export const compositionFromSaved = (raw: unknown) =>

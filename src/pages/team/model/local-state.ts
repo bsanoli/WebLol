@@ -19,7 +19,7 @@ export type CompositionDraft = {
 export type Composition = {
   id: string
   name: string
-  /** Campeões por posição. Os bans ficam em `bans` (salvos como `lanes.ban`, ver composition-storage.ts). */
+  /** Campeões por posição. Os bans ficam em `bans` (salvos como `bans`; o formato antigo `lanes.ban` é só lido, ver composition-storage.ts). */
   lanes: Record<DraftLane, string[]>
   bans: string[]
   laneNotes: Record<string, string>
