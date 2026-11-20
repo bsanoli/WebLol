@@ -1,0 +1,57 @@
+# Publica o site no GitHub Pages por artefato (docs/decisoes/0003-publicacao-por-artefato.md).
+# Precisa de Settings › Pages › Source = "GitHub Actions", que só o admin do repositório muda.
+# Por enquanto roda só sob demanda. Depois do primeiro deploy conferido, o push na `main` passa a disparar.
+name: Deploy
+
+on:
+  workflow_dispatch:
+  workflow_call:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    name: Gerar o site
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: npm
+
+      - name: Instalar dependências
+        run: npm ci
+
+      - name: Build e verificações
+        run: npm run build
+
+      - name: Montar o site em _site
+        run: node scripts/prepare-pages.mjs --out=_site
+
+      - uses: actions/configure-pages@v6
+
+      - uses: actions/upload-pages-artifact@v5
+        with:
+          path: _site
+
+  deploy:
+    name: Publicar
+    needs: build
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v5
