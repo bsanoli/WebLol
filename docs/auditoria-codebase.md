@@ -7,7 +7,7 @@ Os termos seguem o [glossário](glossario.md). As regras novas estão em [conven
 ## Resumo
 
 1. **O mesmo conceito tem vários nomes.** A composição adversária aparece como `rival`, `enemy` e `opponent`, a posição como `lane`, `role` e `DraftLane`, e a Área do time como `camp`, `time` e `team`.
-2. **Não havia verificação automática antes de publicar.** Não existia CI, lint, formatação nem teste unitário, e quase todos os commits iam direto para a `main`. A [Onda 1](#onda-1-verificação-automática) trouxe Biome, Steiger, Vitest, axe, ganchos e CI. As regras com dívida anterior ainda só avisam ([lista](#avisos-que-ainda-não-barram)).
+2. **Não havia verificação automática antes de publicar.** Não existia CI, lint, formatação nem teste unitário, e quase todos os commits iam direto para a `main`. A [Onda 1](#onda-1-verificação-automática) trouxe Biome, Steiger, Vitest, axe, ganchos e CI. O Steiger já barra com zero avisos; o que ainda só avisa está [listado](#avisos-que-ainda-não-barram).
 3. **O build gerado mora no Git.** 636 arquivos gerados estão versionados, e 142 dos 159 commits mexem neles.
 4. **O código mais usado é o menos tipado.** Nove arquivos com `@ts-nocheck` somam 4.052 linhas, entre eles a página do time (1.459 linhas). Antes da formatação do Biome, que quebra as linhas acima de 120 caracteres, eram 3.030 e 883.
 5. **Três sistemas de estilo convivem.** Eram 16 CSS globais (antes da 5a) em `public/assets/`, 5 CSS modules e Tailwind, com cores soltas fora dos tokens.
@@ -78,37 +78,9 @@ Os scripts clássicos `public/assets/shell.js` e `public/assets/sync.js` ficam f
 
 ## Avisos que ainda não barram
 
-Contagem de 20/11/2026, depois da Onda 1. Estas regras acusam código anterior e por isso só avisam. Cada uma vira erro quando chegar a zero ([convenções](convencoes.md#verificação-automática)).
-
-### Avisos do Biome
-
-`npm run lint` mostra 555 avisos e 89 sugestões. As regras com mais avisos:
-
-| Regra | Avisos | Onde corrigir |
-| --- | ---: | --- |
-| `style/noNonNullAssertion` (`!` depois de valor que pode faltar) | 147 | Ondas 3 e 4, ao tipar os arquivos com `@ts-nocheck` |
-| `style/noDescendingSpecificity` (CSS) | 144 | Onda 5 |
-| `nursery/useConsistentBooleanName` | 142 | Onda 3 |
-| `style/useNamingConvention` | 37 | Onda 3 |
-| `suspicious/useIterableCallbackReturn` | 28 | Onda 3 |
-| `complexity/noImportantStyles` (CSS) | 12 | Onda 5 |
-| `suspicious/noImplicitAnyLet` | 12 | Ondas 3 e 4 |
-
-As outras regras têm até 7 avisos cada. O `sync.js` e o `shell.js` ficam fora das regras de nomes, de `const` e de variáveis sem uso, e das correções automáticas de `useOptionalChain`, `noUselessEscapeInRegex` e `noPrototypeBuiltins` (`biome.jsonc`): são scripts clássicos que compartilham variáveis globais, e o Biome os lê como módulos isolados. As 89 sugestões de `style/useTemplate` só saem com `npx biome check --write --unsafe .`, revisando o diff.
-
 ### Avisos do Steiger
 
-`npm run check:fsd` mostra 26 avisos:
-
-| Regra | Avisos | O que acusa |
-| --- | ---: | --- |
-| `fsd/no-public-api-sidestep` | 19 | Imports direto de `shared/config/theme`, `dataset` e `storage-keys` e de `shared/ui/arc` (`tabs`, `switch`, `navigation-hover`, `motion-tokens`, `blocks/site-header`) |
-| `fsd/public-api` | 3 | `shared/config`, `shared/ui/arc` e `shared/ui/reui` sem `index.ts` |
-| `fsd/insignificant-slice` | 2 | `widgets/team-knowledge` e `widgets/tactical-map`, usados só por `pages/team` |
-| `fsd/no-reserved-folder-names` | 1 | Pasta `lib` dentro de `shared/ui/arc` |
-| `fsd/no-segmentless-slices` | 1 | `entities/tactical-play` sem segmentos |
-
-Os dois primeiros somem juntos quando `shared/config` e as pastas de `shared/ui` ganharem `index.ts`, o que cabe na Onda 3 com a troca dos nomes de fornecedor.
+Zerados em 21/11/2026 (Onda 8). `npm run check:fsd` roda com `--fail-on-warnings` e o CI falha se aparecer qualquer aviso. A regra `fsd/insignificant-slice` fica desligada só para `widgets/tactical-map`, `widgets/team-knowledge` e `entities/tactical-play`, que hoje só a Área do time usa (comentário em `steiger.config.ts`). `shared` ganhou um segmento por módulo (`firestore`, `host-bridge`, `local-keys`, `dataset`, `config`, `ui/arc`, `ui/reui`), cada um com `index.ts`.
 
 ### Violações do axe
 
@@ -122,11 +94,11 @@ Cada onda é uma ou mais entregas M ou G com pedido em `docs/pedidos/`. As ondas
 
 Esta entrega: [SDLC](sdlc.md), [glossário](glossario.md), [convenções](convencoes.md), [arquitetura](arquitetura.md), [revisão](revisao.md), ADRs 0001 a 0004, skills `weblol-pedido` e `weblol-padronizar`, agente `change-verifier`.
 
-**Pronta quando** Fabiano e Bruno aceitarem as ADRs 0001, 0002 e 0004 ou pedirem mudanças.
+**Situação:** pronta. Fabiano decidiu em 21/11/2026 que toda decisão passa só por ele; o Bruno só entra quando a tarefa mexer na conta dele. As ADRs 0001 a 0008 valem como aceitas.
 
 ### Onda 1. Verificação automática
 
-**Situação:** implementada em 20/11/2026 ([pedido](pedidos/2026-11-20-onda-1-verificacao.md)). Falta ver o CI rodar no GitHub, no primeiro push da branch.
+**Situação:** pronta. Implementada em 20/11/2026 ([pedido](pedidos/2026-11-20-onda-1-verificacao.md)); o CI roda no GitHub em todo push e passou nos PRs #19 a #21.
 
 1. Biome para formatação e lint, com a reformatação inicial num commit isolado listado em `.git-blame-ignore-revs`.
 2. Steiger ao lado de `scripts/check-architecture.mjs`. O script caseiro continua com o aviso de 300 linhas.
@@ -142,6 +114,8 @@ Esta entrega: [SDLC](sdlc.md), [glossário](glossario.md), [convenções](conven
 
 ### Onda 2. Publicação e higiene
 
+**Situação:** pronta. 2a, 2b e a limpeza foram publicadas; o workflow `deploy.yml` publica no Pages.
+
 Dividida em duas partes. A **2a** (itens 3, 4 e 5) é aditiva e está implementada ([pedido](pedidos/2026-11-20-onda-2-higiene.md)). A **2b** (itens 1, 2 e 6) muda a publicação e depende do Bruno.
 
 1. Deploy por artefato do Actions ([ADR 0003](decisoes/0003-publicacao-por-artefato.md)). Depende do Bruno mudar a fonte do Pages.
@@ -154,6 +128,8 @@ Dividida em duas partes. A **2a** (itens 3, 4 e 5) é aditiva e está implementa
 **Pronta quando** o site publicar sem nenhum arquivo gerado no Git e o CI barrar um bundle acima do orçamento.
 
 ### Onda 3. Nomes e tipos da Área do time
+
+**Situação:** pronta. Nomes e tipos da Área do time feitos nas etapas 3a, 3b e 3c; o aviso do axe sobre `aria-label` segue aceito no teste.
 
 1. Composição: `owner: "ours" | "enemy"` no código, convertendo o campo salvo `team: "mine" | "enemy"` na leitura e na escrita.
 2. Adversária do draft: `enemyId` no código, mantendo `draft.rival` no formato salvo até a migração.
@@ -169,7 +145,9 @@ Renomeações vão em commits próprios, sem mudança de comportamento, de prefe
 
 ### Onda 4. Scripts clássicos para TypeScript
 
-1. ~~Migrar `shell.js` e `sync.js` para slices em `src/`~~ (feito na Onda 4: `features/auth`, `shared/lib/team-changes`, `shared/api/firestore`).
+**Situação:** pronta. `shell.js` e `sync.js` viraram `features/auth`; `public/assets` não tem mais JavaScript.
+
+1. ~~Migrar `shell.js` e `sync.js` para slices em `src/`~~ (feito na Onda 4: `features/auth`, `shared/lib/team-changes`, `shared/firestore`).
 2. Trocar as variáveis globais entre frames por um contrato tipado de mensagens.
 3. Manter os nomes salvos do Firestore e as rotas.
 
@@ -206,3 +184,7 @@ Renomeações vão em commits próprios, sem mudança de comportamento, de prefe
 3. Rodar axe em todas as telas.
 
 **Pronta quando** nenhum arquivo de teste passar de 400 linhas e toda regra de `model/` tiver teste unitário.
+
+### Onda 8. Fechamento
+
+**Situação:** pronta em 21/11/2026 ([pedido](pedidos/2026-11-21-onda-8-fechamento.md)). Steiger com zero avisos e barrando no CI, `shared` segmentado, e os arquivos acima de 300 linhas `tactical-map.ts`, `builds-page.ts`, `build-details.ts` e `compositions-page.ts` divididos sem mudar comportamento. Seguem como exceção `matchup-bar.tsx`, `team-controls.tsx`, `battlefield-layer.ts`, `ward-layer.ts` e o `site-header.tsx` (fornecedor Arc UI).
