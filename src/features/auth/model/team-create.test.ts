@@ -2,7 +2,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest"
 import { createTeamRecords } from "./team-create"
 
 const dbSet = vi.hoisted(() => vi.fn())
-vi.mock("@/shared/api/firestore", () => ({ dbSet }))
+vi.mock("@/shared/firestore", () => ({ dbSet }))
 vi.mock("./identity", () => ({ meKey: () => "capitao_LTZ" }))
 
 describe("createTeamRecords", () => {

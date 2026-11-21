@@ -1,5 +1,5 @@
 // Passos de senha do acesso: jogador (entrar ou criar), admin e primeira senha de um admin novo.
-import { dbSet, fb } from "@/shared/api/firestore"
+import { dbSet, fb } from "@/shared/firestore"
 import { adminEmail, dispId, playerEmail, safeName } from "@/shared/lib/account-id"
 import { makeSlot, slotOf, slotRaw } from "@/shared/lib/admin-crypto"
 import { $, esc } from "@/shared/lib/dom"

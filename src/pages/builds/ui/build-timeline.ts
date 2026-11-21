@@ -3,7 +3,7 @@ import { bootItems, isCompletedItem, itemIcon, itemName, playerLoadout } from ".
 import { directOpponent } from "../model/build-statistics"
 import { ico } from "@/entities/champion"
 import { championSlug, esc } from "@/entities/match"
-import { DATASET, isReference } from "@/shared/config/dataset"
+import { DATASET, isReference } from "@/shared/dataset"
 import { revealContent } from "@/shared/lib/motion"
 
 export type TimelineGame = (typeof games)[number]

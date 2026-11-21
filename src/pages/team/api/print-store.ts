@@ -1,7 +1,7 @@
 // Prints e desenhos das táticas: o app principal guarda cada um à parte (window.weblolImages, em
 // times/{time}/imagens); aberta sozinha, a página guarda só neste navegador.
-import { hostImages } from "@/shared/api/host-bridge"
-import { STORAGE_PREFIXES } from "@/shared/config/storage-keys"
+import { hostImages } from "@/shared/host-bridge"
+import { STORAGE_PREFIXES } from "@/shared/config"
 import { uid } from "../model/local-state"
 
 type SavedImage = { id: string; shared: boolean; error?: string }

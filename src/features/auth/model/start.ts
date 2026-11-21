@@ -1,6 +1,6 @@
 // Partida do painel: liga o endereço, reconecta a conta salva e confere o time a cada minuto.
-import { currentFirebase, fb, ONLINE } from "@/shared/api/firestore"
-import { idbGet } from "@/shared/api/local-keys"
+import { currentFirebase, fb, ONLINE } from "@/shared/firestore"
+import { idbGet } from "@/shared/local-keys"
 import { $, toast } from "@/shared/lib/dom"
 import { closeModal } from "../ui/login-dialog"
 import { stepId } from "../ui/login-steps"

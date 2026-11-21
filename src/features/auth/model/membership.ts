@@ -1,6 +1,6 @@
 // Em que time a conta está e as chaves do admin. Coleções e campos do Firestore não mudam.
-import { dbGet, getJ, putJ } from "@/shared/api/firestore"
-import { ADMIN_FP } from "@/shared/config/admins"
+import { dbGet, getJ, putJ } from "@/shared/firestore"
+import { ADMIN_FP } from "@/shared/config"
 import { normId } from "@/shared/lib/account-id"
 import { fingerprint, type makeSlot, unlockAdmin, type AdminRecord } from "@/shared/lib/admin-crypto"
 import {

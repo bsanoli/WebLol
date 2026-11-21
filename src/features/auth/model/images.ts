@@ -1,9 +1,9 @@
 // Prints das táticas. Cada print fica num documento próprio em times/{time}/imagens/{id}, fora dos dados
 // do time (limite de 1 MB). Sem time (ou se o envio falhar) o print fica neste navegador numa fila e é
 // reenviado com o mesmo id ao sincronizar, enviar ou publicar, para que todo o time consiga vê-lo.
-import type { HostImages } from "@/shared/api/host-bridge"
-import { dbGet, dbSet } from "@/shared/api/firestore"
-import { STORAGE_KEYS, STORAGE_PREFIXES } from "@/shared/config/storage-keys"
+import type { HostImages } from "@/shared/host-bridge"
+import { dbGet, dbSet } from "@/shared/firestore"
+import { STORAGE_KEYS, STORAGE_PREFIXES } from "@/shared/config"
 import { toast } from "@/shared/lib/dom"
 import { lsGet, lsSet, meId, teamPath, user } from "./identity"
 import { session } from "./session"

@@ -16,7 +16,7 @@ import {
   type BuildData,
 } from "../model/build-statistics"
 import { runePage } from "./runes"
-import { DATASET, isReference } from "@/shared/config/dataset"
+import { DATASET, isReference } from "@/shared/dataset"
 
 type BuildIconKind = "item" | "rune" | "spell"
 type Option = { label: string; icons: string[]; percent: number }
