@@ -702,6 +702,10 @@
   border: 1px solid var(--line);
   border-radius: var(--wl-card-radius);
 }
+/* Sem o menu "Mais ferramentas" (moldura, embed, laser, laço): o desenho usa só as ferramentas da barra. */
+.tx-sketch-canvas .App-toolbar__extra-tools-trigger {
+  display: none;
+}
 
 /* Cabeçalho da tática: de quem é e OP.GG */
 .tx-head {

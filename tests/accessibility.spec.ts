@@ -48,6 +48,18 @@ const screens: Screen[] = [
     ready: frame => frame.getByRole("region", { name: "Compras jogo a jogo" }),
   },
   {
+    name: "SoloQ · Lista",
+    route: "/#/builds?fonte=soloq",
+    frame: "#v-soloq",
+    ready: frame => frame.getByRole("searchbox", { name: "Buscar campeão ou item" }),
+  },
+  {
+    name: "SoloQ · Campeão",
+    route: "/#/builds/jayce?fonte=soloq",
+    frame: "#v-soloq",
+    ready: frame => frame.getByRole("region", { name: "Compras jogo a jogo" }),
+  },
+  {
     name: "Composições · Ordem do draft",
     route: "/#/time/composicoes",
     frame: "#v-camp",
@@ -71,6 +83,12 @@ const screens: Screen[] = [
     route: "/#/time/conhecimento",
     frame: "#v-camp",
     ready: frame => frame.getByRole("heading", { name: "Objetivos do rio" }),
+  },
+  {
+    name: "Conhecimento · Controle de wave",
+    route: "/#/time/conhecimento/wave",
+    frame: "#v-camp",
+    ready: frame => frame.getByRole("heading", { name: "Números da wave em 2026" }),
   },
 ]
 

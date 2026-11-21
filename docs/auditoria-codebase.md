@@ -187,6 +187,8 @@ Renomeações vão em commits próprios, sem mudança de comportamento, de prefe
 
 ### Onda 6. Desempenho
 
+**Situação:** parcial, 2026-11-20. Feitos os itens 1, 2, 4 e 5; o item 3 e a meta de metade do volume continuam abertos. Ver [pedido](pedidos/2026-11-20-ondas-6-e-7.md).
+
 1. Montar só a aba ativa da Área do time.
 2. Carregar o mapa realista e o Excalidraw sob demanda.
 3. Tirar os dados do Worlds do bundle e dar nomes legíveis às chaves de `worlds.json`.
@@ -196,6 +198,8 @@ Renomeações vão em commits próprios, sem mudança de comportamento, de prefe
 **Pronta quando** cada rota baixar menos da metade do que baixa hoje, medido como na [auditoria de requisições](auditoria-requisicoes.md).
 
 ### Onda 7. Testes
+
+**Situação:** parcial, 2026-11-20. Feitos os itens 1 e 3 e parte do 2 (tática, wards, campo de batalha, série da final). Ver [pedido](pedidos/2026-11-20-ondas-6-e-7.md).
 
 1. Dividir `tests/tactical-map.spec.ts` por fluxo.
 2. Cobrir com Vitest cada regra de `model/` tocada nas ondas 3 e 4.
