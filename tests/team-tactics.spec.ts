@@ -290,7 +290,27 @@ test("Táticas: Draft e Lane têm a mesma altura, o quadro ocupa a gaveta e a p�
       if ((await toggle.getAttribute("aria-expanded")) === String(collapsed)) await toggle.click()
       expect(await boardHeight("draft")).toBe(await boardHeight("positions"))
       expect(await noScroll()).toBe(true)
+      // Visão Draft: os 5 picks de cada lado cabem sem rolar o quadro.
+      await draft.locator('[data-tactic-board="draft"]').click()
+      const hasHiddenPicks = await draft
+        .locator(".tx-draft-sides")
+        .evaluate(el => el.scrollHeight - el.clientHeight > 1)
+      expect(hasHiddenPicks).toBe(false)
     }
+    // Visão Lane: cada rota tem o card dos dois lados alinhado com o nome da rota.
+    await draft.locator('[data-tactic-board="positions"]').click()
+    await expect(page.locator(".tx-pos-col.left .tx-pos-slot")).toHaveCount(6)
+    const rows = await page.evaluate(() => {
+      const box = (el: Element) => {
+        const { top, height } = el.getBoundingClientRect()
+        return `${Math.round(top)}/${Math.round(height)}`
+      }
+      const names = [...document.querySelectorAll(".tx-pos-name")].map(box)
+      const side = (cls: string) => [...document.querySelectorAll(`.tx-pos-col.${cls} .tx-pos-slot`)].map(box)
+      return { names, left: side("left"), right: side("right") }
+    })
+    expect(rows.left).toEqual(rows.names)
+    if (rows.right.length) expect(rows.right).toEqual(rows.names)
     // Com a lista recolhida, o quadro vai até o fim da gaveta.
     const aside = (await page.locator(".tx-aside").boundingBox())!
     const sides = (await draft.locator(".tx-pos-board").boundingBox())!

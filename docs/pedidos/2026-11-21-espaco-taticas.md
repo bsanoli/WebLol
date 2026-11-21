@@ -23,3 +23,11 @@
 **Fora do escopo:** o recolher da lista de composições de Táticas (continua).
 
 **Suposições:** o campo salvo `matchupBarCollapsed` deixou de ser lido e fica ignorado no armazenamento, sem migração (era só estado de visão). Com a lista expandida em telas baixas, o quadro rola por dentro.
+
+**Card compartilhado:** Draft e Lane usam o mesmo card de pick (`tactic-pick-card`), então fundo, hover, barra do lado e respiro de 12 px até os ícones ficam iguais por construção; cada visão só define o conteúdo interno e o lado da barra.
+
+## Lista de confrontos e altura ajustável
+
+- Itens de confronto: título + comps espelhadas (aprovado pelo Fabiano).
+- Altura da lista ajustável por alça; suposição: o valor fica salvo no estado de visão (campo opcional `tacticsListHeight`, sem migração).
+- A Lane mantém o ban sem listras, diferente do Draft; decisão pendente do Fabiano.

@@ -1,12 +1,11 @@
 // Bloco de notas das táticas. O editor (Tiptap) vive num elemento próprio que sobrevive às re-renderizações
 // do #editor; trocar de tática recria o editor com o documento dela.
 import { lolAsset } from "@/entities/champion"
-import { iconMarkup } from "@/shared/ui/icon"
 import { compressImage } from "../lib/compress-image"
 import { printStore } from "../api/print-store"
 import { CH } from "../model/champion-catalog"
 import { findMatchup, isMatchupKey, matchupTitle } from "../model/matchups"
-import { clearCompNotes, hasTactic, readTacticDocument, writeTacticDocument } from "../model/tactics"
+import { clearCompNotes, readTacticDocument, writeTacticDocument } from "../model/tactics"
 import type { TacticDoc, TacticPrintAttrs } from "../model/tactic-doc"
 import { openPrintSketch } from "./print-sketch"
 import { $, champArt, compById, S, save, toast, touch } from "./team-store"
@@ -45,26 +44,6 @@ const noteChampions = () =>
     return { name: champion.n, portrait: portrait ? lolAsset(portrait) : "" }
   }))
 
-function markTacticTab(compId: TacticId) {
-  const tab = $(
-    compId === null
-      ? "#editor [data-tactic-general]"
-      : isMatchupKey(compId)
-        ? `#editor [data-tactic-matchup="${CSS.escape(compId.slice(3))}"]`
-        : `#editor .tx-tabs [data-tactic-comp="${CSS.escape(compId)}"]`,
-  )
-  const has = hasTactic(S, compId)
-  const mark = tab?.querySelector(".tx-has")
-  if (has && !mark)
-    tab
-      ?.querySelector("b")
-      ?.insertAdjacentHTML(
-        "beforeend",
-        `<span class="tx-has" title="Tem anotação de tática">${iconMarkup("edit")}</span>`,
-      )
-  else if (!has) mark?.remove()
-}
-
 function handleTacticNotesChange(compId: TacticId, doc: TacticDoc) {
   const entry = compId !== null && isMatchupKey(compId) ? findMatchup(S.comps, S.matchups, compId.slice(3)) : null
   const comp = compId === null || entry ? null : compById(compId)
@@ -73,7 +52,6 @@ function handleTacticNotesChange(compId: TacticId, doc: TacticDoc) {
   // As anotações antigas da comp já estão no documento gravado.
   if (comp && clearCompNotes(comp)) touch(comp)
   save()
-  markTacticTab(compId)
 }
 
 export function mountTacticNotesIn(root: HTMLElement, compId: TacticId) {

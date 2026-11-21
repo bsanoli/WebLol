@@ -10,6 +10,7 @@ import {
 } from "../model/local-state"
 import type { SlotInfo } from "../model/champion-slots"
 import { enemyOrder } from "../model/composition-side"
+import { pickCardHTML } from "./tactic-pick-card"
 
 /** Lado do quadro: o da comp aberta (nós) ou o da comp adversária escolhida. */
 export type BoardSide = "us" | "rival"
@@ -60,6 +61,9 @@ export function draftTeamHTML(
 ) {
   const { active, activeSide, slots, img, esc, pickArt, compact = false, heading = "" } = options
   const side = t === "B" ? "b" : "r"
+  const cardSide: DraftSide = t === "B" ? "blue" : "red"
+  // Na Draft a barra do lado fica na borda de fora: o azul à esquerda, o vermelho à direita.
+  const cardBar = t === "B" ? "start" : "end"
   const editing = (lane: string) => !!source && activeSide === owner && active === lane
 
   const mini = (name: string, lane: ChampionSlot, index: number) =>
@@ -79,7 +83,15 @@ export function draftTeamHTML(
     const meta = `<span class="pkh"><b title="${s.code} · ${s.n}º pick">${PICKNAME[s.code]}</b></span>`
     if (!source) {
       const empty = DRAFT_LANES[i]
-      return `<div class="pk ${side} them" data-l="${empty}" data-empty-rival style="--lc:var(${slots[empty].c})"><div class="pick-choice">${meta}${iconMarkup("champion")}<span class="pkn">${slots[empty].n}</span></div></div>`
+      return compact
+        ? pickCardHTML({
+            side: cardSide,
+            bar: cardBar,
+            className: `pk ${side} them`,
+            attrs: `data-l="${empty}" data-empty-rival style="--lc:var(${slots[empty].c})"`,
+            children: `<div class="pick-choice">${meta}${iconMarkup("champion")}<span class="pkn">${slots[empty].n}</span></div>`,
+          })
+        : `<div class="pk ${side} them" data-l="${empty}" data-empty-rival style="--lc:var(${slots[empty].c})"><div class="pick-choice">${meta}${iconMarkup("champion")}<span class="pkn">${slots[empty].n}</span></div></div>`
     }
     const lane = order[i],
       L = slots[lane],
@@ -102,10 +114,15 @@ export function draftTeamHTML(
             : `<button type="button" class="pk-mini" data-priority="${esc(name)}" data-lane="${lane}" aria-label="Tornar ${esc(name)} o campeão de ${L.n}" title="${esc(name)} · ${j + 1}ª opção · clique para tornar principal">${img(name)}</button>`,
         )
         .join("")
-      return `<div class="pk ${side} mine${on ? " act" : ""}" data-l="${lane}" data-champion-group="${t}-pick-${i}" style="--lc:var(${L.c})">
-        ${pickArt(main)}
+      return pickCardHTML({
+        side: cardSide,
+        bar: cardBar,
+        className: `pk ${side} mine${on ? " act" : ""}`,
+        attrs: `data-l="${lane}" data-champion-group="${t}-pick-${i}" style="--lc:var(${L.c})"`,
+        children: `${pickArt(main)}
         <span class="pk-lane"><span class="pk-lane-name lane-label">${laneSelect}</span>${portraits}</span>
-        ${target}</div>`
+        ${target}`,
+      })
     }
     return `<div class="pk ${side} mine${on ? " act" : ""}" data-l="${lane}" data-champion-group="${t}-pick-${i}" style="--lc:var(${L.c})">
         ${pickArt(main)}

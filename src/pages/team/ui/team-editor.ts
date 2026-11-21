@@ -6,9 +6,9 @@ import { enemyOrder, isEnemy, oppositeSide } from "../model/composition-side"
 import { championsOf, draftOf, setChampions } from "../model/local-state"
 import type { ChampionSlot, Composition, DraftLane } from "../model/local-state"
 import { allMatchups, findMatchup, matchupKey } from "../model/matchups"
-import { hasTactic } from "../model/tactics"
 import { SLOT_INFO } from "../model/champion-slots"
 import { draftBoardHTML } from "./draft-board"
+import { savedListHeight } from "./tactic-list-resize"
 import { tacticsHTML } from "./tactics"
 import { capturePickFeedback } from "./pick-feedback"
 import { bindTacticDrop } from "./tactic-drop"
@@ -92,9 +92,9 @@ export function renderEditor() {
         general: !!S.tacticsGeneral,
         drawer: S.tacticsDrawer !== false,
         listCollapsed: S.tacticsListCollapsed === true,
+        listHeight: savedListHeight(S.tacticsListHeight),
         canUndo: hasUndo(),
         boardView: S.tacticsBoard === "positions" ? "positions" : "draft",
-        hasTactic: id => hasTactic(S, id),
         matchupId: S.tacticsMatchup,
         slots: SLOT_INFO,
         img,

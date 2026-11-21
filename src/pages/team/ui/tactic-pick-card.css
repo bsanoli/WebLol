@@ -1,0 +1,61 @@
+/*
+ * Card de pick compartilhado pelas visões Draft e Lane do quadro de Táticas.
+ * Fundo, arte do campeão com escurecimento, hover, barra na cor do lado e respiro até o conteúdo ficam só aqui:
+ * mudou aqui, mudou nas duas visões. Cada visão cuida apenas do conteúdo de dentro do card.
+ */
+#v-comps.tactics-view .tx-pick-card {
+  --tx-pick-side: var(--wl-side-blue, var(--wl-blue-500));
+  --tx-pick-pad: 12px;
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  padding-inline: var(--tx-pick-pad);
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+  background: var(--panel2, var(--bg));
+}
+#v-comps.tactics-view .tx-pick-card.is-red {
+  --tx-pick-side: var(--wl-side-red, var(--wl-red-500));
+}
+#v-comps.tactics-view .tx-pick-card:hover {
+  filter: brightness(1.08);
+}
+/* Barra na cor do lado por cima da arte; a borda (início ou fim) depende de para onde a visão aponta. */
+#v-comps.tactics-view .tx-pick-card::after {
+  position: absolute;
+  z-index: 2;
+  inset-block: 0;
+  left: 0;
+  width: var(--wl-accent-bar, 3px);
+  background: var(--tx-pick-side);
+  content: "";
+  pointer-events: none;
+}
+#v-comps.tactics-view .tx-pick-card.bar-end::after {
+  right: 0;
+  left: auto;
+}
+#v-comps.tactics-view .tx-pick-card > .pick-splash {
+  position: absolute;
+  z-index: -2;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  border-radius: 0;
+  object-fit: cover;
+  object-position: center 22%;
+  opacity: 1;
+  filter: none;
+  pointer-events: none;
+}
+#v-comps.tactics-view .tx-pick-card:has(> .pick-splash)::before {
+  position: absolute;
+  z-index: -1;
+  inset: 0;
+  background:
+    linear-gradient(to top, color-mix(in srgb, var(--bg) 88%, transparent) 0%, transparent 55%),
+    linear-gradient(to bottom, color-mix(in srgb, var(--bg) 70%, transparent) 0%, transparent 42%);
+  content: "";
+  pointer-events: none;
+}
