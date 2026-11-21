@@ -31,3 +31,7 @@
 - Itens de confronto: título + comps espelhadas (aprovado pelo Fabiano).
 - Altura da lista ajustável por alça; suposição: o valor fica salvo no estado de visão (campo opcional `tacticsListHeight`, sem migração).
 - A Lane mantém o ban sem listras, diferente do Draft; decisão pendente do Fabiano.
+
+## Decisão: diferenças entre Draft e Lane
+
+Em 21/11/2026 o Fabiano decidiu manter só na Lane: véu de 60% sobre a arte, ícones alternativos de 32px, ban sem listras, ícone de rota e barra na borda de dentro, para dar legibilidade às alternativas.
