@@ -31,7 +31,7 @@ export type HostGlobals = {
 
 /** O que o app principal chama na janela do iframe. */
 export type FrameHandlers = {
-  applyWebLolRoute?: (route: string[], params?: URLSearchParams) => Promise<boolean> | boolean | void
+  applyWebLolRoute?: (route: string[], params?: URLSearchParams) => Promise<boolean | void> | boolean | void
   weblolTeamChanged?: () => void
 }
 

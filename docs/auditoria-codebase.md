@@ -187,7 +187,7 @@ Renomeações vão em commits próprios, sem mudança de comportamento, de prefe
 
 ### Onda 6. Desempenho
 
-**Situação:** parcial, 2026-11-20. Feitos os itens 1, 2, 4 e 5; o item 3 e a meta de metade do volume continuam abertos. Ver [pedido](pedidos/2026-11-20-ondas-6-e-7.md).
+**Situação:** parcial, 2026-11-20. Feitos os itens 1, 2, 4 e 5 e, no item 3, o código de Builds e Composições do Worlds sai do pacote inicial (268 → 89 kB gzip). Seguem abertos os dados da SoloQ, os retratos e as chaves de `worlds.json`; a meta de metade do volume não foi atingida. Ver [pedido](pedidos/2026-11-20-ondas-6-e-7.md).
 
 1. Montar só a aba ativa da Área do time.
 2. Carregar o mapa realista e o Excalidraw sob demanda.
@@ -199,7 +199,7 @@ Renomeações vão em commits próprios, sem mudança de comportamento, de prefe
 
 ### Onda 7. Testes
 
-**Situação:** parcial, 2026-11-20. Feitos os itens 1 e 3 e parte do 2 (tática, wards, campo de batalha, série da final). Ver [pedido](pedidos/2026-11-20-ondas-6-e-7.md).
+**Situação:** parcial, 2026-11-20. Feitos os itens 1 e 3; no item 2 há Vitest para `tactic-doc`, `wards`, `battlefield`, `final-series`, `composition`, `champion-slots`, `tactics`, `local-state`, `champion-catalog`, `lol-media`, `faelights`, `terrain-sight` e `identity` (148 testes). Faltam `effect-text`, `build-statistics` e os demais módulos de `features/auth/model`. Ver [pedido](pedidos/2026-11-20-ondas-6-e-7.md).
 
 1. Dividir `tests/tactical-map.spec.ts` por fluxo.
 2. Cobrir com Vitest cada regra de `model/` tocada nas ondas 3 e 4.

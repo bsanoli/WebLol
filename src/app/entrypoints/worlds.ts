@@ -9,10 +9,25 @@ import { revealContent } from "@/shared/lib/motion"
 import { DATASET } from "@/shared/config/dataset"
 import "@/app/styles/index.css"
 import { hideTip } from "@/widgets/analytics-tooltip"
-import { buildsView, wireBuilds, setBuildRoute, disposeBuilds } from "@/pages/builds"
-import { compsView, wireComps, setCompositionRoute, disposeCompositions } from "@/pages/worlds-compositions"
 import { championSummaries, overview, renderKpis, renderWorldsFinal, wireLaneOverview } from "@/pages/worlds-overview"
 import { enhanceAnalyticsUI } from "@/shared/lib/analytics-dom"
+// Builds e Composições trazem os maiores arquivos de dados; só carregam quando a aba é aberta.
+type BuildsPage = typeof import("@/pages/builds")
+type CompositionsPage = typeof import("@/pages/worlds-compositions")
+let buildsPage: BuildsPage | undefined
+let compositionsPage: CompositionsPage | undefined
+let navigation = 0
+async function loadPage(id: string) {
+  try {
+    if (id === "builds") buildsPage ??= await import("@/pages/builds")
+    else if (id === "comps") compositionsPage ??= await import("@/pages/worlds-compositions")
+    return true
+  } catch {
+    const view = document.getElementById("view")
+    if (view) view.textContent = "Não foi possível carregar esta seção. Recarregue a página para tentar novamente."
+    return false
+  }
+}
 initializeTheme()
 renderKpis()
 renderWorldsFinal()
@@ -48,7 +63,8 @@ function buildsPath(source: string, parts: string[], filters: RouteFilters) {
   return "/builds" + parts.map(part => "/" + part).join("") + routeQuery({ fonte: source, ...filters })
 }
 
-function applyRoute([page, first, second]: (string | undefined)[], params = new URLSearchParams()) {
+async function applyRoute([page, first, second]: (string | undefined)[], params = new URLSearchParams()) {
+  const current = ++navigation
   if (page === "jogadores") {
     render("geral")
     publishWorlds("geral", [], {}, true)
@@ -60,12 +76,14 @@ function applyRoute([page, first, second]: (string | undefined)[], params = new 
     legacyChampions || legacyMatchups
       ? "builds"
       : (Object.keys(worldsPaths) as PageId[]).find(key => worldsPaths[key] === "/" + page) || defaultTab
+  const loaded = await loadPage(id)
+  if (!loaded || current !== navigation) return
   const query = params.get("busca") || ""
   const lane = laneFromParam(params.get("posicao"))
   if (id === "builds") {
     const champion = (legacyMatchups ? second : first) || ""
     const position = legacyMatchups ? laneFromParam(first) : lane || (legacyChampions ? "Top" : "")
-    const minGames = setBuildRoute({
+    const minGames = buildsPage?.setBuildRoute({
       champion,
       opponent: params.get("adversario") || "",
       query,
@@ -82,25 +100,28 @@ function applyRoute([page, first, second]: (string | undefined)[], params = new 
       )
     return
   }
-  if (id === "comps") setCompositionRoute(query, params)
+  if (id === "comps") compositionsPage?.setCompositionRoute(query, params)
   render(id)
 }
 exposeFrameHandlers({ applyWebLolRoute: applyRoute })
 
-function go(id: string) {
+async function go(id: string) {
   const lane = laneById.get(id)
   const tab = lane ? "builds" : defaultTab
   const filters: Record<string, string> = lane ? { posicao: id } : {}
-  applyRoute([worldsPaths[tab].slice(1)], new URLSearchParams(filters))
+  const pending = applyRoute([worldsPaths[tab].slice(1)], new URLSearchParams(filters))
+  const current = navigation
+  await pending
+  if (current !== navigation) return
   publishWorlds(tab, [], filters)
 }
 
 let standaloneOverview: Root | undefined
 function render(id: PageId) {
   const previousPage = document.body.dataset.page
-  disposeBuilds()
+  buildsPage?.disposeBuilds()
   hideTip()
-  disposeCompositions()
+  compositionsPage?.disposeCompositions()
   standaloneOverview?.unmount()
   standaloneOverview = undefined
   signalHost("weblol:analytics-clear")
@@ -117,13 +138,17 @@ function render(id: PageId) {
   if (!v) return
   if (id === "geral") {
     v.innerHTML = overview()
-    wireLaneOverview(v, go)
+    wireLaneOverview(v, id => void go(id))
   } else if (id === "comps") {
-    v.innerHTML = compsView()
-    wireComps(publishWorlds)
+    if (compositionsPage) {
+      v.innerHTML = compositionsPage.compsView()
+      compositionsPage.wireComps(publishWorlds)
+    }
   } else if (id === "builds") {
-    v.innerHTML = buildsView()
-    wireBuilds({ publishWorlds, buildsPath })
+    if (buildsPage) {
+      v.innerHTML = buildsPage.buildsView()
+      buildsPage.wireBuilds({ publishWorlds, buildsPath })
+    }
   }
   document.body.dataset.page = id
   if (previousPage !== document.body.dataset.page) revealContent(v)
@@ -143,19 +168,22 @@ if (!isEmbedded()) {
     const [path = "", query] = location.hash.slice(1).split("?", 2)
     const params = new URLSearchParams(query)
     const shortChampionRoute = path.match(/^\/?(builds|campeoes)(?:\/([a-z0-9-]+))?$/)
-    if (path.startsWith(DATASET.root + "/")) applyRoute(path.split("/").slice(2), params)
+    if (path.startsWith(DATASET.root + "/")) void applyRoute(path.split("/").slice(2), params)
     else if (shortChampionRoute) {
       const [, page, champion] = shortChampionRoute
       const canonicalPath = DATASET.root + "/" + page + (champion ? "/" + champion : "") + (query ? "?" + query : "")
       history.replaceState(null, "", "#" + canonicalPath)
-      applyRoute([page, champion], params)
-    } else if (path === "jogadores") applyRoute([path], params)
-    else if (laneById.has(path)) applyRoute(["builds"], new URLSearchParams({ posicao: path }))
-    else applyRoute([worldsPaths[path as PageId]?.slice(1) || ""], params)
+      void applyRoute([page, champion], params)
+    } else if (path === "jogadores") void applyRoute([path], params)
+    else if (laneById.has(path)) void applyRoute(["builds"], new URLSearchParams({ posicao: path }))
+    else void applyRoute([worldsPaths[path as PageId]?.slice(1) || ""], params)
   }
   addEventListener("hashchange", applyStandaloneRoute)
   applyStandaloneRoute()
 } else {
-  render(defaultTab)
-  signalHost("weblol:route-ready")
+  const initial = ++navigation
+  void loadPage(defaultTab).then(loaded => {
+    if (loaded && initial === navigation) render(defaultTab)
+    signalHost("weblol:route-ready")
+  })
 }
