@@ -1692,7 +1692,7 @@
   margin: 0 0 8px;
 }
 .tx-pos-board {
-  --tx-pos-row: 44px;
+  --tx-pos-row: 56px;
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
   grid-template-rows: auto repeat(6, minmax(var(--tx-pos-row), auto));
@@ -1729,6 +1729,9 @@
   letter-spacing: 0.02em;
 }
 .tx-pos-slot {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
   display: flex;
   flex-wrap: wrap;
   align-items: center;
@@ -1872,4 +1875,113 @@
 }
 .tx-mx-row .side-dot.comp-side-mark {
   margin-right: 4px;
+}
+
+/* Visão Lane no estilo do Draft, compacta: arte escurecida ao fundo, campeão com nome e alternativas */
+.tx-pos-slot > .pick-splash {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center 22%;
+  opacity: 0.4;
+  filter: brightness(0.7);
+  pointer-events: none;
+}
+.tx-pos-slot.has-art {
+  background: color-mix(in srgb, var(--lc, var(--line)) 8%, var(--panel, transparent));
+}
+#v-comps .tx-pos-ic.main {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  width: auto;
+  height: 40px;
+  padding-right: 8px;
+  color: var(--txt);
+  box-shadow: none;
+}
+#v-comps .tx-pos-ic.main .av {
+  flex: none;
+  width: 40px;
+  height: 40px;
+  box-shadow: 0 0 0 2px var(--lc, var(--line));
+}
+.tx-pos-champ {
+  min-width: 0;
+  overflow: hidden;
+  font-size: 13px;
+  font-weight: 600;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  text-shadow: 0 1px 2px rgb(0 0 0 / 0.7);
+}
+.tx-pos-col.left .tx-pos-ic.main {
+  flex-direction: row-reverse;
+  padding-right: 0;
+  padding-left: 8px;
+}
+.tx-pos-slot .tx-pos-ic.alt {
+  width: 24px;
+  height: 24px;
+}
+.tx-side-col.tx-pos-col h3 .tx-side-name {
+  font-size: 13px;
+  font-weight: 700;
+}
+.tx-side-col.tx-pos-col h3 small {
+  margin-left: 8px;
+}
+
+/* Lane sem campeão na prévia: o espaço fica reservado para as outras não mudarem de posição */
+.matchup-preview .av.av-empty,
+.mini .av.av-empty {
+  border: 1px dashed var(--line);
+  background: transparent;
+  opacity: 0.6;
+}
+
+/* Barra de confronto recolhida e botão de recolher */
+.matchup-collapse {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  min-width: 32px;
+  min-height: 32px;
+  margin-left: auto;
+  cursor: pointer;
+}
+.matchup-collapse svg {
+  width: 16px;
+  height: 16px;
+}
+.matchup.collapsed {
+  flex-wrap: nowrap;
+  min-height: 40px;
+  padding: 0 4px 0 8px;
+  border: 1px solid var(--line);
+  background: var(--panel2, var(--bg));
+}
+.matchup-summary {
+  display: inline-flex;
+  min-width: 0;
+  align-items: center;
+  gap: 8px;
+  color: var(--mut);
+}
+.matchup-summary b {
+  overflow: hidden;
+  color: var(--txt);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.matchup-summary .side-dot {
+  margin-right: 0;
+}
+.matchup-team button:disabled {
+  cursor: not-allowed;
+  opacity: 0.45;
 }

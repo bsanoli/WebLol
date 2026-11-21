@@ -13,7 +13,6 @@ const lineLimit = 300
 const legacyLongFiles = {
   "pages/builds/ui/build-details.ts": 474,
   "pages/builds/ui/builds-page.ts": 621,
-  "pages/team/ui/matchup-bar.tsx": 371,
   "pages/team/ui/team-controls.tsx": 310,
   "pages/worlds-compositions/ui/compositions-page.ts": 383,
   "shared/ui/arc/blocks/site-header/site-header.tsx": 865,

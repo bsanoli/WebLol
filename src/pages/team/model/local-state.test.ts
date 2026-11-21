@@ -51,11 +51,11 @@ describe("campeões da composição", () => {
     expect(comp.bans).toEqual(["Zed"])
   })
 
-  it("a prévia mostra o primeiro campeão de cada posição preenchida", () => {
+  it("a prévia tem uma posição fixa por lane e deixa vazia a que não tem campeão", () => {
     const comp = blank()
     setChampions(comp, "top", ["Ornn", "Sion"])
     setChampions(comp, "sup", ["Braum"])
-    expect(compositionPreview(comp)).toEqual(["Ornn", "Braum"])
+    expect(compositionPreview(comp)).toEqual(["Ornn", "", "", "", "Braum"])
   })
 })
 

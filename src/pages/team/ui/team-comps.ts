@@ -1,16 +1,9 @@
 // Composições nossas e adversárias: criar, trocar, renomear, duplicar, excluir e a barra de confronto.
+import { compositionPreviewHTML } from "./composition-preview"
 import { askName, confirmAction } from "@/shared/ui/dialog-controls"
 import { createCompositionCopy } from "../model/composition"
 import { boardSideOf, enemiesOf, isEnemy, oursOf, setEnemyId, settleOwner } from "../model/composition-side"
-import {
-  blank,
-  compositionPreview,
-  draftOf,
-  setChampions,
-  uid,
-  type Composition,
-  type DraftLane,
-} from "../model/local-state"
+import { blank, draftOf, setChampions, uid, type Composition, type DraftLane } from "../model/local-state"
 import { addMatchup, findMatchup, matchupKey, pruneMatchups } from "../model/matchups"
 import { normalizeOpggLink, opggOf, setOpgg, writeTactic } from "../model/tactics"
 import { mountMatchupBar } from "./matchup-bar"
@@ -25,7 +18,7 @@ const matchupItem = (c: Composition) => ({
   id: c.id,
   name: c.name,
   title: c.name,
-  preview: compositionPreview(c).map(img).join(""),
+  preview: compositionPreviewHTML(c, img),
   side: boardSideOf(c, S.comps, S.cur),
   champions: [...Object.values(c.lanes).flat(), ...c.bans],
 })
@@ -42,6 +35,15 @@ export function renderMatchup() {
     enemy: r ? matchupItem(r) : null,
     side: draftOf(c).side,
     enemyOpgg: r ? opggOf(r) : "",
+    collapsed: S.matchupBarCollapsed === true,
+    onToggleCollapsed: () => {
+      S.matchupBarCollapsed = S.matchupBarCollapsed !== true
+      save()
+      renderMatchup()
+      requestAnimationFrame(() =>
+        requestAnimationFrame(() => $("#editor [data-matchup-collapse]")?.focus({ preventScroll: true })),
+      )
+    },
     onSelectOurs: id => {
       selectComp(id)
       focusMatchup("ours")
