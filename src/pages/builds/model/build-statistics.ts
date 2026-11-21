@@ -1,7 +1,7 @@
 import type DATA from "@dataset/summary"
-import { champions, games as buildGames } from "@dataset/builds"
+import { champions, opponents as opponentCounts } from "@dataset/builds"
 import { championSlug } from "@/entities/match"
-import { isReference } from "@/shared/dataset"
+import { encountersFor } from "./encounters"
 
 export type Champion = (typeof DATA.champs)[number]
 export type LaneSample = Extract<Champion["lanes"][keyof Champion["lanes"]], { n: number }>
@@ -27,27 +27,14 @@ export function directOpponent<Player extends MatchPlayer>(players: Player[], pl
   return players.find(other => other.role === player.role && other.side !== player.side)
 }
 
-const buildEncounters = buildGames.flatMap(game =>
-  game.players
-    .filter(player => !isReference(player))
-    .flatMap(player => {
-      const opponent = directOpponent(game.players, player)
-      return opponent ? [{ player, opponent: opponent.champion, slug: championSlug(opponent.champion) }] : []
-    }),
-)
-
-function encountersFor(champion: string, lane: string) {
-  return buildEncounters.filter(({ player }) => player.champion === champion && (!lane || player.role === lane))
-}
-
+/** Adversários diretos do campeão na rota (ou em todas), do mais ao menos enfrentado. */
 export function buildOpponentOptions(champion: Champion, lane: string) {
-  const opponents = new Map<string, { name: string; slug: string; games: number }>()
-  for (const { opponent, slug } of encountersFor(champion.name, lane)) {
-    const entry = opponents.get(slug)
-    if (entry) entry.games++
-    else opponents.set(slug, { name: opponent, slug, games: 1 })
-  }
-  return [...opponents.values()].sort((a, b) => b.games - a.games || a.name.localeCompare(b.name, "pt-BR"))
+  const counts = (opponentCounts as unknown as Record<string, Record<string, [string, number][]> | undefined>)[
+    champion.name
+  ]?.[lane]
+  return (counts ?? [])
+    .map(([name, games]) => ({ name, slug: championSlug(name), games }))
+    .sort((a, b) => b.games - a.games || a.name.localeCompare(b.name, "pt-BR"))
 }
 
 function frequencies<T extends number | string>(values: T[], games: number): Frequency<T>[] {
@@ -74,11 +61,11 @@ const startingTrinkets = new Set([3340, 3364])
 
 export function opponentBuild(champion: Champion, lane: string, opponent: string): BuildData | undefined {
   const players = encountersFor(champion.name, lane)
-    .filter(entry => entry.slug === opponent)
+    .filter(entry => championSlug(entry.opponent) === opponent)
     .map(entry => entry.player)
   const games = players.length
   if (!games) return
-  const orders = players.map(player => player.skillOrder).filter(Boolean)
+  const orders = players.flatMap(player => (player.skillOrder ? [player.skillOrder] : []))
   const target = champions[champion.name as keyof typeof champions]?.all.skillOrder.priority?.pointsToMax
   const priorities = target ? orders.map(order => skillPriority(order, target)) : []
   const first = priorities.flatMap(([skill]) => (skill ? [skill] : []))

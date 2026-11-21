@@ -10,7 +10,7 @@ Etapas:
    últimos `days` dias (match-v5) e baixa partida + timeline das que ainda não estão no cache.
 3. Guarda as partidas normalizadas em src/data/soloq/matches.json (cache; partidas mais antigas
    que a janela saem do arquivo).
-4. Gera src/data/soloq/{summary,builds,build-assets,build-timeline,drafts}.json no mesmo formato
+4. Gera src/data/soloq/{summary,builds,build-assets,build-timeline,drafts}.json e encounters/<campeão>.json no mesmo formato
    dos dados do Worlds, para a aba SoloQ reaproveitar os componentes das Builds.
 
 Só os jogadores da lista entram nas builds. Os outros participantes ficam como `ref` (adversário direto).
@@ -29,6 +29,8 @@ import urllib.request
 from collections import Counter, defaultdict
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
+
+from split_build_encounters import split_builds
 
 ROOT = Path(__file__).resolve().parent.parent
 DATA = ROOT / "src" / "data"
@@ -424,12 +426,13 @@ def build_dataset(cache, config, ddragon):
     def source(game):
         return f'https://www.leagueofgraphs.com/match/{GRAPHS[game["platform"]]}/{game["id"].split("_", 1)[1]}'
 
-    write("builds.json", {
+    # As partidas individuais vão para um arquivo por campeão (encounters/), carregado sob demanda.
+    write("builds.json", split_builds({
         "asOf": now[:10], "patch": patches.most_common(1)[0][0] if patches else "",
         "gameCount": len(games), "itemNames": item_names, "runeNames": rune_names,
         "games": [{"id": g["id"], "date": g["date"], "players": [lean(p, False) for p in g["players"]]} for g in games],
         "champions": build_champions,
-    })
+    }, OUT / "encounters"))
     write("build-timeline.json", {"games": [{
         "id": g["id"], "date": g["date"], "stage": "soloq", "round": ROUTING[g["platform"]][2], "number": 0,
         "buildsSource": source(g), "blue": "", "red": "", "winner": g["winner"],
