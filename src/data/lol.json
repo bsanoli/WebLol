@@ -5,7 +5,7 @@
       "tags": [
         "Fighter"
       ],
-      "portrait": "lol/champion/Aatrox.png",
+      "portrait": "lol/champion/Aatrox.webp",
       "splash": "lol/splash/Aatrox.webp"
     },
     "Ahri": {
@@ -14,7 +14,7 @@
         "Mage",
         "Assassin"
       ],
-      "portrait": "lol/champion/Ahri.png",
+      "portrait": "lol/champion/Ahri.webp",
       "splash": "lol/splash/Ahri.webp"
     },
     "Akali": {
@@ -22,7 +22,7 @@
       "tags": [
         "Assassin"
       ],
-      "portrait": "lol/champion/Akali.png",
+      "portrait": "lol/champion/Akali.webp",
       "splash": "lol/splash/Akali.webp"
     },
     "Akshan": {
@@ -31,7 +31,7 @@
         "Marksman",
         "Assassin"
       ],
-      "portrait": "lol/champion/Akshan.png",
+      "portrait": "lol/champion/Akshan.webp",
       "splash": "lol/splash/Akshan.webp"
     },
     "Alistar": {
@@ -40,7 +40,7 @@
         "Tank",
         "Support"
       ],
-      "portrait": "lol/champion/Alistar.png",
+      "portrait": "lol/champion/Alistar.webp",
       "splash": "lol/splash/Alistar.webp"
     },
     "Ambessa": {
@@ -49,7 +49,7 @@
         "Fighter",
         "Assassin"
       ],
-      "portrait": "lol/champion/Ambessa.png",
+      "portrait": "lol/champion/Ambessa.webp",
       "splash": "lol/splash/Ambessa.webp"
     },
     "Amumu": {
@@ -58,7 +58,7 @@
         "Tank",
         "Support"
       ],
-      "portrait": "lol/champion/Amumu.png",
+      "portrait": "lol/champion/Amumu.webp",
       "splash": "lol/splash/Amumu.webp"
     },
     "Anivia": {
@@ -66,7 +66,7 @@
       "tags": [
         "Mage"
       ],
-      "portrait": "lol/champion/Anivia.png",
+      "portrait": "lol/champion/Anivia.webp",
       "splash": "lol/splash/Anivia.webp"
     },
     "Annie": {
@@ -75,7 +75,7 @@
         "Mage",
         "Support"
       ],
-      "portrait": "lol/champion/Annie.png",
+      "portrait": "lol/champion/Annie.webp",
       "splash": "lol/splash/Annie.webp"
     },
     "Aphelios": {
@@ -83,7 +83,7 @@
       "tags": [
         "Marksman"
       ],
-      "portrait": "lol/champion/Aphelios.png",
+      "portrait": "lol/champion/Aphelios.webp",
       "splash": "lol/splash/Aphelios.webp"
     },
     "Ashe": {
@@ -92,7 +92,7 @@
         "Marksman",
         "Support"
       ],
-      "portrait": "lol/champion/Ashe.png",
+      "portrait": "lol/champion/Ashe.webp",
       "splash": "lol/splash/Ashe.webp"
     },
     "AurelionSol": {
@@ -100,7 +100,7 @@
       "tags": [
         "Mage"
       ],
-      "portrait": "lol/champion/AurelionSol.png",
+      "portrait": "lol/champion/AurelionSol.webp",
       "splash": "lol/splash/AurelionSol.webp"
     },
     "Aurora": {
@@ -109,7 +109,7 @@
         "Mage",
         "Assassin"
       ],
-      "portrait": "lol/champion/Aurora.png",
+      "portrait": "lol/champion/Aurora.webp",
       "splash": "lol/splash/Aurora.webp"
     },
     "Azir": {
@@ -118,7 +118,7 @@
         "Mage",
         "Marksman"
       ],
-      "portrait": "lol/champion/Azir.png",
+      "portrait": "lol/champion/Azir.webp",
       "splash": "lol/splash/Azir.webp"
     },
     "Bard": {
@@ -127,7 +127,7 @@
         "Support",
         "Mage"
       ],
-      "portrait": "lol/champion/Bard.png",
+      "portrait": "lol/champion/Bard.webp",
       "splash": "lol/splash/Bard.webp"
     },
     "Belveth": {
@@ -135,7 +135,7 @@
       "tags": [
         "Fighter"
       ],
-      "portrait": "lol/champion/Belveth.png",
+      "portrait": "lol/champion/Belveth.webp",
       "splash": "lol/splash/Belveth.webp"
     },
     "Blitzcrank": {
@@ -144,7 +144,7 @@
         "Tank",
         "Support"
       ],
-      "portrait": "lol/champion/Blitzcrank.png",
+      "portrait": "lol/champion/Blitzcrank.webp",
       "splash": "lol/splash/Blitzcrank.webp"
     },
     "Brand": {
@@ -153,7 +153,7 @@
         "Mage",
         "Support"
       ],
-      "portrait": "lol/champion/Brand.png",
+      "portrait": "lol/champion/Brand.webp",
       "splash": "lol/splash/Brand.webp"
     },
     "Braum": {
@@ -162,7 +162,7 @@
         "Tank",
         "Support"
       ],
-      "portrait": "lol/champion/Braum.png",
+      "portrait": "lol/champion/Braum.webp",
       "splash": "lol/splash/Braum.webp"
     },
     "Briar": {
@@ -171,7 +171,7 @@
         "Fighter",
         "Assassin"
       ],
-      "portrait": "lol/champion/Briar.png",
+      "portrait": "lol/champion/Briar.webp",
       "splash": "lol/splash/Briar.webp"
     },
     "Caitlyn": {
@@ -179,7 +179,7 @@
       "tags": [
         "Marksman"
       ],
-      "portrait": "lol/champion/Caitlyn.png",
+      "portrait": "lol/champion/Caitlyn.webp",
       "splash": "lol/splash/Caitlyn.webp"
     },
     "Camille": {
@@ -188,7 +188,7 @@
         "Fighter",
         "Assassin"
       ],
-      "portrait": "lol/champion/Camille.png",
+      "portrait": "lol/champion/Camille.webp",
       "splash": "lol/splash/Camille.webp"
     },
     "Cassiopeia": {
@@ -196,7 +196,7 @@
       "tags": [
         "Mage"
       ],
-      "portrait": "lol/champion/Cassiopeia.png",
+      "portrait": "lol/champion/Cassiopeia.webp",
       "splash": "lol/splash/Cassiopeia.webp"
     },
     "Chogath": {
@@ -205,7 +205,7 @@
         "Tank",
         "Mage"
       ],
-      "portrait": "lol/champion/Chogath.png",
+      "portrait": "lol/champion/Chogath.webp",
       "splash": "lol/splash/Chogath.webp"
     },
     "Corki": {
@@ -214,7 +214,7 @@
         "Marksman",
         "Mage"
       ],
-      "portrait": "lol/champion/Corki.png",
+      "portrait": "lol/champion/Corki.webp",
       "splash": "lol/splash/Corki.webp"
     },
     "Darius": {
@@ -223,7 +223,7 @@
         "Fighter",
         "Tank"
       ],
-      "portrait": "lol/champion/Darius.png",
+      "portrait": "lol/champion/Darius.webp",
       "splash": "lol/splash/Darius.webp"
     },
     "Diana": {
@@ -232,7 +232,7 @@
         "Fighter",
         "Assassin"
       ],
-      "portrait": "lol/champion/Diana.png",
+      "portrait": "lol/champion/Diana.webp",
       "splash": "lol/splash/Diana.webp"
     },
     "Draven": {
@@ -240,7 +240,7 @@
       "tags": [
         "Marksman"
       ],
-      "portrait": "lol/champion/Draven.png",
+      "portrait": "lol/champion/Draven.webp",
       "splash": "lol/splash/Draven.webp"
     },
     "DrMundo": {
@@ -249,7 +249,7 @@
         "Tank",
         "Fighter"
       ],
-      "portrait": "lol/champion/DrMundo.png",
+      "portrait": "lol/champion/DrMundo.webp",
       "splash": "lol/splash/DrMundo.webp"
     },
     "Ekko": {
@@ -258,7 +258,7 @@
         "Assassin",
         "Mage"
       ],
-      "portrait": "lol/champion/Ekko.png",
+      "portrait": "lol/champion/Ekko.webp",
       "splash": "lol/splash/Ekko.webp"
     },
     "Elise": {
@@ -267,7 +267,7 @@
         "Assassin",
         "Mage"
       ],
-      "portrait": "lol/champion/Elise.png",
+      "portrait": "lol/champion/Elise.webp",
       "splash": "lol/splash/Elise.webp"
     },
     "Evelynn": {
@@ -276,7 +276,7 @@
         "Assassin",
         "Mage"
       ],
-      "portrait": "lol/champion/Evelynn.png",
+      "portrait": "lol/champion/Evelynn.webp",
       "splash": "lol/splash/Evelynn.webp"
     },
     "Ezreal": {
@@ -285,7 +285,7 @@
         "Marksman",
         "Mage"
       ],
-      "portrait": "lol/champion/Ezreal.png",
+      "portrait": "lol/champion/Ezreal.webp",
       "splash": "lol/splash/Ezreal.webp"
     },
     "Fiddlesticks": {
@@ -294,7 +294,7 @@
         "Mage",
         "Support"
       ],
-      "portrait": "lol/champion/Fiddlesticks.png",
+      "portrait": "lol/champion/Fiddlesticks.webp",
       "splash": "lol/splash/Fiddlesticks.webp"
     },
     "Fiora": {
@@ -303,7 +303,7 @@
         "Fighter",
         "Assassin"
       ],
-      "portrait": "lol/champion/Fiora.png",
+      "portrait": "lol/champion/Fiora.webp",
       "splash": "lol/splash/Fiora.webp"
     },
     "Fizz": {
@@ -312,7 +312,7 @@
         "Assassin",
         "Fighter"
       ],
-      "portrait": "lol/champion/Fizz.png",
+      "portrait": "lol/champion/Fizz.webp",
       "splash": "lol/splash/Fizz.webp"
     },
     "Galio": {
@@ -321,7 +321,7 @@
         "Tank",
         "Mage"
       ],
-      "portrait": "lol/champion/Galio.png",
+      "portrait": "lol/champion/Galio.webp",
       "splash": "lol/splash/Galio.webp"
     },
     "Gangplank": {
@@ -329,7 +329,7 @@
       "tags": [
         "Fighter"
       ],
-      "portrait": "lol/champion/Gangplank.png",
+      "portrait": "lol/champion/Gangplank.webp",
       "splash": "lol/splash/Gangplank.webp"
     },
     "Garen": {
@@ -338,7 +338,7 @@
         "Fighter",
         "Tank"
       ],
-      "portrait": "lol/champion/Garen.png",
+      "portrait": "lol/champion/Garen.webp",
       "splash": "lol/splash/Garen.webp"
     },
     "Gnar": {
@@ -347,7 +347,7 @@
         "Fighter",
         "Tank"
       ],
-      "portrait": "lol/champion/Gnar.png",
+      "portrait": "lol/champion/Gnar.webp",
       "splash": "lol/splash/Gnar.webp"
     },
     "Gragas": {
@@ -356,7 +356,7 @@
         "Fighter",
         "Mage"
       ],
-      "portrait": "lol/champion/Gragas.png",
+      "portrait": "lol/champion/Gragas.webp",
       "splash": "lol/splash/Gragas.webp"
     },
     "Graves": {
@@ -364,7 +364,7 @@
       "tags": [
         "Marksman"
       ],
-      "portrait": "lol/champion/Graves.png",
+      "portrait": "lol/champion/Graves.webp",
       "splash": "lol/splash/Graves.webp"
     },
     "Gwen": {
@@ -372,7 +372,7 @@
       "tags": [
         "Fighter"
       ],
-      "portrait": "lol/champion/Gwen.png",
+      "portrait": "lol/champion/Gwen.webp",
       "splash": "lol/splash/Gwen.webp"
     },
     "Hecarim": {
@@ -381,7 +381,7 @@
         "Fighter",
         "Tank"
       ],
-      "portrait": "lol/champion/Hecarim.png",
+      "portrait": "lol/champion/Hecarim.webp",
       "splash": "lol/splash/Hecarim.webp"
     },
     "Heimerdinger": {
@@ -390,7 +390,7 @@
         "Mage",
         "Support"
       ],
-      "portrait": "lol/champion/Heimerdinger.png",
+      "portrait": "lol/champion/Heimerdinger.webp",
       "splash": "lol/splash/Heimerdinger.webp"
     },
     "Hwei": {
@@ -399,7 +399,7 @@
         "Mage",
         "Support"
       ],
-      "portrait": "lol/champion/Hwei.png",
+      "portrait": "lol/champion/Hwei.webp",
       "splash": "lol/splash/Hwei.webp"
     },
     "Illaoi": {
@@ -408,7 +408,7 @@
         "Fighter",
         "Tank"
       ],
-      "portrait": "lol/champion/Illaoi.png",
+      "portrait": "lol/champion/Illaoi.webp",
       "splash": "lol/splash/Illaoi.webp"
     },
     "Irelia": {
@@ -417,7 +417,7 @@
         "Fighter",
         "Assassin"
       ],
-      "portrait": "lol/champion/Irelia.png",
+      "portrait": "lol/champion/Irelia.webp",
       "splash": "lol/splash/Irelia.webp"
     },
     "Ivern": {
@@ -426,7 +426,7 @@
         "Support",
         "Mage"
       ],
-      "portrait": "lol/champion/Ivern.png",
+      "portrait": "lol/champion/Ivern.webp",
       "splash": "lol/splash/Ivern.webp"
     },
     "Janna": {
@@ -435,7 +435,7 @@
         "Support",
         "Mage"
       ],
-      "portrait": "lol/champion/Janna.png",
+      "portrait": "lol/champion/Janna.webp",
       "splash": "lol/splash/Janna.webp"
     },
     "JarvanIV": {
@@ -444,7 +444,7 @@
         "Fighter",
         "Tank"
       ],
-      "portrait": "lol/champion/JarvanIV.png",
+      "portrait": "lol/champion/JarvanIV.webp",
       "splash": "lol/splash/JarvanIV.webp"
     },
     "Jax": {
@@ -452,7 +452,7 @@
       "tags": [
         "Fighter"
       ],
-      "portrait": "lol/champion/Jax.png",
+      "portrait": "lol/champion/Jax.webp",
       "splash": "lol/splash/Jax.webp"
     },
     "Jayce": {
@@ -461,7 +461,7 @@
         "Fighter",
         "Marksman"
       ],
-      "portrait": "lol/champion/Jayce.png",
+      "portrait": "lol/champion/Jayce.webp",
       "splash": "lol/splash/Jayce.webp"
     },
     "Jhin": {
@@ -470,7 +470,7 @@
         "Marksman",
         "Mage"
       ],
-      "portrait": "lol/champion/Jhin.png",
+      "portrait": "lol/champion/Jhin.webp",
       "splash": "lol/splash/Jhin.webp"
     },
     "Jinx": {
@@ -478,7 +478,7 @@
       "tags": [
         "Marksman"
       ],
-      "portrait": "lol/champion/Jinx.png",
+      "portrait": "lol/champion/Jinx.webp",
       "splash": "lol/splash/Jinx.webp"
     },
     "Kaisa": {
@@ -487,7 +487,7 @@
         "Marksman",
         "Mage"
       ],
-      "portrait": "lol/champion/Kaisa.png",
+      "portrait": "lol/champion/Kaisa.webp",
       "splash": "lol/splash/Kaisa.webp"
     },
     "Kalista": {
@@ -495,7 +495,7 @@
       "tags": [
         "Marksman"
       ],
-      "portrait": "lol/champion/Kalista.png",
+      "portrait": "lol/champion/Kalista.webp",
       "splash": "lol/splash/Kalista.webp"
     },
     "Karma": {
@@ -504,7 +504,7 @@
         "Mage",
         "Support"
       ],
-      "portrait": "lol/champion/Karma.png",
+      "portrait": "lol/champion/Karma.webp",
       "splash": "lol/splash/Karma.webp"
     },
     "Karthus": {
@@ -512,7 +512,7 @@
       "tags": [
         "Mage"
       ],
-      "portrait": "lol/champion/Karthus.png",
+      "portrait": "lol/champion/Karthus.webp",
       "splash": "lol/splash/Karthus.webp"
     },
     "Kassadin": {
@@ -521,7 +521,7 @@
         "Assassin",
         "Mage"
       ],
-      "portrait": "lol/champion/Kassadin.png",
+      "portrait": "lol/champion/Kassadin.webp",
       "splash": "lol/splash/Kassadin.webp"
     },
     "Katarina": {
@@ -530,7 +530,7 @@
         "Assassin",
         "Mage"
       ],
-      "portrait": "lol/champion/Katarina.png",
+      "portrait": "lol/champion/Katarina.webp",
       "splash": "lol/splash/Katarina.webp"
     },
     "Kayle": {
@@ -539,7 +539,7 @@
         "Mage",
         "Marksman"
       ],
-      "portrait": "lol/champion/Kayle.png",
+      "portrait": "lol/champion/Kayle.webp",
       "splash": "lol/splash/Kayle.webp"
     },
     "Kayn": {
@@ -548,7 +548,7 @@
         "Fighter",
         "Assassin"
       ],
-      "portrait": "lol/champion/Kayn.png",
+      "portrait": "lol/champion/Kayn.webp",
       "splash": "lol/splash/Kayn.webp"
     },
     "Kennen": {
@@ -556,7 +556,7 @@
       "tags": [
         "Mage"
       ],
-      "portrait": "lol/champion/Kennen.png",
+      "portrait": "lol/champion/Kennen.webp",
       "splash": "lol/splash/Kennen.webp"
     },
     "Khazix": {
@@ -564,7 +564,7 @@
       "tags": [
         "Assassin"
       ],
-      "portrait": "lol/champion/Khazix.png",
+      "portrait": "lol/champion/Khazix.webp",
       "splash": "lol/splash/Khazix.webp"
     },
     "Kindred": {
@@ -572,7 +572,7 @@
       "tags": [
         "Marksman"
       ],
-      "portrait": "lol/champion/Kindred.png",
+      "portrait": "lol/champion/Kindred.webp",
       "splash": "lol/splash/Kindred.webp"
     },
     "Kled": {
@@ -580,7 +580,7 @@
       "tags": [
         "Fighter"
       ],
-      "portrait": "lol/champion/Kled.png",
+      "portrait": "lol/champion/Kled.webp",
       "splash": "lol/splash/Kled.webp"
     },
     "KogMaw": {
@@ -589,7 +589,7 @@
         "Marksman",
         "Mage"
       ],
-      "portrait": "lol/champion/KogMaw.png",
+      "portrait": "lol/champion/KogMaw.webp",
       "splash": "lol/splash/KogMaw.webp"
     },
     "KSante": {
@@ -598,7 +598,7 @@
         "Tank",
         "Fighter"
       ],
-      "portrait": "lol/champion/KSante.png",
+      "portrait": "lol/champion/KSante.webp",
       "splash": "lol/splash/KSante.webp"
     },
     "Leblanc": {
@@ -607,7 +607,7 @@
         "Assassin",
         "Mage"
       ],
-      "portrait": "lol/champion/Leblanc.png",
+      "portrait": "lol/champion/Leblanc.webp",
       "splash": "lol/splash/Leblanc.webp"
     },
     "LeeSin": {
@@ -616,7 +616,7 @@
         "Fighter",
         "Assassin"
       ],
-      "portrait": "lol/champion/LeeSin.png",
+      "portrait": "lol/champion/LeeSin.webp",
       "splash": "lol/splash/LeeSin.webp"
     },
     "Leona": {
@@ -625,7 +625,7 @@
         "Tank",
         "Support"
       ],
-      "portrait": "lol/champion/Leona.png",
+      "portrait": "lol/champion/Leona.webp",
       "splash": "lol/splash/Leona.webp"
     },
     "Lillia": {
@@ -634,7 +634,7 @@
         "Fighter",
         "Mage"
       ],
-      "portrait": "lol/champion/Lillia.png",
+      "portrait": "lol/champion/Lillia.webp",
       "splash": "lol/splash/Lillia.webp"
     },
     "Lissandra": {
@@ -642,7 +642,7 @@
       "tags": [
         "Mage"
       ],
-      "portrait": "lol/champion/Lissandra.png",
+      "portrait": "lol/champion/Lissandra.webp",
       "splash": "lol/splash/Lissandra.webp"
     },
     "Lucian": {
@@ -651,7 +651,7 @@
         "Marksman",
         "Assassin"
       ],
-      "portrait": "lol/champion/Lucian.png",
+      "portrait": "lol/champion/Lucian.webp",
       "splash": "lol/splash/Lucian.webp"
     },
     "Lulu": {
@@ -660,7 +660,7 @@
         "Support",
         "Mage"
       ],
-      "portrait": "lol/champion/Lulu.png",
+      "portrait": "lol/champion/Lulu.webp",
       "splash": "lol/splash/Lulu.webp"
     },
     "Lux": {
@@ -669,7 +669,7 @@
         "Mage",
         "Support"
       ],
-      "portrait": "lol/champion/Lux.png",
+      "portrait": "lol/champion/Lux.webp",
       "splash": "lol/splash/Lux.webp"
     },
     "Malphite": {
@@ -678,7 +678,7 @@
         "Tank",
         "Mage"
       ],
-      "portrait": "lol/champion/Malphite.png",
+      "portrait": "lol/champion/Malphite.webp",
       "splash": "lol/splash/Malphite.webp"
     },
     "Malzahar": {
@@ -686,7 +686,7 @@
       "tags": [
         "Mage"
       ],
-      "portrait": "lol/champion/Malzahar.png",
+      "portrait": "lol/champion/Malzahar.webp",
       "splash": "lol/splash/Malzahar.webp"
     },
     "Maokai": {
@@ -695,7 +695,7 @@
         "Tank",
         "Support"
       ],
-      "portrait": "lol/champion/Maokai.png",
+      "portrait": "lol/champion/Maokai.webp",
       "splash": "lol/splash/Maokai.webp"
     },
     "MasterYi": {
@@ -704,7 +704,7 @@
         "Fighter",
         "Assassin"
       ],
-      "portrait": "lol/champion/MasterYi.png",
+      "portrait": "lol/champion/MasterYi.webp",
       "splash": "lol/splash/MasterYi.webp"
     },
     "Mel": {
@@ -713,7 +713,7 @@
         "Mage",
         "Support"
       ],
-      "portrait": "lol/champion/Mel.png",
+      "portrait": "lol/champion/Mel.webp",
       "splash": "lol/splash/Mel.webp"
     },
     "Milio": {
@@ -722,7 +722,7 @@
         "Support",
         "Mage"
       ],
-      "portrait": "lol/champion/Milio.png",
+      "portrait": "lol/champion/Milio.webp",
       "splash": "lol/splash/Milio.webp"
     },
     "MissFortune": {
@@ -731,7 +731,7 @@
         "Marksman",
         "Mage"
       ],
-      "portrait": "lol/champion/MissFortune.png",
+      "portrait": "lol/champion/MissFortune.webp",
       "splash": "lol/splash/MissFortune.webp"
     },
     "MonkeyKing": {
@@ -740,7 +740,7 @@
         "Fighter",
         "Tank"
       ],
-      "portrait": "lol/champion/MonkeyKing.png",
+      "portrait": "lol/champion/MonkeyKing.webp",
       "splash": "lol/splash/MonkeyKing.webp"
     },
     "Mordekaiser": {
@@ -749,7 +749,7 @@
         "Fighter",
         "Mage"
       ],
-      "portrait": "lol/champion/Mordekaiser.png",
+      "portrait": "lol/champion/Mordekaiser.webp",
       "splash": "lol/splash/Mordekaiser.webp"
     },
     "Morgana": {
@@ -758,7 +758,7 @@
         "Support",
         "Mage"
       ],
-      "portrait": "lol/champion/Morgana.png",
+      "portrait": "lol/champion/Morgana.webp",
       "splash": "lol/splash/Morgana.webp"
     },
     "Naafiri": {
@@ -767,7 +767,7 @@
         "Assassin",
         "Fighter"
       ],
-      "portrait": "lol/champion/Naafiri.png",
+      "portrait": "lol/champion/Naafiri.webp",
       "splash": "lol/splash/Naafiri.webp"
     },
     "Nami": {
@@ -776,7 +776,7 @@
         "Support",
         "Mage"
       ],
-      "portrait": "lol/champion/Nami.png",
+      "portrait": "lol/champion/Nami.webp",
       "splash": "lol/splash/Nami.webp"
     },
     "Nasus": {
@@ -785,7 +785,7 @@
         "Fighter",
         "Tank"
       ],
-      "portrait": "lol/champion/Nasus.png",
+      "portrait": "lol/champion/Nasus.webp",
       "splash": "lol/splash/Nasus.webp"
     },
     "Nautilus": {
@@ -794,7 +794,7 @@
         "Tank",
         "Support"
       ],
-      "portrait": "lol/champion/Nautilus.png",
+      "portrait": "lol/champion/Nautilus.webp",
       "splash": "lol/splash/Nautilus.webp"
     },
     "Neeko": {
@@ -803,7 +803,7 @@
         "Mage",
         "Support"
       ],
-      "portrait": "lol/champion/Neeko.png",
+      "portrait": "lol/champion/Neeko.webp",
       "splash": "lol/splash/Neeko.webp"
     },
     "Nidalee": {
@@ -812,7 +812,7 @@
         "Assassin",
         "Mage"
       ],
-      "portrait": "lol/champion/Nidalee.png",
+      "portrait": "lol/champion/Nidalee.webp",
       "splash": "lol/splash/Nidalee.webp"
     },
     "Nilah": {
@@ -821,7 +821,7 @@
         "Fighter",
         "Assassin"
       ],
-      "portrait": "lol/champion/Nilah.png",
+      "portrait": "lol/champion/Nilah.webp",
       "splash": "lol/splash/Nilah.webp"
     },
     "Nocturne": {
@@ -830,7 +830,7 @@
         "Fighter",
         "Assassin"
       ],
-      "portrait": "lol/champion/Nocturne.png",
+      "portrait": "lol/champion/Nocturne.webp",
       "splash": "lol/splash/Nocturne.webp"
     },
     "Nunu": {
@@ -839,7 +839,7 @@
         "Tank",
         "Mage"
       ],
-      "portrait": "lol/champion/Nunu.png",
+      "portrait": "lol/champion/Nunu.webp",
       "splash": "lol/splash/Nunu.webp"
     },
     "Olaf": {
@@ -848,7 +848,7 @@
         "Fighter",
         "Tank"
       ],
-      "portrait": "lol/champion/Olaf.png",
+      "portrait": "lol/champion/Olaf.webp",
       "splash": "lol/splash/Olaf.webp"
     },
     "Orianna": {
@@ -857,7 +857,7 @@
         "Mage",
         "Support"
       ],
-      "portrait": "lol/champion/Orianna.png",
+      "portrait": "lol/champion/Orianna.webp",
       "splash": "lol/splash/Orianna.webp"
     },
     "Ornn": {
@@ -865,7 +865,7 @@
       "tags": [
         "Tank"
       ],
-      "portrait": "lol/champion/Ornn.png",
+      "portrait": "lol/champion/Ornn.webp",
       "splash": "lol/splash/Ornn.webp"
     },
     "Pantheon": {
@@ -874,7 +874,7 @@
         "Fighter",
         "Assassin"
       ],
-      "portrait": "lol/champion/Pantheon.png",
+      "portrait": "lol/champion/Pantheon.webp",
       "splash": "lol/splash/Pantheon.webp"
     },
     "Poppy": {
@@ -883,7 +883,7 @@
         "Tank",
         "Fighter"
       ],
-      "portrait": "lol/champion/Poppy.png",
+      "portrait": "lol/champion/Poppy.webp",
       "splash": "lol/splash/Poppy.webp"
     },
     "Pyke": {
@@ -892,7 +892,7 @@
         "Support",
         "Assassin"
       ],
-      "portrait": "lol/champion/Pyke.png",
+      "portrait": "lol/champion/Pyke.webp",
       "splash": "lol/splash/Pyke.webp"
     },
     "Qiyana": {
@@ -900,7 +900,7 @@
       "tags": [
         "Assassin"
       ],
-      "portrait": "lol/champion/Qiyana.png",
+      "portrait": "lol/champion/Qiyana.webp",
       "splash": "lol/splash/Qiyana.webp"
     },
     "Quinn": {
@@ -909,7 +909,7 @@
         "Marksman",
         "Assassin"
       ],
-      "portrait": "lol/champion/Quinn.png",
+      "portrait": "lol/champion/Quinn.webp",
       "splash": "lol/splash/Quinn.webp"
     },
     "Rakan": {
@@ -917,7 +917,7 @@
       "tags": [
         "Support"
       ],
-      "portrait": "lol/champion/Rakan.png",
+      "portrait": "lol/champion/Rakan.webp",
       "splash": "lol/splash/Rakan.webp"
     },
     "Rammus": {
@@ -925,7 +925,7 @@
       "tags": [
         "Tank"
       ],
-      "portrait": "lol/champion/Rammus.png",
+      "portrait": "lol/champion/Rammus.webp",
       "splash": "lol/splash/Rammus.webp"
     },
     "RekSai": {
@@ -934,7 +934,7 @@
         "Fighter",
         "Tank"
       ],
-      "portrait": "lol/champion/RekSai.png",
+      "portrait": "lol/champion/RekSai.webp",
       "splash": "lol/splash/RekSai.webp"
     },
     "Rell": {
@@ -943,7 +943,7 @@
         "Tank",
         "Support"
       ],
-      "portrait": "lol/champion/Rell.png",
+      "portrait": "lol/champion/Rell.webp",
       "splash": "lol/splash/Rell.webp"
     },
     "Renata": {
@@ -952,7 +952,7 @@
         "Support",
         "Mage"
       ],
-      "portrait": "lol/champion/Renata.png",
+      "portrait": "lol/champion/Renata.webp",
       "splash": "lol/splash/Renata.webp"
     },
     "Renekton": {
@@ -961,7 +961,7 @@
         "Fighter",
         "Tank"
       ],
-      "portrait": "lol/champion/Renekton.png",
+      "portrait": "lol/champion/Renekton.webp",
       "splash": "lol/splash/Renekton.webp"
     },
     "Rengar": {
@@ -970,7 +970,7 @@
         "Assassin",
         "Fighter"
       ],
-      "portrait": "lol/champion/Rengar.png",
+      "portrait": "lol/champion/Rengar.webp",
       "splash": "lol/splash/Rengar.webp"
     },
     "Riven": {
@@ -979,7 +979,7 @@
         "Fighter",
         "Assassin"
       ],
-      "portrait": "lol/champion/Riven.png",
+      "portrait": "lol/champion/Riven.webp",
       "splash": "lol/splash/Riven.webp"
     },
     "Rumble": {
@@ -988,7 +988,7 @@
         "Fighter",
         "Mage"
       ],
-      "portrait": "lol/champion/Rumble.png",
+      "portrait": "lol/champion/Rumble.webp",
       "splash": "lol/splash/Rumble.webp"
     },
     "Ryze": {
@@ -996,7 +996,7 @@
       "tags": [
         "Mage"
       ],
-      "portrait": "lol/champion/Ryze.png",
+      "portrait": "lol/champion/Ryze.webp",
       "splash": "lol/splash/Ryze.webp"
     },
     "Samira": {
@@ -1005,7 +1005,7 @@
         "Marksman",
         "Assassin"
       ],
-      "portrait": "lol/champion/Samira.png",
+      "portrait": "lol/champion/Samira.webp",
       "splash": "lol/splash/Samira.webp"
     },
     "Sejuani": {
@@ -1013,7 +1013,7 @@
       "tags": [
         "Tank"
       ],
-      "portrait": "lol/champion/Sejuani.png",
+      "portrait": "lol/champion/Sejuani.webp",
       "splash": "lol/splash/Sejuani.webp"
     },
     "Senna": {
@@ -1022,7 +1022,7 @@
         "Support",
         "Marksman"
       ],
-      "portrait": "lol/champion/Senna.png",
+      "portrait": "lol/champion/Senna.webp",
       "splash": "lol/splash/Senna.webp"
     },
     "Seraphine": {
@@ -1031,7 +1031,7 @@
         "Support",
         "Mage"
       ],
-      "portrait": "lol/champion/Seraphine.png",
+      "portrait": "lol/champion/Seraphine.webp",
       "splash": "lol/splash/Seraphine.webp"
     },
     "Sett": {
@@ -1040,7 +1040,7 @@
         "Fighter",
         "Tank"
       ],
-      "portrait": "lol/champion/Sett.png",
+      "portrait": "lol/champion/Sett.webp",
       "splash": "lol/splash/Sett.webp"
     },
     "Shaco": {
@@ -1048,7 +1048,7 @@
       "tags": [
         "Assassin"
       ],
-      "portrait": "lol/champion/Shaco.png",
+      "portrait": "lol/champion/Shaco.webp",
       "splash": "lol/splash/Shaco.webp"
     },
     "Shen": {
@@ -1056,7 +1056,7 @@
       "tags": [
         "Tank"
       ],
-      "portrait": "lol/champion/Shen.png",
+      "portrait": "lol/champion/Shen.webp",
       "splash": "lol/splash/Shen.webp"
     },
     "Shyvana": {
@@ -1065,7 +1065,7 @@
         "Fighter",
         "Mage"
       ],
-      "portrait": "lol/champion/Shyvana.png",
+      "portrait": "lol/champion/Shyvana.webp",
       "splash": "lol/splash/Shyvana.webp"
     },
     "Singed": {
@@ -1074,7 +1074,7 @@
         "Tank",
         "Mage"
       ],
-      "portrait": "lol/champion/Singed.png",
+      "portrait": "lol/champion/Singed.webp",
       "splash": "lol/splash/Singed.webp"
     },
     "Sion": {
@@ -1083,7 +1083,7 @@
         "Tank",
         "Fighter"
       ],
-      "portrait": "lol/champion/Sion.png",
+      "portrait": "lol/champion/Sion.webp",
       "splash": "lol/splash/Sion.webp"
     },
     "Sivir": {
@@ -1091,7 +1091,7 @@
       "tags": [
         "Marksman"
       ],
-      "portrait": "lol/champion/Sivir.png",
+      "portrait": "lol/champion/Sivir.webp",
       "splash": "lol/splash/Sivir.webp"
     },
     "Skarner": {
@@ -1100,7 +1100,7 @@
         "Tank",
         "Fighter"
       ],
-      "portrait": "lol/champion/Skarner.png",
+      "portrait": "lol/champion/Skarner.webp",
       "splash": "lol/splash/Skarner.webp"
     },
     "Smolder": {
@@ -1109,7 +1109,7 @@
         "Marksman",
         "Mage"
       ],
-      "portrait": "lol/champion/Smolder.png",
+      "portrait": "lol/champion/Smolder.webp",
       "splash": "lol/splash/Smolder.webp"
     },
     "Sona": {
@@ -1118,7 +1118,7 @@
         "Support",
         "Mage"
       ],
-      "portrait": "lol/champion/Sona.png",
+      "portrait": "lol/champion/Sona.webp",
       "splash": "lol/splash/Sona.webp"
     },
     "Soraka": {
@@ -1127,7 +1127,7 @@
         "Support",
         "Mage"
       ],
-      "portrait": "lol/champion/Soraka.png",
+      "portrait": "lol/champion/Soraka.webp",
       "splash": "lol/splash/Soraka.webp"
     },
     "Swain": {
@@ -1136,7 +1136,7 @@
         "Mage",
         "Support"
       ],
-      "portrait": "lol/champion/Swain.png",
+      "portrait": "lol/champion/Swain.webp",
       "splash": "lol/splash/Swain.webp"
     },
     "Sylas": {
@@ -1145,7 +1145,7 @@
         "Mage",
         "Assassin"
       ],
-      "portrait": "lol/champion/Sylas.png",
+      "portrait": "lol/champion/Sylas.webp",
       "splash": "lol/splash/Sylas.webp"
     },
     "Syndra": {
@@ -1153,7 +1153,7 @@
       "tags": [
         "Mage"
       ],
-      "portrait": "lol/champion/Syndra.png",
+      "portrait": "lol/champion/Syndra.webp",
       "splash": "lol/splash/Syndra.webp"
     },
     "TahmKench": {
@@ -1162,7 +1162,7 @@
         "Tank",
         "Support"
       ],
-      "portrait": "lol/champion/TahmKench.png",
+      "portrait": "lol/champion/TahmKench.webp",
       "splash": "lol/splash/TahmKench.webp"
     },
     "Taliyah": {
@@ -1171,7 +1171,7 @@
         "Mage",
         "Support"
       ],
-      "portrait": "lol/champion/Taliyah.png",
+      "portrait": "lol/champion/Taliyah.webp",
       "splash": "lol/splash/Taliyah.webp"
     },
     "Talon": {
@@ -1179,7 +1179,7 @@
       "tags": [
         "Assassin"
       ],
-      "portrait": "lol/champion/Talon.png",
+      "portrait": "lol/champion/Talon.webp",
       "splash": "lol/splash/Talon.webp"
     },
     "Taric": {
@@ -1188,7 +1188,7 @@
         "Support",
         "Tank"
       ],
-      "portrait": "lol/champion/Taric.png",
+      "portrait": "lol/champion/Taric.webp",
       "splash": "lol/splash/Taric.webp"
     },
     "Teemo": {
@@ -1197,7 +1197,7 @@
         "Marksman",
         "Mage"
       ],
-      "portrait": "lol/champion/Teemo.png",
+      "portrait": "lol/champion/Teemo.webp",
       "splash": "lol/splash/Teemo.webp"
     },
     "Thresh": {
@@ -1206,7 +1206,7 @@
         "Support",
         "Tank"
       ],
-      "portrait": "lol/champion/Thresh.png",
+      "portrait": "lol/champion/Thresh.webp",
       "splash": "lol/splash/Thresh.webp"
     },
     "Tristana": {
@@ -1215,7 +1215,7 @@
         "Marksman",
         "Assassin"
       ],
-      "portrait": "lol/champion/Tristana.png",
+      "portrait": "lol/champion/Tristana.webp",
       "splash": "lol/splash/Tristana.webp"
     },
     "Trundle": {
@@ -1224,7 +1224,7 @@
         "Fighter",
         "Tank"
       ],
-      "portrait": "lol/champion/Trundle.png",
+      "portrait": "lol/champion/Trundle.webp",
       "splash": "lol/splash/Trundle.webp"
     },
     "Tryndamere": {
@@ -1233,7 +1233,7 @@
         "Fighter",
         "Assassin"
       ],
-      "portrait": "lol/champion/Tryndamere.png",
+      "portrait": "lol/champion/Tryndamere.webp",
       "splash": "lol/splash/Tryndamere.webp"
     },
     "TwistedFate": {
@@ -1242,7 +1242,7 @@
         "Mage",
         "Marksman"
       ],
-      "portrait": "lol/champion/TwistedFate.png",
+      "portrait": "lol/champion/TwistedFate.webp",
       "splash": "lol/splash/TwistedFate.webp"
     },
     "Twitch": {
@@ -1251,7 +1251,7 @@
         "Marksman",
         "Assassin"
       ],
-      "portrait": "lol/champion/Twitch.png",
+      "portrait": "lol/champion/Twitch.webp",
       "splash": "lol/splash/Twitch.webp"
     },
     "Udyr": {
@@ -1260,7 +1260,7 @@
         "Fighter",
         "Tank"
       ],
-      "portrait": "lol/champion/Udyr.png",
+      "portrait": "lol/champion/Udyr.webp",
       "splash": "lol/splash/Udyr.webp"
     },
     "Urgot": {
@@ -1269,7 +1269,7 @@
         "Fighter",
         "Tank"
       ],
-      "portrait": "lol/champion/Urgot.png",
+      "portrait": "lol/champion/Urgot.webp",
       "splash": "lol/splash/Urgot.webp"
     },
     "Varus": {
@@ -1278,7 +1278,7 @@
         "Marksman",
         "Mage"
       ],
-      "portrait": "lol/champion/Varus.png",
+      "portrait": "lol/champion/Varus.webp",
       "splash": "lol/splash/Varus.webp"
     },
     "Vayne": {
@@ -1287,7 +1287,7 @@
         "Marksman",
         "Assassin"
       ],
-      "portrait": "lol/champion/Vayne.png",
+      "portrait": "lol/champion/Vayne.webp",
       "splash": "lol/splash/Vayne.webp"
     },
     "Veigar": {
@@ -1295,7 +1295,7 @@
       "tags": [
         "Mage"
       ],
-      "portrait": "lol/champion/Veigar.png",
+      "portrait": "lol/champion/Veigar.webp",
       "splash": "lol/splash/Veigar.webp"
     },
     "Velkoz": {
@@ -1304,7 +1304,7 @@
         "Mage",
         "Support"
       ],
-      "portrait": "lol/champion/Velkoz.png",
+      "portrait": "lol/champion/Velkoz.webp",
       "splash": "lol/splash/Velkoz.webp"
     },
     "Vex": {
@@ -1312,7 +1312,7 @@
       "tags": [
         "Mage"
       ],
-      "portrait": "lol/champion/Vex.png",
+      "portrait": "lol/champion/Vex.webp",
       "splash": "lol/splash/Vex.webp"
     },
     "Vi": {
@@ -1321,7 +1321,7 @@
         "Fighter",
         "Assassin"
       ],
-      "portrait": "lol/champion/Vi.png",
+      "portrait": "lol/champion/Vi.webp",
       "splash": "lol/splash/Vi.webp"
     },
     "Viego": {
@@ -1330,7 +1330,7 @@
         "Fighter",
         "Assassin"
       ],
-      "portrait": "lol/champion/Viego.png",
+      "portrait": "lol/champion/Viego.webp",
       "splash": "lol/splash/Viego.webp"
     },
     "Viktor": {
@@ -1338,7 +1338,7 @@
       "tags": [
         "Mage"
       ],
-      "portrait": "lol/champion/Viktor.png",
+      "portrait": "lol/champion/Viktor.webp",
       "splash": "lol/splash/Viktor.webp"
     },
     "Vladimir": {
@@ -1347,7 +1347,7 @@
         "Mage",
         "Fighter"
       ],
-      "portrait": "lol/champion/Vladimir.png",
+      "portrait": "lol/champion/Vladimir.webp",
       "splash": "lol/splash/Vladimir.webp"
     },
     "Volibear": {
@@ -1356,7 +1356,7 @@
         "Fighter",
         "Tank"
       ],
-      "portrait": "lol/champion/Volibear.png",
+      "portrait": "lol/champion/Volibear.webp",
       "splash": "lol/splash/Volibear.webp"
     },
     "Warwick": {
@@ -1365,7 +1365,7 @@
         "Fighter",
         "Tank"
       ],
-      "portrait": "lol/champion/Warwick.png",
+      "portrait": "lol/champion/Warwick.webp",
       "splash": "lol/splash/Warwick.webp"
     },
     "Xayah": {
@@ -1373,7 +1373,7 @@
       "tags": [
         "Marksman"
       ],
-      "portrait": "lol/champion/Xayah.png",
+      "portrait": "lol/champion/Xayah.webp",
       "splash": "lol/splash/Xayah.webp"
     },
     "Xerath": {
@@ -1382,7 +1382,7 @@
         "Mage",
         "Support"
       ],
-      "portrait": "lol/champion/Xerath.png",
+      "portrait": "lol/champion/Xerath.webp",
       "splash": "lol/splash/Xerath.webp"
     },
     "XinZhao": {
@@ -1391,7 +1391,7 @@
         "Fighter",
         "Tank"
       ],
-      "portrait": "lol/champion/XinZhao.png",
+      "portrait": "lol/champion/XinZhao.webp",
       "splash": "lol/splash/XinZhao.webp"
     },
     "Yasuo": {
@@ -1400,7 +1400,7 @@
         "Fighter",
         "Assassin"
       ],
-      "portrait": "lol/champion/Yasuo.png",
+      "portrait": "lol/champion/Yasuo.webp",
       "splash": "lol/splash/Yasuo.webp"
     },
     "Yone": {
@@ -1409,7 +1409,7 @@
         "Fighter",
         "Assassin"
       ],
-      "portrait": "lol/champion/Yone.png",
+      "portrait": "lol/champion/Yone.webp",
       "splash": "lol/splash/Yone.webp"
     },
     "Yorick": {
@@ -1418,7 +1418,7 @@
         "Fighter",
         "Tank"
       ],
-      "portrait": "lol/champion/Yorick.png",
+      "portrait": "lol/champion/Yorick.webp",
       "splash": "lol/splash/Yorick.webp"
     },
     "Yunara": {
@@ -1426,7 +1426,7 @@
       "tags": [
         "Marksman"
       ],
-      "portrait": "lol/champion/Yunara.png",
+      "portrait": "lol/champion/Yunara.webp",
       "splash": "lol/splash/Yunara.webp"
     },
     "Yuumi": {
@@ -1435,7 +1435,7 @@
         "Support",
         "Mage"
       ],
-      "portrait": "lol/champion/Yuumi.png",
+      "portrait": "lol/champion/Yuumi.webp",
       "splash": "lol/splash/Yuumi.webp"
     },
     "Zaahen": {
@@ -1444,7 +1444,7 @@
         "Fighter",
         "Assassin"
       ],
-      "portrait": "lol/champion/Zaahen.png",
+      "portrait": "lol/champion/Zaahen.webp",
       "splash": "lol/splash/Zaahen.webp"
     },
     "Zac": {
@@ -1453,7 +1453,7 @@
         "Tank",
         "Fighter"
       ],
-      "portrait": "lol/champion/Zac.png",
+      "portrait": "lol/champion/Zac.webp",
       "splash": "lol/splash/Zac.webp"
     },
     "Zed": {
@@ -1461,7 +1461,7 @@
       "tags": [
         "Assassin"
       ],
-      "portrait": "lol/champion/Zed.png",
+      "portrait": "lol/champion/Zed.webp",
       "splash": "lol/splash/Zed.webp"
     },
     "Zeri": {
@@ -1469,7 +1469,7 @@
       "tags": [
         "Marksman"
       ],
-      "portrait": "lol/champion/Zeri.png",
+      "portrait": "lol/champion/Zeri.webp",
       "splash": "lol/splash/Zeri.webp"
     },
     "Ziggs": {
@@ -1477,7 +1477,7 @@
       "tags": [
         "Mage"
       ],
-      "portrait": "lol/champion/Ziggs.png",
+      "portrait": "lol/champion/Ziggs.webp",
       "splash": "lol/splash/Ziggs.webp"
     },
     "Zilean": {
@@ -1486,7 +1486,7 @@
         "Support",
         "Mage"
       ],
-      "portrait": "lol/champion/Zilean.png",
+      "portrait": "lol/champion/Zilean.webp",
       "splash": "lol/splash/Zilean.webp"
     },
     "Zoe": {
@@ -1494,7 +1494,7 @@
       "tags": [
         "Mage"
       ],
-      "portrait": "lol/champion/Zoe.png",
+      "portrait": "lol/champion/Zoe.webp",
       "splash": "lol/splash/Zoe.webp"
     },
     "Zyra": {
@@ -1503,7 +1503,7 @@
         "Mage",
         "Support"
       ],
-      "portrait": "lol/champion/Zyra.png",
+      "portrait": "lol/champion/Zyra.webp",
       "splash": "lol/splash/Zyra.webp"
     },
     "Locke": {
@@ -1512,7 +1512,7 @@
         "Assassin",
         "Mage"
       ],
-      "portrait": "lol/champion/Locke.png",
+      "portrait": "lol/champion/Locke.webp",
       "splash": "lol/splash/Locke.webp"
     }
   },
@@ -2861,7 +2861,7 @@
   "sources": {
     "base": "15.24.1",
     "worlds": {
-      "lol/champion/Locke.png": "16.20.1",
+      "lol/champion/Locke.webp": "16.20.1",
       "lol/splash/Locke.webp": "16.20.1",
       "lol/item/2510.png": "16.20.1",
       "lol/item/2517.png": "16.20.1",

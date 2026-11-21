@@ -191,7 +191,7 @@ def main():
         for id, c in champions.items():
             if id in manifest["champions"]:
                 continue
-            portrait = add("champion", c["image"]["full"], f"{version}/img/champion/{c['image']['full']}", version)
+            portrait = add("champion", c["image"]["full"].replace(".png", ".webp"), f"{version}/img/champion/{c['image']['full']}", version)
             splash = add("splash", f"{id}.webp", f"img/champion/splash/{id}_0.jpg", version)
             manifest["champions"][id] = {"name": c["name"], "tags": c["tags"], "portrait": portrait, "splash": splash}
 
