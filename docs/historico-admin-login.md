@@ -8,6 +8,17 @@ Formato de cada entrada: data, pedido (palavras do Bruno), decisão (quem escolh
 
 ---
 
+## 21/11/2026 — prints que não chegaram ao time
+
+- **Pedido:** "imagem não sincronizada não carrega e fica piscando". O print de outra pessoa que ainda não foi enviado ficava alternando entre "Carregando…" e o aviso.
+- **Decisão:** o print só deixa de aparecer como "carregando" uma vez; a consulta ao banco tem tempo limite de 8 s e o resultado "não existe" vale por 15 s. Quem tem print pendente não envia nem publica a tática que o usa, para os outros não verem um buraco.
+- **O que mudou:**
+  - O nó do print não recarrega a imagem a cada renderização do editor.
+  - O autor vê "Não enviado ao time" com **Tentar de novo**; os outros veem "Aguardando o envio de quem adicionou este print" com **Verificar de novo**.
+  - `sendChanges` deixa de fora as alterações cujo print está pendente e avisa quais; `publish` não publica enquanto o print do capitão estiver pendente.
+  - Se o navegador não tem espaço para guardar o print, o erro volta ao salvar (antes era silencioso).
+- **Aprovação:** não passou pelo Bruno; sem mudança em contas ou regras do Firestore.
+
 ## 20/11/2026 — login, contas e Administração em TypeScript (Onda 4b e 4c)
 
 - **Pedido:** "Seguir para 4b" e "pode seguir" (Fabiano). Refatoração sem mudança de comportamento; nenhuma regra do Firestore foi alterada nem publicada.

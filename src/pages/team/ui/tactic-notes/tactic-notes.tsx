@@ -201,7 +201,12 @@ export function TacticNotes(props: TacticNotesProps) {
       Placeholder.configure({ placeholder: "Escreva a tática… Use @ para citar um campeão e cole prints com Ctrl+V." }),
       championMention(props.champions),
       TacticPrint.configure({
-        store: { save: data => latest.current.store.save(data), load: id => latest.current.store.load(id) },
+        store: {
+          save: data => latest.current.store.save(data),
+          load: (id, fresh) => latest.current.store.load(id, fresh),
+          isPending: id => latest.current.store.isPending?.(id) ?? false,
+          retry: () => latest.current.store.retry?.() ?? Promise.resolve(0),
+        },
         sketch: attrs => latest.current.sketch(attrs),
       }),
     ],
