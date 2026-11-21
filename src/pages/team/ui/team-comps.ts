@@ -63,16 +63,7 @@ export function renderMatchup() {
       ? { id: active.id, title: matchupTitle({ matchup: active, ...entryOf(active) }), named: !!active.name }
       : null,
     enemyOpgg: r ? opggOf(r) : "",
-    collapsed: S.matchupBarCollapsed === true,
     canUndo: hasUndo(),
-    onToggleCollapsed: () => {
-      S.matchupBarCollapsed = S.matchupBarCollapsed !== true
-      save()
-      renderMatchup()
-      requestAnimationFrame(() =>
-        requestAnimationFrame(() => $("#editor [data-matchup-collapse]")?.focus({ preventScroll: true })),
-      )
-    },
     onSelectOurs: (id, mode) => {
       const open = activeMatchup()
       if (open) {

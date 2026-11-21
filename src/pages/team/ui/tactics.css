@@ -1952,44 +1952,6 @@
   opacity: 0.6;
 }
 
-/* Barra de confronto recolhida e botão de recolher */
-.matchup-collapse {
-  display: inline-flex;
-  flex: none;
-  align-items: center;
-  justify-content: center;
-  min-width: 32px;
-  min-height: 32px;
-  margin-left: auto;
-  cursor: pointer;
-}
-.matchup-collapse svg {
-  width: 16px;
-  height: 16px;
-}
-.matchup.collapsed {
-  flex-wrap: nowrap;
-  min-height: 40px;
-  padding: 0 4px 0 8px;
-  border: 1px solid var(--line);
-  background: var(--panel2, var(--bg));
-}
-.matchup-summary {
-  display: inline-flex;
-  min-width: 0;
-  align-items: center;
-  gap: 8px;
-  color: var(--mut);
-}
-.matchup-summary b {
-  overflow: hidden;
-  color: var(--txt);
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-.matchup-summary .side-dot {
-  margin-right: 0;
-}
 .matchup-team button:disabled {
   cursor: not-allowed;
   opacity: 0.45;
@@ -2011,12 +1973,23 @@
 .matchup-head [data-matchup-new] {
   margin-left: auto;
 }
+.matchup-badge,
+.tx-team-tag.mine {
+  background: var(--wl-accent);
+  color: var(--wl-on-accent);
+}
 .matchup-badge {
   padding: 2px 8px;
   border-radius: 999px;
-  background: var(--wl-accent-soft);
   font-size: 12px;
   font-weight: 600;
+}
+.matchup-head [data-matchup-leave],
+.matchup-head [data-matchup-new] {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  min-height: 32px;
 }
 .matchup-hint {
   color: var(--muted);
@@ -2115,4 +2088,73 @@
   margin: 0 0 4px;
   font-size: 14px;
   overflow-wrap: anywhere;
+}
+
+/* Gaveta em coluna flex: abas/lista no topo, barra do quadro e quadro ocupando o resto (Draft e Lane com a mesma altura) */
+.tx-aside {
+  overflow: hidden;
+}
+.tx-tabs {
+  flex: 2 1 0;
+  min-height: 160px;
+}
+.tx-draft {
+  display: flex;
+  flex: 3 1 0;
+  flex-direction: column;
+  gap: 8px;
+  min-height: 280px;
+}
+#v-comps .tx-tabs.list-collapsed {
+  flex: none;
+  min-height: 0;
+}
+#v-comps .tx-tabs.list-collapsed + .tx-draft {
+  flex: 1 1 0;
+}
+.tx-draft-empty {
+  flex: none;
+}
+.tx-board-bar {
+  display: flex;
+  flex: none;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+.tx-board-bar-start,
+.tx-board-bar-end {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+.tx-board-bar-start {
+  gap: 16px;
+}
+.tx-board-bar-start .tx-board-switch {
+  margin: 0;
+}
+#v-comps .tx-board-bar .tx-open-draft,
+#v-comps .tx-board-bar .tx-swap-sides,
+#v-comps .tx-board-bar .tx-undo {
+  min-height: 38px;
+  margin: 0;
+}
+.tx-draft-sides {
+  flex: 1 1 0;
+  min-height: 0;
+  overflow: auto;
+}
+.tx-pos-board {
+  flex: 1 1 0;
+  min-height: 0;
+  overflow: auto;
+  --tx-pos-row: 48px;
+  grid-template-rows: auto repeat(6, minmax(var(--tx-pos-row), 1fr));
+}
+.tx-draft > .tx-col-empty,
+.tx-draft > .tx-draft-empty {
+  flex: 1 1 auto;
 }

@@ -211,13 +211,9 @@ function removeChampion(name: string, lane: ChampionSlot, comp: Composition = ta
   renderGrid()
   focusDraftTarget(lane, comp === cur() ? "us" : "rival")
 }
-// Abre a lista de adversárias junto do botão clicado; com a barra recolhida, ela é aberta antes.
+// Abre a lista de adversárias junto do botão clicado.
 function requestChoose(anchor: HTMLElement) {
-  const ask = () => document.dispatchEvent(new CustomEvent(CHOOSE_EVENT, { detail: { kind: "rival", anchor } }))
-  if (S.matchupBarCollapsed !== true) return ask()
-  S.matchupBarCollapsed = false
-  renderMatchup()
-  requestAnimationFrame(() => requestAnimationFrame(ask))
+  document.dispatchEvent(new CustomEvent(CHOOSE_EVENT, { detail: { kind: "rival", anchor } }))
 }
 $("#editor").addEventListener("click", e => {
   if (eventTarget(e).closest<HTMLElement>("[data-picker]")) {

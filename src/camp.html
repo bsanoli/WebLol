@@ -66,14 +66,14 @@
     <div class="picker-heading"><h2 id="picker-title">Campeões</h2><button data-slot="button" data-variant="ghost" data-size="icon-sm" id="close-picker" type="button" aria-label="Fechar catálogo"><svg class="icon" aria-hidden="true" focusable="false"><use href="assets/icons.svg#close"></use></svg></button></div>
     <div id="target"></div>
     <div class="gtools">
-      <label>Buscar campeão<input data-slot="input" id="search" placeholder="Nome do campeão"></label>
-      <div class="team-select-field"><label id="sort-label" for="sort-trigger">Ordenar por</label><select id="sort" aria-labelledby="sort-label">
+      <input data-slot="input" id="search" placeholder="Buscar campeão" aria-label="Buscar campeão">
+      <div class="roles" id="roles" role="group" aria-label="Filtrar por posição"></div>
+      <div class="team-select-field"><select id="sort" aria-label="Ordenar campeões">
         <option value="az">A → Z</option>
         <option value="ws">Mais jogados no Worlds 2026</option>
         <option value="wsb">Mais banidos no Worlds 2026</option>
       </select></div>
     </div>
-    <div class="filter-heading">Filtrar catálogo por posição</div><div class="roles" id="roles"></div>
     <div id="grid"></div>
     <div class="foot" id="gfoot" hidden></div>
   </div>

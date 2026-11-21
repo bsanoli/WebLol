@@ -125,12 +125,10 @@ function tacticBoardHTML(
     ? `<button type="button" data-slot="button" data-variant="outline" data-size="sm" class="tx-swap-sides" data-matchup-swap title="Trocar os lados do confronto">${iconMarkup("swap")} Trocar lados</button>`
     : ""
   const undo = `<button type="button" data-slot="button" data-variant="outline" data-size="sm" class="tx-undo" data-undo-last${canUndo ? "" : " hidden"} title="Desfazer a última mudança (Ctrl+Z)">${iconMarkup("undo")} Desfazer</button>`
-  return `${boardSwitchHTML(view)}${swap}${undo}${board}${
-    general
-      ? ""
-      : `
-    <button type="button" data-slot="button" data-variant="outline" data-size="sm" class="tx-open-draft" data-open-draft>${iconMarkup("next")} Editar na Ordem do draft</button>`
-  }`
+  const open = general
+    ? ""
+    : `<button type="button" data-slot="button" data-variant="outline" data-size="sm" class="tx-open-draft" data-open-draft>${iconMarkup("next")} Editar na Ordem do draft</button>`
+  return `<div class="tx-board-bar"><div class="tx-board-bar-start">${boardSwitchHTML(view)}${undo}</div><div class="tx-board-bar-end">${swap}${open}</div></div>${board}`
 }
 
 /** Cabeçalho da comp: de quem ela é (só leitura; muda pelo menu ⋯ da Ordem do draft) e, na adversária, o OP.GG do time. */
