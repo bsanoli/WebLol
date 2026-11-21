@@ -1243,7 +1243,11 @@ summary::-webkit-details-marker {
 #v-comps .local-save-actions > summary {
   display: flex;
   justify-content: space-between;
-  min-width: 168px;
+  min-width: 208px;
+}
+#v-comps .local-save-actions[data-draft="pending"] > summary .saved {
+  color: var(--wl-accent);
+  font-weight: 600;
 }
 #v-comps .local-save-actions[data-save-error] .saved {
   color: var(--wl-danger);
@@ -1268,9 +1272,33 @@ summary::-webkit-details-marker {
   border-radius: var(--wl-card-radius);
   box-shadow: 0 var(--wl-space-2) var(--wl-space-6) var(--wl-shadow-soft);
 }
+.local-save-panel {
+  display: flex;
+  flex-direction: column;
+  gap: var(--wl-space-2);
+}
 .local-save-panel p {
-  margin: 0 0 var(--wl-space-2);
+  margin: 0;
   color: var(--wl-muted);
+}
+.local-save-panel > [data-slot="button"] {
+  justify-content: flex-start;
+}
+.save-changes-list {
+  margin: 0;
+  padding: var(--wl-space-2) var(--wl-space-3);
+  max-height: calc(var(--wl-space-8) * 5);
+  overflow-y: auto;
+  list-style: none;
+  border-radius: var(--wl-card-radius);
+  background: var(--wl-bg);
+  font-size: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: var(--wl-space-1);
+}
+.save-changes-list[hidden] {
+  display: none;
 }
 
 #v-comps .composition-toolbar .editor-controls .vtog {

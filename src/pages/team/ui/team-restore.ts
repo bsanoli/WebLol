@@ -1,25 +1,14 @@
-// Restaurar os dados locais: volta à versão sincronizada do time (ou aos dados iniciais) depois de oferecer uma cópia.
+// Descartar o rascunho: volta à versão sincronizada do time (ou aos dados iniciais) depois de oferecer uma cópia.
 import { STORAGE_KEYS } from "@/shared/config"
 import { askChoice } from "@/shared/ui/dialog-controls"
 import { KEY } from "../model/local-state"
 import { parseOfficialBaseline } from "../model/saved-data"
 import { downloadTeamBackup } from "./team-backup"
-import { $, eventTarget, S, localSave, toast } from "./team-store"
+import { $, S, toast } from "./team-store"
 
 const idOf = (item: unknown) => (item as { id?: string } | undefined)?.id
 
 export function mountLocalRestore() {
-  document.addEventListener("click", event => {
-    if (!localSave.contains(eventTarget(event)) && !eventTarget(event).closest?.('[role="alertdialog"]')) {
-      localSave.open = false
-    }
-  })
-  localSave.addEventListener("keydown", event => {
-    if (event.key !== "Escape" || !localSave.open) return
-    localSave.open = false
-    localSave.querySelector("summary")?.focus()
-  })
-
   $("#clear-local").onclick = async () => {
     let rawBase, base
     try {
@@ -33,11 +22,11 @@ export function mountLocalRestore() {
 
     const destination = base ? `a versão sincronizada do time (v${base.version})` : "os dados iniciais do site"
     const choice = await askChoice(
-      "Restaurar dados locais?",
-      `As composições e jogadas deste navegador serão substituídas por ${destination}. Envios para aprovação continuam na fila.`,
+      "Descartar o rascunho?",
+      `As alterações ainda não enviadas serão descartadas: as composições e jogadas deste navegador voltam para ${destination}. Envios para aprovação continuam na fila.`,
       [
         { value: "backup", label: "Baixar cópia" },
-        { value: "restore", label: "Restaurar", destructive: true },
+        { value: "restore", label: "Descartar", destructive: true },
       ],
     )
     if (choice === "backup") {
@@ -48,7 +37,7 @@ export function mountLocalRestore() {
 
     try {
       if (localStorage.getItem(STORAGE_KEYS.officialBaseline) !== rawBase) {
-        toast("A versão do time mudou. Abra a restauração novamente.")
+        toast("A versão do time mudou. Abra o descarte novamente.")
         return
       }
       if (base) {
@@ -69,7 +58,7 @@ export function mountLocalRestore() {
         localStorage.removeItem(KEY)
       }
     } catch {
-      toast("Não foi possível restaurar os dados locais.")
+      toast("Não foi possível descartar o rascunho.")
       return
     }
     window.location.reload()
