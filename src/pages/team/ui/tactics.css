@@ -1856,8 +1856,8 @@
   display: inline-flex;
   flex: none;
   align-items: center;
-  gap: 6px;
+  gap: 4px;
 }
 .tx-mx-row .side-dot.comp-side-mark {
-  margin-right: 6px;
+  margin-right: 4px;
 }
