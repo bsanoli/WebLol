@@ -54,7 +54,8 @@ test("Táticas: monta picks na gaveta e arrasta uma adversária para criar o con
   await expect(board.locator(".tx-side-col")).toHaveCount(2)
   await expect(board.locator(".tx-side-col.empty")).toHaveCount(0)
   const state = await page.evaluate(() => JSON.parse(localStorage.getItem("lol-comps-time-v1")!))
-  expect(state.comps.find((c: { id: string }) => c.id === "nossa").matchups).toHaveLength(1)
+  expect(state.matchups).toHaveLength(1)
+  expect(state.matchups[0]).toMatchObject({ ours: "nossa", side: "blue" })
 })
 
 test("Táticas: visão Lane só com ícones, com as mesmas ações e lembrada ao recarregar", async ({ page }) => {

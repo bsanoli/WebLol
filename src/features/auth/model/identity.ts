@@ -1,5 +1,5 @@
 // Quem está usando o app: conta salva, "Ver como" do admin, papel no time e alterações pendentes.
-import { diff, shared } from "@/shared/lib/team-changes"
+import { diff, withOwnMatchups } from "@/shared/lib/team-changes"
 import { currentFirebase, fb } from "@/shared/api/firestore"
 import { ADMINS } from "@/shared/config/admins"
 import { STORAGE_KEYS } from "@/shared/config/storage-keys"
@@ -63,7 +63,7 @@ export async function fbAdminLogin(password: string) {
 export function pending() {
   const base = lsGet<{ data: Parameters<typeof diff>[1] }>(BKEY)
   if (!base) return []
-  return diff(shared(local() as Parameters<typeof shared>[0]), base.data)
+  return diff(withOwnMatchups(local() as Parameters<typeof withOwnMatchups>[0]), withOwnMatchups(base.data))
 }
 
 // No "Ver como" capitão o admin enxerga como capitão do time aberto; no "Ver como" membro, como membro comum.

@@ -1,15 +1,15 @@
 // Exportar e importar o backup da Área do time (`app: "lol-comps-time"`), no formato salvo.
 import { askChoice } from "@/shared/ui/dialog-controls"
 import { compositionFromSaved, compositionToSaved } from "../model/composition-storage"
-import { settleOwner, setEnemyId } from "../model/composition-side"
+import { settleOwner } from "../model/composition-side"
 import { blank, setChampions, uid } from "../model/local-state"
 import { SLOT_LIST } from "../model/champion-slots"
-import { addMatchup } from "../model/matchups"
+import { sanitizeMatchups, type Matchup } from "../model/matchups"
+import { withOwnMatchups } from "@/shared/lib/team-changes"
 import { normalizeOpggLink, setOpgg } from "../model/tactics"
 import { $, plays, S, save, toast } from "./team-store"
 
 type SavedPlay = { id?: string; live?: unknown; steps?: unknown }
-type SavedMatchup = { id?: unknown; enemy?: unknown; updated?: unknown }
 type SavedComposition = Record<string, any>
 
 export function downloadTeamBackup() {
@@ -21,6 +21,7 @@ export function downloadTeamBackup() {
           version: 1,
           exported: new Date().toISOString(),
           comps: S.comps.map(compositionToSaved),
+          matchups: S.matchups,
           plays: S.plays,
         },
         null,
@@ -40,8 +41,11 @@ const asNames = (list: unknown) => (Array.isArray(list) ? list.map(String) : [])
 
 async function importTeamBackup(file: File, afterImport: () => void) {
   const data = JSON.parse(await file.text())
-  const comps: unknown = data.comps || data
-  if (!Array.isArray(comps)) throw new Error("Formato inválido")
+  const rawComps: unknown = data.comps || data
+  if (!Array.isArray(rawComps)) throw new Error("Formato inválido")
+  // Backups antigos guardam os confrontos dentro da comp; a migração os leva para a lista própria.
+  const migrated = withOwnMatchups({ comps: rawComps, matchups: Array.isArray(data.matchups) ? data.matchups : [] })
+  const comps = migrated.comps
   if (!comps.length) throw new Error("Arquivo sem composições")
   const choice = await askChoice(
     "Importar composições",
@@ -69,21 +73,23 @@ async function importTeamBackup(file: File, afterImport: () => void) {
     if (typeof c.opgg === "string" && c.opgg) setOpgg(b, normalizeOpggLink(c.opgg) || "")
     return b
   })
-  // Ao juntar, as comps ganham ids novos; a adversária de cada draft acompanha.
-  for (const b of clean) if (b.draft?.enemyId) setEnemyId(b, ids.get(b.draft.enemyId) || null)
-  // Confrontos (e as táticas deles) vão junto; ao juntar, ganham ids novos para não colidir.
-  clean.forEach((b, i) => {
-    const saved = comps[i] as SavedComposition
-    const list: SavedMatchup[] = Array.isArray(saved.matchups) ? saved.matchups : []
-    for (const m of list) {
-      const enemy = ids.get(m?.enemy as string)
-      if (!enemy) continue
-      const made = addMatchup(b, enemy, Number(m.updated) || Date.now())
-      if (replace && typeof m.id === "string") made.id = m.id
-    }
-  })
+  // Confrontos acompanham as comps; ao juntar, comps e confrontos ganham ids novos para não colidir.
+  const importedMatchups: Matchup[] = sanitizeMatchups(migrated.matchups)
+    .map(m => {
+      const made: Matchup = { ...m, id: replace ? m.id : uid() }
+      const ours = m.ours && ids.get(m.ours),
+        enemy = m.enemy && ids.get(m.enemy)
+      if (ours) made.ours = ours
+      else delete made.ours
+      if (enemy) made.enemy = enemy
+      else delete made.enemy
+      return made
+    })
+    .filter(m => m.ours || m.enemy)
+  S.matchups = replace ? importedMatchups : [...importedMatchups, ...S.matchups]
   S.comps = replace ? clean : [...clean, ...S.comps]
   S.cur = S.comps[0].id
+  S.curMatchup = null
   if (Array.isArray(data.plays)) {
     const imported = (data.plays as SavedPlay[])
       .filter(p => p && p.live && Array.isArray(p.steps))

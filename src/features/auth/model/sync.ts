@@ -1,6 +1,14 @@
 // Sincronização com o time: lê a versão oficial, junta com a cópia local, envia alterações para aprovação
 // (jogador) e publica a nova versão (capitão ou admin). Coleções e campos do Firestore não mudam.
-import { applyChanges, type Change, itemName, KN, type SharedData, type SharedItem } from "@/shared/lib/team-changes"
+import {
+  applyChanges,
+  type Change,
+  itemName,
+  KN,
+  type SharedData,
+  type SharedItem,
+  withOwnMatchups,
+} from "@/shared/lib/team-changes"
 import { dbGet, dbSet, fb, ONLINE } from "@/shared/api/firestore"
 import { STORAGE_KEYS } from "@/shared/config/storage-keys"
 import { normId } from "@/shared/lib/account-id"
@@ -19,6 +27,7 @@ type OfficialRead = { off: Official; err?: undefined } | { off?: undefined; err:
 type CampState = Record<string, unknown> & {
   comps?: SharedItem[]
   tactics?: SharedItem[]
+  matchups?: SharedItem[]
   plays?: SharedItem[]
   cur?: string
   curPlay?: string
@@ -27,7 +36,7 @@ type CampState = Record<string, unknown> & {
 const emptyOfficial = (): Official => ({
   version: 0,
   at: 0,
-  data: { comps: [], plays: [], tactics: [] },
+  data: { comps: [], plays: [], tactics: [], matchups: [] },
   log: [],
 })
 
@@ -45,6 +54,7 @@ function writeLocal(data: SharedData, official: Official) {
   const live = new Map((state.plays || []).map(play => [play.id, play.live]))
   state.comps = data.comps
   state.tactics = data.tactics || []
+  state.matchups = data.matchups || []
   state.plays = data.plays.map(play => (live.has(play.id) ? { ...play, live: live.get(play.id) } : play))
   if (!state.comps.some(comp => comp.id === state.cur)) state.cur = state.comps[0]?.id
   if (!state.plays.some(play => play.id === state.curPlay)) state.curPlay = state.plays[0]?.id
@@ -99,7 +109,7 @@ export async function sync(options: { reload?: boolean } = {}) {
       }
       return true
     })
-    writeLocal(applyChanges(official.data, mine), official)
+    writeLocal(withOwnMatchups(applyChanges(official.data, mine)), official)
     shouldReload = true
   }
   if (shouldReload && options.reload !== false) session.reloadCamp()
@@ -172,6 +182,12 @@ const logEntry = (v: number, at: number, change: SentChange, status: LogEntry["s
 })
 
 /** Capitão ou admin: grava a nova versão oficial com as alterações aprovadas e recusadas. */
+/** Um envio de cliente antigo não traz `matchups`; sem mudança de confronto aprovada, mantém os do oficial. */
+function keepMatchups(next: SharedData, current: SharedData, approved: Change[]): SharedData {
+  if (approved.some(change => change.kind === "matchup") || next.matchups?.length) return next
+  return { ...next, matchups: current.matchups ?? [] }
+}
+
 export async function publish(approved: SentChange[], rejected: SentChange[], label: string) {
   if (!session.team || !canPublish()) {
     writeRoute(routeRoots.admin)
@@ -205,7 +221,7 @@ export async function publish(approved: SentChange[], rejected: SentChange[], la
     at,
     label,
     by: user()?.id,
-    data: applyChanges(current.data, approved),
+    data: withOwnMatchups(keepMatchups(applyChanges(current.data, approved), current.data, approved)),
     log,
   }
   try {

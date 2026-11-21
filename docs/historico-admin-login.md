@@ -188,3 +188,9 @@ Formato de cada entrada: data, pedido (palavras do Bruno), decisão (quem escolh
   - O principal libera os outros com uma senha provisória.
 - **Pedido:** histórico de "Versões da interface" na aba Administração.
 - **Commits:** 07fa0e8, e2a103a, 2f9be1a, 93284c5 e bef478f.
+
+## 21/11/2026: confronto como item próprio do time
+
+- **Pedido:** confronto com id próprio (nome editável, trocar comps, trocar lados, pares repetidos), sem depender da comp nossa.
+- **Decisão:** lista `matchups` na raiz do estado sincronizado (tipo `matchup`), com migração dos dados antigos mantendo os ids. Detalhes na ADR 0009. Não mexe em contas, senhas nem regras do Firestore.
+- **O que mudou:** sincronização, importação de backup e envio ao time passam a levar `matchups`; excluir uma comp deixa os confrontos com o lado vazio.

@@ -11,7 +11,7 @@ Use quando a pessoa escrever `regra:`, `termo:` ou `decisão:`, e quando corrigi
 
 Uma frase no imperativo, com o motivo quando ele não for óbvio. Acrescente um exemplo certo e um errado quando ajudar.
 
-> Use `enemyId` para a composição adversária do draft. Não use `rival` nem `opponent`.
+> Use `enemy` do confronto (`Matchup`) para a composição adversária do draft. Não use `rival` nem `opponent`.
 
 ## 2. Escolher o lugar
 

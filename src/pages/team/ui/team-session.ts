@@ -1,16 +1,17 @@
 // Seleção em edição na Área do time: qual posição (ou bans) e qual lado do quadro recebem a próxima edição.
 import type { ChampionSlot, Composition } from "../model/local-state"
-import { enemyCompositionOf } from "../model/composition-side"
-import { cur, S } from "./team-store"
+import { findMatchup } from "../model/matchups"
+import { activeMatchup, cur, S } from "./team-store"
 
 /** Lado do quadro em edição: a comp aberta ("us") ou a adversária escolhida ("rival"). */
 export type ActiveSide = "us" | "rival"
 
 export const session: { active: ChampionSlot; side: ActiveSide } = { active: "top", side: "us" }
 
-export const boardEnemy = (): Composition | null | undefined => {
-  const current = cur()
-  return current && enemyCompositionOf(current, S.comps)
+/** Adversária do confronto aberto (só quando a comp aberta é a nossa dele). */
+export const boardEnemy = (): Composition | null => {
+  const active = activeMatchup()
+  return (active?.ours && findMatchup(S.comps, S.matchups, active.id)?.enemy) || null
 }
 
 /** Comp que recebe as edições do quadro e da grade de campeões. */

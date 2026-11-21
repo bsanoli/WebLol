@@ -156,7 +156,7 @@ Dividida em duas partes. A **2a** (itens 3, 4 e 5) é aditiva e está implementa
 ### Onda 3. Nomes e tipos da Área do time
 
 1. Composição: `owner: "ours" | "enemy"` no código, convertendo o campo salvo `team: "mine" | "enemy"` na leitura e na escrita.
-2. Adversária do draft: `enemyId` no código, mantendo `draft.rival` no formato salvo até a migração.
+2. Adversária do draft: `enemy` do confronto (`Matchup`); o antigo `draft.rival` foi migrado (ADR 0009).
 3. Bans fora de `lanes`, numa lista `bans` própria, com migração da chave `lol-comps-time-v1`.
 4. Dividir `team-page.ts` por aba e remover o `@ts-nocheck`.
 5. Campeões e posições como objetos tipados no lugar de `CH` e `LANES`.

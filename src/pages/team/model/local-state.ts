@@ -1,5 +1,7 @@
 import { STORAGE_KEYS } from "@/shared/config/storage-keys"
+import { withOwnMatchups } from "@/shared/lib/team-changes"
 import { compositionFromSaved, hasLegacyBans } from "./composition-storage"
+import { sanitizeMatchups, type Matchup } from "./matchups"
 import { sanitizeComposition } from "./saved-data"
 
 export const KEY = STORAGE_KEYS.teamAreaState
@@ -8,12 +10,9 @@ export const uid = () => Math.random().toString(36).slice(2, 10)
 export type DraftSide = "blue" | "red"
 export type DraftLane = "top" | "jg" | "mid" | "adc" | "sup"
 export type CompositionDraft = {
-  side: DraftSide
   order: Record<DraftSide, DraftLane[]>
   /** Plano do draft de cada lado; vai para o bloco de notas da comp na primeira edição. */
   note: Record<DraftSide, string>
-  /** Id da composição adversária colocada do outro lado do draft (salvo como `rival`). */
-  enemyId?: string
 }
 
 export type Composition = {
@@ -30,8 +29,6 @@ export type Composition = {
   /** Link do OP.GG do time adversário. */
   opgg?: string
   draft?: CompositionDraft
-  /** Confrontos da comp nossa contra adversárias, cada um com tática própria. */
-  matchups?: { id: string; enemy: string; updated: number }[]
 }
 
 export const DRAFT_LANES: DraftLane[] = ["top", "jg", "mid", "adc", "sup"]
@@ -41,14 +38,12 @@ const DEFAULT_ORDER: DraftLane[] = ["mid", "jg", "sup", "adc", "top"]
 export function draftOf(c: Composition): CompositionDraft {
   if (!c.draft || typeof c.draft !== "object") c.draft = {} as CompositionDraft
   const d = c.draft
-  if (d.side !== "red") d.side = "blue"
   if (!d.note || typeof d.note !== "object") d.note = { blue: "", red: "" }
   if (!d.order || typeof d.order !== "object") d.order = {} as CompositionDraft["order"]
   for (const side of ["blue", "red"] as const) {
     const saved = (Array.isArray(d.order[side]) ? d.order[side] : []).filter(lane => DRAFT_LANES.includes(lane))
     d.order[side] = [...new Set([...saved, ...DEFAULT_ORDER])].slice(0, 5)
   }
-  if (typeof d.enemyId !== "string" || !d.enemyId) delete d.enemyId
   return d
 }
 
@@ -74,6 +69,10 @@ export type TeamState = {
   view: "draft" | "tactics" | "map"
   /** Última composição nossa aberta; volta para ela ao sair de uma adversária. */
   lastComp?: string
+  /** Confrontos do time: comp nossa x adversária, com lado e tática própria. */
+  matchups: Matchup[]
+  /** Confronto aberto na Ordem do draft. */
+  curMatchup?: string | null
   tacticsMatchup?: string | null
   tacticsGeneral?: boolean
   tacticsDrawer?: boolean
@@ -104,11 +103,16 @@ export function loadTeamState(): TeamState {
   } catch {
     S = null
   }
-  if (S && Array.isArray(S.comps))
+  if (S && Array.isArray(S.comps)) {
+    // Formato antigo: os confrontos e o lado ficavam dentro da comp nossa. Vira a lista `matchups` do time.
+    const migrated = withOwnMatchups(S as unknown as Parameters<typeof withOwnMatchups>[0])
+    S.comps = migrated.comps as unknown as Composition[]
+    ;(S as { matchups?: unknown }).matchups = migrated.matchups
     S.comps = S.comps
       .map(compositionFromSaved)
       .map(sanitizeComposition)
       .filter(comp => comp !== null)
+  }
   if (!S || !Array.isArray(S.comps)) {
     // Comp de exemplo (genérica) para quem ainda não tem as comps de um time
     const c = blank("Comp de exemplo: luta em time")
@@ -126,7 +130,9 @@ export function loadTeamState(): TeamState {
     S.cur = c.id
   }
   if (!S.comps.some(c => c.id === S.cur)) S.cur = S.comps[0].id
-  return S as TeamState
+  const state = S as TeamState
+  state.matchups = sanitizeMatchups(state.matchups)
+  return state
 }
 
 /** Posição de uma lista de campeões da composição: as cinco posições ou `"ban"`. */

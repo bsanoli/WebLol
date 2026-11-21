@@ -25,10 +25,10 @@ Toda composição é **nossa** ou **adversária**. A Área do time tem duas abas
 Um **confronto** é uma comp nossa contra uma adversária (por exemplo, "Pant Taliyah x Picks Banco Mestre"), com tática própria. A mesma comp nossa pode ter vários confrontos.
 
 - Ficam na 3ª aba da gaveta de Táticas, **Confrontos**, ao lado de Nossas e Adversárias. Clicar numa linha abre o draft dele (a nossa de um lado, a adversária do outro) e o bloco de notas do confronto, separado das notas da comp nossa e da adversária. O botão **OP.GG** do cabeçalho é o da adversária.
-- **+ Novo confronto**, no fim da lista, abre um diálogo para escolher a comp nossa e a adversária (ou **+ Nova adversária…**). Se o par já existir, o site abre o existente.
-- Escolher uma adversária na barra do draft também cria o confronto. Comps que já tinham adversária no draft ganham o confronto sozinhas, sem perder nada.
-- A lixeira da linha exclui o confronto e a tática dele, depois de confirmar. As composições continuam; se a adversária estava no draft da comp nossa, ela sai de lá.
-- Excluir ou mudar de lado a comp nossa ou a adversária remove os confrontos dela.
+- **+ Novo confronto**, no fim da lista, abre um diálogo para escolher a comp nossa e a adversária (ou **+ Nova adversária…**). Pares repetidos são permitidos; cada confronto tem id, nome (lápis do título) e tática próprios.
+- Escolher uma adversária na barra do draft sem confronto aberto cria um confronto novo; com um aberto, troca a comp dele. **Sair do confronto** volta à comp sozinha. Comps que já tinham adversária no draft viram confrontos sozinhas, sem perder nada.
+- A lixeira da linha exclui o confronto e a tática dele, depois de confirmar. As composições continuam.
+- Excluir uma comp não remove os confrontos dela: eles ficam com aquele lado vazio, e o aviso de exclusão lista quais. Arrastar a nossa comp para o lado da adversária (ou usar ⇄) troca os lados, com aviso e **Desfazer**.
 
 ## Ordem do draft com a adversária
 
@@ -90,7 +90,7 @@ Editor de texto rico ([Tiptap](https://tiptap.dev), MIT). O salvamento é autom�
   - `doc`: o documento do bloco de notas (JSON do Tiptap). Cada print é um nó `tacticPrint` com `src` (o print original), `sketch` (a cena do desenho) e `preview` (o print desenhado), todos ids de `imagens`;
   - `text`: o texto puro tirado do `doc` (campeões viram `@Nome`), usado na aprovação do capitão e no lápis da lista;
   - `images`: todos os ids que o `doc` usa.
-- Cada composição fica na lista `comps` com `team` (`mine` ou `enemy`) e, na adversária, `opgg` (o link). A nossa guarda em `draft.rival` o id da adversária aberta no draft e em `matchups` (`{ id, enemy, updated }`) os confrontos; a tática de um confronto tem o id `comp-mx-<id do confronto>`. Os confrontos ficam dentro da comp nossa para seguirem a sincronização das comps. Comps antigas sem `team` são lidas como nossas, ou como adversárias quando tinham `tacticTeam: "enemy"`. Os campos `tactic`, `tacticViews` e `tacticTeam` saem na primeira edição.
+- Cada composição fica na lista `comps` com `team` (`mine` ou `enemy`) e, na adversária, `opgg` (o link). Os confrontos ficam na lista `matchups` do time (`{ id, name?, ours?, enemy?, side, updated }`, ver [ADR 0009](decisoes/0009-confronto-proprio.md)); a tática de um confronto tem o id `comp-mx-<id>`. Comps antigas sem `team` são lidas como nossas, ou como adversárias quando tinham `tacticTeam: "enemy"`. Os campos `tactic`, `tacticViews` e `tacticTeam` saem na primeira edição.
 - Cada print fica num documento próprio do Firebase em `times/{time}/imagens/{print}`, fora dos dados do time, que têm limite de 1 MB. Essa escolha foi do Bruno em 19/11/2026 e está no [histórico de admin e login](historico-admin-login.md).
   - A regra `match /imagens/{id}` do `firestore.rules` precisa estar publicada no console do Firebase.
   - Todo membro ativo do time, o capitão e os admins conseguem ver os prints e desenhos.
