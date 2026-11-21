@@ -108,6 +108,7 @@ function tacticBoardHTML(
   matchup: MatchupEntry | null,
   view: TacticBoardView,
   markup: Markup,
+  canUndo: boolean,
 ) {
   const { sides, hint } = boardSides(c, general, matchup)
   const col = (side: DraftSide) => {
@@ -123,7 +124,8 @@ function tacticBoardHTML(
   const swap = matchup
     ? `<button type="button" data-slot="button" data-variant="outline" data-size="sm" class="tx-swap-sides" data-matchup-swap title="Trocar os lados do confronto">${iconMarkup("swap")} Trocar lados</button>`
     : ""
-  return `${boardSwitchHTML(view)}${swap}${board}${
+  const undo = `<button type="button" data-slot="button" data-variant="outline" data-size="sm" class="tx-undo" data-undo-last${canUndo ? "" : " hidden"} title="Desfazer a última mudança (Ctrl+Z)">${iconMarkup("undo")} Desfazer</button>`
+  return `${boardSwitchHTML(view)}${swap}${undo}${board}${
     general
       ? ""
       : `
@@ -157,6 +159,10 @@ export type TacticsOptions = Markup & {
   compositions: Composition[]
   general: boolean
   drawer?: boolean
+  /** Lista de composições recolhida: só as abas aparecem e o quadro ganha altura. */
+  listCollapsed?: boolean
+  /** Há uma ação para desfazer; o botão fica visível ao lado de "Trocar lados". */
+  canUndo?: boolean
   hasTactic: (id: string | null) => boolean
   matchups: Matchup[]
   /** Confronto aberto (id), quando a tática em edição é a dele. */
@@ -174,6 +180,8 @@ export function tacticsHTML(
     hasTactic,
     matchupId = null,
     drawer = true,
+    listCollapsed = false,
+    canUndo = false,
     boardView = "draft",
     slots,
     img,
@@ -196,8 +204,9 @@ export function tacticsHTML(
   const matchupRow = ({ ours: o, enemy: e, matchup }: MatchupEntry) => {
     const on = active?.matchup.id === matchup.id,
       title = esc(matchupTitle({ matchup, ours: o, enemy: e }))
-    return `<div class="tx-mx-row"><button type="button" class="dz-tab${on ? " on" : ""}" data-tactic-matchup="${esc(matchup.id)}" aria-pressed="${on}" title="${title}">
-      <b>${sideMark(matchup.side)}${title}${mark(hasTactic(matchupKey(matchup.id)))}</b></button>
+    const side = matchup.side
+    return `<div class="tx-mx-row"><button type="button" class="dz-tab side-${side}${on ? " on" : ""}" data-tactic-matchup="${esc(matchup.id)}" aria-pressed="${on}" title="${title} · nossa composição no lado ${side === "blue" ? "azul" : "vermelho"}">
+      <b>${title}${mark(hasTactic(matchupKey(matchup.id)))}</b></button>
       <button type="button" class="tx-mx-del" data-matchup-delete="${esc(matchup.id)}" aria-label="Excluir o confronto ${title}" title="Excluir o confronto (as composições ficam)">${iconMarkup("trash")}</button></div>`
   }
   const footer = (team: ListKey) =>
@@ -218,18 +227,18 @@ export function tacticsHTML(
   const hint = general
     ? "Ideias de jogo que valem para qualquer composição."
     : active
-      ? "Como jogar com a nossa composição contra esta adversária: o que muda nos picks, bans e lutas."
+      ? ""
       : enemy
         ? "Como jogar contra esta composição: ameaças, picks a negar e como vencer as lutas."
         : "Como jogar com esta composição: rotações, objetivos, lutas e condição de vitória."
-  const body = tacticBoardHTML(c, general, active, boardView, { slots, img, esc, pickArt })
+  const body = tacticBoardHTML(c, general, active, boardView, { slots, img, esc, pickArt }, canUndo)
   const drawerToggle = `<button type="button" data-slot="button" data-variant="outline" data-size="sm" class="tx-drawer-toggle" data-tactic-drawer
     aria-expanded="${drawer}" aria-controls="tx-aside" title="${drawer ? "Esconder a lista de composições e o draft" : "Mostrar a lista de composições e o draft"}">${iconMarkup("next")}<span>Composições e draft</span></button>`
   return `<div class="tx${drawer ? "" : " drawer-closed"}">
     <section class="tx-write">
       <div class="tx-head">
         <div class="tx-head-text"><h2 class="tx-title" id="tx-title">${title}</h2>
-        <p class="tx-hint">${hint}</p></div>
+        ${hint ? `<p class="tx-hint">${hint}</p>` : ""}</div>
         ${teamToolsHTML(c, esc, active, general)}
         ${scope}
         ${drawerToggle}
@@ -237,8 +246,9 @@ export function tacticsHTML(
       <div class="tx-notes-slot" data-tactic-notes-slot><p class="tx-notes-loading">Carregando o bloco de notas…</p></div>
     </section>
     <aside class="tx-aside" id="tx-aside" aria-label="Composições e draft"${drawer ? "" : " inert"}>
-      <div class="tx-tabs">
-        <div class="tx-listtabs" role="tablist" aria-label="Composições">${listTab("ours", "Nossas", ours.length)}${listTab("enemy", "Adversárias", enemies.length)}${listTab("matchup", "Confrontos", matchups.length)}</div>
+      <div class="tx-tabs${listCollapsed ? " list-collapsed" : ""}">
+        <div class="tx-listbar"><div class="tx-listtabs" role="tablist" aria-label="Composições">${listTab("ours", "Nossas", ours.length)}${listTab("enemy", "Adversárias", enemies.length)}${listTab("matchup", "Confrontos", matchups.length)}</div>
+        <button type="button" class="tx-list-toggle" data-slot="button" data-variant="outline" data-size="sm" data-tactic-list-toggle aria-expanded="${!listCollapsed}" aria-label="Lista de composições" title="${listCollapsed ? "Mostrar a lista" : "Recolher a lista"}">${iconMarkup("next")}</button></div>
         ${panel("ours", ours.map(tab).join(""), "Nenhuma composição ainda.")}${panel("enemy", enemies.map(tab).join(""), "Nenhuma adversária ainda.")}${panel("matchup", matchups.map(matchupRow).join(""), "Nenhum confronto ainda. Junte uma composição nossa a uma adversária.")}
       </div>
       <div class="tx-draft">${body}</div>

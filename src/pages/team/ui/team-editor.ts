@@ -18,7 +18,21 @@ import { compOf, handleEnemyChampionDrop, keepOurCompositionInDraft, newComp, re
 import { openPicker, placePicker, renderGrid, renderTarget, isPickerOpen } from "./team-grid"
 import { hooks, boardEnemy, session, target } from "./team-session"
 import type { ActiveSide } from "./team-session"
-import { $, boardSide, eventTarget, champArt, compById, cur, esc, img, S, save, toast, touch } from "./team-store"
+import {
+  $,
+  boardSide,
+  eventTarget,
+  champArt,
+  compById,
+  cur,
+  esc,
+  hasUndo,
+  img,
+  S,
+  save,
+  toast,
+  touch,
+} from "./team-store"
 import { mountTacticNotesIn } from "./team-tactic-notes"
 // Arte em alta (1215×717) direto do Data Dragon; se não carregar, usa a cópia local menor.
 function pickArt(name: string) {
@@ -76,6 +90,8 @@ export function renderEditor() {
         matchups: S.matchups,
         general: !!S.tacticsGeneral,
         drawer: S.tacticsDrawer !== false,
+        listCollapsed: S.tacticsListCollapsed === true,
+        canUndo: hasUndo(),
         boardView: S.tacticsBoard === "positions" ? "positions" : "draft",
         hasTactic: id => hasTactic(S, id),
         matchupId: S.tacticsMatchup,
@@ -227,6 +243,9 @@ $("#editor").addEventListener("click", e => {
     removeChampion(rm.dataset.rm ?? "", rm.closest<HTMLElement>("[data-l]")?.dataset.l as ChampionSlot, compOf(rm))
     return
   }
+
+  // Em Táticas, o campeão principal (e o ban) já escolhido não abre a lista: ela abre pelo "+" ou pela linha vazia.
+  if (S.view === "tactics" && eventTarget(e).closest(".tx-pos-ic.main, .tx-pos-ic.ban")) return
 
   const draftTarget = eventTarget(e).closest<HTMLElement>("[data-draft-target]")
   if (draftTarget) {

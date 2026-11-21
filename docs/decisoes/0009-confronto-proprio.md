@@ -26,3 +26,4 @@ O confronto morava dentro da comp nossa (`Composition.matchups[]`), e o lado do 
 
 - Na migração, um confronto embutido cuja adversária não existe mais é descartado (a tática `mx-<id>` fica sem confronto).
 - Um capitão com a versão antiga do site publica sem `matchups`; o `publish` mantém os confrontos do oficial nesse caso.
+- Com um confronto aberto, trocar a comp nossa (ou a adversária) pelo seletor abre um menu com **Substituir neste confronto** (padrão) e **Criar novo confronto** (a comp escolhida com a mesma adversária, ou o inverso, no mesmo lado). Sem confronto aberto, nada muda.

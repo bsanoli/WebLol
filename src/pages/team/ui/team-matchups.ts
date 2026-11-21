@@ -22,7 +22,7 @@ import { editOpggLink, opggTarget } from "./team-comp-edits"
 import { faceEnemy, newComp, selectComp } from "./team-comps"
 import { renderEditor } from "./team-editor"
 import { hooks, session } from "./team-session"
-import { $, compById, cur, eventTarget, img, S, save, toast, touch } from "./team-store"
+import { $, compById, cur, eventTarget, hasUndo, img, runUndo, S, save, setUndo, toast, touch } from "./team-store"
 
 export function mountMatchups() {
   $("#editor").addEventListener("contextmenu", e => {
@@ -40,6 +40,14 @@ export function mountMatchups() {
     aside?.toggleAttribute("inert", !open)
     button.setAttribute("aria-expanded", String(open))
     button.title = open ? "Esconder a lista de composições e o draft" : "Mostrar a lista de composições e o draft"
+  }
+  function handleTacticListToggle(button: HTMLElement) {
+    const collapsed = S.tacticsListCollapsed !== true
+    S.tacticsListCollapsed = collapsed
+    save()
+    button.closest(".tx-tabs")?.classList.toggle("list-collapsed", collapsed)
+    button.setAttribute("aria-expanded", String(!collapsed))
+    button.title = collapsed ? "Mostrar a lista" : "Recolher a lista"
   }
   // "Editar na Ordem do draft": abre o confronto da tática (ou, numa adversária, o confronto dela com a última nossa usada).
   function handleOpenDraft() {
@@ -146,8 +154,18 @@ export function mountMatchups() {
   function handleMatchupSwap() {
     const matchup = S.matchups.find(item => item.id === S.tacticsMatchup)
     if (!matchup) return
+    const before = matchup.side
+    const id = matchup.id
     swapMatchupSides(matchup)
     save()
+    setUndo(() => {
+      const target = S.matchups.find(item => item.id === id)
+      if (!target) return
+      target.side = before
+      target.updated = Date.now()
+      save()
+      renderEditor()
+    })
     renderEditor()
     $("#editor [data-matchup-swap]")?.focus({ preventScroll: true })
   }
@@ -173,6 +191,16 @@ export function mountMatchups() {
     $("#editor [data-tx-list=matchup]")?.focus({ preventScroll: true })
     toast(`Confronto "${title}" excluído`)
   }
+  // Ctrl+Z desfaz a última mudança do quadro, exceto quando o foco está num campo de texto (que tem o próprio desfazer).
+  document.addEventListener("keydown", e => {
+    if (!(e.ctrlKey || e.metaKey) || e.shiftKey || e.altKey || e.key.toLowerCase() !== "z") return
+    const target = e.target as HTMLElement | null
+    if (e.defaultPrevented || e.isComposing || target?.isContentEditable) return
+    if (target?.closest("input, textarea, select, [role=dialog], [data-radix-popper-content-wrapper]")) return
+    if (S.view === "map" || !hasUndo()) return
+    e.preventDefault()
+    runUndo()
+  })
   $("#editor").addEventListener("click", e => {
     const mxOpen = eventTarget(e).closest<HTMLElement>("[data-tactic-matchup]")
     if (mxOpen) {
@@ -193,9 +221,18 @@ export function mountMatchups() {
       void handleNewMatchup()
       return
     }
+    if (eventTarget(e).closest("[data-undo-last]")) {
+      runUndo()
+      return
+    }
     const drawerToggle = eventTarget(e).closest<HTMLElement>("[data-tactic-drawer]")
     if (drawerToggle) {
       handleTacticDrawerToggle(drawerToggle)
+      return
+    }
+    const listToggle = eventTarget(e).closest<HTMLElement>("[data-tactic-list-toggle]")
+    if (listToggle) {
+      handleTacticListToggle(listToggle)
       return
     }
     const boardView = eventTarget(e).closest<HTMLElement>("[data-tactic-board]")

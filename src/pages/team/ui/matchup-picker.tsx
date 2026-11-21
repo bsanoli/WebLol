@@ -58,6 +58,8 @@ export function InlineName({
   )
 }
 
+export type ChoiceMode = "replace" | "new"
+
 /** Evento que os botões do quadro disparam para abrir a lista de composições junto deles. */
 export const CHOOSE_EVENT = "weblol:choose-comp"
 
@@ -69,6 +71,7 @@ export function CompPicker({
   selected,
   noneLabel,
   newLabel,
+  branch,
   onSelect,
   onNew,
 }: {
@@ -79,7 +82,9 @@ export function CompPicker({
   selected: MatchupItem | null
   noneLabel?: string
   newLabel: string
-  onSelect: (id: string | null) => void
+  /** Com um confronto aberto, trocar a comp pergunta se substitui neste confronto ou cria outro. */
+  branch?: boolean
+  onSelect: (id: string | null, mode?: ChoiceMode) => void
   onNew: () => void
 }) {
   const { open, setOpen } = useTeamOverlay()
@@ -98,7 +103,10 @@ export function CompPicker({
   }, [kind, setOpen])
   const handleOpenChange = (next: boolean) => {
     setOpen(next)
-    if (!next) setAnchor(null)
+    if (!next) {
+      setAnchor(null)
+      setPending(null)
+    }
   }
   const searchId = useId()
   const q = query.trim().toLowerCase()
@@ -114,10 +122,18 @@ export function CompPicker({
     setQuery("")
     queueMicrotask(onNew)
   }
-  const choose = (id: string | null) => {
+  const [pending, setPending] = useState<MatchupItem | null>(null)
+  const finish = (id: string | null, mode?: ChoiceMode) => {
     handleOpenChange(false)
     setQuery("")
-    if (id !== (selected?.id ?? null)) queueMicrotask(() => onSelect(id))
+    setPending(null)
+    queueMicrotask(() => onSelect(id, mode))
+  }
+  const choose = (id: string | null) => {
+    if (id === (selected?.id ?? null)) return handleOpenChange(false)
+    const picked = items.find(item => item.id === id)
+    if (branch && picked) setPending(picked)
+    else finish(id)
   }
   return (
     <Popover open={open} onOpenChange={handleOpenChange}>
@@ -141,39 +157,65 @@ export function CompPicker({
         aria-label={label}
         onCloseAutoFocus={keepFocusOutsideFrame}
       >
-        <Input
-          id={searchId}
-          type="search"
-          aria-label={`Buscar ${label.toLowerCase()} pelo nome ou campeão`}
-          value={query}
-          placeholder="Nome ou campeão"
-          autoFocus
-          onChange={event => setQuery(event.target.value)}
-        />
-        <div className="matchup-list" role="group" aria-label={label}>
-          {!q && (
-            <button type="button" className="matchup-item new" onClick={create}>
-              <b>
-                <Icon name="plus" /> {newLabel}
-              </b>
-            </button>
-          )}
-          {noneLabel && !q && (
-            <button type="button" className="matchup-item none" aria-pressed={!selected} onClick={() => choose(null)}>
-              <b>{noneLabel}</b>
-            </button>
-          )}
-          {matches.map(item => (
-            <MatchupOption key={item.id} item={item} selected={item.id === selected?.id} onChoose={choose} />
-          ))}
-          {!matches.length && (
-            <p className="matchup-empty" role="status">
-              {items.length
-                ? "Nenhuma composição encontrada. Tente outro nome ou campeão."
-                : "Nenhuma composição ainda."}
+        {pending ? (
+          <div className="matchup-branch" role="group" aria-label={`Trocar por ${pending.title}`}>
+            <p>
+              Trocar por <b>{pending.title}</b>
             </p>
-          )}
-        </div>
+            <button
+              type="button"
+              className="matchup-item"
+              ref={node => node?.focus()}
+              onClick={() => finish(pending.id, "replace")}
+            >
+              <b>Substituir neste confronto</b>
+            </button>
+            <button type="button" className="matchup-item" onClick={() => finish(pending.id, "new")}>
+              <b>Criar novo confronto</b>
+            </button>
+          </div>
+        ) : (
+          <>
+            <Input
+              id={searchId}
+              type="search"
+              aria-label={`Buscar ${label.toLowerCase()} pelo nome ou campeão`}
+              value={query}
+              placeholder="Nome ou campeão"
+              autoFocus
+              onChange={event => setQuery(event.target.value)}
+            />
+            <div className="matchup-list" role="group" aria-label={label}>
+              {!q && (
+                <button type="button" className="matchup-item new" onClick={create}>
+                  <b>
+                    <Icon name="plus" /> {newLabel}
+                  </b>
+                </button>
+              )}
+              {noneLabel && !q && (
+                <button
+                  type="button"
+                  className="matchup-item none"
+                  aria-pressed={!selected}
+                  onClick={() => choose(null)}
+                >
+                  <b>{noneLabel}</b>
+                </button>
+              )}
+              {matches.map(item => (
+                <MatchupOption key={item.id} item={item} selected={item.id === selected?.id} onChoose={choose} />
+              ))}
+              {!matches.length && (
+                <p className="matchup-empty" role="status">
+                  {items.length
+                    ? "Nenhuma composição encontrada. Tente outro nome ou campeão."
+                    : "Nenhuma composição ainda."}
+                </p>
+              )}
+            </div>
+          </>
+        )}
       </PopoverContent>
     </Popover>
   )

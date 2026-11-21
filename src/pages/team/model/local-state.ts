@@ -76,6 +76,8 @@ export type TeamState = {
   tacticsMatchup?: string | null
   tacticsGeneral?: boolean
   tacticsDrawer?: boolean
+  /** Lista Nossas/Adversárias/Confrontos da gaveta recolhida; só as abas ficam visíveis. */
+  tacticsListCollapsed?: boolean
   /** Barra de confronto do draft recolhida em uma linha. */
   matchupBarCollapsed?: boolean
   /** Visão do quadro de Táticas: `draft` (cards com arte) ou `positions` (visão Lane, só ícones). */

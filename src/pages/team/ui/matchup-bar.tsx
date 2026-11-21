@@ -4,7 +4,8 @@ import type { CompOwner } from "../model/composition-side"
 import type { DraftSide } from "../model/local-state"
 import { ActionMenu, Icon, renderControl } from "./team-controls"
 import type { MatchupItem } from "./matchup-preview"
-import { CompPicker, InlineName } from "./matchup-picker"
+import { CompPicker, InlineName, type ChoiceMode } from "./matchup-picker"
+import { UndoButton } from "./matchup-undo"
 
 export type MatchupBarProps = {
   ours: MatchupItem[]
@@ -17,9 +18,11 @@ export type MatchupBarProps = {
   enemyOpgg: string
   /** Barra recolhida: uma linha fina com os nomes e o lado. */
   collapsed: boolean
+  /** Há uma ação para desfazer (troca de lados, campeão removido por arraste). */
+  canUndo: boolean
   onToggleCollapsed: () => void
-  onSelectOurs: (id: string) => void
-  onSelectEnemy: (id: string | null) => void
+  onSelectOurs: (id: string, mode?: ChoiceMode) => void
+  onSelectEnemy: (id: string | null, mode?: ChoiceMode) => void
   onSide: (side: DraftSide) => void
   onRenameMatchup: () => void
   onLeaveMatchup: () => void
@@ -67,7 +70,8 @@ function MatchupBar(props: MatchupBarProps) {
           items={ours}
           selected={current}
           newLabel="Nova composição nossa"
-          onSelect={id => id && props.onSelectOurs(id)}
+          branch={!!props.matchup}
+          onSelect={(id, mode) => id && props.onSelectOurs(id, mode)}
           onNew={() => props.onNew("ours")}
         />
       )}
@@ -111,6 +115,7 @@ function MatchupBar(props: MatchupBarProps) {
           selected={enemy}
           noneLabel="Escolher adversária"
           newLabel="Nova adversária"
+          branch={!!props.matchup && !!enemy}
           onSelect={props.onSelectEnemy}
           onNew={() => props.onNew("enemy")}
         />
@@ -281,6 +286,7 @@ function MatchupBar(props: MatchupBarProps) {
         >
           <Icon name="swap" /> Trocar lados
         </button>
+        <UndoButton visible={props.canUndo} />
         {side === "blue" ? rivalBlock : oursBlock}
         {toggle}
       </div>

@@ -18,7 +18,21 @@ import { deleteComp, editOpggLink, focusMatchup, handleRenameTo, renameComp } fr
 import { mountMatchupBar } from "./matchup-bar"
 import { renderGrid } from "./team-grid"
 import { hooks, boardEnemy, session } from "./team-session"
-import { $, activeMatchup, boardSide, cur, compById, img, S, save, toast, touch } from "./team-store"
+import {
+  $,
+  activeMatchup,
+  boardSide,
+  cur,
+  compById,
+  hasUndo,
+  img,
+  S,
+  save,
+  clearUndo,
+  setUndo,
+  toast,
+  touch,
+} from "./team-store"
 
 // Comp do lado do quadro onde está o elemento; fora do quadro, a comp aberta.
 export const compOf = (el: Element | null | undefined) =>
@@ -50,6 +64,7 @@ export function renderMatchup() {
       : null,
     enemyOpgg: r ? opggOf(r) : "",
     collapsed: S.matchupBarCollapsed === true,
+    canUndo: hasUndo(),
     onToggleCollapsed: () => {
       S.matchupBarCollapsed = S.matchupBarCollapsed !== true
       save()
@@ -58,11 +73,14 @@ export function renderMatchup() {
         requestAnimationFrame(() => $("#editor [data-matchup-collapse]")?.focus({ preventScroll: true })),
       )
     },
-    onSelectOurs: id => {
+    onSelectOurs: (id, mode) => {
       const open = activeMatchup()
       if (open) {
-        open.ours = id
-        open.updated = Date.now()
+        if (mode === "new") S.curMatchup = addMatchup(S.matchups, { ours: id, enemy: open.enemy, side: open.side }).id
+        else {
+          open.ours = id
+          open.updated = Date.now()
+        }
         S.cur = id
         if (!isEnemy(compById(id) ?? c)) S.lastComp = id
         save()
@@ -73,7 +91,14 @@ export function renderMatchup() {
     },
     onSelectEnemy: handleEnemySelect,
     onSide: next => {
+      const before = boardSide()
       setBoardSide(next)
+      setUndo(() => {
+        setBoardSide(before)
+        save()
+        hooks.renderEditor()
+        renderGrid()
+      })
       save()
       hooks.renderEditor()
       renderGrid()
@@ -135,8 +160,11 @@ function leaveMatchup() {
   hooks.renderAll()
   focusMatchup("ours")
 }
-function handleEnemySelect(id: string | null) {
-  faceEnemy(id)
+function handleEnemySelect(id: string | null, mode?: "replace" | "new") {
+  const open = activeMatchup()
+  if (mode === "new" && open && id)
+    S.curMatchup = addMatchup(S.matchups, { ours: open.ours, enemy: id, side: open.side }).id
+  else faceEnemy(id)
   session.side = id ? "rival" : "us"
   save()
   hooks.renderEditor()
@@ -145,6 +173,7 @@ function handleEnemySelect(id: string | null) {
   toast(id ? `Adversária: ${compById(id)?.name}` : "Adversária removida do draft")
 }
 export function selectComp(id: string) {
+  clearUndo()
   S.cur = id
   const picked = compById(id)
   if (picked && !isEnemy(picked)) S.lastComp = id
