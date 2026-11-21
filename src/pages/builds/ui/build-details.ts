@@ -15,20 +15,20 @@ function buildSample(sample: LaneSample, position?: string, action = "") {
       )
       .join("")}</ul>`
   const metrics = [
-    ["KDA", kdaOf(sample.k, sample.d, sample.a).toFixed(2)],
-    ["Abates", sample.k.toFixed(1)],
-    ["Mortes", sample.d.toFixed(1)],
-    ["Assistências", sample.a.toFixed(1)],
+    ["KDA", kdaOf(sample.avgKills, sample.avgDeaths, sample.avgAssists).toFixed(2)],
+    ["Abates", sample.avgKills.toFixed(1)],
+    ["Mortes", sample.avgDeaths.toFixed(1)],
+    ["Assistências", sample.avgAssists.toFixed(1)],
   ]
   return `<section class="build-sample" aria-label="Amostra${position ? ` de ${esc(position)}` : ""}">
     <header class="build-sample-heading">
       <h4>${position ? laneIconMarkup(position) + esc(position) : "Amostra"}</h4>
-      <span>${sample.n < sample.picks ? `${sample.n} de ${gameCount(sample.picks)}` : gameCount(sample.n)} na amostra</span>
+      <span>${sample.sampleGames < sample.picks ? `${sample.sampleGames} de ${gameCount(sample.picks)}` : gameCount(sample.sampleGames)} na amostra</span>
       ${action}
     </header>
     <div class="build-sample-grid">
       <div class="build-sample-performance">
-        <div class="build-sample-record"><strong class="build-sample-wins">${sample.w}V</strong><span>/</span><strong class="build-sample-losses">${sample.n - sample.w}D</strong></div>
+        <div class="build-sample-record"><strong class="build-sample-wins">${sample.wins}V</strong><span>/</span><strong class="build-sample-losses">${sample.sampleGames - sample.wins}D</strong></div>
         <dl class="build-sample-metrics">${metrics.map(([label, value]) => `<div><dt>${label}</dt><dd>${value}</dd></div>`).join("")}</dl>
       </div>
       <div><div class="build-sample-list-heading"><h5>Quem jogou</h5><span>· jogos</span></div>${counts(sample.players)}</div>
@@ -110,7 +110,7 @@ export function buildTimelineLoading() {
 export function buildDetails(champion: Champion, lane: string, action = "", withTimeline = false, opponent = "") {
   if (opponent) return buildHtml(champion, lane, withTimeline, opponent)
   const samples = Object.entries(champion.lanes)
-    .filter(([position, sample]) => (!lane || position === lane) && sample.n)
+    .filter(([position, sample]) => (!lane || position === lane) && sample.sampleGames)
     .map(([position, sample], index) => buildSample(sample, position, index === 0 ? action : ""))
     .join("")
   const missingSample = lane ? `<p class="hint">Sem estatísticas de desempenho coletadas em ${esc(lane)}.</p>` : ""

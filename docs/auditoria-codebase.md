@@ -22,7 +22,7 @@ Os termos seguem o [glossário](glossario.md). As regras novas estão em [conven
 | Ban guardado como posição | `lanes: Record<"top" \| "jg" \| "mid" \| "adc" \| "sup" \| "ban", string[]>` | Onda 3 (feita: `bans` no código e no formato salvo; `lanes.ban` só é lido, ADR 0007) |
 | Posição com três nomes | `lane`, `role`, `DraftLane`, `ROLES` e `LANES` | Onda 3 |
 | Nomes de uma a três letras | 78 em `public/assets/sync.js`, 78 em `public/assets/shell.js`, 62 em `src/pages/team/ui/team-page.ts`. Em `entities/tactical-play`: `RN`, `TOKS`, `sw`, `PRE`, `cb`, `cr` | Ondas 3 e 4 |
-| Dados em posições de texto ou array | campeões como `"Nome\|Id\|Roles"` (`CH`), `LANES` com `{k, n, c}`, `worlds.json` com chaves `st`, `s`, `g`, `b`, `r`, `bw`, `p` e arrays posicionais | Ondas 3 e 6 |
+| Dados em posições de texto ou array | campeões como `"Nome\|Id\|Roles"` (`CH`), `LANES` com `{k, n, c}`, `worlds.json` com arrays posicionais nas linhas de `lanes` e `matchups` (as chaves curtas saíram na Onda 11) | Ondas 3 e 6 |
 | Prefixos de chave local misturados | `lol-comps-time-v1` e chaves `weblol-…` | Onda 1 (registro) e Onda 3 (migração) |
 | Arquivos e pastas fora do padrão | `PrintSketch.tsx` e `TacticNotes.tsx` em PascalCase (3a feita), pastas com nome de fornecedor (`shared/ui/arc`, `shared/ui/reui`), scripts com nomes em dois idiomas | Onda 3 |
 
@@ -183,7 +183,7 @@ Renomeações vão em commits próprios, sem mudança de comportamento, de prefe
 
 ### Onda 6. Desempenho
 
-**Situação:** parcial, 2026-11-20. Feitos os itens 1, 2, 4 e 5 e, no item 3, o código de Builds e Composições do Worlds sai do pacote inicial (268 → 89 kB gzip). Os retratos dos campeões passaram de PNG para WebP (4,86 → 0,73 MB). Os dados da SoloQ por campeão entraram na Onda 10 (bundle da lista de Builds 4,27 → 2,00 MB); segue aberta a troca das chaves de `worlds.json`; a meta de metade do volume só vale para as rotas que carregam os retratos (por exemplo Composições). Ver [pedido](pedidos/2026-11-20-ondas-6-e-7.md).
+**Situação:** parcial, 2026-11-20. Feitos os itens 1, 2, 4 e 5 e, no item 3, o código de Builds e Composições do Worlds sai do pacote inicial (268 → 89 kB gzip). Os retratos dos campeões passaram de PNG para WebP (4,86 → 0,73 MB). Os dados da SoloQ por campeão entraram na Onda 10 (bundle da lista de Builds 4,27 → 2,00 MB); as chaves do resumo (`worlds.json` e `soloq/summary.json`) ficaram legíveis na Onda 11 (`stage`, `series`, `game`, `blue`, `red`, `blueWon`, `lanes`; amostras com `sampleGames`, `wins`, `avgKills`…); seguem como arrays posicionais as linhas de `lanes` e de `matchups`; a meta de metade do volume só vale para as rotas que carregam os retratos (por exemplo Composições). Ver [pedido](pedidos/2026-11-20-ondas-6-e-7.md).
 
 1. Montar só a aba ativa da Área do time.
 2. Carregar o mapa realista e o Excalidraw sob demanda.

@@ -1,7 +1,14 @@
 import { describe, expect, it } from "vitest"
 import { confirmedFinalSeries } from "./final-series"
 
-const game = (g: number, blueWon: boolean, b = "T1", r = "G2") => ({ s: "W", st: "Final", g, b, r, bw: blueWon })
+const game = (g: number, blueWon: boolean, b = "T1", r = "G2") => ({
+  series: "W",
+  stage: "Final",
+  game: g,
+  blue: b,
+  red: r,
+  blueWon,
+})
 
 describe("confirmedFinalSeries", () => {
   it("confirma a série quando um lado chega a 3 vitórias no último jogo, mesmo trocando de lado", () => {
