@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 import { beforeEach, describe, expect, it, vi } from "vitest"
-import { STORAGE_KEYS } from "@/shared/config/storage-keys"
+import { STORAGE_KEYS } from "@/shared/config"
 import { hostImages, splitByPendingPrints } from "./images"
 
 const db = vi.hoisted(() => ({ dbGet: vi.fn(), dbSet: vi.fn() }))
@@ -8,7 +8,7 @@ const state = vi.hoisted(() => ({
   team: "t1" as string | null,
   account: { id: "a#b" } as { id: string; solo?: boolean } | null,
 }))
-vi.mock("@/shared/api/firestore", () => db)
+vi.mock("@/shared/firestore", () => db)
 vi.mock("@/shared/lib/dom", () => ({ toast: vi.fn() }))
 vi.mock("./session", () => ({ session: state }))
 vi.mock("./identity", () => ({

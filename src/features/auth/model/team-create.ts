@@ -1,5 +1,5 @@
 // Criação de um time novo: o criador vira capitão e o time começa com a versão oficial vazia.
-import { dbSet } from "@/shared/api/firestore"
+import { dbSet } from "@/shared/firestore"
 import { meKey } from "./identity"
 
 const teamSlug = (name: string) =>

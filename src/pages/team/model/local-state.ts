@@ -1,4 +1,4 @@
-import { STORAGE_KEYS } from "@/shared/config/storage-keys"
+import { STORAGE_KEYS } from "@/shared/config"
 import { withOwnMatchups } from "@/shared/lib/team-changes"
 import { compositionFromSaved, hasLegacyBans } from "./composition-storage"
 import { sanitizeMatchups, type Matchup } from "./matchups"

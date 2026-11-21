@@ -21,7 +21,7 @@ flowchart LR
 
 - **Shell** (`src/index.html`, `src/app/entrypoints/main.tsx`): desenha o cabeçalho e as seções (Worlds, Builds, Área do time, Administração). Também inicia `features/auth` (`startPanel`) e mostra um iframe por área.
 - **Iframes**: cada área é uma página Vite própria. O shell troca a visível conforme a rota em `location.hash`.
-- **`features/auth`** (antes `sync.js` e `shell.js`): login por Riot ID, times, capitão, envios, versão oficial, rotas e Administração, em TypeScript. O acesso ao Firestore fica em `shared/api/firestore.ts`. `public/assets` não tem mais JavaScript.
+- **`features/auth`** (antes `sync.js` e `shell.js`): login por Riot ID, times, capitão, envios, versão oficial, rotas e Administração, em TypeScript. O acesso ao Firestore fica em `shared/firestore/firestore.ts`. `public/assets` não tem mais JavaScript.
 
 ## Entradas e builds
 
@@ -47,7 +47,7 @@ Os iframes são da mesma origem, então a comunicação acontece por três camin
    | `weblol:analytics`, `weblol:analytics-clear` | iframe → shell | Mostrar e limpar o tooltip de análise (`analytics-bridge.tsx`) |
    | `weblol:close-account` | `features/auth` → cabeçalho React | Fechar o menu da conta |
 
-2. **Funções globais**: o shell chama `frame.contentWindow.applyWebLolRoute(...)` para aplicar a rota no iframe e `weblolTeamChanged()` para avisar que o time mudou. A Área do time lê do `window.parent` as funções `captainAccess`, `canManageTeam`, `TEAM_NAME`, `renderCaptainPanel` e `weblolImages`, definidas em `features/auth` (`exposeHostGlobals`) e tipadas em `shared/api/host-bridge.ts`. O botão Entrar chama `startSignup`.
+2. **Funções globais**: o shell chama `frame.contentWindow.applyWebLolRoute(...)` para aplicar a rota no iframe e `weblolTeamChanged()` para avisar que o time mudou. A Área do time lê do `window.parent` as funções `captainAccess`, `canManageTeam`, `TEAM_NAME`, `renderCaptainPanel` e `weblolImages`, definidas em `features/auth` (`exposeHostGlobals`) e tipadas em `shared/host-bridge/host-bridge.ts`. O botão Entrar chama `startSignup`.
 3. **Armazenamento compartilhado**: `features/auth` grava o estado do time em `localStorage["lol-comps-time-v1"]`, que a Área do time lê e escreve. Ela escuta o evento `storage` dessa chave para atualizar o status. Depois de sincronizar, trocar de time ou sair, o `reloadCamp()` recarrega o iframe da Área do time por `srcdoc`.
 
 ## Camadas (Feature-Sliced Design)

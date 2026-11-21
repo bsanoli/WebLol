@@ -8,7 +8,7 @@ import {
   DropdownMenuRadioItem,
   DropdownMenuTrigger,
 } from "@/shared/ui/dropdown-menu"
-import { palettes, selectTheme, type PaletteId } from "@/shared/config/theme"
+import { palettes, selectTheme, type PaletteId } from "@/shared/config"
 
 export function ThemePicker({ initialPalette }: { initialPalette: PaletteId }) {
   const [palette, setPalette] = useState(initialPalette)

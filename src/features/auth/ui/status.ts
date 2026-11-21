@@ -1,6 +1,6 @@
 // Menu da conta: texto de sincronização, botão de envio e os seletores "Ver como" e "Ver o time" do admin.
-import { dbList, fb, ONLINE } from "@/shared/api/firestore"
-import type { FrameHandlers } from "@/shared/api/host-bridge"
+import { dbList, fb, ONLINE } from "@/shared/firestore"
+import type { FrameHandlers } from "@/shared/host-bridge"
 import { $, esc, toast } from "@/shared/lib/dom"
 import { closeModal } from "./login-dialog"
 import { stepId } from "./login-steps"

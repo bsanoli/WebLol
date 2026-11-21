@@ -1,7 +1,7 @@
 // Dados da aba Administração: envios, pedidos, jogadores e, para o admin, todas as contas e times.
 import type { Change } from "@/shared/lib/team-changes"
-import { dbDel, dbGet, dbList } from "@/shared/api/firestore"
-import { ADMINS } from "@/shared/config/admins"
+import { dbDel, dbGet, dbList } from "@/shared/firestore"
+import { ADMINS } from "@/shared/config"
 import { dispId, safeName } from "@/shared/lib/account-id"
 import { parseOfficial, parseSubmission } from "./external-data"
 import { teamPath } from "./identity"

@@ -1,5 +1,5 @@
 // Criptografia das chaves do admin (Web Crypto do navegador). Os formatos gravados no Firestore não mudam.
-import { idbSet } from "@/shared/api/local-keys"
+import { idbSet } from "@/shared/local-keys"
 import { normId } from "./account-id"
 
 type Sealed = { iv: string; ct: string }

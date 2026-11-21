@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest"
 
 const stored = new Map<string, unknown>()
-vi.mock("@/shared/api/local-keys", () => ({
+vi.mock("@/shared/local-keys", () => ({
   idbSet: async (key: string, value: unknown) => void stored.set(key, value),
 }))
 

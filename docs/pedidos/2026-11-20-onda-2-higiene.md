@@ -1,7 +1,7 @@
 # Onda 2a: higiene automática (Knip, Oxlint, size-limit)
 
 - **Tamanho:** G
-- **Situação:** implementado, aguardando commit e o CI. A parte 2b está pendente
+- **Situação:** concluído (Onda 2 pronta)
 - **Pedido por:** Fabiano
 - **Data:** 2026-11-20
 

@@ -1,5 +1,5 @@
 // Riot ID de conta: forma de comparar, de mostrar e de guardar (nome de documento e e-mail do Firebase).
-import { ADMINS } from "@/shared/config/admins"
+import { ADMINS } from "@/shared/config"
 
 export const normId = (id: string) => String(id).replace(/\s+/g, "").toLowerCase()
 

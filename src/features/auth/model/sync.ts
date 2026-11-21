@@ -9,8 +9,8 @@ import {
   type SharedItem,
   withOwnMatchups,
 } from "@/shared/lib/team-changes"
-import { dbGet, dbSet, fb, ONLINE } from "@/shared/api/firestore"
-import { STORAGE_KEYS } from "@/shared/config/storage-keys"
+import { dbGet, dbSet, fb, ONLINE } from "@/shared/firestore"
+import { STORAGE_KEYS } from "@/shared/config"
 import { normId } from "@/shared/lib/account-id"
 import { toast } from "@/shared/lib/dom"
 import { openRoute, routeRoots, writeRoute } from "./router"

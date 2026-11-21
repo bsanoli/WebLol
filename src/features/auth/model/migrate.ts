@@ -1,6 +1,6 @@
 // Migração única para times (o time antigo vira o Fraldinha) e backup completo do banco para o admin.
-import { dbDel, dbGet, dbList, dbSet, getJ } from "@/shared/api/firestore"
-import { ADMINS } from "@/shared/config/admins"
+import { dbDel, dbGet, dbList, dbSet, getJ } from "@/shared/firestore"
+import { ADMINS } from "@/shared/config"
 import { dispId, safeName } from "@/shared/lib/account-id"
 import { unseal, verifyObj } from "@/shared/lib/admin-crypto"
 import { parseOfficial } from "./external-data"

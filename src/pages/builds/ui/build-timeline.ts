@@ -1,9 +1,9 @@
 import type { games } from "@dataset/build-timeline"
-import { bootItems, isCompletedItem, itemIcon, itemName, playerLoadout } from "./build-details"
+import { bootItems, isCompletedItem, itemIcon, itemName, playerLoadout } from "./build-icons"
 import { directOpponent } from "../model/build-statistics"
 import { ico } from "@/entities/champion"
 import { championSlug, esc } from "@/entities/match"
-import { DATASET, isReference } from "@/shared/config/dataset"
+import { DATASET, isReference } from "@/shared/dataset"
 import { revealContent } from "@/shared/lib/motion"
 
 export type TimelineGame = (typeof games)[number]

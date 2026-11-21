@@ -3,7 +3,7 @@
 // esse estado e repassa o clique, para a pessoa não precisar abrir o menu da conta.
 // Quando não há o que enviar, o botão continua no lugar, desabilitado, com o motivo no title.
 
-import { hostElement, hostHasCaptainAccess } from "@/shared/api/host-bridge"
+import { hostElement, hostHasCaptainAccess } from "@/shared/host-bridge"
 
 const SEND_ICON = `<svg class="icon" aria-hidden="true" focusable="false"><use href="assets/icons.svg#upload"></use></svg>`
 

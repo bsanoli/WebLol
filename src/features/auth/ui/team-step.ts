@@ -1,6 +1,6 @@
 // Escolha de time depois do login (criar, pedir para entrar, usar sem time) e saída da conta.
-import { dbDel, dbList, dbSet, currentFirebase } from "@/shared/api/firestore"
-import { idbDel } from "@/shared/api/local-keys"
+import { dbDel, dbList, dbSet, currentFirebase } from "@/shared/firestore"
+import { idbDel } from "@/shared/local-keys"
 import { $, esc, toast } from "@/shared/lib/dom"
 import { confirmAction } from "@/shared/ui/dialog-controls"
 import { clearTeamData, guardTeam, loadMembership } from "../model/membership"
