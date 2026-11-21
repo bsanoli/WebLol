@@ -22,12 +22,14 @@ import { hooks } from "./team-session"
 import { mountTeamBackup } from "./team-backup"
 import { mountLocalRestore } from "./team-restore"
 import { mountMatchups } from "./team-matchups"
+import { mountTacticLaneOrder } from "./tactic-lane-order"
 import { mountSaveMenu, renderSaveMenu } from "./team-save-menu"
 import { $, esc, getState, img, plays, S, save, toast } from "./team-store"
 initializeTheme()
 
 mountLocalRestore()
 mountMatchups()
+mountTacticLaneOrder()
 /* ===== Grade de campeões ===== */
 mountChampionGrid({ onChange: () => renderEditor() })
 window.matchMedia("(min-width: 1100px)").addEventListener("change", e => {

@@ -1,5 +1,12 @@
 [
   {
+    "version": "1.81",
+    "date": "2026-11-21",
+    "changes": [
+      "Táticas, visão Draft: o nome da posição em cada pick virou um seletor. Trocar a posição troca a ordem dos picks daquele lado, igual na Ordem do draft."
+    ]
+  },
+  {
     "version": "1.80",
     "date": "2026-11-21",
     "changes": [

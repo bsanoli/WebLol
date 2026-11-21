@@ -102,6 +102,7 @@ export function renderEditor() {
         pickArt,
       })}</div>`,
     )
+    editor.querySelectorAll<HTMLSelectElement>("select[data-pick-position]").forEach(field => mountTeamSelect(field))
     mountTacticNotesIn(editor, S.tacticsGeneral ? null : S.tacticsMatchup ? matchupKey(S.tacticsMatchup) : c.id)
     const txTabs = editor.querySelector(".tx-tabs")
     if (txTabs) txTabs.scrollTop = tabsScroll
@@ -168,6 +169,8 @@ $("#v-comps").addEventListener("input", e => {
 })
 $("#editor").addEventListener("change", e => {
   if (!eventTarget(e).matches("select[data-pick-position]")) return
+  // Em Táticas a troca de posição é tratada em tactic-lane-order.ts.
+  if (S.view === "tactics") return
   const enemySide = eventTarget(e).dataset.draftSide === "rival",
     owner = enemySide ? boardEnemy() : cur()
   if (!owner) return
