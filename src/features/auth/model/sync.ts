@@ -7,7 +7,7 @@ import { normId } from "@/shared/lib/account-id"
 import { toast } from "@/shared/lib/dom"
 import { openRoute, routeRoots, writeRoute } from "./router"
 import { parseOfficial } from "./external-data"
-import { flushImages } from "./images"
+import { flushImages, splitByPendingPrints } from "./images"
 import { BKEY, canPublish, KEY, lsGet, lsSet, local, meKey, preview, SKEY, teamPath, user, pending } from "./identity"
 import { loadMembership } from "./membership"
 import { session, type LogEntry, type Official } from "./session"
@@ -135,15 +135,23 @@ export async function sendChanges() {
   const changes = pending().filter(change => !change.h || !sent.includes(change.h))
   if (!changes.length) return
   await flushImages()
-  const submission = { id: newId(), from: account.id, at: Date.now(), baseVersion: base.version, changes }
+  // Uma tática com print que não chegou ao time só vai depois dele: senão os outros veriam um buraco.
+  const { ready, held } = splitByPendingPrints(changes)
+  if (held.length)
+    toast(
+      `${held.length} alteração(ões) ficou(aram de fora: o print ainda não chegou ao time (${held.map(itemName).join(", ")}). Use "Tentar de novo" no print e envie outra vez.`,
+      7000,
+    )
+  if (!ready.length) return uiHooks.updateStatus()
+  const submission = { id: newId(), from: account.id, at: Date.now(), baseVersion: base.version, changes: ready }
   try {
     await dbSet(teamPath("envios"), submission.id, {
       from: meKey(),
       at: submission.at,
       json: JSON.stringify(submission),
     })
-    lsSet(SKEY, [...sent, ...changes.map(change => change.h)].slice(-500))
-    toast(`${changes.length} alteração(ões) enviada(s) para o capitão aprovar`)
+    lsSet(SKEY, [...sent, ...ready.map(change => change.h)].slice(-500))
+    toast(`${ready.length} alteração(ões) enviada(s) para o capitão aprovar`)
   } catch (error) {
     toast(`Não consegui enviar para o banco do time: ${(error as Error).message}`)
   }
@@ -171,6 +179,12 @@ export async function publish(approved: SentChange[], rejected: SentChange[], la
     return toast(user()?.admin ? "Desbloqueie o admin primeiro" : "Só o capitão publica a versão oficial do time")
   }
   await flushImages()
+  const held = splitByPendingPrints(approved).held
+  if (held.length)
+    return toast(
+      `Não publiquei: o print de ${held.map(itemName).join(", ")} ainda não chegou ao time. Use "Tentar de novo" no print e publique outra vez.`,
+      7000,
+    )
   let result: OfficialRead
   try {
     result = await readOfficial()

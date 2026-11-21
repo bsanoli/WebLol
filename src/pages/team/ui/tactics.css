@@ -549,8 +549,16 @@
   font-size: 13px;
 }
 .tx-print-missing {
+  align-content: center;
+  justify-items: center;
+  gap: 8px;
   border: 1px dashed var(--line);
   border-radius: var(--wl-card-radius);
+  text-align: center;
+}
+.tx-print-missing p {
+  margin: 0;
+  max-width: 44ch;
 }
 .tx-print-tools {
   display: flex;
