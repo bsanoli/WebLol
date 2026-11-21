@@ -87,7 +87,7 @@
   min-width: 0;
   padding: 4px 8px;
   overflow: hidden;
-  border: 1px solid transparent;
+  border: 1px solid var(--wl-border, var(--line));
   border-radius: var(--wl-control-radius);
   background: transparent;
   color: var(--txt);
@@ -139,16 +139,6 @@
   color: var(--mut);
   font-size: 11px;
   white-space: nowrap;
-}
-.tx-has {
-  display: inline-flex;
-  flex: none;
-  margin-left: 4px;
-  color: var(--gold, var(--wl-accent));
-}
-.tx-has .icon {
-  width: 12px;
-  height: 12px;
 }
 
 .tx-draft {
@@ -883,13 +873,6 @@
   color: var(--mut);
   font-size: 12px;
 }
-#v-comps .tx-tabs .tx-group.enemy .dz-tab.on {
-  border-color: var(--wl-danger);
-  background: var(--wl-danger-soft);
-}
-#v-comps .tx-tabs .tx-group.enemy .dz-tab:hover {
-  background: var(--wl-danger-soft);
-}
 #v-comps .tx-group-head [data-comp-new] {
   color: var(--mut);
 }
@@ -1425,38 +1408,17 @@
   border-top: 1px dashed var(--line);
 }
 /* Picks em faixa, como na Ordem do draft: arte ao fundo, posição e campeões no topo, nome e fase embaixo. */
+/* A superfície do card (fundo, arte, hover, barra do lado) vem do card de pick compartilhado: tactic-pick-card.css. */
 #v-comps.tactics-view .tx-side-col .pk {
-  position: relative;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
   align-items: flex-start;
   gap: 8px;
   min-height: 96px;
-  padding: 8px 12px;
-  overflow: hidden;
-  border: 0;
-  border-radius: 0;
-  box-shadow: inset var(--wl-accent-bar, 3px) 0 0 var(--wl-side-blue, var(--wl-blue-500));
-  background: var(--panel2, var(--bg));
 }
 #v-comps.tactics-view .tx-side-col .pk.r {
   align-items: flex-end;
-  box-shadow: inset calc(-1 * var(--wl-accent-bar, 3px)) 0 0 var(--wl-side-red, var(--wl-red-500));
-}
-#v-comps.tactics-view .tx-side-col .pk .pick-splash {
-  inset: 0;
-  width: 100%;
-  opacity: 1;
-  object-position: center 22%;
-}
-#v-comps.tactics-view .tx-side-col .pk.mine:has(.pick-splash)::before {
-  background:
-    linear-gradient(to top, color-mix(in srgb, var(--bg) 88%, transparent) 0%, transparent 55%),
-    linear-gradient(to bottom, color-mix(in srgb, var(--bg) 70%, transparent) 0%, transparent 42%);
-}
-#v-comps.tactics-view .tx-side-col .pk:hover {
-  filter: brightness(1.08);
 }
 #v-comps.tactics-view .tx-side-col .pk.act {
   outline: 2px solid var(--wl-accent, var(--gold));
@@ -1576,7 +1538,6 @@
 }
 #v-comps.tactics-view .tx-side-col .pk.them {
   grid-template-columns: minmax(0, 1fr);
-  box-shadow: inset var(--wl-accent-bar, 3px) 0 0 var(--line);
 }
 @media (prefers-reduced-motion: no-preference) {
   .tx-draft,
@@ -1695,7 +1656,7 @@
   --tx-pos-row: 56px;
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
-  grid-template-rows: auto repeat(6, minmax(var(--tx-pos-row), auto));
+  grid-template-rows: auto minmax(36px, auto) repeat(5, minmax(var(--tx-pos-row), auto));
   column-gap: 8px;
   row-gap: 4px;
 }
@@ -1717,6 +1678,10 @@
 .tx-pos-names-head {
   padding-top: 4px;
 }
+.tx-pos-name .lane-icon {
+  width: 24px;
+  height: 24px;
+}
 .tx-pos-name {
   display: flex;
   align-items: center;
@@ -1729,66 +1694,33 @@
   letter-spacing: 0.02em;
 }
 .tx-pos-slot {
-  position: relative;
-  isolation: isolate;
-  overflow: hidden;
   display: flex;
   flex-wrap: wrap;
   align-items: center;
   align-content: center;
-  gap: 4px;
+  gap: 8px;
   min-width: 0;
-  padding: 4px 4px;
+  padding-block: 4px;
   cursor: pointer;
-  border-left: 3px solid var(--lc, var(--line));
-  background: color-mix(in srgb, var(--lc, var(--line)) 6%, var(--panel, transparent));
 }
 /* Coluna da esquerda espelhada: barra da posição na borda de dentro, principal junto ao centro, nome do lado junto ao centro. */
 .tx-pos-col.left .tx-pos-slot {
   flex-direction: row-reverse;
-  border-left: 0;
-  border-right: 0;
-  box-shadow: inset -3px 0 0 var(--lc, var(--line));
-  padding-right: 8px;
 }
-.tx-pos-col.right .tx-pos-slot {
-  border-left: 0;
-  box-shadow: inset 3px 0 0 var(--lc, var(--line));
-  padding-left: 8px;
-}
-.tx-pos-col.left h3,
-.tx-draft-sides > .tx-side-col.blue h3 {
+/* Cabeçalho dos lados igual nas visões Draft e Lane: ponto, lado e "Nossa · nome da comp"; o azul espelha para o centro. */
+.tx-side-col.blue h3 {
   flex-direction: row-reverse;
 }
-/* Visão Lane sem a cor do lado: sem a linha de cima nem a bolinha; o nome da comp no mesmo tamanho do lado. */
-.tx-side-col.tx-pos-col {
-  border-top: 0;
-}
-/* Na Lane o cabeçalho mostra só Nossa/Adversária e o nome da comp; o lado fica no rótulo acessível da coluna. */
-.tx-side-col.tx-pos-col h3 {
-  min-height: 25px;
-}
-.tx-side-col.tx-pos-col h3 small {
-  margin: 0;
+.tx-side-col h3 small {
+  margin: 0 0 0 8px;
   padding: 0;
   color: var(--txt);
   font-size: 13px;
   font-weight: 600;
 }
-.tx-side-col.tx-pos-col.left h3 small {
+.tx-side-col.blue h3 small {
   margin: 0 0 0 auto;
-  padding: 0;
   text-align: right;
-}
-.tx-pos-col.left h3 small,
-.tx-draft-sides > .tx-side-col.blue h3 small {
-  margin-left: 0;
-  margin-right: auto;
-  padding-left: 0;
-  padding-right: 8px;
-}
-.tx-pos-slot:hover {
-  background: color-mix(in srgb, var(--lc, var(--line)) 14%, var(--panel, transparent));
 }
 .tx-pos-slot.drop {
   outline: 2px dashed var(--wl-accent, var(--gold));
@@ -1822,17 +1754,17 @@
 #v-comps .tx-pos-ic.main {
   width: 36px;
   height: 36px;
-  box-shadow: 0 0 0 2px var(--lc, var(--line));
 }
 #v-comps .tx-pos-ic.alt,
 #v-comps .tx-pos-ic.ban {
   width: 28px;
   height: 28px;
+}
+#v-comps .tx-pos-ic.alt {
   opacity: 0.85;
 }
 #v-comps .tx-pos-ic.ban {
   cursor: grab;
-  filter: grayscale(0.6);
 }
 #v-comps .tx-pos-ic:hover {
   opacity: 1;
@@ -1878,20 +1810,6 @@
 }
 
 /* Visão Lane no estilo do Draft, compacta: arte escurecida ao fundo, campeão com nome e alternativas */
-/* O seletor com #v-comps vence a regra geral do .pick-splash (75% da largura): a arte cobre a linha inteira */
-#v-comps .tx-pos-slot > .pick-splash {
-  position: absolute;
-  inset: 0;
-  z-index: -1;
-  width: 100%;
-  height: 100%;
-  border-radius: 0;
-  object-fit: cover;
-  object-position: center 22%;
-  opacity: 0.5;
-  filter: brightness(0.7);
-  pointer-events: none;
-}
 /* Ícones quadrados como na Ordem do draft; o campeão principal não é clicável, só arrastável */
 #v-comps .tx-pos-ic .av {
   border-radius: var(--wl-control-radius);
@@ -1899,16 +1817,13 @@
 #v-comps .tx-pos-ic.main {
   cursor: grab;
 }
-.tx-pos-slot.has-art {
-  background: color-mix(in srgb, var(--lc, var(--line)) 8%, var(--panel, transparent));
-}
 #v-comps .tx-pos-ic.main {
   display: inline-flex;
   align-items: center;
   gap: 8px;
   width: auto;
   height: 40px;
-  padding-right: 8px;
+  padding: 0 8px 0 0;
   color: var(--txt);
   box-shadow: none;
 }
@@ -1916,7 +1831,6 @@
   flex: none;
   width: 40px;
   height: 40px;
-  box-shadow: 0 0 0 2px var(--lc, var(--line));
 }
 .tx-pos-champ {
   min-width: 0;
@@ -1929,19 +1843,14 @@
 }
 .tx-pos-col.left .tx-pos-ic.main {
   flex-direction: row-reverse;
-  padding-right: 0;
-  padding-left: 8px;
 }
 .tx-pos-slot .tx-pos-ic.alt {
-  width: 24px;
-  height: 24px;
+  width: 32px;
+  height: 32px;
 }
-.tx-side-col.tx-pos-col h3 .tx-side-name {
+.tx-side-col h3 .tx-side-name {
   font-size: 13px;
   font-weight: 700;
-}
-.tx-side-col.tx-pos-col h3 small {
-  margin-left: 8px;
 }
 
 /* Lane sem campeão na prévia: o espaço fica reservado para as outras não mudarem de posição */
@@ -1952,44 +1861,6 @@
   opacity: 0.6;
 }
 
-/* Barra de confronto recolhida e botão de recolher */
-.matchup-collapse {
-  display: inline-flex;
-  flex: none;
-  align-items: center;
-  justify-content: center;
-  min-width: 32px;
-  min-height: 32px;
-  margin-left: auto;
-  cursor: pointer;
-}
-.matchup-collapse svg {
-  width: 16px;
-  height: 16px;
-}
-.matchup.collapsed {
-  flex-wrap: nowrap;
-  min-height: 40px;
-  padding: 0 4px 0 8px;
-  border: 1px solid var(--line);
-  background: var(--panel2, var(--bg));
-}
-.matchup-summary {
-  display: inline-flex;
-  min-width: 0;
-  align-items: center;
-  gap: 8px;
-  color: var(--mut);
-}
-.matchup-summary b {
-  overflow: hidden;
-  color: var(--txt);
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-.matchup-summary .side-dot {
-  margin-right: 0;
-}
 .matchup-team button:disabled {
   cursor: not-allowed;
   opacity: 0.45;
@@ -2011,41 +1882,71 @@
 .matchup-head [data-matchup-new] {
   margin-left: auto;
 }
+.matchup-badge,
+.tx-team-tag.mine {
+  background: var(--wl-accent);
+  color: var(--wl-on-accent);
+}
 .matchup-badge {
   padding: 2px 8px;
   border-radius: 999px;
-  background: var(--wl-accent-soft);
   font-size: 12px;
   font-weight: 600;
+}
+.matchup-head [data-matchup-leave],
+.matchup-head [data-matchup-new] {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  min-height: 32px;
 }
 .matchup-hint {
   color: var(--muted);
   font-size: 13px;
 }
 
-/* Confrontos: linha fina no topo na cor do lado da nossa comp (como as colunas do Draft), nome inteiro que quebra de linha */
+/* Confrontos: itens separados por borda neutra (sem cor de lado), nome inteiro que quebra de linha */
 #v-comps .tx-tabs .tx-mx-row .dz-tab {
   height: auto;
   min-height: 40px;
   align-items: flex-start;
-  border-top: 3px solid var(--wl-side-blue, var(--wl-blue-500));
+  border-color: var(--wl-border, var(--line));
 }
-#v-comps .tx-tabs .tx-mx-row .dz-tab.side-red {
-  border-top-color: var(--wl-side-red, var(--wl-red-500));
+#v-comps .tx-tabs .tx-mx-row .dz-tab.on {
+  border-color: var(--wl-accent);
+}
+/* Os principais de cada lado espelhados (azul à esquerda, vermelho à direita), com o título no centro, no lugar do "x" */
+#v-comps .tx-tabs .tx-mx-item {
+  align-items: center;
+  text-align: center;
+  padding-block: 8px;
+}
+#v-comps .tx-tabs .tx-mx-vs {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 6px;
+  width: 100%;
+}
+#v-comps .tx-tabs .tx-mx-vs .mini {
+  display: grid;
+  grid-template-columns: repeat(5, 20px);
+  gap: 2px;
+}
+#v-comps .tx-tabs .tx-mx-vs .mini .av {
+  width: 20px;
+  height: 20px;
+  border-radius: var(--wl-control-radius);
 }
 #v-comps .tx-tabs .tx-mx-row .dz-tab b {
   align-self: center;
   display: block;
+  font-size: 12px;
+  line-height: 1.25;
   overflow: visible;
   white-space: normal;
   overflow-wrap: anywhere;
   text-overflow: clip;
-}
-#v-comps .tx-tabs .tx-mx-row .dz-tab.on {
-  border-top-color: var(--wl-side-blue, var(--wl-blue-500));
-}
-#v-comps .tx-tabs .tx-mx-row .dz-tab.side-red.on {
-  border-top-color: var(--wl-side-red, var(--wl-red-500));
 }
 
 /* Lista da gaveta recolhível: botão com chevron ao lado das abas; recolhida, só as abas ficam e o quadro ganha altura */
@@ -2117,6 +2018,76 @@
   overflow-wrap: anywhere;
 }
 
+/* Gaveta em coluna flex: abas/lista no topo, barra do quadro e quadro ocupando o resto (Draft e Lane com a mesma altura) */
+.tx-aside {
+  overflow: hidden;
+}
+.tx-tabs {
+  /* Cresce com a altura da tela (120px em 720p, 230px a partir de 830p); o quadro fica com o resto. */
+  flex: 0 0 clamp(120px, calc(100vh - 600px), 230px);
+  min-height: 120px;
+}
+.tx-draft {
+  display: flex;
+  flex: 3 1 0;
+  flex-direction: column;
+  gap: 8px;
+  min-height: 280px;
+}
+#v-comps .tx-tabs.list-collapsed {
+  flex: none;
+  min-height: 0;
+}
+#v-comps .tx-tabs.list-collapsed ~ .tx-draft {
+  flex: 1 1 0;
+}
+.tx-draft-empty {
+  flex: none;
+}
+.tx-board-bar {
+  display: flex;
+  flex: none;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+.tx-board-bar-start,
+.tx-board-bar-end {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+.tx-board-bar-start {
+  gap: 16px;
+}
+.tx-board-bar-start .tx-board-switch {
+  margin: 0;
+}
+#v-comps .tx-board-bar .tx-open-draft,
+#v-comps .tx-board-bar .tx-swap-sides,
+#v-comps .tx-board-bar .tx-undo {
+  min-height: 38px;
+  margin: 0;
+}
+.tx-draft-sides {
+  flex: 1 1 0;
+  min-height: 0;
+  overflow: auto;
+}
+.tx-pos-board {
+  flex: 1 1 0;
+  min-height: 0;
+  overflow: auto;
+  --tx-pos-row: 48px;
+  grid-template-rows: auto minmax(36px, 0.6fr) repeat(5, minmax(var(--tx-pos-row), 1fr));
+}
+.tx-draft > .tx-col-empty,
+.tx-draft > .tx-draft-empty {
+  flex: 1 1 auto;
+}
+
 /* Gaveta de Táticas (visão Draft): a posição do pick é um seletor, como na Ordem do draft */
 #v-comps.tactics-view .tx-side-col .pk-lane-name.lane-label {
   height: auto;
@@ -2132,4 +2103,113 @@
   color: var(--txt);
   font-size: 12px;
   font-weight: 700;
+}
+
+/* Draft na gaveta: os 5 picks cabem sem rolar e dividem a altura do quadro (também com a lista recolhida) */
+#v-comps.tactics-view .tx-draft-sides {
+  grid-template-rows: minmax(0, 1fr);
+}
+#v-comps.tactics-view .tx-side-col:not(.tx-pos-col) {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+#v-comps.tactics-view .tx-side-col > h3 {
+  flex: none;
+}
+#v-comps.tactics-view .tx-side-col > .tm {
+  display: flex;
+  flex: 1 1 0;
+  flex-direction: column;
+  min-height: 0;
+}
+#v-comps.tactics-view .tx-side-col .draft-bans,
+#v-comps.tactics-view .tx-side-col .draft-phase-sep {
+  flex: none;
+}
+#v-comps.tactics-view .tx-side-col .pk {
+  flex: 1 1 0;
+  flex-direction: row;
+  align-items: center;
+  min-height: 44px;
+  padding-block: 4px;
+}
+#v-comps.tactics-view .tx-side-col .pk.r {
+  flex-direction: row-reverse;
+}
+/* O quadro leva a maior parte da gaveta; a lista rola por dentro */
+#v-comps .tx-tabs:not(.list-collapsed) {
+  /* Cresce com a altura da tela (120px em 720p, 230px a partir de 830p); o quadro fica com o resto. */
+  flex: 0 0 var(--tx-list-h, clamp(120px, calc(100vh - 600px), 230px));
+  max-height: max(96px, calc(100vh - 476px));
+  min-height: 96px;
+}
+#v-comps .tx-tabs:not(.list-collapsed) ~ .tx-draft {
+  flex: 1 1 0;
+  min-height: 360px;
+}
+
+/* Bans na visão Lane: ícones maiores sobre um fundo listrado na cor de ban */
+#v-comps.tactics-view .tx-pick-card.tx-pos-slot.ban,
+#v-comps.tactics-view .tx-pick-card.tx-pos-slot.ban:hover {
+  background:
+    repeating-linear-gradient(
+      135deg,
+      color-mix(in srgb, var(--ban, var(--wl-red-500)) 16%, transparent) 0 8px,
+      transparent 8px 16px
+    ),
+    color-mix(in srgb, var(--ban, var(--wl-red-500)) 8%, var(--panel2, var(--bg)));
+}
+#v-comps .tx-pos-ic.ban,
+#v-comps .tx-pos-slot.ban .tx-pos-add {
+  width: 40px;
+  height: 40px;
+}
+#v-comps .tx-pos-board {
+  grid-template-rows: auto minmax(56px, 0.6fr) repeat(5, minmax(var(--tx-pos-row), 1fr));
+}
+/* Coluna da esquerda espelhada: o respiro de 8px do nome fica do lado de dentro do ícone, não junto à barra. */
+#v-comps .tx-pos-col.left .tx-pos-ic.main {
+  padding: 0 0 0 8px;
+}
+
+/* Alça de altura da lista: linha discreta com área de arraste maior; some com a lista recolhida */
+.tx-resize {
+  position: relative;
+  flex: none;
+  height: 12px;
+  margin-block: -6px;
+  cursor: row-resize;
+  touch-action: none;
+}
+.tx-resize::after {
+  position: absolute;
+  inset: 5px 35% auto;
+  height: 2px;
+  border-radius: 1px;
+  background: var(--wl-line, var(--line));
+  content: "";
+  transition: background-color 0.15s ease;
+}
+.tx-resize:hover::after,
+.tx-resize.dragging::after,
+.tx-resize:focus-visible::after {
+  background: var(--wl-accent, var(--acc));
+}
+.tx-resize:focus-visible {
+  outline: 2px solid var(--wl-accent, var(--acc));
+  outline-offset: -2px;
+}
+.tx-tabs.list-collapsed + .tx-resize {
+  display: none;
+}
+@media (prefers-reduced-motion: reduce) {
+  .tx-resize::after {
+    transition: none;
+  }
+}
+
+/* Lane: a arte cobre o card inteiro, com um véu escuro (~60%) para os ícones alternativos ficarem legíveis */
+#v-comps.tactics-view .tx-pos-slot.has-art:has(> .pick-splash)::before {
+  background: color-mix(in srgb, var(--bg) 60%, transparent);
 }

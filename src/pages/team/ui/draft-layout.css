@@ -320,14 +320,9 @@
     padding: 4px 8px;
   }
   #v-comps.draft-view .dz-slot .gtools {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
+    display: flex;
     gap: 4px;
     padding-block: 4px;
-  }
-  #v-comps.draft-view .dz-slot .gtools label {
-    margin: 0;
-    font-size: 12px;
   }
   #v-comps.draft-view .dz-slot .roles {
     padding-block: 2px;
@@ -379,14 +374,6 @@
 /* Lane do time ao lado de "Ordenar por" (substitui o quadro de destino) */
 #target[hidden] {
   display: none !important;
-}
-#champ-picker .gtools {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-  gap: 4px 8px;
-}
-#champ-picker .gtools > label:first-child {
-  grid-column: 1 / -1;
 }
 #champ-picker .gtools select,
 #champ-picker .gtools input {
@@ -613,4 +600,49 @@
 .side-dot.red {
   background: var(--wl-side-red, var(--wl-red-500));
   box-shadow: 0 0 0 2px color-mix(in srgb, var(--wl-side-red, var(--wl-red-500)) 30%, transparent);
+}
+
+/* Catálogo em uma linha: busca (estica), filtros de posição só com ícone e Ordenar compacto */
+#champ-picker .gtools {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+#champ-picker .gtools > #search {
+  flex: 1 1 160px;
+  width: auto;
+  min-width: 120px;
+  margin: 0;
+}
+#champ-picker .gtools .roles {
+  display: flex;
+  flex: none;
+  gap: 2px;
+  padding: 0;
+}
+#champ-picker .gtools .roles button {
+  width: 32px;
+  height: 32px;
+  min-height: 32px;
+  padding: 0;
+  justify-content: center;
+}
+#champ-picker .gtools .roles button .icon,
+#champ-picker .gtools .roles button .lane-icon {
+  width: 16px;
+  height: 16px;
+}
+#champ-picker .gtools .team-select-field {
+  flex: none;
+  min-width: 0;
+}
+#champ-picker .gtools .team-select-field .team-select {
+  margin: 0;
+}
+#champ-picker .gtools .team-select [data-team-trigger="select"],
+#champ-picker .gtools select {
+  height: 32px;
+  min-height: 32px;
+  margin: 0;
 }

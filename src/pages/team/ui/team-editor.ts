@@ -6,9 +6,9 @@ import { enemyOrder, isEnemy, oppositeSide } from "../model/composition-side"
 import { championsOf, draftOf, setChampions } from "../model/local-state"
 import type { ChampionSlot, Composition, DraftLane } from "../model/local-state"
 import { allMatchups, findMatchup, matchupKey } from "../model/matchups"
-import { hasTactic } from "../model/tactics"
 import { SLOT_INFO } from "../model/champion-slots"
 import { draftBoardHTML } from "./draft-board"
+import { savedListHeight } from "./tactic-list-resize"
 import { tacticsHTML } from "./tactics"
 import { capturePickFeedback } from "./pick-feedback"
 import { bindTacticDrop } from "./tactic-drop"
@@ -92,9 +92,9 @@ export function renderEditor() {
         general: !!S.tacticsGeneral,
         drawer: S.tacticsDrawer !== false,
         listCollapsed: S.tacticsListCollapsed === true,
+        listHeight: savedListHeight(S.tacticsListHeight),
         canUndo: hasUndo(),
         boardView: S.tacticsBoard === "positions" ? "positions" : "draft",
-        hasTactic: id => hasTactic(S, id),
         matchupId: S.tacticsMatchup,
         slots: SLOT_INFO,
         img,
@@ -215,13 +215,9 @@ function removeChampion(name: string, lane: ChampionSlot, comp: Composition = ta
   renderGrid()
   focusDraftTarget(lane, comp === cur() ? "us" : "rival")
 }
-// Abre a lista de adversárias junto do botão clicado; com a barra recolhida, ela é aberta antes.
+// Abre a lista de adversárias junto do botão clicado.
 function requestChoose(anchor: HTMLElement) {
-  const ask = () => document.dispatchEvent(new CustomEvent(CHOOSE_EVENT, { detail: { kind: "rival", anchor } }))
-  if (S.matchupBarCollapsed !== true) return ask()
-  S.matchupBarCollapsed = false
-  renderMatchup()
-  requestAnimationFrame(() => requestAnimationFrame(ask))
+  document.dispatchEvent(new CustomEvent(CHOOSE_EVENT, { detail: { kind: "rival", anchor } }))
 }
 $("#editor").addEventListener("click", e => {
   if (eventTarget(e).closest<HTMLElement>("[data-picker]")) {

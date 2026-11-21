@@ -1,5 +1,5 @@
 import { useState } from "react"
-import { ChevronsDownUp, ChevronsUpDown, MoreHorizontal } from "lucide-react"
+import { MoreHorizontal } from "lucide-react"
 import type { CompOwner } from "../model/composition-side"
 import type { DraftSide } from "../model/local-state"
 import { ActionMenu, Icon, renderControl } from "./team-controls"
@@ -16,11 +16,8 @@ export type MatchupBarProps = {
   /** Confronto aberto (com o nome mostrado) ou `null` quando só uma comp está aberta. */
   matchup: { id: string; title: string; named: boolean } | null
   enemyOpgg: string
-  /** Barra recolhida: uma linha fina com os nomes e o lado. */
-  collapsed: boolean
   /** Há uma ação para desfazer (troca de lados, campeão removido por arraste). */
   canUndo: boolean
-  onToggleCollapsed: () => void
   onSelectOurs: (id: string, mode?: ChoiceMode) => void
   onSelectEnemy: (id: string | null, mode?: ChoiceMode) => void
   onSide: (side: DraftSide) => void
@@ -48,7 +45,7 @@ const compActions = (item: MatchupItem, props: MatchupBarProps, enemy: boolean) 
 ]
 
 function MatchupBar(props: MatchupBarProps) {
-  const { ours, enemies, current, enemy, side, enemyOpgg, collapsed } = props
+  const { ours, enemies, current, enemy, side, enemyOpgg } = props
   const [renaming, setRenaming] = useState<"ours" | "rival" | null>(null)
   const other: DraftSide = side === "blue" ? "red" : "blue"
   const oursBlock = (
@@ -222,11 +219,11 @@ function MatchupBar(props: MatchupBarProps) {
             type="button"
             data-matchup-leave
             data-slot="button"
-            data-variant="ghost"
+            data-variant="outline"
             data-size="sm"
             onClick={props.onLeaveMatchup}
           >
-            Sair do confronto
+            <Icon name="close" /> Sair do confronto
           </button>
         </>
       ) : (
@@ -237,38 +234,6 @@ function MatchupBar(props: MatchupBarProps) {
       </button>
     </div>
   )
-  const toggle = (
-    <button
-      type="button"
-      className="matchup-collapse"
-      data-matchup-collapse
-      data-slot="button"
-      data-variant="ghost"
-      data-size="sm"
-      aria-expanded={!collapsed}
-      aria-label={collapsed ? "Mostrar a barra de confronto" : "Recolher a barra de confronto"}
-      title={collapsed ? "Mostrar a barra de confronto" : "Recolher a barra de confronto"}
-      onClick={props.onToggleCollapsed}
-    >
-      {collapsed ? <ChevronsUpDown aria-hidden="true" /> : <ChevronsDownUp aria-hidden="true" />}
-    </button>
-  )
-  if (collapsed)
-    return (
-      <>
-        {head}
-        <div className="matchup collapsed" role="group" aria-label="Confronto do draft">
-          <span className="matchup-summary">
-            <SideDot side={side} />
-            <b>{current.name}</b>
-            <span aria-hidden="true">x</span>
-            <SideDot side={other} />
-            <b>{enemy ? enemy.name : "Sem adversária"}</b>
-          </span>
-          {toggle}
-        </div>
-      </>
-    )
   return (
     <>
       {head}
@@ -288,14 +253,9 @@ function MatchupBar(props: MatchupBarProps) {
         </button>
         <UndoButton visible={props.canUndo} />
         {side === "blue" ? rivalBlock : oursBlock}
-        {toggle}
       </div>
     </>
   )
-}
-
-function SideDot({ side }: { side: DraftSide }) {
-  return <i className={`side-dot ${side}`} role="img" aria-label={side === "blue" ? "Lado azul" : "Lado vermelho"} />
 }
 
 export function mountMatchupBar(host: Element, props: MatchupBarProps) {

@@ -1,6 +1,6 @@
 // Grade de campeões: o catálogo que preenche a posição (ou os bans) em edição, no centro do draft ou num diálogo.
 import { showDialog } from "@/shared/ui/dialog-controls"
-import { laneIconMarkup } from "@/shared/ui/icon"
+import { iconMarkup, laneIconMarkup } from "@/shared/ui/icon"
 import WS from "../api/worlds-champion-stats.json"
 import { CH } from "../model/champion-catalog"
 import { SLOT_LIST, type SlotInfo } from "../model/champion-slots"
@@ -116,7 +116,7 @@ export function mountChampionGrid({ onChange }: { onChange: () => void }) {
   afterChange = onChange
   $("#roles").innerHTML = ROLE_BUTTONS.map(
     ({ k, n }) =>
-      `<button data-slot="button" data-variant="ghost" data-size="sm" data-r="${k}" aria-pressed="${k === "all"}" class="${k === "all" ? "on" : ""}"><span class="lane-label">${laneIconMarkup(k)}${n}</span></button>`,
+      `<button type="button" data-slot="button" data-variant="ghost" data-size="icon-sm" data-r="${k}" aria-pressed="${k === "all"}" aria-label="${n}" title="${n}" class="${k === "all" ? "on" : ""}">${k === "all" ? iconMarkup("layers") : laneIconMarkup(k)}</button>`,
   ).join("")
   $("#roles").onclick = event => {
     const button = (event.target as HTMLElement).closest("button")

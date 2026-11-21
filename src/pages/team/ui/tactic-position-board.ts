@@ -1,9 +1,10 @@
 // Visão Lane do quadro de Táticas: cada linha é uma posição (bans e as cinco lanes), com os dois lados lado a lado.
 // Cada linha tem a arte do campeão ao fundo, o ícone quadrado como na Ordem do draft e as alternativas; o principal só se arrasta.
-import { iconMarkup } from "@/shared/ui/icon"
+import { iconMarkup, laneIconMarkup } from "@/shared/ui/icon"
 import { DRAFT_SIDE } from "../model/draft-order"
 import { DRAFT_LANES, type ChampionSlot, type Composition, type DraftSide } from "../model/local-state"
 import type { SlotInfo } from "../model/champion-slots"
+import { pickCardHTML } from "./tactic-pick-card"
 
 type PositionMarkup = {
   slots: Record<ChampionSlot, SlotInfo>
@@ -21,6 +22,7 @@ function positionCell(
   lane: ChampionSlot,
   owner: "us" | "rival",
   source: Composition,
+  side: DraftSide,
   { slots, img, esc, pickArt }: PositionMarkup,
 ) {
   const L = slots[lane]
@@ -35,7 +37,14 @@ function positionCell(
   }
   const add = `<button type="button" class="tx-pos-add" data-draft-target="${lane}" data-draft-side="${owner}" aria-label="${list.length ? `Adicionar em ${L.n}` : `Escolher campeão de ${L.n}`}" title="${list.length ? `Adicionar em ${L.n}` : `Escolher campeão de ${L.n}`}">${iconMarkup("plus")}</button>`
   const art = lane === "ban" || !list.length ? "" : pickArt(list[0])
-  return `<div class="tx-pos-slot ${lane}${art ? " has-art" : ""}" data-l="${lane}" style="--lc:var(${L.c})" role="group" aria-label="${L.n}">${art}${list.map(icon).join("")}${lane === "ban" || !list.length ? add : ""}</div>`
+  return pickCardHTML({
+    side,
+    // Na Lane os dois lados apontam para o centro: a barra fica na borda de dentro.
+    bar: side === "blue" ? "end" : "start",
+    className: `tx-pos-slot ${lane}${art ? " has-art" : ""}`,
+    attrs: `data-l="${lane}" style="--lc:var(${L.c})" role="group" aria-label="${L.n}"`,
+    children: `${art}${list.map(icon).join("")}${lane === "ban" || !list.length ? add : ""}`,
+  })
 }
 
 function positionColumn(side: DraftSide, entry: PositionSide, hint: string, markup: PositionMarkup) {
@@ -47,7 +56,7 @@ function positionColumn(side: DraftSide, entry: PositionSide, hint: string, mark
   const { owner, source, who } = entry
   return `<div class="tx-side-col tx-pos-col ${side} ${edge}" data-drop-side="${side}" aria-label="${label}">
     <h3><span class="side-dot ${side}" aria-hidden="true"></span><b class="tx-side-name">${label}</b><small title="${who} · ${markup.esc(source.name)}">${who} · ${markup.esc(source.name)}</small></h3>
-    <div class="tx-pos-cells" data-board-side="${owner}" data-comp-id="${markup.esc(source.id)}">${ROWS.map(lane => positionCell(lane, owner, source, markup)).join("")}</div></div>`
+    <div class="tx-pos-cells" data-board-side="${owner}" data-comp-id="${markup.esc(source.id)}">${ROWS.map(lane => positionCell(lane, owner, source, side, markup)).join("")}</div></div>`
 }
 
 /**
@@ -57,7 +66,7 @@ function positionColumn(side: DraftSide, entry: PositionSide, hint: string, mark
 export function positionBoardHTML(sides: Record<DraftSide, PositionSide>, hint: string, markup: PositionMarkup) {
   const labels = ROWS.map(
     lane =>
-      `<span class="tx-pos-name ${lane}" style="--lc:var(${markup.slots[lane].c})">${markup.slots[lane].n}</span>`,
+      `<span class="tx-pos-name ${lane}" style="--lc:var(${markup.slots[lane].c})" title="${markup.slots[lane].n}">${laneIconMarkup(lane) || markup.slots[lane].n}</span>`,
   ).join("")
   return `<div class="tx-pos-board">${positionColumn("blue", sides.blue, hint, markup)}
     <div class="tx-pos-names" aria-hidden="true"><span class="tx-pos-names-head"></span>${labels}</div>

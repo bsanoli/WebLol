@@ -78,8 +78,8 @@ export type TeamState = {
   tacticsDrawer?: boolean
   /** Lista Nossas/Adversárias/Confrontos da gaveta recolhida; só as abas ficam visíveis. */
   tacticsListCollapsed?: boolean
-  /** Barra de confronto do draft recolhida em uma linha. */
-  matchupBarCollapsed?: boolean
+  /** Altura da lista de composições da gaveta, em px, ajustada pela alça; sem valor usa a altura padrão. */
+  tacticsListHeight?: number
   /** Visão do quadro de Táticas: `draft` (cards com arte) ou `positions` (visão Lane, só ícones). */
   tacticsBoard?: "draft" | "positions"
   /** Aba do Conhecimento aberta (`wave` ou `obj`). */

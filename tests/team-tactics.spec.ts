@@ -250,3 +250,71 @@ test("Ordem do draft: arrastar campeões entre cards, criar a adversária e remo
   await page.getByRole("button", { name: "Desfazer" }).click()
   expect((await lanes()).jg).toEqual(["Ornn"])
 })
+
+test("Táticas: Draft e Lane têm a mesma altura, o quadro ocupa a gaveta e a página não rola", async ({ page }) => {
+  await page.addInitScript(() => {
+    if (localStorage.getItem("lol-comps-time-v1")) return
+    const lanes = () => ({ top: [], jg: [], mid: [], adc: [], sup: [] })
+    localStorage.setItem(
+      "lol-comps-time-v1",
+      JSON.stringify({
+        cur: "nossa",
+        view: "tactics",
+        comps: [
+          { id: "nossa", name: "Nossa base", team: "mine", lanes: { ...lanes(), top: ["Ornn"] } },
+          { id: "rival", name: "Time rival", team: "enemy", lanes: { ...lanes(), top: ["Jax"] } },
+        ],
+        matchups: [{ id: "m1", ours: "nossa", enemy: "rival", side: "blue", updated: 1 }],
+        curMatchup: "m1",
+      }),
+    )
+  })
+  for (const size of [
+    { width: 1280, height: 720 },
+    { width: 1600, height: 900 },
+    { width: 1920, height: 1080 },
+  ]) {
+    await page.setViewportSize(size)
+    await page.goto("/camp.html")
+    await page.evaluate(() => window.applyWebLolRoute(["composicoes", "nossa"], new URLSearchParams("modo=taticas")))
+    const draft = page.locator(".tx-draft")
+    const toggle = page.locator("[data-tactic-list-toggle]")
+    const noScroll = () =>
+      page.evaluate(() => document.documentElement.scrollHeight <= document.documentElement.clientHeight)
+    const boardHeight = async (view: "draft" | "positions") => {
+      await draft.locator(`[data-tactic-board="${view}"]`).click()
+      const box = await draft.locator(view === "draft" ? ".tx-draft-sides" : ".tx-pos-board").boundingBox()
+      return Math.round(box!.height)
+    }
+    for (const collapsed of [false, true]) {
+      if ((await toggle.getAttribute("aria-expanded")) === String(collapsed)) await toggle.click()
+      expect(await boardHeight("draft")).toBe(await boardHeight("positions"))
+      expect(await noScroll()).toBe(true)
+      // Visão Draft: os 5 picks de cada lado cabem sem rolar o quadro.
+      await draft.locator('[data-tactic-board="draft"]').click()
+      const hasHiddenPicks = await draft
+        .locator(".tx-draft-sides")
+        .evaluate(el => el.scrollHeight - el.clientHeight > 1)
+      expect(hasHiddenPicks).toBe(false)
+    }
+    // Visão Lane: cada rota tem o card dos dois lados alinhado com o nome da rota.
+    await draft.locator('[data-tactic-board="positions"]').click()
+    await expect(page.locator(".tx-pos-col.left .tx-pos-slot")).toHaveCount(6)
+    const rows = await page.evaluate(() => {
+      const box = (el: Element) => {
+        const { top, height } = el.getBoundingClientRect()
+        return `${Math.round(top)}/${Math.round(height)}`
+      }
+      const names = [...document.querySelectorAll(".tx-pos-name")].map(box)
+      const side = (cls: string) => [...document.querySelectorAll(`.tx-pos-col.${cls} .tx-pos-slot`)].map(box)
+      return { names, left: side("left"), right: side("right") }
+    })
+    expect(rows.left).toEqual(rows.names)
+    if (rows.right.length) expect(rows.right).toEqual(rows.names)
+    // Com a lista recolhida, o quadro vai até o fim da gaveta.
+    const aside = (await page.locator(".tx-aside").boundingBox())!
+    const sides = (await draft.locator(".tx-pos-board").boundingBox())!
+    expect(Math.abs(aside.y + aside.height - (sides.y + sides.height))).toBeLessThanOrEqual(12)
+    await page.evaluate(() => localStorage.setItem("lol-comps-time-v1", ""))
+  }
+})
