@@ -1,7 +1,14 @@
 {
   "$schema": "https://unpkg.com/knip@6/schema.json",
-  "entry": ["src/app/entrypoints/*.{ts,tsx}", "tests/**/*.ts", "scripts/**/*.mjs", "steiger.config.ts"],
-  "project": ["src/**/*.{ts,tsx}", "tests/**/*.ts", "scripts/**/*.mjs"],
+  "entry": [
+    "src/app/entrypoints/*.{ts,tsx}",
+    "tests/**/*.ts",
+    "scripts/**/*.mjs",
+    "steiger.config.ts",
+    "tests-rules/**/*.ts",
+    "vitest.rules.config.ts"
+  ],
+  "project": ["src/**/*.{ts,tsx}", "tests/**/*.ts", "scripts/**/*.mjs", "tests-rules/**/*.ts"],
   "ignore": ["src/data/soloq/encounters.ts"],
   "ignoreDependencies": ["tailwindcss"],
   "ignoreIssues": {
