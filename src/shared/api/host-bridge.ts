@@ -11,13 +11,14 @@ export type HostNavigation = {
   onCopy?: () => void
 }
 
-type HostImageSave = { id: string; shared: boolean; error?: string }
+type HostImageSave = { id: string; shared: boolean; by?: string; error?: string }
 
 /** Prints e desenhos das táticas: o app principal guarda no navegador e, com time, no Firestore. */
 export type HostImages = {
   save(data: string): Promise<HostImageSave>
-  load(id: string): Promise<string | null>
+  load(id: string, fresh?: boolean): Promise<string | null>
   flush?(): Promise<number>
+  isPending?(id: string): boolean
 }
 
 /** O que o app principal expõe na janela pai. */

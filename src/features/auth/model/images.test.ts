@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
 import { beforeEach, describe, expect, it, vi } from "vitest"
 import { STORAGE_KEYS } from "@/shared/config/storage-keys"
-import { hostImages } from "./images"
+import { hostImages, splitByPendingPrints } from "./images"
 
 const db = vi.hoisted(() => ({ dbGet: vi.fn(), dbSet: vi.fn() }))
 const state = vi.hoisted(() => ({
@@ -84,5 +84,42 @@ describe("hostImages", () => {
     state.team = null
     await hostImages.save("data:7")
     expect(await hostImages.flush?.()).toBe(1)
+  })
+
+  it("não volta ao banco a cada tentativa quando o print ainda não existe", async () => {
+    db.dbGet.mockResolvedValue(null)
+    expect(await hostImages.load("sumido")).toBeNull()
+    expect(await hostImages.load("sumido")).toBeNull()
+    expect(db.dbGet).toHaveBeenCalledTimes(1)
+    expect(await hostImages.load("sumido", true)).toBeNull()
+    expect(db.dbGet).toHaveBeenCalledTimes(2)
+  })
+
+  it("isPending só vale para o print que ficou na fila", async () => {
+    db.dbSet.mockRejectedValue(new Error("offline"))
+    const { id } = await hostImages.save("data:4")
+    expect(hostImages.isPending?.(id)).toBe(true)
+    expect(hostImages.isPending?.("outro")).toBe(false)
+  })
+})
+
+describe("splitByPendingPrints", () => {
+  beforeEach(() => localStorage.setItem(STORAGE_KEYS.pendingScreenshots, JSON.stringify(["p1"])))
+
+  const tactic = (src: string) => ({
+    after: { doc: { type: "doc", content: [{ type: "tacticPrint", attrs: { src, sketch: null, preview: null } }] } },
+  })
+
+  it("segura a tática que aponta para print pendente", () => {
+    const { ready, held } = splitByPendingPrints([tactic("p1"), tactic("ok")])
+    expect(held).toHaveLength(1)
+    expect(ready).toHaveLength(1)
+  })
+
+  it("sem pendências, tudo segue", () => {
+    localStorage.setItem(STORAGE_KEYS.pendingScreenshots, "[]")
+    const { ready, held } = splitByPendingPrints([tactic("p1")])
+    expect(held).toHaveLength(0)
+    expect(ready).toHaveLength(1)
   })
 })
