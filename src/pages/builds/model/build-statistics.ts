@@ -1,7 +1,7 @@
 import type DATA from "@dataset/summary"
 import { champions, games as buildGames } from "@dataset/builds"
 import { championSlug } from "@/entities/match"
-import { isReference } from "@/shared/config/dataset"
+import { isReference } from "@/shared/dataset"
 
 export type Champion = (typeof DATA.champs)[number]
 export type LaneSample = Extract<Champion["lanes"][keyof Champion["lanes"]], { n: number }>

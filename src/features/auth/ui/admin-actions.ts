@@ -1,7 +1,7 @@
 // Ações da aba Administração: aprovar e recusar envios, mexer em jogadores, usuários, admins e backup.
 import type { Change } from "@/shared/lib/team-changes"
-import { currentFirebase, dbDel, dbSet } from "@/shared/api/firestore"
-import { idbDel } from "@/shared/api/local-keys"
+import { currentFirebase, dbDel, dbSet } from "@/shared/firestore"
+import { idbDel } from "@/shared/local-keys"
 import { dispId } from "@/shared/lib/account-id"
 import { makeSlot, slotRaw } from "@/shared/lib/admin-crypto"
 import { $, toast } from "@/shared/lib/dom"

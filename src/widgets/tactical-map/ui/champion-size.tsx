@@ -1,7 +1,7 @@
 import { useState } from "react"
 import { createRoot } from "react-dom/client"
 
-import { STORAGE_KEYS } from "@/shared/config/storage-keys"
+import { STORAGE_KEYS } from "@/shared/config"
 import { Label } from "@/shared/ui/label"
 import { Slider } from "@/shared/ui/slider"
 

@@ -1,5 +1,5 @@
 // Gestão do time: todo o time vê; só o capitão e admins agem. Os dados vêm do app principal (a janela pai).
-import { fromHost, hostCanManageTeam, hostHasCaptainAccess, hostTeamName } from "@/shared/api/host-bridge"
+import { fromHost, hostCanManageTeam, hostHasCaptainAccess, hostTeamName } from "@/shared/host-bridge"
 import { $ } from "./team-store"
 
 export const hasCaptainAccess = hostHasCaptainAccess

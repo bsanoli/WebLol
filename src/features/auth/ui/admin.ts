@@ -1,5 +1,5 @@
 // Aba Administração (admin e capitão): desbloqueio, leitura do banco, montagem e ações.
-import { fb, ONLINE } from "@/shared/api/firestore"
+import { fb, ONLINE } from "@/shared/firestore"
 import { $, esc } from "@/shared/lib/dom"
 import { loadAdminData } from "../model/admin-data"
 import { isCaptain, isFirebaseAdmin, pending, preview, user } from "../model/identity"

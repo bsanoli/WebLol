@@ -1,7 +1,7 @@
 import { LayoutGroup, motion, useReducedMotion } from "motion/react"
 import { createRoot } from "react-dom/client"
-import { NavigationHover, useNavigationHover } from "@/shared/ui/arc/navigation-hover"
-import { motionTokens } from "@/shared/ui/arc/motion-tokens"
+import { NavigationHover, useNavigationHover } from "@/shared/ui/arc"
+import { motionTokens } from "@/shared/ui/arc"
 import styles from "@/shared/ui/arc/blocks/site-header/site-header.module.css"
 
 const sections = [

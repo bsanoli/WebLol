@@ -1,1 +1,2 @@
-export { compsView, wireComps, setCompositionRoute, disposeCompositions } from "./ui/compositions-page"
+export { compsView, wireComps, disposeCompositions } from "./ui/compositions-page"
+export { setCompositionRoute } from "./model/comp-filters"
