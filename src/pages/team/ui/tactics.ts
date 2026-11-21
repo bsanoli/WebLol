@@ -247,7 +247,7 @@ export function tacticsHTML(
         <button type="button" class="tx-list-toggle" data-slot="button" data-variant="outline" data-size="sm" data-tactic-list-toggle aria-expanded="${!listCollapsed}" aria-label="Lista de composições" title="${listCollapsed ? "Mostrar a lista" : "Recolher a lista"}">${iconMarkup("next")}</button></div>
         ${panel("ours", ours.map(tab).join(""), "Nenhuma composição ainda.")}${panel("enemy", enemies.map(tab).join(""), "Nenhuma adversária ainda.")}${panel("matchup", matchups.map(matchupRow).join(""), "Nenhum confronto ainda. Junte uma composição nossa a uma adversária.")}
       </div>
-      ${listResizeHTML()}
+      ${listResizeHTML(listHeight)}
       <div class="tx-draft">${body}</div>
     </aside>
   </div>`

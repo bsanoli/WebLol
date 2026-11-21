@@ -9,8 +9,9 @@ const STEP = 16
 export const savedListHeight = (value: unknown) =>
   typeof value === "number" && Number.isFinite(value) && value >= LIST_MIN ? Math.round(value) : undefined
 
-export const listResizeHTML = () =>
-  `<div class="tx-resize" role="separator" aria-orientation="horizontal" tabindex="0" data-tactic-resize aria-label="Ajustar a altura da lista de composições" aria-valuemin="${LIST_MIN}" title="Arraste para ajustar a altura da lista · duplo clique volta ao padrão"></div>`
+/** O `aria-valuenow` já vem na marcação (o separador focável exige); ao focar, o valor real é lido do layout. */
+export const listResizeHTML = (height = 230) =>
+  `<div class="tx-resize" role="separator" aria-orientation="horizontal" tabindex="0" data-tactic-resize aria-label="Ajustar a altura da lista de composições" aria-valuemin="${LIST_MIN}" aria-valuenow="${height}" title="Arraste para ajustar a altura da lista · duplo clique volta ao padrão"></div>`
 
 /** A lista não cresce a ponto de o quadro perder o espaço mínimo dos cinco picks. */
 function limitOf(tabs: HTMLElement) {
@@ -21,7 +22,6 @@ function limitOf(tabs: HTMLElement) {
 function apply(tabs: HTMLElement, handle: HTMLElement, height: number | null) {
   if (height === null) {
     tabs.style.removeProperty("--tx-list-h")
-    handle.removeAttribute("aria-valuenow")
   } else {
     tabs.style.setProperty("--tx-list-h", `${height}px`)
     handle.setAttribute("aria-valuenow", String(height))
