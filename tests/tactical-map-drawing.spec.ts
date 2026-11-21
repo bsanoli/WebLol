@@ -1,10 +1,11 @@
 import { expect, test } from "@playwright/test"
-import { size, visionButton, choose, mapPoint, drag } from "./support/tactical-map"
+import { size, visionButton, choose, mapPoint, drag, waitForRealisticMap } from "./support/tactical-map"
 
 test("Setas retas e curvas encaixam o traço na ponta", async ({ page }) => {
   await page.setViewportSize(size)
   await page.goto("/camp.html")
   await page.getByRole("button", { name: "Mapa tático" }).click()
+  await waitForRealisticMap(page)
   const brush = page.getByRole("radio", { name: "Traço livre", exact: true })
   const arrowhead = page.getByRole("checkbox", { name: "Ponta de seta" })
   await brush.click()
@@ -95,6 +96,7 @@ test("Aviso de visão e menus de ferramenta preservam a área e a câmera do map
   await page.goto("/#/time/mapa")
   await page.getByRole("button", { name: "Entrar sem usuário" }).click()
   const team = page.frameLocator("#v-camp")
+  await waitForRealisticMap(team)
   const viewport = team.getByRole("region", { name: "Mapa da jogada" })
   const board = team.locator("#map")
   const notice = team.getByText("Prévia tática aproximada da visão da equipe.")
@@ -187,6 +189,7 @@ test("Desenha no zoom, limpa apenas setas e mantém a câmera em tela cheia", as
   await page.goto("/#/time/mapa")
   await page.getByRole("button", { name: "Entrar sem usuário" }).click()
   const team = page.frameLocator("#v-camp")
+  await waitForRealisticMap(team)
   const clearArrows = team.locator("#clr")
   const clearStrokes = team.locator("#map-clear-strokes")
   const clearAll = team.locator("#map-clear-all")
