@@ -11,14 +11,10 @@ const lineLimit = 300
 // o teto de cada um é o tamanho de hoje, e a entrada sai da lista quando o arquivo cumpre a regra.
 // Arquivo novo ou fora das listas precisa ter menos de 300 linhas não vazias e nenhum `@ts-nocheck` (docs/convencoes.md).
 const legacyLongFiles = {
-  "pages/builds/ui/build-details.ts": 474,
-  "pages/builds/ui/builds-page.ts": 621,
   "pages/team/ui/matchup-bar.tsx": 371,
   "pages/team/ui/team-controls.tsx": 310,
-  "pages/worlds-compositions/ui/compositions-page.ts": 383,
   "shared/ui/arc/blocks/site-header/site-header.tsx": 865,
   "widgets/tactical-map/ui/battlefield-layer.ts": 373,
-  "widgets/tactical-map/ui/tactical-map.ts": 648,
   "widgets/tactical-map/ui/ward-layer.ts": 303,
 }
 const legacyNoCheckFiles = new Set([])
