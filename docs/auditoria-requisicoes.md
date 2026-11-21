@@ -8,9 +8,9 @@ Medição em 19 de novembro de 2026 sobre os artefatos do GitHub Pages da revis�
 | --- | ---: | ---: | ---: | --- |
 | `#/worlds` | 68 | 4.725.776 B | 0 | O bundle de 1.982.720 B inclui dados e código de Builds e Composições. |
 | `#/composicoes` | 128 | 6.224.040 B | 0 | Mesmo bundle, com Builds. A Visão geral renderiza primeiro. Os dados e painéis de todos os drafts são preparados antes de abrir **Ver draft**. |
-| `#/builds?fonte=worlds` | 195 | 7.565.647 B | 3 | A Visão geral renderiza primeiro. A lista baixa partidas individuais que alimentam os confrontos da ficha. |
+| `#/builds?fonte=worlds` | 195 | 7.565.647 B | 3 | Medição de 2026-11-20. A Visão geral renderiza primeiro. A lista baixava partidas individuais para os confrontos da ficha; desde a Onda 10 o arquivo de cada campeão só vem ao escolher um adversário. |
 | `#/builds/ahri?fonte=worlds` | 91 | 4.980.701 B | 12 | A Visão geral renderiza primeiro. A seção Compras jogo a jogo baixa um JSON de 382.747 B e usa apenas os jogos do recorte selecionado. |
-| `#/builds?fonte=soloq` | 191 | 9.721.176 B | 5 | O bundle de 4.272.506 B inclui partidas individuais. A entrada solicita CSS de Composições do Worlds e uma folha de 38.313 B idêntica à folha base do painel, com outra URL. |
+| `#/builds?fonte=soloq` | 191 | 9.721.176 B | 5 | Medição de 2026-11-20. O bundle de 4.272.506 B incluía partidas individuais; desde a Onda 10 as partidas vêm por campeão e o bundle (entrada + dados de Builds) soma 2.003.713 B (−53%). A entrada solicita CSS de Composições do Worlds e uma folha de 38.313 B idêntica à folha base do painel, com outra URL. |
 | `#/builds/jayce?fonte=soloq` | 98 | 9.865.634 B | 16 | A lista renderiza primeiro. O JSON de Compras jogo a jogo contém toda a SoloQ e pesa 2.497.944 B. |
 | `#/time/composicoes` | 221 | 9.338.064 B | 5 | Baixa o mapa realista de 2.093.130 B, o mapa base de 67.366 B e imagens do HUD. Também monta Conhecimento. |
 | `#/time/mapa` | 221 | 9.338.064 B | 5 | Monta Composições e Conhecimento. Os cinco GET externos são imagens dos campeões da composição inicial. |

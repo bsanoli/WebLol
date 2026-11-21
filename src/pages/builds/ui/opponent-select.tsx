@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react"
+import { createRoot } from "react-dom/client"
 import { ChevronDown } from "lucide-react"
 import { Popover, PopoverContent, PopoverTrigger } from "@/shared/ui/popover"
 import { lolAsset, lolChampion } from "@/entities/champion"
@@ -142,4 +143,10 @@ export function WorldsOpponentSelect({
       </PopoverContent>
     </Popover>
   )
+}
+
+export function mountOpponentSelect(host: HTMLElement, props: Parameters<typeof WorldsOpponentSelect>[0]) {
+  const root = createRoot(host)
+  root.render(<WorldsOpponentSelect {...props} />)
+  return root
 }

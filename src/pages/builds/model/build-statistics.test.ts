@@ -1,6 +1,7 @@
 // @vitest-environment jsdom
-import { describe, expect, it } from "vitest"
+import { beforeAll, describe, expect, it } from "vitest"
 import { buildData, buildOpponentOptions, championBuild, directOpponent, opponentBuild } from "./build-statistics"
+import { encountersStatus, loadEncounters } from "./encounters"
 import DATA from "@dataset/summary"
 
 const champion = DATA.champs.find(item => buildData[item.name]?.all) ?? DATA.champs[0]
@@ -25,6 +26,12 @@ describe("championBuild", () => {
 
 describe("buildOpponentOptions e opponentBuild", () => {
   const options = buildOpponentOptions(champion, "")
+
+  beforeAll(() => loadEncounters(champion.name))
+
+  it("carrega os confrontos do campeão sob demanda", () => {
+    expect(encountersStatus(champion.name)).toBe("ready")
+  })
 
   it("lista adversários do mais ao menos enfrentado, sem repetir", () => {
     expect(options.length).toBeGreaterThan(0)

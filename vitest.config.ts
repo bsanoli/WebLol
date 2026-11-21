@@ -14,6 +14,7 @@ export default defineConfig({
         builds: "worlds-2026-builds.json",
         "build-assets": "worlds-2026-build-assets.json",
         "build-timeline": "worlds-2026-build-timeline.json",
+        encounters: "worlds-2026-encounters.ts",
       }).map(([name, file]) => ({
         find: `@dataset/${name}`,
         replacement: fileURLToPath(new URL(`./src/data/${file}`, import.meta.url)),
