@@ -1,10 +1,11 @@
 import { expect, test } from "@playwright/test"
-import { size, vision, visionButton, mapPoint, drag } from "./support/tactical-map"
+import { size, vision, visionButton, mapPoint, drag, waitForRealisticMap } from "./support/tactical-map"
 
 test("Paredes e arbustos recortam a visão do campeão conforme sua posição", async ({ page }) => {
   await page.setViewportSize(size)
   await page.goto("/camp.html")
   await page.getByRole("button", { name: "Mapa tático" }).click()
+  await waitForRealisticMap(page)
   await visionButton(page, "azul").click()
   const champion = page.getByRole("button", { name: "Azul TOP" })
   const coverage = page.locator("#tactical-fog [data-champion-sight]").first()
@@ -57,6 +58,7 @@ test("Move campeões nas duas visões e reseta a visão e o quadro em edição",
   await page.emulateMedia({ reducedMotion: "reduce" })
   await page.goto("/camp.html")
   await page.getByRole("button", { name: "Mapa tático" }).click()
+  await waitForRealisticMap(page)
   const reset = page.getByRole("button", { name: "Resetar mapa" })
   const tokens = page.locator("#map .tok")
   await expect(tokens).toHaveCount(10)
@@ -203,6 +205,7 @@ test("Navega pelo menu superior e coloca waves nas três rotas com o mapa inteir
   await mapLink.click()
   await page.getByRole("button", { name: "Entrar sem usuário" }).click()
   const team = page.frameLocator("#v-camp")
+  await waitForRealisticMap(team)
   const viewport = team.getByRole("region", { name: "Mapa da jogada" })
   await expect(viewport).toBeVisible()
   await expect(team.getByText("Arquivos", { exact: true })).toBeVisible()
@@ -282,6 +285,7 @@ test("Arquivos, paginação e zoom usam o espaço do mapa sem rolagem", async ({
   await page.goto("/#/time/mapa")
   await page.getByRole("button", { name: "Entrar sem usuário" }).click()
   const team = page.frameLocator("#v-camp")
+  await waitForRealisticMap(team)
   await expect(team.getByRole("tab", { name: "Camadas" })).toHaveAttribute("aria-selected", "true")
   await expect(team.locator("body > header")).toBeHidden()
   await team.locator("#team-files summary").click()
