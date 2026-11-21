@@ -8,6 +8,17 @@ Formato de cada entrada: data, pedido (palavras do Bruno), decisão (quem escolh
 
 ---
 
+## 21/11/2026 — um botão só para salvar, enviar e descartar
+
+- **Pedido:** unificar salvar, salvamento automático e "Restaurar dados locais". A tela mostrava "Salvo neste navegador", um menu para restaurar e, ao lado, o botão de envio, sem dizer o que ainda não foi ao time.
+- **Decisão:** um botão de status na barra da composição, com o menu das ações. O descarte por item fica para depois.
+- **O que mudou:**
+  - O botão mostra "Rascunho · N alterações" ou "Em dia com o time · vN" (e "Salvo neste navegador" sem time; "Falha ao salvar" se o navegador não gravar).
+  - O menu reúne Enviar para aprovação ou Publicar, Sincronizar agora, Ver o que mudou, Exportar e Importar backup e Descartar rascunho (antes "Restaurar dados locais", com o mesmo aviso e a cópia opcional).
+  - O botão "Enviar para aprovação" ao lado do salvamento saiu; o app principal continua decidindo o texto e a ação do envio.
+  - O app principal passa a expor `weblolDraft` (lista de alterações e versão do time) para o iframe.
+- **Aprovação:** não passou pelo Bruno; sem mudança em contas ou regras do Firestore.
+
 ## 21/11/2026 — prints que não chegaram ao time
 
 - **Pedido:** "imagem não sincronizada não carrega e fica piscando". O print de outra pessoa que ainda não foi enviado ficava alternando entre "Carregando…" e o aviso.

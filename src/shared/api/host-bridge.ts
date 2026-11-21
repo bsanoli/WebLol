@@ -21,8 +21,17 @@ export type HostImages = {
   isPending?(id: string): boolean
 }
 
+/** Estado do rascunho da Área do time: o que mudou desde a versão oficial do time. */
+export type HostDraft = {
+  /** Conta com time e banco online: só então há versão oficial para comparar. */
+  synced: boolean
+  version: number | null
+  changes: { kind: string; op: string; name: string }[]
+}
+
 /** O que o app principal expõe na janela pai. */
 export type HostGlobals = {
+  weblolDraft?: () => HostDraft
   captainAccess?: () => boolean
   canManageTeam?: () => boolean
   TEAM_NAME?: () => string
@@ -62,6 +71,7 @@ export const hostImages = (): HostImages | null => {
   return images && typeof images.save === "function" && typeof images.load === "function" ? images : null
 }
 
+export const hostDraft = (): HostDraft | null => fromHost(host => host.weblolDraft?.(), null)
 export const hostHasCaptainAccess = () => !!fromHost(host => host.captainAccess?.(), false)
 export const hostCanManageTeam = () => !!fromHost(host => host.canManageTeam?.(), false)
 export const hostTeamName = () => fromHost(host => host.TEAM_NAME?.(), "")

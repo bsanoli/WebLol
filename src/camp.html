@@ -42,15 +42,20 @@
       <button data-slot="button" data-variant="outline" data-size="sm" id="copy-comp" aria-label="Copiar link da composição"><svg class="icon" aria-hidden="true" focusable="false"><use href="assets/icons.svg#link"></use></svg> Copiar link</button>
       <details class="local-save-actions" id="local-save">
         <summary data-slot="button" data-variant="outline" data-size="sm">
-          <span class="saved" id="saved" role="status">Salvamento automático</span>
+          <span class="saved" id="saved" role="status">Salvo neste navegador</span>
           <span class="local-save-chevron" aria-hidden="true"></span>
         </summary>
         <div class="wl-panel local-save-panel">
           <p id="local-save-description">As edições são salvas automaticamente neste navegador.</p>
-          <button data-slot="button" data-variant="outline" data-size="sm" type="button" id="clear-local">Restaurar dados locais…</button>
+          <button data-slot="button" data-variant="default" data-size="sm" type="button" id="save-send" hidden></button>
+          <button data-slot="button" data-variant="outline" data-size="sm" type="button" id="save-sync">Sincronizar agora</button>
+          <button data-slot="button" data-variant="outline" data-size="sm" type="button" id="save-changes" aria-expanded="false" aria-controls="save-changes-list" hidden>Ver o que mudou</button>
+          <ul class="save-changes-list" id="save-changes-list" hidden></ul>
+          <button data-slot="button" data-variant="outline" data-size="sm" type="button" id="save-export">Exportar backup</button>
+          <button data-slot="button" data-variant="outline" data-size="sm" type="button" id="save-import">Importar backup</button>
+          <button data-slot="button" data-variant="outline" data-size="sm" type="button" id="clear-local">Descartar rascunho…</button>
         </div>
       </details>
-      <button data-slot="button" data-variant="default" data-size="sm" type="button" id="team-send"></button>
     </div>
   </div>
   <div class="wl-panel box comp-editor">

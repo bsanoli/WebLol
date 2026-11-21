@@ -41,26 +41,20 @@ export const touch = (comp: Composition | undefined = cur()) => {
 }
 export const compById = (id: string | undefined): Composition | undefined => S.comps.find(comp => comp.id === id)
 
-const savedStatus = $("#saved")
 export const localSave = $<HTMLDetailsElement>("#local-save")
 
-function setSaveStatus(message: string, failed = false) {
-  if (savedStatus.textContent !== message) savedStatus.textContent = message
-  localSave.toggleAttribute("data-save-error", failed)
-  const description = $("#local-save-description")
-  const help = failed
-    ? "O navegador não conseguiu gravar as edições. Use Exportar para guardar uma cópia."
-    : "As edições são salvas automaticamente neste navegador."
-  if (description.textContent !== help) description.textContent = help
-}
+export const SAVE_RESULT_EVENT = "weblol:save-result"
+let lastSaveFailed = false
+export const saveFailed = () => lastSaveFailed
 
 export function save() {
   try {
     localStorage.setItem(KEY, JSON.stringify(teamStateToSaved(S)))
-    setSaveStatus("Salvo neste navegador")
+    lastSaveFailed = false
   } catch {
-    setSaveStatus("Falha ao salvar", true)
+    lastSaveFailed = true
   }
+  document.dispatchEvent(new Event(SAVE_RESULT_EVENT))
 }
 
 // Composições salvas com `lanes.ban` passam para `bans` na primeira abertura, sem esperar uma edição (ADR 0007).

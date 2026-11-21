@@ -22,7 +22,7 @@ import { hooks } from "./team-session"
 import { mountTeamBackup } from "./team-backup"
 import { mountLocalRestore } from "./team-restore"
 import { mountMatchups } from "./team-matchups"
-import { mountTeamSendButton, syncTeamSendButton } from "./team-send-button"
+import { mountSaveMenu, renderSaveMenu } from "./team-save-menu"
 import { $, esc, getState, img, plays, S, save, toast } from "./team-store"
 initializeTheme()
 
@@ -100,7 +100,7 @@ function publishTeamRoute(
 let wantCaptain = false // link para a gestão aberto antes de o time carregar
 exposeFrameHandlers({ weblolTeamChanged })
 function weblolTeamChanged() {
-  syncTeamSendButton($("#team-send"))
+  renderSaveMenu()
   const ok = hasCaptainAccess()
   renderTeamNavigation(currentTeamView, ok)
   if (ok && wantCaptain) {
@@ -220,7 +220,7 @@ function wireCopyButton(button: HTMLButtonElement, view: "comps" | "map") {
   }
 }
 wireCopyButton($("#copy-comp"), "comps")
-mountTeamSendButton($("#team-send"))
+mountSaveMenu()
 wireCopyButton($("#copy-play"), "map")
 
 hooks.renderEditor = () => renderEditor()
