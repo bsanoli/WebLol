@@ -1,13 +1,7 @@
 import { iconMarkup } from "@/shared/ui/icon"
+import { compositionPreviewHTML } from "./composition-preview"
 import { DRAFT_SIDE } from "../model/draft-order"
-import {
-  compositionPreview,
-  draftOf,
-  type Composition,
-  type ChampionSlot,
-  type DraftLane,
-  type DraftSide,
-} from "../model/local-state"
+import { draftOf, type Composition, type ChampionSlot, type DraftLane, type DraftSide } from "../model/local-state"
 import type { SlotInfo } from "../model/champion-slots"
 import { boardSideOf, enemiesOf, isEnemy, oppositeSide, oursOf, enemyOrder, ownerOf } from "../model/composition-side"
 import { opggOf } from "../model/tactics"
@@ -176,7 +170,7 @@ export function tacticsHTML(
   const tab = (x: Composition) => {
     const on = !general && !active && x.id === c.id
     return `<button type="button" class="dz-tab${on ? " on" : ""}" data-tactic-comp="${esc(x.id)}" draggable="true" aria-pressed="${on}" title="${esc(x.name)}">
-      <b>${esc(x.name)}${mark(hasTactic(x.id))}</b>${sideMark(boardSideOf(x, compositions, c.id))}<span class="mini">${compositionPreview(x).map(img).join("") || "<small>vazia</small>"}</span></button>`
+      <b>${esc(x.name)}${mark(hasTactic(x.id))}</b>${sideMark(boardSideOf(x, compositions, c.id))}<span class="mini">${compositionPreviewHTML(x, img) || "<small>vazia</small>"}</span></button>`
   }
   const ours = oursOf(compositions),
     enemies = enemiesOf(compositions),

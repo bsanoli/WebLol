@@ -12,6 +12,7 @@ import { draftBoardHTML } from "./draft-board"
 import { tacticsHTML } from "./tactics"
 import { capturePickFeedback } from "./pick-feedback"
 import { bindTacticDrop } from "./tactic-drop"
+import { CHOOSE_EVENT } from "./matchup-picker"
 import { clearTeamControls, mountDraftChampionMenu, mountSectionTabs, mountTeamSelect } from "./team-controls"
 import { compOf, handleEnemyChampionDrop, keepOurCompositionInDraft, newComp, renderMatchup } from "./team-comps"
 import { openPicker, placePicker, renderGrid, renderTarget, isPickerOpen } from "./team-grid"
@@ -194,6 +195,14 @@ function removeChampion(name: string, lane: ChampionSlot, comp: Composition = ta
   renderGrid()
   focusDraftTarget(lane, comp === cur() ? "us" : "rival")
 }
+// Abre a lista de adversárias junto do botão clicado; com a barra recolhida, ela é aberta antes.
+function requestChoose(anchor: HTMLElement) {
+  const ask = () => document.dispatchEvent(new CustomEvent(CHOOSE_EVENT, { detail: { kind: "rival", anchor } }))
+  if (S.matchupBarCollapsed !== true) return ask()
+  S.matchupBarCollapsed = false
+  renderMatchup()
+  requestAnimationFrame(() => requestAnimationFrame(ask))
+}
 $("#editor").addEventListener("click", e => {
   if (eventTarget(e).closest<HTMLElement>("[data-picker]")) {
     openPicker()
@@ -203,8 +212,9 @@ $("#editor").addEventListener("click", e => {
     newComp("enemy")
     return
   }
-  if (eventTarget(e).closest<HTMLElement>("[data-choose-rival]")) {
-    $('#editor .matchup-bar [data-matchup="rival"]')?.click()
+  const chooseRival = eventTarget(e).closest<HTMLElement>("[data-choose-rival]")
+  if (chooseRival) {
+    requestChoose(chooseRival)
     return
   }
   const priority = eventTarget(e).closest<HTMLElement>("[data-priority]")

@@ -11,7 +11,6 @@ const lineLimit = 300
 // o teto de cada um é o tamanho de hoje, e a entrada sai da lista quando o arquivo cumpre a regra.
 // Arquivo novo ou fora das listas precisa ter menos de 300 linhas não vazias e nenhum `@ts-nocheck` (docs/convencoes.md).
 const legacyLongFiles = {
-  "pages/team/ui/matchup-bar.tsx": 371,
   "pages/team/ui/team-controls.tsx": 310,
   "shared/ui/arc/blocks/site-header/site-header.tsx": 865,
   "widgets/tactical-map/ui/battlefield-layer.ts": 373,

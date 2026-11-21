@@ -52,8 +52,8 @@ export function draftOf(c: Composition): CompositionDraft {
   return d
 }
 
-/** Primeiro campeão de cada lane, para a prévia da comp nas listas. */
-export const compositionPreview = (c: Composition) => DRAFT_LANES.map(lane => c.lanes[lane]?.[0]).filter(Boolean)
+/** Primeiro campeão de cada lane (top, jg, mid, adc, sup), com "" onde a lane está vazia. */
+export const compositionPreview = (c: Composition): string[] => DRAFT_LANES.map(lane => c.lanes[lane]?.[0] ?? "")
 
 export function blank(name = "Nova comp"): Composition {
   return {
@@ -77,6 +77,8 @@ export type TeamState = {
   tacticsMatchup?: string | null
   tacticsGeneral?: boolean
   tacticsDrawer?: boolean
+  /** Barra de confronto do draft recolhida em uma linha. */
+  matchupBarCollapsed?: boolean
   /** Visão do quadro de Táticas: `draft` (cards com arte) ou `positions` (visão Lane, só ícones). */
   tacticsBoard?: "draft" | "positions"
   /** Aba do Conhecimento aberta (`wave` ou `obj`). */
