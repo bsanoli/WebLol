@@ -1,5 +1,12 @@
 [
   {
+    "version": "1.82",
+    "date": "2026-11-21",
+    "changes": [
+      "Envio e publicação: quando um print de tática não chega ao time, o aviso diz o motivo (por exemplo, regra dos prints não publicada no Firebase ou sem conexão)."
+    ]
+  },
+  {
     "version": "1.81",
     "date": "2026-11-21",
     "changes": [

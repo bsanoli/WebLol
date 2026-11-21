@@ -15,7 +15,7 @@ import { normId } from "@/shared/lib/account-id"
 import { toast } from "@/shared/lib/dom"
 import { openRoute, routeRoots, writeRoute } from "./router"
 import { parseOfficial } from "./external-data"
-import { flushImages, splitByPendingPrints } from "./images"
+import { flushImages, pendingPrintReason, splitByPendingPrints } from "./images"
 import { BKEY, canPublish, KEY, lsGet, lsSet, local, meKey, preview, SKEY, teamPath, user, pending } from "./identity"
 import { loadMembership } from "./membership"
 import { session, type LogEntry, type Official } from "./session"
@@ -149,7 +149,7 @@ export async function sendChanges() {
   const { ready, held } = splitByPendingPrints(changes)
   if (held.length)
     toast(
-      `${held.length} alteração(ões) ficou(aram de fora: o print ainda não chegou ao time (${held.map(itemName).join(", ")}). Use "Tentar de novo" no print e envie outra vez.`,
+      `${held.length} alteração(ões) ficou(aram de fora: o print ainda não chegou ao time (${held.map(itemName).join(", ")}). ${pendingPrintReason() || 'Use "Tentar de novo" no print e envie outra vez.'}`,
       7000,
     )
   if (!ready.length) return uiHooks.updateStatus()
@@ -198,8 +198,8 @@ export async function publish(approved: SentChange[], rejected: SentChange[], la
   const held = splitByPendingPrints(approved).held
   if (held.length)
     return toast(
-      `Não publiquei: o print de ${held.map(itemName).join(", ")} ainda não chegou ao time. Use "Tentar de novo" no print e publique outra vez.`,
-      7000,
+      `Não publiquei: o print de ${held.map(itemName).join(", ")} ainda não chegou ao time. ${pendingPrintReason() || 'Use "Tentar de novo" no print e publique outra vez.'}`,
+      9000,
     )
   let result: OfficialRead
   try {

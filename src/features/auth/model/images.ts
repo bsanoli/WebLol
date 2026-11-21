@@ -52,6 +52,17 @@ const canShareImages = () => !!(session.team && user() && !user()?.solo)
 const uploadImage = (id: string, data: string) => dbSet(teamPath("imagens"), id, { data, at: Date.now(), by: meId() })
 
 let flushing: Promise<number> | null = null
+/** Motivo do último envio de print que falhou, para a mensagem dizer o que fazer. */
+let lastUploadError = ""
+
+/** Explica por que os prints não chegaram ao time, a partir do último erro de envio. */
+export function pendingPrintReason() {
+  if (lastUploadError === "permission-denied")
+    return "O banco do time recusou o print: a regra dos prints (imagens) precisa estar publicada no Firebase."
+  if (lastUploadError === "unavailable" || lastUploadError === "deadline-exceeded")
+    return "Sem conexão com o banco do time agora."
+  return lastUploadError ? `Erro no envio: ${lastUploadError}.` : ""
+}
 
 /** Contrato com os iframes: `window.weblolImages` (ver `host-bridge.ts`). */
 export const hostImages: HostImages = {
@@ -105,10 +116,12 @@ export const hostImages: HostImages = {
         if (!data) continue // apagado deste navegador: não há o que enviar
         try {
           await uploadImage(id, data)
+          lastUploadError = ""
           missingUntil.delete(id)
         } catch (error) {
           const code = (error as { code?: string } | null)?.code
           if (code === "permission-denied" && (await dbGet(teamPath("imagens"), id).catch(() => null))) continue
+          lastUploadError = code || (error as Error | null)?.message || "erro desconhecido"
           left.push(id)
         }
       }
