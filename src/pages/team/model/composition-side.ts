@@ -51,3 +51,14 @@ export const oppositeSide = (side: DraftSide): DraftSide => (side === "blue" ? "
 export function enemyOrder(comp: Composition, enemy: Composition) {
   return draftOf(enemy).order[oppositeSide(draftOf(comp).side)]
 }
+
+/**
+ * Lado em que a comp aparece no quadro. A nossa fica no lado salvo nela; a adversária que uma comp nossa enfrenta
+ * fica do lado oposto ao dessa comp (a aberta, se for ela); sem quem a enfrente, vale o lado salvo na adversária.
+ */
+export function boardSideOf<T extends Composition>(comp: T, comps: T[], currentId?: string | null): DraftSide {
+  if (!isEnemy(comp)) return draftOf(comp).side
+  const facing = comps.filter(item => enemyCompositionOf(item, comps) === comp)
+  const ours = facing.find(item => item.id === currentId) ?? facing[0]
+  return ours ? oppositeSide(draftOf(ours).side) : draftOf(comp).side
+}

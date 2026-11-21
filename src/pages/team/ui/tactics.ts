@@ -9,7 +9,7 @@ import {
   type DraftSide,
 } from "../model/local-state"
 import type { SlotInfo } from "../model/champion-slots"
-import { enemiesOf, isEnemy, oppositeSide, oursOf, enemyOrder, ownerOf } from "../model/composition-side"
+import { boardSideOf, enemiesOf, isEnemy, oppositeSide, oursOf, enemyOrder, ownerOf } from "../model/composition-side"
 import { opggOf } from "../model/tactics"
 import { draftTeamHTML } from "./draft-board"
 import { positionBoardHTML, type PositionSide } from "./tactic-position-board"
@@ -26,6 +26,12 @@ type Markup = {
   img: (name: string) => string
   esc: (value: unknown) => string
   pickArt: (name: string) => string
+}
+
+/** Bolinha do lado salvo na comp, à esquerda dos retratos na lista. */
+function sideMark(side: DraftSide) {
+  const label = side === "blue" ? "Lado azul" : "Lado vermelho"
+  return `<span class="side-dot ${side} comp-side-mark" role="img" aria-label="${label}" title="${label}"></span>`
 }
 
 /** Coluna do quadro: cabeçalho do lado e, abaixo, os picks e bans no mesmo desenho da Ordem do draft, só que compacto. */
@@ -170,7 +176,7 @@ export function tacticsHTML(
   const tab = (x: Composition) => {
     const on = !general && !active && x.id === c.id
     return `<button type="button" class="dz-tab${on ? " on" : ""}" data-tactic-comp="${esc(x.id)}" draggable="true" aria-pressed="${on}" title="${esc(x.name)}">
-      <b>${esc(x.name)}${mark(hasTactic(x.id))}</b><span class="mini">${compositionPreview(x).map(img).join("") || "<small>vazia</small>"}</span></button>`
+      <b>${esc(x.name)}${mark(hasTactic(x.id))}</b>${sideMark(boardSideOf(x, compositions, c.id))}<span class="mini">${compositionPreview(x).map(img).join("") || "<small>vazia</small>"}</span></button>`
   }
   const ours = oursOf(compositions),
     enemies = enemiesOf(compositions),
@@ -181,7 +187,7 @@ export function tacticsHTML(
     const on = active?.matchup.id === matchup.id,
       title = esc(matchupTitle(o, e))
     return `<div class="tx-mx-row"><button type="button" class="dz-tab${on ? " on" : ""}" data-tactic-matchup="${esc(matchup.id)}" aria-pressed="${on}" title="${title}">
-      <b>${title}${mark(hasTactic(matchupKey(matchup.id)))}</b></button>
+      <b>${sideMark(draftOf(o).side)}${title}${mark(hasTactic(matchupKey(matchup.id)))}</b></button>
       <button type="button" class="tx-mx-del" data-matchup-delete="${esc(matchup.id)}" aria-label="Excluir o confronto ${title}" title="Excluir o confronto (as composições ficam)">${iconMarkup("trash")}</button></div>`
   }
   const footer = (team: ListKey) =>

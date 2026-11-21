@@ -1846,3 +1846,18 @@
 #v-comps .tx-pos-ic.dragging {
   opacity: 0.35;
 }
+
+/* Bolinha do lado da comp nas listas de escolha (Táticas e Ordem do draft), à esquerda dos retratos */
+.side-dot.comp-side-mark {
+  margin: 0 2px 0 0;
+  vertical-align: middle;
+}
+.matchup-item-end {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  gap: 6px;
+}
+.tx-mx-row .side-dot.comp-side-mark {
+  margin-right: 6px;
+}

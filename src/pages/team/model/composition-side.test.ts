@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest"
 import {
+  boardSideOf,
   compTitle,
   enemiesOf,
   isEnemy,
@@ -11,7 +12,7 @@ import {
   settleOwner,
   ownerOf,
 } from "./composition-side"
-import { blank, type Composition } from "./local-state"
+import { blank, draftOf, type Composition } from "./local-state"
 
 function comp(name: string, extra: Partial<Composition> & Record<string, unknown> = {}): Composition {
   return Object.assign(blank(name), { id: name.toLowerCase().replace(/\s+/g, "-") }, extra)
@@ -117,5 +118,28 @@ describe("enemyOrder", () => {
     }
     expect(oppositeSide("red")).toBe("blue")
     expect(enemyOrder(ours, enemy)).toEqual(["top", "jg", "mid", "adc", "sup"])
+  })
+})
+
+describe("boardSideOf", () => {
+  it("a nossa fica no lado salvo nela", () => {
+    const ours = comp("Nossa")
+    draftOf(ours).side = "red"
+    expect(boardSideOf(ours, [ours])).toBe("red")
+  })
+
+  it("a adversária enfrentada fica do lado oposto ao da nossa, mesmo com outro lado salvo", () => {
+    const rival = comp("Rival", { owner: "enemy" })
+    const ours = comp("Nossa")
+    setEnemyId(ours, rival.id)
+    draftOf(ours).side = "blue"
+    draftOf(rival).side = "blue"
+    expect(boardSideOf(rival, [ours, rival])).toBe("red")
+  })
+
+  it("a adversária sem quem a enfrente usa o lado salvo nela", () => {
+    const rival = comp("Rival", { owner: "enemy" })
+    draftOf(rival).side = "red"
+    expect(boardSideOf(rival, [rival])).toBe("red")
   })
 })

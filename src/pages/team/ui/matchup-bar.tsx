@@ -5,9 +5,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/shared/ui/popover"
 import type { CompOwner } from "../model/composition-side"
 import type { DraftSide } from "../model/local-state"
 import { ActionMenu, Icon, keepFocusOutsideFrame, renderControl, useTeamOverlay } from "./team-controls"
-
-/** Composição como aparece nas listas da barra: nome, prévia (HTML dos retratos) e campeões para a busca. */
-type MatchupItem = { id: string; name: string; title: string; preview: string; champions: string[] }
+import { MatchupOption, Preview, type MatchupItem } from "./matchup-preview"
 
 export type MatchupBarProps = {
   ours: MatchupItem[]
@@ -32,16 +30,6 @@ const SIDES: [DraftSide, string][] = [
   ["blue", "Azul"],
   ["red", "Vermelho"],
 ]
-
-function Preview({ html }: { html: string }) {
-  return html ? (
-    <span className="mini matchup-preview" dangerouslySetInnerHTML={{ __html: html }} />
-  ) : (
-    <span className="mini matchup-preview">
-      <small>vazia</small>
-    </span>
-  )
-}
 
 /** Nome da comp editável no próprio card do lado: Enter ou sair do campo salva, Esc cancela. */
 function InlineName({
@@ -181,16 +169,7 @@ function CompPicker({
             </button>
           )}
           {matches.map(item => (
-            <button
-              type="button"
-              key={item.id}
-              className="matchup-item"
-              aria-pressed={item.id === selected?.id}
-              onClick={() => choose(item.id)}
-            >
-              <b title={item.title}>{item.title}</b>
-              <Preview html={item.preview} />
-            </button>
+            <MatchupOption key={item.id} item={item} selected={item.id === selected?.id} onChoose={choose} />
           ))}
           {!matches.length && (
             <p className="matchup-empty" role="status">

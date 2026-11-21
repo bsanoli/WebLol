@@ -1,5 +1,12 @@
 [
   {
+    "version": "1.78",
+    "date": "2026-11-20",
+    "changes": [
+      "Composições: nas listas de escolha (Táticas e troca de composição na Ordem do draft) uma bolinha azul ou vermelha à esquerda dos retratos mostra o lado salvo na comp. Na aba Confrontos, a bolinha do nosso lado aparece antes do nome."
+    ]
+  },
+  {
     "version": "1.77",
     "date": "2026-11-20",
     "changes": [
