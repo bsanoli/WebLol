@@ -68,6 +68,7 @@ Este arquivo liga o termo que aparece na tela ao nome que o código usa. Consult
 | Fonte (Worlds, SoloQ) | `dataset: "worlds" \| "soloq"` | Base de partidas usada nas telas. | parâmetro `?fonte=` da URL (contrato), alias `@dataset/*` |
 | Visão geral | `worldsOverview` | Página inicial do Worlds. | rota `geral` |
 | Composições do Worlds | `proComposition` | Composições jogadas por equipes profissionais. Não confundir com `composition` da Área do time. | `worlds-compositions` (nome do slice, mantido) |
+| Resumo do dataset | `summary` (`comps`, `champs`, `matchups`) | Jogos de pro e amostras por campeão e rota. Em `comps`: `stage`, `series`, `game`, `blue`, `red`, `blueWon`, `lanes`. Em `champs[].lanes`: `sampleGames`, `wins`, `avgKills`, `avgDeaths`, `avgAssists`. | `st`, `s`, `g`, `b`, `r`, `bw`, `p`, `n`, `w`, `k`, `d`, `a`, `mgames` |
 | Versões da interface | `uiVersions` | Histórico de mudanças visíveis exibido na Administração. | — |
 
 ## Nomes salvos (contratos)

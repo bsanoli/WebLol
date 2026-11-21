@@ -21,11 +21,11 @@ type Game = (typeof DATA.comps)[number]
 type LaneCells = [string, string, string, string, string, string, string]
 
 function compDraft(game: Game, panelId: string) {
-  const draft = drafts[`${game.s}:${game.g}`]
+  const draft = drafts[`${game.series}:${game.game}`]
   if (!draft) return ""
 
-  const teams = { blue: game.b, red: game.r }
-  const codes = { blue: teamCode(game.b), red: teamCode(game.r) }
+  const teams = { blue: game.blue, red: game.red }
+  const codes = { blue: teamCode(game.blue), red: teamCode(game.red) }
   const first = draft.firstPick
   const second = first === "blue" ? "red" : "blue"
   const phases = [
@@ -126,7 +126,7 @@ export function compCard(g: Game, q: string, champions: Set<string>, index: numb
     `<tr>${side(blueChampion, bluePlayer, blueKda, false)}<td class="match-lane">${laneIconMarkup(lane, true)}</td>${side(redChampion, redPlayer, redKda, true)}</tr>`
   return `<article class="wl-panel cg">
     <div class="match-card-header">
-      <h3 class="match-game">${esc(g.st)} <span aria-hidden="true">·</span> Jogo ${g.g}</h3>
+      <h3 class="match-game">${esc(g.stage)} <span aria-hidden="true">·</span> Jogo ${g.game}</h3>
       ${
         draft
           ? `<button type="button" class="worlds-detail-action match-draft-toggle" data-slot="button" data-variant="ghost" data-size="sm"
@@ -135,8 +135,8 @@ export function compCard(g: Game, q: string, champions: Set<string>, index: numb
       }
     </div>
     <div class="match-details">
-      <div class="match-scoreboard">${team(g.b, "azul", g.bw)}<span class="vs">VS</span>${team(g.r, "vermelho", !g.bw)}</div>
-      <table data-slot="table" class="match-lanes" aria-label="Duelos por rota entre ${esc(g.b)} e ${esc(g.r)}">
+      <div class="match-scoreboard">${team(g.blue, "azul", g.blueWon)}<span class="vs">VS</span>${team(g.red, "vermelho", !g.blueWon)}</div>
+      <table data-slot="table" class="match-lanes" aria-label="Duelos por rota entre ${esc(g.blue)} e ${esc(g.red)}">
         <colgroup><col><col class="kda-column"><col class="lane-column"><col class="kda-column"><col></colgroup>
         <thead><tr>
           <th scope="col" aria-label="Campeão e jogador do lado azul">Campeão</th>
@@ -145,7 +145,7 @@ export function compCard(g: Game, q: string, champions: Set<string>, index: numb
           <th scope="col" aria-label="KDA do lado vermelho">KDA</th>
           <th scope="col" aria-label="Campeão e jogador do lado vermelho">Campeão</th>
         </tr></thead>
-        <tbody>${g.p.map(row => laneRow(row.map(String) as LaneCells)).join("")}</tbody>
+        <tbody>${g.lanes.map(row => laneRow(row.map(String) as LaneCells)).join("")}</tbody>
       </table>
     </div>
     ${draft}

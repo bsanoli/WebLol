@@ -11,7 +11,7 @@ export const teamFilterLabel = () =>
     : "Todos os times"
 
 export function compsView() {
-  const teams = [...new Set(DATA.comps.flatMap(g => [g.b, g.r]))].sort()
+  const teams = [...new Set(DATA.comps.flatMap(g => [g.blue, g.red]))].sort()
   return `<section class="worlds-compositions" aria-labelledby="comps-title">
     <h2 id="comps-title" class="comps-intro">Composições do Worlds</h2>
     <div class="wl-panel comp-filters" role="group" aria-label="Filtrar jogos">

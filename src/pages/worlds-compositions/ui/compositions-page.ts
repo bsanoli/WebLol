@@ -25,7 +25,7 @@ function wireComps(publishWorlds: PublishWorlds) {
   matchGrid.onclick = handleMatchGridClick
   const activeChampions = $("#cc-active")
   const search = $<HTMLInputElement>("#cq")
-  const stages = [...new Set(all.map(game => game.st))]
+  const stages = [...new Set(all.map(game => game.stage))]
   const stageRoot = createRoot($("#comp-stage"))
   compStageRoot = stageRoot
   const drawStage = () => {
@@ -95,7 +95,7 @@ function wireComps(publishWorlds: PublishWorlds) {
     const L = filterCompGames(all, q, champions)
     let extra = ""
     if (compFilters.team) {
-      const w = L.filter(g => (g.b === compFilters.team) === g.bw).length
+      const w = L.filter(g => (g.blue === compFilters.team) === g.blueWon).length
       extra = `<span>${esc(compFilters.team)} · ${w} vitórias · ${L.length - w} derrotas</span>`
     }
     const countLabel = hasCompFilters()

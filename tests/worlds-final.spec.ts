@@ -3,10 +3,10 @@ import { confirmedFinalSeries } from "../src/pages/worlds-overview/model/final-s
 
 test("Confirma a final mesmo quando as equipes trocam de lado", () => {
   const games = [
-    { s: "final-1", st: "Final", g: 1, b: "Gen.G", r: "Bilibili Gaming", bw: true },
-    { s: "final-1", st: "Final", g: 2, b: "Gen.G", r: "Bilibili Gaming", bw: false },
-    { s: "final-1", st: "Final", g: 3, b: "Gen.G", r: "Bilibili Gaming", bw: false },
-    { s: "final-1", st: "Final", g: 4, b: "Bilibili Gaming", r: "Gen.G", bw: true },
+    { series: "final-1", stage: "Final", game: 1, blue: "Gen.G", red: "Bilibili Gaming", blueWon: true },
+    { series: "final-1", stage: "Final", game: 2, blue: "Gen.G", red: "Bilibili Gaming", blueWon: false },
+    { series: "final-1", stage: "Final", game: 3, blue: "Gen.G", red: "Bilibili Gaming", blueWon: false },
+    { series: "final-1", stage: "Final", game: 4, blue: "Bilibili Gaming", red: "Gen.G", blueWon: true },
   ]
   expect(confirmedFinalSeries([...games].reverse())).toEqual({
     winner: "Bilibili Gaming",
@@ -14,8 +14,8 @@ test("Confirma a final mesmo quando as equipes trocam de lado", () => {
     score: [3, 1],
   })
   expect(confirmedFinalSeries(games.slice(0, 3))).toBeUndefined()
-  expect(confirmedFinalSeries([...games.slice(0, 3), { ...games[3], g: 3 }])).toBeUndefined()
-  expect(confirmedFinalSeries([...games, { ...games[3], g: 5 }])).toBeUndefined()
+  expect(confirmedFinalSeries([...games.slice(0, 3), { ...games[3], game: 3 }])).toBeUndefined()
+  expect(confirmedFinalSeries([...games, { ...games[3], game: 5 }])).toBeUndefined()
 })
 
 test("Mostra o placar confirmado somente na visão geral", async ({ page }) => {

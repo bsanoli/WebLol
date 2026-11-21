@@ -317,10 +317,10 @@ def aggregate(players, champion, boots):
 def lane_sample(entries):
     n = len(entries)
     return {
-        "picks": n, "n": n, "w": sum(1 for _, p, won in entries if won),
-        "k": round(sum(p["kda"][0] for _, p, _ in entries) / n, 2),
-        "d": round(sum(p["kda"][1] for _, p, _ in entries) / n, 2),
-        "a": round(sum(p["kda"][2] for _, p, _ in entries) / n, 2),
+        "picks": n, "sampleGames": n, "wins": sum(1 for _, p, won in entries if won),
+        "avgKills": round(sum(p["kda"][0] for _, p, _ in entries) / n, 2),
+        "avgDeaths": round(sum(p["kda"][1] for _, p, _ in entries) / n, 2),
+        "avgAssists": round(sum(p["kda"][2] for _, p, _ in entries) / n, 2),
         "players": [list(e) for e in Counter(p["player"] for _, p, _ in entries).most_common(6)],
         "teams": [list(e) for e in Counter(p["team"] for _, p, _ in entries).most_common(4)],
     }
@@ -413,7 +413,7 @@ def build_dataset(cache, config, ddragon):
     now = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
     write("summary.json", {
         "meta": {"asOf": now if games else None, "regions": regions, "pros": len(config["pros"]), "days": config.get("days", 14)},
-        "games": len(games), "mgames": [], "comps": [], "players": [],
+        "games": len(games), "compGames": [], "comps": [], "players": [],
         "champs": summary_champs, "matchups": summary_matchups,
     })
 
