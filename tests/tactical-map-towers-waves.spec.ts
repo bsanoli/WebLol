@@ -1,10 +1,11 @@
 import { expect, test, type Page } from "@playwright/test"
-import { size, vision, visionButton, choose, mapPoint, drag } from "./support/tactical-map"
+import { size, vision, visionButton, choose, mapPoint, drag, waitForRealisticMap } from "./support/tactical-map"
 
 test("Destrói e restaura torres nas visões de equipe sem ligar o alcance de ataque", async ({ page }) => {
   await page.setViewportSize(size)
   await page.goto("/camp.html")
   await page.getByRole("button", { name: "Mapa tático" }).click()
+  await waitForRealisticMap(page)
   const blue = page.getByRole("button", { name: "Torre externa do topo — Azul", exact: true })
   const red = page.getByRole("button", { name: "Torre externa do topo — Vermelho", exact: true })
   const reach = page.getByRole("switch", { name: "Alcance das torres" })
@@ -68,6 +69,7 @@ test("Projeta as waves nas curvas do mapa realista e mantém o progresso salvo",
   await page.emulateMedia({ reducedMotion: "reduce" })
   await page.goto("/camp.html")
   await page.getByRole("button", { name: "Mapa tático" }).click()
+  await waitForRealisticMap(page)
   await expect(page.locator("#mapimg")).toHaveAttribute("data-map-visible", "")
   const top = page.getByRole("button", { name: "Wave — Topo — Azul" })
   const bot = page.getByRole("button", { name: "Wave — Inferior — Azul" })
@@ -136,6 +138,7 @@ test("Move wards e waves, alterna a visão aliada e restaura o estado das torres
   await page.emulateMedia({ reducedMotion: "reduce" })
   await page.goto("/camp.html")
   await page.getByRole("button", { name: "Mapa tático" }).click()
+  await waitForRealisticMap(page)
   await page.getByRole("tab", { name: "Camadas" }).click()
   await page.getByRole("switch", { name: "Mostrar Lumes Feéricos" }).click()
   const light = page.getByRole("img", { name: "Arbusto ilhado do rio superior" })

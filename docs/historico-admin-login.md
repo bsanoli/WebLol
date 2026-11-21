@@ -205,3 +205,10 @@ Formato de cada entrada: data, pedido (palavras do Bruno), decisão (quem escolh
 - **Pedido:** confronto com id próprio (nome editável, trocar comps, trocar lados, pares repetidos), sem depender da comp nossa.
 - **Decisão:** lista `matchups` na raiz do estado sincronizado (tipo `matchup`), com migração dos dados antigos mantendo os ids. Detalhes na ADR 0009. Não mexe em contas, senhas nem regras do Firestore.
 - **O que mudou:** sincronização, importação de backup e envio ao time passam a levar `matchups`; excluir uma comp deixa os confrontos com o lado vazio.
+
+## 21/11/2026: publicação travada por print que não chega ao time
+
+- **Pedido:** o Bruno viu "Não publiquei: o print de Táticas · Picks Banco Mestre ainda não chegou ao time" e não conseguia publicar.
+- **Decisão:** a trava continua (publicar uma tática com print que o time não consegue abrir deixaria o print quebrado para os outros). A mensagem passa a dizer o motivo do último envio que falhou. Quando o banco recusa (`permission-denied`), ela avisa que a regra dos prints (`times/{id}/imagens`) precisa estar publicada no Firebase. A regra já está no `firestore.rules` da main desde 19/11. Publicar regras do Firestore fica com o Fabiano, conforme a decisão de 20/11.
+- **O que mudou:** `features/auth/model/images.ts` guarda o código do último erro de envio, e `sync.ts` usa esse motivo nos avisos de envio e de publicação. Contas, senhas e regras não mudaram.
+- **Causa achada (21/11):** a regra publicada no console tem o bloco `match /imagens/{id}` fora do `match /times/{t}`, no fim do arquivo. Assim ele não vale para `times/{t}/imagens/{id}`, e todo print é recusado. O `firestore.rules` da main está certo, com o bloco dentro de `times/{t}`. A correção é publicar o bloco no lugar certo. Como publicar regras fica com o Fabiano, o Bruno foi orientado a avisá-lo e a usar o arquivo da main.

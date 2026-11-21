@@ -1,5 +1,6 @@
 import { laneIconMarkup } from "@/shared/ui/icon"
 import { championBuild, opponentBuild, type Champion, type Frequency, type LaneSample } from "../model/build-statistics"
+import { encountersStatus } from "../model/encounters"
 import { esc, kdaOf, teamLogo } from "@/entities/match"
 import { runePage } from "./runes"
 import { buildSkills } from "./build-skills"
@@ -47,6 +48,11 @@ function frequencyList(options: Option[]) {
 }
 
 function buildHtml(champion: Champion, lane: string, withTimeline: boolean, opponent: string) {
+  if (opponent && encountersStatus(champion.name) !== "ready") {
+    return encountersStatus(champion.name) === "error"
+      ? `<p class="build-data-sample" role="status">Não foi possível carregar os confrontos de ${esc(champion.name)}. Escolha o adversário de novo para tentar outra vez.</p>`
+      : `<p class="build-data-sample" role="status">Carregando os confrontos de ${esc(champion.name)}…</p>`
+  }
   const build = opponent ? opponentBuild(champion, lane, opponent) : championBuild(champion, lane)
   if (!build) return `<span class="na">Sem build coletada para ${esc(champion.name)}.</span>`
   const { games } = build

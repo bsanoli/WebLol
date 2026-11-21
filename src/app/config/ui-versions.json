@@ -1,12 +1,33 @@
 [
   {
-    "version": "1.80",
+    "version": "1.83",
     "date": "2026-11-21",
     "changes": [
       "Táticas: o quadro ocupa a gaveta. Draft e Lane têm a mesma altura, a Lane divide a altura em seis linhas iguais e, com a lista recolhida, o quadro vai até o fim. A página não rola de 1280×720 a 1920×1080.",
       "Táticas: uma barra só no topo do quadro, com Draft | Lane e Desfazer à esquerda e Trocar lados e Editar na Ordem do draft à direita, todos na mesma altura.",
       "Ordem do draft: a barra de confronto não recolhe mais. A tag Confronto ficou dourada e sólida, e Sair do confronto virou botão com contorno e ícone.",
       "Catálogo de campeões: busca, filtros de posição só com ícone e Ordenar ficam em uma linha (duas, se faltar largura)."
+    ]
+  },
+  {
+    "version": "1.82",
+    "date": "2026-11-21",
+    "changes": [
+      "Envio e publicação: quando um print de tática não chega ao time, o aviso diz o motivo (por exemplo, regra dos prints não publicada no Firebase ou sem conexão)."
+    ]
+  },
+  {
+    "version": "1.81",
+    "date": "2026-11-21",
+    "changes": [
+      "Táticas, visão Draft: o nome da posição em cada pick virou um seletor. Trocar a posição troca a ordem dos picks daquele lado, igual na Ordem do draft."
+    ]
+  },
+  {
+    "version": "1.80",
+    "date": "2026-11-21",
+    "changes": [
+      "Táticas: o bloco de notas mantém a rolagem quando você muda algo no quadro (visão Lane ou Draft), em vez de voltar para o topo."
     ]
   },
   {

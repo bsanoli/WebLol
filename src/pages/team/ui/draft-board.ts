@@ -86,6 +86,8 @@ export function draftTeamHTML(
       list = source.lanes[lane as DraftLane],
       main = list[0],
       on = editing(lane)
+    // Posição do pick: trocar aqui troca a ordem das posições do lado, igual na Ordem do draft e na gaveta de Táticas.
+    const laneSelect = `<select data-team-select="lane" data-pick-position="${i}" data-draft-side="${owner}" aria-label="Posição do pick ${t}${i + 1}">${DRAFT_LANES.map(x => `<option value="${x}"${x === lane ? " selected" : ""}>${slots[x].n}</option>`).join("")}</select>`
     const drag = main ? ` draggable="true" data-n="${esc(main)}" data-from="${lane}"` : ""
     const target = `<button type="button" class="pk-target pick-choice"${drag} data-champion-slot="0" data-champion-name="${esc(main)}" data-draft-target="${lane}" data-draft-side="${owner}" aria-pressed="${on}" aria-label="${PICKNAME[s.code]} ${main ? esc(main) : "Escolher campeão"} · ${L.n}">
           ${meta}${main ? "" : iconMarkup("champion-add")}
@@ -102,13 +104,13 @@ export function draftTeamHTML(
         .join("")
       return `<div class="pk ${side} mine${on ? " act" : ""}" data-l="${lane}" data-champion-group="${t}-pick-${i}" style="--lc:var(${L.c})">
         ${pickArt(main)}
-        <span class="pk-lane"><span class="pk-lane-name">${L.n}</span>${portraits}</span>
+        <span class="pk-lane"><span class="pk-lane-name lane-label">${laneSelect}</span>${portraits}</span>
         ${target}</div>`
     }
     return `<div class="pk ${side} mine${on ? " act" : ""}" data-l="${lane}" data-champion-group="${t}-pick-${i}" style="--lc:var(${L.c})">
         ${pickArt(main)}
         ${target}
-        <div class="pkf"><span class="lane-label"><select data-team-select="lane" data-pick-position="${i}" data-draft-side="${owner}" aria-label="Posição do pick ${t}${i + 1}">${DRAFT_LANES.map(x => `<option value="${x}"${x === lane ? " selected" : ""}>${slots[x].n}</option>`).join("")}</select></span>
+        <div class="pkf"><span class="lane-label">${laneSelect}</span>
         ${main ? mini(main, lane, 0) : ""}
         ${
           list.length > 1

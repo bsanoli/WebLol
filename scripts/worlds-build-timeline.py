@@ -23,6 +23,8 @@ MANUAL = {  # id do jogo: (time azul, time vermelho, lado vencedor)
 }
 
 builds = json.loads((DATA / "worlds-2026-builds.json").read_text(encoding="utf-8"))
+if "games" not in builds:
+    raise SystemExit("worlds-2026-builds.json já foi separado (sem `games`). Rode este script com o arquivo completo e depois scripts/split_build_encounters.py.")
 worlds = json.loads((DATA / "worlds.json").read_text(encoding="utf-8"))
 drafts = {tuple(sorted(p[1] for p in c["p"])): c for c in worlds["comps"]}
 timeline, missing = [], []

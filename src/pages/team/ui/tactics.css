@@ -2158,3 +2158,20 @@
 .tx-draft > .tx-draft-empty {
   flex: 1 1 auto;
 }
+
+/* Gaveta de Táticas (visão Draft): a posição do pick é um seletor, como na Ordem do draft */
+#v-comps.tactics-view .tx-side-col .pk-lane-name.lane-label {
+  height: auto;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  pointer-events: auto;
+}
+#v-comps.tactics-view .tx-side-col .pk-lane-name .team-select [data-team-trigger="select"] {
+  min-height: 28px;
+  border-left: 3px solid var(--lc, var(--line));
+  background: color-mix(in srgb, var(--bg) 82%, transparent);
+  color: var(--txt);
+  font-size: 12px;
+  font-weight: 700;
+}

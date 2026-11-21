@@ -1,14 +1,14 @@
-import { isEmbedded, navigateHost } from "@/shared/host-bridge"
-import { createElement } from "react"
 import { createRoot, type Root } from "react-dom/client"
 import { buildGameCount, buildsTable, buildMatchesQuery, sortBuildRows } from "./builds-table"
 import { buildLaneHighlights, buildMatchups } from "./build-matchups"
 import { hydrateBuildTimelines } from "./load-build-timeline"
 import { buildOpponentOptions } from "../model/build-statistics"
-import { WorldsOpponentSelect } from "./opponent-select"
+import { discardFailedEncounters } from "../model/encounters"
+import { loadOpponentEncounters } from "./build-opponent-loading"
+import { switchBuildSource } from "./build-source-switch"
+import { mountOpponentSelect } from "./opponent-select"
 import { LANES, championSlug } from "@/entities/match"
 import DATA from "@dataset/summary"
-import { DATASET } from "@/shared/dataset"
 import { enhanceAnalyticsUI } from "@/shared/lib/analytics-dom"
 import { positionFilter, toLane, type Lane } from "./position-filter"
 import { $ } from "@/shared/lib/dom"
@@ -66,14 +66,11 @@ function wireBuilds({ publishWorlds, buildsPath }: BuildRouteDeps) {
     adversario: buildChampion && buildOpponent,
   })
   const publish = (replace = false) => publishWorlds("builds", parts(), filters(), replace)
-  $(".build-source-options").onclick = event => {
-    const source = (event.target as Element).closest<HTMLElement>("[data-build-source]")?.dataset.buildSource
-    if (!source || source === DATASET.source) return
-    const expanded = bc.querySelector<HTMLElement>('.build-toggle[aria-expanded="true"]')?.dataset.buildToggle
-    const path = buildsPath(source, expanded ? [expanded] : parts(), filters())
-    if (isEmbedded()) navigateHost({ path, focusSource: true })
-    else location.assign("./#" + path)
-  }
+  $(".build-source-options").onclick = event =>
+    switchBuildSource(event, source => {
+      const expanded = bc.querySelector<HTMLElement>('.build-toggle[aria-expanded="true"]')?.dataset.buildToggle
+      return buildsPath(source, expanded ? [expanded] : parts(), filters())
+    })
   const draw = (restoreOpponentFocus = false, normalizeRoute = false) => {
     const f = q.value.trim().toLowerCase()
     disposeBuildControls()
@@ -105,6 +102,13 @@ function wireBuilds({ publishWorlds, buildsPath }: BuildRouteDeps) {
     if (buildOpponent && !opponents.some(opponent => opponent.slug === buildOpponent)) {
       buildOpponent = ""
       if (normalizeRoute) publish(true)
+    }
+    if (champion && buildOpponent) {
+      loadOpponentEncounters(
+        champion.name,
+        () => `${buildChampion}/${buildOpponent}`,
+        () => draw(restoreOpponentFocus),
+      )
     }
     const context = champion ? buildMatchups(champion, position) : buildLaneHighlights(matches, bLane)
     highlights = champion ? "" : context
@@ -142,19 +146,17 @@ function wireBuilds({ publishWorlds, buildsPath }: BuildRouteDeps) {
     sortRows()
     const opponentSelect = bc.querySelector<HTMLElement>("[data-build-opponent]")
     if (opponentSelect) {
-      opponentSelectRoot = createRoot(opponentSelect)
-      opponentSelectRoot.render(
-        createElement(WorldsOpponentSelect, {
-          opponents,
-          value: buildOpponent,
-          restoreFocus: restoreOpponentFocus,
-          onChange: (value: string) => {
-            buildOpponent = value
-            draw(true)
-            publish()
-          },
-        }),
-      )
+      opponentSelectRoot = mountOpponentSelect(opponentSelect, {
+        opponents,
+        value: buildOpponent,
+        restoreFocus: restoreOpponentFocus,
+        onChange: value => {
+          if (champion) discardFailedEncounters(champion.name)
+          buildOpponent = value
+          draw(true)
+          publish()
+        },
+      })
     }
     enhanceAnalyticsUI()
     hydrateBuildTimelines(bc)

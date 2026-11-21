@@ -1,6 +1,8 @@
 import { defineConfig, devices } from "@playwright/test"
 
-const baseURL = "http://127.0.0.1:5180"
+// PLAYWRIGHT_PORT deixa rodar a suíte em outra porta quando outra cópia do projeto já usa a 5180.
+const port = process.env.PLAYWRIGHT_PORT ?? "5180"
+const baseURL = `http://127.0.0.1:${port}`
 const isCi = Boolean(process.env.CI)
 
 export default defineConfig({
@@ -14,7 +16,7 @@ export default defineConfig({
   expect: { timeout: 10_000 },
   use: { ...devices["Desktop Chrome"], baseURL, trace: "retain-on-failure" },
   webServer: {
-    command: "npm run dev -- --port 5180",
+    command: `npm run dev -- --port ${port}`,
     url: baseURL,
   },
 })

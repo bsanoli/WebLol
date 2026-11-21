@@ -183,7 +183,7 @@ Renomeações vão em commits próprios, sem mudança de comportamento, de prefe
 
 ### Onda 6. Desempenho
 
-**Situação:** parcial, 2026-11-20. Feitos os itens 1, 2, 4 e 5 e, no item 3, o código de Builds e Composições do Worlds sai do pacote inicial (268 → 89 kB gzip). Os retratos dos campeões passaram de PNG para WebP (4,86 → 0,73 MB). Seguem abertos os dados da SoloQ e as chaves de `worlds.json`; a meta de metade do volume só vale para as rotas que carregam os retratos (por exemplo Composições). Ver [pedido](pedidos/2026-11-20-ondas-6-e-7.md).
+**Situação:** parcial, 2026-11-20. Feitos os itens 1, 2, 4 e 5 e, no item 3, o código de Builds e Composições do Worlds sai do pacote inicial (268 → 89 kB gzip). Os retratos dos campeões passaram de PNG para WebP (4,86 → 0,73 MB). Os dados da SoloQ por campeão entraram na Onda 10 (bundle da lista de Builds 4,27 → 2,00 MB); segue aberta a troca das chaves de `worlds.json`; a meta de metade do volume só vale para as rotas que carregam os retratos (por exemplo Composições). Ver [pedido](pedidos/2026-11-20-ondas-6-e-7.md).
 
 1. Montar só a aba ativa da Área do time.
 2. Carregar o mapa realista e o Excalidraw sob demanda.

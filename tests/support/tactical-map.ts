@@ -1,4 +1,4 @@
-import type { FrameLocator, Page } from "@playwright/test"
+import { expect, type FrameLocator, type Page } from "@playwright/test"
 
 export const size = { width: 1600, height: 1000 }
 
@@ -22,3 +22,11 @@ export async function drag(page: Page, from: { x: number; y: number }, to: { x: 
   await page.mouse.move(to.x, to.y, { steps: 8 })
   await page.mouse.up()
 }
+
+/**
+ * O mapa realista vem ligado, mas a visão só passa a usar a grade dele quando a imagem termina de carregar
+ * (`data-map-visible`). Antes disso vale a grade do minimapa, que não tem os mesmos arbustos. Testes que medem
+ * a visão esperam a imagem, senão o resultado depende da velocidade da máquina.
+ */
+export const waitForRealisticMap = (team: Page | FrameLocator) =>
+  expect(team.locator("#mapimg[data-map-visible]")).toBeAttached()

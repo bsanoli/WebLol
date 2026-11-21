@@ -15,6 +15,7 @@ const datasets = {
     builds: "data/worlds-2026-builds.json",
     "build-assets": "data/worlds-2026-build-assets.json",
     "build-timeline": "data/worlds-2026-build-timeline.json",
+    encounters: "data/worlds-2026-encounters.ts",
   },
   soloq: {
     summary: "data/soloq/summary.json",
@@ -22,6 +23,7 @@ const datasets = {
     builds: "data/soloq/builds.json",
     "build-assets": "data/soloq/build-assets.json",
     "build-timeline": "data/soloq/build-timeline.json",
+    encounters: "data/soloq/encounters.ts",
   },
 }
 
@@ -40,13 +42,19 @@ function developmentDatasets(): Plugin {
         return `export default document.body.dataset.dataset === "soloq"
           ? "/${datasets.soloq["build-timeline"]}" : "/${datasets.worlds["build-timeline"]}";`
       }
+      if (datasetName === "encounters") {
+        return `const files = await (document.body.dataset.dataset === "soloq"
+          ? import("/${datasets.soloq.encounters}")
+          : import("/${datasets.worlds.encounters}"));
+        export const loadEncounterFile = files.loadEncounterFile;`
+      }
       const name = datasetName as keyof typeof datasets.worlds
       const worlds = datasets.worlds[name]
       const soloq = datasets.soloq[name]
       if (!worlds || !soloq) return
       const exports =
         name === "builds"
-          ? "export const { champions, games, itemNames, runeNames } = data;"
+          ? "export const { champions, opponents, itemNames, runeNames } = data;"
           : name === "build-timeline"
             ? "export const { games } = data;"
             : ""

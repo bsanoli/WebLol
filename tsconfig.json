@@ -14,7 +14,8 @@
       "@dataset/drafts": ["./src/data/worlds-2026-drafts.json"],
       "@dataset/builds": ["./src/data/worlds-2026-builds.json"],
       "@dataset/build-assets": ["./src/data/worlds-2026-build-assets.json"],
-      "@dataset/build-timeline": ["./src/data/worlds-2026-build-timeline.json"]
+      "@dataset/build-timeline": ["./src/data/worlds-2026-build-timeline.json"],
+      "@dataset/encounters": ["./src/data/worlds-2026-encounters.ts"]
     }
   },
   "include": ["src"]

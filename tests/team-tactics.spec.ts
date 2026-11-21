@@ -122,6 +122,69 @@ test("Táticas: visão Lane só com ícones, com as mesmas ações e lembrada ao
   await expect(page.locator(".tx-draft").getByRole("button", { name: "Lane" })).toHaveAttribute("aria-pressed", "true")
 })
 
+test("Táticas: o bloco de notas mantém a rolagem ao mudar o quadro", async ({ page }) => {
+  await page.setViewportSize({ width: 1440, height: 900 })
+  await page.addInitScript(() => {
+    if (localStorage.getItem("lol-comps-time-v1")) return
+    const lanes = { top: ["Ornn", "Gnar"], jg: [], mid: [], adc: [], sup: [] }
+    localStorage.setItem(
+      "lol-comps-time-v1",
+      JSON.stringify({
+        cur: "nossa",
+        view: "tactics",
+        tacticsBoard: "positions",
+        comps: [{ id: "nossa", name: "Nossa base", team: "mine", lanes }],
+      }),
+    )
+  })
+  await page.goto("/camp.html")
+  await page.evaluate(() => window.applyWebLolRoute(["composicoes", "nossa"], new URLSearchParams("modo=taticas")))
+  const editor = page.locator(".tx-notes-body .ProseMirror")
+  await editor.click()
+  for (let i = 0; i < 50; i++) await editor.press("Enter")
+  const body = page.locator(".tx-notes-body")
+  await body.evaluate(el => {
+    el.scrollTop = 300
+  })
+  const before = await body.evaluate(el => el.scrollTop)
+  expect(before).toBeGreaterThan(0)
+
+  // Tornar uma alternativa principal redesenha o quadro; o bloco de notas continua no mesmo ponto.
+  await page.locator('.tx-pos-slot.top [data-priority="Gnar"]').click()
+  await expect(page.locator('.tx-pos-slot.top .tx-pos-ic.main[data-n="Gnar"]')).toBeVisible()
+  await expect.poll(() => page.locator(".tx-notes-body").evaluate(el => el.scrollTop)).toBe(before)
+})
+
+test("Táticas: trocar a posição de um pick no quadro da gaveta", async ({ page }) => {
+  await page.setViewportSize({ width: 1440, height: 1080 })
+  await page.addInitScript(() => {
+    if (localStorage.getItem("lol-comps-time-v1")) return
+    const lanes = { top: ["Ornn"], jg: ["Vi"], mid: ["Ahri"], adc: [], sup: [] }
+    localStorage.setItem(
+      "lol-comps-time-v1",
+      JSON.stringify({
+        cur: "nossa",
+        view: "tactics",
+        tacticsBoard: "draft",
+        comps: [{ id: "nossa", name: "Nossa base", team: "mine", lanes }],
+      }),
+    )
+  })
+  await page.goto("/camp.html")
+  await page.evaluate(() => window.applyWebLolRoute(["composicoes", "nossa"], new URLSearchParams("modo=taticas")))
+  const board = page.locator(".tx-draft")
+  const second = board.locator(".tx-side-col .pk").nth(1)
+  const previous = await second.getAttribute("data-l")
+  await second.locator('.pk-lane-name [data-team-trigger="select"]').click()
+  await page.getByRole("option", { name: "Top" }).click()
+  await expect(board.locator(".tx-side-col .pk").nth(1)).toHaveAttribute("data-l", "top")
+  await expect(board.locator(`.tx-side-col .pk[data-l="${previous}"]`)).toHaveCount(1)
+  const state = await page.evaluate(() => JSON.parse(localStorage.getItem("lol-comps-time-v1")!))
+  const draft = state.comps.find((c: { id: string }) => c.id === "nossa").draft
+  // Sem lado salvo, a comp fica no azul.
+  expect(draft.order[draft.side ?? "blue"][1]).toBe("top")
+})
+
 test("Ordem do draft: arrastar campeões entre cards, criar a adversária e remover soltando fora", async ({ page }) => {
   await page.addInitScript(() => {
     localStorage.setItem(

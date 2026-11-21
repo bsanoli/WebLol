@@ -68,3 +68,55 @@ test("Histórico sem compras permanece na página da build SoloQ", async ({ page
   await expect(history.getByText("Sem compras registradas.")).toBeVisible()
   await expect(history.getByRole("button", { name: "Tentar novamente" })).toHaveCount(0)
 })
+
+test("Confrontos do campeão só baixam ao escolher um adversário e se recuperam de falha", async ({ page }) => {
+  const requested: string[] = []
+  let failFirst = true
+  await page.route("**/encounters/*.json*", async route => {
+    requested.push(new URL(route.request().url()).pathname.split("/").pop() ?? "")
+    if (failFirst) {
+      failFirst = false
+      await route.fulfill({ status: 503 })
+      return
+    }
+    await route.continue()
+  })
+
+  await page.goto("/#/builds?fonte=soloq")
+  const builds = page.frameLocator("#v-soloq")
+  await expect(builds.getByRole("searchbox", { name: "Buscar campeão ou item" })).toBeVisible()
+  await page.goto("/#/builds/jayce?fonte=soloq&posicao=top")
+  await expect(builds.locator(".build-card-meta")).toContainText(/Amostra de \d+ jogos?/)
+  expect(requested).toEqual([])
+
+  await builds.locator("#build-opponent-trigger").click()
+  await builds.getByRole("group", { name: "Adversários" }).getByRole("button").nth(1).click()
+  await expect(builds.getByText("Não foi possível carregar os confrontos de Jayce.", { exact: false })).toBeVisible()
+
+  await builds.locator("#build-opponent-trigger").click()
+  await builds.getByRole("group", { name: "Adversários" }).getByRole("button").nth(2).click()
+  await expect(builds.locator(".build-card-meta")).toContainText(/Amostra de \d+ jogos?/)
+  await expect(builds.getByText("Não foi possível carregar os confrontos", { exact: false })).toHaveCount(0)
+  expect(new Set(requested)).toEqual(new Set(["jayce.json"]))
+})
+
+test("Trocar de adversário enquanto os confrontos carregam não deixa o card preso", async ({ page }) => {
+  await page.route("**/encounters/*.json*", async route => {
+    await new Promise(resolve => setTimeout(resolve, 800))
+    await route.continue()
+  })
+
+  await page.goto("/#/builds?fonte=soloq")
+  const builds = page.frameLocator("#v-soloq")
+  await expect(builds.getByRole("searchbox", { name: "Buscar campeão ou item" })).toBeVisible()
+  await page.goto("/#/builds/jayce?fonte=soloq&posicao=top")
+  await expect(builds.locator(".build-card-meta")).toContainText(/Amostra de \d+ jogos?/)
+
+  await builds.locator("#build-opponent-trigger").click()
+  await builds.getByRole("group", { name: "Adversários" }).getByRole("button").nth(1).click()
+  await builds.locator("#build-opponent-trigger").click()
+  await builds.getByRole("group", { name: "Adversários" }).getByRole("button").nth(2).click()
+
+  await expect(builds.locator(".build-card-meta")).toContainText(/Amostra de \d+ jogos?/, { timeout: 10000 })
+  await expect(builds.getByText("Carregando os confrontos", { exact: false })).toHaveCount(0)
+})

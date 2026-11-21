@@ -33,7 +33,7 @@ import {
   toast,
   touch,
 } from "./team-store"
-import { mountTacticNotesIn } from "./team-tactic-notes"
+import { mountTacticNotesIn, rememberTacticNotesScroll } from "./team-tactic-notes"
 // Arte em alta (1215×717) direto do Data Dragon; se não carregar, usa a cópia local menor.
 function pickArt(name: string) {
   const local = name ? champArt(name)?.splash : ""
@@ -81,6 +81,7 @@ export function renderEditor() {
     tabsScroll = editor.querySelector(".tx-tabs")?.scrollTop || 0
   if (editor.contains(catalog)) $("#comps").append(catalog)
   clearTeamControls(editor)
+  rememberTacticNotesScroll()
   editor.replaceChildren()
   if (tv) {
     editor.insertAdjacentHTML(
@@ -101,6 +102,7 @@ export function renderEditor() {
         pickArt,
       })}</div>`,
     )
+    editor.querySelectorAll<HTMLSelectElement>("select[data-pick-position]").forEach(field => mountTeamSelect(field))
     mountTacticNotesIn(editor, S.tacticsGeneral ? null : S.tacticsMatchup ? matchupKey(S.tacticsMatchup) : c.id)
     const txTabs = editor.querySelector(".tx-tabs")
     if (txTabs) txTabs.scrollTop = tabsScroll
@@ -167,6 +169,8 @@ $("#v-comps").addEventListener("input", e => {
 })
 $("#editor").addEventListener("change", e => {
   if (!eventTarget(e).matches("select[data-pick-position]")) return
+  // Em Táticas a troca de posição é tratada em tactic-lane-order.ts.
+  if (S.view === "tactics") return
   const enemySide = eventTarget(e).dataset.draftSide === "rival",
     owner = enemySide ? boardEnemy() : cur()
   if (!owner) return

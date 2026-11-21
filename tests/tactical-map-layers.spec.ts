@@ -1,11 +1,12 @@
 import { expect, test } from "@playwright/test"
-import { size, vision, visionButton, mapPoint, drag } from "./support/tactical-map"
+import { size, vision, visionButton, mapPoint, drag, waitForRealisticMap } from "./support/tactical-map"
 
 test("Abre Camadas com ícones em 60% e mantém o tamanho escolhido", async ({ page }) => {
   await page.setViewportSize(size)
   await page.goto("/#/time/mapa")
   await page.getByRole("button", { name: "Entrar sem usuário" }).click()
   const team = page.frameLocator("#v-camp")
+  await waitForRealisticMap(team)
   const layers = team.getByRole("tab", { name: "Camadas" })
   const slider = team.getByRole("slider", { name: "Tamanho dos ícones" })
   const champion = team.getByRole("button", { name: "Azul TOP", exact: true })
@@ -40,6 +41,8 @@ test("Abre Camadas com ícones em 60% e mantém o tamanho escolhido", async ({ p
   await expect(slider).toHaveAttribute("aria-valuetext", "99%")
   await page.reload()
   const enter = page.getByRole("button", { name: "Entrar sem usuário" })
+  // Depois do reload o login ou a Área do time ainda estão sendo montados: espera um dos dois antes de decidir.
+  await expect.poll(async () => (await enter.isVisible()) || (await layers.isVisible())).toBe(true)
   if (await enter.isVisible()) await enter.click()
   await expect(layers).toHaveAttribute("aria-selected", "true")
   await expect(slider).toHaveAttribute("aria-valuetext", "99%")
@@ -51,6 +54,7 @@ test("Edita o lado da ward junto à peça sem alterar a câmera", async ({ page 
   await page.goto("/#/time/mapa")
   await page.getByRole("button", { name: "Entrar sem usuário" }).click()
   const team = page.frameLocator("#v-camp")
+  await waitForRealisticMap(team)
   const board = team.locator("#map")
   const viewport = team.getByRole("region", { name: "Mapa da jogada" })
   const editor = team.getByRole("dialog", { name: "Lado da ward" })
@@ -119,6 +123,7 @@ test("Atalhos alternam ferramentas e a Borracha apaga uma ward antes do traço s
   await page.setViewportSize(size)
   await page.goto("/camp.html")
   await page.getByRole("button", { name: "Mapa tático" }).click()
+  await waitForRealisticMap(page)
   const viewport = page.getByRole("region", { name: "Mapa da jogada" })
   const tool = (name: string) => page.getByRole("radio", { name, exact: true })
   await viewport.press("h")
@@ -206,6 +211,7 @@ test("Reabre opções da barra, guarda cor e tamanho do cursor e oferece ferrame
   await page.setViewportSize(size)
   await page.goto("/camp.html")
   await page.getByRole("button", { name: "Mapa tático" }).click()
+  await waitForRealisticMap(page)
   const tool = (name: string) => page.getByRole("radio", { name, exact: true })
   for (const [name, panelId] of [
     ["Desenhar seta", "map-arrow-options"],
@@ -261,6 +267,7 @@ test("Reabre opções da barra, guarda cor e tamanho do cursor e oferece ferrame
 
   await page.reload()
   await page.getByRole("button", { name: "Mapa tático" }).click()
+  await waitForRealisticMap(page)
   await cursorMenu.click()
   await expect(cursorOptions.getByRole("button", { name: "Azul" })).toHaveAttribute("aria-pressed", "true")
   await expect(cursorSize.getByRole("button", { name: "Grande" })).toHaveAttribute("aria-pressed", "true")
