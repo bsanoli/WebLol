@@ -33,7 +33,7 @@ import {
   toast,
   touch,
 } from "./team-store"
-import { mountTacticNotesIn } from "./team-tactic-notes"
+import { mountTacticNotesIn, rememberTacticNotesScroll } from "./team-tactic-notes"
 // Arte em alta (1215×717) direto do Data Dragon; se não carregar, usa a cópia local menor.
 function pickArt(name: string) {
   const local = name ? champArt(name)?.splash : ""
@@ -81,6 +81,7 @@ export function renderEditor() {
     tabsScroll = editor.querySelector(".tx-tabs")?.scrollTop || 0
   if (editor.contains(catalog)) $("#comps").append(catalog)
   clearTeamControls(editor)
+  rememberTacticNotesScroll()
   editor.replaceChildren()
   if (tv) {
     editor.insertAdjacentHTML(

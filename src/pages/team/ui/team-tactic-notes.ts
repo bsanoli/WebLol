@@ -15,6 +15,28 @@ import { $, champArt, compById, S, save, toast, touch } from "./team-store"
 type TacticId = string | null
 
 let notesHost: HTMLDivElement | null = null
+/** Rolagem do bloco de notas antes de redesenhar a tela, para voltar ao mesmo ponto na mesma tática. */
+let notesScroll: { key: string; top: number } | null = null
+let notesKey: string | null = null
+
+/** Guarda a rolagem do bloco de notas; chame antes de tirar a tela de Táticas do lugar para redesenhar. */
+export function rememberTacticNotesScroll() {
+  const body = notesHost?.isConnected ? notesHost.querySelector<HTMLElement>(".tx-notes-body") : null
+  notesScroll = body && notesKey ? { key: notesKey, top: body.scrollTop } : null
+}
+
+function restoreTacticNotesScroll(host: HTMLElement, key: string) {
+  const saved = notesScroll
+  notesScroll = null
+  if (!saved || saved.key !== key || !saved.top) return
+  // O editor monta de forma assíncrona: aplica agora e de novo no próximo quadro, quando o conteúdo já tem altura.
+  const apply = () => {
+    const body = host.querySelector<HTMLElement>(".tx-notes-body")
+    if (body) body.scrollTop = saved.top
+  }
+  apply()
+  requestAnimationFrame(() => requestAnimationFrame(apply))
+}
 let noteChampionList: { name: string; portrait: string }[] | null = null
 
 const noteChampions = () =>
@@ -58,6 +80,7 @@ export function mountTacticNotesIn(root: HTMLElement, compId: TacticId) {
   const slot = root.querySelector("[data-tactic-notes-slot]")
   if (!slot) return
   const key = compId ?? "geral"
+  notesKey = key
   if (!notesHost) {
     notesHost = document.createElement("div")
     notesHost.className = "tx-notes-host"
@@ -78,7 +101,9 @@ export function mountTacticNotesIn(root: HTMLElement, compId: TacticId) {
   }
   void import("./tactic-notes")
     .then(({ mountTacticNotes }) => {
-      if (host.isConnected) mountTacticNotes(host, key, props)
+      if (!host.isConnected) return
+      mountTacticNotes(host, key, props)
+      restoreTacticNotesScroll(host, key)
     })
     .catch(() => toast("Não consegui abrir o bloco de notas. Recarregue a página."))
 }

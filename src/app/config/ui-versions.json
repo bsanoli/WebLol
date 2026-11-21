@@ -1,5 +1,12 @@
 [
   {
+    "version": "1.80",
+    "date": "2026-11-21",
+    "changes": [
+      "Táticas: o bloco de notas mantém a rolagem quando você muda algo no quadro (visão Lane ou Draft), em vez de voltar para o topo."
+    ]
+  },
+  {
     "version": "1.79",
     "date": "2026-11-21",
     "changes": [
