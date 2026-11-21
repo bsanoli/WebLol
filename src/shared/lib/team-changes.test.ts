@@ -84,7 +84,12 @@ suite("describe", () => {
   })
 
   it("copia só o que o time compartilha", () => {
-    expect(shared({ comps: [comp("a")], other: 1 } as never)).toEqual({ comps: [comp("a")], plays: [], tactics: [] })
+    expect(shared({ comps: [comp("a")], other: 1 } as never)).toEqual({
+      comps: [comp("a")],
+      plays: [],
+      tactics: [],
+      matchups: [],
+    })
   })
 })
 

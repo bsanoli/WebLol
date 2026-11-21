@@ -23,12 +23,10 @@ const newOursSaved = {
 const enemySaved = { id: "b", name: "Deles", team: "enemy", lanes: { top: [] }, updated: 2 }
 
 describe("compositionFromSaved", () => {
-  it("troca team por owner e rival por enemyId", () => {
+  it("troca team por owner", () => {
     const comp = compositionFromSaved(oursSaved) as unknown as Record<string, unknown>
     expect(comp.owner).toBe("ours")
     expect(comp).not.toHaveProperty("team")
-    expect(comp.draft).toMatchObject({ enemyId: "b" })
-    expect(comp.draft).not.toHaveProperty("rival")
   })
 
   it("mantém a composição adversária", () => {

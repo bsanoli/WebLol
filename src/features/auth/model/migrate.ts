@@ -9,7 +9,12 @@ import { session, type Official } from "./session"
 
 const FIRST_TEAM = { id: "fraldinha", name: "Fraldinha", captainId: "brunoltz#LTZ" }
 const legacyId = (id: string) => (id.includes("#") ? id : id.replace(/_([^_]*)$/, "#$1"))
-const emptyOfficial = (): Official => ({ version: 0, at: 0, data: { comps: [], plays: [], tactics: [] }, log: [] })
+const emptyOfficial = (): Official => ({
+  version: 0,
+  at: 0,
+  data: { comps: [], plays: [], tactics: [], matchups: [] },
+  log: [],
+})
 
 type TeamRow = { id: string; name: string; captain: string }
 

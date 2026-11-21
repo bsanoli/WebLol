@@ -5,7 +5,15 @@ import { ensureTeamPlays } from "@/entities/tactical-play"
 import { CH } from "../model/champion-catalog"
 import { teamStateToSaved } from "../model/composition-storage"
 import { settleOwner } from "../model/composition-side"
-import { KEY, loadTeamState, storedStateHasLegacyBans, uid, type Composition } from "../model/local-state"
+import {
+  KEY,
+  loadTeamState,
+  storedStateHasLegacyBans,
+  uid,
+  type Composition,
+  type DraftSide,
+} from "../model/local-state"
+import type { Matchup } from "../model/matchups"
 
 export const $ = <T extends HTMLElement = HTMLElement>(selector: string) => document.querySelector(selector) as T
 
@@ -40,6 +48,13 @@ export const touch = (comp: Composition | undefined = cur()) => {
   settleOwner(comp)
 }
 export const compById = (id: string | undefined): Composition | undefined => S.comps.find(comp => comp.id === id)
+/** Confronto aberto na Ordem do draft: vale enquanto a comp aberta é a nossa dele (ou a única que ele tem). */
+export const activeMatchup = (): Matchup | null => {
+  const found = S.curMatchup ? S.matchups.find(item => item.id === S.curMatchup) : undefined
+  return found && (found.ours === S.cur || (!found.ours && found.enemy === S.cur)) ? found : null
+}
+/** Lado da nossa comp no quadro: o do confronto aberto; sem confronto, azul. */
+export const boardSide = (): DraftSide => activeMatchup()?.side ?? "blue"
 
 export const localSave = $<HTMLDetailsElement>("#local-save")
 

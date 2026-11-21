@@ -9,7 +9,7 @@ import { PICKNAME } from "../model/draft-order"
 import { championsOf, draftOf, setChampions } from "../model/local-state"
 import type { DraftLane } from "../model/local-state"
 import { session, target } from "./team-session"
-import { $, cur, esc, img, S, save, touch } from "./team-store"
+import { $, boardSide, cur, esc, img, S, save, touch } from "./team-store"
 
 type WorldsStats = { c: Record<string, number[]> }
 const stats = (WS as WorldsStats).c
@@ -39,9 +39,10 @@ export function renderTarget() {
   for (const button of $("#grid").querySelectorAll<HTMLElement>(".ch"))
     button.setAttribute("aria-pressed", String(championsOf(comp, session.active).includes(button.dataset.n ?? "")))
   // Qual slot recebe o campeão: no lado adversário, os picks seguem a ordem dele.
-  const side = enemySide ? oppositeSide(draftOf(ours).side) : draftOf(ours).side
+  const oursSide = boardSide(),
+    side = enemySide ? oppositeSide(oursSide) : oursSide
   const team = side[0].toUpperCase()
-  const order = enemySide ? enemyOrder(ours, comp) : draftOf(ours).order[side]
+  const order = enemySide ? enemyOrder(comp, oursSide) : draftOf(ours).order[side]
   const position = SLOT_LIST.find(slot => slot.k === session.active)
   const slot =
     session.active === "ban" || !position

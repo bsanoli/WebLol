@@ -1,17 +1,20 @@
 import { describe, expect, it } from "vitest"
-import { setEnemyId } from "./composition-side"
+import { withOwnMatchups } from "@/shared/lib/team-changes"
 import { blank, type Composition } from "./local-state"
 import {
   addMatchup,
-  adoptEnemies,
   allMatchups,
+  detachMissingComps,
   findMatchup,
   isMatchupKey,
   matchupKey,
-  matchupsOf,
-  pruneMatchups,
+  matchupsOfComp,
+  matchupTitle,
   removeMatchup,
   resolveCompDrop,
+  sanitizeMatchups,
+  swapMatchupSides,
+  type Matchup,
 } from "./matchups"
 
 function comp(id: string, owner: "ours" | "enemy" = "ours"): Composition {
@@ -27,113 +30,143 @@ describe("matchupKey", () => {
   })
 })
 
-describe("matchupsOf", () => {
-  it("descarta confrontos malformados vindos do armazenamento", () => {
-    const ours = comp("a")
-    ours.matchups = [{ id: "1", enemy: "b", updated: 1 }, null, { id: 2, enemy: "c" }] as never
-    expect(matchupsOf(ours)).toEqual([{ id: "1", enemy: "b", updated: 1 }])
+describe("sanitizeMatchups", () => {
+  it("descarta confrontos malformados e ids repetidos", () => {
+    const list = sanitizeMatchups([{ id: "1", enemy: "b", side: "red", updated: 1 }, null, { id: 2 }, { id: "1" }])
+    expect(list).toEqual([{ id: "1", enemy: "b", side: "red", updated: 1 }])
   })
 
-  it("devolve lista vazia quando o campo falta ou não é lista", () => {
-    expect(matchupsOf(comp("a"))).toEqual([])
-    expect(matchupsOf(Object.assign(comp("a"), { matchups: "x" as never }))).toEqual([])
+  it("devolve lista vazia quando não é lista", () => {
+    expect(sanitizeMatchups(undefined)).toEqual([])
+    expect(sanitizeMatchups("x")).toEqual([])
   })
 })
 
 describe("addMatchup e removeMatchup", () => {
-  it("não duplica o mesmo par", () => {
-    const ours = comp("a")
-    const first = addMatchup(ours, "b", 10)
-    const again = addMatchup(ours, "b", 20)
-    expect(again).toBe(first)
-    expect(ours.matchups).toHaveLength(1)
-    expect(first.updated).toBe(10)
-  })
-
-  it("apaga o campo quando o último confronto sai", () => {
-    const ours = comp("a")
-    const created = addMatchup(ours, "b")
-    removeMatchup(ours, created.id)
-    expect(ours).not.toHaveProperty("matchups")
+  it("permite pares repetidos, cada um com id próprio", () => {
+    const list: Matchup[] = []
+    const first = addMatchup(list, { ours: "a", enemy: "b" })
+    const second = addMatchup(list, { ours: "a", enemy: "b" })
+    expect(list).toHaveLength(2)
+    expect(first.id).not.toBe(second.id)
+    removeMatchup(list, first.id)
+    expect(list.map(item => item.id)).toEqual([second.id])
   })
 })
 
-describe("allMatchups e findMatchup", () => {
-  it("só listam pares com a nossa e a adversária existentes", () => {
-    const ours = comp("a")
-    const enemy = comp("b", "enemy")
-    const other = comp("c")
-    const valid = addMatchup(ours, enemy.id)
-    addMatchup(ours, "apagada")
-    addMatchup(ours, other.id)
-    const comps = [ours, enemy, other]
-    expect(allMatchups(comps).map(entry => entry.matchup.id)).toEqual([valid.id])
-    expect(findMatchup(comps, valid.id)?.enemy).toBe(enemy)
-    expect(findMatchup(comps, null)).toBeNull()
+describe("matchupTitle e allMatchups", () => {
+  const comps = [comp("a"), comp("b", "enemy")]
+
+  it("usa o nome dado ou 'Nossa x Adversária'", () => {
+    const list: Matchup[] = []
+    const plain = addMatchup(list, { ours: "a", enemy: "b" })
+    const named = addMatchup(list, { ours: "a", enemy: "b", name: "Final" })
+    expect(matchupTitle(findMatchup(comps, list, plain.id)!)).toBe("a x b")
+    expect(matchupTitle(findMatchup(comps, list, named.id)!)).toBe("Final")
   })
 
-  it("ignoram confrontos guardados numa comp adversária", () => {
-    const enemy = comp("b", "enemy")
-    const otherEnemy = comp("c", "enemy")
-    addMatchup(enemy, otherEnemy.id)
-    expect(allMatchups([enemy, otherEnemy])).toEqual([])
+  it("mantém o confronto com o lado vazio quando a comp não existe mais", () => {
+    const list: Matchup[] = []
+    addMatchup(list, { ours: "a", enemy: "sumiu" })
+    const [entry] = allMatchups(comps, list)
+    expect(entry.enemy).toBeNull()
+    expect(matchupTitle(entry)).toBe("a x Sem adversária")
   })
 })
 
-describe("pruneMatchups", () => {
-  it("remove os pares sem adversária e devolve os ids para apagar as táticas", () => {
-    const ours = comp("a")
-    const enemy = comp("b", "enemy")
-    const kept = addMatchup(ours, enemy.id)
-    const lost = addMatchup(ours, "apagada")
-    expect(pruneMatchups([ours, enemy])).toEqual([lost.id])
-    expect(matchupsOf(ours)).toEqual([kept])
-  })
-
-  it("não mexe em comps sem confrontos inválidos", () => {
-    const ours = comp("a")
-    const enemy = comp("b", "enemy")
-    const kept = addMatchup(ours, enemy.id)
-    const before = ours.matchups
-    expect(pruneMatchups([ours, enemy])).toEqual([])
-    expect(ours.matchups).toBe(before)
-    expect(ours.matchups).toEqual([kept])
+describe("detachMissingComps", () => {
+  it("tira só o lado que perdeu a comp e devolve os confrontos mexidos", () => {
+    const list: Matchup[] = []
+    const kept = addMatchup(list, { ours: "a", enemy: "b" })
+    const lost = addMatchup(list, { ours: "a", enemy: "x" })
+    const changed = detachMissingComps(list, [comp("a"), comp("b", "enemy")])
+    expect(changed).toEqual([lost])
+    expect(lost.enemy).toBeUndefined()
+    expect(lost.ours).toBe("a")
+    expect(kept.enemy).toBe("b")
   })
 })
 
-describe("adoptEnemies", () => {
-  it("transforma a adversária colocada no draft em confronto", () => {
-    const ours = comp("a")
-    const enemy = comp("b", "enemy")
-    setEnemyId(ours, enemy.id)
-    expect(adoptEnemies([ours, enemy])).toBe(true)
-    expect(matchupsOf(ours).map(item => item.enemy)).toEqual([enemy.id])
-    expect(adoptEnemies([ours, enemy])).toBe(false)
+describe("matchupsOfComp", () => {
+  it("lista os confrontos da comp, do mais recente ao mais antigo", () => {
+    const list: Matchup[] = []
+    const old = addMatchup(list, { ours: "a", enemy: "b" }, 1)
+    const recent = addMatchup(list, { ours: "a", enemy: "c" }, 9)
+    addMatchup(list, { ours: "z", enemy: "c" }, 5)
+    expect(matchupsOfComp(list, "a").map(item => item.id)).toEqual([recent.id, old.id])
+  })
+})
+
+describe("swapMatchupSides", () => {
+  it("inverte o lado da nossa comp", () => {
+    const item = addMatchup([], { ours: "a", enemy: "b", side: "blue" })
+    swapMatchupSides(item, 7)
+    expect(item.side).toBe("red")
+    expect(item.updated).toBe(7)
   })
 })
 
 describe("resolveCompDrop", () => {
-  const ours = comp("a")
-  const enemy = comp("b", "enemy")
-  const comps = [ours, enemy]
+  const comps = [comp("a"), comp("b", "enemy"), comp("c", "enemy")]
 
-  it("só posiciona a comp quando não há par aberto", () => {
-    expect(resolveCompDrop(comps, null, null, ours.id, "red")).toEqual({
-      place: { id: ours.id, side: "red" },
-      matchup: null,
-      open: ours.id,
-    })
+  it("sem confronto aberto, cria um com a comp solta no lado dela", () => {
+    const list: Matchup[] = []
+    const result = resolveCompDrop(comps, list, null, "b", "red")!
+    expect(result.created).toBe(true)
+    expect(list).toHaveLength(1)
+    expect(result.matchup).toMatchObject({ enemy: "b", side: "blue" })
   })
 
-  it("forma o confronto com a comp aberta do outro time", () => {
-    expect(resolveCompDrop(comps, ours.id, null, enemy.id, "blue")).toEqual({
-      place: { id: ours.id, side: "red" },
-      matchup: { ours: ours.id, enemy: enemy.id },
-      open: ours.id,
-    })
+  it("a adversária solta completa o confronto aberto sem trocar os lados", () => {
+    const list: Matchup[] = []
+    const open = addMatchup(list, { ours: "a", side: "blue" })
+    const result = resolveCompDrop(comps, list, open.id, "b", "red")!
+    expect(result.created).toBe(false)
+    expect(result.swapped).toBe(false)
+    expect(open).toMatchObject({ ours: "a", enemy: "b", side: "blue" })
+  })
+
+  it("soltar a nossa no lado da adversária inverte os lados", () => {
+    const list: Matchup[] = []
+    const open = addMatchup(list, { ours: "a", enemy: "b", side: "blue" })
+    const result = resolveCompDrop(comps, list, open.id, "a", "red")!
+    expect(result.swapped).toBe(true)
+    expect(open.side).toBe("red")
+  })
+
+  it("trocar a adversária pela outra mantém os lados", () => {
+    const list: Matchup[] = []
+    const open = addMatchup(list, { ours: "a", enemy: "b", side: "red" })
+    const result = resolveCompDrop(comps, list, open.id, "c", "blue")!
+    expect(result.swapped).toBe(false)
+    expect(open).toMatchObject({ enemy: "c", side: "red" })
   })
 
   it("devolve null para uma comp que não existe", () => {
-    expect(resolveCompDrop(comps, null, null, "apagada", "blue")).toBeNull()
+    expect(resolveCompDrop(comps, [], null, "nada", "blue")).toBeNull()
+  })
+})
+
+describe("withOwnMatchups (migração)", () => {
+  const data = () => ({
+    comps: [
+      { id: "a", team: "mine", draft: { side: "red", rival: "e1" }, matchups: [{ id: "m1", enemy: "e2", updated: 4 }] },
+      { id: "e1", team: "enemy" },
+      { id: "e2", team: "enemy" },
+    ],
+  })
+
+  it("leva os confrontos embutidos e o rival do draft para a lista, mantendo os ids e o lado", () => {
+    const out = withOwnMatchups(data() as never)
+    expect(out.matchups).toEqual([
+      { id: "m1", ours: "a", enemy: "e2", side: "red", updated: 4 },
+      { id: "a-e1", ours: "a", enemy: "e1", side: "red", updated: 0 },
+    ])
+    expect(out.comps[0]).not.toHaveProperty("matchups")
+  })
+
+  it("é idempotente", () => {
+    const once = withOwnMatchups(data() as never)
+    expect(withOwnMatchups(once)).toEqual(once)
   })
 })

@@ -42,6 +42,7 @@ export function mountLocalRestore() {
       }
       if (base) {
         const { comps, plays } = base.data
+        const matchups = Array.isArray(base.data.matchups) ? base.data.matchups : []
         const tactics = Array.isArray(base.data.tactics) ? base.data.tactics : []
         localStorage.setItem(
           KEY,
@@ -49,6 +50,7 @@ export function mountLocalRestore() {
             comps,
             plays,
             tactics,
+            matchups,
             view: S.view,
             cur: idOf(comps.find(comp => idOf(comp) === S.cur)) ?? idOf(comps[0]),
             curPlay: idOf(plays.find(play => idOf(play) === S.curPlay)) ?? idOf(plays[0]),

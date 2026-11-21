@@ -25,7 +25,7 @@ Os nomes de conceitos vêm do [glossário](glossario.md). A arquitetura segue a 
 - **Constantes** de módulo em `UPPER_SNAKE_CASE` só quando forem valores fixos (`DEFAULT_DRAFT_ORDER`). Funções e objetos de configuração usam `camelCase`.
 - **Tipos** em `PascalCase`, no singular: `Composition`, `Matchup`, `PositionId`.
 - **Arquivos e pastas** em `kebab-case`, inclusive componentes React (`tactic-notes.tsx`, não `TacticNotes.tsx`). A pasta diz para que serve: `shared/ui/blocks`, não o nome do fornecedor, em código novo.
-- **Formato salvo da composição** (`team: "mine"`, `draft.rival`) é traduzido para `owner` e `enemyId` só em `pages/team/model/composition-storage.ts`.
+- **Formato salvo da composição** (`team: "mine"`) é traduzido para `owner` só em `pages/team/model/composition-storage.ts`.
 - **Classes CSS** novas descrevem o papel (`.matchup-bar`, `.draft-card`), não a aparência (`.red-box`).
 - **Testes** descrevem o comportamento em português: `"Ordem do draft: arrastar campeão para fora remove da composição"`.
 

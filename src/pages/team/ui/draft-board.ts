@@ -1,6 +1,13 @@
 import { iconMarkup } from "@/shared/ui/icon"
 import { DRAFT_PHASES, DRAFT_SIDE, PICKNAME } from "../model/draft-order"
-import { DRAFT_LANES, draftOf, type Composition, type ChampionSlot, type DraftLane } from "../model/local-state"
+import {
+  DRAFT_LANES,
+  draftOf,
+  type Composition,
+  type ChampionSlot,
+  type DraftLane,
+  type DraftSide,
+} from "../model/local-state"
 import type { SlotInfo } from "../model/champion-slots"
 import { enemyOrder } from "../model/composition-side"
 
@@ -9,6 +16,8 @@ export type BoardSide = "us" | "rival"
 type Team = "B" | "R"
 
 export type DraftBoardOptions = {
+  /** Lado da nossa comp no quadro. */
+  side: DraftSide
   active: string
   activeSide: BoardSide
   slots: Record<ChampionSlot, SlotInfo>
@@ -144,14 +153,15 @@ export function draftTeamHTML(
  */
 export function draftBoardHTML(comp: Composition, enemy: Composition | null, options: DraftBoardOptions) {
   const draft = draftOf(comp),
-    us: Team = draft.side === "blue" ? "B" : "R"
+    oursSide = options.side,
+    us: Team = oursSide === "blue" ? "B" : "R"
   const team = (t: Team) => {
     const owner: BoardSide = t === us ? "us" : "rival"
     const source = owner === "us" ? comp : enemy
     const order: DraftLane[] = source
       ? owner === "us"
-        ? draft.order[draft.side]
-        : enemyOrder(comp, source)
+        ? draft.order[oursSide]
+        : enemyOrder(source, oursSide)
       : DRAFT_LANES
     return draftTeamHTML(t, owner, source, order, options)
   }

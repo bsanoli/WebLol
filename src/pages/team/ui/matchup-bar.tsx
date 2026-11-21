@@ -12,6 +12,8 @@ export type MatchupBarProps = {
   current: MatchupItem
   enemy: MatchupItem | null
   side: DraftSide
+  /** Confronto aberto (com o nome mostrado) ou `null` quando só uma comp está aberta. */
+  matchup: { id: string; title: string; named: boolean } | null
   enemyOpgg: string
   /** Barra recolhida: uma linha fina com os nomes e o lado. */
   collapsed: boolean
@@ -19,6 +21,8 @@ export type MatchupBarProps = {
   onSelectOurs: (id: string) => void
   onSelectEnemy: (id: string | null) => void
   onSide: (side: DraftSide) => void
+  onRenameMatchup: () => void
+  onLeaveMatchup: () => void
   onNew: (owner: CompOwner) => void
   onMove: (id: string) => void
   onOpgg: (id: string) => void
@@ -188,6 +192,46 @@ function MatchupBar(props: MatchupBarProps) {
     </div>
   )
   const swapTo: DraftSide = other
+  const head = (
+    <div className="matchup-head">
+      {props.matchup ? (
+        <>
+          <span className="matchup-badge">Confronto</span>
+          <b className="matchup-title" title={props.matchup.title}>
+            {props.matchup.title}
+          </b>
+          <button
+            type="button"
+            className="matchup-rename"
+            data-matchup-rename-all
+            data-slot="button"
+            data-variant="ghost"
+            data-size="sm"
+            aria-label={`Renomear o confronto ${props.matchup.title}`}
+            title="Renomear o confronto"
+            onClick={props.onRenameMatchup}
+          >
+            <Icon name="edit" />
+          </button>
+          <button
+            type="button"
+            data-matchup-leave
+            data-slot="button"
+            data-variant="ghost"
+            data-size="sm"
+            onClick={props.onLeaveMatchup}
+          >
+            Sair do confronto
+          </button>
+        </>
+      ) : (
+        <span className="matchup-hint">Comp aberta sem confronto</span>
+      )}
+      <button type="button" data-matchup-new data-slot="button" data-variant="outline" data-size="sm">
+        <Icon name="plus" /> Novo confronto
+      </button>
+    </div>
+  )
   const toggle = (
     <button
       type="button"
@@ -206,35 +250,41 @@ function MatchupBar(props: MatchupBarProps) {
   )
   if (collapsed)
     return (
-      <div className="matchup collapsed" role="group" aria-label="Confronto do draft">
-        <span className="matchup-summary">
-          <SideDot side={side} />
-          <b>{current.name}</b>
-          <span aria-hidden="true">x</span>
-          <SideDot side={other} />
-          <b>{enemy ? enemy.name : "Sem adversária"}</b>
-        </span>
-        {toggle}
-      </div>
+      <>
+        {head}
+        <div className="matchup collapsed" role="group" aria-label="Confronto do draft">
+          <span className="matchup-summary">
+            <SideDot side={side} />
+            <b>{current.name}</b>
+            <span aria-hidden="true">x</span>
+            <SideDot side={other} />
+            <b>{enemy ? enemy.name : "Sem adversária"}</b>
+          </span>
+          {toggle}
+        </div>
+      </>
     )
   return (
-    <div className="matchup" role="group" aria-label="Confronto do draft">
-      {side === "blue" ? oursBlock : rivalBlock}
-      <button
-        type="button"
-        className="matchup-swap"
-        data-slot="button"
-        data-variant="outline"
-        data-size="sm"
-        data-side-option={swapTo}
-        aria-label={`Trocar lados: nossa equipe vai para o lado ${swapTo === "blue" ? "azul" : "vermelho"}`}
-        onClick={() => props.onSide(swapTo)}
-      >
-        <Icon name="swap" /> Trocar lados
-      </button>
-      {side === "blue" ? rivalBlock : oursBlock}
-      {toggle}
-    </div>
+    <>
+      {head}
+      <div className="matchup" role="group" aria-label="Confronto do draft">
+        {side === "blue" ? oursBlock : rivalBlock}
+        <button
+          type="button"
+          className="matchup-swap"
+          data-slot="button"
+          data-variant="outline"
+          data-size="sm"
+          data-side-option={swapTo}
+          aria-label={`Trocar lados: nossa equipe vai para o lado ${swapTo === "blue" ? "azul" : "vermelho"}`}
+          onClick={() => props.onSide(swapTo)}
+        >
+          <Icon name="swap" /> Trocar lados
+        </button>
+        {side === "blue" ? rivalBlock : oursBlock}
+        {toggle}
+      </div>
+    </>
   )
 }
 

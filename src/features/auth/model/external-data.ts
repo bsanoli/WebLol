@@ -1,7 +1,7 @@
 // Validação do que vem do Firestore em JSON: versão oficial e envios. Dado fora do formato
 // vira `null` (quem chama decide: "bad" na sincronização, envio quebrado na Administração).
 import * as z from "zod/mini"
-import type { Change } from "@/shared/lib/team-changes"
+import { type Change, withOwnMatchups } from "@/shared/lib/team-changes"
 import type { Official } from "./session"
 
 const list = z.array(z.looseObject({}))
@@ -9,7 +9,12 @@ const list = z.array(z.looseObject({}))
 const officialShape = z.looseObject({
   version: z.number(),
   at: z.optional(z.number()),
-  data: z.looseObject({ comps: z.optional(list), plays: z.optional(list), tactics: z.optional(list) }),
+  data: z.looseObject({
+    comps: z.optional(list),
+    plays: z.optional(list),
+    tactics: z.optional(list),
+    matchups: z.optional(list),
+  }),
   log: z.optional(z.array(z.looseObject({ sid: z.string() }))),
 })
 
@@ -37,7 +42,7 @@ export function parseOfficial(text: unknown): Official | null {
   return {
     ...value,
     at: value.at ?? 0,
-    data: { comps: [], plays: [], tactics: [], ...value.data },
+    data: withOwnMatchups(value.data),
     log: value.log ?? [],
   }
 }
