@@ -1,5 +1,5 @@
 // Primeiros passos do acesso: Riot ID, conexão com o banco e entrada sem usuário.
-import { dbGet, fb, ONLINE } from "@/shared/api/firestore"
+import { dbGet, fb, ONLINE } from "@/shared/firestore"
 import { dispId, isAdminId, safeName } from "@/shared/lib/account-id"
 import { slotOf } from "@/shared/lib/admin-crypto"
 import { $, toast } from "@/shared/lib/dom"

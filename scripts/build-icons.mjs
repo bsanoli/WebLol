@@ -36,6 +36,7 @@ const icons = {
   undo: "ReverseLeft",
   redo: "ReverseRight",
   edit: "Edit03",
+  swap: "Repeat01",
   play: "Play",
   stop: "Square",
   warning: "AlertTriangle",

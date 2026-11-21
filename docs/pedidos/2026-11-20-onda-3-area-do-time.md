@@ -1,7 +1,7 @@
 # Onda 3: nomes e tipos da Área do time
 
 - **Tamanho:** G
-- **Situação:** em andamento (3a, 3b, 3c-1 e 3c-2 feitas; PR da 3b e da 3c por publicar)
+- **Situação:** concluído
 - **Pedido por:** Fabiano
 - **Data:** 2026-11-20
 

@@ -1,7 +1,7 @@
 // Botão único de salvamento da Área do time: mostra se há rascunho ou se está em dia com o time e reúne
 // enviar, sincronizar, ver o que mudou, descartar o rascunho e o backup. O app principal (`features/auth`) decide
 // o texto e a ação do envio (#send); aqui o menu só espelha esse estado e repassa o clique.
-import { hostDraft, hostElement } from "@/shared/api/host-bridge"
+import { hostDraft, hostElement } from "@/shared/host-bridge"
 import { KN, OPN, type ItemKind, type ChangeOp } from "@/shared/lib/team-changes"
 import { $, localSave, SAVE_RESULT_EVENT, saveFailed } from "./team-store"
 

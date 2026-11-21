@@ -8,7 +8,7 @@ const db = vi.hoisted(() => ({
   dbSet: vi.fn(),
   getJ: vi.fn(),
 }))
-vi.mock("@/shared/api/firestore", () => db)
+vi.mock("@/shared/firestore", () => db)
 vi.mock("@/shared/lib/admin-crypto", () => ({ unseal: vi.fn(), verifyObj: vi.fn() }))
 vi.mock("./membership", () => ({ loadAdminKey: vi.fn() }))
 vi.mock("./session", () => ({ session: { admin: null, keys: null } }))

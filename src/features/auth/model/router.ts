@@ -1,5 +1,5 @@
 // Abas do app principal: endereço (#/rota) ↔ tela, carga dos iframes e links copiáveis.
-import type { HostNavigation, FrameHandlers } from "@/shared/api/host-bridge"
+import type { HostNavigation, FrameHandlers } from "@/shared/host-bridge"
 import { $, toast } from "@/shared/lib/dom"
 import { renderAdmin } from "../ui/admin"
 import { closeModal } from "../ui/login-dialog"

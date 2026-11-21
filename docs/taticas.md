@@ -118,5 +118,5 @@ Editor de texto rico ([Tiptap](https://tiptap.dev), MIT). O salvamento é autom�
 | Regras das táticas (texto, prints, notas antigas da comp, OP.GG) | `src/pages/team/model/tactics.ts` |
 | Compressão dos prints | `src/pages/team/lib/compress-image.ts` |
 | Estilos | `src/pages/team/ui/tactics.css` |
-| Envio e leitura dos prints e sincronização de `tactics` | `src/features/auth` e `src/shared/api/host-bridge.ts` (`window.weblolImages`) |
+| Envio e leitura dos prints e sincronização de `tactics` | `src/features/auth` e `src/shared/host-bridge/host-bridge.ts` (`window.weblolImages`) |
 | Regra dos prints | `firestore.rules` (`match /imagens/{id}`) |

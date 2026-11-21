@@ -32,7 +32,8 @@ test("Abre uma composição salva no formato anterior em modo Draft", async ({ p
   const team = page
   const matchup = team.getByRole("group", { name: "Confronto do draft" })
   await expect(matchup.getByRole("button", { name: /Nossa\s+Composição anterior/ })).toBeVisible()
-  await expect(matchup.locator(".matchup-pick.ours .mini .av")).toHaveText(["O", "A"])
+  await expect(matchup.locator(".matchup-pick.ours .mini .av:not(.av-empty)")).toHaveText(["O", "A"])
+  await expect(matchup.locator(".matchup-pick.ours .mini .av-empty")).toHaveCount(3)
   await expect(team.getByRole("button", { name: /Ornn.*Top/i }).first()).toBeVisible()
   await expect(team.getByRole("tab", { name: "Opções por posição" })).toHaveCount(0)
   await expect(team.locator(".dz-slot #champ-picker")).toBeVisible()

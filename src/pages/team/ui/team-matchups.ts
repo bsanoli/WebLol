@@ -1,6 +1,7 @@
 // Táticas: confrontos, gaveta de composições e abas da lista, com os cliques do editor em Táticas.
+import { compositionPreviewHTML } from "./composition-preview"
 import { askName, confirmAction } from "@/shared/ui/dialog-controls"
-import { blank, compositionPreview, draftOf } from "../model/local-state"
+import { blank, draftOf } from "../model/local-state"
 import type { Composition } from "../model/local-state"
 import { enemiesOf, enemyCompositionOf, isEnemy, oursOf, setEnemyId, settleOwner } from "../model/composition-side"
 import {
@@ -79,7 +80,7 @@ export function mountMatchups() {
       toast("Crie uma composição nossa antes de montar um confronto")
       return
     }
-    const option = (x: Composition) => ({ id: x.id, name: x.name, preview: compositionPreview(x).map(img).join("") })
+    const option = (x: Composition) => ({ id: x.id, name: x.name, preview: compositionPreviewHTML(x, img) })
     const choice = await askMatchup(ours.map(option), enemies.map(option), isEnemy(cur()) ? ours[0].id : cur().id)
     if (!choice) return
     let enemyId = choice.enemy

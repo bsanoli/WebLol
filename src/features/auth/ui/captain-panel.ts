@@ -1,6 +1,6 @@
 // Aba "Gestão do time" da Área do time: pedidos, jogadores e histórico das versões oficiais.
 import { KN, OPN } from "@/shared/lib/team-changes"
-import { dbDel, dbList, dbSet } from "@/shared/api/firestore"
+import { dbDel, dbList, dbSet } from "@/shared/firestore"
 import { esc, fmtD, toast } from "@/shared/lib/dom"
 import { confirmAction } from "@/shared/ui/dialog-controls"
 import { isCaptain, isFirebaseAdmin, preview, user } from "../model/identity"

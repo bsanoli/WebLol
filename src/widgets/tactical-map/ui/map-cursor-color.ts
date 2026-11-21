@@ -1,4 +1,4 @@
-import { STORAGE_KEYS } from "@/shared/config/storage-keys"
+import { STORAGE_KEYS } from "@/shared/config"
 import moveCursor from "./cursors/move.svg?raw"
 import openHandCursor from "./cursors/hand.svg?raw"
 import closedHandCursor from "./cursors/hand-closed.svg?raw"

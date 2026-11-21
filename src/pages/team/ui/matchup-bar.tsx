@@ -1,11 +1,10 @@
-import { useId, useState } from "react"
-import { ChevronDown } from "lucide-react"
-import { Input } from "@/shared/ui/input"
-import { Popover, PopoverContent, PopoverTrigger } from "@/shared/ui/popover"
+import { useState } from "react"
+import { ChevronsDownUp, ChevronsUpDown, MoreHorizontal } from "lucide-react"
 import type { CompOwner } from "../model/composition-side"
 import type { DraftSide } from "../model/local-state"
-import { ActionMenu, Icon, keepFocusOutsideFrame, renderControl, useTeamOverlay } from "./team-controls"
-import { MatchupOption, Preview, type MatchupItem } from "./matchup-preview"
+import { ActionMenu, Icon, renderControl } from "./team-controls"
+import type { MatchupItem } from "./matchup-preview"
+import { CompPicker, InlineName } from "./matchup-picker"
 
 export type MatchupBarProps = {
   ours: MatchupItem[]
@@ -14,6 +13,9 @@ export type MatchupBarProps = {
   enemy: MatchupItem | null
   side: DraftSide
   enemyOpgg: string
+  /** Barra recolhida: uma linha fina com os nomes e o lado. */
+  collapsed: boolean
+  onToggleCollapsed: () => void
   onSelectOurs: (id: string) => void
   onSelectEnemy: (id: string | null) => void
   onSide: (side: DraftSide) => void
@@ -24,164 +26,6 @@ export type MatchupBarProps = {
   onRenameTo: (id: string, name: string) => void
   onDuplicate: (id: string) => void
   onDelete: (id: string) => void
-}
-
-const SIDES: [DraftSide, string][] = [
-  ["blue", "Azul"],
-  ["red", "Vermelho"],
-]
-
-/** Nome da comp editável no próprio card do lado: Enter ou sair do campo salva, Esc cancela. */
-function InlineName({
-  kind,
-  label,
-  side,
-  item,
-  onSave,
-  onClose,
-}: {
-  kind: "ours" | "rival"
-  label: string
-  side: DraftSide
-  item: MatchupItem
-  onSave: (name: string) => void
-  onClose: () => void
-}) {
-  const [value, setValue] = useState(item.name)
-  const done = (save: boolean) => {
-    if (save) onSave(value)
-    onClose()
-  }
-  return (
-    <div className={`matchup-pick ${kind} editing`}>
-      <span className="matchup-pick-text">
-        <small>
-          <span className={`side-dot ${side}`} aria-hidden="true" />
-          {label}
-        </small>
-        <Input
-          className="matchup-name-input"
-          value={value}
-          autoFocus
-          aria-label={`Nome de ${item.name}`}
-          onFocus={event => event.currentTarget.select()}
-          onChange={event => setValue(event.target.value)}
-          onBlur={() => done(true)}
-          onKeyDown={event => {
-            if (event.key === "Enter") {
-              event.preventDefault()
-              done(true)
-            }
-            if (event.key === "Escape") {
-              event.preventDefault()
-              done(false)
-            }
-          }}
-        />
-      </span>
-    </div>
-  )
-}
-
-function CompPicker({
-  kind,
-  label,
-  side,
-  items,
-  selected,
-  noneLabel,
-  newLabel,
-  onSelect,
-  onNew,
-}: {
-  kind: "ours" | "rival"
-  label: string
-  side: DraftSide
-  items: MatchupItem[]
-  selected: MatchupItem | null
-  noneLabel?: string
-  newLabel: string
-  onSelect: (id: string | null) => void
-  onNew: () => void
-}) {
-  const { open, setOpen } = useTeamOverlay()
-  const [query, setQuery] = useState("")
-  const searchId = useId()
-  const q = query.trim().toLowerCase()
-  const matches = items.filter(
-    item =>
-      !q ||
-      item.title.toLowerCase().includes(q) ||
-      item.name.toLowerCase().includes(q) ||
-      item.champions.some(name => name.toLowerCase().includes(q)),
-  )
-  const create = () => {
-    setOpen(false)
-    setQuery("")
-    queueMicrotask(onNew)
-  }
-  const choose = (id: string | null) => {
-    setOpen(false)
-    setQuery("")
-    if (id !== (selected?.id ?? null)) queueMicrotask(() => onSelect(id))
-  }
-  return (
-    <Popover open={open} onOpenChange={setOpen}>
-      <PopoverTrigger className={`matchup-pick ${kind}`} data-matchup={kind}>
-        <span className="matchup-pick-text">
-          <small>
-            <span className={`side-dot ${side}`} aria-hidden="true" />
-            {label}
-          </small>
-          <b title={selected?.title}>{selected ? selected.title : noneLabel}</b>
-        </span>
-        {selected && <Preview html={selected.preview} />}
-        <span className="sr-only">Trocar</span>
-        <ChevronDown className="matchup-chevron" aria-hidden="true" />
-      </PopoverTrigger>
-      <PopoverContent
-        className="matchup-popover"
-        align="start"
-        collisionPadding={8}
-        aria-label={label}
-        onCloseAutoFocus={keepFocusOutsideFrame}
-      >
-        <Input
-          id={searchId}
-          type="search"
-          aria-label={`Buscar ${label.toLowerCase()} pelo nome ou campeão`}
-          value={query}
-          placeholder="Nome ou campeão"
-          autoFocus
-          onChange={event => setQuery(event.target.value)}
-        />
-        <div className="matchup-list" role="group" aria-label={label}>
-          {!q && (
-            <button type="button" className="matchup-item new" onClick={create}>
-              <b>
-                <Icon name="plus" /> {newLabel}
-              </b>
-            </button>
-          )}
-          {noneLabel && !q && (
-            <button type="button" className="matchup-item none" aria-pressed={!selected} onClick={() => choose(null)}>
-              <b>{noneLabel}</b>
-            </button>
-          )}
-          {matches.map(item => (
-            <MatchupOption key={item.id} item={item} selected={item.id === selected?.id} onChoose={choose} />
-          ))}
-          {!matches.length && (
-            <p className="matchup-empty" role="status">
-              {items.length
-                ? "Nenhuma composição encontrada. Tente outro nome ou campeão."
-                : "Nenhuma composição ainda."}
-            </p>
-          )}
-        </div>
-      </PopoverContent>
-    </Popover>
-  )
 }
 
 const compActions = (item: MatchupItem, props: MatchupBarProps, enemy: boolean) => [
@@ -197,7 +41,7 @@ const compActions = (item: MatchupItem, props: MatchupBarProps, enemy: boolean) 
 ]
 
 function MatchupBar(props: MatchupBarProps) {
-  const { ours, enemies, current, enemy, side, enemyOpgg } = props
+  const { ours, enemies, current, enemy, side, enemyOpgg, collapsed } = props
   const [renaming, setRenaming] = useState<"ours" | "rival" | null>(null)
   const other: DraftSide = side === "blue" ? "red" : "blue"
   const oursBlock = (
@@ -261,13 +105,13 @@ function MatchupBar(props: MatchupBarProps) {
           side={other}
           items={enemies}
           selected={enemy}
-          noneLabel="Sem adversária"
+          noneLabel="Escolher adversária"
           newLabel="Nova adversária"
           onSelect={props.onSelectEnemy}
           onNew={() => props.onNew("enemy")}
         />
       )}
-      {enemy && renaming !== "rival" && (
+      {renaming !== "rival" && (
         <button
           type="button"
           className="matchup-rename"
@@ -275,18 +119,28 @@ function MatchupBar(props: MatchupBarProps) {
           data-slot="button"
           data-variant="ghost"
           data-size="sm"
-          aria-label={`Editar o nome de ${enemy.name}`}
+          aria-label={enemy ? `Editar o nome de ${enemy.name}` : "Editar o nome da adversária"}
           title="Editar o nome"
+          disabled={!enemy}
           onClick={() => setRenaming("rival")}
         >
           <Icon name="edit" />
         </button>
       )}
-      {enemy && (
-        <span className="composition-menu">
+      <span className="composition-menu">
+        {enemy ? (
           <ActionMenu label={`Ações de ${enemy.name}`} actions={compActions(enemy, props, true)} />
-        </span>
-      )}
+        ) : (
+          <button
+            type="button"
+            data-team-trigger="icon"
+            disabled
+            aria-label="Ações da adversária (escolha uma adversária primeiro)"
+          >
+            <MoreHorizontal aria-hidden="true" />
+          </button>
+        )}
+      </span>
       {enemy && enemyOpgg && (
         <>
           <a
@@ -334,6 +188,35 @@ function MatchupBar(props: MatchupBarProps) {
     </div>
   )
   const swapTo: DraftSide = other
+  const toggle = (
+    <button
+      type="button"
+      className="matchup-collapse"
+      data-matchup-collapse
+      data-slot="button"
+      data-variant="ghost"
+      data-size="sm"
+      aria-expanded={!collapsed}
+      aria-label={collapsed ? "Mostrar a barra de confronto" : "Recolher a barra de confronto"}
+      title={collapsed ? "Mostrar a barra de confronto" : "Recolher a barra de confronto"}
+      onClick={props.onToggleCollapsed}
+    >
+      {collapsed ? <ChevronsUpDown aria-hidden="true" /> : <ChevronsDownUp aria-hidden="true" />}
+    </button>
+  )
+  if (collapsed)
+    return (
+      <div className="matchup collapsed" role="group" aria-label="Confronto do draft">
+        <span className="matchup-summary">
+          <SideDot side={side} />
+          <b>{current.name}</b>
+          <span aria-hidden="true">x</span>
+          <SideDot side={other} />
+          <b>{enemy ? enemy.name : "Sem adversária"}</b>
+        </span>
+        {toggle}
+      </div>
+    )
   return (
     <div className="matchup" role="group" aria-label="Confronto do draft">
       {side === "blue" ? oursBlock : rivalBlock}
@@ -350,8 +233,13 @@ function MatchupBar(props: MatchupBarProps) {
         <Icon name="swap" /> Trocar lados
       </button>
       {side === "blue" ? rivalBlock : oursBlock}
+      {toggle}
     </div>
   )
+}
+
+function SideDot({ side }: { side: DraftSide }) {
+  return <i className={`side-dot ${side}`} role="img" aria-label={side === "blue" ? "Lado azul" : "Lado vermelho"} />
 }
 
 export function mountMatchupBar(host: Element, props: MatchupBarProps) {

@@ -9,6 +9,7 @@ type PositionMarkup = {
   slots: Record<ChampionSlot, SlotInfo>
   img: (name: string) => string
   esc: (value: unknown) => string
+  pickArt: (name: string) => string
 }
 
 /** Um lado do quadro: a comp, de quem ela é, ou nada (o lado espera uma composição arrastada). */
@@ -20,7 +21,7 @@ function positionCell(
   lane: ChampionSlot,
   owner: "us" | "rival",
   source: Composition,
-  { slots, img, esc }: PositionMarkup,
+  { slots, img, esc, pickArt }: PositionMarkup,
 ) {
   const L = slots[lane]
   const list = lane === "ban" ? source.bans : source.lanes[lane]
@@ -29,11 +30,12 @@ function positionCell(
     if (lane === "ban")
       return `<span class="tx-pos-ic ban" ${drag} role="img" aria-label="Ban: ${esc(name)}" title="${esc(name)} · ${index + 1}º ban">${img(name)}</span>`
     if (index === 0)
-      return `<button type="button" class="tx-pos-ic main" ${drag} data-draft-target="${lane}" data-draft-side="${owner}" aria-label="${L.n}: ${esc(name)} · trocar campeão" title="${esc(name)} · principal em ${L.n}">${img(name)}</button>`
+      return `<button type="button" class="tx-pos-ic main" ${drag} data-draft-target="${lane}" data-draft-side="${owner}" aria-label="${L.n}: ${esc(name)} · trocar campeão" title="${esc(name)} · principal em ${L.n}">${img(name)}<span class="tx-pos-champ">${esc(name)}</span></button>`
     return `<button type="button" class="tx-pos-ic alt" ${drag} data-priority="${esc(name)}" data-lane="${lane}" aria-label="Tornar ${esc(name)} o campeão de ${L.n}" title="${esc(name)} · ${index + 1}ª opção · clique para tornar principal">${img(name)}</button>`
   }
   const add = `<button type="button" class="tx-pos-add" data-draft-target="${lane}" data-draft-side="${owner}" aria-label="${list.length ? `Adicionar em ${L.n}` : `Escolher campeão de ${L.n}`}" title="${list.length ? `Adicionar em ${L.n}` : `Escolher campeão de ${L.n}`}">${iconMarkup("plus")}</button>`
-  return `<div class="tx-pos-slot ${lane}" data-l="${lane}" style="--lc:var(${L.c})" role="group" aria-label="${L.n}">${list.map(icon).join("")}${lane === "ban" || !list.length ? add : ""}</div>`
+  const art = lane === "ban" || !list.length ? "" : pickArt(list[0])
+  return `<div class="tx-pos-slot ${lane}${art ? " has-art" : ""}" data-l="${lane}" style="--lc:var(${L.c})" role="group" aria-label="${L.n}">${art}${list.map(icon).join("")}${lane === "ban" || !list.length ? add : ""}</div>`
 }
 
 function positionColumn(side: DraftSide, entry: PositionSide, hint: string, markup: PositionMarkup) {
@@ -44,7 +46,7 @@ function positionColumn(side: DraftSide, entry: PositionSide, hint: string, mark
     <h3 aria-hidden="true"></h3><p class="tx-col-empty">${hint}</p></div>`
   const { owner, source, who } = entry
   return `<div class="tx-side-col tx-pos-col ${side} ${edge}" data-drop-side="${side}" aria-label="${label}">
-    <h3><small title="${who} · ${markup.esc(source.name)}">${who} · ${markup.esc(source.name)}</small></h3>
+    <h3><span class="side-dot ${side}" aria-hidden="true"></span><b class="tx-side-name">${label}</b><small title="${who} · ${markup.esc(source.name)}">${who} · ${markup.esc(source.name)}</small></h3>
     <div class="tx-pos-cells" data-board-side="${owner}" data-comp-id="${markup.esc(source.id)}">${ROWS.map(lane => positionCell(lane, owner, source, markup)).join("")}</div></div>`
 }
 

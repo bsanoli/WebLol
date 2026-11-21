@@ -1,8 +1,8 @@
 // O que os iframes (Área do time, Builds, Worlds) leem da janela pai. Os nomes são o contrato de
-// `shared/api/host-bridge.ts`; só estes seis ficam no `window`.
-import type { HostGlobals } from "@/shared/api/host-bridge"
+// `shared/host-bridge/host-bridge.ts`; só estes seis ficam no `window`.
+import type { HostGlobals } from "@/shared/host-bridge"
 import { canManageTeam, captainAccess, renderCaptainPanel, TEAM_NAME } from "../ui/captain-panel"
-import { ONLINE } from "@/shared/api/firestore"
+import { ONLINE } from "@/shared/firestore"
 import { itemName } from "@/shared/lib/team-changes"
 import { hostImages } from "./images"
 import { pending, user } from "./identity"

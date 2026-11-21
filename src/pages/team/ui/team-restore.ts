@@ -1,5 +1,5 @@
 // Descartar o rascunho: volta à versão sincronizada do time (ou aos dados iniciais) depois de oferecer uma cópia.
-import { STORAGE_KEYS } from "@/shared/config/storage-keys"
+import { STORAGE_KEYS } from "@/shared/config"
 import { askChoice } from "@/shared/ui/dialog-controls"
 import { KEY } from "../model/local-state"
 import { parseOfficialBaseline } from "../model/saved-data"
