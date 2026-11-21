@@ -2,24 +2,33 @@
 import { compositionPreviewHTML } from "./composition-preview"
 import { askName, confirmAction } from "@/shared/ui/dialog-controls"
 import { createCompositionCopy } from "../model/composition"
-import { boardSideOf, enemiesOf, isEnemy, oursOf, setEnemyId, settleOwner } from "../model/composition-side"
-import { blank, draftOf, setChampions, uid, type Composition, type DraftLane } from "../model/local-state"
-import { addMatchup, findMatchup, matchupKey, pruneMatchups } from "../model/matchups"
+import { enemiesOf, isEnemy, oursOf, settleOwner } from "../model/composition-side"
+import { blank, setChampions, uid, type Composition, type DraftLane, type DraftSide } from "../model/local-state"
+import {
+  addMatchup,
+  detachMissingComps,
+  findMatchup,
+  matchupsOfComp,
+  matchupTitle,
+  oppositeSideOf,
+} from "../model/matchups"
 import { normalizeOpggLink, opggOf, setOpgg, writeTactic } from "../model/tactics"
+import type { Matchup } from "../model/matchups"
+import { deleteComp, editOpggLink, focusMatchup, handleRenameTo, renameComp } from "./team-comp-edits"
 import { mountMatchupBar } from "./matchup-bar"
 import { renderGrid } from "./team-grid"
 import { hooks, boardEnemy, session } from "./team-session"
-import { $, cur, compById, img, S, save, toast, touch } from "./team-store"
+import { $, activeMatchup, boardSide, cur, compById, img, S, save, toast, touch } from "./team-store"
 
 // Comp do lado do quadro onde está o elemento; fora do quadro, a comp aberta.
 export const compOf = (el: Element | null | undefined) =>
   compById((el?.closest?.("[data-comp-id]") as HTMLElement | null)?.dataset.compId) || cur()
-const matchupItem = (c: Composition) => ({
+const matchupItem = (c: Composition, side: DraftSide) => ({
   id: c.id,
   name: c.name,
   title: c.name,
   preview: compositionPreviewHTML(c, img),
-  side: boardSideOf(c, S.comps, S.cur),
+  side,
   champions: [...Object.values(c.lanes).flat(), ...c.bans],
 })
 
@@ -27,13 +36,18 @@ export function renderMatchup() {
   const host = $("#editor .matchup-bar")
   if (!host) return
   const c = cur(),
-    r = boardEnemy()
+    r = boardEnemy(),
+    active = activeMatchup(),
+    side = boardSide()
   mountMatchupBar(host, {
-    ours: oursOf(S.comps).map(matchupItem),
-    enemies: enemiesOf(S.comps).map(matchupItem),
-    current: matchupItem(c),
-    enemy: r ? matchupItem(r) : null,
-    side: draftOf(c).side,
+    ours: oursOf(S.comps).map(x => matchupItem(x, side)),
+    enemies: enemiesOf(S.comps).map(x => matchupItem(x, oppositeSideOf(side))),
+    current: matchupItem(c, side),
+    enemy: r ? matchupItem(r, oppositeSideOf(side)) : null,
+    side,
+    matchup: active
+      ? { id: active.id, title: matchupTitle({ matchup: active, ...entryOf(active) }), named: !!active.name }
+      : null,
     enemyOpgg: r ? opggOf(r) : "",
     collapsed: S.matchupBarCollapsed === true,
     onToggleCollapsed: () => {
@@ -45,18 +59,28 @@ export function renderMatchup() {
       )
     },
     onSelectOurs: id => {
-      selectComp(id)
+      const open = activeMatchup()
+      if (open) {
+        open.ours = id
+        open.updated = Date.now()
+        S.cur = id
+        if (!isEnemy(compById(id) ?? c)) S.lastComp = id
+        save()
+        hooks.renderAll()
+        hooks.publishRoute("comps")
+      } else selectComp(id)
       focusMatchup("ours")
     },
     onSelectEnemy: handleEnemySelect,
-    onSide: side => {
-      draftOf(cur()).side = side
-      touch()
+    onSide: next => {
+      setBoardSide(next)
       save()
       hooks.renderEditor()
       renderGrid()
-      $(`#editor [data-side-option="${side}"]`)?.focus({ preventScroll: true })
+      $(`#editor [data-side-option="${oppositeSideOf(next)}"]`)?.focus({ preventScroll: true })
     },
+    onRenameMatchup: () => void renameMatchup(),
+    onLeaveMatchup: leaveMatchup,
     onNew: owner => newComp(owner),
     onMove: moveComp,
     onOpgg: id => void editOpggLink(compById(id)),
@@ -66,16 +90,53 @@ export function renderMatchup() {
     onDelete: id => void deleteComp(id),
   })
 }
-const focusMatchup = (kind: "ours" | "rival") =>
-  requestAnimationFrame(() => $(`#editor [data-matchup="${kind}"]`)?.focus({ preventScroll: true }))
-// Põe a adversária no draft da comp nossa e registra o confronto (a tática dele fica em Táticas › Confrontos).
-export function faceEnemy(ours: Composition, enemyId: string | null) {
-  setEnemyId(ours, enemyId)
-  if (enemyId) addMatchup(ours, enemyId)
-  touch(ours)
+const entryOf = (matchup: Matchup) => {
+  const { ours, enemy } = findMatchup(S.comps, S.matchups, matchup.id) ?? { ours: null, enemy: null }
+  return { ours, enemy }
+}
+/** Lado da nossa comp no confronto aberto; sem confronto aberto, cria um com a comp aberta. */
+function setBoardSide(next: DraftSide) {
+  const open = activeMatchup() ?? openMatchupFor(cur().id)
+  open.side = next
+  open.updated = Date.now()
+}
+function openMatchupFor(oursId: string, enemyId?: string) {
+  const created = addMatchup(S.matchups, { ours: oursId, enemy: enemyId })
+  S.curMatchup = created.id
+  return created
+}
+/** Põe a adversária no confronto aberto (ou cria um confronto novo com a comp aberta). `null` tira a adversária. */
+export function faceEnemy(enemyId: string | null) {
+  const open = activeMatchup()
+  if (open) {
+    if (enemyId) open.enemy = enemyId
+    else delete open.enemy
+    open.updated = Date.now()
+  } else if (enemyId) openMatchupFor(cur().id, enemyId)
+}
+async function renameMatchup() {
+  const open = activeMatchup()
+  if (!open) return
+  const title = matchupTitle({ matchup: open, ...entryOf(open) })
+  const value = await askName("Renomear confronto", open.name ?? title, "Nome do confronto (vazio volta ao padrão)")
+  if (value === undefined) return
+  const name = value.trim()
+  if (name) open.name = name
+  else delete open.name
+  open.updated = Date.now()
+  save()
+  hooks.renderEditor()
+  focusMatchup("ours")
+}
+function leaveMatchup() {
+  S.curMatchup = null
+  session.side = "us"
+  save()
+  hooks.renderAll()
+  focusMatchup("ours")
 }
 function handleEnemySelect(id: string | null) {
-  faceEnemy(cur(), id)
+  faceEnemy(id)
   session.side = id ? "rival" : "us"
   save()
   hooks.renderEditor()
@@ -87,6 +148,8 @@ export function selectComp(id: string) {
   S.cur = id
   const picked = compById(id)
   if (picked && !isEnemy(picked)) S.lastComp = id
+  // A comp reabre o confronto mais recente dela.
+  S.curMatchup = matchupsOfComp(S.matchups, id).find(item => item.ours === id)?.id ?? null
   if (!boardEnemy()) session.side = "us"
   save()
   hooks.renderAll()
@@ -98,10 +161,12 @@ export function keepOurCompositionInDraft() {
   if (S.view !== "draft") return
   const c = cur()
   if (c && !isEnemy(c)) return
-  const facing = c && oursOf(S.comps).find(x => x.draft?.enemyId === c.id)
-  const next = facing || S.comps.find(x => x.id === S.lastComp && !isEnemy(x)) || oursOf(S.comps)[0]
+  const facing = c && S.matchups.find(x => x.enemy === c.id && x.ours && findMatchup(S.comps, S.matchups, x.id)?.ours)
+  const next =
+    (facing && compById(facing.ours)) || S.comps.find(x => x.id === S.lastComp && !isEnemy(x)) || oursOf(S.comps)[0]
   if (next) {
     S.cur = next.id
+    S.curMatchup = facing?.id ?? matchupsOfComp(S.matchups, next.id).find(item => item.ours === next.id)?.id ?? null
     session.side = facing ? "rival" : "us"
   }
 }
@@ -115,10 +180,11 @@ export function newComp(owner: "ours" | "enemy" = "ours") {
   S.comps.unshift(c)
   session.active = "top"
   if (faceIt) {
-    faceEnemy(cur(), c.id)
+    faceEnemy(c.id)
     session.side = "rival"
   } else {
     S.cur = c.id
+    S.curMatchup = null
     S.tacticsGeneral = false
     if (!enemy) S.lastComp = c.id
     session.side = "us"
@@ -135,20 +201,6 @@ export function newComp(owner: "ours" | "enemy" = "ours") {
       $<HTMLInputElement>("#cname").select()
     }, 0)
 }
-// Nome editado direto no card do lado.
-function handleRenameTo(id: string, value: unknown) {
-  const c = compById(id),
-    name = String(value || "").trim()
-  if (!c || !name || name === c.name) return
-  c.name = name
-  touch(c)
-  save()
-  if (id === S.cur) {
-    $<HTMLInputElement>("#cname").value = name
-    $("#cname").title = name
-  }
-  hooks.renderEditor()
-}
 // Campeão solto no lado adversário vazio: cria a adversária já com ele, na rota mais provável.
 export function handleEnemyChampionDrop(name: string, lane: DraftLane) {
   const ours = cur()
@@ -158,27 +210,12 @@ export function handleEnemyChampionDrop(name: string, lane: DraftLane) {
   S.comps.unshift(c)
   setChampions(c, lane, [name])
   session.active = lane
-  faceEnemy(ours, c.id)
+  faceEnemy(c.id)
   session.side = "rival"
   save()
   hooks.renderAll()
   hooks.publishRoute("comps")
   toast(`Adversária "${c.name}" criada com ${name}`)
-}
-async function renameComp(id: string) {
-  const c = compById(id)
-  if (!c) return
-  const name = (await askName("Renomear composição", c.name, "Nome da composição"))?.trim()
-  if (!name || name === c.name) return
-  c.name = name
-  touch(c)
-  save()
-  if (id === S.cur) {
-    $<HTMLInputElement>("#cname").value = name
-    $("#cname").title = name
-  }
-  hooks.renderEditor()
-  focusMatchup(id === S.cur ? "ours" : "rival")
 }
 function duplicateComposition(id: string) {
   const source = compById(id)
@@ -187,36 +224,16 @@ function duplicateComposition(id: string) {
   S.comps.unshift(copy)
   // Na Ordem do draft, a cópia de uma adversária vira a adversária do quadro.
   if (isEnemy(copy) && S.view === "draft" && !isEnemy(cur())) {
-    faceEnemy(cur(), copy.id)
+    faceEnemy(copy.id)
     session.side = "rival"
-  } else S.cur = copy.id
+  } else {
+    S.cur = copy.id
+    S.curMatchup = null
+  }
   save()
   hooks.renderAll()
   hooks.publishRoute("comps")
   focusMatchup(isEnemy(copy) && S.view === "draft" ? "rival" : "ours")
-}
-async function deleteComp(id: string) {
-  const c = compById(id)
-  if (!c || !(await confirmAction(`Excluir a comp "${c.name}"? As táticas dela também saem.`, "Excluir composição")))
-    return false
-  writeTactic(S, c.id, c.name, "", Date.now(), [])
-  S.comps = S.comps.filter(x => x.id !== c.id)
-  for (const x of S.comps) if (x.draft?.enemyId === c.id) setEnemyId(x, null)
-  dropMatchupTactics()
-  if (!S.comps.length) S.comps.push(blank())
-  if (!compById(S.cur))
-    S.cur = (S.comps.find(x => x.id === S.lastComp && !isEnemy(x)) || oursOf(S.comps)[0] || S.comps[0]).id
-  if (!boardEnemy()) session.side = "us"
-  save()
-  hooks.renderAll()
-  hooks.publishRoute("comps")
-  focusMatchup("ours")
-  return true
-}
-
-function dropMatchupTactics() {
-  for (const id of pruneMatchups(S.comps)) writeTactic(S, matchupKey(id), "", "", Date.now(), [])
-  if (S.tacticsMatchup && !findMatchup(S.comps, S.tacticsMatchup)) S.tacticsMatchup = null
 }
 // Passa a comp de uma lista para a outra (menu ⋯ da barra de confronto).
 function moveComp(id: string) {
@@ -230,13 +247,12 @@ function moveComp(id: string) {
       const next = S.comps.find(x => x.id === S.lastComp && !isEnemy(x)) || oursOf(S.comps)[0]
       if (next) {
         S.cur = next.id
-        faceEnemy(next, id)
+        S.curMatchup = matchupsOfComp(S.matchups, next.id).find(item => item.ours === next.id)?.id ?? null
+        faceEnemy(id)
         session.side = "rival"
       }
     }
   } else {
-    for (const x of S.comps) if (x.draft?.enemyId === id) setEnemyId(x, null)
-    dropMatchupTactics()
     if (id === S.cur) S.lastComp = id
     if (!boardEnemy()) session.side = "us"
   }
@@ -245,24 +261,4 @@ function moveComp(id: string) {
   hooks.publishRoute("comps")
   focusMatchup(toEnemy && boardEnemy()?.id === id ? "rival" : "ours")
   toast(toEnemy ? `"${c.name}" agora é adversária` : `"${c.name}" agora é nossa`)
-}
-
-// Botão direito no OP.GG troca o link; sem link, o clique esquerdo também pede.
-// Na tática de um confronto, o OP.GG é o da adversária dele.
-export const opggTarget = () => (S.tacticsMatchup ? findMatchup(S.comps, S.tacticsMatchup)?.enemy || cur() : cur())
-export async function editOpggLink(target?: Composition) {
-  const item = target || cur(),
-    value = await askName("Link do OP.GG do time adversário", opggOf(item), "Endereço (deixe vazio para remover)")
-  if (value === undefined) return
-  const link = normalizeOpggLink(value)
-  if (link === null) {
-    toast("Link inválido. Cole o endereço completo do OP.GG.")
-    return
-  }
-  setOpgg(item, link)
-  touch(item)
-  save()
-  hooks.renderEditor()
-  toast(link ? "Link do OP.GG salvo" : "Link do OP.GG removido")
-  ;($("#editor [data-tactic-opgg]") || $("#editor [data-matchup-opgg]"))?.focus({ preventScroll: true })
 }

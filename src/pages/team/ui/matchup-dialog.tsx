@@ -5,7 +5,7 @@ import { Dialog, DialogContent, DialogTitle } from "@/shared/ui/dialog"
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from "@/shared/ui/select"
 
 export const NEW_ENEMY = "__new-enemy"
-export type MatchupChoice = { ours: string; enemy: string }
+export type MatchupChoice = { ours: string; enemy: string; side: "blue" | "red" }
 /** Linhas da lista com altura e margem internas maiores, para o nome e os retratos respirarem. */
 const ITEM_CLASS = "min-h-12 rounded-md py-2 pr-10 pl-3 cursor-pointer *:[span]:last:min-w-0 *:[span]:last:flex-1"
 
@@ -39,6 +39,7 @@ function MatchupForm({
 }) {
   const [ourId, setOurId] = useState(initialOurs)
   const [enemyId, setEnemyId] = useState("")
+  const [side, setSide] = useState<"blue" | "red">("blue")
   const field = (
     label: string,
     value: string,
@@ -75,7 +76,7 @@ function MatchupForm({
       className="grid gap-4"
       onSubmit={event => {
         event.preventDefault()
-        if (ourId && enemyId) onDone({ ours: ourId, enemy: enemyId })
+        if (ourId && enemyId) onDone({ ours: ourId, enemy: enemyId, side })
       }}
     >
       <p className="m-0 text-sm text-muted-foreground">
@@ -87,6 +88,23 @@ function MatchupForm({
         id: NEW_ENEMY,
         name: "+ Nova adversária…",
       })}
+      <div className="flex items-center justify-between gap-2">
+        <span className="text-sm">
+          <span role="status" aria-live="polite">
+            <i className={`side-dot ${side}`} aria-hidden="true" /> Nossa no lado{" "}
+            {side === "blue" ? "azul" : "vermelho"}
+          </span>
+        </span>
+        <Button
+          type="button"
+          variant="outline"
+          size="sm"
+          data-side-swap
+          onClick={() => setSide(side === "blue" ? "red" : "blue")}
+        >
+          <span aria-hidden="true">⇄</span> Trocar lados
+        </Button>
+      </div>
       <div className="flex justify-end gap-2">
         <Button type="button" variant="outline" onClick={() => onDone()}>
           Cancelar

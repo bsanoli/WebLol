@@ -1,6 +1,7 @@
 // Conversão entre o formato salvo da composição (`lol-comps-time-v1`, backup e Firestore) e o formato do código.
-// Salvo: `team: "mine" | "enemy"` e `draft.rival` (os bans já são `bans`; `lanes.ban` só é lido).
-// Código: `owner: "ours" | "enemy"` e `draft.enemyId`.
+// Salvo: `team: "mine" | "enemy"` (os bans já são `bans`; `lanes.ban` só é lido). O confronto e o lado da nossa comp
+// ficam na lista `matchups` do time (docs/decisoes/0009-confronto-proprio.md).
+// Código: `owner: "ours" | "enemy"`.
 // Os nomes salvos são contrato e só mudam com migração e ADR (docs/convencoes.md).
 //
 // A conversão preserva a ordem das chaves e a ausência dos campos: a sincronização compara cada composição pelo JSON,
@@ -39,7 +40,6 @@ function readLegacyBans(comp: PlainObject): PlainObject {
 function convertComposition(raw: PlainObject, direction: "read" | "write"): PlainObject {
   const isReading = direction === "read"
   const ownerKey = isReading ? "team" : "owner"
-  const enemyKey = isReading ? "rival" : "enemyId"
   const values = isReading ? OWNER_FROM_SAVED : OWNER_TO_SAVED
 
   let comp = raw
@@ -48,9 +48,6 @@ function convertComposition(raw: PlainObject, direction: "read" | "write"): Plai
   if (typeof owner === "string" && Object.hasOwn(values, owner)) {
     comp = renameKeys(comp, { [ownerKey]: isReading ? "owner" : "team" })
     comp[isReading ? "owner" : "team"] = values[owner]
-  }
-  if (isPlainObject(raw.draft) && enemyKey in raw.draft) {
-    comp = { ...comp, draft: renameKeys(raw.draft, { [enemyKey]: isReading ? "enemyId" : "rival" }) }
   }
   return isReading ? readLegacyBans(comp) : comp
 }

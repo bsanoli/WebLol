@@ -1985,3 +1985,31 @@
   cursor: not-allowed;
   opacity: 0.45;
 }
+
+.matchup-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  margin-bottom: 8px;
+}
+.matchup-head .matchup-title {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.matchup-head [data-matchup-new] {
+  margin-left: auto;
+}
+.matchup-badge {
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: var(--wl-accent-soft);
+  font-size: 12px;
+  font-weight: 600;
+}
+.matchup-hint {
+  color: var(--muted);
+  font-size: 13px;
+}

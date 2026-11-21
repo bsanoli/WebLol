@@ -17,7 +17,7 @@ O código mistura idiomas e sinônimos. Contagem em `src/` e `public/assets/` em
 ## Decisão
 
 1. Identificadores, tipos, arquivos e pastas em inglês. Textos da interface, documentação, comentários, testes e commits em português.
-2. Cada conceito tem um termo, definido no [glossário](../glossario.md). Ex.: composição nossa e adversária viram `owner: "ours" | "enemy"`, a adversária do draft vira `enemyId`, posição vira `position` e rota física vira `lane`.
+2. Cada conceito tem um termo, definido no [glossário](../glossario.md). Ex.: composição nossa e adversária viram `owner: "ours" | "enemy"`, a adversária do draft vira `enemy` do confronto, posição vira `position` e rota física vira `lane`.
 3. Nomes salvos (chaves locais, campos, coleções, rotas e parâmetros) são contratos. Continuam como estão até uma migração com ADR. A fronteira (`api` ou `model`) converte para o nome canônico.
 4. O código legado é renomeado por ondas ([backlog](../auditoria-codebase.md#backlog-por-ondas)), em commits só de renomeação, nunca misturados com mudança de comportamento.
 

@@ -34,8 +34,8 @@ Este arquivo liga o termo que aparece na tela ao nome que o código usa. Consult
 | Composição | `composition` | Picks por posição, bans, draft e notas de um time. | `comp`, `comps`, `cur`, `S.comps` |
 | Nossa / Adversária | `owner: "ours" \| "enemy"` | De quem é a composição: do nosso time ou do time que vamos enfrentar. | campo salvo `team: "mine" \| "enemy"`, `CompTeam`, `tacticTeam`, `mine`, `rival` |
 | Composição adversária | `enemyComposition` | Composição com `owner` igual a `"enemy"`. | `rival`, `rivalComp` |
-| Adversária do draft | `enemyId` | Id da composição adversária colocada do outro lado do draft de uma composição nossa. | campo salvo `draft.rival`, `rivalId`, `setRival`, `rivalOf` |
-| Confronto | `matchup` | Uma composição nossa contra uma adversária, com tática própria. | `MatchupEntry` |
+| Adversária do confronto | `enemy` (em `Matchup`) | Id da composição adversária do confronto aberto no draft. O lado da nossa comp é `side` (`blue` ou `red`), também no confronto. | antigo `draft.rival` e `enemyId` (migrados), `rivalId`, `setRival`, `rivalOf` |
+| Confronto | `matchup` | Item próprio do time: uma composição nossa contra uma adversária, com id, nome opcional, lado da nossa no draft e tática própria. | `MatchupEntry` |
 | Táticas / Bloco de notas | `tacticNote` | Texto rico (Tiptap) de uma composição, de um confronto ou das "Táticas gerais". | `tactic` (também usado para a antiga "tática salva") |
 | Tática salva (antiga) | — | Formato antigo de composição com tática. Só aparece na migração. | `tactic: true`, `tacticViews` |
 | Print | `screenshot` | Imagem colada no bloco de notas. Em inglês, *print* significa impressão. | `print`, `print-store`, `print-sketch`, `img` |

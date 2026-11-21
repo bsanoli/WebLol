@@ -1,6 +1,6 @@
 // Estado da conta e do time neste navegador. Antes eram variáveis globais dos scripts clássicos
 // (`TEAM`, `MEMB`, `OFF`, `ADMIN`, `KEYS`, `pendingId`…); agora há um dono só.
-import type { SharedData } from "@/shared/lib/team-changes"
+import type { ItemKind, SharedData } from "@/shared/lib/team-changes"
 import type { AdminKeys, AdminRecord } from "@/shared/lib/admin-crypto"
 
 export type Account = { id: string; admin: boolean; created?: number; solo?: boolean }
@@ -15,7 +15,7 @@ export type LogEntry = {
   at: number
   sid: string
   from: string
-  kind: "comp" | "play" | "tactic"
+  kind: ItemKind
   op: "add" | "edit" | "del"
   id: string
   name: string

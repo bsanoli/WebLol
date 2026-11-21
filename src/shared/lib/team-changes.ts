@@ -1,7 +1,7 @@
 // Diferenças entre a Área do time local e a versão oficial: o que entra num envio e como aparece na lista.
 // Os itens seguem o formato salvo (`team`, `draft.rival`, `lanes.*`): é o que o Firestore guarda.
 // Os bans vêm em `bans` (formato atual) ou em `lanes.ban` (formato antigo, ADR 0007); os dois contam como o mesmo dado.
-export type ItemKind = "comp" | "play" | "tactic"
+export type ItemKind = "comp" | "play" | "tactic" | "matchup"
 export type ChangeOp = "add" | "edit" | "del"
 export type SharedItem = {
   id: string
@@ -11,6 +11,10 @@ export type SharedItem = {
   notes?: string
   team?: string
   tacticTeam?: string
+  /** Confronto: comp nossa, comp adversária e o lado da nossa (as duas comps são opcionais). */
+  ours?: string
+  enemy?: string
+  side?: string
   draft?: { rival?: string; [key: string]: unknown }
   steps?: unknown[]
   cb?: unknown
@@ -22,23 +26,66 @@ export type SharedItem = {
   updated?: unknown
   [key: string]: unknown
 }
-export type SharedData = { comps: SharedItem[]; plays: SharedItem[]; tactics: SharedItem[] }
+export type SharedData = { comps: SharedItem[]; plays: SharedItem[]; tactics: SharedItem[]; matchups: SharedItem[] }
 export type Change = { kind: ItemKind; op: ChangeOp; id: string; before?: SharedItem; after?: SharedItem; h?: string }
 
-const KINDS: ItemKind[] = ["comp", "play", "tactic"]
+const KINDS: ItemKind[] = ["comp", "play", "tactic", "matchup"]
 const clone = <T>(value: T): T => JSON.parse(JSON.stringify(value))
 const ESCAPES: Record<string, string> = { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }
 const escapeHtml = (value: unknown) => String(value ?? "").replace(/[&<>"]/g, char => ESCAPES[char] ?? char)
 
-export const KN: Record<ItemKind, string> = { comp: "Comp", play: "Jogada", tactic: "Tática" }
+export const KN: Record<ItemKind, string> = { comp: "Comp", play: "Jogada", tactic: "Tática", matchup: "Confronto" }
 export const OPN: Record<ChangeOp, string> = { add: "nova", edit: "alterada", del: "apagada" }
 
-/** Só o que o time compartilha: composições, jogadas e táticas. */
+/** Só o que o time compartilha: composições, jogadas, táticas e confrontos. */
 export const shared = (state?: Partial<SharedData> | null): SharedData => ({
   comps: clone(state?.comps || []),
   plays: clone(state?.plays || []),
   tactics: clone(state?.tactics || []),
+  matchups: clone(state?.matchups || []),
 })
+
+/**
+ * Leva os confrontos que viviam dentro da comp nossa (`matchups` e `draft.rival`) e o lado dela (`draft.side`) para a
+ * lista `matchups` do time, mantendo os ids (a tática `mx-<id>` continua valendo). Lê os dois formatos e é idempotente:
+ * o que já está na lista não é copiado de novo, e os ids criados a partir de `draft.rival` são os mesmos em qualquer navegador.
+ */
+export function withOwnMatchups(data?: Partial<SharedData> | null): SharedData {
+  const out = shared(data)
+  const enemyIds = new Set(
+    out.comps.filter(comp => comp.team === "enemy" || comp.tacticTeam === "enemy").map(c => c.id),
+  )
+  const known = new Set(out.matchups.map(item => item.id))
+  const add = (item: SharedItem) => {
+    if (known.has(item.id)) return
+    known.add(item.id)
+    out.matchups.push(item)
+  }
+  for (const comp of out.comps) {
+    const draft = comp.draft
+    const side = draft?.side === "red" ? "red" : "blue"
+    const embedded = Array.isArray(comp.matchups) ? (comp.matchups as SharedItem[]) : []
+    const isOurs = !enemyIds.has(comp.id)
+    if (isOurs) {
+      for (const item of embedded)
+        if (item && typeof item.id === "string" && typeof item.enemy === "string" && enemyIds.has(item.enemy))
+          add({ id: item.id, ours: comp.id, enemy: item.enemy, side, updated: item.updated ?? comp.updated ?? 0 })
+      const rival = draft?.rival
+      if (
+        typeof rival === "string" &&
+        enemyIds.has(rival) &&
+        !out.matchups.some(m => m.ours === comp.id && m.enemy === rival)
+      )
+        add({ id: `${comp.id}-${rival}`, ours: comp.id, enemy: rival, side, updated: comp.updated ?? 0 })
+    }
+    delete comp.matchups
+    if (draft) {
+      delete draft.side
+      delete draft.rival
+    }
+  }
+  return out
+}
 
 /** Posições da composição com os bans como `ban`, venham de `lanes.ban` ou de `bans`. */
 function savedPositions(item: SharedItem) {
@@ -112,7 +159,8 @@ export function applyChanges(data: Partial<SharedData>, changes: Change[]): Shar
   return out
 }
 
-export const itemName = (change: Change) => (change.after || change.before)?.name || "(sem nome)"
+export const itemName = (change: Change) =>
+  (change.after || change.before)?.name || (change.kind === "matchup" ? "Confronto" : "(sem nome)")
 
 function describeNew(change: Change) {
   const { after } = change
@@ -127,6 +175,7 @@ function describeNew(change: Change) {
     return `Campeões: ${lanes || "nenhum"}`
   }
   if (change.kind === "play") return `${after.steps?.length || 0} passos`
+  if (change.kind === "matchup") return "Confronto entre uma comp nossa e uma adversária"
   return "Texto da tática"
 }
 
@@ -155,6 +204,13 @@ function describeComp(a: SharedItem, b: SharedItem, out: string[]) {
   if (JSON.stringify(draftNow) !== JSON.stringify(draftBefore)) out.push("Ordem do draft alterada")
 }
 
+function describeMatchup(a: SharedItem, b: SharedItem, out: string[]) {
+  if ((a.ours || "") !== (b.ours || "")) out.push("Comp nossa do confronto trocada")
+  if ((a.enemy || "") !== (b.enemy || "")) out.push("Adversária do confronto trocada")
+  if ((a.side || "blue") !== (b.side || "blue"))
+    out.push(`Lados trocados: nossa no ${a.side === "red" ? "vermelho" : "azul"}`)
+}
+
 function describeTactic(a: SharedItem, b: SharedItem, out: string[]) {
   if ((a.text || "") !== (b.text || "")) out.push("Texto da tática alterado")
   if (JSON.stringify(a.images || []) !== JSON.stringify(b.images || [])) out.push("Prints ou desenhos alterados")
@@ -171,6 +227,7 @@ export function describe(change: Change) {
   if (a.name !== b.name) out.push(`Nome: <b>${escapeHtml(b.name)}</b> → <b>${escapeHtml(a.name)}</b>`)
   if (change.kind === "comp") describeComp(a, b, out)
   else if (change.kind === "tactic") describeTactic(a, b, out)
+  else if (change.kind === "matchup") describeMatchup(a, b, out)
   else {
     if ((a.steps || []).length !== (b.steps || []).length)
       out.push(`Passos: ${(b.steps || []).length} → ${(a.steps || []).length}`)

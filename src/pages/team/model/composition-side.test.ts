@@ -1,18 +1,6 @@
 import { describe, expect, it } from "vitest"
-import {
-  boardSideOf,
-  compTitle,
-  enemiesOf,
-  isEnemy,
-  oppositeSide,
-  oursOf,
-  enemyCompositionOf,
-  enemyOrder,
-  setEnemyId,
-  settleOwner,
-  ownerOf,
-} from "./composition-side"
-import { blank, draftOf, type Composition } from "./local-state"
+import { enemiesOf, isEnemy, oppositeSide, oursOf, enemyOrder, settleOwner, ownerOf } from "./composition-side"
+import { blank, type Composition } from "./local-state"
 
 function comp(name: string, extra: Partial<Composition> & Record<string, unknown> = {}): Composition {
   return Object.assign(blank(name), { id: name.toLowerCase().replace(/\s+/g, "-") }, extra)
@@ -43,13 +31,6 @@ describe("settleOwner", () => {
     expect(legacy).not.toHaveProperty("tacticViews")
     expect(legacy).not.toHaveProperty("tacticTeam")
   })
-
-  it("tira a adversária do draft quando a comp passa a ser adversária", () => {
-    const ours = comp("A")
-    setEnemyId(ours, "rival")
-    settleOwner(ours, "enemy")
-    expect(ours.draft?.enemyId).toBeUndefined()
-  })
 })
 
 describe("oursOf e enemiesOf", () => {
@@ -60,86 +41,15 @@ describe("oursOf e enemiesOf", () => {
   })
 })
 
-describe("enemyCompositionOf e compTitle", () => {
-  const enemy = comp("Time rival", { owner: "enemy" })
-
-  it("acham a adversária colocada no draft", () => {
-    const ours = comp("Nossa base")
-    setEnemyId(ours, enemy.id)
-    expect(enemyCompositionOf(ours, [ours, enemy])).toBe(enemy)
-    expect(compTitle(ours, [ours, enemy])).toBe("Nossa base x Time rival")
-  })
-
-  it("ignoram a adversária que não existe mais", () => {
-    const ours = comp("Nossa base")
-    setEnemyId(ours, "apagada")
-    expect(enemyCompositionOf(ours, [ours, enemy])).toBeNull()
-    expect(compTitle(ours, [ours, enemy])).toBe("Nossa base")
-  })
-
-  it("ignoram uma comp nossa apontada como adversária", () => {
-    const ours = comp("Nossa base")
-    const other = comp("Outra nossa")
-    setEnemyId(ours, other.id)
-    expect(enemyCompositionOf(ours, [ours, other])).toBeNull()
-  })
-
-  it("não dão adversária para uma comp adversária", () => {
-    const enemyWithRival = comp("Outra rival", { owner: "enemy", draft: undefined })
-    enemyWithRival.draft = {
-      side: "blue",
-      order: { blue: [], red: [] },
-      note: { blue: "", red: "" },
-      enemyId: enemy.id,
-    }
-    expect(enemyCompositionOf(enemyWithRival, [enemyWithRival, enemy])).toBeNull()
-  })
-})
-
-describe("setEnemyId", () => {
-  it("remove a adversária com null", () => {
-    const ours = comp("A")
-    setEnemyId(ours, "b")
-    expect(ours.draft?.enemyId).toBe("b")
-    setEnemyId(ours, null)
-    expect(ours.draft).not.toHaveProperty("enemyId")
-  })
-})
-
 describe("enemyOrder", () => {
   it("usa a ordem da adversária do lado oposto ao nosso", () => {
-    const ours = comp("A")
     const enemy = comp("B", { owner: "enemy" })
-    ours.draft = { side: "red", order: { blue: [], red: [] }, note: { blue: "", red: "" } }
     enemy.draft = {
-      side: "blue",
       order: { blue: ["top", "jg", "mid", "adc", "sup"], red: ["sup", "adc", "mid", "jg", "top"] },
       note: { blue: "", red: "" },
     }
     expect(oppositeSide("red")).toBe("blue")
-    expect(enemyOrder(ours, enemy)).toEqual(["top", "jg", "mid", "adc", "sup"])
-  })
-})
-
-describe("boardSideOf", () => {
-  it("a nossa fica no lado salvo nela", () => {
-    const ours = comp("Nossa")
-    draftOf(ours).side = "red"
-    expect(boardSideOf(ours, [ours])).toBe("red")
-  })
-
-  it("a adversária enfrentada fica do lado oposto ao da nossa, mesmo com outro lado salvo", () => {
-    const rival = comp("Rival", { owner: "enemy" })
-    const ours = comp("Nossa")
-    setEnemyId(ours, rival.id)
-    draftOf(ours).side = "blue"
-    draftOf(rival).side = "blue"
-    expect(boardSideOf(rival, [ours, rival])).toBe("red")
-  })
-
-  it("a adversária sem quem a enfrente usa o lado salvo nela", () => {
-    const rival = comp("Rival", { owner: "enemy" })
-    draftOf(rival).side = "red"
-    expect(boardSideOf(rival, [rival])).toBe("red")
+    expect(enemyOrder(enemy, "red")).toEqual(["top", "jg", "mid", "adc", "sup"])
+    expect(enemyOrder(enemy, "blue")).toEqual(["sup", "adc", "mid", "jg", "top"])
   })
 })
