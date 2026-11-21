@@ -78,6 +78,24 @@ Os scripts clássicos `public/assets/shell.js` e `public/assets/sync.js` ficam f
 
 ## Avisos que ainda não barram
 
+O Biome segue só avisando; o Steiger foi zerado e já barra.
+
+### Avisos do Biome
+
+`npm run lint` mostra 555 avisos e 89 sugestões. As regras com mais avisos:
+
+| Regra | Avisos | Onde corrigir |
+| --- | ---: | --- |
+| `style/noNonNullAssertion` (`!` depois de valor que pode faltar) | 147 | Ondas 3 e 4, ao tipar os arquivos com `@ts-nocheck` |
+| `style/noDescendingSpecificity` (CSS) | 144 | Onda 5 |
+| `nursery/useConsistentBooleanName` | 142 | Onda 3 |
+| `style/useNamingConvention` | 37 | Onda 3 |
+| `suspicious/useIterableCallbackReturn` | 28 | Onda 3 |
+| `complexity/noImportantStyles` (CSS) | 12 | Onda 5 |
+| `suspicious/noImplicitAnyLet` | 12 | Ondas 3 e 4 |
+
+As outras regras têm até 7 avisos cada. O `sync.js` e o `shell.js` ficam fora das regras de nomes, de `const` e de variáveis sem uso, e das correções automáticas de `useOptionalChain`, `noUselessEscapeInRegex` e `noPrototypeBuiltins` (`biome.jsonc`): são scripts clássicos que compartilham variáveis globais, e o Biome os lê como módulos isolados. As 89 sugestões de `style/useTemplate` só saem com `npx biome check --write --unsafe .`, revisando o diff.
+
 ### Avisos do Steiger
 
 Zerados em 21/11/2026 (Onda 8). `npm run check:fsd` roda com `--fail-on-warnings` e o CI falha se aparecer qualquer aviso. A regra `fsd/insignificant-slice` fica desligada só para `widgets/tactical-map`, `widgets/team-knowledge` e `entities/tactical-play`, que hoje só a Área do time usa (comentário em `steiger.config.ts`). `shared` ganhou um segmento por módulo (`firestore`, `host-bridge`, `local-keys`, `dataset`, `config`, `ui/arc`, `ui/reui`), cada um com `index.ts`.
