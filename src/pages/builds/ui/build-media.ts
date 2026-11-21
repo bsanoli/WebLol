@@ -1,4 +1,4 @@
-export const compactBuilds = matchMedia("(max-width: 767px)")
+const compactBuilds = matchMedia("(max-width: 767px)")
 export const reduceBuildMotion = matchMedia("(prefers-reduced-motion: reduce)")
 
 export const detailColumnSpan = () => (compactBuilds.matches ? 4 : 8)

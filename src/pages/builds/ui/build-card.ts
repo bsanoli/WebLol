@@ -6,7 +6,7 @@ import { type Champion, type buildOpponentOptions, championBuild } from "../mode
 import { buildDetails } from "./build-details"
 import { buildMatchups } from "./build-matchups"
 
-export type Opponent = ReturnType<typeof buildOpponentOptions>[number]
+type Opponent = ReturnType<typeof buildOpponentOptions>[number]
 
 type ChampionCardOptions = {
   champion: Champion
