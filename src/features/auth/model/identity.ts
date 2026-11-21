@@ -1,8 +1,8 @@
 // Quem está usando o app: conta salva, "Ver como" do admin, papel no time e alterações pendentes.
 import { diff, shared } from "@/shared/lib/team-changes"
-import { currentFirebase, fb } from "@/shared/api/firestore"
-import { ADMINS } from "@/shared/config/admins"
-import { STORAGE_KEYS } from "@/shared/config/storage-keys"
+import { currentFirebase, fb } from "@/shared/firestore"
+import { ADMINS } from "@/shared/config"
+import { STORAGE_KEYS } from "@/shared/config"
 import { adminEmail, isAdminId, playerEmail, safeName } from "@/shared/lib/account-id"
 import { session, type Account, type PreviewMode } from "./session"
 

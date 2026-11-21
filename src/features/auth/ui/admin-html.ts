@@ -1,6 +1,6 @@
 // HTML da aba Administração: a parte do capitão (envios e pedidos) e a parte só do admin.
 import { describe, itemName, KN, OPN, type Change } from "@/shared/lib/team-changes"
-import { ADMINS } from "@/shared/config/admins"
+import { ADMINS } from "@/shared/config"
 import { dispId, normId } from "@/shared/lib/account-id"
 import { slotOf } from "@/shared/lib/admin-crypto"
 import { esc, fmtD } from "@/shared/lib/dom"

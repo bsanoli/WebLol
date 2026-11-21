@@ -1,11 +1,11 @@
-import { Tabs, TabsList, TabsTrigger } from "@/shared/ui/arc/tabs/tabs"
+import { Tabs, TabsList, TabsTrigger } from "@/shared/ui/arc"
 import { ToggleGroup, ToggleGroupItem } from "@/shared/ui/toggle-group"
 import { Fragment, useEffect, useReducer, useState } from "react"
 import type { ReactNode } from "react"
 import { createRoot, type Root } from "react-dom/client"
 import { MoreHorizontal } from "lucide-react"
 import { ContextMenu } from "radix-ui"
-import { Switch } from "@/shared/ui/arc/switch/switch"
+import { Switch } from "@/shared/ui/arc"
 import { Empty, EmptyDescription, EmptyHeader } from "@/shared/ui/empty"
 
 import {

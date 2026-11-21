@@ -1,7 +1,7 @@
 # Onda 2b: deploy por artefato do Actions
 
 - **Tamanho:** G
-- **Situação:** etapas 1 e 2 concluídas; etapa 3 (limpeza) implementada na branch `onda-2b-limpeza`, aguardando PR
+- **Situação:** concluído
 - **Pedido por:** Fabiano
 - **Data:** 2026-11-20
 

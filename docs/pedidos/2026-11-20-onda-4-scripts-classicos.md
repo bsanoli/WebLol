@@ -1,7 +1,7 @@
 # Onda 4: scripts clássicos para TypeScript
 
 - **Tamanho:** G
-- **Situação:** em andamento (4a, 4b e 4c mergeadas (PR #14); 4d em andamento)
+- **Situação:** concluído
 - **Pedido por:** Fabiano
 - **Data:** 2026-11-20
 

@@ -1,8 +1,8 @@
 // Sincronização com o time: lê a versão oficial, junta com a cópia local, envia alterações para aprovação
 // (jogador) e publica a nova versão (capitão ou admin). Coleções e campos do Firestore não mudam.
 import { applyChanges, type Change, itemName, KN, type SharedData, type SharedItem } from "@/shared/lib/team-changes"
-import { dbGet, dbSet, fb, ONLINE } from "@/shared/api/firestore"
-import { STORAGE_KEYS } from "@/shared/config/storage-keys"
+import { dbGet, dbSet, fb, ONLINE } from "@/shared/firestore"
+import { STORAGE_KEYS } from "@/shared/config"
 import { normId } from "@/shared/lib/account-id"
 import { toast } from "@/shared/lib/dom"
 import { openRoute, routeRoots, writeRoute } from "./router"

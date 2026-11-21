@@ -1,4 +1,4 @@
-import { STORAGE_KEYS } from "@/shared/config/storage-keys"
+import { STORAGE_KEYS } from "@/shared/config"
 import { compositionFromSaved, hasLegacyBans } from "./composition-storage"
 import { sanitizeComposition } from "./saved-data"
 

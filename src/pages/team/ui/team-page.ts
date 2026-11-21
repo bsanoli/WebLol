@@ -1,5 +1,5 @@
-import { exposeFrameHandlers, navigateHost } from "@/shared/api/host-bridge"
-import { initializeTheme } from "@/shared/config/theme"
+import { exposeFrameHandlers, navigateHost } from "@/shared/host-bridge"
+import { initializeTheme } from "@/shared/config"
 import { viewFromMode } from "../model/saved-data"
 import { uid, compositionPreview } from "../model/local-state"
 import { isEnemy } from "../model/composition-side"
