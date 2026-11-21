@@ -1,7 +1,6 @@
 # Movimento da interface
 
-`public/assets/motion.css` é carregado depois dos estilos de cada página em
-`src/index.html`, `src/worlds.html` e `src/camp.html`. A página principal e os
+`src/app/styles/motion.css` é importado depois dos estilos de cada página nos CSS de entrada (`home.css`, `worlds.css` e `camp.css`, em `src/app/styles/`); a ordem do `@import` é a ordem da cascata (ver ADR 0008). A página principal e os
 iframes compartilham os mesmos tokens: 120 ms para controles, 180 ms para menus
 e feedback, 240 ms para painéis; deslocamento de 6 px e curva de saída suave.
 

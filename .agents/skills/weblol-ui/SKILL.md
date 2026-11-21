@@ -25,12 +25,12 @@ Quando a tarefa pedir uma direção visual ou comparação, OP.GG, OP.GG Esports
 
 ## Regra dos 8
 
-- Use múltiplos de 8 px como padrão para margens, padding, gaps e alturas de controles. Use subdivisões de 4 px para ajustes finos, mantendo todos esses valores na mesma escala. Reutilize os tokens de espaçamento e de componentes de [base.css](../../../public/assets/base.css) ao definir margens, padding, gaps e alturas. Quando o mesmo espaçamento cumprir um papel recorrente na tela e variar por breakpoint, atribua esse papel a um token da tela.
+- Use múltiplos de 8 px como padrão para margens, padding, gaps e alturas de controles. Use subdivisões de 4 px para ajustes finos, mantendo todos esses valores na mesma escala. Reutilize os tokens de espaçamento e de componentes de [base.css](../../../src/app/styles/base.css) ao definir margens, padding, gaps e alturas. Quando o mesmo espaçamento cumprir um papel recorrente na tela e variar por breakpoint, atribua esse papel a um token da tela.
 - Use distâncias menores dentro de um grupo e maiores entre grupos. Como ponto de partida, use 8 px entre título e descrição, 16 px de padding em cards compactos, 24 px em painéis padrão e 32 px entre seções. Ajuste a densidade conforme o conteúdo.
 - Alinhe as bordas e o início do conteúdo em cards do mesmo nível. Reutilize as variantes de botão existentes e use a mesma altura para controles de função equivalente na mesma barra.
 - Ao compactar uma fase do draft, mantenha o alinhamento à esquerda usado nas demais fases para número, retrato e texto.
 - Aplique a escala tanto aos valores novos quanto aos espaçamentos que alterar. Confira no diff se eles usam os tokens da escala. Tipografia, espessura de bordas e desenhos de ícones seguem seus próprios tokens.
-- Use a **Visão geral do Worlds** como referência para as margens de 32 px e o alinhamento dos painéis de rankings no desktop. O CSS fica em [analytics.css](../../../public/assets/analytics.css).
+- Use a **Visão geral do Worlds** como referência para as margens de 32 px e o alinhamento dos painéis de rankings no desktop. O CSS fica em [analytics.css](../../../src/widgets/tournament-overview/ui/analytics.css).
 
 - Em modais e painéis, alinhe o botão de fechar no canto superior direito, na mesma altura do cabeçalho. Reserve espaço horizontal para o controle e confira que ele não cria uma linha vazia acima do conteúdo.
 

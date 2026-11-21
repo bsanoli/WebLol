@@ -77,7 +77,7 @@
     display: grid;
     grid-template-columns: minmax(0, 1fr) minmax(420px, 1.15fr) minmax(0, 1fr);
     grid-template-rows: none;
-    gap: 14px;
+    gap: 16px;
     align-items: stretch;
     flex: 1;
     min-height: 0;
@@ -85,7 +85,7 @@
   #v-comps.draft-view .tm {
     display: flex;
     flex-direction: column;
-    gap: 6px;
+    gap: 4px;
     grid-row: auto;
     min-width: 0;
     margin: 0;
@@ -100,7 +100,7 @@
   #v-comps.draft-view .draft-bans {
     display: flex;
     align-items: center;
-    gap: 6px;
+    gap: 4px;
     min-height: 52px;
   }
   #v-comps.draft-view .tm.r .draft-bans {
@@ -175,7 +175,7 @@
   }
   #v-comps.draft-view .tm > .pk.mine .pkn:not(.pk-empty) {
     font-size: 20px;
-    text-shadow: 0 1px 4px #000;
+    text-shadow: 0 1px 4px var(--wl-black);
   }
   #v-comps.draft-view .tm > .pk.them {
     justify-content: flex-end;
@@ -189,7 +189,7 @@
     overflow: auto;
     display: flex;
     flex-direction: column;
-    gap: 10px;
+    gap: 8px;
     min-width: 0;
   }
   #v-comps.draft-view .dz-names {
@@ -209,11 +209,11 @@
     line-height: 1.1;
   }
   #v-comps.draft-view .dz-names .tmh:first-child {
-    color: #6ea2ff;
+    color: var(--wl-draft-name-blue);
     align-items: flex-start;
   }
   #v-comps.draft-view .dz-names .tmh:last-child {
-    color: #ff6b7d;
+    color: var(--wl-draft-name-red);
     align-items: flex-end;
     text-align: right;
   }
@@ -226,8 +226,8 @@
   #v-comps.draft-view .dz-tabs {
     display: flex;
     flex-wrap: wrap;
-    gap: 6px;
-    padding: 6px;
+    gap: 4px;
+    padding: 4px;
     border: 1px solid var(--line);
     border-radius: var(--wl-card-radius);
     background: var(--panel2, var(--bg));
@@ -242,7 +242,7 @@
     gap: 4px;
     min-width: 0;
     max-width: 190px;
-    padding: 6px 9px;
+    padding: 4px 8px;
     border: 1px solid transparent;
     border-radius: var(--wl-control-radius);
     background: transparent;
@@ -317,12 +317,12 @@
     align-items: center;
     justify-content: space-between;
     gap: 8px;
-    padding: 6px 10px;
+    padding: 4px 8px;
   }
   #v-comps.draft-view .dz-slot .gtools {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 6px;
+    gap: 4px;
     padding-block: 4px;
   }
   #v-comps.draft-view .dz-slot .gtools label {
@@ -383,7 +383,7 @@
 #champ-picker .gtools {
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-  gap: 6px 8px;
+  gap: 4px 8px;
 }
 #champ-picker .gtools > label:first-child {
   grid-column: 1 / -1;
@@ -414,7 +414,7 @@
   width: 34px;
   height: 34px;
   border-radius: var(--wl-control-radius);
-  border: 1px solid #fff4;
+  border: 1px solid var(--wl-white-alpha-27);
 }
 #v-comps .pk .dchip.primary .av {
   border: 2px solid var(--wl-accent);
@@ -428,7 +428,7 @@
   border: 1px solid var(--line);
   border-radius: var(--wl-control-radius);
   background: var(--panel);
-  box-shadow: 0 8px 24px #0008;
+  box-shadow: 0 8px 24px var(--wl-shadow-overlay);
 }
 .chip-menu [role="menuitem"] {
   display: flex;
@@ -602,15 +602,15 @@
   flex: none;
   width: 8px;
   height: 8px;
-  margin-right: 6px;
+  margin-right: 4px;
   border-radius: 50%;
   vertical-align: 1px;
 }
 .side-dot.blue {
-  background: var(--wl-side-blue, #3b82f6);
-  box-shadow: 0 0 0 2px color-mix(in srgb, var(--wl-side-blue, #3b82f6) 30%, transparent);
+  background: var(--wl-side-blue, var(--wl-blue-500));
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--wl-side-blue, var(--wl-blue-500)) 30%, transparent);
 }
 .side-dot.red {
-  background: var(--wl-side-red, #ef4444);
-  box-shadow: 0 0 0 2px color-mix(in srgb, var(--wl-side-red, #ef4444) 30%, transparent);
+  background: var(--wl-side-red, var(--wl-red-500));
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--wl-side-red, var(--wl-red-500)) 30%, transparent);
 }

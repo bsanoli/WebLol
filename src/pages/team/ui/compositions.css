@@ -183,7 +183,7 @@ summary::-webkit-details-marker {
 #composition-notes > summary {
   font-size: 12px;
   color: var(--mut);
-  padding: 5px 0;
+  padding: 4px 0;
 }
 #composition-notes :is(textarea, label) {
   width: 100%;
@@ -199,8 +199,8 @@ summary::-webkit-details-marker {
   align-items: center;
   gap: 8px;
   min-height: 70px;
-  padding: 6px 8px;
-  margin-bottom: 6px;
+  padding: 4px 8px;
+  margin-bottom: 4px;
   border: 1px solid var(--line);
   border-left: var(--wl-accent-bar) solid var(--line);
   border-radius: 0;
@@ -232,7 +232,7 @@ summary::-webkit-details-marker {
 #v-comps .chips {
   display: flex;
   flex-wrap: wrap;
-  gap: 6px;
+  gap: 4px;
   min-width: 0;
   padding: 0;
 }
@@ -246,7 +246,7 @@ summary::-webkit-details-marker {
 .champ-priority {
   display: flex;
   align-items: center;
-  gap: 9px;
+  gap: 8px;
   padding: 0;
   background: transparent;
   border: 0;
@@ -305,13 +305,13 @@ summary::-webkit-details-marker {
 }
 #v-comps .dside {
   margin: 0;
-  gap: 5px;
+  gap: 4px;
 }
 #v-comps .dseq {
   max-width: 100%;
   margin: 0;
   padding: 0;
-  gap: 10px;
+  gap: 8px;
 }
 #v-comps .sq {
   width: 22px;
@@ -559,7 +559,7 @@ summary::-webkit-details-marker {
 #v-comps .ch,
 #picker-dialog .ch {
   padding: 4px 2px;
-  gap: 5px;
+  gap: 4px;
   border-radius: var(--wl-card-radius);
 }
 #v-comps .ch .av,
@@ -651,7 +651,7 @@ summary::-webkit-details-marker {
   #v-comps .lane {
     grid-template-columns: 66px minmax(0, 1fr) var(--wl-button-height-sm);
     gap: 4px;
-    padding: 6px 4px;
+    padding: 4px 4px;
   }
   #v-comps .ln {
     font-size: 10px;
@@ -695,7 +695,7 @@ summary::-webkit-details-marker {
     min-height: 44px;
   }
   #v-comps .dseq {
-    gap: 6px;
+    gap: 4px;
   }
   #v-comps .sq {
     width: 19px;
@@ -734,7 +734,7 @@ summary::-webkit-details-marker {
   padding-right: 210px;
 }
 #v-comps #editor {
-  padding-top: 10px;
+  padding-top: 8px;
 }
 #v-comps .lane {
   min-height: 60px;
@@ -810,7 +810,7 @@ summary::-webkit-details-marker {
     display: grid;
     grid-template-columns: auto minmax(0, 1fr);
     align-items: stretch;
-    gap: 6px;
+    gap: 4px;
   }
   #v-comps .local-save-actions {
     display: contents;
@@ -826,13 +826,13 @@ summary::-webkit-details-marker {
 }
 #v-comps .dside button[aria-pressed="true"].b {
   background: var(--wl-side-blue-surface);
-  border-color: #5a91ef;
-  color: #fff;
+  border-color: var(--wl-side-blue-pressed-edge);
+  color: var(--wl-white);
 }
 #v-comps .dside button[aria-pressed="true"].r {
   background: var(--wl-side-red-surface);
-  border-color: #e97583;
-  color: #fff;
+  border-color: var(--wl-side-red-pressed-edge);
+  color: var(--wl-white);
 }
 #v-comps #cname {
   min-height: var(--wl-button-height-sm);
@@ -862,7 +862,7 @@ summary::-webkit-details-marker {
 }
 @media (max-width: 600px) {
   body:has(#v-comps.on) > header {
-    gap: 6px;
+    gap: 4px;
     padding: 8px 12px;
   }
   body:has(#v-comps.on) > header .team-brand,
@@ -984,7 +984,7 @@ summary::-webkit-details-marker {
     width: min(32px, calc((100% - 4 * var(--wl-space-1)) / 5));
   }
   #v-comps #editor {
-    padding: 12px 16px 14px;
+    padding: 12px 16px 16px;
   }
   #v-comps .editor-status {
     right: 16px;
@@ -998,17 +998,17 @@ summary::-webkit-details-marker {
     min-height: 76px;
     padding: 8px 12px;
     grid-template-columns: 112px minmax(0, 1fr) minmax(140px, 21%);
-    gap: 14px;
+    gap: 16px;
     margin-bottom: 8px;
   }
   #v-comps .ln {
     font-size: 13px;
   }
   #v-comps .chips {
-    gap: 10px;
+    gap: 8px;
   }
   #v-comps .chip.primary {
-    margin-right: 22px;
+    margin-right: 24px;
   }
   #v-comps .chip.primary .av {
     width: 58px;
@@ -1094,7 +1094,7 @@ summary::-webkit-details-marker {
   }
   #v-comps .pkh b {
     font-size: 12px;
-    padding: 4px 6px;
+    padding: 4px 4px;
   }
   #v-comps .pkn {
     min-width: 0;
@@ -1128,20 +1128,20 @@ summary::-webkit-details-marker {
     height: 27px;
   }
   #v-comps .picker-heading {
-    padding: 16px 14px 9px;
+    padding: 16px 16px 8px;
   }
   #v-comps #target {
-    margin-inline: 14px;
+    margin-inline: 16px;
   }
   #v-comps #grid {
     grid-template-columns: repeat(auto-fill, minmax(68px, 1fr));
     max-height: 47vh;
-    padding: 8px 14px 12px;
+    padding: 8px 16px 12px;
     gap: 8px;
   }
   #v-comps .ch {
-    padding: 6px 3px;
-    gap: 6px;
+    padding: 4px 3px;
+    gap: 4px;
   }
   #v-comps .ch .av {
     width: 54px;
@@ -1166,7 +1166,7 @@ summary::-webkit-details-marker {
   justify-content: center;
   width: 18px;
   height: 18px;
-  margin-left: 6px;
+  margin-left: 4px;
   border-radius: 50%;
   background: var(--wl-accent-soft);
   color: var(--wl-accent);
@@ -1266,7 +1266,7 @@ summary::-webkit-details-marker {
   width: min(280px, calc(100vw - var(--wl-space-8)));
   padding: var(--wl-space-3);
   border-radius: var(--wl-card-radius);
-  box-shadow: 0 var(--wl-space-2) var(--wl-space-6) #0006;
+  box-shadow: 0 var(--wl-space-2) var(--wl-space-6) var(--wl-shadow-soft);
 }
 .local-save-panel p {
   margin: 0 0 var(--wl-space-2);

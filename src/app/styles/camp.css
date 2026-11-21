@@ -1,0 +1,10 @@
+/* Estilos da Área do time (camp.html), na ordem da cascata. Cada página tem o seu arquivo de entrada porque o Vite
+   tira da ordem os CSS compartilhados entre páginas ao ligá-los direto no HTML. */
+@import "./palettes.css";
+@import "./base.css";
+@import "../../pages/team/ui/team.css";
+@import "../../pages/team/ui/compositions.css";
+@import "./motion.css";
+@import "../../pages/team/ui/draft-layout.css";
+@import "../../shared/ui/team-controls.css";
+@import "../../pages/team/ui/tactics.css";

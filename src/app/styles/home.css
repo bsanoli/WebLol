@@ -1,0 +1,5 @@
+/* Estilos da página principal (index.html), na ordem da cascata. */
+@import "./palettes.css";
+@import "./base.css";
+@import "./shell.css";
+@import "./motion.css";

@@ -55,7 +55,8 @@ Os nomes de conceitos vêm do [glossário](glossario.md). A arquitetura segue a 
 
 - Use os tokens `--wl-*` e os equivalentes do Tailwind. Cor nova entra como token com papel semântico, não como hexadecimal solto.
 - Espaçamentos e alturas em múltiplos de 8 px, com ajustes de 4 px. Bordas de 1 px são a exceção.
-- Componente React novo usa Tailwind ou CSS module do próprio slice. Os arquivos globais em `public/assets/*.css` só recebem ajustes no que já está lá.
+- Componente React novo usa Tailwind ou CSS module do próprio slice. CSS de tela mora no slice dono ([ADR 0008](decisoes/0008-onde-moram-os-estilos.md)).
+- Hexadecimal em CSS de `src/` só em `src/app/styles/tokens.css` e `palettes.css`; o `check-architecture` barra o resto.
 
 ## Verificação automática
 

@@ -399,7 +399,7 @@
   line-height: 1.35;
 }
 .build-context h4 {
-  margin: 10px 0 4px;
+  margin: 8px 0 4px;
   color: var(--muted);
   font-size: 12px;
 }
@@ -410,7 +410,7 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  margin-bottom: 10px;
+  margin-bottom: 8px;
 }
 .build-context-champion strong {
   display: block;
@@ -552,7 +552,7 @@
   }
   .builds-workspace .builds-table :is(th, td),
   .builds-workspace .builds-table tbody .build-col-champion {
-    padding-inline: 10px;
+    padding-inline: 8px;
   }
 }
 @media (768px <= width < 1024px) {
@@ -566,7 +566,7 @@
   }
   .builds-table :is(th, td),
   .builds-table tbody .build-col-champion {
-    padding-inline: 6px;
+    padding-inline: 4px;
   }
   .builds-table :is(.build-col-games, .build-col-boots, .build-col-runes, .build-col-spells) {
     display: none;
@@ -589,7 +589,7 @@
     height: 8px;
   }
   .builds-table .build-champion {
-    gap: 6px;
+    gap: 4px;
   }
   .build-mobile-games {
     display: inline;
@@ -601,7 +601,7 @@
 }
 @media (max-width: 360px) {
   .builds-table .build-summary-row > :is(th, td) {
-    padding-block: 7px;
+    padding-block: 8px;
   }
   .builds-table :is(.build-col-win, .build-col-ban) {
     width: 46px;
@@ -923,19 +923,19 @@
   min-width: 0;
 }
 [data-rune-tree="Dominação"] {
-  --rune-accent: #e36d82;
+  --rune-accent: var(--wl-rune-domination);
 }
 [data-rune-tree="Inspiração"] {
-  --rune-accent: #52c6c7;
+  --rune-accent: var(--wl-rune-inspiration);
 }
 [data-rune-tree="Precisão"] {
-  --rune-accent: #d9a955;
+  --rune-accent: var(--wl-rune-precision);
 }
 [data-rune-tree="Determinação"] {
-  --rune-accent: #70bf65;
+  --rune-accent: var(--wl-rune-resolve);
 }
 [data-rune-tree="Feitiçaria"] {
-  --rune-accent: #9d93ea;
+  --rune-accent: var(--wl-rune-sorcery);
 }
 .rune-tree-heading {
   display: grid;

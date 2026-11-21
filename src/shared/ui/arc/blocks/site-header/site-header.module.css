@@ -339,7 +339,7 @@
 .feature {
   display: grid;
   align-content: start;
-  gap: 6px;
+  gap: 4px;
   border: 0;
   border-radius: var(--radius-control);
   padding: var(--space-2) var(--space-2) var(--space-3);
@@ -368,7 +368,7 @@
 .featureTitle {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
+  gap: 4px;
   padding: 0 var(--space-1);
   font-size: var(--text-sm);
   font-weight: 500;
