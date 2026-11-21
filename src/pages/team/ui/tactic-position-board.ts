@@ -1,5 +1,5 @@
 // Visão Lane do quadro de Táticas: cada linha é uma posição (bans e as cinco lanes), com os dois lados lado a lado.
-// Só ícones dos campeões, sem a arte; os nomes ficam na dica (title) e no rótulo acessível.
+// Cada linha tem a arte do campeão ao fundo, o ícone quadrado como na Ordem do draft e as alternativas; o principal só se arrasta.
 import { iconMarkup } from "@/shared/ui/icon"
 import { DRAFT_SIDE } from "../model/draft-order"
 import { DRAFT_LANES, type ChampionSlot, type Composition, type DraftSide } from "../model/local-state"
@@ -30,7 +30,7 @@ function positionCell(
     if (lane === "ban")
       return `<span class="tx-pos-ic ban" ${drag} role="img" aria-label="Ban: ${esc(name)}" title="${esc(name)} · ${index + 1}º ban">${img(name)}</span>`
     if (index === 0)
-      return `<button type="button" class="tx-pos-ic main" ${drag} data-draft-target="${lane}" data-draft-side="${owner}" aria-label="${L.n}: ${esc(name)} · trocar campeão" title="${esc(name)} · principal em ${L.n}">${img(name)}<span class="tx-pos-champ">${esc(name)}</span></button>`
+      return `<span class="tx-pos-ic main" ${drag} role="img" aria-label="${L.n}: ${esc(name)}" title="${esc(name)} · principal em ${L.n}">${img(name)}<span class="tx-pos-champ">${esc(name)}</span></span>`
     return `<button type="button" class="tx-pos-ic alt" ${drag} data-priority="${esc(name)}" data-lane="${lane}" aria-label="Tornar ${esc(name)} o campeão de ${L.n}" title="${esc(name)} · ${index + 1}ª opção · clique para tornar principal">${img(name)}</button>`
   }
   const add = `<button type="button" class="tx-pos-add" data-draft-target="${lane}" data-draft-side="${owner}" aria-label="${list.length ? `Adicionar em ${L.n}` : `Escolher campeão de ${L.n}`}" title="${list.length ? `Adicionar em ${L.n}` : `Escolher campeão de ${L.n}`}">${iconMarkup("plus")}</button>`

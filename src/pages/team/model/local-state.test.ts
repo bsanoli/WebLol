@@ -18,10 +18,9 @@ function stubStorage(value?: string) {
 afterEach(() => vi.unstubAllGlobals())
 
 describe("draftOf", () => {
-  it("completa o draft que falta com lado azul, planos vazios e a ordem padrão", () => {
+  it("completa o draft que falta com planos vazios e a ordem padrão", () => {
     const comp = blank()
     const draft = draftOf(comp)
-    expect(draft.side).toBe("blue")
     expect(draft.note).toEqual({ blue: "", red: "" })
     expect(draft.order.blue).toEqual(["mid", "jg", "sup", "adc", "top"])
   })
@@ -29,15 +28,12 @@ describe("draftOf", () => {
   it("mantém a ordem salva, tira lanes inválidas e completa o resto sem repetir", () => {
     const comp = blank()
     comp.draft = {
-      side: "red",
       order: { blue: ["top", "x" as never, "top"], red: [] },
       note: { blue: "", red: "" },
-      enemyId: "",
     }
     const draft = draftOf(comp)
-    expect(draft.side).toBe("red")
     expect(draft.order.blue).toEqual(["top", "mid", "jg", "sup", "adc"])
-    expect("enemyId" in draft).toBe(false)
+    expect("side" in draft).toBe(false)
   })
 })
 

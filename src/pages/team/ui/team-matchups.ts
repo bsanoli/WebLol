@@ -1,26 +1,28 @@
 // Táticas: confrontos, gaveta de composições e abas da lista, com os cliques do editor em Táticas.
 import { compositionPreviewHTML } from "./composition-preview"
 import { askName, confirmAction } from "@/shared/ui/dialog-controls"
-import { blank, draftOf } from "../model/local-state"
-import type { Composition } from "../model/local-state"
-import { enemiesOf, enemyCompositionOf, isEnemy, oursOf, setEnemyId, settleOwner } from "../model/composition-side"
+import { blank } from "../model/local-state"
+import type { Composition, DraftSide } from "../model/local-state"
+import { enemiesOf, isEnemy, oursOf, settleOwner } from "../model/composition-side"
 import {
   addMatchup,
-  type DraftSideKey,
   findMatchup,
   matchupKey,
+  matchupsOfComp,
   matchupTitle,
-  matchupsOf,
   removeMatchup,
   resolveCompDrop,
+  swapMatchupSides,
+  type Matchup,
 } from "../model/matchups"
 import { opggOf, writeTactic } from "../model/tactics"
 import { askMatchup, NEW_ENEMY } from "./matchup-dialog"
 import { bindTacticDrop } from "./tactic-drop"
-import { editOpggLink, faceEnemy, newComp, opggTarget, selectComp } from "./team-comps"
+import { editOpggLink, opggTarget } from "./team-comp-edits"
+import { faceEnemy, newComp, selectComp } from "./team-comps"
 import { renderEditor } from "./team-editor"
 import { hooks, session } from "./team-session"
-import { $, compById, cur, eventTarget, img, S, save, toast, touch } from "./team-store"
+import { $, compById, cur, eventTarget, hasUndo, img, runUndo, S, save, setUndo, toast, touch } from "./team-store"
 
 export function mountMatchups() {
   $("#editor").addEventListener("contextmenu", e => {
@@ -39,20 +41,37 @@ export function mountMatchups() {
     button.setAttribute("aria-expanded", String(open))
     button.title = open ? "Esconder a lista de composições e o draft" : "Mostrar a lista de composições e o draft"
   }
-  // "Editar na Ordem do draft": numa adversária, abre a comp nossa que a enfrenta (ou a coloca contra a última usada).
+  function handleTacticListToggle(button: HTMLElement) {
+    const collapsed = S.tacticsListCollapsed !== true
+    S.tacticsListCollapsed = collapsed
+    save()
+    button.closest(".tx-tabs")?.classList.toggle("list-collapsed", collapsed)
+    button.setAttribute("aria-expanded", String(!collapsed))
+    button.title = collapsed ? "Mostrar a lista" : "Recolher a lista"
+  }
+  // "Editar na Ordem do draft": abre o confronto da tática (ou, numa adversária, o confronto dela com a última nossa usada).
   function handleOpenDraft() {
     const c = cur()
+    const open = S.tacticsGeneral ? null : findMatchup(S.comps, S.matchups, S.tacticsMatchup)
     S.view = "draft"
     S.tacticsGeneral = false
-    if (isEnemy(c)) {
-      const facing = oursOf(S.comps).find(x => enemyCompositionOf(x, S.comps) === c)
-      const ours = facing || S.comps.find(x => x.id === S.lastComp && !isEnemy(x)) || oursOf(S.comps)[0]
+    if (open?.ours) {
+      S.cur = open.ours.id
+      S.curMatchup = open.matchup.id
+      session.side = "rival"
+    } else if (isEnemy(c)) {
+      const facing = matchupsOfComp(S.matchups, c.id).find(
+        item => item.enemy === c.id && item.ours && compById(item.ours),
+      )
+      const ours =
+        (facing && compById(facing.ours)) || S.comps.find(x => x.id === S.lastComp && !isEnemy(x)) || oursOf(S.comps)[0]
       if (ours) {
-        if (!facing) faceEnemy(ours, c.id)
         S.cur = ours.id
+        S.curMatchup = facing?.id ?? null
+        if (!facing) faceEnemy(c.id)
         session.side = "rival"
       }
-    } else session.side = S.tacticsMatchup ? "rival" : "us"
+    } else session.side = "us"
     save()
     hooks.renderAll()
     hooks.publishRoute("comps")
@@ -60,14 +79,16 @@ export function mountMatchups() {
   }
   // Abre o confronto: a comp nossa com a adversária do outro lado e a tática própria dele.
   function openMatchup(id: string) {
-    const entry = findMatchup(S.comps, id)
+    const entry = findMatchup(S.comps, S.matchups, id)
     if (!entry) return
-    setEnemyId(entry.ours, entry.enemy.id)
-    S.cur = entry.ours.id
-    S.lastComp = entry.ours.id
+    if (entry.ours) {
+      S.cur = entry.ours.id
+      S.lastComp = entry.ours.id
+    }
+    S.curMatchup = id
     S.tacticsGeneral = false
     S.tacticsMatchup = id
-    S.view = "tactics"
+    if (S.view !== "draft") S.view = "tactics"
     save()
     hooks.renderAll()
     hooks.publishRoute("comps")
@@ -94,50 +115,64 @@ export function mountMatchups() {
       S.comps.unshift(created)
       enemyId = created.id
     }
-    openMatchupBetween(choice.ours, enemyId)
+    const created = addMatchup(S.matchups, { ours: choice.ours, enemy: enemyId, side: choice.side })
+    touch(compById(choice.ours) ?? cur())
+    openMatchup(created.id)
+    toast("Confronto criado")
   }
-  // Cria o confronto entre uma comp nossa e uma adversária (ou abre o que já existe).
-  function openMatchupBetween(oursId: string, enemyId: string) {
-    const ours = compById(oursId)
-    if (!ours) return
-    const existed = matchupsOf(ours).some(x => x.enemy === enemyId)
-    const entry = addMatchup(ours, enemyId)
-    touch(ours)
-    openMatchup(entry.id)
-    toast(existed ? "Esse confronto já existia. Abri ele." : "Confronto criado")
-  }
-  // Comp solta num lado do quadro da gaveta: fica nesse lado; a do time oposto, se estiver aberta, vira o par (confronto).
-  function handleCompDrop(id: string, side: DraftSideKey) {
-    const result = resolveCompDrop(
-      S.comps,
-      S.tacticsGeneral ? null : S.cur,
-      S.tacticsGeneral ? null : (S.tacticsMatchup ?? null),
-      id,
-      side,
-    )
-    if (!result) return
-    const placed = compById(result.place.id)
-    if (placed) {
-      draftOf(placed).side = result.place.side
-      touch(placed)
+  // Comp solta num lado do quadro da gaveta: ocupa esse lado do confronto aberto (ou de um novo, com a comp aberta).
+  function handleCompDrop(id: string, side: DraftSide) {
+    const c = cur()
+    let openId = S.tacticsGeneral ? null : (S.tacticsMatchup ?? null)
+    let precreated: Matchup | null = null
+    if (!openId && !S.tacticsGeneral && c && c.id !== id) {
+      precreated = addMatchup(S.matchups, isEnemy(c) ? { enemy: c.id, side: "blue" } : { ours: c.id, side: "blue" })
+      openId = precreated.id
     }
-    if (result.matchup) {
-      openMatchupBetween(result.matchup.ours, result.matchup.enemy)
+    const before = openId ? { ...(S.matchups.find(m => m.id === openId) as Matchup) } : null
+    const result = resolveCompDrop(S.comps, S.matchups, openId, id, side)
+    if (!result) {
+      if (precreated) removeMatchup(S.matchups, precreated.id)
       return
     }
-    S.tacticsGeneral = false
-    S.tacticsMatchup = null
-    if (result.open !== S.cur) selectComp(result.open)
-    else {
-      save()
-      renderEditor()
+    touch(compById(id) ?? c)
+    openMatchup(result.matchup.id)
+    if (result.swapped && before) {
+      const swappedTo = result.matchup.side
+      toast(`Lados trocados: Nossa no ${swappedTo === "blue" ? "azul" : "vermelho"}`, () => {
+        const m = S.matchups.find(item => item.id === result.matchup.id)
+        if (!m) return
+        m.side = before.side
+        m.ours = before.ours
+        m.enemy = before.enemy
+        save()
+        renderEditor()
+      })
     }
   }
   bindTacticDrop($("#editor"), handleCompDrop)
+  function handleMatchupSwap() {
+    const matchup = S.matchups.find(item => item.id === S.tacticsMatchup)
+    if (!matchup) return
+    const before = matchup.side
+    const id = matchup.id
+    swapMatchupSides(matchup)
+    save()
+    setUndo(() => {
+      const target = S.matchups.find(item => item.id === id)
+      if (!target) return
+      target.side = before
+      target.updated = Date.now()
+      save()
+      renderEditor()
+    })
+    renderEditor()
+    $("#editor [data-matchup-swap]")?.focus({ preventScroll: true })
+  }
   async function handleMatchupDelete(id: string) {
-    const entry = findMatchup(S.comps, id)
+    const entry = findMatchup(S.comps, S.matchups, id)
     if (!entry) return
-    const title = matchupTitle(entry.ours, entry.enemy)
+    const title = matchupTitle(entry)
     if (
       !(await confirmAction(
         `Excluir o confronto "${title}"? As composições ficam; só a tática dele é apagada.`,
@@ -145,11 +180,10 @@ export function mountMatchups() {
       ))
     )
       return
-    removeMatchup(entry.ours, id)
+    removeMatchup(S.matchups, id)
     writeTactic(S, matchupKey(id), "", "", Date.now(), [])
-    if (entry.ours.draft?.enemyId === entry.enemy.id) setEnemyId(entry.ours, null)
     if (S.tacticsMatchup === id) S.tacticsMatchup = null
-    touch(entry.ours)
+    if (S.curMatchup === id) S.curMatchup = null
     save()
     hooks.renderAll()
     hooks.publishRoute("comps")
@@ -157,11 +191,25 @@ export function mountMatchups() {
     $("#editor [data-tx-list=matchup]")?.focus({ preventScroll: true })
     toast(`Confronto "${title}" excluído`)
   }
+  // Ctrl+Z desfaz a última mudança do quadro, exceto quando o foco está num campo de texto (que tem o próprio desfazer).
+  document.addEventListener("keydown", e => {
+    if (!(e.ctrlKey || e.metaKey) || e.shiftKey || e.altKey || e.key.toLowerCase() !== "z") return
+    const target = e.target as HTMLElement | null
+    if (e.defaultPrevented || e.isComposing || target?.isContentEditable) return
+    if (target?.closest("input, textarea, select, [role=dialog], [data-radix-popper-content-wrapper]")) return
+    if (S.view === "map" || !hasUndo()) return
+    e.preventDefault()
+    runUndo()
+  })
   $("#editor").addEventListener("click", e => {
     const mxOpen = eventTarget(e).closest<HTMLElement>("[data-tactic-matchup]")
     if (mxOpen) {
       if (mxOpen.dataset.tacticMatchup !== S.tacticsMatchup || S.tacticsGeneral)
         openMatchup(mxOpen.dataset.tacticMatchup ?? "")
+      return
+    }
+    if (eventTarget(e).closest<HTMLElement>("[data-matchup-swap]")) {
+      handleMatchupSwap()
       return
     }
     const mxDelete = eventTarget(e).closest<HTMLElement>("[data-matchup-delete]")
@@ -173,9 +221,18 @@ export function mountMatchups() {
       void handleNewMatchup()
       return
     }
+    if (eventTarget(e).closest("[data-undo-last]")) {
+      runUndo()
+      return
+    }
     const drawerToggle = eventTarget(e).closest<HTMLElement>("[data-tactic-drawer]")
     if (drawerToggle) {
       handleTacticDrawerToggle(drawerToggle)
+      return
+    }
+    const listToggle = eventTarget(e).closest<HTMLElement>("[data-tactic-list-toggle]")
+    if (listToggle) {
+      handleTacticListToggle(listToggle)
       return
     }
     const boardView = eventTarget(e).closest<HTMLElement>("[data-tactic-board]")

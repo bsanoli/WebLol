@@ -5,7 +5,7 @@ import { revealContent } from "@/shared/lib/motion"
 import { enemyOrder, isEnemy, oppositeSide } from "../model/composition-side"
 import { championsOf, draftOf, setChampions } from "../model/local-state"
 import type { ChampionSlot, Composition, DraftLane } from "../model/local-state"
-import { adoptEnemies, allMatchups, findMatchup, matchupKey, resolveCompDrop } from "../model/matchups"
+import { allMatchups, findMatchup, matchupKey } from "../model/matchups"
 import { hasTactic } from "../model/tactics"
 import { SLOT_INFO } from "../model/champion-slots"
 import { draftBoardHTML } from "./draft-board"
@@ -18,7 +18,21 @@ import { compOf, handleEnemyChampionDrop, keepOurCompositionInDraft, newComp, re
 import { openPicker, placePicker, renderGrid, renderTarget, isPickerOpen } from "./team-grid"
 import { hooks, boardEnemy, session, target } from "./team-session"
 import type { ActiveSide } from "./team-session"
-import { $, eventTarget, champArt, compById, cur, esc, img, S, save, toast, touch } from "./team-store"
+import {
+  $,
+  boardSide,
+  eventTarget,
+  champArt,
+  compById,
+  cur,
+  esc,
+  hasUndo,
+  img,
+  S,
+  save,
+  toast,
+  touch,
+} from "./team-store"
 import { mountTacticNotesIn } from "./team-tactic-notes"
 // Arte em alta (1215×717) direto do Data Dragon; se não carregar, usa a cópia local menor.
 function pickArt(name: string) {
@@ -31,8 +45,7 @@ function pickArt(name: string) {
 
 export function renderEditor() {
   if (S.view !== "tactics") S.view = "draft"
-  if (adoptEnemies(S.comps)) save()
-  if (S.tacticsMatchup && !findMatchup(S.comps, S.tacticsMatchup)) S.tacticsMatchup = null
+  if (S.tacticsMatchup && !findMatchup(S.comps, S.matchups, S.tacticsMatchup)) S.tacticsMatchup = null
   keepOurCompositionInDraft()
   const editor = $("#editor")
   const previousComposition = editor.dataset.motionComposition
@@ -74,8 +87,11 @@ export function renderEditor() {
       "beforeend",
       `<div id="composition-panel" role="tabpanel" aria-labelledby="tab-tactics">${tacticsHTML(c, {
         compositions: S.comps,
+        matchups: S.matchups,
         general: !!S.tacticsGeneral,
         drawer: S.tacticsDrawer !== false,
+        listCollapsed: S.tacticsListCollapsed === true,
+        canUndo: hasUndo(),
         boardView: S.tacticsBoard === "positions" ? "positions" : "draft",
         hasTactic: id => hasTactic(S, id),
         matchupId: S.tacticsMatchup,
@@ -112,7 +128,7 @@ export function renderEditor() {
   <div id="composition-panel" role="tabpanel" aria-labelledby="tab-draft">
   <div class="matchup-bar" data-team-control></div>
   <button data-slot="button" data-variant="default" type="button" class="jump-picker" data-picker>${iconMarkup("plus")} Adicionar campeão</button>
-  ${draftBoardHTML(c, boardEnemy() ?? null, { active: session.active, activeSide: session.side, slots: SLOT_INFO, img, esc, pickArt })}
+  ${draftBoardHTML(c, boardEnemy() ?? null, { side: boardSide(), active: session.active, activeSide: session.side, slots: SLOT_INFO, img, esc, pickArt })}
   <p class="help">Selecione o retrato para torná-lo principal. Para remover, abra o menu do retrato com o botão direito ou Shift+F10.</p></div>`,
   )
   renderMatchup()
@@ -142,7 +158,7 @@ $("#v-comps").addEventListener("input", e => {
   if (S.view === "tactics") {
     const label = $(`#editor [data-tactic-comp="${CSS.escape(c.id)}"] b`)?.firstChild
     if (label) label.textContent = c.name
-    if (S.tacticsMatchup || allMatchups(S.comps).some(x => x.enemy === c)) renderEditor()
+    if (S.tacticsMatchup || allMatchups(S.comps, S.matchups).some(x => x.enemy === c)) renderEditor()
     else {
       const title = $("#tx-title")?.firstChild
       if (title && !S.tacticsGeneral) title.textContent = `Táticas · ${c.name}`
@@ -154,7 +170,7 @@ $("#editor").addEventListener("change", e => {
   const enemySide = eventTarget(e).dataset.draftSide === "rival",
     owner = enemySide ? boardEnemy() : cur()
   if (!owner) return
-  const order = enemySide ? enemyOrder(cur(), owner) : draftOf(owner).order[draftOf(owner).side],
+  const order = enemySide ? enemyOrder(owner, boardSide()) : draftOf(owner).order[boardSide()],
     i = Number(eventTarget(e).dataset.pickPosition)
   const lane = eventTarget<HTMLSelectElement>(e).value as DraftLane,
     j = order.indexOf(lane)
@@ -227,6 +243,9 @@ $("#editor").addEventListener("click", e => {
     removeChampion(rm.dataset.rm ?? "", rm.closest<HTMLElement>("[data-l]")?.dataset.l as ChampionSlot, compOf(rm))
     return
   }
+
+  // Em Táticas, o campeão principal (e o ban) já escolhido não abre a lista: ela abre pelo "+" ou pela linha vazia.
+  if (S.view === "tactics" && eventTarget(e).closest(".tx-pos-ic.main, .tx-pos-ic.ban")) return
 
   const draftTarget = eventTarget(e).closest<HTMLElement>("[data-draft-target]")
   if (draftTarget) {

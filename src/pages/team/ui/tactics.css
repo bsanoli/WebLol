@@ -1878,17 +1878,26 @@
 }
 
 /* Visão Lane no estilo do Draft, compacta: arte escurecida ao fundo, campeão com nome e alternativas */
-.tx-pos-slot > .pick-splash {
+/* O seletor com #v-comps vence a regra geral do .pick-splash (75% da largura): a arte cobre a linha inteira */
+#v-comps .tx-pos-slot > .pick-splash {
   position: absolute;
   inset: 0;
   z-index: -1;
   width: 100%;
   height: 100%;
+  border-radius: 0;
   object-fit: cover;
   object-position: center 22%;
-  opacity: 0.4;
+  opacity: 0.5;
   filter: brightness(0.7);
   pointer-events: none;
+}
+/* Ícones quadrados como na Ordem do draft; o campeão principal não é clicável, só arrastável */
+#v-comps .tx-pos-ic .av {
+  border-radius: var(--wl-control-radius);
+}
+#v-comps .tx-pos-ic.main {
+  cursor: grab;
 }
 .tx-pos-slot.has-art {
   background: color-mix(in srgb, var(--lc, var(--line)) 8%, var(--panel, transparent));
@@ -1984,4 +1993,126 @@
 .matchup-team button:disabled {
   cursor: not-allowed;
   opacity: 0.45;
+}
+
+.matchup-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  margin-bottom: 8px;
+}
+.matchup-head .matchup-title {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.matchup-head [data-matchup-new] {
+  margin-left: auto;
+}
+.matchup-badge {
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: var(--wl-accent-soft);
+  font-size: 12px;
+  font-weight: 600;
+}
+.matchup-hint {
+  color: var(--muted);
+  font-size: 13px;
+}
+
+/* Confrontos: linha fina no topo na cor do lado da nossa comp (como as colunas do Draft), nome inteiro que quebra de linha */
+#v-comps .tx-tabs .tx-mx-row .dz-tab {
+  height: auto;
+  min-height: 40px;
+  align-items: flex-start;
+  border-top: 3px solid var(--wl-side-blue, var(--wl-blue-500));
+}
+#v-comps .tx-tabs .tx-mx-row .dz-tab.side-red {
+  border-top-color: var(--wl-side-red, var(--wl-red-500));
+}
+#v-comps .tx-tabs .tx-mx-row .dz-tab b {
+  align-self: center;
+  display: block;
+  overflow: visible;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  text-overflow: clip;
+}
+#v-comps .tx-tabs .tx-mx-row .dz-tab.on {
+  border-top-color: var(--wl-side-blue, var(--wl-blue-500));
+}
+#v-comps .tx-tabs .tx-mx-row .dz-tab.side-red.on {
+  border-top-color: var(--wl-side-red, var(--wl-red-500));
+}
+
+/* Lista da gaveta recolhível: botão com chevron ao lado das abas; recolhida, só as abas ficam e o quadro ganha altura */
+.tx-listbar {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 32px;
+  align-items: stretch;
+  gap: 4px;
+}
+#v-comps .tx-list-toggle {
+  width: 32px;
+  height: auto;
+  min-height: 32px;
+  padding: 0;
+  cursor: pointer;
+}
+#v-comps .tx-list-toggle .icon {
+  width: 14px;
+  height: 14px;
+  transform: rotate(-90deg);
+  transition: transform 0.2s ease;
+}
+#v-comps .tx-list-toggle[aria-expanded="false"] .icon {
+  transform: rotate(90deg);
+}
+#v-comps .tx-tabs.list-collapsed {
+  flex: none;
+  min-height: 0;
+  overflow: visible;
+}
+#v-comps .tx-tabs.list-collapsed .tx-group {
+  display: none;
+}
+@media (prefers-reduced-motion: reduce) {
+  #v-comps .tx-list-toggle .icon {
+    transition: none;
+  }
+}
+
+/* Desfazer fixo ao lado de "Trocar lados": fica até a próxima edição */
+#v-comps .matchup-undo,
+#v-comps .tx-undo {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  gap: 4px;
+  min-height: 32px;
+  cursor: pointer;
+}
+#v-comps .matchup-undo[hidden],
+#v-comps .tx-undo[hidden] {
+  display: none;
+}
+#v-comps .matchup-undo .icon,
+#v-comps .tx-undo .icon {
+  width: 14px;
+  height: 14px;
+}
+
+/* Trocar a comp com confronto aberto: substituir ou criar outro */
+.matchup-branch {
+  display: grid;
+  gap: 4px;
+  padding: 8px;
+}
+.matchup-branch p {
+  margin: 0 0 4px;
+  font-size: 14px;
+  overflow-wrap: anywhere;
 }

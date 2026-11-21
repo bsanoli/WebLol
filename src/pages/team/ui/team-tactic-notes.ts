@@ -44,10 +44,10 @@ function markTacticTab(compId: TacticId) {
 }
 
 function handleTacticNotesChange(compId: TacticId, doc: TacticDoc) {
-  const entry = compId !== null && isMatchupKey(compId) ? findMatchup(S.comps, compId.slice(3)) : null
+  const entry = compId !== null && isMatchupKey(compId) ? findMatchup(S.comps, S.matchups, compId.slice(3)) : null
   const comp = compId === null || entry ? null : compById(compId)
   if (compId !== null && !comp && !entry) return
-  writeTacticDocument(S, compId, entry ? matchupTitle(entry.ours, entry.enemy) : comp?.name || "", doc, Date.now())
+  writeTacticDocument(S, compId, entry ? matchupTitle(entry) : comp?.name || "", doc, Date.now())
   // As anotações antigas da comp já estão no documento gravado.
   if (comp && clearCompNotes(comp)) touch(comp)
   save()

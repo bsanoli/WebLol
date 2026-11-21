@@ -5,7 +5,7 @@ describe("parseOfficial", () => {
   it("aceita a versão oficial e completa o que faltar", () => {
     const official = parseOfficial(JSON.stringify({ version: 3, data: { comps: [{ id: "a" }] } }))
     expect(official?.version).toBe(3)
-    expect(official?.data).toEqual({ comps: [{ id: "a" }], plays: [], tactics: [] })
+    expect(official?.data).toEqual({ comps: [{ id: "a" }], plays: [], tactics: [], matchups: [] })
     expect(official?.log).toEqual([])
   })
   it("recusa JSON quebrado e formato errado", () => {

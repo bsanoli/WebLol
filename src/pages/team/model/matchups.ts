@@ -1,110 +1,144 @@
-import { uid, type Composition } from "./local-state"
+import { uid, type Composition, type DraftSide } from "./local-state"
 import { isEnemy } from "./composition-side"
-// Confronto: uma comp nossa contra uma adversária, com tática própria.
-// Fica dentro da comp nossa (`matchups`), para seguir a sincronização das comps.
+// Confronto: item próprio do time (lista `matchups` na raiz do estado), com id, nome opcional, uma comp nossa,
+// uma adversária e o lado da nossa no draft. Cada confronto tem tática própria (`mx-<id>`).
+// Decisão em docs/decisoes/0009-confronto-proprio.md.
 
-export type Matchup = { id: string; enemy: string; updated: number }
-export type MatchupEntry = { ours: Composition; enemy: Composition; matchup: Matchup }
+export type Matchup = {
+  id: string
+  name?: string
+  ours?: string
+  enemy?: string
+  side: DraftSide
+  updated: number
+}
+/** Confronto com as comps resolvidas; um lado fica `null` quando a comp foi excluída ou ainda não foi escolhida. */
+export type MatchupEntry = { matchup: Matchup; ours: Composition | null; enemy: Composition | null }
 
 /** Chave da tática do confronto no armazenamento de táticas. */
 export const matchupKey = (id: string) => `mx-${id}`
 export const isMatchupKey = (key: string | null): key is string => !!key && key.startsWith("mx-")
 
-export const matchupTitle = (ours: Composition, enemy: Composition) => `${ours.name} x ${enemy.name}`
+export const oppositeSideOf = (side: DraftSide): DraftSide => (side === "blue" ? "red" : "blue")
 
-export function matchupsOf(comp: Composition): Matchup[] {
-  if (!Array.isArray(comp.matchups)) return []
-  return comp.matchups.filter(item => !!item && typeof item.id === "string" && typeof item.enemy === "string")
+/** Título do confronto: o nome dado ou, sem nome, "Nossa x Adversária". */
+export function matchupTitle(entry: Pick<MatchupEntry, "matchup" | "ours" | "enemy">) {
+  const name = entry.matchup.name?.trim()
+  if (name) return name
+  return `${entry.ours?.name ?? "Sem comp nossa"} x ${entry.enemy?.name ?? "Sem adversária"}`
 }
 
-/** Cria o confronto; se o par já existir, devolve o existente. */
-export function addMatchup(comp: Composition, enemyId: string, now = Date.now()): Matchup {
-  const found = matchupsOf(comp).find(item => item.enemy === enemyId)
-  if (found) return found
-  const created: Matchup = { id: uid(), enemy: enemyId, updated: now }
-  comp.matchups = [...matchupsOf(comp), created]
-  return created
-}
-
-export function removeMatchup(comp: Composition, id: string) {
-  comp.matchups = matchupsOf(comp).filter(item => item.id !== id)
-  if (!comp.matchups.length) delete comp.matchups
-}
-
-/** Confrontos válidos (nossa e adversária existentes), na ordem das comps. */
-export function allMatchups(comps: Composition[]): MatchupEntry[] {
-  const byId = new Map(comps.map(comp => [comp.id, comp]))
-  const list: MatchupEntry[] = []
-  for (const ours of comps) {
-    if (isEnemy(ours)) continue
-    for (const matchup of matchupsOf(ours)) {
-      const enemy = byId.get(matchup.enemy)
-      if (enemy && isEnemy(enemy)) list.push({ ours, enemy, matchup })
+/** Só confrontos bem formados; o que vem do armazenamento pode estar incompleto. */
+export function sanitizeMatchups(raw: unknown): Matchup[] {
+  if (!Array.isArray(raw)) return []
+  const list: Matchup[] = []
+  const seen = new Set<string>()
+  for (const item of raw) {
+    if (typeof item !== "object" || item === null || typeof item.id !== "string" || !item.id || seen.has(item.id))
+      continue
+    seen.add(item.id)
+    const matchup: Matchup = {
+      id: item.id,
+      side: item.side === "red" ? "red" : "blue",
+      updated: Number(item.updated) || 0,
     }
+    if (typeof item.name === "string" && item.name.trim()) matchup.name = item.name
+    if (typeof item.ours === "string" && item.ours) matchup.ours = item.ours
+    if (typeof item.enemy === "string" && item.enemy) matchup.enemy = item.enemy
+    list.push(matchup)
   }
   return list
 }
 
-export const findMatchup = (comps: Composition[], id: string | null | undefined) =>
-  id ? (allMatchups(comps).find(entry => entry.matchup.id === id) ?? null) : null
-
-/** Remove confrontos cujo par não existe mais e devolve os ids removidos (para apagar as táticas). */
-export function pruneMatchups(comps: Composition[]): string[] {
-  const alive = new Set(allMatchups(comps).map(entry => entry.matchup.id))
-  const dropped: string[] = []
-  for (const comp of comps) {
-    const all = matchupsOf(comp)
-    if (all.length === (comp.matchups?.length ?? 0) && all.every(item => alive.has(item.id))) continue
-    for (const item of all) if (!alive.has(item.id)) dropped.push(item.id)
-    comp.matchups = all.filter(item => alive.has(item.id))
-    if (!comp.matchups.length) delete comp.matchups
-  }
-  return dropped
+function matchupEntry(comps: Composition[], matchup: Matchup): MatchupEntry {
+  const byId = (id?: string) => comps.find(comp => comp.id === id) ?? null
+  const ours = byId(matchup.ours),
+    enemy = byId(matchup.enemy)
+  return { matchup, ours: ours && !isEnemy(ours) ? ours : null, enemy: enemy && isEnemy(enemy) ? enemy : null }
 }
 
-/** Uma adversária já colocada no draft vira confronto. Devolve true se algo mudou. */
-export function adoptEnemies(comps: Composition[]): boolean {
-  let changed = false
-  const enemies = new Set(comps.filter(isEnemy).map(comp => comp.id))
-  for (const ours of comps) {
-    const enemyId = ours.draft?.enemyId
-    if (isEnemy(ours) || !enemyId || !enemies.has(enemyId)) continue
-    if (!matchupsOf(ours).some(item => item.enemy === enemyId)) {
-      addMatchup(ours, enemyId)
-      changed = true
+/** Todos os confrontos, na ordem da lista (inclui os que perderam uma das comps). */
+export const allMatchups = (comps: Composition[], matchups: Matchup[]): MatchupEntry[] =>
+  matchups.map(matchup => matchupEntry(comps, matchup))
+
+export const findMatchup = (comps: Composition[], matchups: Matchup[], id: string | null | undefined) => {
+  const matchup = id ? matchups.find(item => item.id === id) : undefined
+  return matchup ? matchupEntry(comps, matchup) : null
+}
+
+/** Cria um confronto (pares repetidos são permitidos) e o acrescenta à lista. */
+export function addMatchup(
+  matchups: Matchup[],
+  init: { ours?: string; enemy?: string; side?: DraftSide; name?: string } = {},
+  now = Date.now(),
+): Matchup {
+  const created: Matchup = { id: uid(), side: init.side ?? "blue", updated: now }
+  if (init.name?.trim()) created.name = init.name.trim()
+  if (init.ours) created.ours = init.ours
+  if (init.enemy) created.enemy = init.enemy
+  matchups.push(created)
+  return created
+}
+
+export function removeMatchup(matchups: Matchup[], id: string) {
+  const index = matchups.findIndex(item => item.id === id)
+  if (index >= 0) matchups.splice(index, 1)
+}
+
+/** Confrontos que usam a comp, do mais recente para o mais antigo. */
+export const matchupsOfComp = (matchups: Matchup[], compId: string) =>
+  matchups.filter(item => item.ours === compId || item.enemy === compId).sort((a, b) => b.updated - a.updated)
+
+/** Tira dos confrontos as comps que não existem mais (o confronto fica com aquele lado vazio). */
+export function detachMissingComps(matchups: Matchup[], comps: Composition[]): Matchup[] {
+  const alive = new Set(comps.map(comp => comp.id))
+  const changed: Matchup[] = []
+  for (const item of matchups) {
+    let touched = false
+    if (item.ours && !alive.has(item.ours)) {
+      delete item.ours
+      touched = true
     }
+    if (item.enemy && !alive.has(item.enemy)) {
+      delete item.enemy
+      touched = true
+    }
+    if (touched) changed.push(item)
   }
   return changed
 }
 
-export type DraftSideKey = "blue" | "red"
-/** `place`: comp que muda de lado no draft. `matchup`: par a abrir. `open`: comp a abrir quando falta o par. */
-export type CompDrop = {
-  place: { id: string; side: DraftSideKey }
-  matchup: { ours: string; enemy: string } | null
-  open: string
+/** Troca os lados do confronto (a nossa passa para o lado da adversária). */
+export function swapMatchupSides(matchup: Matchup, now = Date.now()) {
+  matchup.side = oppositeSideOf(matchup.side)
+  matchup.updated = now
 }
+
+/** Confronto atualizado ao soltar uma comp num lado do quadro, e se os lados se inverteram. */
+export type CompDrop = { matchup: Matchup; created: boolean; swapped: boolean }
 
 /**
  * O que acontece ao soltar uma comp num lado do quadro da gaveta de Táticas.
- * A comp solta fica nesse lado; a comp do time oposto, aberta (ou do confronto aberto), vira o par dela.
+ * A comp solta ocupa esse lado no confronto aberto (ou num confronto novo, se não houver). Se a nossa for solta no
+ * lado em que estava a adversária, os lados se invertem. Devolve `null` para uma comp que não existe.
  */
 export function resolveCompDrop(
   comps: Composition[],
-  openId: string | null,
+  matchups: Matchup[],
   openMatchupId: string | null,
   droppedId: string,
-  side: DraftSideKey,
+  side: DraftSide,
 ): CompDrop | null {
   const dropped = comps.find(comp => comp.id === droppedId)
   if (!dropped) return null
-  const matchup = findMatchup(comps, openMatchupId)
-  const open = matchup ? [matchup.ours, matchup.enemy] : comps.filter(comp => comp.id === openId)
-  const partner = open.find(comp => comp.id !== dropped.id && isEnemy(comp) !== isEnemy(dropped)) ?? null
-  if (!partner) return { place: { id: dropped.id, side }, matchup: null, open: dropped.id }
-  const ours = isEnemy(dropped) ? partner : dropped,
-    enemy = isEnemy(dropped) ? dropped : partner
-  // O lado do confronto fica guardado na comp nossa; a adversária fica no lado oposto.
-  const oursSide: DraftSideKey = isEnemy(dropped) ? (side === "blue" ? "red" : "blue") : side
-  return { place: { id: ours.id, side: oursSide }, matchup: { ours: ours.id, enemy: enemy.id }, open: ours.id }
+  const oursSide = isEnemy(dropped) ? oppositeSideOf(side) : side
+  const found = openMatchupId ? matchups.find(item => item.id === openMatchupId) : undefined
+  const matchup = found ?? addMatchup(matchups, { side: oursSide })
+  const before = matchup.side
+  if (isEnemy(dropped)) matchup.enemy = dropped.id
+  else matchup.ours = dropped.id
+  matchup.side = oursSide
+  matchup.updated = Date.now()
+  const hasPartner = isEnemy(dropped) ? !!matchup.ours : !!matchup.enemy
+  return { matchup, created: !found, swapped: !!found && hasPartner && before !== oursSide }
 }

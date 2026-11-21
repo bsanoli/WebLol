@@ -1,5 +1,15 @@
 [
   {
+    "version": "1.79",
+    "date": "2026-11-21",
+    "changes": [
+      "Táticas, visão Lane: a arte do campeão cobre a linha inteira (escurecida) e os ícones ficam quadrados, como no Draft. Clicar no campeão principal já escolhido não abre a lista; o + adiciona.",
+      "Táticas, aba Confrontos: uma linha fina no topo, na cor do lado da nossa comp, substitui a bolinha, e o nome inteiro quebra de linha. A lista Nossas/Adversárias/Confrontos recolhe pelo botão ao lado das abas (lembra a escolha).",
+      "Desfazer: botão fixo ao lado de Trocar lados, que fica até a próxima edição e responde a Ctrl+Z. Vale para troca de lados e campeão removido por arraste; o aviso some mais rápido.",
+      "Ordem do draft: com um confronto aberto, trocar a comp nossa ou a adversária pergunta se substitui neste confronto (padrão) ou cria um novo confronto."
+    ]
+  },
+  {
     "version": "1.78",
     "date": "2026-11-20",
     "changes": [

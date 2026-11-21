@@ -50,8 +50,8 @@ test("Abre uma composição salva no formato anterior em modo Draft", async ({ p
   const state = await page.evaluate(() => JSON.parse(localStorage.getItem("lol-comps-time-v1")!))
   const rival = state.comps.find((c: { name: string }) => c.name === "Time rival")
   expect(rival.team).toBe("enemy")
-  expect(state.comps.find((c: { id: string }) => c.id === "comp-antiga").draft.rival).toBe(rival.id)
-  expect(state.comps.find((c: { id: string }) => c.id === "comp-antiga").matchups).toHaveLength(1)
+  expect(state.matchups).toHaveLength(1)
+  expect(state.matchups[0]).toMatchObject({ ours: "comp-antiga", enemy: rival.id, side: "blue" })
 
   // Trocar lados: a barra e o quadro se invertem e a comp nossa vai para a direita.
   await expect(team.getByText("Editando:")).toBeVisible()
@@ -61,7 +61,23 @@ test("Abre uma composição salva no formato anterior em modo Draft", async ({ p
   await matchup.getByRole("button", { name: /Trocar lados/ }).click()
   await expect(matchup.locator(".matchup-team").last()).toHaveClass(/ours/)
   const swapped = await page.evaluate(() => JSON.parse(localStorage.getItem("lol-comps-time-v1")!))
-  expect(swapped.comps.find((c: { id: string }) => c.id === "comp-antiga").draft.side).toBe("red")
+  expect(swapped.matchups[0].side).toBe("red")
+
+  // Desfazer fixo: aparece depois da troca, desfaz pelo botão e por Ctrl+Z.
+  const undo = matchup.getByRole("button", { name: /Desfazer/ })
+  await expect(undo).toBeVisible()
+  await undo.click()
+  await expect(undo).toBeHidden()
+  expect((await page.evaluate(() => JSON.parse(localStorage.getItem("lol-comps-time-v1")!))).matchups[0].side).toBe(
+    "blue",
+  )
+  await matchup.getByRole("button", { name: /Trocar lados/ }).click()
+  await page.keyboard.press("Control+z")
+  await expect(undo).toBeHidden()
+  expect((await page.evaluate(() => JSON.parse(localStorage.getItem("lol-comps-time-v1")!))).matchups[0].side).toBe(
+    "blue",
+  )
+  await matchup.getByRole("button", { name: /Trocar lados/ }).click()
 
   for (const viewport of [
     { width: 1920, height: 1024 },
@@ -77,7 +93,7 @@ test("Abre uma composição salva no formato anterior em modo Draft", async ({ p
   await team.getByRole("tab", { name: /Confrontos/ }).click()
   const row = team.locator("[data-tactic-matchup]")
   await expect(row).toHaveCount(1)
-  await expect(row).toHaveAttribute("title", "Composição anterior x Time rival")
+  await expect(row).toHaveAttribute("title", /^Composição anterior x Time rival/)
   await row.click()
   await expect(team.locator("#tx-title")).toContainText("Composição anterior x Time rival")
   await team.getByRole("tab", { name: /Confrontos/ }).click()
