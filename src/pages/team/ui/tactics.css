@@ -50,7 +50,7 @@
   white-space: nowrap;
 }
 .tx-hint {
-  margin: 0 0 6px;
+  margin: 0 0 4px;
   color: var(--mut);
   font-size: 12px;
 }
@@ -58,7 +58,7 @@
 .tx-aside {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 8px;
   min-width: 0;
   min-height: 0;
 }
@@ -120,7 +120,7 @@
   flex: none;
   width: 14px;
   height: 14px;
-  margin-right: 6px;
+  margin-right: 4px;
 }
 #v-comps .tx-tabs .dz-tab .mini {
   display: grid;
@@ -143,7 +143,7 @@
 .tx-has {
   display: inline-flex;
   flex: none;
-  margin-left: 6px;
+  margin-left: 4px;
   color: var(--gold, var(--wl-accent));
 }
 .tx-has .icon {
@@ -155,7 +155,7 @@
   flex: none;
   min-height: 0;
   overflow: auto;
-  padding: 10px;
+  padding: 8px;
   border: 1px solid var(--line);
   border-radius: 0;
   background: var(--panel2, var(--bg));
@@ -172,11 +172,11 @@
 }
 .tx-side-col {
   min-width: 0;
-  padding-top: 6px;
-  border-top: 3px solid var(--wl-side-blue, #3b82f6);
+  padding-top: 4px;
+  border-top: 3px solid var(--wl-side-blue, var(--wl-blue-500));
 }
 .tx-side-col.red {
-  border-top-color: var(--wl-side-red, #ef4444);
+  border-top-color: var(--wl-side-red, var(--wl-red-500));
 }
 .tx-side-col h3 {
   display: flex;
@@ -227,7 +227,7 @@
   column-gap: 8px;
   align-items: center;
   min-height: 40px;
-  padding: 4px 6px;
+  padding: 4px 4px;
   border-left: var(--wl-accent-bar) solid var(--lc, var(--line));
   border-radius: 0;
   background: color-mix(in srgb, var(--txt) 4%, transparent);
@@ -274,7 +274,7 @@
 .tx-alts {
   grid-column: 3;
   grid-row: 1 / 3;
-  padding: 1px 6px;
+  padding: 1px 4px;
   border-radius: var(--wl-control-radius);
   background: var(--bg);
   color: var(--mut);
@@ -449,7 +449,7 @@
   display: inline-flex;
   align-items: center;
   gap: 4px;
-  padding: 0 6px 0 2px;
+  padding: 0 4px 0 2px;
   border-radius: var(--wl-control-radius);
   background: var(--wl-accent-soft);
   color: var(--txt);
@@ -607,7 +607,7 @@
   display: inline-flex;
   flex: none;
   align-items: center;
-  gap: 6px;
+  gap: 4px;
 }
 .tx-drawer-toggle .icon {
   width: 14px;
@@ -726,7 +726,7 @@
 #v-comps .tx-opgg {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
+  gap: 4px;
 }
 #v-comps .tx-opgg .icon {
   width: 14px;
@@ -748,16 +748,16 @@
   font-weight: 600;
 }
 .tx-team-tag.enemy {
-  background: var(--wl-danger-soft, color-mix(in srgb, #ef4444 18%, transparent));
-  color: var(--wl-danger, #ef4444);
+  background: var(--wl-danger-soft, color-mix(in srgb, var(--wl-red-500) 18%, transparent));
+  color: var(--wl-danger, var(--wl-red-500));
 }
 .tx-enemy-tag {
   flex: none;
-  margin-left: 6px;
-  padding: 0 5px;
+  margin-left: 4px;
+  padding: 0 4px;
   border-radius: var(--wl-control-radius);
-  background: var(--wl-danger-soft, color-mix(in srgb, #ef4444 18%, transparent));
-  color: var(--wl-danger, #ef4444);
+  background: var(--wl-danger-soft, color-mix(in srgb, var(--wl-red-500) 18%, transparent));
+  color: var(--wl-danger, var(--wl-red-500));
   font-size: 10px;
   font-weight: 600;
 }
@@ -827,7 +827,7 @@
 }
 #v-comps .tx-new {
   align-self: flex-start;
-  gap: 6px;
+  gap: 4px;
   color: var(--mut);
   cursor: pointer;
 }
@@ -846,7 +846,7 @@
 .tx-group-head h3 {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 4px;
   margin: 0;
   color: var(--mut);
   font-size: 11px;
@@ -896,7 +896,7 @@
 #v-comps .tx-open-draft {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
+  gap: 4px;
   margin-top: 16px;
 }
 #v-comps .tx-open-draft .icon {
@@ -1032,7 +1032,7 @@
   display: inline-flex;
   flex: none;
   align-items: center;
-  gap: 6px;
+  gap: 4px;
   min-height: 32px;
   cursor: pointer;
 }
@@ -1080,7 +1080,7 @@
 #v-comps .matchup-opgg {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
+  gap: 4px;
   flex: none;
 }
 #v-comps .matchup-opgg-edit {
@@ -1230,7 +1230,7 @@
 #v-comps .draft-rival-empty button {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
+  gap: 4px;
 }
 .draft-rival-actions {
   display: flex;
@@ -1425,12 +1425,12 @@
   overflow: hidden;
   border: 0;
   border-radius: 0;
-  box-shadow: inset var(--wl-accent-bar, 3px) 0 0 var(--wl-side-blue, #3b82f6);
+  box-shadow: inset var(--wl-accent-bar, 3px) 0 0 var(--wl-side-blue, var(--wl-blue-500));
   background: var(--panel2, var(--bg));
 }
 #v-comps.tactics-view .tx-side-col .pk.r {
   align-items: flex-end;
-  box-shadow: inset calc(-1 * var(--wl-accent-bar, 3px)) 0 0 var(--wl-side-red, #ef4444);
+  box-shadow: inset calc(-1 * var(--wl-accent-bar, 3px)) 0 0 var(--wl-side-red, var(--wl-red-500));
 }
 #v-comps.tactics-view .tx-side-col .pk .pick-splash {
   inset: 0;
@@ -1467,7 +1467,7 @@
   display: inline-flex;
   align-items: center;
   height: 28px;
-  padding: 0 10px;
+  padding: 0 8px;
   border: 1px solid var(--line);
   border-left: 3px solid var(--lc, var(--line));
   border-radius: var(--wl-control-radius);
@@ -1482,7 +1482,7 @@
   width: 28px;
   height: 28px;
   margin: 0;
-  border: 1px solid #fff4;
+  border: 1px solid var(--wl-white-alpha-27);
   border-radius: var(--wl-control-radius);
 }
 #v-comps.tactics-view .tx-side-col .pk-mini.primary .av {
@@ -1554,7 +1554,7 @@
   font-weight: 750;
   line-height: 1.1;
   text-overflow: ellipsis;
-  text-shadow: 0 1px 4px #000;
+  text-shadow: 0 1px 4px var(--wl-black);
   white-space: nowrap;
 }
 #v-comps.tactics-view .tx-side-col .pkn.pk-empty {
@@ -1677,7 +1677,7 @@
 
 /* Quadro de Táticas: alternador Draft | Lane e a visão Lane (só ícones, uma linha por posição) */
 .tx-board-switch {
-  margin: 0 0 10px;
+  margin: 0 0 8px;
 }
 .tx-pos-board {
   --tx-pos-row: 44px;
@@ -1703,7 +1703,7 @@
   min-height: 0;
 }
 .tx-pos-names-head {
-  padding-top: 6px;
+  padding-top: 4px;
 }
 .tx-pos-name {
   display: flex;
@@ -1723,7 +1723,7 @@
   align-content: center;
   gap: 4px;
   min-width: 0;
-  padding: 4px 6px;
+  padding: 4px 4px;
   cursor: pointer;
   border-left: 3px solid var(--lc, var(--line));
   background: color-mix(in srgb, var(--lc, var(--line)) 6%, var(--panel, transparent));
@@ -1734,12 +1734,12 @@
   border-left: 0;
   border-right: 0;
   box-shadow: inset -3px 0 0 var(--lc, var(--line));
-  padding-right: 10px;
+  padding-right: 8px;
 }
 .tx-pos-col.right .tx-pos-slot {
   border-left: 0;
   box-shadow: inset 3px 0 0 var(--lc, var(--line));
-  padding-left: 10px;
+  padding-left: 8px;
 }
 .tx-pos-col.left h3,
 .tx-draft-sides > .tx-side-col.blue h3 {

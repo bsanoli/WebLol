@@ -10,7 +10,7 @@ Os termos seguem o [glossário](glossario.md). As regras novas estão em [conven
 2. **Não havia verificação automática antes de publicar.** Não existia CI, lint, formatação nem teste unitário, e quase todos os commits iam direto para a `main`. A [Onda 1](#onda-1-verificação-automática) trouxe Biome, Steiger, Vitest, axe, ganchos e CI. As regras com dívida anterior ainda só avisam ([lista](#avisos-que-ainda-não-barram)).
 3. **O build gerado mora no Git.** 636 arquivos gerados estão versionados, e 142 dos 159 commits mexem neles.
 4. **O código mais usado é o menos tipado.** Nove arquivos com `@ts-nocheck` somam 4.052 linhas, entre eles a página do time (1.459 linhas). Antes da formatação do Biome, que quebra as linhas acima de 120 caracteres, eram 3.030 e 883.
-5. **Três sistemas de estilo convivem.** São 16 CSS globais em `public/assets/`, 5 CSS modules e Tailwind, com cores soltas fora dos tokens.
+5. **Três sistemas de estilo convivem.** Eram 16 CSS globais (antes da 5a) em `public/assets/`, 5 CSS modules e Tailwind, com cores soltas fora dos tokens.
 6. **As páginas carregam mais do que mostram.** A Área do time monta todas as abas e o mapa realista de 2 MB, e cada rota faz de 68 a 221 requisições.
 
 ## 1. Nomes
@@ -55,8 +55,8 @@ Os scripts clássicos `public/assets/shell.js` e `public/assets/sync.js` ficam f
 
 ## 4. Estilos
 
-- 16 arquivos CSS globais em `public/assets/`, 5 CSS modules em `src/` e classes Tailwind por cima.
-- Cores hexadecimais fora dos tokens: `base.css` (105), `team.css` (58), `tactics.css` (10), `draft-layout.css` (9), `shell.css` (5) e `compositions.css` (5).
+- (antes da 5a) 16 arquivos CSS globais em `public/assets/`, 5 CSS modules em `src/` e classes Tailwind por cima.
+- (antes da 5a) Cores hexadecimais fora dos tokens: `base.css` (105), `team.css` (58), `tactics.css` (10), `draft-layout.css` (9), `shell.css` (5) e `compositions.css` (5).
 - Muitos espaçamentos não são múltiplos de 4 px, o que contraria a escala de 8 px da [skill weblol-ui](../.agents/skills/weblol-ui/SKILL.md).
 
 ## 5. Fluxo de trabalho
@@ -176,6 +176,8 @@ Renomeações vão em commits próprios, sem mudança de comportamento, de prefe
 **Pronta quando** `public/assets/` não tiver mais JavaScript de aplicação e login, troca de time, backup e sincronização passarem nos testes.
 
 ### Onda 5. Estilos
+
+**Situação:** 5a, 5b, 5c e 5d feitas em 2026-11-20 ([ADR 0008](decisoes/0008-onde-moram-os-estilos.md)). Escala de 8 px aplicada a margin, padding e gap; alturas e larguras ficam de fora.
 
 1. Levar os CSS globais de `public/assets/` para `src/`, junto dos slices que os usam.
 2. Trocar as cores hexadecimais por tokens semânticos.

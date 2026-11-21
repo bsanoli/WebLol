@@ -1,0 +1,61 @@
+/* Cores que não mudam com a paleta escolhida. As que mudam ficam em palettes.css (:root e [data-palette]).
+   Este é o único arquivo de src/ onde a cor hexadecimal é permitida; o resto usa var(--wl-*). */
+:root {
+  --wl-shadow-overlay: #0008;
+  --wl-shadow-thumb: #0004;
+  --wl-badge-bg: #101017;
+  --wl-badge-text: #fff;
+  --wl-rune-domination: #e36d82;
+  --wl-rune-inspiration: #52c6c7;
+  --wl-rune-precision: #d9a955;
+  --wl-rune-resolve: #70bf65;
+  --wl-rune-sorcery: #9d93ea;
+  /* Cores da Área do time, nomeadas pelo papel (sombra, ala, marcador do mapa). */
+  --wl-black: #000;
+  --wl-shadow-faint: #0005;
+  --wl-shadow-soft: #0006;
+  --wl-shadow-strong: #0009;
+  --wl-black-alpha-67: #000a;
+  --wl-slot-empty-bg: #0a0d14;
+  --wl-art-fade-solid: #0b0f17;
+  --wl-art-fade-faint: #0b0f1726;
+  --wl-art-fade-medium: #0b0f1740;
+  --wl-art-fade-bottom: #0b0f17bd;
+  --wl-art-fade-strong: #0b0f17ec;
+  --wl-faelight-ring: #101b1c;
+  --wl-ward-vision-glow: #102422;
+  --wl-token-bg: #111;
+  --wl-map-piece-bg: #111821;
+  --wl-ward-farsight-edge: #142a2c;
+  --wl-map-base-bg: #16231a;
+  --wl-map-wave-ring: #16232e;
+  --wl-faelight-teal-bg: #17685b;
+  --wl-map-wave-ring-inner: #1c232c;
+  --wl-map-target-ring: #21201c;
+  --wl-map-wave-bg: #303a44;
+  --wl-vision-bonus-fill: #39ccaa66;
+  --wl-blue-500: #3b82f6;
+  --wl-slot-empty-muted: #555c70;
+  --wl-side-blue-pressed-edge: #5a91ef;
+  --wl-draft-name-blue: #6ea2ff;
+  --wl-slot-mine-line: #7a6a3a;
+  --wl-faelight-amber-bg: #805114;
+  --wl-vision-bonus-line: #93edd6;
+  --wl-ward-farsight-text: #a3dcff;
+  --wl-map-wave-line: #c3cbd3;
+  --wl-map-wave-preview-bg: #c3cbd344;
+  --wl-faelight-teal-border: #d6fff2;
+  --wl-pick-name-text: #e2e8f0;
+  --wl-side-red-pressed-edge: #e97583;
+  --wl-red-500: #ef4444;
+  --wl-map-erase-outline: #ff5656;
+  --wl-draft-name-red: #ff6b7d;
+  --wl-ward-control-text: #ffafd3;
+  --wl-faelight-amber-border: #ffe0a3;
+  --wl-ward-stealth-text: #ffe6a3;
+  --wl-map-target-outline: #fff2b7;
+  --wl-white-alpha-20: #fff3;
+  --wl-white-alpha-27: #fff4;
+  --wl-white-alpha-40: #fff6;
+  --wl-white: #fff;
+}

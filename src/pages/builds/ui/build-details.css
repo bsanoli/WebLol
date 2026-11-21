@@ -260,8 +260,8 @@
   bottom: 0;
   min-width: var(--wl-space-3);
   border-radius: var(--wl-control-radius);
-  background: #101017;
-  color: #fff;
+  background: var(--wl-badge-bg);
+  color: var(--wl-badge-text);
   font-size: 10px;
   line-height: var(--wl-space-3);
   text-align: center;

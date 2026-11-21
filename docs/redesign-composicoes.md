@@ -5,8 +5,8 @@ Implementado na rota existente `/#/time/composicoes`.
 ## Fontes e decisões
 
 - Editor, catálogo, estado local, importação/exportação e links: `src/pages/team/ui/team-page.ts`.
-- Estrutura da área do time: `src/camp.html`; estilos compartilhados: `public/assets/team.css` e `base.css`.
-- Estilos específicos novos: `public/assets/compositions.css`, sem alterar a aparência do mapa ou do conhecimento.
+- Estrutura da área do time: `src/camp.html`; estilos compartilhados: `src/pages/team/ui/team.css` e `src/app/styles/base.css`.
+- Estilos específicos novos: `src/pages/team/ui/compositions.css`, sem alterar a aparência do mapa ou do conhecimento.
 - Shell, Riot ID e sincronização ficam em `src/features/auth`, sem alterações.
 - Referência principal: mockup fornecido pelo usuário. Consultados também [OP.GG](https://op.gg/lol/champions), [OP.GG Esports](https://esports.op.gg/), [Mobalytics](https://mobalytics.gg/lol/tier-list) e [League of Graphs](https://www.leagueofgraphs.com/champions/tier-list): filtros explícitos, navegação por contexto e organização compacta por posição.
 
@@ -16,7 +16,7 @@ A preferência fica em `weblol-composition-palette`, fora do JSON compartilhado.
 
 ## Padrão de bordas
 
-Use os tokens de `public/assets/compositions.css` para componentes novos nesta tela, incluindo o catálogo móvel.
+Use os tokens de `src/pages/team/ui/compositions.css` para componentes novos nesta tela, incluindo o catálogo móvel.
 
 | Token | Raio | Onde usar |
 | --- | --- | --- |

@@ -122,6 +122,18 @@ for (const file of files) {
   }
 }
 
+// Cor hexadecimal em CSS só existe no arquivo de tokens; o resto usa var(--wl-*) (docs/convencoes.md).
+const tokenFiles = ["app/styles/tokens.css", "app/styles/palettes.css"]
+const hexColor = /#[0-9a-fA-F]{3,8}\b/
+for (const entry of readdirSync(sourceRoot, { recursive: true, withFileTypes: true })) {
+  if (!entry.isFile() || !entry.name.endsWith(".css")) continue
+  const file = relative(sourceRoot, join(entry.parentPath, entry.name)).replaceAll("\\", "/")
+  if (tokenFiles.includes(file)) continue
+  const css = readFileSync(join(sourceRoot, file), "utf8").replace(/\/\*[\s\S]*?\*\//g, "")
+  if (hexColor.test(css))
+    violations.add(`${file}: cor hexadecimal fora de ${tokenFiles.join(" e ")}; use um token var(--wl-*)`)
+}
+
 for (const violation of [...violations].sort()) console.error(violation)
 if (violations.size) process.exitCode = 1
 if (!process.exitCode) console.log(`Arquitetura verificada em ${files.length} arquivos.`)

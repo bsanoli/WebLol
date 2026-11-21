@@ -7,7 +7,6 @@
       "src/**",
       "tests/**",
       "scripts/**",
-      "public/assets/*.css",
       "*.ts",
       "*.json",
       "*.jsonc",

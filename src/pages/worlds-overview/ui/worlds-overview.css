@@ -20,7 +20,7 @@ header {
   justify-content: space-between;
   gap: 12px 24px;
   border-bottom: 2px solid var(--gold);
-  padding-bottom: 14px;
+  padding-bottom: 16px;
 }
 h1 {
   font-size: var(--wl-title-size);
@@ -35,11 +35,11 @@ h1 span {
 .sub {
   color: var(--muted);
   font-size: 13px;
-  margin-top: 6px;
+  margin-top: 4px;
 }
 .kpis {
   display: flex;
-  gap: 22px;
+  gap: 24px;
   flex-wrap: wrap;
 }
 .kpi .v {
@@ -60,9 +60,9 @@ th button:focus-visible {
 }
 nav {
   display: flex;
-  gap: 6px;
+  gap: 4px;
   flex-wrap: wrap;
-  margin: 18px 0 20px;
+  margin: 16px 0 20px;
 }
 .av {
   position: relative;
@@ -97,7 +97,7 @@ td.champ .av {
 .chip .av {
   width: 18px;
   height: 18px;
-  margin-right: 5px;
+  margin-right: 4px;
 }
 .chip {
   display: inline-flex;
@@ -153,7 +153,7 @@ h2 {
 }
 .bars {
   display: grid;
-  gap: 5px;
+  gap: 4px;
 }
 .bar {
   display: grid;
@@ -173,7 +173,7 @@ h2 {
   font-weight: 600;
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 4px;
 }
 .bar .nm .av {
   margin: 0;
@@ -216,20 +216,20 @@ h2 {
 }
 .legend {
   display: flex;
-  gap: 14px;
+  gap: 16px;
   font-size: 12px;
   color: var(--muted);
-  margin-bottom: 10px;
+  margin-bottom: 8px;
   flex-wrap: wrap;
 }
 .legend span {
   display: flex;
   align-items: center;
-  gap: 5px;
+  gap: 4px;
 }
 .tools {
   display: flex;
-  gap: 10px;
+  gap: 8px;
   flex-wrap: wrap;
   align-items: center;
   margin-bottom: 12px;
@@ -281,7 +281,7 @@ td.champ {
 .mini {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 4px;
 }
 .mini .track {
   width: 60px;
@@ -308,13 +308,13 @@ tr.detail td {
 .chips {
   display: flex;
   flex-wrap: wrap;
-  gap: 5px;
+  gap: 4px;
 }
 .chip {
   background: var(--surface);
   border: 1px solid var(--line);
   border-radius: var(--wl-control-radius);
-  padding: 1px 9px;
+  padding: 1px 8px;
   font-size: 13px;
 }
 .na {
@@ -492,7 +492,7 @@ tr.detail td {
   color: var(--bg);
   font-size: 12.5px;
   line-height: 1.4;
-  padding: 6px 9px;
+  padding: 4px 8px;
   border-radius: var(--wl-card-radius);
   max-width: 260px;
   box-shadow: 0 4px 14px rgba(0, 0, 0, 0.25);
@@ -508,7 +508,7 @@ tr.detail td {
   display: flex;
   align-items: center;
   min-width: 0;
-  gap: 5px;
+  gap: 4px;
 }
 .item-name span {
   overflow-wrap: anywhere;
@@ -526,7 +526,7 @@ tr.detail td {
 }
 .runes {
   display: grid;
-  gap: 6px;
+  gap: 4px;
   font-size: 13px;
   line-height: 1.45;
 }
@@ -537,7 +537,7 @@ tr.detail td {
 }
 .rune-group + .rune-group {
   border-top: 1px dashed var(--line);
-  padding-top: 6px;
+  padding-top: 4px;
 }
 .runes b {
   color: var(--gold);
@@ -556,7 +556,7 @@ tr.detail td {
 .foot {
   color: var(--muted);
   font-size: 12.5px;
-  margin-top: 22px;
+  margin-top: 24px;
   max-width: 75ch;
 }
 @media (max-width: 520px) {
@@ -592,13 +592,13 @@ tr.detail td {
 header {
   display: block;
   border-bottom: 1px solid var(--line);
-  padding-bottom: 18px;
+  padding-bottom: 16px;
 }
 .eyebrow {
   font-weight: 600;
   font-size: 13px;
   color: var(--gold);
-  margin-bottom: 5px;
+  margin-bottom: 4px;
 }
 .sub {
   font-size: 14px;

@@ -1,0 +1,13 @@
+/* Estilos do Worlds e do SoloQ (worlds.html e soloq.html), na ordem da cascata. */
+@import "./palettes.css";
+@import "./base.css";
+@import "../../pages/worlds-overview/ui/worlds-overview.css";
+@import "../../shared/ui/team-controls.css";
+@import "../../widgets/tournament-overview/ui/analytics.css";
+@import "../../pages/builds/ui/builds.css";
+@import "../../widgets/analytics-tooltip/ui/tooltip.css";
+@import "../../pages/worlds-compositions/ui/worlds-compositions.css";
+@import "../../widgets/tournament-overview/ui/analytics-layout.css";
+@import "../../pages/builds/ui/build-details.css";
+@import "../../pages/builds/ui/build-timeline.css";
+@import "./motion.css";
