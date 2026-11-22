@@ -221,7 +221,7 @@ export function tacticsHTML(
     `<button type="button" role="tab" class="tx-listtab ${team}" id="tx-listtab-${team}" data-tx-list="${team}" aria-controls="tx-list-${team}" aria-selected="${team === shown}" tabindex="${team === shown ? 0 : -1}">${label}<small>${count}</small></button>`
   const scope = `<div class="tx-scope" role="group" aria-label="Tática aberta">
     <button type="button" class="tx-scope-btn" data-tactic-comp="${esc(c.id)}" aria-pressed="${!general}" title="Táticas da composição aberta">Esta composição</button>
-    <button type="button" class="tx-scope-btn" data-tactic-general aria-pressed="${general}" title="Ideias de jogo que valem para qualquer composição"><b>Gerais</b></button></div>`
+    <button type="button" class="tx-scope-btn" data-tactic-general aria-pressed="${general}"><b>Gerais</b></button></div>`
   const enemy = !general && !active && isEnemy(c)
   const title = general ? "Táticas gerais" : `Táticas · ${esc(active ? matchupTitle(active) : c.name)}`
   const hint = enemy ? "Como jogar contra esta composição: ameaças, picks a negar e como vencer as lutas." : ""
