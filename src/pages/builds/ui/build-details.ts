@@ -110,7 +110,11 @@ export function buildTimelineLoading() {
 export function buildDetails(champion: Champion, lane: string, action = "", hasTimeline = false, opponent = "") {
   if (opponent) return buildHtml(champion, lane, hasTimeline, opponent)
   const samples = Object.entries(champion.lanes)
-    .filter(([position, sample]) => (!lane || position === lane) && sample.sampleGames)
+    .flatMap(([position, sample]) =>
+      (!lane || position === lane) && "sampleGames" in sample && sample.sampleGames
+        ? [[position, sample] as const]
+        : [],
+    )
     .map(([position, sample], index) => buildSample(sample, position, index === 0 ? action : ""))
     .join("")
   const missingSample = lane ? `<p class="hint">Sem estatísticas de desempenho coletadas em ${esc(lane)}.</p>` : ""

@@ -1,7 +1,7 @@
 import DATA from "@dataset/summary"
-import { championSlug } from "@/entities/match"
+import { championSlug, type SummaryGame } from "@/entities/match"
 
-export type CompGame = (typeof DATA.comps)[number]
+export type CompGame = SummaryGame
 
 export const compChampionLanes = new Map<string, Set<string>>()
 for (const game of DATA.comps) {

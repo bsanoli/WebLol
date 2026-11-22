@@ -10,7 +10,6 @@
     "noEmit": true,
     "paths": {
       "@/*": ["./src/*"],
-      "@dataset/summary": ["./src/data/worlds.json"],
       "@dataset/drafts": ["./src/data/worlds-2026-drafts.json"],
       "@dataset/builds": ["./src/data/worlds-2026-builds.json"],
       "@dataset/build-assets": ["./src/data/worlds-2026-build-assets.json"],

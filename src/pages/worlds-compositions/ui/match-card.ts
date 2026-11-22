@@ -1,9 +1,8 @@
 import { iconMarkup, laneIconMarkup } from "@/shared/ui/icon"
-import type DATA from "@dataset/summary"
 import DRAFTS from "@dataset/drafts"
 
 import { ico } from "@/entities/champion"
-import { esc, teamLogo, teamCode } from "@/entities/match"
+import { esc, teamLogo, teamCode, type CompLaneRow, type SummaryGame } from "@/entities/match"
 
 type DraftSide = "blue" | "red"
 type Draft = {
@@ -16,9 +15,7 @@ type Draft = {
 // O JSON guarda `firstPick` como texto; o formato é fixo ("blue" ou "red").
 const drafts = DRAFTS as unknown as Partial<Record<string, Draft>>
 
-type Game = (typeof DATA.comps)[number]
-/** Rota, depois campeão, jogador e KDA do lado azul e do vermelho. */
-type LaneCells = [string, string, string, string, string, string, string]
+type Game = SummaryGame
 
 function compDraft(game: Game, panelId: string) {
   const draft = drafts[`${game.series}:${game.game}`]
@@ -122,7 +119,7 @@ export function compCard(g: Game, q: string, champions: Set<string>, index: numb
     const score = `<td class="match-kda" data-tip="Abates / Mortes / Assistências de ${esc(player)}">${kda}</td>`
     return isRight ? score + pick : pick + score
   }
-  const laneRow = ([lane, blueChampion, bluePlayer, blueKda, redChampion, redPlayer, redKda]: LaneCells) =>
+  const laneRow = ([lane, blueChampion, bluePlayer, blueKda, redChampion, redPlayer, redKda]: CompLaneRow) =>
     `<tr>${side(blueChampion, bluePlayer, blueKda, false)}<td class="match-lane">${laneIconMarkup(lane, true)}</td>${side(redChampion, redPlayer, redKda, true)}</tr>`
   return `<article class="wl-panel cg">
     <div class="match-card-header">
@@ -145,7 +142,7 @@ export function compCard(g: Game, q: string, champions: Set<string>, index: numb
           <th scope="col" aria-label="KDA do lado vermelho">KDA</th>
           <th scope="col" aria-label="Campeão e jogador do lado vermelho">Campeão</th>
         </tr></thead>
-        <tbody>${g.lanes.map(row => laneRow(row.map(String) as LaneCells)).join("")}</tbody>
+        <tbody>${g.lanes.map(row => laneRow(row)).join("")}</tbody>
       </table>
     </div>
     ${draft}

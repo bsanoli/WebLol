@@ -226,4 +226,11 @@ Formato de cada entrada: data, pedido (palavras do Bruno), decisão (quem escolh
 - **Decisão:** nada é publicado. O projeto do emulador é `demo-weblol` (sem acesso ao banco real), as contas são fictícias (`ana_br1`, `bia_br1`, `caio_br1`) e só os e-mails de admin vêm da configuração, porque as próprias regras os fixam. `firebase.json` só configura o emulador (sem a chave `firestore.rules`, para um `firebase deploy` nunca publicar este arquivo por engano). Os testes ficam fora do `npm run verify`, em `npm run test:rules`, porque exigem Java 21; o CI roda num job próprio (`regras`).
 - **O que mudou:** `tests-rules/firestore.rules.test.ts` (35 testes), `vitest.rules.config.ts`, `firebase.json`, o job `regras` no `ci.yml` e as dependências de desenvolvimento `firebase-tools`, `@firebase/rules-unit-testing` e `firebase`. `firestore.rules` não mudou.
 - **Cobertura:** chave pública e dados do admin (os dois e-mails), coleções só do admin, contas, times (criar como capitão, não trocar a capitania), isolamento entre times, e-mails fora do padrão `@weblol.app`, dados oficiais, prints (limite de 1 MB, só texto, sem atualização), envios ao capitão e filiação (pedir, aceitar, sair, remover).
-- **Pendente:** os eventos dos iframes do roteador, o clique no topo, o link copiado e o `adminUnlock` com senha errada continuam sem teste.
+- **Pendente:** os eventos dos iframes do roteador, o clique no topo, o link copiado e o `adminUnlock` com senha errada continuam sem teste (resolvido em 22/11/2026, abaixo).
+
+## 22/11/2026: testes que faltavam no roteador e no `adminUnlock`
+
+- **Pedido:** fechar a Onda 7 da auditoria (Fabiano). Faltavam os eventos dos iframes, o clique no topo, o link copiado e o `adminUnlock` com senha errada.
+- **Decisão:** mesma regra dos PRs anteriores: só doubles, sem Firebase, conta ou regra real. Nenhuma aprovação do Bruno, porque nada mexe na conta dele nem publica regras.
+- **O que mudou:** só testes (`router-events.test.ts`, novo, e dois casos em `membership.test.ts`). Nenhuma regra de login, conta, senha ou Firestore foi alterada.
+- **Cobertura nova:** rota pronta, `load` e navegação dos iframes, copiar link (com e sem permissão da área de transferência), recarga da Área do time, menu do topo e botão voltar, caminho do capitão para a Administração; `adminUnlock` com senha errada do cofre (nem tenta entrar no banco) e com senha do banco diferente da do cofre.

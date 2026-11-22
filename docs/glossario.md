@@ -21,6 +21,7 @@ Este arquivo liga o termo que aparece na tela ao nome que o código usa. Consult
 | Pick | `pick` | Campeão escolhido para uma posição. Alternativos ficam na mesma posição, depois do principal. | — |
 | Ordem do draft | `draftOrder` | Sequência das posições em que cada lado escolhe. | `order` |
 | Partida | `match` | Jogo registrado no dataset (Worlds ou SoloQ). | — |
+| — (não aparece na tela) | `encounter` | Um jogador de um campeão contra o adversário direto numa **partida registrada**, com a build e as runas dele. Vive em um arquivo por campeão (no Worlds, `worlds-2026-encounters.ts`; na SoloQ, `soloq/encounters.ts`) (`encounters/<campeão>.json`) que só baixa quando alguém escolhe um adversário em Builds. O Knip ignora `src/data/soloq/encounters.ts` porque só o alias `@dataset/encounters` do build da SoloQ o importa. Não confundir com `matchup`, o item do time. | — |
 | Build | `build` | Itens, runas e feitiços de um jogador numa partida. | — |
 | Oponente direto | `opponent` | Jogador da mesma posição no outro time de uma **partida registrada** (Builds). Só existe em dados de partidas, onde não há "nosso time". | `directOpponent`, `buildOpponent` |
 | Equipe profissional | `proTeam` | Equipe do Worlds ou de um jogador profissional (T1, G2…). Não confundir com o time do WebLol. | campos `b` e `r` de `src/data/worlds.json` (formato do dataset) |
