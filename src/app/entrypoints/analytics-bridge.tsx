@@ -21,7 +21,8 @@ export function connectAnalytics(frame: HTMLIFrameElement) {
     const container = frame.contentDocument?.getElementById("analytics-root")
     if (!container) return
     const data = (event as CustomEvent<AnalyticsPayload>).detail
-    root = createRoot(container)
-    flushSync(() => root!.render(<TournamentOverview champions={data.champions} games={data.games} />))
+    const nextRoot = createRoot(container)
+    root = nextRoot
+    flushSync(() => nextRoot.render(<TournamentOverview champions={data.champions} games={data.games} />))
   })
 }

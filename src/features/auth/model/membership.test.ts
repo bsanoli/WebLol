@@ -3,8 +3,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 const docs = vi.hoisted(() => new Map<string, unknown>())
 const written = vi.hoisted(() => [] as unknown[][])
 vi.mock("@/shared/firestore", () => ({
-  // biome-ignore lint/style/useNamingConvention: nome exportado pelo módulo real
-  ONLINE: true,
+  IS_ONLINE: true,
   currentFirebase: () => ({
     auth: { currentUser: docs.get("__email__") ? { email: docs.get("__email__") } : null },
   }),
@@ -27,7 +26,6 @@ vi.mock("@/shared/firestore", () => ({
 // A impressão digital vira "fp-" + n: o registro com n "bom" é o original fixado no app.
 vi.mock("@/shared/config", async importOriginal => ({
   ...(await importOriginal<typeof import("@/shared/config")>()),
-  // biome-ignore lint/style/useNamingConvention: nome exportado pelo módulo real
   ADMIN_FP: "fp-bom",
 }))
 vi.mock("@/shared/lib/admin-crypto", async importOriginal => ({

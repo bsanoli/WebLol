@@ -78,23 +78,16 @@ Os scripts clássicos `public/assets/shell.js` e `public/assets/sync.js` ficam f
 
 ## Avisos que ainda não barram
 
-O Biome segue só avisando; o Steiger foi zerado e já barra.
+O Steiger e o Biome foram zerados e já barram.
 
 ### Avisos do Biome
 
-`npm run lint` mostra 555 avisos e 89 sugestões. As regras com mais avisos:
+Zerado em 21/11/2026 (eram 570 avisos e 51 sugestões). `npm run lint` usa `--error-on-warnings`, e o CI roda `biome ci --error-on-warnings`. Todas as regras voltaram ao nível do preset ou a erro. Não há `biome-ignore` no código: exceções ficam em `overrides` de `biome.jsonc` (`!important` de `prefers-reduced-motion` e de `[hidden]` só em `base.css` e `motion.css`; nomes que são contrato em arquivos listados; testes `*.test.ts`):
 
-| Regra | Avisos | Onde corrigir |
-| --- | ---: | --- |
-| `style/noNonNullAssertion` (`!` depois de valor que pode faltar) | 147 | Ondas 3 e 4, ao tipar os arquivos com `@ts-nocheck` |
-| `style/noDescendingSpecificity` (CSS) | 144 | Onda 5 |
-| `nursery/useConsistentBooleanName` | 142 | Onda 3 |
-| `style/useNamingConvention` | 37 | Onda 3 |
-| `suspicious/useIterableCallbackReturn` | 28 | Onda 3 |
-| `complexity/noImportantStyles` (CSS) | 12 | Onda 5 |
-| `suspicious/noImplicitAnyLet` | 12 | Ondas 3 e 4 |
+- nomes que são contrato (chaves salvas, dados da Riot, `TEAM_NAME` dos iframes, códigos do draft);
+- `dangerouslySetInnerHTML` com SVG gerado pelo WebLol, e `role="group"` onde um `fieldset` traria estilos do navegador.
 
-As outras regras têm até 7 avisos cada. O `sync.js` e o `shell.js` ficam fora das regras de nomes, de `const` e de variáveis sem uso, e das correções automáticas de `useOptionalChain`, `noUselessEscapeInRegex` e `noPrototypeBuiltins` (`biome.jsonc`): são scripts clássicos que compartilham variáveis globais, e o Biome os lê como módulos isolados. As 89 sugestões de `style/useTemplate` só saem com `npx biome check --write --unsafe .`, revisando o diff.
+Os helpers `requireElement` e `requireClosest` (`src/shared/lib/dom.ts`) e `tests/support/box.ts` substituem o `!` depois de `querySelector`. O `sync.js` e o `shell.js` seguem fora de algumas regras (`biome.jsonc`): são scripts clássicos que compartilham variáveis globais.
 
 ### Avisos do Steiger
 

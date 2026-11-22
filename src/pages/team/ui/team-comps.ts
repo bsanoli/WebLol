@@ -1,18 +1,18 @@
 // Composições nossas e adversárias: criar, trocar, renomear, duplicar, excluir e a barra de confronto.
-import { compositionPreviewHTML } from "./composition-preview"
-import { askName, confirmAction } from "@/shared/ui/dialog-controls"
+import { askName } from "@/shared/ui/dialog-controls"
 import { createCompositionCopy } from "../model/composition"
 import { enemiesOf, isEnemy, oursOf, settleOwner } from "../model/composition-side"
-import { blank, setChampions, uid, type Composition, type DraftLane, type DraftSide } from "../model/local-state"
 import {
-  addMatchup,
-  detachMissingComps,
-  findMatchup,
-  matchupsOfComp,
-  matchupTitle,
-  oppositeSideOf,
-} from "../model/matchups"
-import { normalizeOpggLink, opggOf, setOpgg, writeTactic } from "../model/tactics"
+  blank,
+  compositionPreview,
+  setChampions,
+  uid,
+  type Composition,
+  type DraftLane,
+  type DraftSide,
+} from "../model/local-state"
+import { addMatchup, findMatchup, matchupsOfComp, matchupTitle, oppositeSideOf } from "../model/matchups"
+import { opggOf } from "../model/tactics"
 import type { Matchup } from "../model/matchups"
 import { deleteComp, editOpggLink, focusMatchup, handleRenameTo, renameComp } from "./team-comp-edits"
 import { mountMatchupBar } from "./matchup-bar"
@@ -25,7 +25,6 @@ import {
   cur,
   compById,
   hasUndo,
-  img,
   S,
   save,
   clearUndo,
@@ -41,7 +40,7 @@ const matchupItem = (c: Composition, side: DraftSide) => ({
   id: c.id,
   name: c.name,
   title: c.name,
-  preview: compositionPreviewHTML(c, img),
+  preview: compositionPreview(c),
   side,
   champions: [...Object.values(c.lanes).flat(), ...c.bans],
 })
@@ -191,28 +190,28 @@ export function keepOurCompositionInDraft() {
   }
 }
 export function newComp(owner: "ours" | "enemy" = "ours") {
-  const enemy = owner === "enemy",
-    count = (enemy ? enemiesOf(S.comps) : oursOf(S.comps)).length + 1
-  const faceIt = enemy && S.view === "draft" && !isEnemy(cur())
-  const name = enemy ? `Adversária ${count}` : `Comp ${count}`
+  const isEnemyOwner = owner === "enemy",
+    count = (isEnemyOwner ? enemiesOf(S.comps) : oursOf(S.comps)).length + 1
+  const shouldFaceIt = isEnemyOwner && S.view === "draft" && !isEnemy(cur())
+  const name = isEnemyOwner ? `Adversária ${count}` : `Comp ${count}`
   const c = blank(name)
   settleOwner(c, owner)
   S.comps.unshift(c)
   session.active = "top"
-  if (faceIt) {
+  if (shouldFaceIt) {
     faceEnemy(c.id)
     session.side = "rival"
   } else {
     S.cur = c.id
     S.curMatchup = null
     S.tacticsGeneral = false
-    if (!enemy) S.lastComp = c.id
+    if (!isEnemyOwner) S.lastComp = c.id
     session.side = "us"
   }
   save()
   hooks.renderAll()
   hooks.publishRoute("comps")
-  if (faceIt) {
+  if (shouldFaceIt) {
     focusMatchup("rival")
     toast(`Adversária "${name}" criada. Para trocar o nome, use o lápis no card do lado.`)
   } else
@@ -259,10 +258,10 @@ function duplicateComposition(id: string) {
 function moveComp(id: string) {
   const c = compById(id)
   if (!c) return
-  const toEnemy = !isEnemy(c)
-  settleOwner(c, toEnemy ? "enemy" : "ours")
+  const isToEnemy = !isEnemy(c)
+  settleOwner(c, isToEnemy ? "enemy" : "ours")
   touch(c)
-  if (toEnemy) {
+  if (isToEnemy) {
     if (id === S.cur) {
       const next = S.comps.find(x => x.id === S.lastComp && !isEnemy(x)) || oursOf(S.comps)[0]
       if (next) {
@@ -279,6 +278,6 @@ function moveComp(id: string) {
   save()
   hooks.renderAll()
   hooks.publishRoute("comps")
-  focusMatchup(toEnemy && boardEnemy()?.id === id ? "rival" : "ours")
-  toast(toEnemy ? `"${c.name}" agora é adversária` : `"${c.name}" agora é nossa`)
+  focusMatchup(isToEnemy && boardEnemy()?.id === id ? "rival" : "ours")
+  toast(isToEnemy ? `"${c.name}" agora é adversária` : `"${c.name}" agora é nossa`)
 }

@@ -11,6 +11,7 @@ import {
 import { isSide, sideLabel, mapRadius, type Side } from "../model/battlefield"
 import type { MapPoint } from "../model/faelights"
 import { mountWardSidePopover } from "./ward-side-popover"
+import { requireElement } from "@/shared/lib/dom"
 
 const directions = new Map<string, MapPoint>([
   ["ArrowLeft", [-1, 0]],
@@ -43,19 +44,19 @@ export function mountWardLayer({
   mountTeamSelect: (field: HTMLSelectElement) => void
   onPlaced: () => void
 }) {
-  const map = document.querySelector<HTMLElement>("#map")!
-  const viewport = document.querySelector<HTMLElement>("#map-viewport")!
-  const layer = map.querySelector<SVGSVGElement>("#map-wards")!
-  const realistic = map.querySelector("#mapimg")!
-  const spots = map.querySelector("#map-faelights")!
-  const cursor = map.querySelector<HTMLButtonElement>("#map-ward-cursor")!
-  const legend = document.querySelector<HTMLElement>("#map-ward-legend")!
-  const typeLegend = document.querySelector<HTMLElement>("#map-ward-types")!
-  const bonusLegend = document.querySelector<HTMLElement>("#map-ward-bonus-legend")!
-  const clear = document.querySelector<HTMLButtonElement>("#map-clear-wards")!
-  const typeSelect = document.querySelector<HTMLSelectElement>("#map-ward-type")!
-  const sideSelect = document.querySelector<HTMLSelectElement>("#map-ward-side")!
-  const targets = map.querySelector<HTMLElement>("#map-ward-targets")!
+  const map = requireElement<HTMLElement>("#map")
+  const viewport = requireElement<HTMLElement>("#map-viewport")
+  const layer = requireElement<SVGSVGElement>("#map-wards", map)
+  const realistic = requireElement<Element>("#mapimg", map)
+  const spots = requireElement<Element>("#map-faelights", map)
+  const cursor = requireElement<HTMLButtonElement>("#map-ward-cursor", map)
+  const legend = requireElement<HTMLElement>("#map-ward-legend")
+  const typeLegend = requireElement<HTMLElement>("#map-ward-types")
+  const bonusLegend = requireElement<HTMLElement>("#map-ward-bonus-legend")
+  const clear = requireElement<HTMLButtonElement>("#map-clear-wards")
+  const typeSelect = requireElement<HTMLSelectElement>("#map-ward-type")
+  const sideSelect = requireElement<HTMLSelectElement>("#map-ward-side")
+  const targets = requireElement<HTMLElement>("#map-ward-targets", map)
   const editor = mountWardSidePopover(viewport, changeSide)
   for (const { id, label, sight } of wardTypes) {
     const option = new Option(label, id)
@@ -115,15 +116,15 @@ export function mountWardLayer({
       )
       .join("")
     layer.innerHTML = `<g aria-hidden="true">${coverage}</g>${markers}`
-    const erasing = getTool() === "erase"
-    const interactive = !isPlaying() && (getTool() === "move" || erasing)
-    targets.innerHTML = interactive
+    const isErasing = getTool() === "erase"
+    const isInteractive = !isPlaying() && (getTool() === "move" || isErasing)
+    targets.innerHTML = isInteractive
       ? wards
           .map(
             ({ point: [x, y], type, side }, index) => `
       <button type="button" class="map-ward-target" data-ward-index="${index}" style="left:${x}%;top:${y}%"
-        aria-label="${erasing ? "Apagar" : "Mover"} ${type.label} — ${side ? sideLabel[side] : "Sem lado"}"
-        ${erasing ? "" : 'aria-haspopup="dialog" aria-controls="map-ward-popover" aria-expanded="false"'}
+        aria-label="${isErasing ? "Apagar" : "Mover"} ${type.label} — ${side ? sideLabel[side] : "Sem lado"}"
+        ${isErasing ? "" : 'aria-haspopup="dialog" aria-controls="map-ward-popover" aria-expanded="false"'}
         title="${type.label} — ${side ? sideLabel[side] : "Sem lado"}"></button>`,
           )
           .join("")
@@ -300,12 +301,12 @@ export function mountWardLayer({
       editor.close()
       selected = -1
     },
-    setTool(tool: string, focusCursor = false) {
-      const editing = tool === "ward"
-      cursor.hidden = !editing
-      map.classList.toggle("ward-editing", editing)
+    setTool(tool: string, shouldFocusCursor = false) {
+      const isEditing = tool === "ward"
+      cursor.hidden = !isEditing
+      map.classList.toggle("ward-editing", isEditing)
       cursor.setAttribute("aria-label", "Colocar ward no mapa")
-      if (editing && focusCursor) cursor.focus({ preventScroll: true })
+      if (isEditing && shouldFocusCursor) cursor.focus({ preventScroll: true })
     },
   }
 }

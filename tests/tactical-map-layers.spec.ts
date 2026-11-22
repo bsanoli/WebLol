@@ -1,5 +1,6 @@
 import { expect, test } from "@playwright/test"
-import { size, vision, visionButton, mapPoint, drag, waitForRealisticMap } from "./support/tactical-map"
+import { boxOf } from "./support/box"
+import { size, visionButton, mapPoint, drag, waitForRealisticMap } from "./support/tactical-map"
 
 test("Abre Camadas com ícones em 60% e mantém o tamanho escolhido", async ({ page }) => {
   await page.setViewportSize(size)
@@ -15,15 +16,15 @@ test("Abre Camadas com ícones em 60% e mantém o tamanho escolhido", async ({ p
   await expect(layers).toHaveAttribute("aria-selected", "true")
   await expect(slider).toHaveAttribute("aria-valuetext", "60%")
   expect(await scale()).toBe("0.6")
-  const initialWidth = (await champion.boundingBox())!.width
+  const initialWidth = (await boxOf(champion)).width
 
   await slider.press("ArrowRight")
   await expect(slider).toBeFocused()
   await expect(slider).toHaveAttribute("aria-valuetext", "61%")
   expect(await scale()).toBe("0.61")
 
-  const track = (await team.locator("[data-slot=slider-track]").boundingBox())!
-  const thumb = (await slider.boundingBox())!
+  const track = await boxOf(team.locator("[data-slot=slider-track]"))
+  const thumb = await boxOf(slider)
   await page.mouse.move(thumb.x + thumb.width / 2, thumb.y + thumb.height / 2)
   await page.mouse.down()
   await page.mouse.move(track.x + track.width * 0.43, track.y + track.height / 2, { steps: 6 })
@@ -32,7 +33,7 @@ test("Abre Camadas com ícones em 60% e mantém o tamanho escolhido", async ({ p
   await page.mouse.move(track.x + track.width - 1, track.y + track.height / 2, { steps: 6 })
   await page.mouse.up()
   await expect(slider).toHaveAttribute("aria-valuetext", "100%")
-  expect((await champion.boundingBox())!.width).toBeGreaterThan(initialWidth)
+  expect((await boxOf(champion)).width).toBeGreaterThan(initialWidth)
 
   await slider.press("ArrowLeft")
   await expect(slider).toHaveAttribute("aria-valuetext", "99%")
@@ -66,9 +67,9 @@ test("Edita o lado da ward junto à peça sem alterar a câmera", async ({ page 
   await team.getByRole("radio", { name: "Mover", exact: true }).click()
 
   const assertFits = async () => {
-    const area = (await viewport.boundingBox())!
-    const menu = (await editor.boundingBox())!
-    const camera = (await team.getByRole("group", { name: "Câmera do mapa" }).boundingBox())!
+    const area = await boxOf(viewport)
+    const menu = await boxOf(editor)
+    const camera = await boxOf(team.getByRole("group", { name: "Câmera do mapa" }))
     expect(menu.x).toBeGreaterThanOrEqual(area.x)
     expect(menu.y).toBeGreaterThanOrEqual(area.y)
     expect(menu.x + menu.width).toBeLessThanOrEqual(area.x + area.width)
@@ -113,7 +114,7 @@ test("Edita o lado da ward junto à peça sem alterar a câmera", async ({ page 
   await expect(editor).toBeHidden()
   await expect(exitFullscreen).toBeVisible()
 
-  const ward = (await blue.boundingBox())!
+  const ward = await boxOf(blue)
   await drag(page, { x: ward.x + ward.width / 2, y: ward.y + ward.height / 2 }, await mapPoint(team, 0.82, 0.75))
   await expect(editor).toBeHidden()
   await expect(team.locator(".ward-vision-range")).toHaveAttribute("cx", "82")

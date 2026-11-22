@@ -52,8 +52,9 @@ const icons = {
   lock: "Lock01",
 }
 
+const untitledIcons = new Map(Object.entries(UntitledIcons))
 const symbols = Object.entries(icons).map(([id, name]) => {
-  const Icon = UntitledIcons[name]
+  const Icon = untitledIcons.get(name)
   if (!Icon) throw new Error(`Untitled UI icon not found: ${name}`)
   const svg = renderToStaticMarkup(createElement(Icon))
   const end = svg.indexOf(">")

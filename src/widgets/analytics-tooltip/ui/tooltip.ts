@@ -40,11 +40,11 @@ function showDefinition(term: HTMLElement) {
   const { width, height } = definition.getBoundingClientRect()
   const right = document.documentElement.clientWidth - width - 8
   const beside = panel.right <= right ? panel.right : panel.left - width
-  const fitsBeside = beside >= 8 && beside <= right
-  const left = fitsBeside ? beside : anchor.left + (anchor.width - width) / 2
-  const top = fitsBeside || anchor.bottom + height <= innerHeight - 8 ? anchor.bottom : anchor.top - height
-  definition.style.left = Math.max(8, Math.min(left, right)) + "px"
-  definition.style.top = Math.max(8, Math.min(top, innerHeight - height - 8)) + "px"
+  const doesFitBeside = beside >= 8 && beside <= right
+  const left = doesFitBeside ? beside : anchor.left + (anchor.width - width) / 2
+  const top = doesFitBeside || anchor.bottom + height <= innerHeight - 8 ? anchor.bottom : anchor.top - height
+  definition.style.left = `${Math.max(8, Math.min(left, right))}px`
+  definition.style.top = `${Math.max(8, Math.min(top, innerHeight - height - 8))}px`
 }
 export function hideTip() {
   cancelPendingHover()
@@ -114,19 +114,19 @@ function showTip(target: HTMLElement, x = 0, y = 0) {
     const anchor = target.getBoundingClientRect()
     const above = Math.max(0, anchor.top - 8)
     const below = Math.max(0, innerHeight - anchor.bottom - 8)
-    const placeAbove = height <= above || (height > below && above >= below)
-    const availableHeight = placeAbove ? above : below
-    el.style.maxHeight = availableHeight + "px"
+    const shouldPlaceAbove = height <= above || (height > below && above >= below)
+    const availableHeight = shouldPlaceAbove ? above : below
+    el.style.maxHeight = `${availableHeight}px`
     const left = anchor.left + (anchor.width - width) / 2
-    const top = placeAbove ? anchor.top - Math.min(height, availableHeight) : anchor.bottom
-    el.style.left = Math.max(8, Math.min(left, document.documentElement.clientWidth - width - 8)) + "px"
-    el.style.top = Math.max(8, top) + "px"
+    const top = shouldPlaceAbove ? anchor.top - Math.min(height, availableHeight) : anchor.bottom
+    el.style.left = `${Math.max(8, Math.min(left, document.documentElement.clientWidth - width - 8))}px`
+    el.style.top = `${Math.max(8, top)}px`
     return
   }
   const left = x + 14 + width > innerWidth - 8 ? x - width - 14 : x + 14
   const top = y + 16 + height > innerHeight - 8 ? y - height - 12 : y + 16
-  el.style.left = Math.max(8, left) + "px"
-  el.style.top = Math.max(8, top) + "px"
+  el.style.left = `${Math.max(8, left)}px`
+  el.style.top = `${Math.max(8, top)}px`
 }
 // Warm Tooltip (React Bits): the first pointer tooltip waits, then nearby
 // targets open immediately while the group is warm.
@@ -143,7 +143,7 @@ function handleTooltipMouseMove(e: MouseEvent) {
   if (target && target === dismissedGameTip) return
   dismissedGameTip = undefined
   const gameTipOpen = tipTarget?.hasAttribute("data-game-tip") && !tipEl().hidden
-  if (!target || !target.hasAttribute("data-game-tip")) {
+  if (!target?.hasAttribute("data-game-tip")) {
     const nextWarmUntil = gameTipOpen ? performance.now() + warmWindow : warmUntil
     if (target) showTip(target, e.clientX, e.clientY)
     else hideTip()

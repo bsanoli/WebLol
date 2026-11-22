@@ -9,7 +9,7 @@ import {
   type SharedItem,
   withOwnMatchups,
 } from "@/shared/lib/team-changes"
-import { dbGet, dbSet, fb, ONLINE } from "@/shared/firestore"
+import { dbGet, dbSet, fb, IS_ONLINE } from "@/shared/firestore"
 import { STORAGE_KEYS } from "@/shared/config"
 import { normId } from "@/shared/lib/account-id"
 import { toast } from "@/shared/lib/dom"
@@ -63,7 +63,7 @@ function writeLocal(data: SharedData, official: Official) {
 }
 
 export async function sync(options: { reload?: boolean } = {}) {
-  if (!ONLINE) return uiHooks.setSync("Banco online não configurado", "warn")
+  if (!IS_ONLINE) return uiHooks.setSync("Banco online não configurado", "warn")
   if (!user() || user()?.solo || !session.team) {
     uiHooks.updateStatus()
     return

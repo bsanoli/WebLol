@@ -26,10 +26,10 @@ export function buildMatchups(champion: Champion, position: string) {
   const rank = (direction: number) => (a: Matchup, b: Matchup) =>
     direction * byWinRate(a, b) || b[1] - a[1] || a[0].localeCompare(b[0], "pt-BR")
   const games = opponents.reduce((total, [, count]) => total + count, 0)
-  const rows = (entries: Matchup[], hidden = false) =>
+  const rows = (entries: Matchup[], isHidden = false) =>
     entries
       .map(
-        ([opponent, count, wins]) => `<li${hidden ? " hidden" : ""}>
+        ([opponent, count, wins]) => `<li${isHidden ? " hidden" : ""}>
     <button type="button" class="build-matchup-row" data-build="${championSlug(opponent)}" data-build-lane="${esc(lane)}">
       <span class="build-context-name">${ico(opponent)}<span>${esc(opponent)}</span></span>
       <span class="build-context-count"><strong data-result="${wins * 2 > count ? "positive" : wins * 2 < count ? "negative" : "even"}">${((100 * wins) / count).toLocaleString("pt-BR", { maximumFractionDigits: 1 })}%</strong><small>${gameCount(count)}</small></span>
@@ -42,14 +42,14 @@ export function buildMatchups(champion: Champion, position: string) {
   const split = Math.ceil(ranked.length / 2)
   const best = ranked.slice(0, split)
   const worst = ranked.slice(split).sort(rank(1))
-  const group = (title: string, entries: Matchup[], collapsed = false) => {
+  const group = (title: string, entries: Matchup[], isCollapsed = false) => {
     if (!entries.length) return ""
     const extra = entries.slice(MATCHUP_PAGE_SIZE)
-    const paginated = DATASET.source === "soloq" && collapsed
-    return `${collapsed ? `<details class="build-matchup-group"><summary>${title}${iconMarkup("next")}</summary>` : `<h4>${title}</h4>`}
-      <ul class="build-context-list" aria-label="${title}">${rows(entries.slice(0, MATCHUP_PAGE_SIZE))}${paginated ? rows(extra, true) : ""}</ul>
+    const isPaginated = DATASET.source === "soloq" && isCollapsed
+    return `${isCollapsed ? `<details class="build-matchup-group"><summary>${title}${iconMarkup("next")}</summary>` : `<h4>${title}</h4>`}
+      <ul class="build-context-list" aria-label="${title}">${rows(entries.slice(0, MATCHUP_PAGE_SIZE))}${isPaginated ? rows(extra, true) : ""}</ul>
       ${
-        extra.length && paginated
+        extra.length && isPaginated
           ? `<button type="button" data-slot="button" data-variant="ghost" data-size="sm"
         class="build-matchup-more" data-show-matchup-page><span>Ver mais ${Math.min(MATCHUP_PAGE_SIZE, extra.length)}</span> ${iconMarkup("next")}</button>`
           : extra.length
@@ -57,12 +57,12 @@ export function buildMatchups(champion: Champion, position: string) {
         class="build-matchup-more" data-show-matchups aria-label="Ver mais adversários: ${title}">Ver mais adversários (${extra.length}) ${iconMarkup("next")}</button>
         <ul class="build-context-list" aria-label="Mais adversários: ${title}" hidden>${rows(extra)}</ul>`
             : ""
-      }${collapsed ? "</details>" : ""}`
+      }${isCollapsed ? "</details>" : ""}`
   }
   return `<h3>Confrontos</h3>
     <div class="build-context-champion">${ico(champion.name)}<div>
       <strong>${esc(champion.name)}</strong>
-      <span class="lane-label">${laneIconMarkup(lane, true)}${esc(lane)}${games ? `<span title="${esc(gameCount(games) + " " + DATASET.matchupGames)}">· ${gameCount(games)}</span>` : ""}</span>
+      <span class="lane-label">${laneIconMarkup(lane, true)}${esc(lane)}${games ? `<span title="${esc(`${gameCount(games)} ${DATASET.matchupGames}`)}">· ${gameCount(games)}</span>` : ""}</span>
     </div></div>
     ${
       opponents.length

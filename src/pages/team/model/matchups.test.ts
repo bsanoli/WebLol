@@ -17,6 +17,12 @@ import {
   type Matchup,
 } from "./matchups"
 
+/** Garante que o valor existe e o devolve sem `undefined`. */
+function defined<T>(value: T | null | undefined): T {
+  if (value === null || value === undefined) throw new Error("Valor ausente no teste")
+  return value
+}
+
 function comp(id: string, owner: "ours" | "enemy" = "ours"): Composition {
   return Object.assign(blank(id), { id, owner })
 }
@@ -61,8 +67,8 @@ describe("matchupTitle e allMatchups", () => {
     const list: Matchup[] = []
     const plain = addMatchup(list, { ours: "a", enemy: "b" })
     const named = addMatchup(list, { ours: "a", enemy: "b", name: "Final" })
-    expect(matchupTitle(findMatchup(comps, list, plain.id)!)).toBe("a x b")
-    expect(matchupTitle(findMatchup(comps, list, named.id)!)).toBe("Final")
+    expect(matchupTitle(defined(findMatchup(comps, list, plain.id)))).toBe("a x b")
+    expect(matchupTitle(defined(findMatchup(comps, list, named.id)))).toBe("Final")
   })
 
   it("mantém o confronto com o lado vazio quando a comp não existe mais", () => {
@@ -111,7 +117,7 @@ describe("resolveCompDrop", () => {
 
   it("sem confronto aberto, cria um com a comp solta no lado dela", () => {
     const list: Matchup[] = []
-    const result = resolveCompDrop(comps, list, null, "b", "red")!
+    const result = defined(resolveCompDrop(comps, list, null, "b", "red"))
     expect(result.created).toBe(true)
     expect(list).toHaveLength(1)
     expect(result.matchup).toMatchObject({ enemy: "b", side: "blue" })
@@ -120,7 +126,7 @@ describe("resolveCompDrop", () => {
   it("a adversária solta completa o confronto aberto sem trocar os lados", () => {
     const list: Matchup[] = []
     const open = addMatchup(list, { ours: "a", side: "blue" })
-    const result = resolveCompDrop(comps, list, open.id, "b", "red")!
+    const result = defined(resolveCompDrop(comps, list, open.id, "b", "red"))
     expect(result.created).toBe(false)
     expect(result.swapped).toBe(false)
     expect(open).toMatchObject({ ours: "a", enemy: "b", side: "blue" })
@@ -129,7 +135,7 @@ describe("resolveCompDrop", () => {
   it("soltar a nossa no lado da adversária inverte os lados", () => {
     const list: Matchup[] = []
     const open = addMatchup(list, { ours: "a", enemy: "b", side: "blue" })
-    const result = resolveCompDrop(comps, list, open.id, "a", "red")!
+    const result = defined(resolveCompDrop(comps, list, open.id, "a", "red"))
     expect(result.swapped).toBe(true)
     expect(open.side).toBe("red")
   })
@@ -137,7 +143,7 @@ describe("resolveCompDrop", () => {
   it("trocar a adversária pela outra mantém os lados", () => {
     const list: Matchup[] = []
     const open = addMatchup(list, { ours: "a", enemy: "b", side: "red" })
-    const result = resolveCompDrop(comps, list, open.id, "c", "blue")!
+    const result = defined(resolveCompDrop(comps, list, open.id, "c", "blue"))
     expect(result.swapped).toBe(false)
     expect(open).toMatchObject({ enemy: "c", side: "red" })
   })

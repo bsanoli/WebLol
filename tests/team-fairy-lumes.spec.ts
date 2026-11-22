@@ -1,4 +1,5 @@
 import { expect, test } from "@playwright/test"
+import { boxOf, required } from "./support/box"
 
 test("Um passo do mapa tático continua salvo após recarregar", async ({ page }) => {
   await page.goto("/camp.html")
@@ -71,9 +72,8 @@ test("Wards em Lumes exibem a visão do ponto e acompanham os passos da jogada",
   const island = light.getByRole("img", { name: "Arbusto ilhado do rio superior" })
   const jungle = light.getByRole("img", { name: "Selva azul perto do top" })
   const clickSpot = async (spot: typeof island) => {
-    const box = await spot.boundingBox()
-    expect(box).not.toBeNull()
-    await page.mouse.click(box!.x + box!.width / 2, box!.y + box!.height / 2)
+    const box = await boxOf(spot)
+    await page.mouse.click(box.x + box.width / 2, box.y + box.height / 2)
   }
 
   await add.press("Space")
@@ -132,7 +132,7 @@ test("Wards em Lumes exibem a visão do ponto e acompanham os passos da jogada",
   await page.getByRole("tab", { name: "Camadas" }).click()
   await additional.click()
   await expect(bonus).toHaveCount(1)
-  await expect(extraWard).toHaveAttribute("transform", position!)
+  await expect(extraWard).toHaveAttribute("transform", required(position, "transform da ward extra"))
   await expect(extraWard).toHaveAttribute("aria-label", /900 unidades/)
   await additional.click()
   await expect(bonus).toHaveCount(2)
@@ -164,7 +164,7 @@ test("O tipo da ward define seu alcance dentro e fora dos Lumes", async ({ page 
   }
   const place = async (x: number, y: number) => {
     if ((await add.getAttribute("aria-checked")) !== "true") await add.click()
-    const map = (await page.locator("#map").boundingBox())!
+    const map = await boxOf(page.locator("#map"))
     await page.mouse.click(map.x + map.width * x, map.y + map.height * y)
   }
   const wards = page.getByRole("group", { name: "Wards no mapa" })
@@ -186,7 +186,7 @@ test("O tipo da ward define seu alcance dentro e fora dos Lumes", async ({ page 
   await place(0.226, 0.225)
   await expect(range("control").last()).toHaveAttribute("r", String(1125 / 148.5))
   await expect(range("farsight")).toHaveCount(1)
-  await expect(bonus).toHaveAttribute("d", bonusShape!)
+  await expect(bonus).toHaveAttribute("d", required(bonusShape, "formato do bônus"))
 
   await page.reload()
   await page.getByRole("button", { name: "Mapa tático" }).click()

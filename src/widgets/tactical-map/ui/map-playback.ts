@@ -77,7 +77,7 @@ export function mountMapPlayback({
     M.transition = null
     M.frame = null
     M.playback = null
-    $("#splay").innerHTML = iconMarkup("play") + " Reproduzir"
+    $("#splay").innerHTML = `${iconMarkup("play")} Reproduzir`
   }
   async function playSteps() {
     if (M.playing) {
@@ -94,7 +94,7 @@ export function mountMapPlayback({
     M.playing = true
     layers.drawing.reset()
     layers.wardLayer.clearSelection()
-    $("#splay").innerHTML = iconMarkup("stop") + " Parar"
+    $("#splay").innerHTML = `${iconMarkup("stop")} Parar`
     p.live = snapshotFrame(p.steps[0])
     M.sel = 0
     actions.renderPlays(true)

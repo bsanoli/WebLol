@@ -1,4 +1,5 @@
 import { isSide, type MapPerspective, type Side } from "../model/battlefield"
+import { requireClosest, requireElement } from "@/shared/lib/dom"
 
 export type Tool = "move" | "hand" | "draw" | "freehand" | "erase" | "ward" | "wave-b" | "wave-r"
 
@@ -76,14 +77,15 @@ export function mountMapTools({
     disabled: boolean,
   ) => void
 }) {
-  const host = document.getElementById("map-modes")!
-  const viewport = document.getElementById("map-viewport")!
-  const workspace = document.getElementById("v-map")!
-  const toolbar = host.closest<HTMLElement>(".map-toolbar")!
-  const editToolbar = host.closest<HTMLElement>(".map-edit-toolbar")!
+  const host = requireElement("#map-modes")
+  const viewport = requireElement("#map-viewport")
+  const workspace = requireElement("#v-map")
+  const toolbar = requireClosest<HTMLElement>(host, ".map-toolbar")
+  const editToolbar = requireClosest<HTMLElement>(host, ".map-edit-toolbar")
   const panels = new Map<Tool, HTMLElement>()
   for (const { value, panel } of mapTools) {
-    if (panel) panels.set(value, document.getElementById(panel)!)
+    const element = panel ? document.getElementById(panel) : null
+    if (element) panels.set(value, element)
   }
   let openPanel: HTMLElement | undefined
   const panelButton = () => host.querySelector<HTMLElement>(`[data-tool="${currentTool()}"][aria-controls]`)
@@ -121,18 +123,14 @@ export function mountMapTools({
     event => {
       if (!openPanel || !(event.target instanceof Element)) return
       const listId = activeSelect()?.getAttribute("aria-controls")
-      const list = listId && document.getElementById(listId)
-      if (
-        openPanel.contains(event.target) ||
-        panelButton()?.contains(event.target) ||
-        (list && list.contains(event.target))
-      )
+      const list = listId ? document.getElementById(listId) : null
+      if (openPanel.contains(event.target) || panelButton()?.contains(event.target) || list?.contains(event.target))
         return
       showPanel()
     },
     true,
   )
-  const palette = document.getElementById("cols")!
+  const palette = requireElement("#cols")
   let renderedTool: Tool | undefined
   palette.innerHTML = colors
     .map(
@@ -142,8 +140,9 @@ export function mountMapTools({
     .join("")
   palette.onclick = event => {
     const button = (event.target as Element).closest<HTMLButtonElement>("[data-color]")
-    if (!button || !canEdit()) return
-    chooseColor(button.dataset.color!)
+    const color = button?.dataset.color
+    if (!button || !color || !canEdit()) return
+    chooseColor(color)
     palette.querySelectorAll("[data-color]").forEach(swatch => {
       swatch.setAttribute("aria-pressed", String(swatch === button))
     })
@@ -219,9 +218,9 @@ export function mountMapTools({
       showPanel(panels.get(tool))
       renderedTool = tool
     }
-    document.getElementById("map-arrowhead-option")!.hidden = tool !== "freehand"
-    document.getElementById("map-colors-title")!.textContent = tool === "freehand" ? "Cor do traço" : "Cor da seta"
-    document.getElementById("map-wave-options")!.hidden = !waveToolSide(tool)
+    requireElement("#map-arrowhead-option").hidden = tool !== "freehand"
+    requireElement("#map-colors-title").textContent = tool === "freehand" ? "Cor do traço" : "Cor da seta"
+    requireElement("#map-wave-options").hidden = !waveToolSide(tool)
     return tool
   }
 
@@ -275,18 +274,18 @@ export function mountMapDisclosures() {
 }
 
 export function mountMapSidebar(workspace: HTMLElement) {
-  const layout = workspace.querySelector<HTMLElement>("#mapw")!
-  const button = workspace.querySelector<HTMLButtonElement>("#map-panel-toggle")!
-  const sidebar = workspace.querySelector<HTMLElement>("#map-sidebar")!
+  const layout = requireElement<HTMLElement>("#mapw", workspace)
+  const button = requireElement<HTMLButtonElement>("#map-panel-toggle", workspace)
+  const sidebar = requireElement<HTMLElement>("#map-sidebar", workspace)
   const compact = window.matchMedia("(width < 1000px)")
-  function setOpen(open: boolean) {
-    layout.toggleAttribute("data-panel-open", open)
-    button.setAttribute("aria-expanded", String(open))
+  function setOpen(isOpen: boolean) {
+    layout.toggleAttribute("data-panel-open", isOpen)
+    button.setAttribute("aria-expanded", String(isOpen))
   }
   button.onclick = () => {
-    const open = !layout.hasAttribute("data-panel-open")
-    setOpen(open)
-    if (open) sidebar.focus({ preventScroll: true })
+    const isOpen = !layout.hasAttribute("data-panel-open")
+    setOpen(isOpen)
+    if (isOpen) sidebar.focus({ preventScroll: true })
   }
   compact.addEventListener("change", () => setOpen(false))
   workspace.addEventListener(

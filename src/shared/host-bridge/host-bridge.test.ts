@@ -1,8 +1,8 @@
 import { afterEach, describe, expect, it, vi } from "vitest"
 import {
   fromHost,
-  hostCanManageTeam,
-  hostHasCaptainAccess,
+  canHostManageTeam,
+  hasHostCaptainAccess,
   hostImages,
   hostTeamName,
   navigateHost,
@@ -20,17 +20,17 @@ afterEach(() => vi.unstubAllGlobals())
 describe("host-bridge", () => {
   it("devolve os valores de reserva quando a tela roda sozinha", () => {
     stubWindow(null)
-    expect(hostHasCaptainAccess()).toBe(false)
-    expect(hostCanManageTeam()).toBe(false)
+    expect(hasHostCaptainAccess()).toBe(false)
+    expect(canHostManageTeam()).toBe(false)
     expect(hostTeamName()).toBe("")
     expect(hostImages()).toBeNull()
   })
 
   it("lê o que o app principal expõe", () => {
-    const host = { captainAccess: () => true, canManageTeam: () => true, ["TEAM_NAME"]: () => "Fraldinha" }
+    const host = { captainAccess: () => true, canManageTeam: () => true, TEAM_NAME: () => "Fraldinha" }
     stubWindow(host)
-    expect(hostHasCaptainAccess()).toBe(true)
-    expect(hostCanManageTeam()).toBe(true)
+    expect(hasHostCaptainAccess()).toBe(true)
+    expect(canHostManageTeam()).toBe(true)
     expect(hostTeamName()).toBe("Fraldinha")
   })
 

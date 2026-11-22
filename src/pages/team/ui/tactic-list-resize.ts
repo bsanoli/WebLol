@@ -56,12 +56,12 @@ export function mountTacticListResize() {
       apply(tabs, handle, height)
     }
     const end = () => {
-      const moved = height !== startHeight
+      const hasMoved = height !== startHeight
       handle.classList.remove("dragging")
       handle.removeEventListener("pointermove", move)
       handle.removeEventListener("pointerup", end)
       handle.removeEventListener("pointercancel", end)
-      if (moved) commit(height)
+      if (hasMoved) commit(height)
     }
     handle.addEventListener("pointermove", move)
     handle.addEventListener("pointerup", end)

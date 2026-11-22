@@ -10,7 +10,20 @@ import { normalizeOpggLink, setOpgg } from "../model/tactics"
 import { $, plays, S, save, toast } from "./team-store"
 
 type SavedPlay = { id?: string; live?: unknown; steps?: unknown }
-type SavedComposition = Record<string, any>
+type Draft = ReturnType<typeof blank>
+type SavedComposition = {
+  id?: string
+  name?: string
+  notes?: string
+  laneNotes?: Draft["laneNotes"]
+  draft?: Draft["draft"]
+  updated?: number
+  bans?: unknown
+  lanes?: Record<string, unknown>
+  owner?: string
+  tacticTeam?: string
+  opgg?: unknown
+}
 
 export function downloadTeamBackup() {
   const blob = new Blob(
@@ -56,7 +69,7 @@ async function importTeamBackup(file: File, afterImport: () => void) {
     ],
   )
   if (!choice) return
-  const replace = choice === "replace"
+  const isReplace = choice === "replace"
   const ids = new Map<string, string>()
   const clean = comps.map(saved => {
     const c = compositionFromSaved(saved) as SavedComposition
@@ -66,7 +79,7 @@ async function importTeamBackup(file: File, afterImport: () => void) {
     if (c.draft) b.draft = c.draft
     b.updated = c.updated || Date.now()
     for (const slot of SLOT_LIST) setChampions(b, slot.k, asNames(slot.k === "ban" ? c.bans : c.lanes?.[slot.k]))
-    b.id = replace ? c.id || b.id : b.id
+    b.id = isReplace ? c.id || b.id : b.id
     if (c.id) ids.set(c.id, b.id)
     if (c.owner === "enemy" || c.owner === "ours" || c.tacticTeam === "enemy")
       settleOwner(b, c.owner === "ours" ? "ours" : "enemy")
@@ -76,7 +89,7 @@ async function importTeamBackup(file: File, afterImport: () => void) {
   // Confrontos acompanham as comps; ao juntar, comps e confrontos ganham ids novos para não colidir.
   const importedMatchups: Matchup[] = sanitizeMatchups(migrated.matchups)
     .map(m => {
-      const made: Matchup = { ...m, id: replace ? m.id : uid() }
+      const made: Matchup = { ...m, id: isReplace ? m.id : uid() }
       const ours = m.ours && ids.get(m.ours),
         enemy = m.enemy && ids.get(m.enemy)
       if (ours) made.ours = ours
@@ -86,15 +99,15 @@ async function importTeamBackup(file: File, afterImport: () => void) {
       return made
     })
     .filter(m => m.ours || m.enemy)
-  S.matchups = replace ? importedMatchups : [...importedMatchups, ...S.matchups]
-  S.comps = replace ? clean : [...clean, ...S.comps]
+  S.matchups = isReplace ? importedMatchups : [...importedMatchups, ...S.matchups]
+  S.comps = isReplace ? clean : [...clean, ...S.comps]
   S.cur = S.comps[0].id
   S.curMatchup = null
   if (Array.isArray(data.plays)) {
     const imported = (data.plays as SavedPlay[])
-      .filter(p => p && p.live && Array.isArray(p.steps))
-      .map(p => ({ ...p, id: replace ? p.id || uid() : uid() }))
-    S.plays = replace ? imported : [...plays(), ...imported]
+      .filter(p => p?.live && Array.isArray(p.steps))
+      .map(p => ({ ...p, id: isReplace ? p.id || uid() : uid() }))
+    S.plays = isReplace ? imported : [...plays(), ...imported]
     plays()
   }
   afterImport()

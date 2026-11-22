@@ -104,7 +104,7 @@ export function mountBattlefield({
   const detectedLane = get("map-wave-detected")
   const viewport = get("map-viewport")
   let keyboardPoint: MapPoint = [50, 50]
-  let showTowers = false
+  let areTowersShown = false
   let drag: { index: number; wave: Wave; pointer: number; start: MapPoint; moved: boolean } | undefined
 
   const at = ([x, y]: MapPoint) => `left:${x}%;top:${y}%`
@@ -123,7 +123,7 @@ export function mountBattlefield({
           wave,
           index,
         ) => `<button type="button" class="map-piece map-wave" data-side="${wave.side}" data-wave-index="${index}"
-      style="${at(positions.get(waveKey(wave))!)}" aria-label="Wave — ${laneLabel[wave.lane]} — ${sideLabel[wave.side]}" aria-description="Grupo de seis minions" title="Wave — ${laneLabel[wave.lane]} — ${sideLabel[wave.side]}"
+      style="${at(positions.get(waveKey(wave)) ?? wavePosition(wave, style))}" aria-label="Wave — ${laneLabel[wave.lane]} — ${sideLabel[wave.side]}" aria-description="Grupo de seis minions" title="Wave — ${laneLabel[wave.lane]} — ${sideLabel[wave.side]}"
       ${interactive || (canEdit() && getTool() === "erase") ? "" : "disabled"}><img class="map-wave-caster" src="assets/lol/hud/${casterPortrait[wave.side]}" alt=""></button>`,
       )
       .join("")
@@ -132,10 +132,10 @@ export function mountBattlefield({
 
   function renderTowers(frame = read()) {
     const interactive = canEdit() && getTool() === "move"
-    const teamVision = getPerspective() !== "all"
+    const isTeamVision = getPerspective() !== "all"
     const { style } = wardScene()
     const activeTowers = towers.filter(tower => !frame.destroyedTowers?.includes(tower.id))
-    get("map-tower-ranges").innerHTML = showTowers
+    get("map-tower-ranges").innerHTML = areTowersShown
       ? activeTowers
           .map(
             tower =>
@@ -143,16 +143,16 @@ export function mountBattlefield({
           )
           .join("")
       : ""
-    towersHost.toggleAttribute("data-team-vision", teamVision)
+    towersHost.toggleAttribute("data-team-vision", isTeamVision)
     towersHost.innerHTML =
-      showTowers || teamVision
+      areTowersShown || isTeamVision
         ? towers
             .map(tower => {
-              const destroyed = frame.destroyedTowers?.includes(tower.id)
-              const state = destroyed ? "Destruída" : "Ativa"
-              const action = destroyed ? "Restaurar torre" : "Destruir torre"
+              const isDestroyed = frame.destroyedTowers?.includes(tower.id)
+              const state = isDestroyed ? "Destruída" : "Ativa"
+              const action = isDestroyed ? "Restaurar torre" : "Destruir torre"
               return `<button type="button" class="map-piece map-tower" data-side="${tower.side}" data-tower="${tower.id}"
-       style="${at(tower.point)}" aria-pressed="${Boolean(destroyed)}" aria-label="${tower.name}" aria-description="${state}${interactive ? `. ${action}` : ""}"
+       style="${at(tower.point)}" aria-pressed="${Boolean(isDestroyed)}" aria-label="${tower.name}" aria-description="${state}${interactive ? `. ${action}` : ""}"
        title="${tower.name} · ${state}${interactive ? ` · ${action}` : ""}"
        ${interactive ? "" : "disabled"}><img src="assets/lol/hud/tower.png" alt=""></button>`
             })
@@ -167,8 +167,8 @@ export function mountBattlefield({
 
   towersHost.addEventListener("click", event => {
     const button = (event.target as Element).closest<HTMLButtonElement>("[data-tower]")
-    if (!button || !canEdit() || getTool() !== "move") return
-    const id = button.dataset.tower!
+    const id = button?.dataset.tower
+    if (!button || !id || !canEdit() || getTool() !== "move") return
     toggleTower(id)
     towersHost.querySelector<HTMLElement>(`[data-tower="${id}"]`)?.focus({ preventScroll: true })
   })
@@ -195,7 +195,7 @@ export function mountBattlefield({
       onPlaced()
     }
   }
-  function showPreview(target: MapPoint, fromKeyboard = false) {
+  function showPreview(target: MapPoint, isFromKeyboard = false) {
     const side = waveToolSide(getTool())
     if (!isSide(side)) return
     const { style } = wardScene()
@@ -206,8 +206,8 @@ export function mountBattlefield({
     preview.hidden = false
     const label = `Rota detectada: ${laneLabel[wave.lane]}`
     if (detectedLane.textContent !== label) detectedLane.textContent = label
-    cursor.hidden = !fromKeyboard
-    if (fromKeyboard) cursor.style.cssText = at(target)
+    cursor.hidden = !isFromKeyboard
+    if (isFromKeyboard) cursor.style.cssText = at(target)
   }
   function hidePreview() {
     preview.hidden = cursor.hidden = true
@@ -333,11 +333,12 @@ export function mountBattlefield({
           : undefined
     if (!button) return
     const targetName = button.getAttribute("aria-label") ?? ""
-    if (kind === "tower") {
-      const id = button.dataset.tower!
-      const destroyed = read().destroyedTowers?.includes(id)
+    const towerId = button.dataset.tower
+    if (kind === "tower" && towerId) {
+      const id = towerId
+      const isDestroyed = read().destroyedTowers?.includes(id)
       return {
-        label: destroyed ? "Restaurar" : "Marcar como destruída",
+        label: isDestroyed ? "Restaurar" : "Marcar como destruída",
         targetName,
         marker: button,
         run: () => {
@@ -366,14 +367,14 @@ export function mountBattlefield({
     contextAction,
     renderTowers,
     get showTowers() {
-      return showTowers
+      return areTowersShown
     },
-    toggleTowers(enabled: boolean) {
-      showTowers = enabled
+    toggleTowers(isEnabled: boolean) {
+      areTowersShown = isEnabled
       renderTowers()
     },
-    setWavePreview(active: boolean, focus: boolean) {
-      if (!active) {
+    setWavePreview(isActive: boolean, shouldFocus: boolean) {
+      if (!isActive) {
         hidePreview()
         viewport.removeAttribute("aria-description")
         return
@@ -382,7 +383,7 @@ export function mountBattlefield({
         "aria-description",
         "Use as setas para mover o cursor e Enter para colocar a wave na rota mais próxima.",
       )
-      if (focus) viewport.focus({ preventScroll: true })
+      if (shouldFocus) viewport.focus({ preventScroll: true })
     },
   }
 }

@@ -1,5 +1,6 @@
 import { iconMarkup } from "@/shared/ui/icon"
 import type { MapPoint } from "../model/faelights"
+import { requireClosest, requireElement } from "@/shared/lib/dom"
 
 export function mountMapCamera(
   viewport: HTMLElement,
@@ -8,22 +9,22 @@ export function mountMapCamera(
   getTool: () => string,
   onMove: () => void,
 ) {
-  const zoomIn = document.querySelector<HTMLButtonElement>("#map-zoom-in")!
-  const zoomOut = document.querySelector<HTMLButtonElement>("#map-zoom-out")!
-  const fit = document.querySelector<HTMLButtonElement>("#map-zoom-fit")!
-  const value = document.querySelector<HTMLOutputElement>("#map-zoom-value")!
-  const workspace = document.querySelector<HTMLElement>("#v-map")!
-  const layout = workspace.querySelector<HTMLElement>("#mapw")!
-  const fullscreen = document.querySelector<HTMLButtonElement>("#map-fullscreen")!
-  const toolbar = workspace.querySelector<HTMLElement>(".map-toolbar")!
-  const editToolbar = toolbar.querySelector<HTMLElement>(".map-edit-toolbar")!
-  const stageBar = toolbar.querySelector<HTMLElement>(".map-stage-bar")!
-  const stage = viewport.closest<HTMLElement>(".map-stage")!
+  const zoomIn = requireElement<HTMLButtonElement>("#map-zoom-in")
+  const zoomOut = requireElement<HTMLButtonElement>("#map-zoom-out")
+  const fit = requireElement<HTMLButtonElement>("#map-zoom-fit")
+  const value = requireElement<HTMLOutputElement>("#map-zoom-value")
+  const workspace = requireElement<HTMLElement>("#v-map")
+  const layout = requireElement<HTMLElement>("#mapw", workspace)
+  const fullscreen = requireElement<HTMLButtonElement>("#map-fullscreen")
+  const toolbar = requireElement<HTMLElement>(".map-toolbar", workspace)
+  const editToolbar = requireElement<HTMLElement>(".map-edit-toolbar", toolbar)
+  const stageBar = requireElement<HTMLElement>(".map-stage-bar", toolbar)
+  const stage = requireClosest<HTMLElement>(viewport, ".map-stage")
   let zoom = 1
   let x = 0,
     y = 0
-  let space = false
-  let overMap = false
+  let isSpaceHeld = false
+  let isOverMap = false
   let pointerControl: Element | null = null
   let wheelFrame = 0
   let drag: { id: number; x: number; y: number; startX: number; startY: number } | undefined
@@ -34,16 +35,16 @@ export function mountMapCamera(
 
   function alignToolbar() {
     const fitInset = Math.max(0, (viewport.clientWidth - stage.clientHeight) / 2)
-    const sharedRow =
+    const isRowShared =
       stageBar.offsetTop < editToolbar.offsetTop + editToolbar.offsetHeight &&
       editToolbar.offsetTop < stageBar.offsetTop + stageBar.offsetHeight
     const gap = Number.parseFloat(getComputedStyle(toolbar).columnGap)
-    const boundary = sharedRow ? stageBar.offsetLeft - gap : toolbar.clientWidth
+    const boundary = isRowShared ? stageBar.offsetLeft - gap : toolbar.clientWidth
     const room = boundary - editToolbar.offsetLeft - editToolbar.offsetWidth
     layout.style.setProperty("--map-toolbar-inset", `${Math.max(0, Math.min(fitInset, room))}px`)
   }
 
-  function render(redraw = true) {
+  function render(shouldRedraw = true) {
     const width = viewport.clientWidth,
       height = viewport.clientHeight
     const board = Math.min(width, height) * zoom
@@ -53,14 +54,14 @@ export function mountMapCamera(
     value.value = `${Math.round(zoom * 100)}%`
     zoomOut.disabled = zoom === 1
     zoomIn.disabled = zoom === 3
-    if (redraw && board) onChange()
+    if (shouldRedraw && board) onChange()
   }
 
   function setZoom(
     next: number,
     anchorX = viewport.clientWidth / 2,
     anchorY = viewport.clientHeight / 2,
-    redraw = true,
+    shouldRedraw = true,
   ) {
     if (next === zoom) return
     onMove()
@@ -71,7 +72,7 @@ export function mountMapCamera(
     x = anchorX - (anchorX - x) * scale
     y = anchorY - (anchorY - y) * scale
     zoom = next
-    render(redraw)
+    render(shouldRedraw)
   }
   const step = (delta: number) => setZoom(Math.max(1, Math.min(3, zoom + delta)))
   zoomIn.onclick = () => step(0.25)
@@ -97,15 +98,15 @@ export function mountMapCamera(
     { passive: false },
   )
 
-  function setSpace(pressed: boolean) {
-    space = pressed
-    viewport.classList.toggle("map-temporary-hand", pressed)
+  function setSpace(isPressed: boolean) {
+    isSpaceHeld = isPressed
+    viewport.classList.toggle("map-temporary-hand", isPressed)
   }
   viewport.addEventListener("pointerenter", () => {
-    overMap = true
+    isOverMap = true
   })
   viewport.addEventListener("pointerleave", () => {
-    overMap = false
+    isOverMap = false
   })
   const controlSelector = 'button, a[href], summary, [role="button"], [role="radio"]'
   document.addEventListener(
@@ -124,7 +125,7 @@ export function mountMapCamera(
       event.metaKey ||
       event.defaultPrevented ||
       !workspace.classList.contains("on") ||
-      (!overMap && event.target !== viewport)
+      (!isOverMap && event.target !== viewport)
     )
       return
     const target = event.target instanceof Element ? event.target : null
@@ -147,7 +148,7 @@ export function mountMapCamera(
   })
   window.addEventListener("blur", () => {
     setSpace(false)
-    overMap = false
+    isOverMap = false
     pointerControl = null
   })
   viewport.addEventListener("keydown", event => {
@@ -155,7 +156,7 @@ export function mountMapCamera(
     if (event.key === "+" || event.key === "=") step(0.25)
     if (event.key === "-") step(-0.25)
     if (event.key === "0") setZoom(1)
-    if (getTool() !== "hand" && !space) return
+    if (getTool() !== "hand" && !isSpaceHeld) return
     const dx = event.key === "ArrowLeft" ? 32 : event.key === "ArrowRight" ? -32 : 0
     const dy = event.key === "ArrowUp" ? 32 : event.key === "ArrowDown" ? -32 : 0
     if (dx || dy) {
@@ -169,7 +170,7 @@ export function mountMapCamera(
   viewport.addEventListener(
     "pointerdown",
     event => {
-      if (event.button !== 0 || (getTool() !== "hand" && !space)) return
+      if (event.button !== 0 || (getTool() !== "hand" && !isSpaceHeld)) return
       onMove()
       event.preventDefault()
       event.stopPropagation()

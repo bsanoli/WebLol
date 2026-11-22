@@ -98,6 +98,7 @@ export function TabsList({
     }
   }, [update])
   useLayoutEffect(() => {
+    if (!active) return
     reveal(list.current?.querySelector<HTMLElement>('[role="tab"][data-state="active"]') ?? null)
   }, [active, reveal])
   const scrollTabs = (direction: number) =>

@@ -5,7 +5,7 @@ import { handleEnemyChampionDrop, compOf } from "./team-comps"
 import { renderEditor } from "./team-editor"
 import { renderGrid } from "./team-grid"
 import { session } from "./team-session"
-import { $, compById, cur, eventTarget, S, save, toast, touch } from "./team-store"
+import { $, compById, cur, eventTarget, save, toast, touch } from "./team-store"
 import type { DraftLane } from "../model/local-state"
 
 // arrastar e soltar
@@ -28,7 +28,7 @@ $("#editor").addEventListener("dragover", e => {
   const ln = eventTarget(e).closest<HTMLElement>("[data-comp-id] [data-l],[data-empty-rival][data-l]")
   if (!ln || !drag) return
   e.preventDefault()
-  document.querySelectorAll(".drop").forEach(x => x !== ln && x.classList.remove("drop"))
+  for (const x of document.querySelectorAll(".drop")) if (x !== ln) x.classList.remove("drop")
   ln.classList.add("drop")
 })
 $("#editor").addEventListener("dragleave", e => {
@@ -74,8 +74,8 @@ $("#editor").addEventListener("drop", e => {
     idx = arr.indexOf(over.dataset.n ?? "")
     const r = over.getBoundingClientRect()
     // Na coluna da esquerda da visão Lane a linha é espelhada: a ordem corre da direita para a esquerda.
-    const mirrored = !!over.closest(".tx-pos-col.left")
-    if (mirrored ? e.clientX < r.left + r.width / 2 : e.clientX > r.left + r.width / 2) idx++
+    const isMirrored = !!over.closest(".tx-pos-col.left")
+    if (isMirrored ? e.clientX < r.left + r.width / 2 : e.clientX > r.left + r.width / 2) idx++
   }
   arr.splice(idx, 0, n)
   setChampions(c, to, arr)
@@ -91,9 +91,9 @@ $("#editor").addEventListener("drop", e => {
 document.addEventListener("dragend", e => {
   const d = drag
   drag = null
-  document.querySelectorAll(".drop,.dragging").forEach(x => x.classList.remove("drop", "dragging"))
-  const inside = e.clientX > 0 && e.clientY > 0 && e.clientX < innerWidth && e.clientY < innerHeight
-  if (!d || !d.from || !d.comp || !inside) return
+  for (const x of document.querySelectorAll(".drop,.dragging")) x.classList.remove("drop", "dragging")
+  const isInside = e.clientX > 0 && e.clientY > 0 && e.clientX < innerWidth && e.clientY < innerHeight
+  if (!d?.from || !d.comp || !isInside) return
   const c = compById(d.comp)
   if (!c || !championsOf(c, d.from).includes(d.n)) return
   const lane = d.from,

@@ -1,4 +1,5 @@
 import { expect, type FrameLocator, type Page } from "@playwright/test"
+import { boxOf } from "./box"
 
 export const size = { width: 1600, height: 1000 }
 
@@ -12,7 +13,7 @@ export async function choose(team: Page | FrameLocator, field: string, option: s
 }
 
 export async function mapPoint(team: Page | FrameLocator, x: number, y: number) {
-  const map = (await team.locator("#map").boundingBox())!
+  const map = await boxOf(team.locator("#map"))
   return { x: map.x + map.width * x, y: map.y + map.height * y }
 }
 

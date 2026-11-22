@@ -23,8 +23,8 @@ export function InlineName({
   onClose: () => void
 }) {
   const [value, setValue] = useState(item.name)
-  const done = (save: boolean) => {
-    if (save) onSave(value)
+  const done = (shouldSave: boolean) => {
+    if (shouldSave) onSave(value)
     onClose()
   }
   return (
@@ -101,9 +101,9 @@ export function CompPicker({
     document.addEventListener(CHOOSE_EVENT, handleRequest)
     return () => document.removeEventListener(CHOOSE_EVENT, handleRequest)
   }, [kind, setOpen])
-  const handleOpenChange = (next: boolean) => {
-    setOpen(next)
-    if (!next) {
+  const handleOpenChange = (shouldOpen: boolean) => {
+    setOpen(shouldOpen)
+    if (!shouldOpen) {
       setAnchor(null)
       setPending(null)
     }
@@ -146,7 +146,7 @@ export function CompPicker({
           </small>
           <b title={selected?.title}>{selected ? selected.title : noneLabel}</b>
         </span>
-        {selected && <Preview html={selected.preview} />}
+        {selected && <Preview names={selected.preview} />}
         <span className="sr-only">Trocar</span>
         <ChevronDown className="matchup-chevron" aria-hidden="true" />
       </PopoverTrigger>
@@ -158,7 +158,7 @@ export function CompPicker({
         onCloseAutoFocus={keepFocusOutsideFrame}
       >
         {pending ? (
-          <div className="matchup-branch" role="group" aria-label={`Trocar por ${pending.title}`}>
+          <fieldset className="matchup-branch" aria-label={`Trocar por ${pending.title}`}>
             <p>
               Trocar por <b>{pending.title}</b>
             </p>
@@ -173,7 +173,7 @@ export function CompPicker({
             <button type="button" className="matchup-item" onClick={() => finish(pending.id, "new")}>
               <b>Criar novo confronto</b>
             </button>
-          </div>
+          </fieldset>
         ) : (
           <>
             <Input
@@ -185,7 +185,7 @@ export function CompPicker({
               autoFocus
               onChange={event => setQuery(event.target.value)}
             />
-            <div className="matchup-list" role="group" aria-label={label}>
+            <fieldset className="matchup-list" aria-label={label}>
               {!q && (
                 <button type="button" className="matchup-item new" onClick={create}>
                   <b>
@@ -213,7 +213,7 @@ export function CompPicker({
                     : "Nenhuma composição ainda."}
                 </p>
               )}
-            </div>
+            </fieldset>
           </>
         )}
       </PopoverContent>

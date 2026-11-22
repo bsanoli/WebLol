@@ -23,11 +23,6 @@
   min-height: var(--wl-button-height);
   color: var(--ink);
 }
-.comp-filters > label input,
-.comp-filters .comp-picker-trigger {
-  height: var(--comp-control-height);
-  min-height: var(--comp-control-height);
-}
 .comp-stage-trigger {
   width: 100%;
 }
@@ -81,11 +76,13 @@
   text-align: left;
   white-space: normal;
 }
+.comp-filters > label input,
+.comp-filters .comp-picker-trigger {
+  height: var(--comp-control-height);
+  min-height: var(--comp-control-height);
+}
 .comp-picker-trigger .icon {
   flex: none;
-}
-.comp-picker-trigger[aria-expanded="true"] > .icon {
-  transform: rotate(180deg);
 }
 .comp-picker-value {
   display: flex;
@@ -295,6 +292,9 @@
 .comp-filter-chips .icon {
   width: 14px;
   height: 14px;
+}
+.comp-picker-trigger[aria-expanded="true"] > .icon {
+  transform: rotate(180deg);
 }
 .comp-count {
   display: flex;

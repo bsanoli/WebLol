@@ -72,9 +72,9 @@ export function IntentNavbarMenu({
       }, 220)
     }
   }
-  function toggle(open: boolean) {
+  function toggle(shouldOpen: boolean) {
     stopTimers()
-    setMode(open ? "press" : null)
+    setMode(shouldOpen ? "press" : null)
   }
 
   return (

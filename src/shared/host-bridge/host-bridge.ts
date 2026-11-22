@@ -41,7 +41,7 @@ export type HostGlobals = {
 
 /** O que o app principal chama na janela do iframe. */
 export type FrameHandlers = {
-  applyWebLolRoute?: (route: string[], params?: URLSearchParams) => Promise<boolean | void> | boolean | void
+  applyWebLolRoute?: (route: string[], params?: URLSearchParams) => unknown
   weblolTeamChanged?: () => void
 }
 
@@ -72,8 +72,8 @@ export const hostImages = (): HostImages | null => {
 }
 
 export const hostDraft = (): HostDraft | null => fromHost(host => host.weblolDraft?.(), null)
-export const hostHasCaptainAccess = () => !!fromHost(host => host.captainAccess?.(), false)
-export const hostCanManageTeam = () => !!fromHost(host => host.canManageTeam?.(), false)
+export const hasHostCaptainAccess = () => !!fromHost(host => host.captainAccess?.(), false)
+export const canHostManageTeam = () => !!fromHost(host => host.canManageTeam?.(), false)
 export const hostTeamName = () => fromHost(host => host.TEAM_NAME?.(), "")
 
 /** Pede ao app principal para abrir um destino (rota, cópia de link). Fora de um iframe, não faz nada. */

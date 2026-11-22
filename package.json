@@ -10,7 +10,7 @@
     "prebuild": "node scripts/build-icons.mjs",
     "pages:prepare": "npm run build && node scripts/prepare-pages.mjs",
     "preview": "vite preview --host 127.0.0.1",
-    "lint": "biome check .",
+    "lint": "biome check --error-on-warnings .",
     "lint:fix": "biome check --write .",
     "format": "biome format --write .",
     "check:architecture": "node scripts/check-architecture.mjs",

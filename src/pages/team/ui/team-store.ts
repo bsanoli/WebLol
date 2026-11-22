@@ -20,7 +20,7 @@ export const $ = <T extends HTMLElement = HTMLElement>(selector: string) => docu
 const ESCAPES: Record<string, string> = { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }
 export const esc = (value: unknown) => String(value ?? "").replace(/[&<>"]/g, char => ESCAPES[char])
 
-const initials = (name: string) =>
+export const initials = (name: string) =>
   name
     .replace(/[^A-Za-z ]/g, "")
     .split(" ")
@@ -60,15 +60,15 @@ export const boardSide = (): DraftSide => activeMatchup()?.side ?? "blue"
 export const localSave = $<HTMLDetailsElement>("#local-save")
 
 export const SAVE_RESULT_EVENT = "weblol:save-result"
-let lastSaveFailed = false
-export const saveFailed = () => lastSaveFailed
+let didLastSaveFail = false
+export const saveFailed = () => didLastSaveFail
 
 export function save() {
   try {
     localStorage.setItem(KEY, JSON.stringify(teamStateToSaved(S)))
-    lastSaveFailed = false
+    didLastSaveFail = false
   } catch {
-    lastSaveFailed = true
+    didLastSaveFail = true
   }
   document.dispatchEvent(new Event(SAVE_RESULT_EVENT))
 }
@@ -90,7 +90,7 @@ export function clearUndo() {
   if (undoAction) setUndo(null)
 }
 /** Desfaz a última ação desfazível; devolve `false` quando não há nada a desfazer. */
-export function runUndo() {
+export function didRunUndo() {
   const action = undoAction
   if (!action) return false
   undoAction = null
@@ -114,7 +114,7 @@ export function toast(message: string, undo?: () => void) {
     button.setAttribute("data-size", "sm")
     button.addEventListener("click", () => {
       // O botão do aviso desfaz a própria ação, mesmo que outra tenha sido registrada depois.
-      if (undoAction === undo) runUndo()
+      if (undoAction === undo) didRunUndo()
       else {
         undo()
         element.classList.remove("on")

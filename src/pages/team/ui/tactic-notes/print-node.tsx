@@ -23,17 +23,17 @@ function PrintView({ node, updateAttributes, deleteNode, selected, extension }: 
   storeRef.current = store
 
   useEffect(() => {
-    let alive = true
+    let isAlive = true
     void storeRef.current.load(shown, attempt > 0).then(value => {
-      if (alive) setData(value)
+      if (isAlive) setData(value)
     })
     return () => {
-      alive = false
+      isAlive = false
     }
   }, [shown, attempt])
 
   // Só o autor tem o print na fila de pendentes (a fila fica no navegador dele).
-  const mine = data === null && !!store.isPending?.(shown)
+  const isMine = data === null && !!store.isPending?.(shown)
 
   const handleRetry = async () => {
     if (busy) return
@@ -62,7 +62,7 @@ function PrintView({ node, updateAttributes, deleteNode, selected, extension }: 
     <NodeViewWrapper className={`tx-print-node${selected ? " is-selected" : ""}`} data-drag-handle>
       {data === null ? (
         <div className="tx-print-missing" contentEditable={false}>
-          {mine ? (
+          {isMine ? (
             <>
               <p>Não enviado ao time. O print está só neste navegador e os outros ainda não o veem.</p>
               <Button type="button" variant="outline" size="sm" onClick={() => void handleRetry()} disabled={busy}>

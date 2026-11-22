@@ -37,7 +37,7 @@ export type FirebaseSession = {
   }
 }
 
-export const ONLINE = true
+export const IS_ONLINE = true
 let session: FirebaseSession | null = null
 
 /** Sessão já aberta, ou `null` enquanto ninguém chamou `fb()`. */
@@ -69,9 +69,9 @@ export async function dbGet(collection: string, id: string) {
   return snapshot.exists() ? snapshot.data() : null
 }
 
-export async function dbSet(collection: string, id: string, data: unknown, merge?: boolean) {
+export async function dbSet(collection: string, id: string, data: unknown, shouldMerge?: boolean) {
   const { db, fs } = await fb()
-  await fs.setDoc(fs.doc(db, collection, id), data, merge ? { merge: true } : {})
+  await fs.setDoc(fs.doc(db, collection, id), data, shouldMerge ? { merge: true } : {})
 }
 
 export async function dbList(collection: string, field?: string, value?: unknown) {

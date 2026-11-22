@@ -1,5 +1,6 @@
 import { expect, test, type Page } from "@playwright/test"
-import { size, vision, visionButton, choose, mapPoint, drag, waitForRealisticMap } from "./support/tactical-map"
+import { boxOf, required } from "./support/box"
+import { size, visionButton, choose, mapPoint, drag, waitForRealisticMap } from "./support/tactical-map"
 
 test("Destrói e restaura torres nas visões de equipe sem ligar o alcance de ataque", async ({ page }) => {
   await page.setViewportSize(size)
@@ -114,7 +115,7 @@ test("Projeta as waves nas curvas do mapa realista e mantém o progresso salvo",
     [top, 0.49, 0.085],
     [bot, 0.47, 0.91],
   ] as const) {
-    const marker = (await wave.boundingBox())!
+    const marker = await boxOf(wave)
     await drag(page, { x: marker.x + marker.width / 2, y: marker.y + marker.height / 2 }, await mapPoint(page, x, y))
     await expectPoint(wave, x * 100, y * 100)
   }
@@ -150,8 +151,8 @@ test("Move wards e waves, alterna a visão aliada e restaura o estado das torres
   await page.getByRole("radio", { name: "Mover", exact: true }).click()
   const ward = page.getByRole("button", { name: "Mover Sentinela Invisível — Vermelho" })
   await expect(ward).toBeVisible()
-  const lightBox = (await light.boundingBox())!
-  const wardBox = (await ward.boundingBox())!
+  const lightBox = await boxOf(light)
+  const wardBox = await boxOf(ward)
   await drag(
     page,
     { x: wardBox.x + wardBox.width / 2, y: wardBox.y + wardBox.height / 2 },
@@ -202,7 +203,7 @@ test("Move wards e waves, alterna a visão aliada e restaura o estado das torres
   await page.getByRole("button", { name: "Desfazer", exact: true }).click()
   await expect(waves).toHaveCount(6)
   const wave = page.getByRole("button", { name: "Wave — Topo — Azul" })
-  const waveBox = (await wave.boundingBox())!
+  const waveBox = await boxOf(wave)
   await drag(
     page,
     { x: waveBox.x + waveBox.width / 2, y: waveBox.y + waveBox.height / 2 },
@@ -242,10 +243,10 @@ test("Move wards e waves, alterna a visão aliada e restaura o estado das torres
 
   await page.getByRole("button", { name: "Selecionar passo 1" }).click()
   await expect(tower).toHaveAttribute("aria-pressed", "false")
-  await expect(wave).toHaveAttribute("style", topWave!)
+  await expect(wave).toHaveAttribute("style", required(topWave, "estilo da onda no passo 1"))
   await page.getByRole("button", { name: "Reproduzir" }).click()
   await expect(tower).toHaveAttribute("aria-pressed", "true")
-  await expect(wave).toHaveAttribute("style", movedWave!)
+  await expect(wave).toHaveAttribute("style", required(movedWave, "estilo da onda movida"))
   await expect(page.getByRole("button", { name: "Reproduzir" })).toBeVisible()
 
   await visionButton(page, "geral").click()

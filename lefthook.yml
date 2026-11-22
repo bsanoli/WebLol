@@ -4,7 +4,7 @@ pre-commit:
   jobs:
     - name: biome
       glob: "*.{js,mjs,cjs,ts,tsx,jsx,json,jsonc,css}"
-      run: node node_modules/@biomejs/biome/bin/biome check --write --no-errors-on-unmatched --files-ignore-unknown=true --colors=off {staged_files}
+      run: node node_modules/@biomejs/biome/bin/biome check --write --error-on-warnings --no-errors-on-unmatched --files-ignore-unknown=true --colors=off {staged_files}
       stage_fixed: true
 
 pre-push:

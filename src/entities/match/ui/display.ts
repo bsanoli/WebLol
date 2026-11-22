@@ -52,7 +52,7 @@ export function teamLogo(team: string) {
     : ""
 }
 
-export const pct = (x: number) => Math.round(x * 100) + "%"
+export const pct = (x: number) => `${Math.round(x * 100)}%`
 export const wrPill = (w: number, n: number) => {
   if (!n) return '<span class="wr" aria-label="Sem jogos">—</span>'
   const r = w / n

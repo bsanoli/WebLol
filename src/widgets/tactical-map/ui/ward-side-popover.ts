@@ -1,16 +1,17 @@
 import { clamp, isSide, type Side } from "../model/battlefield"
+import { requireElement } from "@/shared/lib/dom"
 
 export function mountWardSidePopover(viewport: HTMLElement, changeSide: (side?: Side) => void) {
-  const popover = document.querySelector<HTMLElement>("#map-ward-popover")!
-  const camera = document.querySelector<HTMLElement>(".map-camera-controls")!
+  const popover = requireElement<HTMLElement>("#map-ward-popover")
+  const camera = requireElement<HTMLElement>(".map-camera-controls")
   const options = [...popover.querySelectorAll<HTMLButtonElement>("[data-ward-side]")]
   let trigger: HTMLButtonElement | undefined
   const isOpen = () => popover.matches(":popover-open")
 
-  function close(restoreFocus = false) {
+  function close(shouldRestoreFocus = false) {
     const previousTrigger = trigger
     if (isOpen()) popover.hidePopover()
-    if (restoreFocus) previousTrigger?.focus({ preventScroll: true })
+    if (shouldRestoreFocus) previousTrigger?.focus({ preventScroll: true })
   }
 
   popover.addEventListener("beforetoggle", event => {

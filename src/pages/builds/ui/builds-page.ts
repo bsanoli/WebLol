@@ -1,5 +1,5 @@
 import { createRoot, type Root } from "react-dom/client"
-import { buildGameCount, buildsTable, buildMatchesQuery, sortBuildRows } from "./builds-table"
+import { buildGameCount, buildsTable, doesBuildMatchQuery, sortBuildRows } from "./builds-table"
 import { buildLaneHighlights, buildMatchups } from "./build-matchups"
 import { hydrateBuildTimelines } from "./load-build-timeline"
 import { buildOpponentOptions } from "../model/build-statistics"
@@ -15,7 +15,7 @@ import { $ } from "@/shared/lib/dom"
 import { buildControlRoots, disposeBuildControls, mountSkillOptions } from "./build-controls"
 import { createBuildContextMotion } from "./build-context-motion"
 import { createBuildDetailPanels } from "./build-detail-panels"
-import { handleMatchupPageClick, handleMoreMatchupsClick, handleTimelineViewClick } from "./build-list-interactions"
+import { didHandleListClick } from "./build-list-interactions"
 import { championCard } from "./build-card"
 import { renderBuildsResults, renderBuildsView } from "./builds-view"
 
@@ -27,7 +27,7 @@ let opponentSelectRoot: Root | undefined
 let buildFiltersRoot: Root | undefined
 type BuildFilters = Record<string, string | number | null | undefined>
 type BuildRouteDeps = {
-  publishWorlds: (id: "builds", parts: string[], filters: BuildFilters, replace?: boolean) => void
+  publishWorlds: (id: "builds", parts: string[], filters: BuildFilters, shouldReplace?: boolean) => void
   buildsPath: (source: string, parts: string[], filters: BuildFilters) => string
 }
 
@@ -65,13 +65,13 @@ function wireBuilds({ publishWorlds, buildsPath }: BuildRouteDeps) {
     minJogos: buildMinGames,
     adversario: buildChampion && buildOpponent,
   })
-  const publish = (replace = false) => publishWorlds("builds", parts(), filters(), replace)
+  const publish = (shouldReplace = false) => publishWorlds("builds", parts(), filters(), shouldReplace)
   $(".build-source-options").onclick = event =>
     switchBuildSource(event, source => {
       const expanded = bc.querySelector<HTMLElement>('.build-toggle[aria-expanded="true"]')?.dataset.buildToggle
       return buildsPath(source, expanded ? [expanded] : parts(), filters())
     })
-  const draw = (restoreOpponentFocus = false, normalizeRoute = false) => {
+  const draw = (shouldRestoreOpponentFocus = false, shouldNormalizeRoute = false) => {
     const f = q.value.trim().toLowerCase()
     disposeBuildControls()
     opponentSelectRoot?.unmount()
@@ -80,7 +80,7 @@ function wireBuilds({ publishWorlds, buildsPath }: BuildRouteDeps) {
     clearAll.setAttribute("aria-disabled", String(!hasFilters()))
     const matches = buildChampion
       ? []
-      : list.filter(c => games(c) > 0 && games(c) >= buildMinGames && buildMatchesQuery(c, bLane, f))
+      : list.filter(c => games(c) > 0 && games(c) >= buildMinGames && doesBuildMatchQuery(c, bLane, f))
     const countLabel = matches.length
       ? `${matches.length.toLocaleString("pt-BR")} ${matches.length === 1 ? "campeão" : "campeões"}`
       : ""
@@ -101,13 +101,13 @@ function wireBuilds({ publishWorlds, buildsPath }: BuildRouteDeps) {
     const opponents = champion ? buildOpponentOptions(champion, position) : []
     if (buildOpponent && !opponents.some(opponent => opponent.slug === buildOpponent)) {
       buildOpponent = ""
-      if (normalizeRoute) publish(true)
+      if (shouldNormalizeRoute) publish(true)
     }
     if (champion && buildOpponent) {
       loadOpponentEncounters(
         champion.name,
         () => `${buildChampion}/${buildOpponent}`,
-        () => draw(restoreOpponentFocus),
+        () => draw(shouldRestoreOpponentFocus),
       )
     }
     const context = champion ? buildMatchups(champion, position) : buildLaneHighlights(matches, bLane)
@@ -149,7 +149,7 @@ function wireBuilds({ publishWorlds, buildsPath }: BuildRouteDeps) {
       opponentSelectRoot = mountOpponentSelect(opponentSelect, {
         opponents,
         value: buildOpponent,
-        restoreFocus: restoreOpponentFocus,
+        restoreFocus: shouldRestoreOpponentFocus,
         onChange: value => {
           if (champion) discardFailedEncounters(champion.name)
           buildOpponent = value
@@ -193,7 +193,7 @@ function wireBuilds({ publishWorlds, buildsPath }: BuildRouteDeps) {
       animateMatchupGroupToggle(matchupSummary)
       return
     }
-    if (handleMatchupPageClick(target) || handleMoreMatchupsClick(target) || handleTimelineViewClick(target)) return
+    if (didHandleListClick(target)) return
     const sort = target.closest<HTMLElement>(".builds-table thead button[data-k]")
     if (sort) {
       const k = sort.dataset.k ?? ""

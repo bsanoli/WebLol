@@ -55,7 +55,7 @@ function createSuggestionMenu() {
       option.append(icon, item.name)
       option.addEventListener("mousedown", event => event.preventDefault())
       option.addEventListener("click", () => choose(i))
-      element!.append(option)
+      element?.append(option)
     })
     element.setAttribute("aria-activedescendant", `tx-mention-option-${index}`)
   }

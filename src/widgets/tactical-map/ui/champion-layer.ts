@@ -46,16 +46,16 @@ export function mountChampionLayer({
     for (const { button, id } of tokens) {
       const point = positions[id]
       if (!point) continue
-      button.style.left = point[0] + "%"
-      button.style.top = point[1] + "%"
+      button.style.left = `${point[0]}%`
+      button.style.top = `${point[1]}%`
     }
   }
 
   function render() {
     for (const { button, side, role } of tokens) {
       const name = champion(side, role)
-      button.innerHTML = (name ? portrait(name) : "") + `<span class="map-lane-icon">${laneIconMarkup(role)}</span>`
-      button.title = `${side === "b" ? "Azul" : "Vermelho"} ${RN[role]}${name ? " - " + name : ""}`
+      button.innerHTML = `${name ? portrait(name) : ""}<span class="map-lane-icon">${laneIconMarkup(role)}</span>`
+      button.title = `${side === "b" ? "Azul" : "Vermelho"} ${RN[role]}${name ? ` - ${name}` : ""}`
       button.setAttribute("aria-label", button.title)
     }
     place()
@@ -65,9 +65,9 @@ export function mountChampionLayer({
     const token = (event.target as Element).closest<HTMLButtonElement>(".tok")
     const direction = directions.get(event.key)
     if (!token || !direction || !canMove() || event.ctrlKey || event.altKey || event.metaKey) return
-    const id = token.dataset.t!,
-      current = read()[id]
-    if (!current) return
+    const id = token.dataset.t
+    const current = id ? read()[id] : undefined
+    if (!id || !current) return
     event.preventDefault()
     const step = event.shiftKey ? 5 : 1
     const next: MapPoint = [clamp(current[0] + direction[0] * step), clamp(current[1] + direction[1] * step)]
@@ -76,8 +76,9 @@ export function mountChampionLayer({
 
   map.addEventListener("pointerdown", event => {
     const token = (event.target as Element).closest<HTMLButtonElement>(".tok")
-    if (!token || !canMove() || event.button !== 0) return
-    drag = { id: token.dataset.t!, pointer: event.pointerId, start: point(event) }
+    const id = token?.dataset.t
+    if (!token || !id || !canMove() || event.button !== 0) return
+    drag = { id, pointer: event.pointerId, start: point(event) }
     token.setPointerCapture(event.pointerId)
     token.focus({ preventScroll: true })
     event.preventDefault()
@@ -111,8 +112,8 @@ export function mountChampionLayer({
   return {
     render,
     place,
-    setInteractive(enabled: boolean) {
-      for (const { button } of tokens) button.tabIndex = enabled ? 0 : -1
+    setInteractive(isEnabled: boolean) {
+      for (const { button } of tokens) button.tabIndex = isEnabled ? 0 : -1
     },
   }
 }

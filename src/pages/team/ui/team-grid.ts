@@ -35,14 +35,14 @@ export function renderTarget() {
   const comp = target()
   const ours = cur()
   if (!comp || !ours) return
-  const enemySide = comp !== ours
+  const isEnemySide = comp !== ours
   for (const button of $("#grid").querySelectorAll<HTMLElement>(".ch"))
     button.setAttribute("aria-pressed", String(championsOf(comp, session.active).includes(button.dataset.n ?? "")))
   // Qual slot recebe o campeão: no lado adversário, os picks seguem a ordem dele.
   const oursSide = boardSide(),
-    side = enemySide ? oppositeSide(oursSide) : oursSide
+    side = isEnemySide ? oppositeSide(oursSide) : oursSide
   const team = side[0].toUpperCase()
-  const order = enemySide ? enemyOrder(comp, oursSide) : draftOf(ours).order[side]
+  const order = isEnemySide ? enemyOrder(comp, oursSide) : draftOf(ours).order[side]
   const position = SLOT_LIST.find(slot => slot.k === session.active)
   const slot =
     session.active === "ban" || !position
@@ -62,7 +62,11 @@ export function renderGrid() {
   const query = normalize($<HTMLInputElement>("#search").value)
   const sort = $<HTMLSelectElement>("#sort").value
   const where: Record<string, SlotInfo[]> = {}
-  for (const slot of SLOT_LIST) for (const name of championsOf(comp, slot.k)) (where[name] ||= []).push(slot)
+  for (const slot of SLOT_LIST)
+    for (const name of championsOf(comp, slot.k)) {
+      where[name] ||= []
+      where[name].push(slot)
+    }
   const list = CH.filter(
     champion =>
       (!query || normalize(champion.n).includes(query)) && (role === "all" || champion.r.includes(role as DraftLane)),

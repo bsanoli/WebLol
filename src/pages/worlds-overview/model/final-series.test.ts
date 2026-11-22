@@ -1,13 +1,13 @@
 import { describe, expect, it } from "vitest"
 import { confirmedFinalSeries } from "./final-series"
 
-const game = (g: number, blueWon: boolean, b = "T1", r = "G2") => ({
+const game = (g: number, didBlueWin: boolean, b = "T1", r = "G2") => ({
   series: "W",
   stage: "Final",
   game: g,
   blue: b,
   red: r,
-  blueWon,
+  blueWon: didBlueWin,
 })
 
 describe("confirmedFinalSeries", () => {

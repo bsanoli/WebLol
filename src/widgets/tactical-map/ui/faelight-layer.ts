@@ -1,4 +1,5 @@
 import { faelights } from "../model/faelights"
+import { requireElement } from "@/shared/lib/dom"
 
 export function mountFaelightLayer({
   getState,
@@ -17,14 +18,14 @@ export function mountFaelightLayer({
   ) => void
   onAvailabilityChange: () => void
 }) {
-  const layer = document.querySelector<HTMLElement>("#map-faelights")!
-  const toggle = document.querySelector<HTMLElement>("#map-faelight-toggle")!
-  const additionalToggle = document.querySelector<HTMLElement>("#map-faelight-additional-toggle")!
-  const legend = document.querySelector<HTMLElement>("#map-faelight-additional-legend")!
-  const fullLegend = document.querySelector<HTMLElement>("#map-faelight-legend")!
-  let previewPlacement = false
+  const layer = requireElement<HTMLElement>("#map-faelights")
+  const toggle = requireElement<HTMLElement>("#map-faelight-toggle")
+  const additionalToggle = requireElement<HTMLElement>("#map-faelight-additional-toggle")
+  const legend = requireElement<HTMLElement>("#map-faelight-additional-legend")
+  const fullLegend = requireElement<HTMLElement>("#map-faelight-legend")
+  let isPlacementPreview = false
   const renderVisibility = () => {
-    layer.hidden = getState().showFaelights !== true && !previewPlacement
+    layer.hidden = getState().showFaelights !== true && !isPlacementPreview
   }
 
   for (const { location, minimap, realistic, additional } of faelights) {
@@ -41,15 +42,15 @@ export function mountFaelightLayer({
   }
 
   function renderAdditional() {
-    const visible = getState().showFaelights === true
-    const additional = getState().additionalFaelights === true
-    layer.toggleAttribute("data-additional", additional)
-    layer.toggleAttribute("data-additional-visible", additional && visible)
-    legend.hidden = !additional || !visible
+    const isVisible = getState().showFaelights === true
+    const hasAdditional = getState().additionalFaelights === true
+    layer.toggleAttribute("data-additional", hasAdditional)
+    layer.toggleAttribute("data-additional-visible", hasAdditional && isVisible)
+    legend.hidden = !hasAdditional || !isVisible
     mountMapSwitch(
       additionalToggle,
       "Lumes adicionais",
-      additional && visible,
+      hasAdditional && isVisible,
       next => {
         if (getState().showFaelights !== true) return
         getState().additionalFaelights = next
@@ -57,15 +58,15 @@ export function mountFaelightLayer({
         renderAdditional()
         onAvailabilityChange()
       },
-      !visible,
+      !isVisible,
     )
   }
 
   function renderToggle() {
-    const checked = getState().showFaelights === true
+    const isChecked = getState().showFaelights === true
     renderVisibility()
-    fullLegend.hidden = !checked
-    mountMapSwitch(toggle, "Mostrar Lumes Feéricos", checked, next => {
+    fullLegend.hidden = !isChecked
+    mountMapSwitch(toggle, "Mostrar Lumes Feéricos", isChecked, next => {
       getState().showFaelights = next
       save()
       renderToggle()
@@ -80,8 +81,8 @@ export function mountFaelightLayer({
       renderToggle()
       renderAdditional()
     },
-    preview(preview: boolean) {
-      previewPlacement = preview
+    preview(isPreviewed: boolean) {
+      isPlacementPreview = isPreviewed
       renderVisibility()
     },
   }

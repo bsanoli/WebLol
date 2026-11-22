@@ -1,5 +1,5 @@
 import { ensureTeamPlays } from "@/entities/tactical-play"
-import { $ } from "@/shared/lib/dom"
+import { $, requireElement } from "@/shared/lib/dom"
 import { readWaves } from "../model/battlefield"
 import { readWards } from "../model/wards"
 import { mountBattlefield } from "./battlefield-layer"
@@ -101,7 +101,7 @@ export function mountTacticalMap<Comp extends MapComposition>(deps: MapDeps<Comp
     battlefield.renderSight(visibleFrame())
   })
 
-  renderMapFallback(document.querySelector<SVGSVGElement>("#schem")!)
+  renderMapFallback(requireElement<SVGSVGElement>("#schem"))
   const map = $("#map")
   mountChampionSize($("#map-champion-size"), map)
   const viewport = $("#map-viewport")
@@ -208,12 +208,12 @@ export function mountTacticalMap<Comp extends MapComposition>(deps: MapDeps<Comp
     mountToolGroup,
     chooseTool: tool => selectTool(tool, true),
   })
-  function selectTool(tool: Tool, focusCursor: boolean) {
+  function selectTool(tool: Tool, shouldFocusCursor: boolean) {
     M.tool = tool
     drawing.reset()
     wardLayer.clearSelection()
     layers.contextMenu.close()
-    drawMapTools(focusCursor)
+    drawMapTools(shouldFocusCursor)
     refreshMap()
     drawing.render()
   }
@@ -221,12 +221,12 @@ export function mountTacticalMap<Comp extends MapComposition>(deps: MapDeps<Comp
     selectTool("move", false)
     viewport.focus({ preventScroll: true })
   }
-  function drawMapTools(focusCursor = false) {
+  function drawMapTools(shouldFocusCursor = false) {
     const tool = renderToolControls()
     champions.setInteractive(tool === "move")
-    wardLayer.setTool(tool, focusCursor)
+    wardLayer.setTool(tool, shouldFocusCursor)
     layers.previewFaelights.preview(tool === "ward")
-    battlefield.setWavePreview(Boolean(waveToolSide(tool)), focusCursor)
+    battlefield.setWavePreview(Boolean(waveToolSide(tool)), shouldFocusCursor)
   }
   function refreshMap() {
     layers.contextMenu.close()

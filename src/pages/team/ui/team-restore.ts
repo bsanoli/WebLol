@@ -10,7 +10,8 @@ const idOf = (item: unknown) => (item as { id?: string } | undefined)?.id
 
 export function mountLocalRestore() {
   $("#clear-local").onclick = async () => {
-    let rawBase, base
+    let rawBase: string | null
+    let base: ReturnType<typeof parseOfficialBaseline>
     try {
       rawBase = localStorage.getItem(STORAGE_KEYS.officialBaseline)
       base = parseOfficialBaseline(rawBase)

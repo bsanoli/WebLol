@@ -39,12 +39,12 @@
   line-height: var(--rune-rate-height);
   font-variant-numeric: tabular-nums;
 }
-.rune-frequency-choice .is-selected + small {
-  color: var(--text);
-}
 .build-section h5 small {
   color: var(--muted);
   font-weight: 400;
+}
+.rune-frequency-choice .is-selected + small {
+  color: var(--text);
 }
 .build-more summary {
   width: fit-content;
