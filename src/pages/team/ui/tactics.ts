@@ -224,13 +224,7 @@ export function tacticsHTML(
     <button type="button" class="tx-scope-btn" data-tactic-general aria-pressed="${general}" title="Ideias de jogo que valem para qualquer composição"><b>Gerais</b></button></div>`
   const enemy = !general && !active && isEnemy(c)
   const title = general ? "Táticas gerais" : `Táticas · ${esc(active ? matchupTitle(active) : c.name)}`
-  const hint = general
-    ? "Ideias de jogo que valem para qualquer composição."
-    : active
-      ? ""
-      : enemy
-        ? "Como jogar contra esta composição: ameaças, picks a negar e como vencer as lutas."
-        : ""
+  const hint = enemy ? "Como jogar contra esta composição: ameaças, picks a negar e como vencer as lutas." : ""
   const body = tacticBoardHTML(c, general, active, boardView, { slots, img, esc, pickArt }, canUndo)
   const drawerToggle = `<button type="button" data-slot="button" data-variant="outline" data-size="sm" class="tx-drawer-toggle" data-tactic-drawer
     aria-expanded="${drawer}" aria-controls="tx-aside" title="${drawer ? "Esconder a lista de composições e o draft" : "Mostrar a lista de composições e o draft"}">${iconMarkup("next")}<span>Composições e draft</span></button>`
