@@ -25,6 +25,7 @@ Atualize o perfil em `docs/agentes/`. Os arquivos em `.codex/agents/` (TOML) e `
 | [weblol-padronizar](../.agents/skills/weblol-padronizar/SKILL.md) | Registrar regras, termos e decisões vindos de correções ou de `regra:`, `termo:` e `decisão:` |
 | [grill-me](../.agents/skills/grill-me/SKILL.md) | Entrevista para afiar um plano ou ideia. Só roda quando chamada pelo nome |
 | [grilling](../.agents/skills/grilling/SKILL.md) | A entrevista usada pela grill-me, em rodadas de perguntas com resposta recomendada |
+| [prototype](../.agents/skills/prototype/SKILL.md) | Montar variantes de uma peça de interface atrás de um seletor e promover a escolhida ([processo](sdlc.md#protótipos)). Só roda quando chamada pelo nome |
 | [feature-sliced-design](../.agents/skills/feature-sliced-design/SKILL.md) | Escolher fronteiras, APIs públicas e dependências entre slices |
 | [weblol-ui](../.agents/skills/weblol-ui/SKILL.md) | Implementar ou ajustar interfaces do WebLol |
 | [ui-refactor](../.agents/skills/ui-refactor/SKILL.md) | Reorganizar telas, hierarquia e componentes |
@@ -33,7 +34,7 @@ Atualize o perfil em `docs/agentes/`. Os arquivos em `.codex/agents/` (TOML) e `
 | [weblol-atualizar-soloq](../.agents/skills/weblol-atualizar-soloq/SKILL.md) | Atualizar os dados Solo/Duo dos profissionais ou regenerar o dataset |
 | [weblol-publicar](../.agents/skills/weblol-publicar/SKILL.md) | Preparar e publicar no GitHub Pages conforme a autorização |
 
-Edite a fonte em `.agents/skills/`. As skills `grill-me` e `grilling` vêm de [mattpocock/skills](https://github.com/mattpocock/skills) pelo `npx skills`, registradas em `skills-lock.json`. Se criar, renomear ou editar a descrição de uma skill, atualize e confira os adaptadores em `.claude/skills/`. O script mantém `disable-model-invocation: true` quando a fonte o declara:
+Edite a fonte em `.agents/skills/`. As skills `grill-me` e `grilling` vêm de [mattpocock/skills](https://github.com/mattpocock/skills), e a `prototype` de [emilkowalski/skills](https://github.com/emilkowalski/skills), todas pelo `npx skills` e registradas em `skills-lock.json`. Depois de instalar, apague o link simbólico que o instalador cria em `.claude/skills/` e rode o script de sincronização abaixo. Se criar, renomear ou editar a descrição de uma skill, atualize e confira os adaptadores em `.claude/skills/`. O script mantém `disable-model-invocation: true` quando a fonte o declara:
 
 ```sh
 node scripts/sincronizar-skills.mjs

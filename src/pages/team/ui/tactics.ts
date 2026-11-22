@@ -222,17 +222,14 @@ export function tacticsHTML(
   const scope = `<div class="tx-scope" role="group" aria-label="Tática aberta">
     <button type="button" class="tx-scope-btn" data-tactic-comp="${esc(c.id)}" aria-pressed="${!general}" title="Táticas da composição aberta">Esta composição</button>
     <button type="button" class="tx-scope-btn" data-tactic-general aria-pressed="${general}"><b>Gerais</b></button></div>`
-  const enemy = !general && !active && isEnemy(c)
   const title = general ? "Táticas gerais" : `Táticas · ${esc(active ? matchupTitle(active) : c.name)}`
-  const hint = enemy ? "Como jogar contra esta composição: ameaças, picks a negar e como vencer as lutas." : ""
   const body = tacticBoardHTML(c, general, active, boardView, { slots, img, esc, pickArt }, canUndo)
   const drawerToggle = `<button type="button" data-slot="button" data-variant="outline" data-size="sm" class="tx-drawer-toggle" data-tactic-drawer
     aria-expanded="${drawer}" aria-controls="tx-aside" title="${drawer ? "Esconder a lista de composições e o draft" : "Mostrar a lista de composições e o draft"}">${iconMarkup("next")}<span>Composições e draft</span></button>`
   return `<div class="tx${drawer ? "" : " drawer-closed"}"${asideWidth ? ` style="--tx-aside-w:${asideWidth}px"` : ""}>
     <section class="tx-write">
       <div class="tx-head">
-        <div class="tx-head-text"><h2 class="tx-title" id="tx-title">${title}</h2>
-        ${hint ? `<p class="tx-hint">${hint}</p>` : ""}</div>
+        <div class="tx-head-text"><h2 class="tx-title" id="tx-title">${title}</h2></div>
         ${teamToolsHTML(c, esc, active, general)}
         ${scope}
         ${drawerToggle}

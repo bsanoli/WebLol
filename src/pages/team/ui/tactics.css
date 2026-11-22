@@ -50,11 +50,6 @@
   text-overflow: ellipsis;
   white-space: nowrap;
 }
-.tx-hint {
-  margin: 0 0 4px;
-  color: var(--mut);
-  font-size: 12px;
-}
 
 .tx-aside {
   display: flex;
