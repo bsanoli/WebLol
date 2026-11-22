@@ -1,7 +1,7 @@
 // O que os iframes (Área do time, Builds, Worlds) leem da janela pai. Os nomes são o contrato de
 // `shared/host-bridge/host-bridge.ts`; só estes seis ficam no `window`.
 import type { HostGlobals } from "@/shared/host-bridge"
-import { canManageTeam, captainAccess, renderCaptainPanel, TEAM_NAME } from "../ui/captain-panel"
+import { canManageTeam, hasCaptainAccess, renderCaptainPanel, TEAM_NAME } from "../ui/captain-panel"
 import { IS_ONLINE } from "@/shared/firestore"
 import { itemName } from "@/shared/lib/team-changes"
 import { hostImages } from "./images"
@@ -17,9 +17,8 @@ function weblolDraft() {
 
 export function exposeHostGlobals() {
   const globals: HostGlobals = {
-    captainAccess,
+    captainAccess: hasCaptainAccess,
     canManageTeam,
-    // biome-ignore lint/style/useNamingConvention: nome fixado pelo contrato com os iframes
     TEAM_NAME,
     renderCaptainPanel,
     weblolImages: hostImages,

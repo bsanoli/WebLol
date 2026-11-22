@@ -17,12 +17,10 @@ const percent = new Intl.NumberFormat("pt-BR", { maximumFractionDigits: 0 })
 const number = new Intl.NumberFormat("pt-BR")
 const gamesPerPage = 5
 const rounds: Record<string, string> = {
-  // biome-ignore-start lint/style/useNamingConvention: chaves vindas da API de partidas
   QUARTERFINALS: "Quartas",
   SEMIFINALS: "Semifinal",
   FINAL: "Final",
   FINALS: "Final",
-  // biome-ignore-end lint/style/useNamingConvention: fim da exceção
 }
 
 function stageLabel(game: Game, player: Player) {

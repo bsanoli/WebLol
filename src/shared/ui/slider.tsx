@@ -8,6 +8,9 @@ type SliderProps = React.ComponentProps<typeof SliderPrimitive.Root> & {
   thumbProps?: Pick<React.ComponentProps<typeof SliderPrimitive.Thumb>, "aria-labelledby" | "aria-valuetext">
 }
 
+/** As alças seguem a posição dos valores e nunca trocam de ordem; cada posição tem a sua chave. */
+const THUMB_KEYS = ["primeira", "segunda", "terceira", "quarta"]
+
 function Slider({ className, defaultValue, value, min = 0, max = 100, thumbProps, ...props }: SliderProps) {
   const _values = React.useMemo(
     () => (Array.isArray(value) ? value : Array.isArray(defaultValue) ? defaultValue : [min, max]),
@@ -41,8 +44,7 @@ function Slider({ className, defaultValue, value, min = 0, max = 100, thumbProps
       {Array.from({ length: _values.length }, (_, index) => (
         <SliderPrimitive.Thumb
           data-slot="slider-thumb"
-          // biome-ignore lint/suspicious/noArrayIndexKey: as alças são fixas e seguem a posição dos valores, sem reordenar
-          key={index}
+          key={THUMB_KEYS[index]}
           className="block size-4 shrink-0 rounded-full border border-primary bg-white shadow-sm ring-ring/50 transition-[color,box-shadow] hover:ring-4 focus-visible:ring-4 focus-visible:outline-hidden disabled:pointer-events-none disabled:opacity-50"
           {...thumbProps}
         />

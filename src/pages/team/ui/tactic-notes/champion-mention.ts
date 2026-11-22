@@ -108,9 +108,7 @@ function createSuggestionMenu() {
 export function championMention(champions: NoteChampion[]) {
   const portraits = new Map(champions.map(ch => [ch.name, ch.portrait]))
   return Mention.configure({
-    // biome-ignore-start lint/style/useNamingConvention: opção da extensão Mention do TipTap
     HTMLAttributes: { class: "tx-mention" },
-    // biome-ignore-end lint/style/useNamingConvention: fim da exceção
     renderText: ({ node }) => `@${node.attrs.label ?? node.attrs.id}`,
     renderHTML: ({ options, node }) => {
       const name = String(node.attrs.label ?? node.attrs.id ?? "")

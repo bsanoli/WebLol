@@ -96,17 +96,9 @@ function App() {
 
   return (
     <>
-      {/* biome-ignore lint/a11y/useValidAnchor: o link de pular também move o foco para o conteúdo */}
-      <a
-        className="skip-link"
-        href="#screens"
-        onClick={event => {
-          event.preventDefault()
-          document.getElementById("screens")?.focus()
-        }}
-      >
+      <button type="button" className="skip-link" onClick={() => document.getElementById("screens")?.focus()}>
         Ir para o conteúdo
-      </a>
+      </button>
       <SiteHeader
         id="top"
         variant="simple"

@@ -49,7 +49,7 @@ export function Icon({ name }: { name: string }) {
 export function mountDraftChampionMenu(host: HTMLElement, name: string, remove: () => void) {
   const button = requireElement<HTMLButtonElement>("button", host)
   const { priority, lane } = button.dataset
-  const html = button.innerHTML
+  const content = Array.from(button.childNodes)
   renderControl(
     host,
     <ContextMenu.Root>
@@ -61,8 +61,7 @@ export function mountDraftChampionMenu(host: HTMLElement, name: string, remove: 
           data-lane={lane}
           aria-label={button.getAttribute("aria-label") ?? name}
           title={button.title}
-          // biome-ignore lint/security/noDangerouslySetInnerHtml: ícone copiado do botão original, que já é markup do WebLol
-          dangerouslySetInnerHTML={{ __html: html }}
+          ref={node => node?.replaceChildren(...content.map(child => child.cloneNode(true)))}
         />
       </ContextMenu.Trigger>
       <ContextMenu.Portal>

@@ -32,9 +32,7 @@ type Slot = { t: Team; k: "pick" | "ban"; i: number; code: string; n: number }
 // Picks e bans têm numeração própria (1º a 10º pick, 1º a 10º ban).
 const SLOTS: Slot[] = (() => {
   const list: Slot[] = [],
-    // biome-ignore-start lint/style/useNamingConvention: B e R são os códigos de lado do draft
     count = { B: { pick: 0, ban: 0 }, R: { pick: 0, ban: 0 } },
-    // biome-ignore-end lint/style/useNamingConvention: fim da exceção
     total = { pick: 0, ban: 0 }
   for (const [, slots] of DRAFT_PHASES)
     for (const slot of slots) {

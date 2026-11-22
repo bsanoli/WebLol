@@ -1,12 +1,13 @@
 // Peças das listas de composições da barra de confronto: a bolinha do lado e os retratos.
 import type { DraftSide } from "../model/local-state"
+import { ChampionPortraits } from "./portraits"
 
-/** Composição como aparece nas listas da barra: nome, prévia (HTML dos retratos) e campeões para a busca. */
+/** Composição como aparece nas listas da barra: nome, prévia (campeões de cada lane, "" onde está vazia) e campeões para a busca. */
 export type MatchupItem = {
   id: string
   name: string
   title: string
-  preview: string
+  preview: string[]
   champions: string[]
   /** Lado salvo na comp, mostrado como bolinha azul ou vermelha antes dos retratos. */
   side: DraftSide
@@ -18,13 +19,11 @@ export function SideMark({ side }: { side: DraftSide }) {
   return <span className={`side-dot ${side} comp-side-mark`} role="img" aria-label={label} title={label} />
 }
 
-export function Preview({ html }: { html: string }) {
-  return html ? (
-    <span
-      className="mini matchup-preview"
-      // biome-ignore lint/security/noDangerouslySetInnerHtml: miniatura em SVG gerada pelo WebLol a partir do draft
-      dangerouslySetInnerHTML={{ __html: html }}
-    />
+export function Preview({ names }: { names: string[] }) {
+  return names.some(Boolean) ? (
+    <span className="mini matchup-preview">
+      <ChampionPortraits names={names} />
+    </span>
   ) : (
     <span className="mini matchup-preview">
       <small>vazia</small>
@@ -47,7 +46,7 @@ export function MatchupOption({
       <b title={item.title}>{item.title}</b>
       <span className="matchup-item-end">
         <SideMark side={item.side} />
-        <Preview html={item.preview} />
+        <Preview names={item.preview} />
       </span>
     </button>
   )

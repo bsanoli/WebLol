@@ -5,7 +5,7 @@ import { compressImage } from "../lib/compress-image"
 import { printStore } from "../api/print-store"
 import { CH } from "../model/champion-catalog"
 import { findMatchup, isMatchupKey, matchupTitle } from "../model/matchups"
-import { clearCompNotes, readTacticDocument, writeTacticDocument } from "../model/tactics"
+import { didClearCompNotes, readTacticDocument, writeTacticDocument } from "../model/tactics"
 import type { TacticDoc, TacticPrintAttrs } from "../model/tactic-doc"
 import { openPrintSketch } from "./print-sketch"
 import { champArt, compById, S, save, toast, touch } from "./team-store"
@@ -50,7 +50,7 @@ function handleTacticNotesChange(compId: TacticId, doc: TacticDoc) {
   if (compId !== null && !comp && !entry) return
   writeTacticDocument(S, compId, entry ? matchupTitle(entry) : comp?.name || "", doc, Date.now())
   // As anotações antigas da comp já estão no documento gravado.
-  if (comp && clearCompNotes(comp)) touch(comp)
+  if (comp && didClearCompNotes(comp)) touch(comp)
   save()
 }
 

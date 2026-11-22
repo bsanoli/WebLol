@@ -179,22 +179,18 @@ const BASE = [
 ]
 /** Campeão do catálogo: nome, id da imagem e as posições em que costuma jogar. */
 export type CatalogChampion = { n: string; id: string; r: DraftLane[] }
-// biome-ignore-start lint/style/useNamingConvention: letras do formato compacto do catálogo
 const RL: Record<string, DraftLane> = { T: "top", J: "jg", M: "mid", A: "adc", S: "sup" }
-// biome-ignore-end lint/style/useNamingConvention: fim da exceção
 export const CH: CatalogChampion[] = BASE.map(s => {
   const [n = "", id = "", r = ""] = s.split("|")
   return { n, id, r: [...r].map(c => RL[c]).filter((lane): lane is DraftLane => lane !== undefined) }
 })
 const TAG_ROLE: Record<string, DraftLane> = {
-  // biome-ignore-start lint/style/useNamingConvention: classes de campeão como na Riot
   Fighter: "top",
   Tank: "top",
   Mage: "mid",
   Assassin: "mid",
   Marksman: "adc",
   Support: "sup",
-  // biome-ignore-end lint/style/useNamingConvention: fim da exceção
 }
 for (const [id, c] of Object.entries(LOL_DATA.champions)) {
   const existing = CH.find(x => x.id === id)

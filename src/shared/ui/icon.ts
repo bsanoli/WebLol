@@ -12,6 +12,11 @@ const laneIcons = new Map([
   ["suporte", ["sup", "Suporte"]],
 ])
 
+/** Nome do arquivo do ícone da rota em `assets/lanes/`, ou nada se a rota não existe. */
+export function laneIconFile(lane: string | undefined) {
+  return laneIcons.get(lane?.toLowerCase() ?? "")?.[0]
+}
+
 export function laneIconMarkup(lane: string | undefined, isStandalone = false) {
   const icon = laneIcons.get(lane?.toLowerCase() ?? "")
   if (!icon) return ""

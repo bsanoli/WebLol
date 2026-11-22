@@ -82,7 +82,7 @@ O Steiger e o Biome foram zerados e já barram.
 
 ### Avisos do Biome
 
-Zerado em 21/11/2026 (eram 570 avisos e 51 sugestões). `npm run lint` usa `--error-on-warnings`, e o CI roda `biome ci --error-on-warnings`. Todas as regras voltaram ao nível do preset ou a erro. Exceções ficam em comentários `biome-ignore` com o motivo, exceto o `!important` de `prefers-reduced-motion` e de `[hidden]`, liberado por um `override` em `biome.jsonc` só para `base.css` e `motion.css`:
+Zerado em 21/11/2026 (eram 570 avisos e 51 sugestões). `npm run lint` usa `--error-on-warnings`, e o CI roda `biome ci --error-on-warnings`. Todas as regras voltaram ao nível do preset ou a erro. Não há `biome-ignore` no código: exceções ficam em `overrides` de `biome.jsonc` (`!important` de `prefers-reduced-motion` e de `[hidden]` só em `base.css` e `motion.css`; nomes que são contrato em arquivos listados; testes `*.test.ts`):
 
 - nomes que são contrato (chaves salvas, dados da Riot, `TEAM_NAME` dos iframes, códigos do draft);
 - `dangerouslySetInnerHTML` com SVG gerado pelo WebLol, e `role="group"` onde um `fieldset` traria estilos do navegador.

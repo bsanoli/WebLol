@@ -2,14 +2,12 @@ import { afterEach, describe, expect, it, vi } from "vitest"
 
 vi.mock("../ui/captain-panel", () => ({
   canManageTeam: () => true,
-  captainAccess: () => true,
+  hasCaptainAccess: () => true,
   renderCaptainPanel: () => {},
-  // biome-ignore lint/style/useNamingConvention: nome exportado pelo módulo real
   TEAM_NAME: "Time",
 }))
 vi.mock("./images", () => ({ hostImages: { fake: true } }))
 vi.mock("@/shared/firestore", () => ({
-  // biome-ignore lint/style/useNamingConvention: nome exportado pelo módulo real
   IS_ONLINE: true,
   currentFirebase: () => null,
 }))

@@ -237,8 +237,7 @@ function MatchupBar(props: MatchupBarProps) {
   return (
     <>
       {head}
-      {/* biome-ignore lint/a11y/useSemanticElements: fieldset traria borda e margens do navegador para o confronto */}
-      <div className="matchup" role="group" aria-label="Confronto do draft">
+      <fieldset className="matchup" aria-label="Confronto do draft">
         {side === "blue" ? oursBlock : rivalBlock}
         <button
           type="button"
@@ -254,7 +253,7 @@ function MatchupBar(props: MatchupBarProps) {
         </button>
         <UndoButton visible={props.canUndo} />
         {side === "blue" ? rivalBlock : oursBlock}
-      </div>
+      </fieldset>
     </>
   )
 }

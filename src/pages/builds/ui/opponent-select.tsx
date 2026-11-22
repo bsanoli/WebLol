@@ -33,7 +33,7 @@ export function WorldsOpponentSelect({
   const [query, setQuery] = useState("")
   const trigger = useRef<HTMLButtonElement>(null)
   const search = useRef<HTMLInputElement>(null)
-  const options = useRef<HTMLDivElement>(null)
+  const options = useRef<HTMLFieldSetElement>(null)
   const selected = opponents.find(opponent => opponent.slug === value)
   const term = championSlug(query.trim())
   const matches = opponents.filter(opponent => championSlug(opponent.name).includes(term))
@@ -111,8 +111,7 @@ export function WorldsOpponentSelect({
             }
           }}
         />
-        {/* biome-ignore lint/a11y/useSemanticElements: fieldset traria borda e margens do navegador para a lista */}
-        <div ref={options} className="build-opponent-results" role="group" aria-label="Adversários">
+        <fieldset ref={options} className="build-opponent-results" aria-label="Adversários">
           {!term && (
             <button
               type="button"
@@ -140,7 +139,7 @@ export function WorldsOpponentSelect({
             </button>
           ))}
           {term && !matches.length && <p role="status">Nenhum adversário encontrado.</p>}
-        </div>
+        </fieldset>
       </PopoverContent>
     </Popover>
   )

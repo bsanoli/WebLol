@@ -6,7 +6,7 @@ import { closeModal } from "./login-dialog"
 import { stepId } from "./login-steps"
 import { stepTeam, enterTeam } from "./team-step"
 import { renderAdmin } from "./admin"
-import { captainAccess } from "./captain-panel"
+import { hasCaptainAccess } from "./captain-panel"
 import { loadMembership } from "../model/membership"
 import { openRoute, routeRoots, writeRoute } from "../model/router"
 import { publish, refreshTeam, sendChanges, sync, type SentChange } from "../model/sync"
@@ -60,7 +60,7 @@ export function updateStatus(shouldKeepChip = false) {
     // o iframe da Área do time ainda não carregou
   }
   document.body.dataset.accountName = account?.id ?? ""
-  document.body.dataset.teamManagement = String(captainAccess())
+  document.body.dataset.teamManagement = String(hasCaptainAccess())
   document.body.dataset.accountRole = roleLabel()
   document.body.dataset.preview = preview()
   document.body.classList.toggle("isadmin", !!account?.admin || isCaptain())

@@ -2,6 +2,7 @@ import { useState } from "react"
 import { createRoot } from "react-dom/client"
 import { Button } from "@/shared/ui/button"
 import { Dialog, DialogContent, DialogTitle } from "@/shared/ui/dialog"
+import { ChampionPortraits } from "./portraits"
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from "@/shared/ui/select"
 
 export const NEW_ENEMY = "__new-enemy"
@@ -9,21 +10,18 @@ export type MatchupChoice = { ours: string; enemy: string; side: "blue" | "red" 
 /** Linhas da lista com altura e margem internas maiores, para o nome e os retratos respirarem. */
 const ITEM_CLASS = "min-h-12 rounded-md py-2 pr-10 pl-3 cursor-pointer *:[span]:last:min-w-0 *:[span]:last:flex-1"
 
-/** Opção da lista: nome e, quando houver, os retratos dos campeões (HTML já montado pela página). */
-type Option = { id: string; name: string; preview?: string }
+/** Opção da lista: nome e, quando houver, os campeões de cada lane ("" onde está vazia). */
+type Option = { id: string; name: string; preview?: string[] }
 
 function OptionLabel({ item }: { item: Option }) {
   if (item.preview === undefined) return <>{item.name}</>
   return (
     <span className="mx-opt">
       <b title={item.name}>{item.name}</b>
-      {item.preview ? (
-        <span
-          className="mx-opt-preview"
-          aria-hidden="true"
-          // biome-ignore lint/security/noDangerouslySetInnerHtml: miniatura em SVG gerada pelo WebLol a partir do draft
-          dangerouslySetInnerHTML={{ __html: item.preview }}
-        />
+      {item.preview.some(Boolean) ? (
+        <span className="mx-opt-preview" aria-hidden="true">
+          <ChampionPortraits names={item.preview} />
+        </span>
       ) : (
         <small className="mx-opt-empty">vazia</small>
       )}

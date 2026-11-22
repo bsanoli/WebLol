@@ -1,9 +1,16 @@
 // Composições nossas e adversárias: criar, trocar, renomear, duplicar, excluir e a barra de confronto.
-import { compositionPreviewHTML } from "./composition-preview"
 import { askName } from "@/shared/ui/dialog-controls"
 import { createCompositionCopy } from "../model/composition"
 import { enemiesOf, isEnemy, oursOf, settleOwner } from "../model/composition-side"
-import { blank, setChampions, uid, type Composition, type DraftLane, type DraftSide } from "../model/local-state"
+import {
+  blank,
+  compositionPreview,
+  setChampions,
+  uid,
+  type Composition,
+  type DraftLane,
+  type DraftSide,
+} from "../model/local-state"
 import { addMatchup, findMatchup, matchupsOfComp, matchupTitle, oppositeSideOf } from "../model/matchups"
 import { opggOf } from "../model/tactics"
 import type { Matchup } from "../model/matchups"
@@ -18,7 +25,6 @@ import {
   cur,
   compById,
   hasUndo,
-  img,
   S,
   save,
   clearUndo,
@@ -34,7 +40,7 @@ const matchupItem = (c: Composition, side: DraftSide) => ({
   id: c.id,
   name: c.name,
   title: c.name,
-  preview: compositionPreviewHTML(c, img),
+  preview: compositionPreview(c),
   side,
   champions: [...Object.values(c.lanes).flat(), ...c.bans],
 })

@@ -475,6 +475,8 @@ body:has(#header-tools[data-state="open"]) #screens::after {
   background: var(--wl-surface);
 }
 .skip-link {
+  cursor: pointer;
+  font: inherit;
   position: fixed;
   z-index: 100;
   top: var(--wl-space-2);

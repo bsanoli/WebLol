@@ -1,7 +1,6 @@
 // Táticas: confrontos, gaveta de composições e abas da lista, com os cliques do editor em Táticas.
-import { compositionPreviewHTML } from "./composition-preview"
 import { askName, confirmAction } from "@/shared/ui/dialog-controls"
-import { blank } from "../model/local-state"
+import { blank, compositionPreview } from "../model/local-state"
 import type { Composition, DraftSide } from "../model/local-state"
 import { enemiesOf, isEnemy, oursOf, settleOwner } from "../model/composition-side"
 import {
@@ -22,7 +21,7 @@ import { editOpggLink, opggTarget } from "./team-comp-edits"
 import { faceEnemy, newComp, selectComp } from "./team-comps"
 import { renderEditor } from "./team-editor"
 import { hooks, session } from "./team-session"
-import { $, compById, cur, eventTarget, hasUndo, img, runUndo, S, save, setUndo, toast, touch } from "./team-store"
+import { $, compById, cur, eventTarget, hasUndo, didRunUndo, S, save, setUndo, toast, touch } from "./team-store"
 
 export function mountMatchups() {
   $("#editor").addEventListener("contextmenu", e => {
@@ -101,7 +100,7 @@ export function mountMatchups() {
       toast("Crie uma composição nossa antes de montar um confronto")
       return
     }
-    const option = (x: Composition) => ({ id: x.id, name: x.name, preview: compositionPreviewHTML(x, img) })
+    const option = (x: Composition) => ({ id: x.id, name: x.name, preview: compositionPreview(x) })
     const choice = await askMatchup(ours.map(option), enemies.map(option), isEnemy(cur()) ? ours[0].id : cur().id)
     if (!choice) return
     let enemyId = choice.enemy
@@ -199,7 +198,7 @@ export function mountMatchups() {
     if (target?.closest("input, textarea, select, [role=dialog], [data-radix-popper-content-wrapper]")) return
     if (S.view === "map" || !hasUndo()) return
     e.preventDefault()
-    runUndo()
+    didRunUndo()
   })
   $("#editor").addEventListener("click", e => {
     const mxOpen = eventTarget(e).closest<HTMLElement>("[data-tactic-matchup]")
@@ -222,7 +221,7 @@ export function mountMatchups() {
       return
     }
     if (eventTarget(e).closest("[data-undo-last]")) {
-      runUndo()
+      didRunUndo()
       return
     }
     const drawerToggle = eventTarget(e).closest<HTMLElement>("[data-tactic-drawer]")

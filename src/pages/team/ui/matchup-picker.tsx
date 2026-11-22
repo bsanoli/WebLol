@@ -146,7 +146,7 @@ export function CompPicker({
           </small>
           <b title={selected?.title}>{selected ? selected.title : noneLabel}</b>
         </span>
-        {selected && <Preview html={selected.preview} />}
+        {selected && <Preview names={selected.preview} />}
         <span className="sr-only">Trocar</span>
         <ChevronDown className="matchup-chevron" aria-hidden="true" />
       </PopoverTrigger>
@@ -158,8 +158,7 @@ export function CompPicker({
         onCloseAutoFocus={keepFocusOutsideFrame}
       >
         {pending ? (
-          // biome-ignore lint/a11y/useSemanticElements: fieldset traria borda e margens do navegador para a troca
-          <div className="matchup-branch" role="group" aria-label={`Trocar por ${pending.title}`}>
+          <fieldset className="matchup-branch" aria-label={`Trocar por ${pending.title}`}>
             <p>
               Trocar por <b>{pending.title}</b>
             </p>
@@ -174,7 +173,7 @@ export function CompPicker({
             <button type="button" className="matchup-item" onClick={() => finish(pending.id, "new")}>
               <b>Criar novo confronto</b>
             </button>
-          </div>
+          </fieldset>
         ) : (
           <>
             <Input
@@ -186,8 +185,7 @@ export function CompPicker({
               autoFocus
               onChange={event => setQuery(event.target.value)}
             />
-            {/* biome-ignore lint/a11y/useSemanticElements: fieldset traria borda e margens do navegador para a lista */}
-            <div className="matchup-list" role="group" aria-label={label}>
+            <fieldset className="matchup-list" aria-label={label}>
               {!q && (
                 <button type="button" className="matchup-item new" onClick={create}>
                   <b>
@@ -215,7 +213,7 @@ export function CompPicker({
                     : "Nenhuma composição ainda."}
                 </p>
               )}
-            </div>
+            </fieldset>
           </>
         )}
       </PopoverContent>

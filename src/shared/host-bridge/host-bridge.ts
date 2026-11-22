@@ -34,17 +34,14 @@ export type HostGlobals = {
   weblolDraft?: () => HostDraft
   captainAccess?: () => boolean
   canManageTeam?: () => boolean
-  // biome-ignore-start lint/style/useNamingConvention: TEAM_NAME é contrato com os iframes
   TEAM_NAME?: () => string
-  // biome-ignore-end lint/style/useNamingConvention: fim da exceção
   renderCaptainPanel?: (panel: HTMLElement) => void | Promise<void>
   weblolImages?: HostImages
 }
 
 /** O que o app principal chama na janela do iframe. */
 export type FrameHandlers = {
-  // biome-ignore lint/suspicious/noConfusingVoidType: o app principal não usa o retorno; os handlers podem não devolver nada
-  applyWebLolRoute?: (route: string[], params?: URLSearchParams) => Promise<boolean | void> | boolean | void
+  applyWebLolRoute?: (route: string[], params?: URLSearchParams) => unknown
   weblolTeamChanged?: () => void
 }
 

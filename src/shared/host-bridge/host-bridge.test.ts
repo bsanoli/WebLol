@@ -27,10 +27,7 @@ describe("host-bridge", () => {
   })
 
   it("lê o que o app principal expõe", () => {
-    // biome-ignore-start lint/style/useNamingConvention: TEAM_NAME é contrato com os iframes
-    // biome-ignore lint/correctness/noComponentHookFactories: TEAM_NAME é função do contrato com os iframes, não um componente
     const host = { captainAccess: () => true, canManageTeam: () => true, TEAM_NAME: () => "Fraldinha" }
-    // biome-ignore-end lint/style/useNamingConvention: fim da exceção
     stubWindow(host)
     expect(hasHostCaptainAccess()).toBe(true)
     expect(canHostManageTeam()).toBe(true)

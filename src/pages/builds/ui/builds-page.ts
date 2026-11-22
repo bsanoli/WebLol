@@ -15,7 +15,7 @@ import { $ } from "@/shared/lib/dom"
 import { buildControlRoots, disposeBuildControls, mountSkillOptions } from "./build-controls"
 import { createBuildContextMotion } from "./build-context-motion"
 import { createBuildDetailPanels } from "./build-detail-panels"
-import { handleMatchupPageClick, handleMoreMatchupsClick, handleTimelineViewClick } from "./build-list-interactions"
+import { didHandleListClick } from "./build-list-interactions"
 import { championCard } from "./build-card"
 import { renderBuildsResults, renderBuildsView } from "./builds-view"
 
@@ -193,7 +193,7 @@ function wireBuilds({ publishWorlds, buildsPath }: BuildRouteDeps) {
       animateMatchupGroupToggle(matchupSummary)
       return
     }
-    if (handleMatchupPageClick(target) || handleMoreMatchupsClick(target) || handleTimelineViewClick(target)) return
+    if (didHandleListClick(target)) return
     const sort = target.closest<HTMLElement>(".builds-table thead button[data-k]")
     if (sort) {
       const k = sort.dataset.k ?? ""
