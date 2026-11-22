@@ -1,4 +1,5 @@
 // Peças das listas de composições da barra de confronto: a bolinha do lado e os retratos.
+import { ComboboxItem } from "@/shared/ui/combobox"
 import type { DraftSide } from "../model/local-state"
 import { ChampionPortraits } from "./portraits"
 
@@ -32,22 +33,14 @@ export function Preview({ names }: { names: string[] }) {
 }
 
 /** Linha da lista de escolha: nome à esquerda; bolinha do lado e retratos à direita. */
-export function MatchupOption({
-  item,
-  selected,
-  onChoose,
-}: {
-  item: MatchupItem
-  selected: boolean
-  onChoose: (id: string) => void
-}) {
+export function MatchupOption({ item }: { item: MatchupItem }) {
   return (
-    <button type="button" className="matchup-item" aria-pressed={selected} onClick={() => onChoose(item.id)}>
+    <ComboboxItem className="matchup-item" value={item.id} label={item.title}>
       <b title={item.title}>{item.title}</b>
       <span className="matchup-item-end">
         <SideMark side={item.side} />
         <Preview names={item.preview} />
       </span>
-    </button>
+    </ComboboxItem>
   )
 }

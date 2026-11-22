@@ -198,11 +198,6 @@
 .tablewrap > table {
   min-width: 720px;
 }
-.build-opponent-results button {
-  display: flex;
-  justify-content: flex-start;
-  width: 100%;
-}
 .tablewrap th button {
   width: 100%;
   min-height: var(--wl-button-height);
@@ -756,27 +751,6 @@
 .build-opponent-filter .team-select [data-team-trigger="select"] {
   min-height: var(--wl-button-height-sm);
   padding-block: 0;
-}
-.build-opponent-options {
-  display: flex;
-  flex-direction: column;
-  gap: var(--wl-space-2);
-  width: max(var(--radix-popover-trigger-width), 240px);
-  max-height: min(320px, var(--radix-popover-content-available-height));
-  padding: var(--wl-space-2);
-}
-.build-opponent-options input {
-  width: 100%;
-}
-.build-opponent-results {
-  min-width: 0;
-  min-height: 0;
-  overflow: auto;
-  padding: var(--wl-space-1);
-}
-.build-opponent-results p {
-  margin: var(--wl-space-2);
-  color: var(--wl-muted);
 }
 .build-opponent-count {
   margin-inline-start: auto;

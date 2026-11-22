@@ -1112,9 +1112,25 @@
   outline: 2px solid var(--txt);
   outline-offset: -2px;
 }
-.matchup-item[aria-pressed="true"] {
+.matchup-item[aria-pressed="true"],
+.matchup-item[data-selected] {
   border-color: var(--wl-accent);
   background: var(--wl-accent-soft);
+  color: var(--txt);
+}
+.matchup-item[data-highlighted] {
+  background: color-mix(in srgb, var(--txt) 8%, transparent);
+}
+.matchup-item[data-selected][data-highlighted] {
+  background: var(--wl-accent-soft);
+}
+/* Combobox compartilhado: largura fixa do menu de confronto e lista que rola dentro do popup */
+.wl-combobox.matchup-popover {
+  width: 380px;
+  max-width: calc(100vw - 16px);
+}
+.wl-combobox.matchup-popover .matchup-list {
+  max-height: none;
 }
 /* Lista do diálogo "Novo confronto": nome da comp e retratos dos campeões, no portal fora de #v-comps */
 .mx-opt {

@@ -129,7 +129,7 @@ export function useTeamOverlay() {
   return { open, setOpen }
 }
 
-export function keepFocusOutsideFrame(event: Event) {
+function keepFocusOutsideFrame(event: Event) {
   if (!document.hasFocus()) event.preventDefault()
 }
 

@@ -42,7 +42,7 @@ test("Abre uma composição salva no formato anterior em modo Draft", async ({ p
   // Sem adversária, o outro lado pede uma; ao criar uma nova adversária ela ocupa esse lado.
   await expect(team.locator(".tm.rival .draft-rival-empty")).toBeVisible()
   await matchup.locator(".matchup-pick.rival").click()
-  await page.getByRole("button", { name: /Nova adversária/ }).click()
+  await page.getByRole("option", { name: /Nova adversária/ }).click()
   await matchup.getByRole("button", { name: /Editar o nome de Adversária/ }).click()
   await matchup.getByRole("textbox").fill("Time rival")
   await matchup.getByRole("textbox").press("Enter")

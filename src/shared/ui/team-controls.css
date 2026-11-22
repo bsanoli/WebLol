@@ -192,3 +192,52 @@ button[data-team-trigger]:disabled {
   padding: var(--wl-space-3);
   font-size: var(--wl-detail-size);
 }
+
+/* Seletor com busca (shared/ui/combobox). Largura e altura máximas seguem o botão e o espaço disponível. */
+.wl-combobox {
+  display: flex;
+  flex-direction: column;
+  gap: var(--wl-space-2);
+  width: max(var(--anchor-width), 240px);
+  max-height: min(320px, var(--available-height));
+  padding: var(--wl-space-2);
+}
+.wl-combobox input {
+  width: 100%;
+}
+.wl-combobox-list {
+  min-height: 0;
+  overflow: auto;
+  padding: var(--wl-space-1);
+}
+.wl-combobox-empty {
+  margin: var(--wl-space-2);
+  color: var(--wl-muted);
+}
+.wl-combobox-item {
+  display: flex;
+  align-items: center;
+  gap: var(--wl-space-2);
+  width: 100%;
+  min-height: var(--wl-button-height-sm);
+  padding-inline: var(--wl-space-3);
+  border-radius: var(--wl-control-radius);
+  color: var(--wl-text);
+  font-size: 13px;
+  cursor: pointer;
+}
+.wl-combobox-item[data-highlighted] {
+  background: var(--wl-hover, color-mix(in srgb, var(--wl-text) 8%, transparent));
+}
+.wl-combobox-item[data-selected] {
+  background: color-mix(in srgb, var(--wl-accent) 13%, var(--wl-raised));
+  color: var(--wl-accent);
+}
+.wl-combobox-item[data-disabled] {
+  opacity: 0.5;
+  cursor: default;
+}
+.wl-combobox input:focus-visible {
+  outline: 2px solid var(--wl-accent);
+  outline-offset: -2px;
+}
