@@ -23,3 +23,8 @@ stats.html
 # Locais de cada pessoa
 /.claude/launch.json
 /.ua/
+
+# Logs do emulador do Firestore
+firestore-debug.log
+ui-debug.log
+firebase-debug.log

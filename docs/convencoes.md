@@ -68,6 +68,7 @@ O Biome formata e aponta problemas, o Steiger confere as fronteiras do FSD, o Vi
 | `npm run lint:fix` | Biome com as correções automáticas |
 | `npm run check` | Arquitetura (`check-architecture.mjs` e Steiger) e tipos |
 | `npm run test:unit` | Vitest, nos arquivos `*.test.ts` de `src/` |
+| `npm run test:rules` | Regras do `firestore.rules` no emulador local (`tests-rules/`). Precisa de Java 21 e não entra no `verify`; o CI roda no job `regras`. No Windows, se o emulador falhar com "Unable to establish loopback connection", defina `JAVA_TOOL_OPTIONS=-Djava.io.tmpdir=C:/tmp-java -Djdk.net.unixdomain.tmpdir=C:/tmp-java` (pasta curta, sem nome 8.3) |
 | `npm run verify` | As três verificações rápidas acima, em sequência |
 | `npm test` | Playwright, incluindo o axe |
 

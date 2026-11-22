@@ -65,3 +65,26 @@ jobs:
             test-results/
             playwright-report/
           retention-days: 7
+
+  regras:
+    name: Regras do Firestore (emulador)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: npm
+
+      - uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: 21
+
+      - name: Instalar dependências
+        run: npm ci
+
+      - name: Regras contra o emulador (nada é publicado)
+        run: npm run test:rules
