@@ -49,6 +49,11 @@
   },
   "overrides": [
     {
+      // Só aqui o !important é intencional: [hidden] e "reduzir movimento" precisam vencer qualquer regra e estilo inline de biblioteca.
+      "includes": ["src/app/styles/base.css", "src/app/styles/motion.css"],
+      "linter": { "rules": { "complexity": { "noImportantStyles": "off" } } }
+    },
+    {
       "includes": ["tests/**"],
       "linter": { "domains": { "playwright": "recommended" } }
     }

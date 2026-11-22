@@ -82,10 +82,9 @@ O Steiger e o Biome foram zerados e já barram.
 
 ### Avisos do Biome
 
-Zerado em 21/11/2026 (eram 570 avisos e 51 sugestões). `npm run lint` usa `--error-on-warnings`, e o CI roda `biome ci --error-on-warnings`. Todas as regras voltaram ao nível do preset ou a erro. Exceções ficam em comentários `biome-ignore` com o motivo:
+Zerado em 21/11/2026 (eram 570 avisos e 51 sugestões). `npm run lint` usa `--error-on-warnings`, e o CI roda `biome ci --error-on-warnings`. Todas as regras voltaram ao nível do preset ou a erro. Exceções ficam em comentários `biome-ignore` com o motivo, exceto o `!important` de `prefers-reduced-motion` e de `[hidden]`, liberado por um `override` em `biome.jsonc` só para `base.css` e `motion.css`:
 
 - nomes que são contrato (chaves salvas, dados da Riot, `TEAM_NAME` dos iframes, códigos do draft);
-- `!important` de `prefers-reduced-motion` e de `[hidden]`;
 - `dangerouslySetInnerHTML` com SVG gerado pelo WebLol, e `role="group"` onde um `fieldset` traria estilos do navegador.
 
 Os helpers `requireElement` e `requireClosest` (`src/shared/lib/dom.ts`) e `tests/support/box.ts` substituem o `!` depois de `querySelector`. O `sync.js` e o `shell.js` seguem fora de algumas regras (`biome.jsonc`): são scripts clássicos que compartilham variáveis globais.

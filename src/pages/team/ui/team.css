@@ -3274,10 +3274,6 @@ body:has(#v-map.on) > header {
     padding-left: 8px;
     padding-bottom: 4px;
   }
-  .plan-head > h2 {
-    /* biome-ignore lint/complexity/noImportantStyles: #v-comps .plan-head > h2 (1,1,1) define padding e tem especificidade maior */
-    padding-left: 0 !important;
-  }
 }
 
 /* Biblioteca de composições como coluna à esquerda de "Monte o plano" */

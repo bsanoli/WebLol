@@ -372,9 +372,8 @@
 }
 
 /* Lane do time ao lado de "Ordenar por" (substitui o quadro de destino) */
-#target[hidden] {
-  /* biome-ignore lint/complexity/noImportantStyles: #v-comps #target (2,0,0) define display: grid e tem especificidade maior */
-  display: none !important;
+#v-comps #target[hidden] {
+  display: none;
 }
 #lane-target-tool select {
   color: var(--wl-accent);

@@ -23,7 +23,7 @@
 **Suposições:**
 
 - Nomes que são contrato (campos salvos no `localStorage` ou no Firestore, parâmetros da URL, ids e campos que vêm dos dados da Riot) ficam como estão. Onde a regra de nomes acusa um desses, a exceção fica num comentário `biome-ignore` com o motivo.
-- O `!important` dentro de `prefers-reduced-motion` e o que vence estilos inline de bibliotecas ficam, com `biome-ignore` e o motivo. Sem ele, a animação não desliga para quem pediu menos movimento.
+- O `!important` dentro de `prefers-reduced-motion` e o que vence estilos inline de bibliotecas ficam, sem `biome-ignore` por linha: um `override` em `biome.jsonc` desliga `noImportantStyles` só em `base.css` e `motion.css`, e os demais `!important` foram trocados por seletores mais específicos. Sem ele, a animação não desliga para quem pediu menos movimento.
 
 ## Plano
 
@@ -36,7 +36,7 @@
 
 ## Resultado
 
-- **Mudou:** 0 avisos e 0 sugestões do Biome. Booleanos renomeados (`is/has/should/can`), `!` trocado por `requireElement`/`requireClosest` e checagens, `forEach` com retorno virou `for…of`, CSS reordenado sem mudar seletores (`!important` mantido só onde é preciso, com motivo). `biome.jsonc` sem rebaixamentos; `lint` e o CI usam `--error-on-warnings`. Quatro tetos de linhas em `scripts/check-architecture.mjs` subiram 1 ou 2 linhas (troca do `!`).
+- **Mudou:** 0 avisos e 0 sugestões do Biome. Booleanos renomeados (`is/has/should/can`), `!` trocado por `requireElement`/`requireClosest` e checagens, `forEach` com retorno virou `for…of`, CSS reordenado sem mudar seletores (`!important` só em `base.css` e `motion.css`, via `override` central, sem `biome-ignore`). `biome.jsonc` sem rebaixamentos; `lint` e o CI usam `--error-on-warnings`. Quatro tetos de linhas em `scripts/check-architecture.mjs` subiram 1 ou 2 linhas (troca do `!`).
 - **Verificado:** `biome check --error-on-warnings`, `npm run check`, `tsc`, 255 testes Vitest, build e 51 testes Playwright passam. Estilos calculados do CSS comparados antes e depois em 13 cenários de desktop (Worlds, Builds, Área do time, mapa tático): 0 diferenças. O Playwright pegou três renomes que estragaram atributos (`aria-current`, `aria-hidden`) e um `await`; corrigidos.
 - **Pendências:** popover de confronto e diálogo do Excalidraw reais não foram abertos (cobertos por cópias de teste). Seletores CSS mortos (`comp-library`, `library-search`, `tmh`, `draft-comments`, `#notes`, `#dnote`, `plan-head`) ficam como sugestão de limpeza.
 - **Regras registradas:** o Biome barra qualquer aviso; exceções só com `biome-ignore` e motivo.
