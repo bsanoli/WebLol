@@ -1,7 +1,6 @@
 // Táticas: confrontos, gaveta de composições e abas da lista, com os cliques do editor em Táticas.
-import { compositionPreviewHTML } from "./composition-preview"
 import { askName, confirmAction } from "@/shared/ui/dialog-controls"
-import { blank } from "../model/local-state"
+import { blank, compositionPreview } from "../model/local-state"
 import type { Composition, DraftSide } from "../model/local-state"
 import { enemiesOf, isEnemy, oursOf, settleOwner } from "../model/composition-side"
 import {
@@ -22,7 +21,7 @@ import { editOpggLink, opggTarget } from "./team-comp-edits"
 import { faceEnemy, newComp, selectComp } from "./team-comps"
 import { renderEditor } from "./team-editor"
 import { hooks, session } from "./team-session"
-import { $, compById, cur, eventTarget, hasUndo, img, runUndo, S, save, setUndo, toast, touch } from "./team-store"
+import { $, compById, cur, eventTarget, hasUndo, didRunUndo, S, save, setUndo, toast, touch } from "./team-store"
 
 export function mountMatchups() {
   $("#editor").addEventListener("contextmenu", e => {
@@ -31,23 +30,23 @@ export function mountMatchups() {
     void editOpggLink(opggTarget())
   })
   function handleTacticDrawerToggle(button: HTMLElement) {
-    const open = S.tacticsDrawer === false
-    S.tacticsDrawer = open
+    const isOpen = S.tacticsDrawer === false
+    S.tacticsDrawer = isOpen
     save()
     const tx = button.closest(".tx"),
       aside = $("#tx-aside")
-    tx?.classList.toggle("drawer-closed", !open)
-    aside?.toggleAttribute("inert", !open)
-    button.setAttribute("aria-expanded", String(open))
-    button.title = open ? "Esconder a lista de composições e o draft" : "Mostrar a lista de composições e o draft"
+    tx?.classList.toggle("drawer-closed", !isOpen)
+    aside?.toggleAttribute("inert", !isOpen)
+    button.setAttribute("aria-expanded", String(isOpen))
+    button.title = isOpen ? "Esconder a lista de composições e o draft" : "Mostrar a lista de composições e o draft"
   }
   function handleTacticListToggle(button: HTMLElement) {
-    const collapsed = S.tacticsListCollapsed !== true
-    S.tacticsListCollapsed = collapsed
+    const isCollapsed = S.tacticsListCollapsed !== true
+    S.tacticsListCollapsed = isCollapsed
     save()
-    button.closest(".tx-tabs")?.classList.toggle("list-collapsed", collapsed)
-    button.setAttribute("aria-expanded", String(!collapsed))
-    button.title = collapsed ? "Mostrar a lista" : "Recolher a lista"
+    button.closest(".tx-tabs")?.classList.toggle("list-collapsed", isCollapsed)
+    button.setAttribute("aria-expanded", String(!isCollapsed))
+    button.title = isCollapsed ? "Mostrar a lista" : "Recolher a lista"
   }
   // "Editar na Ordem do draft": abre o confronto da tática (ou, numa adversária, o confronto dela com a última nossa usada).
   function handleOpenDraft() {
@@ -101,7 +100,7 @@ export function mountMatchups() {
       toast("Crie uma composição nossa antes de montar um confronto")
       return
     }
-    const option = (x: Composition) => ({ id: x.id, name: x.name, preview: compositionPreviewHTML(x, img) })
+    const option = (x: Composition) => ({ id: x.id, name: x.name, preview: compositionPreview(x) })
     const choice = await askMatchup(ours.map(option), enemies.map(option), isEnemy(cur()) ? ours[0].id : cur().id)
     if (!choice) return
     let enemyId = choice.enemy
@@ -199,7 +198,7 @@ export function mountMatchups() {
     if (target?.closest("input, textarea, select, [role=dialog], [data-radix-popper-content-wrapper]")) return
     if (S.view === "map" || !hasUndo()) return
     e.preventDefault()
-    runUndo()
+    didRunUndo()
   })
   $("#editor").addEventListener("click", e => {
     const mxOpen = eventTarget(e).closest<HTMLElement>("[data-tactic-matchup]")
@@ -222,7 +221,7 @@ export function mountMatchups() {
       return
     }
     if (eventTarget(e).closest("[data-undo-last]")) {
-      runUndo()
+      didRunUndo()
       return
     }
     const drawerToggle = eventTarget(e).closest<HTMLElement>("[data-tactic-drawer]")
@@ -260,9 +259,9 @@ export function mountMatchups() {
       const wrap = listTab.closest(".tx-tabs")
       if (!wrap) return
       wrap.querySelectorAll<HTMLElement>("[data-tx-list]").forEach(b => {
-        const on = b === listTab
-        b.setAttribute("aria-selected", String(on))
-        b.tabIndex = on ? 0 : -1
+        const isOn = b === listTab
+        b.setAttribute("aria-selected", String(isOn))
+        b.tabIndex = isOn ? 0 : -1
       })
       wrap.querySelectorAll<HTMLElement>(".tx-group").forEach(g => {
         g.hidden = g.id !== `tx-list-${listTab.dataset.txList}`
@@ -273,8 +272,8 @@ export function mountMatchups() {
     if (tacticTab) {
       const general = tacticTab.hasAttribute("data-tactic-general"),
         id = tacticTab.dataset.tacticComp
-      const fromMatchup = !!S.tacticsMatchup
-      if (general === !!S.tacticsGeneral && (general || id === S.cur) && !fromMatchup) return
+      const isFromMatchup = !!S.tacticsMatchup
+      if (general === !!S.tacticsGeneral && (general || id === S.cur) && !isFromMatchup) return
       S.tacticsGeneral = general
       S.tacticsMatchup = null
       if (general) {

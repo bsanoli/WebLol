@@ -1,6 +1,6 @@
 import { createElement } from "react"
 import { LANES } from "@/entities/match"
-import { iconMarkup, laneIconMarkup } from "@/shared/ui/icon"
+import { laneIconFile } from "@/shared/ui/icon"
 import { ToggleGroup, ToggleGroupItem } from "@/shared/ui/toggle-group"
 import type { Champion } from "../model/build-statistics"
 
@@ -8,12 +8,24 @@ import type { Champion } from "../model/build-statistics"
 export type Lane = keyof Champion["lanes"] | ""
 export const toLane = (value: string) => (LANES.some(([name]) => name === value) ? (value as Lane) : "")
 
-const buildLaneIcon = (lane: string) => (lane ? laneIconMarkup(lane) : iconMarkup("layers"))
+const buildLaneIcon = (lane: string) => {
+  if (!lane) {
+    return createElement(
+      "svg",
+      { className: "icon", "aria-hidden": true, focusable: false },
+      createElement("use", { href: "assets/icons.svg#layers" }),
+    )
+  }
+  const file = laneIconFile(lane)
+  return file
+    ? createElement("img", { className: "lane-icon", src: `assets/lanes/${file}.svg`, width: 16, height: 16, alt: "" })
+    : null
+}
 export function positionFilter(
   lanes: string[],
   current: string,
   label: string,
-  showNames: boolean,
+  shouldShowNames: boolean,
   change: (lane: string) => void,
 ) {
   return createElement(
@@ -39,8 +51,8 @@ export function positionFilter(
           "aria-label": lane || "Todas as posições",
           ...{ "data-lane": lane, "data-slot": "button", "data-variant": "ghost" },
         },
-        createElement("span", { dangerouslySetInnerHTML: { __html: buildLaneIcon(lane) } }),
-        showNames ? lane || "Todas" : null,
+        createElement("span", null, buildLaneIcon(lane)),
+        shouldShowNames ? lane || "Todas" : null,
       ),
     ),
   )

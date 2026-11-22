@@ -10,7 +10,7 @@ import { readOfficial } from "../model/sync"
 
 /** Todo membro ativo do time vê a aba; só o capitão (ou admin desbloqueado) aceita pedidos e exclui jogadores. */
 export const TEAM_NAME = () => session.team?.name || ""
-export const captainAccess = () => !!session.team && !!user() && !user()?.solo
+export const hasCaptainAccess = () => !!session.team && !!user() && !user()?.solo
 export const canManageTeam = () =>
   !!session.team && (isCaptain() || (!preview() && !!user()?.admin && isFirebaseAdmin()))
 
@@ -124,7 +124,7 @@ function bindActions(region: HTMLElement, members: MemberRow[], teamName: string
 
 export async function renderCaptainPanel(region: HTMLElement | null) {
   if (!region) return
-  if (!captainAccess()) {
+  if (!hasCaptainAccess()) {
     region.innerHTML = `<div class="wl-panel card">Entre em um time para ver os jogadores e o histórico.</div>`
     return
   }

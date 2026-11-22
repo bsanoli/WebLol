@@ -27,9 +27,6 @@
 .listShell[data-right="true"] .viewport {
   mask-image: linear-gradient(to right, black, black calc(100% - 35px), transparent);
 }
-.listShell[data-left="true"][data-right="true"] .viewport {
-  mask-image: linear-gradient(to right, transparent, black 35px, black calc(100% - 35px), transparent);
-}
 /* The list owns the stacking context so the gliding highlight passes under every label, not over earlier ones. */
 .list {
   position: relative;
@@ -139,6 +136,9 @@
 .root[data-variant="underline"] .viewport,
 .root[data-variant="underline"] .list {
   width: 100%;
+}
+.listShell[data-left="true"][data-right="true"] .viewport {
+  mask-image: linear-gradient(to right, transparent, black 35px, black calc(100% - 35px), transparent);
 }
 .root[data-variant="underline"] .listShell {
   border: 0;

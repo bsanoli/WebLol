@@ -33,10 +33,10 @@ function developmentDatasets(): Plugin {
     name: "weblol-development-datasets",
     apply: "serve",
     resolveId(id) {
-      if (id.startsWith("@dataset/")) return "\0" + prefix + id.slice("@dataset/".length)
+      if (id.startsWith("@dataset/")) return `\0${prefix}${id.slice("@dataset/".length)}`
     },
     load(id) {
-      if (!id.startsWith("\0" + prefix)) return
+      if (!id.startsWith(`\0${prefix}`)) return
       const datasetName = id.slice(prefix.length + 1)
       if (datasetName === "build-timeline-url") {
         return `export default document.body.dataset.dataset === "soloq"
@@ -70,8 +70,8 @@ function developmentDatasets(): Plugin {
 }
 
 export default defineConfig(({ command, mode }) => {
-  const soloq = mode === "soloq"
-  const dataset = soloq ? datasets.soloq : datasets.worlds
+  const isSoloq = mode === "soloq"
+  const dataset = isSoloq ? datasets.soloq : datasets.worlds
   return {
     root: src(""),
     publicDir: fileURLToPath(new URL("./public", import.meta.url)),
@@ -84,14 +84,14 @@ export default defineConfig(({ command, mode }) => {
       ...(mode === "analyze" ? [visualizer({ filename: "stats.html", gzipSize: true, template: "treemap" })] : []),
     ],
     server: {
-      port: soloq ? 5174 : 5173,
+      port: isSoloq ? 5174 : 5173,
       strictPort: true,
     },
     build: {
       rolldownOptions: {
-        input: (soloq ? ["soloq.html"] : ["index.html", "worlds.html", "camp.html"]).map(src),
+        input: (isSoloq ? ["soloq.html"] : ["index.html", "worlds.html", "camp.html"]).map(src),
       },
-      outDir: fileURLToPath(new URL(soloq ? "./dist-soloq" : "./dist", import.meta.url)),
+      outDir: fileURLToPath(new URL(isSoloq ? "./dist-soloq" : "./dist", import.meta.url)),
       emptyOutDir: true,
     },
     resolve: {
@@ -99,7 +99,7 @@ export default defineConfig(({ command, mode }) => {
         ...(command === "build"
           ? [
               ...Object.entries(dataset).map(([name, path]) => ({ find: `@dataset/${name}`, replacement: src(path) })),
-              { find: "@dataset/build-timeline-url", replacement: src(dataset["build-timeline"]) + "?url" },
+              { find: "@dataset/build-timeline-url", replacement: `${src(dataset["build-timeline"])}?url` },
             ]
           : []),
         { find: "@", replacement: src("") },

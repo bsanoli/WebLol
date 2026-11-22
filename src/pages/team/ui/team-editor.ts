@@ -2,7 +2,7 @@
 import { lolImage } from "@/entities/champion"
 import { iconMarkup } from "@/shared/ui/icon"
 import { revealContent } from "@/shared/lib/motion"
-import { enemyOrder, isEnemy, oppositeSide } from "../model/composition-side"
+import { enemyOrder, isEnemy } from "../model/composition-side"
 import { championsOf, draftOf, setChampions } from "../model/local-state"
 import type { ChampionSlot, Composition, DraftLane } from "../model/local-state"
 import { allMatchups, findMatchup, matchupKey } from "../model/matchups"
@@ -11,28 +11,13 @@ import { draftBoardHTML } from "./draft-board"
 import { savedListHeight } from "./tactic-list-resize"
 import { tacticsHTML } from "./tactics"
 import { capturePickFeedback } from "./pick-feedback"
-import { bindTacticDrop } from "./tactic-drop"
 import { CHOOSE_EVENT } from "./matchup-picker"
 import { clearTeamControls, mountDraftChampionMenu, mountSectionTabs, mountTeamSelect } from "./team-controls"
-import { compOf, handleEnemyChampionDrop, keepOurCompositionInDraft, newComp, renderMatchup } from "./team-comps"
+import { compOf, keepOurCompositionInDraft, newComp, renderMatchup } from "./team-comps"
 import { openPicker, placePicker, renderGrid, renderTarget, isPickerOpen } from "./team-grid"
 import { hooks, boardEnemy, session, target } from "./team-session"
 import type { ActiveSide } from "./team-session"
-import {
-  $,
-  boardSide,
-  eventTarget,
-  champArt,
-  compById,
-  cur,
-  esc,
-  hasUndo,
-  img,
-  S,
-  save,
-  toast,
-  touch,
-} from "./team-store"
+import { $, boardSide, eventTarget, champArt, cur, esc, hasUndo, img, S, save, touch } from "./team-store"
 import { mountTacticNotesIn, rememberTacticNotesScroll } from "./team-tactic-notes"
 // Arte em alta (1215×717) direto do Data Dragon; se não carregar, usa a cópia local menor.
 function pickArt(name: string) {
@@ -51,10 +36,10 @@ export function renderEditor() {
   const previousComposition = editor.dataset.motionComposition
   const previousView = editor.dataset.motionView
   const c = cur(),
-    tv = S.view === "tactics",
+    isTactics = S.view === "tactics",
     view = S.view
-  $("#v-comps").classList.toggle("draft-view", !tv)
-  $("#v-comps").classList.toggle("tactics-view", tv)
+  $("#v-comps").classList.toggle("draft-view", !isTactics)
+  $("#v-comps").classList.toggle("tactics-view", isTactics)
   const showPickFeedback =
     previousComposition === c.id && previousView === view ? capturePickFeedback(editor) : undefined
   const nameInput = $<HTMLInputElement>("#cname")
@@ -83,7 +68,7 @@ export function renderEditor() {
   clearTeamControls(editor)
   rememberTacticNotesScroll()
   editor.replaceChildren()
-  if (tv) {
+  if (isTactics) {
     editor.insertAdjacentHTML(
       "beforeend",
       `<div id="composition-panel" role="tabpanel" aria-labelledby="tab-tactics">${tacticsHTML(c, {
@@ -102,7 +87,7 @@ export function renderEditor() {
         pickArt,
       })}</div>`,
     )
-    editor.querySelectorAll<HTMLSelectElement>("select[data-pick-position]").forEach(field => mountTeamSelect(field))
+    for (const field of editor.querySelectorAll<HTMLSelectElement>("select[data-pick-position]")) mountTeamSelect(field)
     mountTacticNotesIn(editor, S.tacticsGeneral ? null : S.tacticsMatchup ? matchupKey(S.tacticsMatchup) : c.id)
     const txTabs = editor.querySelector(".tx-tabs")
     if (txTabs) txTabs.scrollTop = tabsScroll
@@ -138,7 +123,7 @@ export function renderEditor() {
     const { n = "", from = "" } = host.dataset
     mountDraftChampionMenu(host, n, () => removeChampion(n, from as ChampionSlot, compOf(host)))
   })
-  editor.querySelectorAll<HTMLSelectElement>("select[data-pick-position]").forEach(field => mountTeamSelect(field))
+  for (const field of editor.querySelectorAll<HTMLSelectElement>("select[data-pick-position]")) mountTeamSelect(field)
   placePicker()
   $("#grid").scrollTop = gridScroll
   renderTarget()
@@ -171,20 +156,20 @@ $("#editor").addEventListener("change", e => {
   if (!eventTarget(e).matches("select[data-pick-position]")) return
   // Em Táticas a troca de posição é tratada em tactic-lane-order.ts.
   if (S.view === "tactics") return
-  const enemySide = eventTarget(e).dataset.draftSide === "rival",
-    owner = enemySide ? boardEnemy() : cur()
+  const isEnemySide = eventTarget(e).dataset.draftSide === "rival",
+    owner = isEnemySide ? boardEnemy() : cur()
   if (!owner) return
-  const order = enemySide ? enemyOrder(owner, boardSide()) : draftOf(owner).order[boardSide()],
+  const order = isEnemySide ? enemyOrder(owner, boardSide()) : draftOf(owner).order[boardSide()],
     i = Number(eventTarget(e).dataset.pickPosition)
   const lane = eventTarget<HTMLSelectElement>(e).value as DraftLane,
     j = order.indexOf(lane)
   ;[order[i], order[j]] = [lane, order[i]]
   session.active = lane
-  session.side = enemySide ? "rival" : "us"
+  session.side = isEnemySide ? "rival" : "us"
   touch(owner)
   save()
   renderEditor()
-  const side = enemySide ? "rival" : "us"
+  const side = isEnemySide ? "rival" : "us"
   requestAnimationFrame(() =>
     $(`[data-pick-position="${i}"][data-draft-side="${side}"] + .team-select button`)?.focus({ preventScroll: true }),
   )

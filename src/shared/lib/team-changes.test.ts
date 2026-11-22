@@ -1,6 +1,12 @@
 import { describe as suite, expect, it } from "vitest"
 import { applyChanges, describe, diff, hsh, itemName, shared } from "./team-changes"
 
+/** Garante que o valor existe e o devolve sem `undefined`. */
+function defined<T>(value: T | null | undefined): T {
+  if (value === null || value === undefined) throw new Error("Valor ausente no teste")
+  return value
+}
+
 const comp = (id: string, extra = {}) => ({
   id,
   name: `Comp ${id}`,
@@ -48,7 +54,7 @@ suite("applyChanges", () => {
 suite("describe", () => {
   it("lista os campeões de uma comp nova", () => {
     const [change] = diff({ comps: [comp("a")] }, {})
-    expect(describe(change!)).toBe("Campeões: <b>TOP</b> Ornn · <b>MID</b> Orianna · <b>BAN</b> Zed")
+    expect(describe(defined(change))).toBe("Campeões: <b>TOP</b> Ornn · <b>MID</b> Orianna · <b>BAN</b> Zed")
   })
 
   it("resume o que mudou numa edição e escapa o texto", () => {
@@ -65,7 +71,7 @@ suite("describe", () => {
       ],
     }
     const [change] = diff(local, base)
-    expect(describe(change!).split("<br>")).toEqual([
+    expect(describe(defined(change)).split("<br>")).toEqual([
       "Nome: <b>Comp a</b> → <b>&lt;Nova&gt;</b>",
       "<b>TOP</b>: + Jax",
       "<b>MID</b>: − Orianna",
@@ -73,7 +79,7 @@ suite("describe", () => {
       "Lado alterado: nossa → adversária",
       "Adversária do draft alterada",
     ])
-    expect(itemName(change!)).toBe("<Nova>")
+    expect(itemName(defined(change))).toBe("<Nova>")
   })
 
   it("descreve tática e jogada", () => {
@@ -106,6 +112,6 @@ suite("bans nos dois formatos", () => {
     const changed = { ...novo, bans: ["Ahri"] }
     const [change] = diff({ comps: [changed] }, { comps: [old] })
     expect(change?.op).toBe("edit")
-    expect(describe(change!)).toContain("BAN")
+    expect(describe(defined(change))).toContain("BAN")
   })
 })

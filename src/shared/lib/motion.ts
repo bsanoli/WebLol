@@ -7,11 +7,11 @@ reducedMotion.addEventListener("change", () => {
   if (reducedMotion.matches) for (const animation of running) animation.cancel()
 })
 
-export function revealContent(element: Element | null, quick = false) {
+export function revealContent(element: Element | null, isQuick = false) {
   if (!element || reducedMotion.matches || !element.getClientRects().length) return
   byElement.get(element)?.cancel()
   const tokens = getComputedStyle(document.documentElement)
-  const duration = parseFloat(tokens.getPropertyValue(quick ? "--wl-motion-normal" : "--wl-motion-panel")) || 240
+  const duration = parseFloat(tokens.getPropertyValue(isQuick ? "--wl-motion-normal" : "--wl-motion-panel")) || 240
   const distance = tokens.getPropertyValue("--wl-motion-distance").trim() || "6px"
   const animation = element.animate(
     [

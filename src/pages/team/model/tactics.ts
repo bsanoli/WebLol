@@ -93,7 +93,7 @@ export function readTacticDocument(state: TacticsState, compId: string | null): 
 }
 
 /** Depois que o bloco de notas gravou as anotações antigas, elas saem da comp para não aparecer duas vezes. */
-export function clearCompNotes(comp: Composition): boolean {
+export function didClearCompNotes(comp: Composition): boolean {
   if (!pendingCompNotes(comp)) return false
   comp.notes = ""
   draftOf(comp).note = { blue: "", red: "" }

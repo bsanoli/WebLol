@@ -3,7 +3,6 @@ import { initializeTheme } from "@/shared/config"
 import { viewFromMode } from "../model/saved-data"
 import { uid, compositionPreview } from "../model/local-state"
 import { isEnemy } from "../model/composition-side"
-import type { Composition } from "../model/local-state"
 import { mountTeamNavigation } from "./team-navigation"
 import {
   clearTeamControls,
@@ -56,10 +55,10 @@ let currentTeamView: TeamView = "comps"
 let routeRequest = 0
 let tacticalMap: TacticalMap | undefined
 let renderKnow: (() => void) | undefined
-let compositionsMounted = false
-const usesParentNavigation = window.frameElement?.id === "v-camp"
-document.body.toggleAttribute("data-parent-navigation", usesParentNavigation)
-const renderTeamNavigation = usesParentNavigation
+let areCompositionsMounted = false
+const hasParentNavigation = window.frameElement?.id === "v-camp"
+document.body.toggleAttribute("data-parent-navigation", hasParentNavigation)
+const renderTeamNavigation = hasParentNavigation
   ? () => {}
   : mountTeamNavigation($("#team-navigation"), handleTeamNavigation)
 
@@ -72,14 +71,14 @@ function handleTeamNavigation(view: TeamView) {
 function showTeamView(view: TeamView) {
   currentTeamView = view
   $<HTMLDetailsElement>("#team-files").open = false
-  const filesSlot = view === "map" ? "#map-file-slot" : usesParentNavigation ? "#team-files-" + view : "#team-file-slot"
+  const filesSlot = view === "map" ? "#map-file-slot" : hasParentNavigation ? `#team-files-${view}` : "#team-file-slot"
   $(filesSlot).append($("#team-files"))
   renderTeamNavigation(view, hasCaptainAccess())
-  document.querySelectorAll(".view").forEach(section => section.classList.toggle("on", section.id === "v-" + view))
+  for (const section of document.querySelectorAll(".view")) section.classList.toggle("on", section.id === `v-${view}`)
   if (view === "comps") {
-    if (!compositionsMounted) {
+    if (!areCompositionsMounted) {
       mountTeamSelect($("#sort"))
-      compositionsMounted = true
+      areCompositionsMounted = true
     }
     renderAll()
   }
@@ -92,23 +91,23 @@ function publishTeamRoute(
   { includeItem = true, onCopy }: { includeItem?: boolean; onCopy?: () => void } = {},
 ) {
   $("#route-note").hidden = true
-  let path = "/time/" + teamPages[view]
-  if (view === "know") path += "/" + (guides[S.kTab ?? ""] || guides.obj)
+  let path = `/time/${teamPages[view]}`
+  if (view === "know") path += `/${guides[S.kTab ?? ""] || guides.obj}`
   if (includeItem && view === "comps")
-    path += "/" + encodeURIComponent(S.cur) + "?modo=" + (S.view === "tactics" ? "taticas" : "draft")
-  if (includeItem && view === "map") path += "/" + encodeURIComponent(S.curPlay ?? "")
+    path += `/${encodeURIComponent(S.cur)}?modo=${S.view === "tactics" ? "taticas" : "draft"}`
+  if (includeItem && view === "map") path += `/${encodeURIComponent(S.curPlay ?? "")}`
   navigateHost({ path, onCopy })
 }
 
 /* ===== Gestão do time (todo o time vê; só o capitão e admins agem; os dados vêm do app principal) ===== */
-let wantCaptain = false // link para a gestão aberto antes de o time carregar
+let shouldOpenCaptain = false // link para a gestão aberto antes de o time carregar
 exposeFrameHandlers({ weblolTeamChanged })
 function weblolTeamChanged() {
   renderSaveMenu()
   const ok = hasCaptainAccess()
   renderTeamNavigation(currentTeamView, ok)
-  if (ok && wantCaptain) {
-    wantCaptain = false
+  if (ok && shouldOpenCaptain) {
+    shouldOpenCaptain = false
     void openTeamView("cap")
     return
   }
@@ -128,10 +127,10 @@ exposeFrameHandlers({
 
 async function openTeamView(view: TeamView, item?: string, params?: URLSearchParams) {
   const request = ++routeRequest
-  wantCaptain = false
+  shouldOpenCaptain = false
   if (view === "cap" && !hasCaptainAccess()) {
     view = "comps"
-    wantCaptain = true
+    shouldOpenCaptain = true
   }
   const note = $("#route-note")
   if ((view === "map" && !tacticalMap) || (view === "know" && !renderKnow)) {
@@ -169,10 +168,10 @@ async function openTeamView(view: TeamView, item?: string, params?: URLSearchPar
     }
   }
   let missing = ""
-  const matches = (entry: { id: string }) => encodeURIComponent(entry.id) === item
+  const isItemMatch = (entry: { id: string }) => encodeURIComponent(entry.id) === item
   if (view === "comps") {
     if (item) {
-      const comp = S.comps.find(matches)
+      const comp = S.comps.find(isItemMatch)
       if (comp) {
         S.cur = comp.id
         if (!isEnemy(comp)) S.lastComp = comp.id
@@ -184,7 +183,7 @@ async function openTeamView(view: TeamView, item?: string, params?: URLSearchPar
     const mode = viewFromMode(params?.get("modo"))
     if (mode) S.view = mode
   } else if (view === "map" && item) {
-    const selected = plays().find(matches)
+    const selected = plays().find(isItemMatch)
     if (selected) tacticalMap?.selectPlay(selected.id)
     if (!selected)
       missing =
@@ -239,4 +238,4 @@ function renderAll() {
   renderGrid()
 }
 plays()
-if (!usesParentNavigation) void openTeamView("comps")
+if (!hasParentNavigation) void openTeamView("comps")

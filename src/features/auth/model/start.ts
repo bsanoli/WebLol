@@ -1,5 +1,5 @@
 // Partida do painel: liga o endereço, reconecta a conta salva e confere o time a cada minuto.
-import { currentFirebase, fb, ONLINE } from "@/shared/firestore"
+import { currentFirebase, fb, IS_ONLINE } from "@/shared/firestore"
 import { idbGet } from "@/shared/local-keys"
 import { $, toast } from "@/shared/lib/dom"
 import { closeModal } from "../ui/login-dialog"
@@ -36,7 +36,7 @@ function askToSignInAgain(accountId: string) {
 
 async function reconnect() {
   const account = user()
-  if (!account || !ONLINE) return
+  if (!account || !IS_ONLINE) return
   setSync("Conectando ao time…", "")
   try {
     await fb()
@@ -81,7 +81,7 @@ async function checkOfficialVersion() {
 }
 
 async function pollTeam() {
-  if (!ONLINE || !user() || !currentFirebase()?.auth.currentUser) return
+  if (!IS_ONLINE || !user() || !currentFirebase()?.auth.currentUser) return
   if (session.team) return checkOfficialVersion()
   if (session.memb?.status === "pendente") await checkPendingMembership()
 }

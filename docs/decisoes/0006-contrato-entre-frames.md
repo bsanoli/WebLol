@@ -11,7 +11,7 @@
 
 ## Decisão
 
-1. `src/shared/host-bridge/host-bridge.ts` é o único ponto em que uma tela em iframe fala com a janela pai: tipos `HostGlobals`, `HostImages`, `HostNavigation` e `FrameHandlers`, leitores com valor de reserva (`hostHasCaptainAccess`, `hostTeamName`, `hostImages`...), `navigateHost` para o evento `weblol:navigate` e `exposeFrameHandlers` para o que o app principal chama na tela.
+1. `src/shared/host-bridge/host-bridge.ts` é o único ponto em que uma tela em iframe fala com a janela pai: tipos `HostGlobals`, `HostImages`, `HostNavigation` e `FrameHandlers`, leitores com valor de reserva (`hasHostCaptainAccess`, `hostTeamName`, `hostImages`...), `navigateHost` para o evento `weblol:navigate` e `exposeFrameHandlers` para o que o app principal chama na tela.
 2. Os nomes das globais não mudam nesta parte. Com a migração do `shell.js` e do `sync.js` (4b e 4c, feita), só cinco globais restam no `window` (`exposeHostGlobals`); o adaptador troca as globais por mensagens tipadas sem tocar nas telas.
 
 3. Diferenças aceitas em relação ao código anterior: uma exceção síncrona de `renderCaptainPanel` agora é engolida pelo valor de reserva (sem log), e uma tela aberta sozinha usa direto o armazém local de prints, sem procurar `weblolImages` na própria janela.

@@ -1,8 +1,9 @@
 import { revealContent } from "@/shared/lib/motion"
 import { MATCHUP_PAGE_SIZE } from "./build-matchups"
+import { requireClosest, requireElement } from "@/shared/lib/dom"
 
 /** "Ver mais" paginado dos confrontos. Devolve true quando o clique era dele. */
-export function handleMatchupPageClick(target: Element) {
+function didHandleMatchupPageClick(target: Element) {
   const page = target.closest<HTMLElement>("[data-show-matchup-page]")
   if (!page) return false
   const hiddenRows = [...(page.previousElementSibling?.querySelectorAll<HTMLElement>("li[hidden]") ?? [])]
@@ -24,7 +25,7 @@ export function handleMatchupPageClick(target: Element) {
 }
 
 /** "Ver mais adversários" que revela a lista escondida. Devolve true quando o clique era dele. */
-export function handleMoreMatchupsClick(target: Element) {
+function didHandleMoreMatchupsClick(target: Element) {
   const more = target.closest("[data-show-matchups]")
   if (!more) return false
   const list = more.nextElementSibling as HTMLElement
@@ -36,13 +37,18 @@ export function handleMoreMatchupsClick(target: Element) {
 }
 
 /** Alterna a visão da linha do tempo de compras. Devolve true quando o clique era dela. */
-export function handleTimelineViewClick(target: Element) {
+function didHandleTimelineViewClick(target: Element) {
   const view = target.closest<HTMLButtonElement>("[data-timeline-view]")
   if (!view) return false
-  const section = view.closest(".build-timeline")!
+  const section = requireClosest<Element>(view, ".build-timeline")
   section.querySelectorAll<HTMLButtonElement>("[data-timeline-view]").forEach(button => {
     button.setAttribute("aria-pressed", String(button === view))
   })
-  section.querySelector<HTMLElement>(".build-timeline-games")!.dataset.view = view.dataset.timelineView ?? ""
+  requireElement<HTMLElement>(".build-timeline-games", section).dataset.view = view.dataset.timelineView ?? ""
   return true
+}
+
+/** Trata o clique em "Ver mais", "Ver mais adversários" ou na troca da linha do tempo; devolve true quando era de um deles. */
+export function didHandleListClick(target: Element) {
+  return didHandleMatchupPageClick(target) || didHandleMoreMatchupsClick(target) || didHandleTimelineViewClick(target)
 }

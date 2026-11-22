@@ -15,7 +15,7 @@ import {
   Undo2,
   type LucideIcon,
 } from "lucide-react"
-import { useEffect, useMemo, useRef } from "react"
+import { useCallback, useEffect, useMemo, useRef } from "react"
 import type { EditorView } from "@tiptap/pm/view"
 import { Button } from "@/shared/ui/button"
 import type { PrintStore } from "../../api/print-store"
@@ -140,7 +140,7 @@ export function TacticNotes(props: TacticNotesProps) {
   const emitted = useRef(JSON.stringify(props.doc))
   const editorRef = useRef<Editor | null>(null)
 
-  const flush = () => {
+  const flush = useCallback(() => {
     if (timer.current === undefined) return
     window.clearTimeout(timer.current)
     timer.current = undefined
@@ -149,7 +149,7 @@ export function TacticNotes(props: TacticNotesProps) {
     const doc = editor.getJSON() as TacticDoc
     emitted.current = JSON.stringify(doc)
     latest.current.onChange(doc)
-  }
+  }, [])
 
   // Comprime e guarda cada imagem e insere os prints na posição indicada (ou no cursor).
   const insertPrints = async (files: File[], at?: number) => {
@@ -157,13 +157,13 @@ export function TacticNotes(props: TacticNotesProps) {
     const editor = editorRef.current
     if (!editor || !files.length) return
     const nodes = []
-    let localOnly = false,
+    let isLocalOnly = false,
       failed = ""
     for (const file of files) {
       try {
         const result = await store.save(await compressImage(file))
         nodes.push(printNode(result.id))
-        if (!result.shared) localOnly = true
+        if (!result.shared) isLocalOnly = true
         if (result.error) failed = result.error
       } catch (error) {
         failed = error instanceof Error ? error.message : "erro"
@@ -179,7 +179,7 @@ export function TacticNotes(props: TacticNotesProps) {
     toast(
       failed
         ? "Não consegui enviar o print ao time agora. Ele será reenviado na próxima sincronização."
-        : localOnly
+        : isLocalOnly
           ? "Print salvo neste navegador. Ele vai para o time quando você sincronizar com um time."
           : nodes.length > 1
             ? `${nodes.length} prints adicionados`
@@ -266,7 +266,7 @@ export function TacticNotes(props: TacticNotesProps) {
       window.removeEventListener("pagehide", flush)
       flush()
     }
-  }, [])
+  }, [flush])
 
   return (
     <div className="tx-notes">

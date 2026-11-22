@@ -1,4 +1,5 @@
 import { isSide, sideLabel, type Side } from "../model/battlefield"
+import { requireElement } from "@/shared/lib/dom"
 
 type Composition = { id: string; name: string; champions: string[] }
 
@@ -13,11 +14,11 @@ export function mountMapCompositions({
   choose: (side: Side, id: string) => void
   portrait: (champion: string) => string
 }) {
-  const panel = document.querySelector<HTMLElement>("#panel-map-comps")!
-  const list = panel.querySelector<HTMLElement>("#map-composition-list")!
+  const panel = requireElement<HTMLElement>("#panel-map-comps")
+  const list = requireElement<HTMLElement>("#map-composition-list", panel)
   const sides = [...panel.querySelectorAll<HTMLButtonElement>("[data-composition-side]")]
   let side: Side = "b"
-  let disabled = false
+  let isDisabled = false
   let buttons: HTMLButtonElement[] = []
 
   function syncSelection() {
@@ -25,7 +26,7 @@ export function mountMapCompositions({
     const active = buttons.find(button => button.dataset.composition === id) ?? buttons[0]
     for (const button of buttons) {
       button.setAttribute("aria-pressed", String(button === active))
-      button.disabled = disabled
+      button.disabled = isDisabled
     }
   }
 
@@ -82,8 +83,8 @@ export function mountMapCompositions({
 
   return {
     render,
-    setDisabled(value: boolean) {
-      disabled = value
+    setDisabled(isDisabledNext: boolean) {
+      isDisabled = isDisabledNext
       syncSelection()
     },
   }

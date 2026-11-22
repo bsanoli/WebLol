@@ -172,8 +172,8 @@ export function splitByPendingPrints<T extends { after?: unknown }>(changes: T[]
   const ready: T[] = []
   const held: T[] = []
   for (const change of changes) {
-    const blocked = [...printIdsOf(change.after)].some(id => waiting.has(id))
-    ;(blocked ? held : ready).push(change)
+    const isBlocked = [...printIdsOf(change.after)].some(id => waiting.has(id))
+    ;(isBlocked ? held : ready).push(change)
   }
   return { ready, held }
 }

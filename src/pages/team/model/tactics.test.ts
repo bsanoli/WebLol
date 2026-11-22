@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest"
 import { blank } from "./local-state"
 import {
-  clearCompNotes,
+  didClearCompNotes,
   ensureTactics,
   hasTactic,
   normalizeOpggLink,
@@ -46,12 +46,12 @@ describe("hasTactic e documento", () => {
     expect(state.tactics).toEqual([])
   })
 
-  it("clearCompNotes limpa as anotações antigas só uma vez", () => {
+  it("didClearCompNotes limpa as anotações antigas só uma vez", () => {
     const comp = blank("Luta")
     comp.notes = "Plano"
-    expect(clearCompNotes(comp)).toBe(true)
+    expect(didClearCompNotes(comp)).toBe(true)
     expect(comp.notes).toBe("")
-    expect(clearCompNotes(comp)).toBe(false)
+    expect(didClearCompNotes(comp)).toBe(false)
   })
 
   it("writeTacticDocument guarda o documento, o texto puro e os ids dos prints", () => {

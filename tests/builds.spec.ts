@@ -71,11 +71,11 @@ test("Histórico sem compras permanece na página da build SoloQ", async ({ page
 
 test("Confrontos do campeão só baixam ao escolher um adversário e se recuperam de falha", async ({ page }) => {
   const requested: string[] = []
-  let failFirst = true
+  let shouldFailFirst = true
   await page.route("**/encounters/*.json*", async route => {
     requested.push(new URL(route.request().url()).pathname.split("/").pop() ?? "")
-    if (failFirst) {
-      failFirst = false
+    if (shouldFailFirst) {
+      shouldFailFirst = false
       await route.fulfill({ status: 503 })
       return
     }

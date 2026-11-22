@@ -11,6 +11,7 @@ import {
   ComboboxTrigger,
 } from "@/shared/ui/combobox"
 import { lolAsset, lolChampion } from "@/entities/champion"
+import { championSlug } from "@/entities/match"
 
 type Opponent = { name: string; slug: string; games: number }
 
@@ -41,6 +42,9 @@ export function WorldsOpponentSelect({
   const [trigger, setTrigger] = useState<HTMLButtonElement | null>(null)
   const [query, setQuery] = useState("")
   const selected = opponents.find(opponent => opponent.slug === value)
+  // A busca ignora acentos e pontuação, como o resto das buscas por campeão.
+  const term = championSlug(query.trim())
+  const matches = opponents.filter(opponent => championSlug(opponent.name).includes(term))
 
   useEffect(() => {
     if (restoreFocus) trigger?.focus({ preventScroll: true })
@@ -50,12 +54,13 @@ export function WorldsOpponentSelect({
     <Combobox
       value={value || ALL_OPPONENTS}
       query={query}
+      filter={false}
       onQueryChange={setQuery}
-      onOpenChange={open => {
-        if (open) setQuery("")
+      onOpenChange={isOpen => {
+        if (isOpen) setQuery("")
       }}
-      onOpenChangeComplete={open => {
-        if (!open) trigger?.focus({ preventScroll: true })
+      onOpenChangeComplete={isOpen => {
+        if (!isOpen && document.hasFocus()) trigger?.focus({ preventScroll: true })
       }}
       onValueChange={next => {
         const slug = !next || next === ALL_OPPONENTS ? "" : next
@@ -75,19 +80,14 @@ export function WorldsOpponentSelect({
         <ChevronDown aria-hidden="true" />
       </ComboboxTrigger>
       <ComboboxContent anchor={trigger}>
-        <ComboboxInput
-          data-slot="input"
-          aria-label="Pesquisar adversário"
-          placeholder="Pesquisar adversário"
-          autoFocus
-        />
+        <ComboboxInput aria-label="Pesquisar adversário" placeholder="Pesquisar adversário" autoFocus />
         <ComboboxList aria-label="Adversários">
-          {!query.trim() && (
+          {!term && (
             <ComboboxItem value={ALL_OPPONENTS} label="Todos os adversários">
               Todos os adversários
             </ComboboxItem>
           )}
-          {opponents.map(opponent => (
+          {matches.map(opponent => (
             <ComboboxItem key={opponent.slug} value={opponent.slug} label={opponent.name}>
               <OpponentLabel opponent={opponent} />
               <small className="build-opponent-count">
@@ -96,7 +96,7 @@ export function WorldsOpponentSelect({
             </ComboboxItem>
           ))}
         </ComboboxList>
-        <ComboboxEmpty>Nenhum adversário encontrado.</ComboboxEmpty>
+        {term && !matches.length && <ComboboxEmpty>Nenhum adversário encontrado.</ComboboxEmpty>}
       </ComboboxContent>
     </Combobox>
   )

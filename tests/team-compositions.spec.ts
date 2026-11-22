@@ -1,4 +1,5 @@
 import { expect, test } from "@playwright/test"
+import { boxOf } from "./support/box"
 
 test("Abre uma composição salva no formato anterior em modo Draft", async ({ page }) => {
   await page.setViewportSize({ width: 1920, height: 1080 })
@@ -47,7 +48,7 @@ test("Abre uma composição salva no formato anterior em modo Draft", async ({ p
   await matchup.getByRole("textbox").press("Enter")
   await expect(matchup.getByRole("button", { name: /Adversária\s+Time rival/ })).toBeVisible()
   await expect(team.locator(".tm.rival.mine")).toBeVisible()
-  const state = await page.evaluate(() => JSON.parse(localStorage.getItem("lol-comps-time-v1")!))
+  const state = await page.evaluate(() => JSON.parse(localStorage.getItem("lol-comps-time-v1") ?? "null"))
   const rival = state.comps.find((c: { name: string }) => c.name === "Time rival")
   expect(rival.team).toBe("enemy")
   expect(state.matchups).toHaveLength(1)
@@ -60,7 +61,7 @@ test("Abre uma composição salva no formato anterior em modo Draft", async ({ p
   await expect(matchup.getByRole("button", { name: /OP\.GG/ })).toBeVisible()
   await matchup.getByRole("button", { name: /Trocar lados/ }).click()
   await expect(matchup.locator(".matchup-team").last()).toHaveClass(/ours/)
-  const swapped = await page.evaluate(() => JSON.parse(localStorage.getItem("lol-comps-time-v1")!))
+  const swapped = await page.evaluate(() => JSON.parse(localStorage.getItem("lol-comps-time-v1") ?? "null"))
   expect(swapped.matchups[0].side).toBe("red")
 
   // Desfazer fixo: aparece depois da troca, desfaz pelo botão e por Ctrl+Z.
@@ -68,15 +69,15 @@ test("Abre uma composição salva no formato anterior em modo Draft", async ({ p
   await expect(undo).toBeVisible()
   await undo.click()
   await expect(undo).toBeHidden()
-  expect((await page.evaluate(() => JSON.parse(localStorage.getItem("lol-comps-time-v1")!))).matchups[0].side).toBe(
-    "blue",
-  )
+  expect(
+    (await page.evaluate(() => JSON.parse(localStorage.getItem("lol-comps-time-v1") ?? "null"))).matchups[0].side,
+  ).toBe("blue")
   await matchup.getByRole("button", { name: /Trocar lados/ }).click()
   await page.keyboard.press("Control+z")
   await expect(undo).toBeHidden()
-  expect((await page.evaluate(() => JSON.parse(localStorage.getItem("lol-comps-time-v1")!))).matchups[0].side).toBe(
-    "blue",
-  )
+  expect(
+    (await page.evaluate(() => JSON.parse(localStorage.getItem("lol-comps-time-v1") ?? "null"))).matchups[0].side,
+  ).toBe("blue")
   await matchup.getByRole("button", { name: /Trocar lados/ }).click()
 
   for (const viewport of [
@@ -100,7 +101,7 @@ test("Abre uma composição salva no formato anterior em modo Draft", async ({ p
   await team.locator("[data-matchup-delete]").click()
   await page.getByRole("alertdialog").getByRole("button", { name: "Excluir confronto" }).click()
   await expect(team.locator("[data-tactic-matchup]")).toHaveCount(0)
-  const after = await page.evaluate(() => JSON.parse(localStorage.getItem("lol-comps-time-v1")!))
+  const after = await page.evaluate(() => JSON.parse(localStorage.getItem("lol-comps-time-v1") ?? "null"))
   expect(after.comps.map((c: { name: string }) => c.name)).toEqual(
     expect.arrayContaining(["Composição anterior", "Time rival"]),
   )
@@ -128,7 +129,7 @@ test("Duplica e salva uma composição do formato anterior sem alterar a origina
   const name = page.getByRole("textbox", { name: "Nome da composição" })
   await expect(name).toHaveValue("Composição anterior (cópia)")
 
-  const state = await page.evaluate(() => JSON.parse(localStorage.getItem("lol-comps-time-v1")!))
+  const state = await page.evaluate(() => JSON.parse(localStorage.getItem("lol-comps-time-v1") ?? "null"))
   expect(state.cur).not.toBe(original.id)
   expect(state.comps).toHaveLength(2)
   const { ban: _ban, ...copyLanes } = original.lanes
@@ -197,7 +198,7 @@ test("Limpar tudo apaga as anotações em uma única ação reversível", async 
   await expect(clear).toBeDisabled()
 
   await team.getByRole("radio", { name: "Desenhar seta" }).click()
-  const map = (await team.locator("#map").boundingBox())!
+  const map = await boxOf(team.locator("#map"))
   const x = map.x + map.width * 0.45
   const y = map.y + map.height * 0.36
   const tokens = team.locator("#map .tok")
@@ -209,17 +210,16 @@ test("Limpar tudo apaga as anotações em uma única ação reversível", async 
   await expect(clear).toBeEnabled()
   const canvas = team.locator("#cv")
   const hasArrow = () =>
-    canvas.evaluate((node: HTMLCanvasElement) =>
-      node
-        .getContext("2d")!
-        .getImageData(0, 0, node.width, node.height)
-        .data.some((value, i) => i % 4 === 3 && value > 0),
-    )
+    canvas.evaluate((node: HTMLCanvasElement) => {
+      const context = node.getContext("2d")
+      if (!context) throw new Error("Canvas sem contexto 2d")
+      return context.getImageData(0, 0, node.width, node.height).data.some((value, i) => i % 4 === 3 && value > 0)
+    })
   expect(await hasArrow()).toBe(true)
 
   await team.getByRole("radio", { name: "Colocar ward" }).click()
   await expect(team.locator("#mapimg")).toHaveAttribute("data-map-visible", "")
-  const wardMap = (await team.locator("#map").boundingBox())!
+  const wardMap = await boxOf(team.locator("#map"))
   await page.mouse.click(wardMap.x + wardMap.width * 0.234, wardMap.y + wardMap.height * 0.236)
   const ward = team.locator("#map-wards .ward-marker")
   await team.getByRole("tab", { name: "Camadas" }).click()

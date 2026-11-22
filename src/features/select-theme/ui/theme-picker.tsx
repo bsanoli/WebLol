@@ -13,7 +13,8 @@ import { palettes, selectTheme, type PaletteId } from "@/shared/config"
 export function ThemePicker({ initialPalette }: { initialPalette: PaletteId }) {
   const [palette, setPalette] = useState(initialPalette)
   const [open, setOpen] = useState(false)
-  const selected = palettes.find(option => option.id === palette)!
+  const selected = palettes.find(option => option.id === palette)
+  if (!selected) throw new Error(`Paleta desconhecida: ${palette}`)
 
   useEffect(() => {
     if (!open) return

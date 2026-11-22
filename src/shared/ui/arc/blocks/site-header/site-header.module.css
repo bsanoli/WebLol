@@ -96,6 +96,10 @@
   min-width: 0;
   margin-left: var(--space-4);
 }
+.nav {
+  position: relative;
+  isolation: isolate;
+}
 .header[data-variant="centered"] .nav {
   margin: 0;
 }
@@ -159,10 +163,6 @@
 }
 .navItem[data-open] .chevron {
   transform: rotate(180deg);
-}
-.nav {
-  position: relative;
-  isolation: isolate;
 }
 .indicator {
   position: absolute;

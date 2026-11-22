@@ -86,7 +86,7 @@ export function mountMapStepPanel(
     if (!canChangeFrame()) return
     const p = play(),
       at = M.sel >= 0 ? M.sel + 1 : p.steps.length
-    p.steps.splice(at, 0, { label: "Passo " + (p.steps.length + 1), ...snapshotFrame(p.live) })
+    p.steps.splice(at, 0, { label: `Passo ${p.steps.length + 1}`, ...snapshotFrame(p.live) })
     M.sel = at
     save()
     renderPlays()

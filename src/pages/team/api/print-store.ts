@@ -19,7 +19,7 @@ const LOCAL_PREFIX = STORAGE_PREFIXES.screenshotCache
 
 const localImages: PrintStore = {
   async save(data) {
-    const id = "local-" + uid()
+    const id = `local-${uid()}`
     try {
       localStorage.setItem(LOCAL_PREFIX + id, data)
     } catch {

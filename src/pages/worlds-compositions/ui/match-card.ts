@@ -106,21 +106,21 @@ function compDraft(game: Game, panelId: string) {
 export function compCard(g: Game, q: string, champions: Set<string>, index: number) {
   const panelId = `match-draft-${index}`
   const draft = compDraft(g, panelId)
-  const hl = (text: string, selected = false) =>
-    selected || (q && text.toLowerCase().includes(q)) ? `<mark>${esc(text)}</mark>` : esc(text)
-  const team = (name: string, color: string, won: boolean) => `<div class="match-team" data-side="${color}">
+  const hl = (text: string, isSelected = false) =>
+    isSelected || (q && text.toLowerCase().includes(q)) ? `<mark>${esc(text)}</mark>` : esc(text)
+  const team = (name: string, color: string, isWinner: boolean) => `<div class="match-team" data-side="${color}">
     <span class="match-team-crest" aria-hidden="true">${teamLogo(name)}</span>
     <div class="match-team-label">
       <strong class="match-team-name" title="${esc(name)}">${esc(name)}</strong>
-      <small class="match-team-result"${won ? " data-winner" : ""}>${won ? "Vitória" : "Derrota"}</small>
+      <small class="match-team-result"${isWinner ? " data-winner" : ""}>${isWinner ? "Vitória" : "Derrota"}</small>
     </div>
   </div>`
-  const side = (champion: string, player: string, kda: string, right: boolean) => {
+  const side = (champion: string, player: string, kda: string, isRight: boolean) => {
     const pick = `<td class="match-pick"><div class="match-champion">
       ${ico(champion)}<div><strong>${hl(champion, champions.has(champion))}</strong><small>${hl(player)}</small></div>
     </div></td>`
     const score = `<td class="match-kda" data-tip="Abates / Mortes / Assistências de ${esc(player)}">${kda}</td>`
-    return right ? score + pick : pick + score
+    return isRight ? score + pick : pick + score
   }
   const laneRow = ([lane, blueChampion, bluePlayer, blueKda, redChampion, redPlayer, redKda]: LaneCells) =>
     `<tr>${side(blueChampion, bluePlayer, blueKda, false)}<td class="match-lane">${laneIconMarkup(lane, true)}</td>${side(redChampion, redPlayer, redKda, true)}</tr>`

@@ -5,7 +5,7 @@ type SetSync = (text: string, kind: "" | "ok" | "warn" | "bad") => void
 export const uiHooks = {
   renderAdmin: (() => {}) as () => void,
   setSync: (() => {}) as SetSync,
-  updateStatus: (() => {}) as (keepChip?: boolean) => void,
+  updateStatus: (() => {}) as (shouldKeepChip?: boolean) => void,
 }
 
 export function bindUiHooks(hooks: typeof uiHooks) {

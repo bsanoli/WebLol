@@ -42,7 +42,11 @@ const SLOTS: Slot[] = (() => {
     }
   return list
 })()
-const slotOf = (t: Team, k: "pick" | "ban", i: number) => SLOTS.find(s => s.t === t && s.k === k && s.i === i)!
+const slotOf = (t: Team, k: "pick" | "ban", i: number) => {
+  const slot = SLOTS.find(s => s.t === t && s.k === k && s.i === i)
+  if (!slot) throw new Error(`Vaga de draft inexistente: ${t} ${k} ${i}`)
+  return slot
+}
 
 export type DraftTeamOptions = DraftBoardOptions & {
   /** Versão pequena para a gaveta de Táticas: sem arte, select de posição nem alternativas. */
@@ -64,7 +68,7 @@ export function draftTeamHTML(
   const cardSide: DraftSide = t === "B" ? "blue" : "red"
   // Na Draft a barra do lado fica na borda de fora: o azul à esquerda, o vermelho à direita.
   const cardBar = t === "B" ? "start" : "end"
-  const editing = (lane: string) => !!source && activeSide === owner && active === lane
+  const isEditing = (lane: string) => !!source && activeSide === owner && active === lane
 
   const mini = (name: string, lane: ChampionSlot, index: number) =>
     `<div class="chip dchip ${index === 0 ? "primary" : "alternative"}" data-team-control draggable="true" data-n="${esc(name)}" data-from="${lane}"${index > 0 ? ` data-champion-slot="${index}" data-champion-name="${esc(name)}"` : ""}><button class="champ-priority" data-priority="${esc(name)}" data-lane="${lane}" data-draft-side="${owner}" aria-label="${index === 0 ? "Principal" : "Tornar principal"}: ${esc(name)} em ${slots[lane].n}" title="${esc(name)} · ${index + 1}ª opção · clique para tornar principal, botão direito para excluir">${img(name)}</button></div>`
@@ -74,7 +78,7 @@ export function draftTeamHTML(
       name = source?.bans[i]
     if (!source)
       return `<div class="bsq" data-l="ban" data-bi="${i}" data-empty-rival title="${s.n}º ban"><span class="bn">${s.n}</span></div>`
-    return `<div class="bsq${name ? " has" : ""} mine${editing("ban") ? " act" : ""}" data-l="ban" data-bi="${i}" data-champion-slot="${i}" data-champion-name="${esc(name)}" title="${s.n}º ban">
+    return `<div class="bsq${name ? " has" : ""} mine${isEditing("ban") ? " act" : ""}" data-l="ban" data-bi="${i}" data-champion-slot="${i}" data-champion-name="${esc(name)}" title="${s.n}º ban">
       ${name ? `<span class="dm" draggable="true" data-n="${esc(name)}" data-from="ban">${img(name)}<button type="button" class="draft-ban-remove" data-slot="button" data-variant="ghost" data-size="icon-xs" data-rm="${esc(name)}" aria-label="Remover ${esc(name)}">${iconMarkup("close")}</button></span>` : `<span class="bn">${s.n}</span>`}</div>`
   }
 
@@ -97,7 +101,7 @@ export function draftTeamHTML(
       L = slots[lane],
       list = source.lanes[lane as DraftLane],
       main = list[0],
-      on = editing(lane)
+      on = isEditing(lane)
     // Posição do pick: trocar aqui troca a ordem das posições do lado, igual na Ordem do draft e na gaveta de Táticas.
     const laneSelect = `<select data-team-select="lane" data-pick-position="${i}" data-draft-side="${owner}" aria-label="Posição do pick ${t}${i + 1}">${DRAFT_LANES.map(x => `<option value="${x}"${x === lane ? " selected" : ""}>${slots[x].n}</option>`).join("")}</select>`
     const drag = main ? ` draggable="true" data-n="${esc(main)}" data-from="${lane}"` : ""
@@ -141,7 +145,7 @@ export function draftTeamHTML(
   }
 
   const bansHead = source
-    ? `<button type="button" class="draft-ban-target" data-draft-target="ban" data-draft-side="${owner}" aria-pressed="${editing("ban")}">Bans ${editing("ban") ? '<span class="draft-editing">Editando</span>' : ""}</button>`
+    ? `<button type="button" class="draft-ban-target" data-draft-target="ban" data-draft-side="${owner}" aria-pressed="${isEditing("ban")}">Bans ${isEditing("ban") ? '<span class="draft-editing">Editando</span>' : ""}</button>`
     : '<div class="draft-phase">Bans</div>'
   const empty =
     source || compact

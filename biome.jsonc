@@ -35,30 +35,49 @@
     "domains": { "playwright": "none" },
     "rules": {
       "preset": "recommended",
-      // Nomes, como em docs/convencoes.md. Começam como aviso; a Onda 3 corrige o código existente.
+      // Nomes, como em docs/convencoes.md. Contratos (campos salvos, dados da Riot) ficam nos overrides abaixo, sem comentário no código.
       "style": {
-        "useNamingConvention": { "level": "warn", "options": { "strictCase": false } },
-        "useFilenamingConvention": { "level": "warn", "options": { "filenameCases": ["kebab-case"] } }
+        "useNamingConvention": { "level": "error", "options": { "strictCase": false } },
+        "useFilenamingConvention": { "level": "error", "options": { "filenameCases": ["kebab-case"] } }
       },
-      "nursery": { "useConsistentBooleanName": "warn" },
-      // Débito anterior à Onda 1: regras do preset que já tinham violações no código.
-      // Ficam como aviso até zerar e então voltam a ser erro (docs/auditoria-codebase.md, "Avisos do Biome").
-      "suspicious": {
-        "useIterableCallbackReturn": "warn",
-        "noImplicitAnyLet": "warn",
-        "noAssignInExpressions": "warn",
-        "noArrayIndexKey": "warn"
-      },
-      "security": { "noDangerouslySetInnerHtml": "warn" },
-      "correctness": { "useExhaustiveDependencies": "warn" },
+      "nursery": { "useConsistentBooleanName": "error" },
+      // Componentes de entrada que o Biome deve tratar como campos de formulário.
       "a11y": {
-        "useSemanticElements": "warn",
-        "noLabelWithoutControl": "warn",
-        "useValidAnchor": "warn"
+        "noLabelWithoutControl": { "level": "error", "options": { "inputComponents": ["Input", "Select"] } }
       }
     }
   },
   "overrides": [
+    {
+      // Só aqui o !important é intencional: [hidden] e "reduzir movimento" precisam vencer qualquer regra e estilo inline de biblioteca.
+      "includes": ["src/app/styles/base.css", "src/app/styles/motion.css"],
+      "linter": { "rules": { "complexity": { "noImportantStyles": "off" } } }
+    },
+    {
+      // Os mocks dos testes repetem os nomes que o módulo real exporta (IS_ONLINE, TEAM_NAME, ADMIN_FP...).
+      "includes": ["src/**/*.test.ts"],
+      "linter": {
+        "rules": {
+          "style": { "useNamingConvention": "off" },
+          "correctness": { "noComponentHookFactories": "off" }
+        }
+      }
+    },
+    {
+      // Nomes que são contrato: globais lidas pelos iframes (TEAM_NAME), códigos salvos do draft (B, R, slots),
+      // letras do catálogo, chaves da API de partidas e nomes dos dados da Riot. Mudar exige migração e ADR.
+      "includes": [
+        "src/shared/host-bridge/host-bridge.ts",
+        "src/features/auth/model/host-globals.ts",
+        "src/pages/builds/ui/build-timeline.ts",
+        "src/pages/team/model/champion-catalog.ts",
+        "src/pages/team/model/draft-order.ts",
+        "src/pages/team/ui/draft-board.ts",
+        "src/pages/team/ui/tactic-notes/champion-mention.ts",
+        "src/widgets/analytics-tooltip/model/effect-text.ts"
+      ],
+      "linter": { "rules": { "style": { "useNamingConvention": "off" } } }
+    },
     {
       "includes": ["tests/**"],
       "linter": { "domains": { "playwright": "recommended" } }

@@ -16,3 +16,17 @@ export function toast(message: string, ms = 3200) {
   clearTimeout(toastTimer)
   toastTimer = setTimeout(() => element.classList.remove("on"), ms)
 }
+
+/** Elemento que a tela precisa ter: lança um erro claro em vez de seguir com `null`. */
+export function requireElement<T extends Element = HTMLElement>(selector: string, root: ParentNode = document): T {
+  const element = root.querySelector<T>(selector)
+  if (!element) throw new Error(`Elemento não encontrado: ${selector}`)
+  return element
+}
+
+/** Ancestral que a tela precisa ter: lança um erro claro em vez de seguir com `null`. */
+export function requireClosest<T extends Element = HTMLElement>(from: Element, selector: string): T {
+  const element = from.closest<T>(selector)
+  if (!element) throw new Error(`Ancestral não encontrado: ${selector}`)
+  return element
+}

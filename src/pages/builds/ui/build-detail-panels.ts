@@ -14,7 +14,7 @@ export function createBuildDetailPanels() {
   const detailAnimations = new WeakMap<HTMLElement, ReturnType<typeof animate>>()
   const detailContents = new WeakMap<HTMLElement, DetailContent>()
 
-  const setExpanded = (button: HTMLButtonElement, expanded: boolean) => {
+  const setExpanded = (button: HTMLButtonElement, isExpanded: boolean) => {
     const detail = document.getElementById(button.getAttribute("aria-controls") ?? "") as HTMLTableRowElement
     const cell = detail.cells[0]
     const panel = cell.firstElementChild as HTMLElement
@@ -22,9 +22,9 @@ export function createBuildDetailPanels() {
     detailAnimations.get(panel)?.stop()
     detailAnimations.delete(panel)
 
-    if (!expanded && detail.contains(document.activeElement)) button.focus({ preventScroll: true })
-    button.setAttribute("aria-expanded", String(expanded))
-    detail.inert = !expanded
+    if (!isExpanded && detail.contains(document.activeElement)) button.focus({ preventScroll: true })
+    button.setAttribute("aria-expanded", String(isExpanded))
+    detail.inert = !isExpanded
     detail.hidden = false
     const content = detailContents.get(panel)
     if (!content) return
@@ -32,7 +32,7 @@ export function createBuildDetailPanels() {
       content.root.render(
         createElement(
           Collapsible,
-          { open: expanded },
+          { open: isExpanded },
           createElement(
             CollapsibleContent,
             { forceMount: true },
@@ -44,9 +44,9 @@ export function createBuildDetailPanels() {
     mountSkillOptions(content.element)
     cell.colSpan = detailColumnSpan()
     panel.style.height = ""
-    const endHeight = expanded ? panel.getBoundingClientRect().height : 0
+    const endHeight = isExpanded ? panel.getBoundingClientRect().height : 0
     const settle = () => {
-      detail.hidden = !expanded
+      detail.hidden = !isExpanded
       panel.style.height = ""
       panel.style.overflow = ""
       detailAnimations.delete(panel)

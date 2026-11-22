@@ -31,8 +31,8 @@ export function InlineName({
   onClose: () => void
 }) {
   const [value, setValue] = useState(item.name)
-  const done = (save: boolean) => {
-    if (save) onSave(value)
+  const done = (shouldSave: boolean) => {
+    if (shouldSave) onSave(value)
     onClose()
   }
   return (
@@ -121,9 +121,9 @@ export function CompPicker({
     document.addEventListener(CHOOSE_EVENT, handleRequest)
     return () => document.removeEventListener(CHOOSE_EVENT, handleRequest)
   }, [kind, setOpen])
-  const handleOpenChange = (next: boolean) => {
-    setOpen(next)
-    if (next) setQuery("")
+  const handleOpenChange = (shouldOpen: boolean) => {
+    setOpen(shouldOpen)
+    if (shouldOpen) setQuery("")
     else {
       setAnchor(null)
       startPending(null)
@@ -192,13 +192,13 @@ export function CompPicker({
           </small>
           <b title={selected?.title}>{selected ? selected.title : noneLabel}</b>
         </span>
-        {selected && <Preview html={selected.preview} />}
+        {selected && <Preview names={selected.preview} />}
         <span className="sr-only">Trocar</span>
         <ChevronDown className="matchup-chevron" aria-hidden="true" />
       </ComboboxTrigger>
       <ComboboxContent className="matchup-popover" anchor={anchor ?? trigger} aria-label={label}>
         {pending ? (
-          <div className="matchup-branch" role="group" aria-label={`Trocar por ${pending.title}`}>
+          <fieldset className="matchup-branch" aria-label={`Trocar por ${pending.title}`}>
             <p>
               Trocar por <b>{pending.title}</b>
             </p>
@@ -213,7 +213,7 @@ export function CompPicker({
             <button type="button" className="matchup-item" onClick={() => finish(pending.id, "new")}>
               <b>Criar novo confronto</b>
             </button>
-          </div>
+          </fieldset>
         ) : (
           <>
             <ComboboxInput

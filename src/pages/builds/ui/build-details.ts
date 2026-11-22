@@ -7,11 +7,11 @@ import { buildSkills } from "./build-skills"
 import { completedItems, gameCount, itemOption, percent, spellOption, starterOption, type Option } from "./build-icons"
 
 function buildSample(sample: LaneSample, position?: string, action = "") {
-  const counts = (entries: LaneSample["players"], showTeamLogo = false) =>
+  const counts = (entries: LaneSample["players"], shouldShowTeamLogo = false) =>
     `<ul class="build-sample-counts">${entries
       .map(
         ([name, count]) =>
-          `<li><span class="build-sample-person">${showTeamLogo ? teamLogo(String(name)) : ""}${esc(name)}</span><strong>${count}</strong></li>`,
+          `<li><span class="build-sample-person">${shouldShowTeamLogo ? teamLogo(String(name)) : ""}${esc(name)}</span><strong>${count}</strong></li>`,
       )
       .join("")}</ul>`
   const metrics = [
@@ -47,7 +47,7 @@ function frequencyList(options: Option[]) {
     .join("")}</ul>`
 }
 
-function buildHtml(champion: Champion, lane: string, withTimeline: boolean, opponent: string) {
+function buildHtml(champion: Champion, lane: string, hasTimeline: boolean, opponent: string) {
   if (opponent && encountersStatus(champion.name) !== "ready") {
     return encountersStatus(champion.name) === "error"
       ? `<p class="build-data-sample" role="status">Não foi possível carregar os confrontos de ${esc(champion.name)}. Escolha o adversário de novo para tentar outra vez.</p>`
@@ -92,7 +92,7 @@ function buildHtml(champion: Champion, lane: string, withTimeline: boolean, oppo
       </div>
     </div>
     ${
-      withTimeline
+      hasTimeline
         ? `<section class="build-timeline" data-build-timeline="${esc(champion.name)}" data-lane="${esc(lane)}" data-opponent="${esc(opponent)}" aria-label="Compras jogo a jogo">
       ${buildTimelineLoading()}
     </section>`
@@ -107,8 +107,8 @@ export function buildTimelineLoading() {
 }
 
 /** `withTimeline`: mostra "Compras jogo a jogo" (só na página do campeão). */
-export function buildDetails(champion: Champion, lane: string, action = "", withTimeline = false, opponent = "") {
-  if (opponent) return buildHtml(champion, lane, withTimeline, opponent)
+export function buildDetails(champion: Champion, lane: string, action = "", hasTimeline = false, opponent = "") {
+  if (opponent) return buildHtml(champion, lane, hasTimeline, opponent)
   const samples = Object.entries(champion.lanes)
     .filter(([position, sample]) => (!lane || position === lane) && sample.sampleGames)
     .map(([position, sample], index) => buildSample(sample, position, index === 0 ? action : ""))
@@ -116,6 +116,6 @@ export function buildDetails(champion: Champion, lane: string, action = "", with
   const missingSample = lane ? `<p class="hint">Sem estatísticas de desempenho coletadas em ${esc(lane)}.</p>` : ""
   return (
     (samples || `<div class="build-sample-heading">${missingSample}${action}</div>`) +
-    buildHtml(champion, lane, withTimeline, opponent)
+    buildHtml(champion, lane, hasTimeline, opponent)
   )
 }

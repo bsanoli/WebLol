@@ -35,7 +35,8 @@ function decodeTerrain(style: MapStyle) {
     brushGroup[cell] = group
     const pending = [cell]
     while (pending.length) {
-      const current = pending.pop()!
+      const current = pending.pop()
+      if (current === undefined) break
       const col = current % width
       const adjacent = [
         col > 0 ? current - 1 : -1,

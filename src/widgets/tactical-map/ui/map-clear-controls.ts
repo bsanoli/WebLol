@@ -14,7 +14,7 @@ export function mountMapClearControls({ canChangeFrame, play, layers, actions }:
   const resetMap = $<HTMLButtonElement>("#map-reset")
   const initialPositions = initialFrame().pos
 
-  function frameHasChanges() {
+  function hasFrameChanges() {
     const { pos, lines, wards, waves, destroyedTowers } = play().live
     return Boolean(
       lines?.length ||
@@ -33,7 +33,7 @@ export function mountMapClearControls({ canChangeFrame, play, layers, actions }:
     clearStrokes.disabled = !canEdit || !lines?.some(line => !hasArrowhead(line))
     clearWaves.disabled = !canEdit || !hasWaves
     clearMap.disabled = !canEdit || !hasAnnotations
-    resetMap.disabled = !canChangeFrame() || (layers.vision.getPerspective() === "all" && !frameHasChanges())
+    resetMap.disabled = !canChangeFrame() || (layers.vision.getPerspective() === "all" && !hasFrameChanges())
   }
   function resetSelections() {
     layers.drawing.reset()
@@ -56,7 +56,7 @@ export function mountMapClearControls({ canChangeFrame, play, layers, actions }:
   }
   resetMap.onclick = () => {
     if (resetMap.disabled) return
-    if (frameHasChanges()) {
+    if (hasFrameChanges()) {
       resetSelections()
       actions.writeFrame(initialFrame())
     }

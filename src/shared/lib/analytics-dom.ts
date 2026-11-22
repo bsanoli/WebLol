@@ -17,9 +17,8 @@ export function enhanceAnalyticsUI() {
         : "Tabela de estatísticas. Role horizontalmente para ver todas as colunas.",
     )
   })
-  document
-    .querySelectorAll("tr.main")
-    .forEach(el => el.setAttribute("aria-expanded", String(el.classList.contains("open"))))
+  for (const el of document.querySelectorAll("tr.main"))
+    el.setAttribute("aria-expanded", String(el.classList.contains("open")))
   document.querySelectorAll<HTMLElement>("[data-tip]").forEach(el => {
     if (el.matches(".item,.rune-token,.preview-item")) el.tabIndex = 0
     el.setAttribute("aria-describedby", "tip")

@@ -2,12 +2,15 @@ type Slot = { champion: string; element: HTMLElement }
 
 function championGroups(editor: HTMLElement) {
   return new Map(
-    [...editor.querySelectorAll<HTMLElement>("[data-champion-group]")].map(group => {
+    [...editor.querySelectorAll<HTMLElement>("[data-champion-group]")].flatMap(group => {
+      const groupKey = group.dataset.championGroup
+      if (!groupKey) return []
       const slots = new Map<string, Slot>()
       for (const element of group.querySelectorAll<HTMLElement>("[data-champion-slot]")) {
-        slots.set(element.dataset.championSlot!, { champion: element.dataset.championName ?? "", element })
+        const slotKey = element.dataset.championSlot
+        if (slotKey) slots.set(slotKey, { champion: element.dataset.championName ?? "", element })
       }
-      return [group.dataset.championGroup!, { group, slots }] as const
+      return [[groupKey, { group, slots }] as const]
     }),
   )
 }

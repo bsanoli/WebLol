@@ -1,5 +1,5 @@
 // Primeiros passos do acesso: Riot ID, conexão com o banco e entrada sem usuário.
-import { dbGet, fb, ONLINE } from "@/shared/firestore"
+import { dbGet, fb, IS_ONLINE } from "@/shared/firestore"
 import { dispId, isAdminId, safeName } from "@/shared/lib/account-id"
 import { slotOf } from "@/shared/lib/admin-crypto"
 import { $, toast } from "@/shared/lib/dom"
@@ -68,7 +68,7 @@ export function stepId() {
 
 async function afterId() {
   mstatus("Conectando ao banco do time…")
-  if (!ONLINE) return merr("O banco online ainda não foi configurado neste app.")
+  if (!IS_ONLINE) return merr("O banco online ainda não foi configurado neste app.")
   try {
     await fb()
   } catch {

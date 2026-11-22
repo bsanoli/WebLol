@@ -18,12 +18,12 @@ import {
 
 export type BuildSort = { k: string; d: number }
 
-export function buildMatchesQuery(champion: Champion, lane: string, query: string) {
+export function doesBuildMatchQuery(champion: Champion, lane: string, query: string) {
   const term = query.normalize("NFD").replace(/\p{M}/gu, "").toLowerCase()
-  const matches = (value: string) => value.normalize("NFD").replace(/\p{M}/gu, "").toLowerCase().includes(term)
-  if (matches(champion.name)) return true
+  const isMatch = (value: string) => value.normalize("NFD").replace(/\p{M}/gu, "").toLowerCase().includes(term)
+  if (isMatch(champion.name)) return true
   const build = championBuild(champion, lane)
-  return build?.finalItems.some(({ value }) => matches(itemLabels[value] ?? "") || matches(itemKeys.get(value) ?? ""))
+  return build?.finalItems.some(({ value }) => isMatch(itemLabels[value] ?? "") || isMatch(itemKeys.get(value) ?? ""))
 }
 
 const missingBuildOption = '<span class="na" aria-label="Sem dados">—</span>'
