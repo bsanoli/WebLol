@@ -1,0 +1,80 @@
+# Antes e depois das telas em cada PR (docs/decisoes/0010-ui-diff-nos-prs.md).
+# Posta um único comentário no PR, atualizado a cada push, com o veredito e as mudanças medidas.
+# As imagens vão para a branch órfã `ui-diff-assets` deste repositório, que é público: por isso as
+# rotas do ui-diff.config.json cobrem só telas públicas (sem login nem Administração).
+name: ui-diff
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
+
+permissions:
+  contents: write # grava as imagens na branch ui-diff-assets
+  pull-requests: write # cria e atualiza o comentário
+
+concurrency:
+  group: ui-diff-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+env:
+  # Versão fixa do ui-diff (https://github.com/imuratalpay/ui-diff). Para atualizar, troque o commit e revise o CHANGELOG.
+  UI_DIFF_REF: 9d511f63c99c81337f143051cd942e9e8dbfb32b
+  UI_DIFF_BROWSER_CHANNEL: chrome
+  GH_TOKEN: ${{ github.token }}
+
+jobs:
+  ui-diff:
+    name: Antes e depois
+    # PRs de fork recebem token só de leitura; ficam de fora.
+    if: github.event.pull_request.head.repo.full_name == github.repository && !github.event.pull_request.draft
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: npm
+
+      - name: Instalar dependências do WebLol
+        run: npm ci
+
+      - name: Baixar o ui-diff na versão fixa
+        run: |
+          git clone --quiet https://github.com/imuratalpay/ui-diff.git "$RUNNER_TEMP/ui-diff"
+          git -C "$RUNNER_TEMP/ui-diff" checkout --quiet "$UI_DIFF_REF"
+          npm --prefix "$RUNNER_TEMP/ui-diff/skills/ui-diff" ci --no-audit --no-fund
+          echo "UI_DIFF=node $RUNNER_TEMP/ui-diff/skills/ui-diff/bin/ui-diff.mjs" >> "$GITHUB_ENV"
+
+      - name: Calcular a chave do cache da base
+        id: chave
+        run: |
+          $UI_DIFF cache-key --quiet --base "origin/${{ github.base_ref }}" --head "${{ github.event.pull_request.head.sha }}" > "$RUNNER_TEMP/chave.json"
+          echo "key=ui-diff-$(jq -r .key "$RUNNER_TEMP/chave.json")" >> "$GITHUB_OUTPUT"
+
+      - uses: actions/cache@v6
+        with:
+          path: .ui-diff/cache
+          key: ${{ steps.chave.outputs.key }}
+
+      - name: Capturar e comparar
+        run: $UI_DIFF run --base "origin/${{ github.base_ref }}" --head "${{ github.event.pull_request.head.sha }}"
+
+      - name: Publicar o comentário
+        # --allow-public-repo: decisão registrada na ADR 0010.
+        run: $UI_DIFF publish --pr ${{ github.event.pull_request.number }} --allow-public-repo
+
+      - name: Guardar o relatório completo
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: ui-diff-report
+          path: |
+            .ui-diff
+            !.ui-diff/cache
+          include-hidden-files: true
+          retention-days: 14

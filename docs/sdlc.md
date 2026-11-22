@@ -33,9 +33,10 @@ Na dúvida entre dois tamanhos, escolha o maior só se a mudança tocar algo sal
 | 1. Pedido | Claude reescreve a mensagem como resultado esperado e critérios de aceite, com os termos do [glossário](glossario.md), e classifica o tamanho. | Em M e G, a pessoa confirma ou corrige a interpretação. Em M, se a mensagem já autoriza a execução (`implemente`, `corrija`, `bora`) e nenhuma dúvida muda a entrega, a interpretação fica registrada e a implementação segue. A dúvida vem como pergunta com opções, a recomendada primeiro. | Seção "Pedido" do [modelo](pedidos/_modelo.md) |
 | 2. Especificação (só G) | Telas e estados (vazio, texto longo, erro, carregando), dados e migração, rotas, impacto nos builds Worlds e SoloQ, termos novos. | Fabiano aprova. O Bruno só age no que exigir a conta dele ou as regras do Firestore. | Seção "Especificação" e ADR, se houver decisão |
 | 3. Plano | No modo de planejamento: arquivos por camada FSD, testes a criar ou ajustar, riscos. Em G, ondas que possam ser publicadas uma de cada vez. | Aprovação do plano em G. Em M, o plano é mostrado e a implementação segue. | Seção "Plano" |
+| 3b. Protótipo (opcional, interface nova) | Quando a interface é nova ou redesenhada e há mais de um caminho plausível, a skill [prototype](../.agents/skills/prototype/SKILL.md) (Emil Kowalski) monta 3 variantes realmente diferentes atrás de um seletor, usando os tokens do WebLol. Fabiano escolhe no navegador e a variante vencedora segue para a implementação. | Fabiano escolhe a variante | Variante escolhida registrada no "Plano" |
 | 4. Implementação | Código conforme as [convenções](convencoes.md) e testes junto do código. Os ganchos rodam o Biome no arquivo editado e o `npm run check` no fim do turno. | — | Diff |
 | 5. Verificação | `npm run verify`, testes Playwright da área e conferência no navegador desktop pelo fluxo real. Em M e G, o agente [change-verifier](agentes/change-verifier.md) confere o diff contra o pedido em contexto novo. | Tudo passa ou a falha é anterior e está registrada. | Resumo da verificação |
-| 6. Revisão e publicação | Checklist de [revisão](revisao.md). "publique" aciona a skill [weblol-publicar](../.agents/skills/weblol-publicar/SKILL.md). Em G, um PR. | Pedido explícito de publicação | Commit, push e PR |
+| 6. Revisão e publicação | Checklist de [revisão](revisao.md). "publique" aciona a skill [weblol-publicar](../.agents/skills/weblol-publicar/SKILL.md). Em G, um PR. Em PR que muda interface, leia o comentário do [ui-diff](decisoes/0010-ui-diff-nos-prs.md): cada mudança medida é intencional ou vira ajuste. | Pedido explícito de publicação | Commit, push e PR |
 | 7. Aprendizado | Cada correção feita pela pessoa vira regra no lugar certo (veja o [ciclo de padronização](#ciclo-de-padronização)). | — | Glossário, convenções, ADR, skill ou verificação |
 
 ### Pronto para começar (M e G)
@@ -68,12 +69,23 @@ Escreva como de costume. As frases abaixo são atalhos que Claude e Codex reconh
 | `regra: …` | Registra a regra no lugar certo e já aplica no trabalho atual |
 | `termo: X = Y` | Acrescenta ao glossário |
 | `decisão: …` | Cria uma ADR em `docs/decisoes/` |
+| `/prototype <peça de interface>` | Monta variantes da peça atrás de um seletor, espera a escolha e promove a vencedora. Só roda quando chamada pelo nome. Veja [Protótipos](#protótipos) |
 | `revise <área ou diff>` | Revisão pelo [checklist](revisao.md), com achados por severidade e sem editar |
 | `padronize <área>` | Aplica o glossário e as convenções numa área, sem mudar o comportamento |
 | `refatore <área>` | Pega o item do [backlog](auditoria-codebase.md#backlog-por-ondas), planeja e executa por ondas |
 | `explique …`, `por que …?` | Só explica |
 | `onde paramos?` | Lê `docs/pedidos/` e o backlog e resume o que está aberto |
 | `publique` | Commit, push e GitHub Pages |
+
+## Protótipos
+
+A skill `prototype` vem de [emilkowalski/skills](https://github.com/emilkowalski/skills) pelo `npx skills`, registrada em `skills-lock.json`. Ela é de divergência: não revisa telas existentes.
+
+- **Quando usar:** peça de interface nova ou redesenhada, com mais de um caminho plausível. Em P e em ajustes de caso único, não use.
+- **Uma peça por vez.** Para uma tela inteira, escolha a peça de maior impacto e deixe o resto para outra rodada.
+- **Onde vive:** fora das camadas FSD e do código de produção. Nada em `src/` importa o protótipo, e o `npm run check` continua passando. A superfície do protótipo é apagada depois da escolha (ou mantida só se a pessoa pedir) e nunca entra em commit.
+- **Como fica:** as variantes usam os tokens e componentes do WebLol, conteúdo realista (times, campeões, números plausíveis) e valem para desktop. Cada variante respeita [weblol-ui](../.agents/skills/weblol-ui/SKILL.md), Gestalt e WCAG 2.2 AA.
+- **Escolha:** `keep <variante>` promove a vencedora seguindo as convenções e o FSD. `riff <variante>` gera nova rodada ao redor dela.
 
 ## Ciclo de padronização
 
@@ -102,6 +114,7 @@ Quando a pessoa corrige uma entrega, a correção diz algo sobre o processo. Se 
 | Antes de a sessão encerrar o turno | Biome e `npm run check`, que inclui o Steiger (gancho `Stop`) | Ativo desde a Onda 1 |
 | No commit | Biome nos arquivos staged, com as correções automáticas (Lefthook `pre-commit`) | Ativo desde a Onda 1, instalado pelo `npm install` |
 | No push | `npm run check` (arquitetura, tipos e Oxlint com regras de tipos) e Vitest (Lefthook `pre-push`) | Ativo desde a Onda 1; Oxlint desde a Onda 2 |
+| Em todo PR do repositório (fora rascunhos) | ui-diff: captura as telas afetadas na base e no PR e comenta o antes e depois, com as mudanças medidas ([ADR 0010](decisoes/0010-ui-diff-nos-prs.md)). Informativo, não bloqueia | Proposto, ativo depois do merge de `ui-diff.yml` |
 | Em todo push para o GitHub | Biome, `npm run check`, `sincronizar-skills --check`, Knip, Vitest, build, `size-limit` e Playwright com axe (`ci.yml`). O PR mostra o resultado do push da branch | Ativo desde a Onda 1 |
 | Na publicação | Build e deploy | Deploy por artefato do GitHub Actions a cada push na `main` ([ADR 0003](decisoes/0003-publicacao-por-artefato.md)). |
 
