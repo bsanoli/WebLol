@@ -28,3 +28,6 @@ stats.html
 firestore-debug.log
 ui-debug.log
 firebase-debug.log
+
+# Resultado local do ui-diff
+/.ui-diff/

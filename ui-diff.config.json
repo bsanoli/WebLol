@@ -1,0 +1,54 @@
+{
+  "$schema": "https://raw.githubusercontent.com/imuratalpay/ui-diff/9d511f63c99c81337f143051cd942e9e8dbfb32b/skills/ui-diff/schema/ui-diff.config.schema.json",
+  "startCommand": "npm run dev -- --port {port}",
+  "readyPath": "/worlds.html",
+  "startTimeoutMs": 120000,
+  "routes": [
+    {
+      "path": "/worlds.html",
+      "name": "worlds",
+      "files": [
+        "src/worlds.html",
+        "src/app/entrypoints/worlds.ts",
+        "src/pages/worlds-overview/**",
+        "src/pages/worlds-compositions/**",
+        "src/pages/builds/**",
+        "src/widgets/tournament-overview/**",
+        "src/widgets/analytics-tooltip/**"
+      ]
+    },
+    {
+      "path": "/soloq.html",
+      "name": "soloq",
+      "files": ["src/soloq.html", "src/app/entrypoints/soloq.ts", "src/data/soloq/**"]
+    },
+    {
+      "path": "/camp.html",
+      "name": "camp",
+      "files": [
+        "src/camp.html",
+        "src/app/entrypoints/team.ts",
+        "src/pages/team/**",
+        "src/widgets/tactical-map/**",
+        "src/widgets/team-knowledge/**"
+      ]
+    }
+  ],
+  "globalFiles": [
+    "src/app/styles/**",
+    "src/shared/ui/**",
+    "src/shared/lib/**",
+    "src/entities/**",
+    "src/features/select-theme/**",
+    "public/**",
+    "vite.config.ts",
+    "package-lock.json"
+  ],
+  "viewports": [{ "name": "desktop", "width": 1440, "height": 900 }],
+  "themes": [{ "name": "padrao" }],
+  "freeze": { "time": "2026-11-22T12:00:00Z" },
+  "detect": {
+    "maxRoutes": 6,
+    "exclude": ["tests/**", "tests-rules/**", "docs/**", "**/*.md", "src/data/**/*.json"]
+  }
+}

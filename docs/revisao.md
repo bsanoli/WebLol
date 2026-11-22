@@ -37,6 +37,7 @@ Não reporte como achado o que o lint, o formatador ou o `npm run check` já apo
 - Skill [weblol-ui](../.agents/skills/weblol-ui/SKILL.md): tokens, regra dos 8, Gestalt, foco por teclado, cursor e hover em itens clicáveis.
 - Conferido em desktop com nomes longos, campos ausentes, estado vazio e valores extremos, nos temas que a tela usa.
 - `prefers-reduced-motion` respeitado nas animações novas.
+- Comentário do ui-diff no PR lido: cada mudança medida é pedida, e o que mudou sem ser pedido é corrigido ou explicado no resumo. Telas fora das três rotas (login, Administração, dados de time) seguem só pela conferência manual.
 - Entrada nova no topo de `src/app/config/ui-versions.json` (o tipo fica em `ui-versions.ts`).
 
 **Desempenho**

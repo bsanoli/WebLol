@@ -12,6 +12,7 @@ Numere em sequência (`0005-assunto.md`). Uma ADR aceita não muda de conteúdo.
 | [0004](0004-ferramentas-de-qualidade.md) | Lint, formatação, código sem uso, CI e ganchos do Claude Code | Proposta |
 | [0005](0005-bans-e-validacao-de-dados.md) | Bans em lista própria no código e validação com Zod Mini | Aceita |
 | [0008](0008-onde-moram-os-estilos.md) | Onde moram os estilos e os tokens de cor | Aceita |
+| [0010](0010-ui-diff-nos-prs.md) | Antes e depois das telas em cada PR com o ui-diff | Proposta |
 
 ## Modelo
 
