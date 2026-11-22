@@ -21,6 +21,7 @@ O [ui-diff](https://github.com/imuratalpay/ui-diff) captura as telas afetadas na
 - `detect.conventions` fica desligado. As pastas `src/pages/` do FSD não são rotas, e a convenção inventava caminhos como `/team/ui/tactics`. Só as rotas declaradas são capturadas.
 - O comentário é informativo. Não bloqueia o merge, porque a mudança visual intencional é o caso normal de um PR de interface.
 - No [processo](../sdlc.md), a etapa de revisão passa a incluir ler o comentário do ui-diff em PRs que mudam interface.
+- O ui-diff não roda neste computador (sem WSL2) e só comenta depois que o PR existe. Por isso, antes de abrir o PR, a sessão mostra no chat o antes e depois capturado no navegador local, com o mesmo fluxo da rota. O comentário do CI continua sendo a fonte das medidas.
 
 ## Consequências
 
