@@ -90,11 +90,11 @@ test("Confrontos do campeão só baixam ao escolher um adversário e se recupera
   expect(requested).toEqual([])
 
   await builds.locator("#build-opponent-trigger").click()
-  await builds.getByRole("group", { name: "Adversários" }).getByRole("button").nth(1).click()
+  await builds.getByRole("listbox", { name: "Adversários" }).getByRole("option").nth(1).click()
   await expect(builds.getByText("Não foi possível carregar os confrontos de Jayce.", { exact: false })).toBeVisible()
 
   await builds.locator("#build-opponent-trigger").click()
-  await builds.getByRole("group", { name: "Adversários" }).getByRole("button").nth(2).click()
+  await builds.getByRole("listbox", { name: "Adversários" }).getByRole("option").nth(2).click()
   await expect(builds.locator(".build-card-meta")).toContainText(/Amostra de \d+ jogos?/)
   await expect(builds.getByText("Não foi possível carregar os confrontos", { exact: false })).toHaveCount(0)
   expect(new Set(requested)).toEqual(new Set(["jayce.json"]))
@@ -113,9 +113,9 @@ test("Trocar de adversário enquanto os confrontos carregam não deixa o card pr
   await expect(builds.locator(".build-card-meta")).toContainText(/Amostra de \d+ jogos?/)
 
   await builds.locator("#build-opponent-trigger").click()
-  await builds.getByRole("group", { name: "Adversários" }).getByRole("button").nth(1).click()
+  await builds.getByRole("listbox", { name: "Adversários" }).getByRole("option").nth(1).click()
   await builds.locator("#build-opponent-trigger").click()
-  await builds.getByRole("group", { name: "Adversários" }).getByRole("button").nth(2).click()
+  await builds.getByRole("listbox", { name: "Adversários" }).getByRole("option").nth(2).click()
 
   await expect(builds.locator(".build-card-meta")).toContainText(/Amostra de \d+ jogos?/, { timeout: 10000 })
   await expect(builds.getByText("Carregando os confrontos", { exact: false })).toHaveCount(0)

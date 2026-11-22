@@ -1,9 +1,17 @@
-import { useEffect, useId, useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import { ChevronDown } from "lucide-react"
 import { Input } from "@/shared/ui/input"
-import { Popover, PopoverAnchor, PopoverContent, PopoverTrigger } from "@/shared/ui/popover"
+import {
+  Combobox,
+  ComboboxContent,
+  ComboboxEmpty,
+  ComboboxInput,
+  ComboboxItem,
+  ComboboxList,
+  ComboboxTrigger,
+} from "@/shared/ui/combobox"
 import type { DraftSide } from "../model/local-state"
-import { Icon, keepFocusOutsideFrame, useTeamOverlay } from "./team-controls"
+import { Icon, useTeamOverlay } from "./team-controls"
 import { MatchupOption, Preview, type MatchupItem } from "./matchup-preview"
 
 /** Nome da comp editável no próprio card do lado: Enter ou sair do campo salva, Esc cancela. */
@@ -63,6 +71,10 @@ export type ChoiceMode = "replace" | "new"
 /** Evento que os botões do quadro disparam para abrir a lista de composições junto deles. */
 export const CHOOSE_EVENT = "weblol:choose-comp"
 
+/** Valores reservados das linhas fixas da lista; os demais valores são ids de composição. */
+const NONE_VALUE = "__none__"
+const NEW_VALUE = "__new__"
+
 export function CompPicker({
   kind,
   label,
@@ -89,8 +101,16 @@ export function CompPicker({
 }) {
   const { open, setOpen } = useTeamOverlay()
   const [query, setQuery] = useState("")
+  const [trigger, setTrigger] = useState<HTMLButtonElement | null>(null)
   // Botões fora da barra ("Escolher existente") pedem o menu e ele abre junto do botão clicado.
   const [anchor, setAnchor] = useState<HTMLElement | null>(null)
+  const [pending, setPending] = useState<MatchupItem | null>(null)
+  // Espelha `pending` para os eventos do Combobox, que chegam antes de o React renderizar de novo.
+  const pendingRef = useRef<MatchupItem | null>(null)
+  const startPending = (item: MatchupItem | null) => {
+    pendingRef.current = item
+    setPending(item)
+  }
   useEffect(() => {
     const handleRequest = (event: Event) => {
       const detail = (event as CustomEvent<{ kind: string; anchor: HTMLElement }>).detail
@@ -103,12 +123,12 @@ export function CompPicker({
   }, [kind, setOpen])
   const handleOpenChange = (next: boolean) => {
     setOpen(next)
-    if (!next) {
+    if (next) setQuery("")
+    else {
       setAnchor(null)
-      setPending(null)
+      startPending(null)
     }
   }
-  const searchId = useId()
   const q = query.trim().toLowerCase()
   const matches = items.filter(
     item =>
@@ -119,26 +139,52 @@ export function CompPicker({
   )
   const create = () => {
     handleOpenChange(false)
-    setQuery("")
     queueMicrotask(onNew)
   }
-  const [pending, setPending] = useState<MatchupItem | null>(null)
   const finish = (id: string | null, mode?: ChoiceMode) => {
     handleOpenChange(false)
-    setQuery("")
-    setPending(null)
     queueMicrotask(() => onSelect(id, mode))
   }
   const choose = (id: string | null) => {
     if (id === (selected?.id ?? null)) return handleOpenChange(false)
     const picked = items.find(item => item.id === id)
-    if (branch && picked) setPending(picked)
+    if (branch && picked) startPending(picked)
     else finish(id)
   }
+  const handleValueChange = (value: string | null) => {
+    if (value === NEW_VALUE) create()
+    else choose(!value || value === NONE_VALUE ? null : value)
+  }
   return (
-    <Popover open={open} onOpenChange={handleOpenChange}>
-      {anchor && <PopoverAnchor virtualRef={{ current: anchor }} />}
-      <PopoverTrigger className={`matchup-pick ${kind}`} data-matchup={kind}>
+    <Combobox
+      open={open}
+      value={selected?.id ?? NONE_VALUE}
+      query={query}
+      filter={false}
+      onQueryChange={setQuery}
+      onValueChange={handleValueChange}
+      onOpenChange={(next, details) => {
+        // Com a pergunta de substituir ou criar na tela, só Esc e clique fora fecham o menu.
+        if (!next && pendingRef.current && (details.reason === "focus-out" || details.reason === "item-press")) {
+          details.cancel()
+          return
+        }
+        // Escolher a comp que já está selecionada não dispara onValueChange: fecha por aqui.
+        if (!next && branch && details.reason === "item-press") {
+          details.cancel()
+          queueMicrotask(() => {
+            if (!pendingRef.current) handleOpenChange(false)
+          })
+          return
+        }
+        handleOpenChange(next)
+      }}
+      onOpenChangeComplete={next => {
+        // Dentro do iframe, só devolve o foco ao botão quando a página ainda o tem.
+        if (!next && document.hasFocus()) trigger?.focus({ preventScroll: true })
+      }}
+    >
+      <ComboboxTrigger ref={setTrigger} className={`matchup-pick ${kind}`} data-matchup={kind}>
         <span className="matchup-pick-text">
           <small>
             <span className={`side-dot ${side}`} aria-hidden="true" />
@@ -149,14 +195,8 @@ export function CompPicker({
         {selected && <Preview html={selected.preview} />}
         <span className="sr-only">Trocar</span>
         <ChevronDown className="matchup-chevron" aria-hidden="true" />
-      </PopoverTrigger>
-      <PopoverContent
-        className="matchup-popover"
-        align="start"
-        collisionPadding={8}
-        aria-label={label}
-        onCloseAutoFocus={keepFocusOutsideFrame}
-      >
+      </ComboboxTrigger>
+      <ComboboxContent className="matchup-popover" anchor={anchor ?? trigger} aria-label={label}>
         {pending ? (
           <div className="matchup-branch" role="group" aria-label={`Trocar por ${pending.title}`}>
             <p>
@@ -176,47 +216,38 @@ export function CompPicker({
           </div>
         ) : (
           <>
-            <Input
-              id={searchId}
-              type="search"
+            <ComboboxInput
               aria-label={`Buscar ${label.toLowerCase()} pelo nome ou campeão`}
-              value={query}
               placeholder="Nome ou campeão"
               autoFocus
-              onChange={event => setQuery(event.target.value)}
             />
-            <div className="matchup-list" role="group" aria-label={label}>
+            <ComboboxList className="matchup-list" aria-label={label}>
               {!q && (
-                <button type="button" className="matchup-item new" onClick={create}>
+                <ComboboxItem className="matchup-item new" value={NEW_VALUE} label={newLabel}>
                   <b>
                     <Icon name="plus" /> {newLabel}
                   </b>
-                </button>
+                </ComboboxItem>
               )}
               {noneLabel && !q && (
-                <button
-                  type="button"
-                  className="matchup-item none"
-                  aria-pressed={!selected}
-                  onClick={() => choose(null)}
-                >
+                <ComboboxItem className="matchup-item none" value={NONE_VALUE} label={noneLabel}>
                   <b>{noneLabel}</b>
-                </button>
+                </ComboboxItem>
               )}
               {matches.map(item => (
-                <MatchupOption key={item.id} item={item} selected={item.id === selected?.id} onChoose={choose} />
+                <MatchupOption key={item.id} item={item} />
               ))}
-              {!matches.length && (
-                <p className="matchup-empty" role="status">
-                  {items.length
-                    ? "Nenhuma composição encontrada. Tente outro nome ou campeão."
-                    : "Nenhuma composição ainda."}
-                </p>
-              )}
-            </div>
+            </ComboboxList>
+            {!matches.length && (
+              <ComboboxEmpty className="matchup-empty">
+                {items.length
+                  ? "Nenhuma composição encontrada. Tente outro nome ou campeão."
+                  : "Nenhuma composição ainda."}
+              </ComboboxEmpty>
+            )}
           </>
         )}
-      </PopoverContent>
-    </Popover>
+      </ComboboxContent>
+    </Combobox>
   )
 }
