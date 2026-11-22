@@ -17,6 +17,8 @@ O [ui-diff](https://github.com/imuratalpay/ui-diff) captura as telas afetadas na
 - A configuração fica em `ui-diff.config.json`. Captura em desktop 1440×900, relógio fixo, nas três páginas que o shell mostra em iframes: `/worlds.html`, `/soloq.html` e `/camp.html`. Cada rota lista os arquivos que a afetam, e `globalFiles` marca o que afeta todas.
 - O repositório é público e o ui-diff recusa publicar imagens nele. O workflow usa `--allow-public-repo`, e as imagens ficam na branch órfã `ui-diff-assets`, visíveis a qualquer pessoa. Isso só é aceitável porque as rotas cobrem telas que o site já publica. Login e Administração (`index.html` com conta) ficam fora e não podem entrar na configuração sem nova decisão.
 - A Área do time é capturada no estado vazio (sem `localStorage`), então o comentário mostra layout, não dados reais de um time.
+- Táticas tem uma rota própria (`camp-taticas`). Como a página aberta sozinha começa na Ordem do draft, a rota abre Táticas por cliques (`actions`) e cria uma adversária de teste (`Adversária 1`), que só existe no navegador da captura. Assim o comentário mostra o cabeçalho, o bloco de notas e o quadro de Táticas.
+- `detect.conventions` fica desligado. As pastas `src/pages/` do FSD não são rotas, e a convenção inventava caminhos como `/team/ui/tactics`. Só as rotas declaradas são capturadas.
 - O comentário é informativo. Não bloqueia o merge, porque a mudança visual intencional é o caso normal de um PR de interface.
 - No [processo](../sdlc.md), a etapa de revisão passa a incluir ler o comentário do ui-diff em PRs que mudam interface.
 
