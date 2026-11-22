@@ -27,8 +27,9 @@
 
 .tx {
   display: grid;
-  grid-template-columns: minmax(0, 1.35fr) minmax(360px, 1fr);
-  gap: var(--wl-panel-gap, 12px);
+  /* Notas | alça de largura (12px) | gaveta. `--tx-aside-w` vem da alça; sem ele vale a proporção padrão. */
+  grid-template-columns: minmax(0, 1.35fr) 12px var(--tx-aside-w, minmax(360px, 1fr));
+  column-gap: 0;
   flex: 1 1 auto;
   min-height: 0;
   width: 100%;
@@ -579,8 +580,12 @@
 .tx-aside {
   transition: opacity 0.2s ease;
 }
+/* Durante o arraste da alça a largura acompanha o mouse, sem a animação de abrir/fechar a gaveta. */
+.tx:has(.tx-vresize.dragging) {
+  transition: none;
+}
 .tx.drawer-closed {
-  grid-template-columns: minmax(0, 1fr) 0;
+  grid-template-columns: minmax(0, 1fr) 0 0;
   column-gap: 0;
 }
 @media (prefers-reduced-motion: reduce) {
@@ -2222,7 +2227,32 @@
 .tx-tabs.list-collapsed + .tx-resize {
   display: none;
 }
+/* Alça de largura entre o bloco de notas e a gaveta: ocupa a coluna de 12px que separa os dois */
+.tx-vresize {
+  position: relative;
+  cursor: col-resize;
+  touch-action: none;
+}
+.tx-vresize::after {
+  position: absolute;
+  inset: 35% auto 35% 5px;
+  width: 2px;
+  border-radius: 1px;
+  background: var(--wl-line, var(--line));
+  content: "";
+  transition: background-color 0.15s ease;
+}
+.tx-vresize:hover::after,
+.tx-vresize.dragging::after,
+.tx-vresize:focus-visible::after {
+  background: var(--wl-accent, var(--acc));
+}
+.tx-vresize:focus-visible {
+  outline: 2px solid var(--wl-accent, var(--acc));
+  outline-offset: -2px;
+}
 @media (prefers-reduced-motion: reduce) {
+  .tx-vresize::after,
   .tx-resize::after {
     transition: none;
   }

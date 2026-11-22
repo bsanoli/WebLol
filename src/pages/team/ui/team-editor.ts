@@ -8,6 +8,7 @@ import type { ChampionSlot, Composition, DraftLane } from "../model/local-state"
 import { allMatchups, findMatchup, matchupKey } from "../model/matchups"
 import { SLOT_INFO } from "../model/champion-slots"
 import { draftBoardHTML } from "./draft-board"
+import { savedAsideWidth } from "./tactic-aside-resize"
 import { savedListHeight } from "./tactic-list-resize"
 import { tacticsHTML } from "./tactics"
 import { capturePickFeedback } from "./pick-feedback"
@@ -78,6 +79,7 @@ export function renderEditor() {
         drawer: S.tacticsDrawer !== false,
         listCollapsed: S.tacticsListCollapsed === true,
         listHeight: savedListHeight(S.tacticsListHeight),
+        asideWidth: savedAsideWidth(S.tacticsAsideWidth),
         canUndo: hasUndo(),
         boardView: S.tacticsBoard === "positions" ? "positions" : "draft",
         matchupId: S.tacticsMatchup,

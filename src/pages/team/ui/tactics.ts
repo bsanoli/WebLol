@@ -5,6 +5,7 @@ import { draftOf, type Composition, type ChampionSlot, type DraftLane, type Draf
 import type { SlotInfo } from "../model/champion-slots"
 import { enemiesOf, isEnemy, oppositeSide, oursOf, enemyOrder, ownerOf } from "../model/composition-side"
 import { opggOf } from "../model/tactics"
+import { asideResizeHTML } from "./tactic-aside-resize"
 import { listResizeHTML } from "./tactic-list-resize"
 import { matchupRowHTML } from "./tactic-matchup-row"
 import { draftTeamHTML } from "./draft-board"
@@ -162,6 +163,8 @@ export type TacticsOptions = Markup & {
   /** Lista de composições recolhida: só as abas aparecem e o quadro ganha altura. */
   listCollapsed?: boolean
   listHeight?: number
+  /** Largura da gaveta em px, ajustada pela alça; sem valor usa a padrão. */
+  asideWidth?: number
   /** Há uma ação para desfazer; o botão fica visível ao lado de "Trocar lados". */
   canUndo?: boolean
   matchups: Matchup[]
@@ -181,6 +184,7 @@ export function tacticsHTML(
     drawer = true,
     listCollapsed = false,
     listHeight,
+    asideWidth,
     canUndo = false,
     boardView = "draft",
     slots,
@@ -226,11 +230,11 @@ export function tacticsHTML(
       ? ""
       : enemy
         ? "Como jogar contra esta composição: ameaças, picks a negar e como vencer as lutas."
-        : "Como jogar com esta composição: rotações, objetivos, lutas e condição de vitória."
+        : ""
   const body = tacticBoardHTML(c, general, active, boardView, { slots, img, esc, pickArt }, canUndo)
   const drawerToggle = `<button type="button" data-slot="button" data-variant="outline" data-size="sm" class="tx-drawer-toggle" data-tactic-drawer
     aria-expanded="${drawer}" aria-controls="tx-aside" title="${drawer ? "Esconder a lista de composições e o draft" : "Mostrar a lista de composições e o draft"}">${iconMarkup("next")}<span>Composições e draft</span></button>`
-  return `<div class="tx${drawer ? "" : " drawer-closed"}">
+  return `<div class="tx${drawer ? "" : " drawer-closed"}"${asideWidth ? ` style="--tx-aside-w:${asideWidth}px"` : ""}>
     <section class="tx-write">
       <div class="tx-head">
         <div class="tx-head-text"><h2 class="tx-title" id="tx-title">${title}</h2>
@@ -241,6 +245,7 @@ export function tacticsHTML(
       </div>
       <div class="tx-notes-slot" data-tactic-notes-slot><p class="tx-notes-loading">Carregando o bloco de notas…</p></div>
     </section>
+    ${drawer ? asideResizeHTML(asideWidth) : ""}
     <aside class="tx-aside" id="tx-aside" aria-label="Composições e draft"${drawer ? "" : " inert"}>
       <div class="tx-tabs${listCollapsed ? " list-collapsed" : ""}"${listHeight ? ` style="--tx-list-h:${listHeight}px"` : ""}>
         <div class="tx-listbar"><div class="tx-listtabs" role="tablist" aria-label="Composições">${listTab("ours", "Nossas", ours.length)}${listTab("enemy", "Adversárias", enemies.length)}${listTab("matchup", "Confrontos", matchups.length)}</div>

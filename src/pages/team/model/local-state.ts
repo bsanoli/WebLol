@@ -80,6 +80,8 @@ export type TeamState = {
   tacticsListCollapsed?: boolean
   /** Altura da lista de composições da gaveta, em px, ajustada pela alça; sem valor usa a altura padrão. */
   tacticsListHeight?: number
+  /** Largura da gaveta de Táticas (lista e quadro), em px, ajustada pela alça entre ela e o bloco de notas; sem valor usa a largura padrão. */
+  tacticsAsideWidth?: number
   /** Visão do quadro de Táticas: `draft` (cards com arte) ou `positions` (visão Lane, só ícones). */
   tacticsBoard?: "draft" | "positions"
   /** Aba do Conhecimento aberta (`wave` ou `obj`). */
