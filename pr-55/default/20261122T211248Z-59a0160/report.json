@@ -1,0 +1,695 @@
+{
+  "version": 3,
+  "tool": {
+    "name": "ui-diff",
+    "version": "2.0.0"
+  },
+  "createdAt": "2026-11-22T21:12:48.416Z",
+  "routes": [
+    {
+      "path": "/soloq.html",
+      "name": "soloq",
+      "reasons": [
+        "src/app/entrypoints/soloq.ts matches src/app/entrypoints/soloq.ts",
+        "imported: src/app/entrypoints/worlds.ts → src/app/entrypoints/soloq.ts",
+        "imported: src/pages/builds/model/build-statistics.ts → … → src/app/entrypoints/soloq.ts",
+        "imported: src/pages/builds/ui/build-details.ts → … → src/app/entrypoints/soloq.ts",
+        "imported: src/pages/builds/ui/build-matchups.ts → … → src/app/entrypoints/soloq.ts",
+        "imported: src/pages/worlds-compositions/model/comp-filters.ts → … → src/app/entrypoints/soloq.ts",
+        "imported: src/pages/worlds-compositions/ui/match-card.ts → … → src/app/entrypoints/soloq.ts",
+        "app-wide file src/entities/match/index.ts changed",
+        "app-wide file src/entities/match/model/summary.test.ts changed",
+        "app-wide file src/entities/match/model/summary.ts changed"
+      ],
+      "confidence": "high"
+    },
+    {
+      "path": "/worlds.html",
+      "name": "worlds",
+      "reasons": [
+        "src/app/entrypoints/worlds.ts matches src/app/entrypoints/worlds.ts",
+        "src/pages/builds/model/build-statistics.ts matches src/pages/builds/**",
+        "src/pages/builds/ui/build-details.ts matches src/pages/builds/**",
+        "src/pages/builds/ui/build-matchups.ts matches src/pages/builds/**",
+        "src/pages/worlds-compositions/model/comp-filters.ts matches src/pages/worlds-compositions/**",
+        "src/pages/worlds-compositions/ui/match-card.ts matches src/pages/worlds-compositions/**",
+        "app-wide file src/entities/match/index.ts changed",
+        "app-wide file src/entities/match/model/summary.test.ts changed",
+        "app-wide file src/entities/match/model/summary.ts changed"
+      ],
+      "confidence": "high"
+    },
+    {
+      "path": "/camp.html",
+      "name": "camp",
+      "reasons": [
+        "app-wide file src/entities/match/index.ts changed",
+        "app-wide file src/entities/match/model/summary.test.ts changed",
+        "app-wide file src/entities/match/model/summary.ts changed"
+      ],
+      "confidence": "medium"
+    },
+    {
+      "path": "/camp.html?captura=taticas",
+      "name": "camp-taticas",
+      "reasons": [
+        "app-wide file src/entities/match/index.ts changed",
+        "app-wide file src/entities/match/model/summary.test.ts changed",
+        "app-wide file src/entities/match/model/summary.ts changed"
+      ],
+      "confidence": "medium"
+    }
+  ],
+  "detect": {
+    "uiFiles": [
+      "src/app/entrypoints/soloq.ts",
+      "src/app/entrypoints/worlds.ts",
+      "src/entities/match/index.ts",
+      "src/entities/match/model/summary.test.ts",
+      "src/entities/match/model/summary.ts",
+      "src/features/auth/model/membership.test.ts",
+      "src/features/auth/model/router-events.test.ts",
+      "src/pages/builds/model/build-statistics.ts",
+      "src/pages/builds/ui/build-details.ts",
+      "src/pages/builds/ui/build-matchups.ts",
+      "src/pages/worlds-compositions/model/comp-filters.ts",
+      "src/pages/worlds-compositions/ui/match-card.ts",
+      "src/vite-env.d.ts",
+      "tsconfig.json"
+    ],
+    "unmatched": [
+      "src/features/auth/model/membership.test.ts",
+      "src/features/auth/model/router-events.test.ts",
+      "src/vite-env.d.ts",
+      "tsconfig.json"
+    ],
+    "skippedRoutes": [],
+    "needsExample": [],
+    "notes": []
+  },
+  "viewports": [
+    "desktop"
+  ],
+  "themes": [
+    "padrao"
+  ],
+  "base": {
+    "label": "main @ 69a6090",
+    "mode": "worktree",
+    "sha": "69a609026b06e4e0308e091a3ea06291031c0469",
+    "shortSha": "69a6090",
+    "ref": "69a609026b06e4e0308e091a3ea06291031c0469",
+    "includesUncommitted": false
+  },
+  "head": {
+    "label": "59a0160",
+    "mode": "worktree",
+    "sha": "59a01603ae5f27741a982c4441a6f83cc8ef23db",
+    "shortSha": "59a0160",
+    "ref": "59a01603ae5f27741a982c4441a6f83cc8ef23db",
+    "includesUncommitted": false
+  },
+  "captures": [
+    {
+      "id": "soloq__desktop__padrao",
+      "route": {
+        "path": "/soloq.html",
+        "name": "soloq",
+        "slug": "soloq"
+      },
+      "viewport": "desktop",
+      "theme": "padrao",
+      "status": "unchanged",
+      "urls": {},
+      "images": {
+        "focus": [],
+        "base": "captures/base/soloq__desktop__padrao.png",
+        "head": "captures/head/soloq__desktop__padrao.png"
+      },
+      "warnings": [
+        "base: style snapshot stopped at 2500 elements (capture.styleMaxElements); elements further down the page were not recorded, so the token audit and the style diff do not cover them",
+        "head: style snapshot stopped at 2500 elements (capture.styleMaxElements); elements further down the page were not recorded, so the token audit and the style diff do not cover them",
+        "page is taller than capture.maxHeight (4000px); only the top part was compared"
+      ],
+      "truncated": true,
+      "fingerprint": {
+        "base": {
+          "commit": "69a609026b06e4e0308e091a3ea06291031c0469",
+          "viewport": {
+            "width": 1440,
+            "height": 900,
+            "deviceScaleFactor": 1,
+            "isMobile": false
+          },
+          "browser": {
+            "name": "chrome",
+            "version": "157.0.8103.78",
+            "userAgent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/157.0.0.0 Safari/537.36"
+          },
+          "fonts": {
+            "loaded": [
+              "Barlow",
+              "Barlow Condensed"
+            ],
+            "failed": [],
+            "pending": []
+          },
+          "freeze": {
+            "clock": "2026-11-22T12:00:00.000Z",
+            "seed": 795556381,
+            "animations": true,
+            "fonts": true
+          },
+          "media": {
+            "reducedMotion": "reduce",
+            "colorScheme": "light",
+            "locale": "en-US",
+            "timezone": "UTC"
+          },
+          "data": "not declared",
+          "cache": {
+            "hit": false,
+            "key": "base-69a609026b06-d63e1b67559f1b09"
+          }
+        },
+        "head": {
+          "commit": "59a01603ae5f27741a982c4441a6f83cc8ef23db",
+          "viewport": {
+            "width": 1440,
+            "height": 900,
+            "deviceScaleFactor": 1,
+            "isMobile": false
+          },
+          "browser": {
+            "name": "chrome",
+            "version": "157.0.8103.78",
+            "userAgent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/157.0.0.0 Safari/537.36"
+          },
+          "fonts": {
+            "loaded": [
+              "Barlow",
+              "Barlow Condensed"
+            ],
+            "failed": [],
+            "pending": []
+          },
+          "freeze": {
+            "clock": "2026-11-22T12:00:00.000Z",
+            "seed": 795556381,
+            "animations": true,
+            "fonts": true
+          },
+          "media": {
+            "reducedMotion": "reduce",
+            "colorScheme": "light",
+            "locale": "en-US",
+            "timezone": "UTC"
+          },
+          "data": "not declared"
+        },
+        "differences": []
+      },
+      "diff": {
+        "changedPixels": 0,
+        "ratio": 0,
+        "regions": [],
+        "scale": 1,
+        "sizeBefore": [
+          1440,
+          4000
+        ],
+        "sizeAfter": [
+          1440,
+          4000
+        ],
+        "sizeChanged": false
+      },
+      "elementMap": {
+        "base": {
+          "elements": 2500,
+          "capped": true
+        },
+        "head": {
+          "elements": 2500,
+          "capped": true
+        }
+      },
+      "styleDiff": {
+        "matched": {
+          "high": 533,
+          "medium": 1967,
+          "low": 0
+        },
+        "changes": [],
+        "regions": []
+      }
+    },
+    {
+      "id": "worlds__desktop__padrao",
+      "route": {
+        "path": "/worlds.html",
+        "name": "worlds",
+        "slug": "worlds"
+      },
+      "viewport": "desktop",
+      "theme": "padrao",
+      "status": "unchanged",
+      "urls": {},
+      "images": {
+        "focus": [],
+        "base": "captures/base/worlds__desktop__padrao.png",
+        "head": "captures/head/worlds__desktop__padrao.png"
+      },
+      "warnings": [],
+      "truncated": false,
+      "fingerprint": {
+        "base": {
+          "commit": "69a609026b06e4e0308e091a3ea06291031c0469",
+          "viewport": {
+            "width": 1440,
+            "height": 900,
+            "deviceScaleFactor": 1,
+            "isMobile": false
+          },
+          "browser": {
+            "name": "chrome",
+            "version": "157.0.8103.78",
+            "userAgent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/157.0.0.0 Safari/537.36"
+          },
+          "fonts": {
+            "loaded": [
+              "Barlow",
+              "Barlow Condensed"
+            ],
+            "failed": [],
+            "pending": []
+          },
+          "freeze": {
+            "clock": "2026-11-22T12:00:00.000Z",
+            "seed": 795556381,
+            "animations": true,
+            "fonts": true
+          },
+          "media": {
+            "reducedMotion": "reduce",
+            "colorScheme": "light",
+            "locale": "en-US",
+            "timezone": "UTC"
+          },
+          "data": "not declared",
+          "cache": {
+            "hit": false,
+            "key": "base-69a609026b06-d63e1b67559f1b09"
+          }
+        },
+        "head": {
+          "commit": "59a01603ae5f27741a982c4441a6f83cc8ef23db",
+          "viewport": {
+            "width": 1440,
+            "height": 900,
+            "deviceScaleFactor": 1,
+            "isMobile": false
+          },
+          "browser": {
+            "name": "chrome",
+            "version": "157.0.8103.78",
+            "userAgent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/157.0.0.0 Safari/537.36"
+          },
+          "fonts": {
+            "loaded": [
+              "Barlow",
+              "Barlow Condensed"
+            ],
+            "failed": [],
+            "pending": []
+          },
+          "freeze": {
+            "clock": "2026-11-22T12:00:00.000Z",
+            "seed": 795556381,
+            "animations": true,
+            "fonts": true
+          },
+          "media": {
+            "reducedMotion": "reduce",
+            "colorScheme": "light",
+            "locale": "en-US",
+            "timezone": "UTC"
+          },
+          "data": "not declared"
+        },
+        "differences": []
+      },
+      "diff": {
+        "changedPixels": 0,
+        "ratio": 0,
+        "regions": [],
+        "scale": 1,
+        "sizeBefore": [
+          1440,
+          2050
+        ],
+        "sizeAfter": [
+          1440,
+          2050
+        ],
+        "sizeChanged": false
+      },
+      "elementMap": {
+        "base": {
+          "elements": 710
+        },
+        "head": {
+          "elements": 710
+        }
+      },
+      "styleDiff": {
+        "matched": {
+          "high": 23,
+          "medium": 687,
+          "low": 0
+        },
+        "changes": [],
+        "regions": []
+      }
+    },
+    {
+      "id": "camp__desktop__padrao",
+      "route": {
+        "path": "/camp.html",
+        "name": "camp",
+        "slug": "camp"
+      },
+      "viewport": "desktop",
+      "theme": "padrao",
+      "status": "unchanged",
+      "urls": {},
+      "images": {
+        "focus": [],
+        "base": "captures/base/camp__desktop__padrao.png",
+        "head": "captures/head/camp__desktop__padrao.png"
+      },
+      "warnings": [],
+      "truncated": false,
+      "fingerprint": {
+        "base": {
+          "commit": "69a609026b06e4e0308e091a3ea06291031c0469",
+          "viewport": {
+            "width": 1440,
+            "height": 900,
+            "deviceScaleFactor": 1,
+            "isMobile": false
+          },
+          "browser": {
+            "name": "chrome",
+            "version": "157.0.8103.78",
+            "userAgent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/157.0.0.0 Safari/537.36"
+          },
+          "fonts": {
+            "loaded": [
+              "Barlow",
+              "Barlow Condensed"
+            ],
+            "failed": [],
+            "pending": []
+          },
+          "freeze": {
+            "clock": "2026-11-22T12:00:00.000Z",
+            "seed": 795556381,
+            "animations": true,
+            "fonts": true
+          },
+          "media": {
+            "reducedMotion": "reduce",
+            "colorScheme": "light",
+            "locale": "en-US",
+            "timezone": "UTC"
+          },
+          "data": "not declared",
+          "cache": {
+            "hit": false,
+            "key": "base-69a609026b06-d63e1b67559f1b09"
+          }
+        },
+        "head": {
+          "commit": "59a01603ae5f27741a982c4441a6f83cc8ef23db",
+          "viewport": {
+            "width": 1440,
+            "height": 900,
+            "deviceScaleFactor": 1,
+            "isMobile": false
+          },
+          "browser": {
+            "name": "chrome",
+            "version": "157.0.8103.78",
+            "userAgent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/157.0.0.0 Safari/537.36"
+          },
+          "fonts": {
+            "loaded": [
+              "Barlow",
+              "Barlow Condensed"
+            ],
+            "failed": [],
+            "pending": []
+          },
+          "freeze": {
+            "clock": "2026-11-22T12:00:00.000Z",
+            "seed": 795556381,
+            "animations": true,
+            "fonts": true
+          },
+          "media": {
+            "reducedMotion": "reduce",
+            "colorScheme": "light",
+            "locale": "en-US",
+            "timezone": "UTC"
+          },
+          "data": "not declared"
+        },
+        "differences": []
+      },
+      "diff": {
+        "changedPixels": 0,
+        "ratio": 0,
+        "regions": [],
+        "scale": 1,
+        "sizeBefore": [
+          1440,
+          900
+        ],
+        "sizeAfter": [
+          1440,
+          900
+        ],
+        "sizeChanged": false
+      },
+      "elementMap": {
+        "base": {
+          "elements": 1040
+        },
+        "head": {
+          "elements": 1040
+        }
+      },
+      "styleDiff": {
+        "matched": {
+          "high": 252,
+          "medium": 788,
+          "low": 0
+        },
+        "changes": [],
+        "regions": []
+      }
+    },
+    {
+      "id": "camp-taticas__desktop__padrao",
+      "route": {
+        "path": "/camp.html?captura=taticas",
+        "name": "camp-taticas",
+        "slug": "camp-taticas"
+      },
+      "viewport": "desktop",
+      "theme": "padrao",
+      "status": "unchanged",
+      "urls": {},
+      "images": {
+        "focus": [],
+        "base": "captures/base/camp-taticas__desktop__padrao.png",
+        "head": "captures/head/camp-taticas__desktop__padrao.png"
+      },
+      "warnings": [],
+      "truncated": false,
+      "fingerprint": {
+        "base": {
+          "commit": "69a609026b06e4e0308e091a3ea06291031c0469",
+          "viewport": {
+            "width": 1440,
+            "height": 900,
+            "deviceScaleFactor": 1,
+            "isMobile": false
+          },
+          "browser": {
+            "name": "chrome",
+            "version": "157.0.8103.78",
+            "userAgent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/157.0.0.0 Safari/537.36"
+          },
+          "fonts": {
+            "loaded": [
+              "Barlow",
+              "Barlow Condensed"
+            ],
+            "failed": [],
+            "pending": []
+          },
+          "freeze": {
+            "clock": "2026-11-22T12:00:00.000Z",
+            "seed": 795556381,
+            "animations": true,
+            "fonts": true
+          },
+          "media": {
+            "reducedMotion": "reduce",
+            "colorScheme": "light",
+            "locale": "en-US",
+            "timezone": "UTC"
+          },
+          "data": "not declared",
+          "cache": {
+            "hit": false,
+            "key": "base-69a609026b06-d63e1b67559f1b09"
+          }
+        },
+        "head": {
+          "commit": "59a01603ae5f27741a982c4441a6f83cc8ef23db",
+          "viewport": {
+            "width": 1440,
+            "height": 900,
+            "deviceScaleFactor": 1,
+            "isMobile": false
+          },
+          "browser": {
+            "name": "chrome",
+            "version": "157.0.8103.78",
+            "userAgent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/157.0.0.0 Safari/537.36"
+          },
+          "fonts": {
+            "loaded": [
+              "Barlow",
+              "Barlow Condensed"
+            ],
+            "failed": [],
+            "pending": []
+          },
+          "freeze": {
+            "clock": "2026-11-22T12:00:00.000Z",
+            "seed": 795556381,
+            "animations": true,
+            "fonts": true
+          },
+          "media": {
+            "reducedMotion": "reduce",
+            "colorScheme": "light",
+            "locale": "en-US",
+            "timezone": "UTC"
+          },
+          "data": "not declared"
+        },
+        "differences": []
+      },
+      "diff": {
+        "changedPixels": 0,
+        "ratio": 0,
+        "regions": [],
+        "scale": 1,
+        "sizeBefore": [
+          1440,
+          900
+        ],
+        "sizeAfter": [
+          1440,
+          900
+        ],
+        "sizeChanged": false
+      },
+      "elementMap": {
+        "base": {
+          "elements": 257
+        },
+        "head": {
+          "elements": 257
+        }
+      },
+      "styleDiff": {
+        "matched": {
+          "high": 80,
+          "medium": 177,
+          "low": 0
+        },
+        "changes": [],
+        "regions": []
+      }
+    }
+  ],
+  "variants": [],
+  "motion": [],
+  "baseCache": {
+    "key": "base-69a609026b06-d63e1b67559f1b09",
+    "hit": false,
+    "configHash": "192c02bd104a6654",
+    "browser": "chrome 157.0.8103.78",
+    "uiDiffVersion": "2.0.0",
+    "stored": true
+  },
+  "warnings": [
+    "1 capture was cut at capture.maxHeight (4000px): soloq__desktop__padrao. Changes below that line are not compared; raise capture.maxHeight to include them."
+  ],
+  "stats": {
+    "captures": 4,
+    "changed": 0,
+    "unchanged": 4,
+    "added": 0,
+    "removed": 0,
+    "errors": 0
+  },
+  "timings": {
+    "totalMs": 60064,
+    "detectMs": 83,
+    "prepare": {
+      "wallMs": 1132,
+      "base": {
+        "mode": "worktree",
+        "checkoutMs": 198,
+        "install": {
+          "kind": "linked",
+          "ms": 20
+        },
+        "bootMs": 877,
+        "totalMs": 1127
+      },
+      "head": {
+        "mode": "worktree",
+        "checkoutMs": 148,
+        "install": {
+          "kind": "linked",
+          "ms": 19
+        },
+        "bootMs": 937,
+        "totalMs": 1128
+      }
+    },
+    "browserMs": 136,
+    "capture": {
+      "ms": 57410,
+      "count": 8,
+      "slowest": {
+        "id": "soloq__desktop__padrao",
+        "side": "base",
+        "ms": 21628
+      }
+    },
+    "diffMs": 942,
+    "extras": {
+      "styleDiffMs": 327,
+      "elementMapMs": 6265
+    }
+  }
+}

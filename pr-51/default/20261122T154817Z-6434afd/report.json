@@ -1,0 +1,379 @@
+{
+  "version": 3,
+  "tool": {
+    "name": "ui-diff",
+    "version": "2.0.0"
+  },
+  "createdAt": "2026-11-22T15:48:17.740Z",
+  "routes": [
+    {
+      "path": "/camp.html",
+      "name": "camp",
+      "reasons": [
+        "src/pages/team/ui/tactics.css matches src/pages/team/**",
+        "src/pages/team/ui/tactics.ts matches src/pages/team/**"
+      ],
+      "confidence": "high"
+    },
+    {
+      "path": "/team/ui/tactics",
+      "name": "/team/ui/tactics",
+      "reasons": [
+        "src/pages/team/ui/tactics.ts is the next-pages page for /team/ui/tactics"
+      ],
+      "confidence": "high"
+    }
+  ],
+  "detect": {
+    "uiFiles": [
+      "skills-lock.json",
+      "src/pages/team/ui/tactics.css",
+      "src/pages/team/ui/tactics.ts"
+    ],
+    "unmatched": [
+      "skills-lock.json"
+    ],
+    "skippedRoutes": [],
+    "needsExample": [],
+    "notes": []
+  },
+  "viewports": [
+    "desktop"
+  ],
+  "themes": [
+    "padrao"
+  ],
+  "base": {
+    "label": "main @ e608476",
+    "mode": "worktree",
+    "sha": "e608476fdde0e5c9ee9c3deac424d1bbf77cefc9",
+    "shortSha": "e608476",
+    "ref": "e608476fdde0e5c9ee9c3deac424d1bbf77cefc9",
+    "includesUncommitted": false
+  },
+  "head": {
+    "label": "6434afd",
+    "mode": "worktree",
+    "sha": "6434afdb94f23672a843b62bb4e3dfc01ebe7479",
+    "shortSha": "6434afd",
+    "ref": "6434afdb94f23672a843b62bb4e3dfc01ebe7479",
+    "includesUncommitted": false
+  },
+  "captures": [
+    {
+      "id": "camp__desktop__padrao",
+      "route": {
+        "path": "/camp.html",
+        "name": "camp",
+        "slug": "camp"
+      },
+      "viewport": "desktop",
+      "theme": "padrao",
+      "status": "unchanged",
+      "urls": {},
+      "images": {
+        "focus": [],
+        "base": "captures/base/camp__desktop__padrao.png",
+        "head": "captures/head/camp__desktop__padrao.png"
+      },
+      "warnings": [],
+      "truncated": false,
+      "fingerprint": {
+        "base": {
+          "commit": "e608476fdde0e5c9ee9c3deac424d1bbf77cefc9",
+          "viewport": {
+            "width": 1440,
+            "height": 900,
+            "deviceScaleFactor": 1,
+            "isMobile": false
+          },
+          "browser": {
+            "name": "chrome",
+            "version": "157.0.8103.78",
+            "userAgent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/157.0.0.0 Safari/537.36"
+          },
+          "fonts": {
+            "loaded": [
+              "Barlow",
+              "Barlow Condensed"
+            ],
+            "failed": [],
+            "pending": []
+          },
+          "freeze": {
+            "clock": "2026-11-22T12:00:00.000Z",
+            "seed": 795556381,
+            "animations": true,
+            "fonts": true
+          },
+          "media": {
+            "reducedMotion": "reduce",
+            "colorScheme": "light",
+            "locale": "en-US",
+            "timezone": "UTC"
+          },
+          "data": "not declared",
+          "cache": {
+            "hit": false,
+            "key": "base-e608476fdde0-495cca1553e5887a"
+          }
+        },
+        "head": {
+          "commit": "6434afdb94f23672a843b62bb4e3dfc01ebe7479",
+          "viewport": {
+            "width": 1440,
+            "height": 900,
+            "deviceScaleFactor": 1,
+            "isMobile": false
+          },
+          "browser": {
+            "name": "chrome",
+            "version": "157.0.8103.78",
+            "userAgent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/157.0.0.0 Safari/537.36"
+          },
+          "fonts": {
+            "loaded": [
+              "Barlow",
+              "Barlow Condensed"
+            ],
+            "failed": [],
+            "pending": []
+          },
+          "freeze": {
+            "clock": "2026-11-22T12:00:00.000Z",
+            "seed": 795556381,
+            "animations": true,
+            "fonts": true
+          },
+          "media": {
+            "reducedMotion": "reduce",
+            "colorScheme": "light",
+            "locale": "en-US",
+            "timezone": "UTC"
+          },
+          "data": "not declared"
+        },
+        "differences": []
+      },
+      "diff": {
+        "changedPixels": 0,
+        "ratio": 0,
+        "regions": [],
+        "scale": 1,
+        "sizeBefore": [
+          1440,
+          900
+        ],
+        "sizeAfter": [
+          1440,
+          900
+        ],
+        "sizeChanged": false
+      },
+      "elementMap": {
+        "base": {
+          "elements": 1040
+        },
+        "head": {
+          "elements": 1040
+        }
+      },
+      "styleDiff": {
+        "matched": {
+          "high": 252,
+          "medium": 788,
+          "low": 0
+        },
+        "changes": [],
+        "regions": []
+      }
+    },
+    {
+      "id": "team-ui-tactics__desktop__padrao",
+      "route": {
+        "path": "/team/ui/tactics",
+        "name": "/team/ui/tactics",
+        "slug": "team-ui-tactics"
+      },
+      "viewport": "desktop",
+      "theme": "padrao",
+      "status": "unchanged",
+      "urls": {},
+      "images": {
+        "focus": [],
+        "base": "captures/base/team-ui-tactics__desktop__padrao.png",
+        "head": "captures/head/team-ui-tactics__desktop__padrao.png"
+      },
+      "warnings": [],
+      "truncated": false,
+      "fingerprint": {
+        "base": {
+          "commit": "e608476fdde0e5c9ee9c3deac424d1bbf77cefc9",
+          "viewport": {
+            "width": 1440,
+            "height": 900,
+            "deviceScaleFactor": 1,
+            "isMobile": false
+          },
+          "browser": {
+            "name": "chrome",
+            "version": "157.0.8103.78",
+            "userAgent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/157.0.0.0 Safari/537.36"
+          },
+          "fonts": {
+            "loaded": [
+              "Barlow"
+            ],
+            "failed": [],
+            "pending": []
+          },
+          "freeze": {
+            "clock": "2026-11-22T12:00:00.000Z",
+            "seed": 795556381,
+            "animations": true,
+            "fonts": true
+          },
+          "media": {
+            "reducedMotion": "reduce",
+            "colorScheme": "light",
+            "locale": "en-US",
+            "timezone": "UTC"
+          },
+          "data": "not declared",
+          "cache": {
+            "hit": false,
+            "key": "base-e608476fdde0-495cca1553e5887a"
+          }
+        },
+        "head": {
+          "commit": "6434afdb94f23672a843b62bb4e3dfc01ebe7479",
+          "viewport": {
+            "width": 1440,
+            "height": 900,
+            "deviceScaleFactor": 1,
+            "isMobile": false
+          },
+          "browser": {
+            "name": "chrome",
+            "version": "157.0.8103.78",
+            "userAgent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/157.0.0.0 Safari/537.36"
+          },
+          "fonts": {
+            "loaded": [
+              "Barlow"
+            ],
+            "failed": [],
+            "pending": []
+          },
+          "freeze": {
+            "clock": "2026-11-22T12:00:00.000Z",
+            "seed": 795556381,
+            "animations": true,
+            "fonts": true
+          },
+          "media": {
+            "reducedMotion": "reduce",
+            "colorScheme": "light",
+            "locale": "en-US",
+            "timezone": "UTC"
+          },
+          "data": "not declared"
+        },
+        "differences": []
+      },
+      "diff": {
+        "changedPixels": 0,
+        "ratio": 0,
+        "regions": [],
+        "scale": 1,
+        "sizeBefore": [
+          1440,
+          900
+        ],
+        "sizeAfter": [
+          1440,
+          900
+        ],
+        "sizeChanged": false
+      },
+      "elementMap": {
+        "base": {
+          "elements": 36
+        },
+        "head": {
+          "elements": 36
+        }
+      },
+      "styleDiff": {
+        "matched": {
+          "high": 13,
+          "medium": 23,
+          "low": 0
+        },
+        "changes": [],
+        "regions": []
+      }
+    }
+  ],
+  "variants": [],
+  "motion": [],
+  "baseCache": {
+    "key": "base-e608476fdde0-495cca1553e5887a",
+    "hit": false,
+    "configHash": "7c321d78e074ea3c",
+    "browser": "chrome 157.0.8103.78",
+    "uiDiffVersion": "2.0.0",
+    "stored": true
+  },
+  "warnings": [],
+  "stats": {
+    "captures": 2,
+    "changed": 0,
+    "unchanged": 2,
+    "added": 0,
+    "removed": 0,
+    "errors": 0
+  },
+  "timings": {
+    "totalMs": 14712,
+    "detectMs": 83,
+    "prepare": {
+      "wallMs": 1410,
+      "base": {
+        "mode": "worktree",
+        "checkoutMs": 426,
+        "install": {
+          "kind": "linked",
+          "ms": 18
+        },
+        "bootMs": 941,
+        "totalMs": 1409
+      },
+      "head": {
+        "mode": "worktree",
+        "checkoutMs": 466,
+        "install": {
+          "kind": "linked",
+          "ms": 19
+        },
+        "bootMs": 865,
+        "totalMs": 1376
+      }
+    },
+    "browserMs": 122,
+    "capture": {
+      "ms": 12816,
+      "count": 4,
+      "slowest": {
+        "id": "camp__desktop__padrao",
+        "side": "base",
+        "ms": 5517
+      }
+    },
+    "diffMs": 216,
+    "extras": {
+      "styleDiffMs": 59,
+      "elementMapMs": 1218
+    }
+  }
+}

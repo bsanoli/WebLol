@@ -1,0 +1,55 @@
+{
+  "version": 3,
+  "tool": {
+    "name": "ui-diff",
+    "version": "2.0.0"
+  },
+  "createdAt": "2026-11-22T14:08:06.061Z",
+  "routes": [],
+  "detect": {
+    "uiFiles": [
+      "ui-diff.config.json"
+    ],
+    "unmatched": [
+      "ui-diff.config.json"
+    ],
+    "skippedRoutes": [],
+    "needsExample": [],
+    "notes": []
+  },
+  "viewports": [
+    "desktop"
+  ],
+  "themes": [
+    "padrao"
+  ],
+  "base": {
+    "label": "a8d4812a0f58d2ee47d46ee08eabba6e060be33a",
+    "mode": "worktree",
+    "sha": "a8d4812a0f58d2ee47d46ee08eabba6e060be33a",
+    "shortSha": "a8d4812"
+  },
+  "head": {
+    "label": "fcb8f021efaeee19d2f47a76dc908d00cb7ccb61",
+    "mode": "worktree",
+    "sha": "fcb8f021efaeee19d2f47a76dc908d00cb7ccb61",
+    "shortSha": "fcb8f02"
+  },
+  "captures": [],
+  "variants": [],
+  "motion": [],
+  "warnings": [],
+  "stats": {
+    "captures": 0,
+    "changed": 0,
+    "unchanged": 0,
+    "added": 0,
+    "removed": 0,
+    "errors": 0
+  },
+  "notChecked": "1 UI file changed but none could be mapped to a route: 1 file could not be traced to a page (pass --routes, or map them with routes[].files)",
+  "timings": {
+    "totalMs": 114,
+    "detectMs": 107
+  }
+}

@@ -1,0 +1,55 @@
+{
+  "version": 3,
+  "tool": {
+    "name": "ui-diff",
+    "version": "2.0.0"
+  },
+  "createdAt": "2026-11-22T16:06:37.902Z",
+  "routes": [],
+  "detect": {
+    "uiFiles": [
+      "ui-diff.config.json"
+    ],
+    "unmatched": [
+      "ui-diff.config.json"
+    ],
+    "skippedRoutes": [],
+    "needsExample": [],
+    "notes": []
+  },
+  "viewports": [
+    "desktop"
+  ],
+  "themes": [
+    "padrao"
+  ],
+  "base": {
+    "label": "6434afdb94f23672a843b62bb4e3dfc01ebe7479",
+    "mode": "worktree",
+    "sha": "6434afdb94f23672a843b62bb4e3dfc01ebe7479",
+    "shortSha": "6434afd"
+  },
+  "head": {
+    "label": "35ac3704f113bf3ee7d3037f27f8fcc62fac480e",
+    "mode": "worktree",
+    "sha": "35ac3704f113bf3ee7d3037f27f8fcc62fac480e",
+    "shortSha": "35ac370"
+  },
+  "captures": [],
+  "variants": [],
+  "motion": [],
+  "warnings": [],
+  "stats": {
+    "captures": 0,
+    "changed": 0,
+    "unchanged": 0,
+    "added": 0,
+    "removed": 0,
+    "errors": 0
+  },
+  "notChecked": "1 UI file changed but none could be mapped to a route: 1 file could not be traced to a page (pass --routes, or map them with routes[].files)",
+  "timings": {
+    "totalMs": 110,
+    "detectMs": 102
+  }
+}

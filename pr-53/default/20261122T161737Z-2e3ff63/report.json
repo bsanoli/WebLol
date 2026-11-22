@@ -1,0 +1,596 @@
+{
+  "version": 3,
+  "tool": {
+    "name": "ui-diff",
+    "version": "2.0.0"
+  },
+  "createdAt": "2026-11-22T16:17:37.343Z",
+  "routes": [
+    {
+      "path": "/camp.html",
+      "name": "camp",
+      "reasons": [
+        "src/pages/team/ui/tactics.css matches src/pages/team/**"
+      ],
+      "confidence": "high"
+    },
+    {
+      "path": "/camp.html?captura=taticas",
+      "name": "camp-taticas",
+      "reasons": [
+        "src/pages/team/ui/tactics.css matches src/pages/team/**"
+      ],
+      "confidence": "high"
+    }
+  ],
+  "detect": {
+    "uiFiles": [
+      "src/pages/team/ui/tactics.css"
+    ],
+    "unmatched": [],
+    "skippedRoutes": [],
+    "needsExample": [],
+    "notes": []
+  },
+  "viewports": [
+    "desktop"
+  ],
+  "themes": [
+    "padrao"
+  ],
+  "base": {
+    "label": "ui-sdk-combobox @ 35ac370",
+    "mode": "worktree",
+    "sha": "35ac3704f113bf3ee7d3037f27f8fcc62fac480e",
+    "shortSha": "35ac370",
+    "ref": "35ac3704f113bf3ee7d3037f27f8fcc62fac480e",
+    "includesUncommitted": false
+  },
+  "head": {
+    "label": "2e3ff63",
+    "mode": "worktree",
+    "sha": "2e3ff6354cab306e8c78a09389ab3296f881b075",
+    "shortSha": "2e3ff63",
+    "ref": "2e3ff6354cab306e8c78a09389ab3296f881b075",
+    "includesUncommitted": false
+  },
+  "captures": [
+    {
+      "id": "camp__desktop__padrao",
+      "route": {
+        "path": "/camp.html",
+        "name": "camp",
+        "slug": "camp"
+      },
+      "viewport": "desktop",
+      "theme": "padrao",
+      "status": "unchanged",
+      "urls": {},
+      "images": {
+        "focus": [],
+        "base": "captures/base/camp__desktop__padrao.png",
+        "head": "captures/head/camp__desktop__padrao.png"
+      },
+      "warnings": [],
+      "truncated": false,
+      "fingerprint": {
+        "base": {
+          "commit": "35ac3704f113bf3ee7d3037f27f8fcc62fac480e",
+          "viewport": {
+            "width": 1440,
+            "height": 900,
+            "deviceScaleFactor": 1,
+            "isMobile": false
+          },
+          "browser": {
+            "name": "chrome",
+            "version": "157.0.8103.78",
+            "userAgent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/157.0.0.0 Safari/537.36"
+          },
+          "fonts": {
+            "loaded": [
+              "Barlow",
+              "Barlow Condensed"
+            ],
+            "failed": [],
+            "pending": []
+          },
+          "freeze": {
+            "clock": "2026-11-22T12:00:00.000Z",
+            "seed": 795556381,
+            "animations": true,
+            "fonts": true
+          },
+          "media": {
+            "reducedMotion": "reduce",
+            "colorScheme": "light",
+            "locale": "en-US",
+            "timezone": "UTC"
+          },
+          "data": "not declared",
+          "cache": {
+            "hit": false,
+            "key": "base-35ac3704f113-d14a560dab85584a"
+          }
+        },
+        "head": {
+          "commit": "2e3ff6354cab306e8c78a09389ab3296f881b075",
+          "viewport": {
+            "width": 1440,
+            "height": 900,
+            "deviceScaleFactor": 1,
+            "isMobile": false
+          },
+          "browser": {
+            "name": "chrome",
+            "version": "157.0.8103.78",
+            "userAgent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/157.0.0.0 Safari/537.36"
+          },
+          "fonts": {
+            "loaded": [
+              "Barlow",
+              "Barlow Condensed"
+            ],
+            "failed": [],
+            "pending": []
+          },
+          "freeze": {
+            "clock": "2026-11-22T12:00:00.000Z",
+            "seed": 795556381,
+            "animations": true,
+            "fonts": true
+          },
+          "media": {
+            "reducedMotion": "reduce",
+            "colorScheme": "light",
+            "locale": "en-US",
+            "timezone": "UTC"
+          },
+          "data": "not declared"
+        },
+        "differences": []
+      },
+      "diff": {
+        "changedPixels": 0,
+        "ratio": 0,
+        "regions": [],
+        "scale": 1,
+        "sizeBefore": [
+          1440,
+          900
+        ],
+        "sizeAfter": [
+          1440,
+          900
+        ],
+        "sizeChanged": false
+      },
+      "elementMap": {
+        "base": {
+          "elements": 1040
+        },
+        "head": {
+          "elements": 1040
+        }
+      },
+      "styleDiff": {
+        "matched": {
+          "high": 252,
+          "medium": 788,
+          "low": 0
+        },
+        "changes": [],
+        "regions": []
+      }
+    },
+    {
+      "id": "camp-taticas__desktop__padrao",
+      "route": {
+        "path": "/camp.html?captura=taticas",
+        "name": "camp-taticas",
+        "slug": "camp-taticas"
+      },
+      "viewport": "desktop",
+      "theme": "padrao",
+      "status": "changed",
+      "urls": {},
+      "images": {
+        "focus": [
+          "compare/camp-taticas__desktop__padrao__focus-1.png"
+        ],
+        "base": "captures/base/camp-taticas__desktop__padrao.png",
+        "head": "captures/head/camp-taticas__desktop__padrao.png",
+        "diff": "diff/camp-taticas__desktop__padrao.png",
+        "compare": "compare/camp-taticas__desktop__padrao.png",
+        "pairs": [
+          "compare/camp-taticas__desktop__padrao__pair-1.png"
+        ],
+        "blinks": [
+          "compare/camp-taticas__desktop__padrao__blink-1.gif"
+        ]
+      },
+      "warnings": [],
+      "truncated": false,
+      "fingerprint": {
+        "base": {
+          "commit": "35ac3704f113bf3ee7d3037f27f8fcc62fac480e",
+          "viewport": {
+            "width": 1440,
+            "height": 900,
+            "deviceScaleFactor": 1,
+            "isMobile": false
+          },
+          "browser": {
+            "name": "chrome",
+            "version": "157.0.8103.78",
+            "userAgent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/157.0.0.0 Safari/537.36"
+          },
+          "fonts": {
+            "loaded": [
+              "Barlow",
+              "Barlow Condensed"
+            ],
+            "failed": [],
+            "pending": []
+          },
+          "freeze": {
+            "clock": "2026-11-22T12:00:00.000Z",
+            "seed": 795556381,
+            "animations": true,
+            "fonts": true
+          },
+          "media": {
+            "reducedMotion": "reduce",
+            "colorScheme": "light",
+            "locale": "en-US",
+            "timezone": "UTC"
+          },
+          "data": "not declared",
+          "cache": {
+            "hit": false,
+            "key": "base-35ac3704f113-d14a560dab85584a"
+          }
+        },
+        "head": {
+          "commit": "2e3ff6354cab306e8c78a09389ab3296f881b075",
+          "viewport": {
+            "width": 1440,
+            "height": 900,
+            "deviceScaleFactor": 1,
+            "isMobile": false
+          },
+          "browser": {
+            "name": "chrome",
+            "version": "157.0.8103.78",
+            "userAgent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/157.0.0.0 Safari/537.36"
+          },
+          "fonts": {
+            "loaded": [
+              "Barlow",
+              "Barlow Condensed"
+            ],
+            "failed": [],
+            "pending": []
+          },
+          "freeze": {
+            "clock": "2026-11-22T12:00:00.000Z",
+            "seed": 795556381,
+            "animations": true,
+            "fonts": true
+          },
+          "media": {
+            "reducedMotion": "reduce",
+            "colorScheme": "light",
+            "locale": "en-US",
+            "timezone": "UTC"
+          },
+          "data": "not declared"
+        },
+        "differences": []
+      },
+      "diff": {
+        "changedPixels": 863,
+        "ratio": 0.0006658950617283951,
+        "regions": [
+          {
+            "x": 32,
+            "y": 152,
+            "width": 160,
+            "height": 24
+          }
+        ],
+        "scale": 1,
+        "sizeBefore": [
+          1440,
+          900
+        ],
+        "sizeAfter": [
+          1440,
+          900
+        ],
+        "sizeChanged": false,
+        "focusBoxes": [
+          {
+            "x": 0,
+            "y": 54,
+            "width": 420,
+            "height": 220
+          }
+        ]
+      },
+      "elementMap": {
+        "base": {
+          "elements": 257
+        },
+        "head": {
+          "elements": 257
+        }
+      },
+      "styleDiff": {
+        "matched": {
+          "high": 80,
+          "medium": 177,
+          "low": 0
+        },
+        "changes": [
+          {
+            "kind": "changed",
+            "name": "heading 'Táticas · Adversária 1'",
+            "selector": "#tx-title",
+            "base": 66,
+            "head": 66,
+            "confidence": "high",
+            "reason": "same id \"tx-title\"",
+            "changes": [
+              {
+                "property": "size",
+                "group": "box",
+                "before": "240.5×18.5px",
+                "after": "240.5×23px",
+                "id": "h66:size",
+                "kind": "effect",
+                "cause": "h66:font-size"
+              },
+              {
+                "property": "font-size",
+                "group": "type",
+                "before": "16px",
+                "after": "20px",
+                "id": "h66:font-size",
+                "kind": "cause"
+              },
+              {
+                "property": "line-height",
+                "group": "type",
+                "before": "18.5px",
+                "after": "23px",
+                "id": "h66:line-height",
+                "kind": "cause"
+              }
+            ],
+            "box": {
+              "x": 33,
+              "y": 153,
+              "width": 240.703125,
+              "height": 23
+            },
+            "deviceBox": {
+              "x": 33,
+              "y": 153,
+              "width": 241,
+              "height": 23
+            },
+            "magnitude": 12.825,
+            "verified": true
+          },
+          {
+            "kind": "changed",
+            "name": "div.tx-head-text",
+            "selector": "div.tx-head-text",
+            "base": 65,
+            "head": 65,
+            "confidence": "medium",
+            "reason": "same place under div.tx-head",
+            "changes": [
+              {
+                "property": "size",
+                "group": "box",
+                "before": "240.5×18.5px",
+                "after": "240.5×23px",
+                "id": "h65:size",
+                "kind": "effect",
+                "cause": "h66:font-size"
+              }
+            ],
+            "box": {
+              "x": 33,
+              "y": 153,
+              "width": 240.703125,
+              "height": 23
+            },
+            "deviceBox": {
+              "x": 33,
+              "y": 153,
+              "width": 241,
+              "height": 23
+            },
+            "magnitude": 0.325
+          }
+        ],
+        "regions": [
+          {
+            "region": {
+              "x": 32,
+              "y": 152,
+              "width": 160,
+              "height": 24
+            },
+            "element": {
+              "name": "div.tx-head-text",
+              "selector": "div.tx-head-text"
+            },
+            "changes": [
+              0,
+              1
+            ]
+          }
+        ]
+      }
+    }
+  ],
+  "variants": [],
+  "motion": [],
+  "baseCache": {
+    "key": "base-35ac3704f113-d14a560dab85584a",
+    "hit": false,
+    "configHash": "b50ef6cf7d1c2714",
+    "browser": "chrome 157.0.8103.78",
+    "uiDiffVersion": "2.0.0",
+    "stored": true
+  },
+  "warnings": [],
+  "stats": {
+    "captures": 2,
+    "changed": 1,
+    "unchanged": 1,
+    "added": 0,
+    "removed": 0,
+    "errors": 0
+  },
+  "measured": [
+    {
+      "route": "/camp.html?captura=taticas",
+      "id": "m1",
+      "kind": "cause",
+      "name": "heading 'Táticas · Adversária 1'",
+      "selector": "#tx-title",
+      "property": "font-size",
+      "before": "16px",
+      "after": "20px",
+      "text": "font-size 16px → 20px",
+      "magnitude": 12.825,
+      "variants": [
+        {
+          "capture": "camp-taticas__desktop__padrao",
+          "viewport": "desktop",
+          "theme": "padrao",
+          "magnitude": 12.825,
+          "change": "h66:font-size"
+        }
+      ],
+      "where": "desktop"
+    },
+    {
+      "route": "/camp.html?captura=taticas",
+      "id": "m3",
+      "kind": "effect",
+      "name": "heading 'Táticas · Adversária 1'",
+      "selector": "#tx-title",
+      "property": "size",
+      "before": "240.5×18.5px",
+      "after": "240.5×23px",
+      "text": "size 240.5×18.5px → 240.5×23px",
+      "magnitude": 12.825,
+      "variants": [
+        {
+          "capture": "camp-taticas__desktop__padrao",
+          "viewport": "desktop",
+          "theme": "padrao",
+          "magnitude": 12.825,
+          "change": "h66:size",
+          "cause": "h66:font-size"
+        }
+      ],
+      "cause": "m1",
+      "where": "desktop"
+    },
+    {
+      "route": "/camp.html?captura=taticas",
+      "id": "m4",
+      "kind": "effect",
+      "name": "div.tx-head-text",
+      "selector": "div.tx-head-text",
+      "property": "size",
+      "before": "240.5×18.5px",
+      "after": "240.5×23px",
+      "text": "size 240.5×18.5px → 240.5×23px",
+      "magnitude": 0.325,
+      "variants": [
+        {
+          "capture": "camp-taticas__desktop__padrao",
+          "viewport": "desktop",
+          "theme": "padrao",
+          "magnitude": 0.325,
+          "change": "h65:size",
+          "cause": "h66:font-size"
+        }
+      ],
+      "cause": "m1",
+      "where": "desktop"
+    },
+    {
+      "route": "/camp.html?captura=taticas",
+      "id": "m2",
+      "kind": "cause",
+      "name": "heading 'Táticas · Adversária 1'",
+      "selector": "#tx-title",
+      "property": "line-height",
+      "before": "18.5px",
+      "after": "23px",
+      "text": "line-height 18.5px → 23px",
+      "magnitude": 12.825,
+      "variants": [
+        {
+          "capture": "camp-taticas__desktop__padrao",
+          "viewport": "desktop",
+          "theme": "padrao",
+          "magnitude": 12.825,
+          "change": "h66:line-height"
+        }
+      ],
+      "where": "desktop"
+    }
+  ],
+  "timings": {
+    "totalMs": 20723,
+    "detectMs": 103,
+    "prepare": {
+      "wallMs": 1734,
+      "base": {
+        "mode": "worktree",
+        "checkoutMs": 257,
+        "install": {
+          "kind": "linked",
+          "ms": 28
+        },
+        "bootMs": 1384,
+        "totalMs": 1725
+      },
+      "head": {
+        "mode": "worktree",
+        "checkoutMs": 329,
+        "install": {
+          "kind": "linked",
+          "ms": 26
+        },
+        "bootMs": 1337,
+        "totalMs": 1729
+      }
+    },
+    "browserMs": 160,
+    "capture": {
+      "ms": 17854,
+      "count": 4,
+      "slowest": {
+        "id": "camp__desktop__padrao",
+        "side": "base",
+        "ms": 7024
+      }
+    },
+    "diffMs": 746,
+    "extras": {
+      "styleDiffMs": 116,
+      "elementMapMs": 2279
+    }
+  }
+}
