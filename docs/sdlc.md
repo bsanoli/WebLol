@@ -35,7 +35,7 @@ Na dúvida entre dois tamanhos, escolha o maior só se a mudança tocar algo sal
 | 3. Plano | No modo de planejamento: arquivos por camada FSD, testes a criar ou ajustar, riscos. Em G, ondas que possam ser publicadas uma de cada vez. | Aprovação do plano em G. Em M, o plano é mostrado e a implementação segue. | Seção "Plano" |
 | 4. Implementação | Código conforme as [convenções](convencoes.md) e testes junto do código. Os ganchos rodam o Biome no arquivo editado e o `npm run check` no fim do turno. | — | Diff |
 | 5. Verificação | `npm run verify`, testes Playwright da área e conferência no navegador desktop pelo fluxo real. Em M e G, o agente [change-verifier](agentes/change-verifier.md) confere o diff contra o pedido em contexto novo. | Tudo passa ou a falha é anterior e está registrada. | Resumo da verificação |
-| 6. Revisão e publicação | Checklist de [revisão](revisao.md). "publique" aciona a skill [weblol-publicar](../.agents/skills/weblol-publicar/SKILL.md). Em G, um PR. | Pedido explícito de publicação | Commit, push e PR |
+| 6. Revisão e publicação | Checklist de [revisão](revisao.md). "publique" aciona a skill [weblol-publicar](../.agents/skills/weblol-publicar/SKILL.md). Em G, um PR. Em PR que muda interface, leia o comentário do [ui-diff](decisoes/0010-ui-diff-nos-prs.md): cada mudança medida é intencional ou vira ajuste. | Pedido explícito de publicação | Commit, push e PR |
 | 7. Aprendizado | Cada correção feita pela pessoa vira regra no lugar certo (veja o [ciclo de padronização](#ciclo-de-padronização)). | — | Glossário, convenções, ADR, skill ou verificação |
 
 ### Pronto para começar (M e G)
@@ -102,6 +102,7 @@ Quando a pessoa corrige uma entrega, a correção diz algo sobre o processo. Se 
 | Antes de a sessão encerrar o turno | Biome e `npm run check`, que inclui o Steiger (gancho `Stop`) | Ativo desde a Onda 1 |
 | No commit | Biome nos arquivos staged, com as correções automáticas (Lefthook `pre-commit`) | Ativo desde a Onda 1, instalado pelo `npm install` |
 | No push | `npm run check` (arquitetura, tipos e Oxlint com regras de tipos) e Vitest (Lefthook `pre-push`) | Ativo desde a Onda 1; Oxlint desde a Onda 2 |
+| Em todo PR do repositório (fora rascunhos) | ui-diff: captura as telas afetadas na base e no PR e comenta o antes e depois, com as mudanças medidas ([ADR 0010](decisoes/0010-ui-diff-nos-prs.md)). Informativo, não bloqueia | Proposto, ativo depois do merge de `ui-diff.yml` |
 | Em todo push para o GitHub | Biome, `npm run check`, `sincronizar-skills --check`, Knip, Vitest, build, `size-limit` e Playwright com axe (`ci.yml`). O PR mostra o resultado do push da branch | Ativo desde a Onda 1 |
 | Na publicação | Build e deploy | Deploy por artefato do GitHub Actions a cada push na `main` ([ADR 0003](decisoes/0003-publicacao-por-artefato.md)). |
 
