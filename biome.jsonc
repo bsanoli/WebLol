@@ -34,26 +34,15 @@
     "domains": { "playwright": "none" },
     "rules": {
       "preset": "recommended",
-      // Nomes, como em docs/convencoes.md. Começam como aviso; a Onda 3 corrige o código existente.
+      // Nomes, como em docs/convencoes.md. Contratos (campos salvos, dados da Riot) ficam com biome-ignore e motivo.
       "style": {
-        "useNamingConvention": { "level": "warn", "options": { "strictCase": false } },
-        "useFilenamingConvention": { "level": "warn", "options": { "filenameCases": ["kebab-case"] } }
+        "useNamingConvention": { "level": "error", "options": { "strictCase": false } },
+        "useFilenamingConvention": { "level": "error", "options": { "filenameCases": ["kebab-case"] } }
       },
-      "nursery": { "useConsistentBooleanName": "warn" },
-      // Débito anterior à Onda 1: regras do preset que já tinham violações no código.
-      // Ficam como aviso até zerar e então voltam a ser erro (docs/auditoria-codebase.md, "Avisos do Biome").
-      "suspicious": {
-        "useIterableCallbackReturn": "warn",
-        "noImplicitAnyLet": "warn",
-        "noAssignInExpressions": "warn",
-        "noArrayIndexKey": "warn"
-      },
-      "security": { "noDangerouslySetInnerHtml": "warn" },
-      "correctness": { "useExhaustiveDependencies": "warn" },
+      "nursery": { "useConsistentBooleanName": "error" },
+      // Componentes de entrada que o Biome deve tratar como campos de formulário.
       "a11y": {
-        "useSemanticElements": "warn",
-        "noLabelWithoutControl": "warn",
-        "useValidAnchor": "warn"
+        "noLabelWithoutControl": { "level": "error", "options": { "inputComponents": ["Input", "Select"] } }
       }
     }
   },

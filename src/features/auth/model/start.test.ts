@@ -14,7 +14,7 @@ const fx = vi.hoisted(() => ({
 
 vi.mock("@/shared/firestore", () => ({
   // biome-ignore lint/style/useNamingConvention: nome exportado pelo módulo real
-  ONLINE: true,
+  IS_ONLINE: true,
   currentFirebase: () => (fx.fbFails ? null : { auth: { currentUser: fx.currentUser } }),
   fb: async () => {
     if (fx.fbFails) throw new Error("rede")

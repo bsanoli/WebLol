@@ -23,9 +23,6 @@
   gap: var(--wl-space-4) var(--wl-space-6);
   padding-bottom: var(--wl-space-4);
 }
-.wrap > header h1 {
-  letter-spacing: 0.01em;
-}
 .wrap > header .sub {
   margin: var(--wl-space-2) 0 0;
 }
@@ -33,9 +30,6 @@
   justify-content: space-between;
   align-items: center;
   flex-wrap: wrap;
-}
-.worlds-heading .tournament-scope {
-  margin-top: var(--wl-space-3);
 }
 @media (min-width: 760px) {
   body[data-page="comps"] .worlds-heading {
@@ -112,6 +106,9 @@
   margin: 0;
   font-size: 13px;
 }
+.worlds-heading .tournament-scope {
+  margin-top: var(--wl-space-3);
+}
 .tournament-scope dt {
   color: var(--muted);
   font-size: 12px;
@@ -137,8 +134,8 @@
 .builds-heading h1 {
   margin: 0;
 }
-.builds-heading .hint {
-  margin: var(--wl-space-1) 0 0;
+.wrap > header h1 {
+  letter-spacing: 0.01em;
 }
 .build-source-options {
   display: flex;
@@ -156,6 +153,9 @@
   line-height: 1.6;
   max-width: 90ch;
 }
+.builds-heading .hint {
+  margin: var(--wl-space-1) 0 0;
+}
 .analytics-dashboard {
   display: grid;
   grid-template-columns: minmax(0, 1fr);
@@ -170,10 +170,6 @@
   font-size: 16px;
   border-bottom: 1px solid var(--line);
 }
-.draft-summary .metric-grid {
-  border: 0;
-  border-radius: 0;
-}
 .metric-grid {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
@@ -182,6 +178,10 @@
   border: 1px solid var(--line);
   border-radius: var(--wl-panel-radius);
   overflow: hidden;
+}
+.draft-summary .metric-grid {
+  border: 0;
+  border-radius: 0;
 }
 .metric-card {
   padding: var(--wl-space-4) var(--worlds-card-padding);

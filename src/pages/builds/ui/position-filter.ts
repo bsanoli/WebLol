@@ -13,7 +13,7 @@ export function positionFilter(
   lanes: string[],
   current: string,
   label: string,
-  showNames: boolean,
+  shouldShowNames: boolean,
   change: (lane: string) => void,
 ) {
   return createElement(
@@ -39,8 +39,9 @@ export function positionFilter(
           "aria-label": lane || "Todas as posições",
           ...{ "data-lane": lane, "data-slot": "button", "data-variant": "ghost" },
         },
+        // biome-ignore lint/security/noDangerouslySetInnerHtml: SVG do ícone gerado pelo próprio WebLol, sem texto de usuário
         createElement("span", { dangerouslySetInnerHTML: { __html: buildLaneIcon(lane) } }),
-        showNames ? lane || "Todas" : null,
+        shouldShowNames ? lane || "Todas" : null,
       ),
     ),
   )

@@ -31,23 +31,23 @@ export function mountMatchups() {
     void editOpggLink(opggTarget())
   })
   function handleTacticDrawerToggle(button: HTMLElement) {
-    const open = S.tacticsDrawer === false
-    S.tacticsDrawer = open
+    const isOpen = S.tacticsDrawer === false
+    S.tacticsDrawer = isOpen
     save()
     const tx = button.closest(".tx"),
       aside = $("#tx-aside")
-    tx?.classList.toggle("drawer-closed", !open)
-    aside?.toggleAttribute("inert", !open)
-    button.setAttribute("aria-expanded", String(open))
-    button.title = open ? "Esconder a lista de composições e o draft" : "Mostrar a lista de composições e o draft"
+    tx?.classList.toggle("drawer-closed", !isOpen)
+    aside?.toggleAttribute("inert", !isOpen)
+    button.setAttribute("aria-expanded", String(isOpen))
+    button.title = isOpen ? "Esconder a lista de composições e o draft" : "Mostrar a lista de composições e o draft"
   }
   function handleTacticListToggle(button: HTMLElement) {
-    const collapsed = S.tacticsListCollapsed !== true
-    S.tacticsListCollapsed = collapsed
+    const isCollapsed = S.tacticsListCollapsed !== true
+    S.tacticsListCollapsed = isCollapsed
     save()
-    button.closest(".tx-tabs")?.classList.toggle("list-collapsed", collapsed)
-    button.setAttribute("aria-expanded", String(!collapsed))
-    button.title = collapsed ? "Mostrar a lista" : "Recolher a lista"
+    button.closest(".tx-tabs")?.classList.toggle("list-collapsed", isCollapsed)
+    button.setAttribute("aria-expanded", String(!isCollapsed))
+    button.title = isCollapsed ? "Mostrar a lista" : "Recolher a lista"
   }
   // "Editar na Ordem do draft": abre o confronto da tática (ou, numa adversária, o confronto dela com a última nossa usada).
   function handleOpenDraft() {
@@ -260,9 +260,9 @@ export function mountMatchups() {
       const wrap = listTab.closest(".tx-tabs")
       if (!wrap) return
       wrap.querySelectorAll<HTMLElement>("[data-tx-list]").forEach(b => {
-        const on = b === listTab
-        b.setAttribute("aria-selected", String(on))
-        b.tabIndex = on ? 0 : -1
+        const isOn = b === listTab
+        b.setAttribute("aria-selected", String(isOn))
+        b.tabIndex = isOn ? 0 : -1
       })
       wrap.querySelectorAll<HTMLElement>(".tx-group").forEach(g => {
         g.hidden = g.id !== `tx-list-${listTab.dataset.txList}`
@@ -273,8 +273,8 @@ export function mountMatchups() {
     if (tacticTab) {
       const general = tacticTab.hasAttribute("data-tactic-general"),
         id = tacticTab.dataset.tacticComp
-      const fromMatchup = !!S.tacticsMatchup
-      if (general === !!S.tacticsGeneral && (general || id === S.cur) && !fromMatchup) return
+      const isFromMatchup = !!S.tacticsMatchup
+      if (general === !!S.tacticsGeneral && (general || id === S.cur) && !isFromMatchup) return
       S.tacticsGeneral = general
       S.tacticsMatchup = null
       if (general) {

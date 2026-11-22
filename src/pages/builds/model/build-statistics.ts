@@ -69,7 +69,7 @@ export function opponentBuild(champion: Champion, lane: string, opponent: string
   const target = champions[champion.name as keyof typeof champions]?.all.skillOrder.priority?.pointsToMax
   const priorities = target ? orders.map(order => skillPriority(order, target)) : []
   const first = priorities.flatMap(([skill]) => (skill ? [skill] : []))
-  const pairs = priorities.flatMap(([first, second]) => (second ? [first + ">" + second] : []))
+  const pairs = priorities.flatMap(([first, second]) => (second ? [`${first}>${second}`] : []))
   const starters = players
     .map(player =>
       (player.itemEventsByMinute as [number, number[]][])

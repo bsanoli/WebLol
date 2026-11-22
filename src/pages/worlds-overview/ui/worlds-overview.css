@@ -90,10 +90,6 @@ nav {
   height: 100%;
   object-fit: contain;
 }
-td.champ .av {
-  width: var(--wl-portrait-size);
-  height: var(--wl-portrait-size);
-}
 .chip .av {
   width: 18px;
   height: 18px;
@@ -174,9 +170,6 @@ h2 {
   display: flex;
   align-items: center;
   gap: 4px;
-}
-.bar .nm .av {
-  margin: 0;
 }
 .bar .nm .lane-icon {
   width: 14px;
@@ -423,6 +416,13 @@ tr.detail td {
   height: var(--wl-space-12);
   margin: 0;
   font-size: 14px;
+}
+td.champ .av {
+  width: var(--wl-portrait-size);
+  height: var(--wl-portrait-size);
+}
+.bar .nm .av {
+  margin: 0;
 }
 .chip.good {
   border-color: var(--good);

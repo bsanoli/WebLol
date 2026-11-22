@@ -8,7 +8,7 @@ import { findMatchup, isMatchupKey, matchupTitle } from "../model/matchups"
 import { clearCompNotes, readTacticDocument, writeTacticDocument } from "../model/tactics"
 import type { TacticDoc, TacticPrintAttrs } from "../model/tactic-doc"
 import { openPrintSketch } from "./print-sketch"
-import { $, champArt, compById, S, save, toast, touch } from "./team-store"
+import { champArt, compById, S, save, toast, touch } from "./team-store"
 
 /** `null` é a tática geral; `m:<id>` é a de um confronto; o resto é o id da composição. */
 type TacticId = string | null

@@ -18,6 +18,7 @@ import {
   DropdownMenuTrigger,
 } from "@/shared/ui/dropdown-menu"
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from "@/shared/ui/select"
+import { requireElement } from "@/shared/lib/dom"
 
 const roots = new WeakMap<Element, Root>()
 
@@ -46,7 +47,7 @@ export function Icon({ name }: { name: string }) {
 }
 
 export function mountDraftChampionMenu(host: HTMLElement, name: string, remove: () => void) {
-  const button = host.querySelector("button")!
+  const button = requireElement<HTMLButtonElement>("button", host)
   const { priority, lane } = button.dataset
   const html = button.innerHTML
   renderControl(
@@ -60,6 +61,7 @@ export function mountDraftChampionMenu(host: HTMLElement, name: string, remove: 
           data-lane={lane}
           aria-label={button.getAttribute("aria-label") ?? name}
           title={button.title}
+          // biome-ignore lint/security/noDangerouslySetInnerHtml: ícone copiado do botão original, que já é markup do WebLol
           dangerouslySetInnerHTML={{ __html: html }}
         />
       </ContextMenu.Trigger>
@@ -92,17 +94,17 @@ export function mountMapEmpty(host: Element) {
 export function mountMapSwitch(
   host: Element,
   label: string,
-  checked: boolean,
+  isChecked: boolean,
   onCheckedChange: (checked: boolean) => void,
-  disabled = false,
+  isDisabled = false,
 ) {
   renderControl(
     host,
     <Switch
       className="map-check"
       label={label}
-      checked={checked}
-      disabled={disabled}
+      checked={isChecked}
+      disabled={isDisabled}
       onCheckedChange={onCheckedChange}
     />,
   )
@@ -172,13 +174,13 @@ function TeamSelect({ field }: { field: HTMLSelectElement }) {
   const [portalContainer, setPortalContainer] = useState<HTMLElement>()
   const options = Array.from(field.options)
   const selected = options[field.selectedIndex]
-  const lanes = field.dataset.teamSelect === "lane"
+  const isLaneSelect = field.dataset.teamSelect === "lane"
   const compact = field.hasAttribute("data-pick-position")
 
   function renderLabel(option: HTMLOptionElement) {
     return (
       <>
-        {lanes && option.value !== "ban" && (
+        {isLaneSelect && option.value !== "ban" && (
           <img className="lane-icon" src={`assets/lanes/${option.value}.svg`} alt="" />
         )}
         <span className="team-select-label">{option.dataset.label ?? option.text}</span>
@@ -289,7 +291,7 @@ export function mountToolGroup(
   value: string,
   options: (SectionOption & { shortcuts?: string })[],
   change: (value: string) => void,
-  disabled = false,
+  isDisabled = false,
 ) {
   renderControl(
     host,
@@ -297,7 +299,7 @@ export function mountToolGroup(
       type="single"
       value={value}
       spacing={1}
-      disabled={disabled}
+      disabled={isDisabled}
       className="map-modes seg"
       aria-label="Modo da ferramenta"
       onValueChange={next => change(next || value)}

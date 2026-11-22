@@ -94,16 +94,16 @@ export function detachMissingComps(matchups: Matchup[], comps: Composition[]): M
   const alive = new Set(comps.map(comp => comp.id))
   const changed: Matchup[] = []
   for (const item of matchups) {
-    let touched = false
+    let hasTouched = false
     if (item.ours && !alive.has(item.ours)) {
       delete item.ours
-      touched = true
+      hasTouched = true
     }
     if (item.enemy && !alive.has(item.enemy)) {
       delete item.enemy
-      touched = true
+      hasTouched = true
     }
-    if (touched) changed.push(item)
+    if (hasTouched) changed.push(item)
   }
   return changed
 }

@@ -22,7 +22,7 @@ export function mountMapSightLayer(host: SVGElement, getPerspective: () => MapPe
 
   return function renderSight(frame: SightFrame, waves: Wave[]) {
     const perspective = getPerspective()
-    const includesSide = (side: Side | undefined) =>
+    const isSideIncluded = (side: Side | undefined) =>
       side !== undefined && (!isSide(perspective) || side === perspective)
     const scene = wardScene()
     const { style } = scene
@@ -30,7 +30,7 @@ export function mountMapSightLayer(host: SVGElement, getPerspective: () => MapPe
     const brushes = new Map<number, { shape: NonNullable<ReturnType<typeof occupiedBrush>>; side: Side | "both" }>()
     for (const [id, point] of Object.entries(frame.pos)) {
       const side = id.split("_", 1)[0]
-      if (!isSide(side) || !includesSide(side)) continue
+      if (!isSide(side) || !isSideIncluded(side)) continue
       champions.push(point)
       const shape = occupiedBrush(point, style)
       if (!shape) continue
@@ -54,16 +54,17 @@ export function mountMapSightLayer(host: SVGElement, getPerspective: () => MapPe
         `<path data-champion-sight="" data-origin-x="${point[0]}" data-origin-y="${point[1]}" d="${terrainSightOutline(point, style, championSight)}"/>`,
     )
     const occupiedSight = occupied.map(({ shape }) => `<path d="${shape.fill}" transform="${shape.transform}"/>`)
-    const fixedTowers = (towerPaths[style] ??= towers.map(tower => path(tower.point, style, towerSight, "tower")))
+    const fixedTowers = towerPaths[style] ?? towers.map(tower => path(tower.point, style, towerSight, "tower"))
+    towerPaths[style] = fixedTowers
     const visibleTowers = towers.flatMap((tower, index) =>
-      includesSide(tower.side) && !frame.destroyedTowers?.includes(tower.id) ? [fixedTowers[index]] : [],
+      isSideIncluded(tower.side) && !frame.destroyedTowers?.includes(tower.id) ? [fixedTowers[index]] : [],
     )
     const visibleWaves = waves
-      .filter(wave => includesSide(wave.side))
+      .filter(wave => isSideIncluded(wave.side))
       .map(wave => path(wavePosition(wave, style), style, minionSight, "wave"))
     const visibleWards = readWards(frame.wards)
       .map(ward => wardOnMap(ward, scene))
-      .filter(ward => includesSide(ward.side))
+      .filter(ward => isSideIncluded(ward.side))
     const wardPaths = visibleWards.map(ward => {
       const bonus = ward.faelight
       const [x, y] = ward.point

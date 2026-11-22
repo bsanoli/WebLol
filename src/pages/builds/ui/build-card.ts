@@ -20,8 +20,8 @@ type ChampionCardOptions = {
 function cardHeading({ champion, position, opponents = [], opponent }: ChampionCardOptions) {
   const selectedOpponent = opponents.find(entry => entry.slug === opponent)
   const gameCount = selectedOpponent?.games ?? championBuild(champion, position)?.games
-  const multiplePositions = Object.values(champion.lanes).filter(lane => lane.picks).length > 1
-  const positionLabel = position || (multiplePositions ? "Todas as posições" : champion.main)
+  const hasMultiplePositions = Object.values(champion.lanes).filter(lane => lane.picks).length > 1
+  const positionLabel = position || (hasMultiplePositions ? "Todas as posições" : champion.main)
   return `<header class="build-card-heading">
         <div class="build-card-identity">
           ${ico(champion.name)}

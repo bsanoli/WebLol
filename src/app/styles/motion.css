@@ -247,8 +247,11 @@ details:not([open])::details-content {
   *::before,
   *::after,
   details::details-content {
+    /* biome-ignore lint/complexity/noImportantStyles: o usuário pediu menos movimento; precisa vencer qualquer regra e estilo inline */
     animation: none !important;
+    /* biome-ignore lint/complexity/noImportantStyles: o usuário pediu menos movimento; precisa vencer qualquer regra e estilo inline */
     transition: none !important;
+    /* biome-ignore lint/complexity/noImportantStyles: o usuário pediu menos movimento; precisa vencer qualquer regra e estilo inline */
     scroll-behavior: auto !important;
   }
 }

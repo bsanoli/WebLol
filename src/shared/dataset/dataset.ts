@@ -1,8 +1,8 @@
 // O mesmo código das abas do Worlds monta a aba SoloQ. O build com `--mode soloq`
 // troca os arquivos de `@dataset/*` (ver vite.config.ts) e estes textos.
-const SOLOQ = import.meta.env.DEV ? document.body.dataset.dataset === "soloq" : import.meta.env.MODE === "soloq"
+const IS_SOLOQ = import.meta.env.DEV ? document.body.dataset.dataset === "soloq" : import.meta.env.MODE === "soloq"
 
-export const DATASET = SOLOQ
+export const DATASET = IS_SOLOQ
   ? {
       root: "/soloq",
       source: "soloq",

@@ -10,7 +10,7 @@ vi.mock("../ui/captain-panel", () => ({
 vi.mock("./images", () => ({ hostImages: { fake: true } }))
 vi.mock("@/shared/firestore", () => ({
   // biome-ignore lint/style/useNamingConvention: nome exportado pelo módulo real
-  ONLINE: true,
+  IS_ONLINE: true,
   currentFirebase: () => null,
 }))
 

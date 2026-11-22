@@ -8,6 +8,7 @@ export const DRAFT_PHASES = [
 
 /** Nome de cada pick pela ordem do draft (no lugar de B1, R1...). */
 export const PICKNAME: Record<string, string> = {
+  // biome-ignore-start lint/style/useNamingConvention: códigos de slot do draft são contrato salvo
   B1: "First Pick",
   B2: "Dupla B2/B3",
   B3: "Dupla B2/B3",
@@ -18,6 +19,7 @@ export const PICKNAME: Record<string, string> = {
   R3: "Solo R3",
   R4: "Solo R4",
   R5: "Last Pick",
+  // biome-ignore-end lint/style/useNamingConvention: fim da exceção
 }
 
 export const DRAFT_SIDE = { blue: "Lado azul", red: "Lado vermelho" } as const

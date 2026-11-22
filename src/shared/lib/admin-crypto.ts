@@ -69,14 +69,14 @@ export async function slotRaw(admin: AdminRecord, id: string, password: string):
   return { enc: await aesDecrypt(key, slot.encPriv), sig: await aesDecrypt(key, slot.sigPriv) }
 }
 
-export async function makeSlot(raw: RawKeys, password: string, temp?: boolean): Promise<Slot> {
+export async function makeSlot(raw: RawKeys, password: string, isTemp?: boolean): Promise<Slot> {
   const salt = crypto.getRandomValues(new Uint8Array(16))
   const key = await passwordKey(password, salt)
   return {
     salt: toBase64(salt),
     encPriv: await aesEncrypt(key, raw.enc),
     sigPriv: await aesEncrypt(key, raw.sig),
-    temp: !!temp,
+    temp: !!isTemp,
     at: Date.now(),
   }
 }

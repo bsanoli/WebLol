@@ -70,7 +70,7 @@ function emptyColumn(side: DraftSide, hint: string) {
 export type TacticBoardView = "draft" | "positions"
 
 /** Quem ocupa cada lado: com confronto, cada comp no seu lado; com uma comp só, ela fica no lado salvo e o outro espera o par. */
-function boardSides(c: Composition, general: boolean, matchup: MatchupEntry | null) {
+function boardSides(c: Composition, isGeneral: boolean, matchup: MatchupEntry | null) {
   const sides: Record<DraftSide, PositionSide> = { blue: null, red: null }
   let hint = "Arraste uma composição da lista para este lado."
   if (matchup) {
@@ -79,7 +79,7 @@ function boardSides(c: Composition, general: boolean, matchup: MatchupEntry | nu
     if (ours) sides[side] = { owner: "us", source: ours, who: "Nossa" }
     if (enemy) sides[oppositeSide(side)] = { owner: "rival", source: enemy, who: "Adversária" }
     hint = "Arraste uma composição da lista para este lado e complete o confronto."
-  } else if (!general) {
+  } else if (!isGeneral) {
     const enemy = isEnemy(c)
     sides[enemy ? "red" : "blue"] = { owner: "us", source: c, who: enemy ? "Adversária" : "Nossa" }
     hint = enemy
@@ -106,13 +106,13 @@ function boardSwitchHTML(view: TacticBoardView) {
 /** Quadro editável da gaveta, sempre com os dois lados; cada lado aceita uma composição arrastada da lista. */
 function tacticBoardHTML(
   c: Composition,
-  general: boolean,
+  isGeneral: boolean,
   matchup: MatchupEntry | null,
   view: TacticBoardView,
   markup: Markup,
   canUndo: boolean,
 ) {
-  const { sides, hint } = boardSides(c, general, matchup)
+  const { sides, hint } = boardSides(c, isGeneral, matchup)
   const col = (side: DraftSide) => {
     const entry = sides[side]
     return entry
@@ -127,14 +127,14 @@ function tacticBoardHTML(
     ? `<button type="button" data-slot="button" data-variant="outline" data-size="sm" class="tx-swap-sides" data-matchup-swap title="Trocar os lados do confronto">${iconMarkup("swap")} Trocar lados</button>`
     : ""
   const undo = `<button type="button" data-slot="button" data-variant="outline" data-size="sm" class="tx-undo" data-undo-last${canUndo ? "" : " hidden"} title="Desfazer a última mudança (Ctrl+Z)">${iconMarkup("undo")} Desfazer</button>`
-  const open = general
+  const open = isGeneral
     ? ""
     : `<button type="button" data-slot="button" data-variant="outline" data-size="sm" class="tx-open-draft" data-open-draft>${iconMarkup("next")} Editar na Ordem do draft</button>`
   return `<div class="tx-board-bar"><div class="tx-board-bar-start">${boardSwitchHTML(view)}${undo}</div><div class="tx-board-bar-end">${swap}${open}</div></div>${board}`
 }
 
 /** Cabeçalho da comp: de quem ela é (só leitura; muda pelo menu ⋯ da Ordem do draft) e, na adversária, o OP.GG do time. */
-function teamToolsHTML(c: Composition, esc: Markup["esc"], matchup: MatchupEntry | null, hidden = false) {
+function teamToolsHTML(c: Composition, esc: Markup["esc"], matchup: MatchupEntry | null, isHidden = false) {
   const team = matchup ? "enemy" : ownerOf(c),
     link = matchup ? (matchup.enemy ? opggOf(matchup.enemy) : "") : opggOf(c)
   const tag = matchup
@@ -152,7 +152,7 @@ Botão direito: trocar o link`
     }">${iconMarkup("link")} ${link ? "OP.GG" : "+ OP.GG"}</button>`
       : ""
   // Em Táticas gerais as ferramentas ficam invisíveis, mas ocupam o lugar: o alternador não muda de posição.
-  return `<div class="tx-team-tools"${hidden ? ' inert aria-hidden="true"' : ""}>${tag}${opgg}</div>`
+  return `<div class="tx-team-tools"${isHidden ? ' inert aria-hidden="true"' : ""}>${tag}${opgg}</div>`
 }
 
 export type TacticsOptions = Markup & {
@@ -190,8 +190,8 @@ export function tacticsHTML(
   }: TacticsOptions,
 ) {
   const tab = (x: Composition) => {
-    const on = !general && !active && x.id === c.id
-    return `<button type="button" class="dz-tab${on ? " on" : ""}" data-tactic-comp="${esc(x.id)}" draggable="true" aria-pressed="${on}" title="${esc(x.name)}">
+    const isOn = !general && !active && x.id === c.id
+    return `<button type="button" class="dz-tab${isOn ? " on" : ""}" data-tactic-comp="${esc(x.id)}" draggable="true" aria-pressed="${isOn}" title="${esc(x.name)}">
       <b>${esc(x.name)}</b>${sideMark(sideInContext(x, active?.matchup ?? null))}<span class="mini">${compositionPreviewHTML(x, img) || "<small>vazia</small>"}</span></button>`
   }
   const ours = oursOf(compositions),

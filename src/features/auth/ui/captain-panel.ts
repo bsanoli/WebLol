@@ -10,6 +10,7 @@ import { readOfficial } from "../model/sync"
 
 /** Todo membro ativo do time vê a aba; só o capitão (ou admin desbloqueado) aceita pedidos e exclui jogadores. */
 export const TEAM_NAME = () => session.team?.name || ""
+// biome-ignore lint/nursery/useConsistentBooleanName: nome fixado pelo contrato com os iframes
 export const captainAccess = () => !!session.team && !!user() && !user()?.solo
 export const canManageTeam = () =>
   !!session.team && (isCaptain() || (!preview() && !!user()?.admin && isFirebaseAdmin()))

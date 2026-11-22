@@ -21,7 +21,7 @@ export function mountMapPlayControls(
     publishTeamRoute("map")
   }
   $("#pnew").onclick = async () => {
-    const n = await askName("Nova jogada", "Jogada " + (plays().length + 1))
+    const n = await askName("Nova jogada", `Jogada ${plays().length + 1}`)
     if (n === undefined) return
     const p = newPlay(n || undefined)
     state().plays.push(p)

@@ -43,10 +43,10 @@ export function showDialog({
   const host = document.createElement("div")
   document.body.append(host)
   const root = createRoot(host)
-  let closed = false
+  let isClosed = false
   function close() {
-    if (closed) return
-    closed = true
+    if (isClosed) return
+    isClosed = true
     root.unmount()
     host.remove()
     if (trigger instanceof HTMLElement && trigger.isConnected) trigger.focus({ preventScroll: true })
@@ -97,10 +97,10 @@ export function askChoice<T extends string>(title: string, description: ReactNod
     const host = document.createElement("div")
     document.body.append(host)
     const root = createRoot(host)
-    let finished = false
+    let isFinished = false
     function finish(value?: T) {
-      if (finished) return
-      finished = true
+      if (isFinished) return
+      isFinished = true
       queueMicrotask(() => {
         root.unmount()
         host.remove()
@@ -142,10 +142,10 @@ export function askName(title: string, initial: string, label = "Nome da jogada"
     const host = document.createElement("div")
     document.body.append(host)
     const root = createRoot(host)
-    let finished = false
+    let isFinished = false
     function finish(value?: string) {
-      if (finished) return
-      finished = true
+      if (isFinished) return
+      isFinished = true
       queueMicrotask(() => {
         root.unmount()
         host.remove()

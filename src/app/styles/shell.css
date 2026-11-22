@@ -39,9 +39,6 @@ input {
   flex-wrap: wrap;
   margin-bottom: var(--wl-space-3);
 }
-.card .hd b {
-  font-size: 15px;
-}
 .mut {
   color: var(--mut);
   font-size: 12px;
@@ -86,14 +83,14 @@ input {
   color: var(--txt);
   font-weight: 600;
 }
+.card .hd b {
+  font-size: 15px;
+}
 .btns {
   display: flex;
   gap: var(--wl-space-2);
   margin-top: var(--wl-space-4);
   flex-wrap: wrap;
-}
-#admin tr:hover td {
-  background: var(--panel2);
 }
 .ok {
   color: var(--green);
@@ -161,12 +158,6 @@ input {
   font-size: 15px;
   margin: 4px 0 8px;
 }
-#mbox label {
-  display: block;
-  font-size: 12px;
-  color: var(--mut);
-  margin: var(--wl-space-4) 0 var(--wl-space-1);
-}
 :root {
   --bg: var(--wl-bg);
   --panel: var(--wl-surface);
@@ -198,6 +189,9 @@ input {
 #header-tools[data-state="open"] {
   display: grid;
   gap: var(--wl-space-1);
+}
+.admin-form [data-slot="button"] {
+  justify-self: start;
 }
 #header-tools [data-slot="button"] {
   width: 100%;
@@ -347,6 +341,9 @@ body:has(#header-tools[data-state="open"]) #screens::after {
 #admin td {
   font-variant-numeric: tabular-nums;
 }
+#admin tr:hover td {
+  background: var(--panel2);
+}
 #admin table:has(> thead th[aria-label="Ações"]:last-child) td:last-child:not([colspan]) {
   width: 1%;
   text-align: end;
@@ -379,9 +376,6 @@ body:has(#header-tools[data-state="open"]) #screens::after {
   color: var(--mut);
   font-size: var(--wl-label-size);
 }
-.admin-form [data-slot="button"] {
-  justify-self: start;
-}
 .admin-form [role="alert"]:empty {
   position: absolute;
 }
@@ -404,6 +398,12 @@ body:has(#header-tools[data-state="open"]) #screens::after {
   font-size: var(--wl-section-size);
   line-height: 1.2;
   font-weight: 700;
+}
+#mbox label {
+  display: block;
+  font-size: 12px;
+  color: var(--mut);
+  margin: var(--wl-space-4) 0 var(--wl-space-1);
 }
 #mbox label {
   font-size: var(--wl-label-size);

@@ -1,4 +1,5 @@
 import { expect, test } from "@playwright/test"
+import { boxOf } from "./support/box"
 
 test("Táticas: monta picks na gaveta e arrasta uma adversária para criar o confronto", async ({ page }) => {
   await page.setViewportSize({ width: 1440, height: 1080 })
@@ -53,7 +54,7 @@ test("Táticas: monta picks na gaveta e arrasta uma adversária para criar o con
   await expect(page.locator("#tx-title")).toContainText("Nossa base x Time rival")
   await expect(board.locator(".tx-side-col")).toHaveCount(2)
   await expect(board.locator(".tx-side-col.empty")).toHaveCount(0)
-  const state = await page.evaluate(() => JSON.parse(localStorage.getItem("lol-comps-time-v1")!))
+  const state = await page.evaluate(() => JSON.parse(localStorage.getItem("lol-comps-time-v1") ?? "null"))
   expect(state.matchups).toHaveLength(1)
   expect(state.matchups[0]).toMatchObject({ ours: "nossa", side: "blue" })
 })
@@ -87,7 +88,7 @@ test("Táticas: visão Lane só com ícones, com as mesmas ações e lembrada ao
   await expect(board.getByRole("button", { name: "Lane" })).toHaveAttribute("aria-pressed", "true")
   await expect(board.locator(".pk")).toHaveCount(0)
   await expect(board.locator(".tx-pos-slot")).toHaveCount(12)
-  const read = () => page.evaluate(() => JSON.parse(localStorage.getItem("lol-comps-time-v1")!))
+  const read = () => page.evaluate(() => JSON.parse(localStorage.getItem("lol-comps-time-v1") ?? "null"))
 
   // Clicar numa alternativa a torna principal.
   await board.locator('.tx-pos-col.blue .tx-pos-slot.top [data-priority="Gnar"]').click()
@@ -103,7 +104,7 @@ test("Táticas: visão Lane só com ícones, com as mesmas ações e lembrada ao
 
   // O vermelho, na direita, segue da esquerda para a direita: soltar à esquerda de um ícone coloca antes dele.
   const camille = board.locator('.tx-pos-col.red .tx-pos-slot.top [data-n="Camille"]')
-  const box = (await camille.boundingBox())!
+  const box = await boxOf(camille)
   await board
     .locator('.tx-pos-col.red .tx-pos-slot.top [data-n="Jax"]')
     .dragTo(camille, { targetPosition: { x: 3, y: box.height / 2 } })
@@ -179,7 +180,7 @@ test("Táticas: trocar a posição de um pick no quadro da gaveta", async ({ pag
   await page.getByRole("option", { name: "Top" }).click()
   await expect(board.locator(".tx-side-col .pk").nth(1)).toHaveAttribute("data-l", "top")
   await expect(board.locator(`.tx-side-col .pk[data-l="${previous}"]`)).toHaveCount(1)
-  const state = await page.evaluate(() => JSON.parse(localStorage.getItem("lol-comps-time-v1")!))
+  const state = await page.evaluate(() => JSON.parse(localStorage.getItem("lol-comps-time-v1") ?? "null"))
   const draft = state.comps.find((c: { id: string }) => c.id === "nossa").draft
   // Sem lado salvo, a comp fica no azul.
   expect(draft.order[draft.side ?? "blue"][1]).toBe("top")
@@ -208,11 +209,13 @@ test("Ordem do draft: arrastar campeões entre cards, criar a adversária e remo
   const drag = (from: string, to: string | null) =>
     page.evaluate(
       ([f, t]) => {
-        const src = document.querySelector(f as string)!,
+        const src = document.querySelector(f as string),
           dt = new DataTransfer()
+        if (!src) throw new Error(`Origem não encontrada: ${f}`)
         src.dispatchEvent(new DragEvent("dragstart", { bubbles: true, dataTransfer: dt }))
         if (t) {
-          const dst = document.querySelector(t)!
+          const dst = document.querySelector(t)
+          if (!dst) throw new Error(`Destino não encontrado: ${t}`)
           dst.dispatchEvent(new DragEvent("dragover", { bubbles: true, cancelable: true, dataTransfer: dt }))
           dst.dispatchEvent(new DragEvent("drop", { bubbles: true, cancelable: true, dataTransfer: dt }))
         }
@@ -225,7 +228,8 @@ test("Ordem do draft: arrastar campeões entre cards, criar a adversária e remo
   const lanes = () =>
     page.evaluate(
       () =>
-        JSON.parse(localStorage.getItem("lol-comps-time-v1")!).comps.find((c: { id: string }) => c.id === "c1").lanes,
+        JSON.parse(localStorage.getItem("lol-comps-time-v1") ?? "null").comps.find((c: { id: string }) => c.id === "c1")
+          .lanes,
     )
 
   // Card vazio do lado adversário é destino: cria a adversária com o campeão naquela rota.
@@ -234,8 +238,9 @@ test("Ordem do draft: arrastar campeões entre cards, criar a adversária e remo
   await expect(page.locator(".tm.rival.mine")).toBeVisible()
   const afterCreate = await page.evaluate(
     () =>
-      JSON.parse(localStorage.getItem("lol-comps-time-v1")!).comps.find((c: { team?: string }) => c.team === "enemy")
-        .lanes,
+      JSON.parse(localStorage.getItem("lol-comps-time-v1") ?? "null").comps.find(
+        (c: { team?: string }) => c.team === "enemy",
+      ).lanes,
   )
   expect(afterCreate.sup).toEqual(["Ahri"])
   expect((await lanes()).mid).toEqual([])
@@ -283,8 +288,8 @@ test("Táticas: Draft e Lane têm a mesma altura, o quadro ocupa a gaveta e a p�
       page.evaluate(() => document.documentElement.scrollHeight <= document.documentElement.clientHeight)
     const boardHeight = async (view: "draft" | "positions") => {
       await draft.locator(`[data-tactic-board="${view}"]`).click()
-      const box = await draft.locator(view === "draft" ? ".tx-draft-sides" : ".tx-pos-board").boundingBox()
-      return Math.round(box!.height)
+      const box = await boxOf(draft.locator(view === "draft" ? ".tx-draft-sides" : ".tx-pos-board"))
+      return Math.round(box.height)
     }
     for (const collapsed of [false, true]) {
       if ((await toggle.getAttribute("aria-expanded")) === String(collapsed)) await toggle.click()
@@ -312,8 +317,8 @@ test("Táticas: Draft e Lane têm a mesma altura, o quadro ocupa a gaveta e a p�
     expect(rows.left).toEqual(rows.names)
     if (rows.right.length) expect(rows.right).toEqual(rows.names)
     // Com a lista recolhida, o quadro vai até o fim da gaveta.
-    const aside = (await page.locator(".tx-aside").boundingBox())!
-    const sides = (await draft.locator(".tx-pos-board").boundingBox())!
+    const aside = await boxOf(page.locator(".tx-aside"))
+    const sides = await boxOf(draft.locator(".tx-pos-board"))
     expect(Math.abs(aside.y + aside.height - (sides.y + sides.height))).toBeLessThanOrEqual(12)
     await page.evaluate(() => localStorage.setItem("lol-comps-time-v1", ""))
   }

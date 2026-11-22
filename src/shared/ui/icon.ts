@@ -12,9 +12,9 @@ const laneIcons = new Map([
   ["suporte", ["sup", "Suporte"]],
 ])
 
-export function laneIconMarkup(lane: string | undefined, standalone = false) {
+export function laneIconMarkup(lane: string | undefined, isStandalone = false) {
   const icon = laneIcons.get(lane?.toLowerCase() ?? "")
   if (!icon) return ""
   const [file, label] = icon
-  return `<img class="lane-icon" src="assets/lanes/${file}.svg" width="16" height="16" alt="${standalone ? label : ""}"${standalone ? ` title="${label}"` : ""}>`
+  return `<img class="lane-icon" src="assets/lanes/${file}.svg" width="16" height="16" alt="${isStandalone ? label : ""}"${isStandalone ? ` title="${label}"` : ""}>`
 }

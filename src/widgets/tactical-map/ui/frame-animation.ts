@@ -7,14 +7,14 @@ export function animatePieces(
   from: MovingPieces,
   to: MovingPieces,
   duration: number,
-  active: () => boolean,
+  isActive: () => boolean,
   update: (pieces: MovingPieces) => void,
 ) {
   const start = performance.now()
   const previousWaves = new Map(from.waves.map(wave => [waveKey(wave), wave]))
   return new Promise<boolean>(resolve => {
     function frame(now: number) {
-      if (!active()) {
+      if (!isActive()) {
         resolve(false)
         return
       }

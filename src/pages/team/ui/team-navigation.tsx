@@ -45,18 +45,18 @@ function TeamNavigation({
         <NavigationHover target={hover.target?.isConnected ? hover.target : null} />
         {sections.map(({ value, label, icon }) => {
           if (value === "cap" && !showManagement) return null
-          const active = current === value
+          const isActive = current === value
           return (
             <button
               key={value}
               type="button"
               data-nav-item=""
-              data-current={active ? "" : undefined}
-              aria-pressed={active}
+              data-current={isActive ? "" : undefined}
+              aria-pressed={isActive}
               className={`${styles.navItem} ${styles.accentItem}`}
               onClick={() => onSelect(value)}
             >
-              {active && (
+              {isActive && (
                 <motion.span
                   className={styles.indicator}
                   layoutId="current"
@@ -78,7 +78,7 @@ function TeamNavigation({
 
 export function mountTeamNavigation(host: HTMLElement, onSelect: (view: TeamView) => void) {
   const root = createRoot(host)
-  return (current: TeamView, showManagement: boolean) => {
-    root.render(<TeamNavigation current={current} showManagement={showManagement} onSelect={onSelect} />)
+  return (current: TeamView, shouldShowManagement: boolean) => {
+    root.render(<TeamNavigation current={current} showManagement={shouldShowManagement} onSelect={onSelect} />)
   }
 }

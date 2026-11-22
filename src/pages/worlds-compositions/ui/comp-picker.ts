@@ -17,18 +17,18 @@ export function wireFloatingPicker(trigger: HTMLElement, picker: HTMLElement, se
   compositionPopovers.push(root)
   picker.remove()
   picker.hidden = false
-  let open = false
-  const setOpen = (next: boolean) => {
-    if (next)
+  let isOpen = false
+  const setOpen = (shouldOpen: boolean) => {
+    if (shouldOpen)
       for (const other of compositionPopovers) {
         if (other !== root) other.dismiss?.()
       }
-    open = next
-    trigger.setAttribute("aria-expanded", String(open))
+    isOpen = shouldOpen
+    trigger.setAttribute("aria-expanded", String(isOpen))
     root.render(
       createElement(
         Popover,
-        { open, onOpenChange: setOpen },
+        { open: isOpen, onOpenChange: setOpen },
         createElement(PopoverAnchor, { virtualRef: { current: trigger } }),
         createElement(
           PopoverContent,
@@ -52,9 +52,9 @@ export function wireFloatingPicker(trigger: HTMLElement, picker: HTMLElement, se
     )
   }
   root.dismiss = () => {
-    if (open) setOpen(false)
+    if (isOpen) setOpen(false)
   }
-  trigger.onclick = () => setOpen(!open)
+  trigger.onclick = () => setOpen(!isOpen)
   return () => {
     setOpen(false)
     trigger.focus()
@@ -125,8 +125,8 @@ export function wireCompPicker(
   const filterOptions = () => {
     const query = lolKey(search.value)
     for (const option of options) {
-      const matchesCategory = !category || option.categories.includes(category)
-      option.button.hidden = !matchesCategory || !(option.name.includes(query) || option.code.includes(query))
+      const isCategoryMatch = !category || option.categories.includes(category)
+      option.button.hidden = !isCategoryMatch || !(option.name.includes(query) || option.code.includes(query))
     }
     empty.hidden = options.some(({ button }) => !button.hidden)
     grid.scrollTop = 0

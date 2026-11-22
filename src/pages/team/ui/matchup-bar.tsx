@@ -32,13 +32,13 @@ export type MatchupBarProps = {
   onDelete: (id: string) => void
 }
 
-const compActions = (item: MatchupItem, props: MatchupBarProps, enemy: boolean) => [
+const compActions = (item: MatchupItem, props: MatchupBarProps, isEnemy: boolean) => [
   {
-    label: enemy ? "Mover para nossas" : "Mover para adversárias",
+    label: isEnemy ? "Mover para nossas" : "Mover para adversárias",
     icon: <Icon name="swap" />,
     run: () => props.onMove(item.id),
   },
-  ...(enemy ? [{ label: "Link do OP.GG…", icon: <Icon name="link" />, run: () => props.onOpgg(item.id) }] : []),
+  ...(isEnemy ? [{ label: "Link do OP.GG…", icon: <Icon name="link" />, run: () => props.onOpgg(item.id) }] : []),
   { label: "Renomear", icon: <Icon name="edit" />, run: () => props.onRename(item.id) },
   { label: "Duplicar", icon: <Icon name="duplicate" />, run: () => props.onDuplicate(item.id) },
   { label: "Excluir", icon: <Icon name="trash" />, destructive: true, run: () => props.onDelete(item.id) },
@@ -237,6 +237,7 @@ function MatchupBar(props: MatchupBarProps) {
   return (
     <>
       {head}
+      {/* biome-ignore lint/a11y/useSemanticElements: fieldset traria borda e margens do navegador para o confronto */}
       <div className="matchup" role="group" aria-label="Confronto do draft">
         {side === "blue" ? oursBlock : rivalBlock}
         <button

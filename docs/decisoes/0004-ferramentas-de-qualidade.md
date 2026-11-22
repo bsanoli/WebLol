@@ -36,7 +36,7 @@ Preferir ferramentas que não dependem do compilador TypeScript, em duas ondas d
 
 Versões fixas no `package.json`: Biome 2.6.8, Steiger 0.10.0 com o plugin 0.8.2, Vitest 5.1.1, Lefthook 2.2.2 e @axe-core/playwright 4.14.0. Diferenças em relação à tabela acima:
 
-- **Avisos antes de erros.** As regras de nomes do Biome, as regras do preset que já tinham violações no código e 5 das 17 regras do Steiger (as que já tinham violações) começam como aviso; as outras 12 já barram. Elas sobem para erro quando o código daquela regra estiver limpo. A lista está na [auditoria](../auditoria-codebase.md#avisos-que-ainda-não-barram).
+- **Avisos antes de erros.** O Biome foi zerado em 21/11/2026 e todas as suas regras barram (`--error-on-warnings`). 5 das 17 regras do Steiger (as que já tinham violações) começam como aviso; as outras 12 já barram. Elas sobem para erro quando o código daquela regra estiver limpo. A lista está na [auditoria](../auditoria-codebase.md#avisos-que-ainda-não-barram).
 - **axe com violações conhecidas.** `tests/accessibility.spec.ts` passa as oito telas principais pelo axe e só aceita as violações listadas em `known`, por tela e com o máximo de elementos. Uma regra nova, uma tela nova ou mais elementos fazem o teste falhar.
 - **CI em todo push e sob demanda (`workflow_dispatch`), sem `pull_request`.** O PR mostra o resultado do push da própria branch, então rodar nos dois eventos repetiria o mesmo trabalho.
 - **`PostToolUse` em `src/`, `tests/` e `scripts/`**, fora `src/data/`, que é gerado. Erros voltam ao agente com código 2, e avisos voltam como contexto.

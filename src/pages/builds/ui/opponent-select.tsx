@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react"
+import { useCallback, useEffect, useRef, useState } from "react"
 import { createRoot } from "react-dom/client"
 import { ChevronDown } from "lucide-react"
 import { Popover, PopoverContent, PopoverTrigger } from "@/shared/ui/popover"
@@ -38,10 +38,10 @@ export function WorldsOpponentSelect({
   const term = championSlug(query.trim())
   const matches = opponents.filter(opponent => championSlug(opponent.name).includes(term))
 
-  function changeOpen(next: boolean) {
-    setOpen(next)
-    if (!next) setQuery("")
-  }
+  const changeOpen = useCallback((shouldOpen: boolean) => {
+    setOpen(shouldOpen)
+    if (!shouldOpen) setQuery("")
+  }, [])
 
   function choose(next: string) {
     changeOpen(false)
@@ -60,7 +60,7 @@ export function WorldsOpponentSelect({
       })
     window.addEventListener("blur", close)
     return () => window.removeEventListener("blur", close)
-  }, [open])
+  }, [open, changeOpen])
 
   return (
     <Popover open={open} onOpenChange={changeOpen}>
@@ -111,6 +111,7 @@ export function WorldsOpponentSelect({
             }
           }}
         />
+        {/* biome-ignore lint/a11y/useSemanticElements: fieldset traria borda e margens do navegador para a lista */}
         <div ref={options} className="build-opponent-results" role="group" aria-label="Adversários">
           {!term && (
             <button

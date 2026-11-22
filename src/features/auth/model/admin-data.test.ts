@@ -8,7 +8,7 @@ const db = vi.hoisted(() => ({
 }))
 vi.mock("@/shared/firestore", () => ({
   // biome-ignore lint/style/useNamingConvention: nome exportado pelo módulo real
-  ONLINE: true,
+  IS_ONLINE: true,
   dbGet: async (collection: string, id: string) => {
     if (db.fail.has(`${collection}/${id}`)) throw new Error("rede")
     return db.docs.get(`${collection}/${id}`) ?? null

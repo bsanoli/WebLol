@@ -39,16 +39,16 @@ type PageId = keyof typeof worldsPaths
 type RouteFilters = Record<string, string | number | null | undefined>
 const laneFromParam = (value: string | null | undefined) => (value && laneById.get(value)) || ""
 
-function publishWorlds(id: PageId, parts: string[] = [], filters: RouteFilters = {}, replace = false) {
+function publishWorlds(id: PageId, parts: string[] = [], filters: RouteFilters = {}, shouldReplace = false) {
   const embedded = isEmbedded()
   const path =
     id === "builds" && embedded
       ? buildsPath(DATASET.source, parts, filters)
       : (id === "comps" && embedded ? worldsPaths.comps : DATASET.root + worldsPaths[id]) +
-        parts.map(part => "/" + part).join("") +
+        parts.map(part => `/${part}`).join("") +
         routeQuery(filters)
-  if (embedded) navigateHost({ path, replace })
-  else if (location.hash !== "#" + path) history[replace ? "replaceState" : "pushState"](null, "", "#" + path)
+  if (embedded) navigateHost({ path, replace: shouldReplace })
+  else if (location.hash !== `#${path}`) history[shouldReplace ? "replaceState" : "pushState"](null, "", `#${path}`)
 }
 
 function routeQuery(filters: RouteFilters) {
@@ -56,11 +56,11 @@ function routeQuery(filters: RouteFilters) {
     value ? [[key, String(value)] as [string, string]] : [],
   )
   const query = new URLSearchParams(entries).toString()
-  return query ? "?" + query : ""
+  return query ? `?${query}` : ""
 }
 
 function buildsPath(source: string, parts: string[], filters: RouteFilters) {
-  return "/builds" + parts.map(part => "/" + part).join("") + routeQuery({ fonte: source, ...filters })
+  return `/builds${parts.map(part => `/${part}`).join("")}${routeQuery({ fonte: source, ...filters })}`
 }
 
 async function applyRoute([page, first, second]: (string | undefined)[], params = new URLSearchParams()) {
@@ -70,19 +70,19 @@ async function applyRoute([page, first, second]: (string | undefined)[], params 
     publishWorlds("geral", [], {}, true)
     return
   }
-  const legacyChampions = page === "campeoes"
-  const legacyMatchups = page === "confrontos"
+  const isLegacyChampions = page === "campeoes"
+  const isLegacyMatchups = page === "confrontos"
   const id =
-    legacyChampions || legacyMatchups
+    isLegacyChampions || isLegacyMatchups
       ? "builds"
-      : (Object.keys(worldsPaths) as PageId[]).find(key => worldsPaths[key] === "/" + page) || defaultTab
+      : (Object.keys(worldsPaths) as PageId[]).find(key => worldsPaths[key] === `/${page}`) || defaultTab
   const loaded = await loadPage(id)
   if (!loaded || current !== navigation) return
   const query = params.get("busca") || ""
   const lane = laneFromParam(params.get("posicao"))
   if (id === "builds") {
-    const champion = (legacyMatchups ? second : first) || ""
-    const position = legacyMatchups ? laneFromParam(first) : lane || (legacyChampions ? "Top" : "")
+    const champion = (isLegacyMatchups ? second : first) || ""
+    const position = isLegacyMatchups ? laneFromParam(first) : lane || (isLegacyChampions ? "Top" : "")
     const minGames = buildsPage?.setBuildRoute({
       champion,
       opponent: params.get("adversario") || "",
@@ -91,7 +91,7 @@ async function applyRoute([page, first, second]: (string | undefined)[], params 
       minGames: params.get("minJogos"),
     })
     render(id)
-    if (legacyChampions || legacyMatchups)
+    if (isLegacyChampions || isLegacyMatchups)
       publishWorlds(
         "builds",
         champion ? [champion] : [],
@@ -129,11 +129,11 @@ function render(id: PageId) {
   if (kpis) kpis.hidden = isEmbedded() || id !== "geral"
   const final = document.getElementById("worlds-final")
   if (final?.hasAttribute("data-confirmed")) final.hidden = id !== "geral"
-  const builds = id === "builds"
+  const isBuilds = id === "builds"
   const header = document.querySelector<HTMLElement>(".wrap > header")
-  if (header) header.hidden = builds
+  if (header) header.hidden = isBuilds
   const foot = document.querySelector<HTMLElement>(".wrap > .foot")
-  if (foot) foot.hidden = builds && DATASET.source === "worlds"
+  if (foot) foot.hidden = isBuilds && DATASET.source === "worlds"
   const v = document.getElementById("view")
   if (!v) return
   if (id === "geral") {
@@ -168,11 +168,11 @@ if (!isEmbedded()) {
     const [path = "", query] = location.hash.slice(1).split("?", 2)
     const params = new URLSearchParams(query)
     const shortChampionRoute = path.match(/^\/?(builds|campeoes)(?:\/([a-z0-9-]+))?$/)
-    if (path.startsWith(DATASET.root + "/")) void applyRoute(path.split("/").slice(2), params)
+    if (path.startsWith(`${DATASET.root}/`)) void applyRoute(path.split("/").slice(2), params)
     else if (shortChampionRoute) {
       const [, page, champion] = shortChampionRoute
-      const canonicalPath = DATASET.root + "/" + page + (champion ? "/" + champion : "") + (query ? "?" + query : "")
-      history.replaceState(null, "", "#" + canonicalPath)
+      const canonicalPath = `${DATASET.root}/${page}${champion ? `/${champion}` : ""}${query ? `?${query}` : ""}`
+      history.replaceState(null, "", `#${canonicalPath}`)
       void applyRoute([page, champion], params)
     } else if (path === "jogadores") void applyRoute([path], params)
     else if (laneById.has(path)) void applyRoute(["builds"], new URLSearchParams({ posicao: path }))

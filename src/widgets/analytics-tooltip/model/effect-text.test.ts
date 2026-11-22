@@ -13,7 +13,9 @@ describe("effectText", () => {
   })
 
   it("marca o título de um efeito ativo e tira esse título do texto", () => {
+    // biome-ignore-start lint/style/useNamingConvention: título do efeito como vem dos dados da Riot
     const body = effectText("Disparo\nCausa dano.", { Disparo: "active" })
+    // biome-ignore-end lint/style/useNamingConvention: fim da exceção
     const heading = body.querySelector(".effect-heading")
     expect(heading?.querySelector("b")?.textContent).toBe("Disparo")
     expect(heading?.querySelector("small")?.textContent).toBe("Ativo")
@@ -21,7 +23,9 @@ describe("effectText", () => {
   })
 
   it("reconhece o título quando há complemento entre parênteses e trata o resto como passiva", () => {
+    // biome-ignore-start lint/style/useNamingConvention: título do efeito como vem dos dados da Riot
     const body = effectText("Vigor (3s)\nDá escudo.", { Vigor: "passive" })
+    // biome-ignore-end lint/style/useNamingConvention: fim da exceção
     expect(body.querySelector(".effect-heading small")?.textContent).toBe("Passiva")
     expect(body.querySelector(".effect-heading b")?.textContent).toBe("Vigor (3s)")
   })

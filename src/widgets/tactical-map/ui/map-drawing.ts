@@ -1,4 +1,5 @@
 import type { MapPoint } from "../model/faelights"
+import { requireElement } from "@/shared/lib/dom"
 
 type StrokeKind = "arrow" | "freehand" | "freehand-arrow"
 export type Line = { c: string; pts: MapPoint[]; kind?: StrokeKind; width?: number; dashed?: boolean }
@@ -40,10 +41,10 @@ export function mountMapDrawing({
   scale: () => number
   update: () => void
 }) {
-  const canvas = map.querySelector<HTMLCanvasElement>("canvas")!
-  const width = document.querySelector<HTMLSelectElement>("#map-stroke-width")!
-  const style = document.querySelector<HTMLSelectElement>("#map-stroke-style")!
-  const arrowhead = document.querySelector<HTMLInputElement>("#map-stroke-arrowhead")!
+  const canvas = requireElement<HTMLCanvasElement>("canvas", map)
+  const width = requireElement<HTMLSelectElement>("#map-stroke-width")
+  const style = requireElement<HTMLSelectElement>("#map-stroke-style")
+  const arrowhead = requireElement<HTMLInputElement>("#map-stroke-arrowhead")
   let color = "#ffd34d"
   let hover = -1
   let contextIndex = -1
@@ -66,8 +67,9 @@ export function mountMapDrawing({
     const size = Math.round(rect.width * dpr)
     if (!size) return
     if (canvas.width !== size || canvas.height !== size) canvas.width = canvas.height = size
-    const g = canvas.getContext("2d")!,
-      unit = size / 100
+    const g = canvas.getContext("2d")
+    if (!g) return
+    const unit = size / 100
     g.clearRect(0, 0, size, size)
     g.lineCap = "round"
     g.lineJoin = "round"
@@ -75,16 +77,16 @@ export function mountMapDrawing({
     const lines = preview ? [...read(), preview] : read()
     lines.forEach((line, index) => {
       if (line.pts.length < 2) return
-      const contextSelected = index === contextIndex
-      const highlight = !contextSelected && getTool() === "erase" && index === hover
-      const thickness = (highlight ? 6 : (line.width ?? 3.2)) * dpr
-      g.strokeStyle = g.fillStyle = highlight ? "#ff5656" : line.c
+      const isContextSelected = index === contextIndex
+      const isHighlighted = !isContextSelected && getTool() === "erase" && index === hover
+      const thickness = (isHighlighted ? 6 : (line.width ?? 3.2)) * dpr
+      g.strokeStyle = g.fillStyle = isHighlighted ? "#ff5656" : line.c
       g.lineWidth = thickness
-      g.setLineDash(line.dashed || highlight ? [8 * dpr, 5 * dpr] : [])
+      g.setLineDash(line.dashed || isHighlighted ? [8 * dpr, 5 * dpr] : [])
       const end = line.pts.length - 1
       const [x, y] = line.pts[end]
-      const freehandArrow = line.kind === "freehand-arrow"
-      const [bx, by] = freehandArrow
+      const isFreehandArrow = line.kind === "freehand-arrow"
+      const [bx, by] = isFreehandArrow
         ? pointBeforeEnd(line.pts, (12 * dpr) / unit).point
         : line.pts[Math.max(0, end - 3)]
       const drawHead = hasArrowhead(line) && (x !== bx || y !== by)
@@ -104,7 +106,7 @@ export function mountMapDrawing({
           g.lineTo(tail.point[0] * unit, tail.point[1] * unit)
           g.lineTo(x * unit - inset * Math.cos(angle), y * unit - inset * Math.sin(angle))
         }
-        if (contextSelected) {
+        if (isContextSelected) {
           g.save()
           g.strokeStyle = "#fff2b7"
           g.lineWidth = thickness + 5 * dpr
@@ -119,7 +121,7 @@ export function mountMapDrawing({
       g.lineTo(x * unit - tip * Math.cos(angle - 0.45), y * unit - tip * Math.sin(angle - 0.45))
       g.lineTo(x * unit - tip * Math.cos(angle + 0.45), y * unit - tip * Math.sin(angle + 0.45))
       g.closePath()
-      if (contextSelected) {
+      if (isContextSelected) {
         g.save()
         g.setLineDash([])
         g.strokeStyle = "#fff2b7"
@@ -260,8 +262,8 @@ export function mountMapDrawing({
       return {
         label: "Excluir",
         targetName,
-        highlight(active: boolean) {
-          contextIndex = active ? index : -1
+        highlight(isActive: boolean) {
+          contextIndex = isActive ? index : -1
           render()
         },
         run() {

@@ -189,7 +189,7 @@ export function mountKnowledge({ getState, save, publishTeamRoute, mountSectionT
     )
     $("#panel-wave").hidden = kt !== "wave"
     $("#panel-obj").hidden = kt !== "obj"
-    if (previousTab && previousTab !== kt) revealContent($("#panel-" + kt))
+    if (previousTab && previousTab !== kt) revealContent($(`#panel-${kt}`))
   }
   $("#know").addEventListener("input", event => {
     const input = calcInput(event)
@@ -210,7 +210,7 @@ export function mountKnowledge({ getState, save, publishTeamRoute, mountSectionT
   })
   $("#know").addEventListener("focusout", event => {
     const input = calcInput(event)
-    if (!input || !input.value.trim() || parseGameTime(input.value) != null) return
+    if (!input?.value.trim() || parseGameTime(input.value) != null) return
     input.setAttribute("aria-invalid", "true")
     const error = input.parentElement?.querySelector(".calc-error")
     if (error) error.textContent = "Use minutos e segundos, como 12:30."

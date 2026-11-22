@@ -38,9 +38,6 @@
   font-size: 12px;
   font-weight: 500;
 }
-#tip.ability-tip .game-tip-description p {
-  font-weight: 400;
-}
 #tip.ability-tip .game-tip-description b {
   font-weight: 600;
 }
@@ -60,6 +57,9 @@
 }
 #tip .effect-heading + p {
   margin-top: 3px;
+}
+#tip.ability-tip .game-tip-description p {
+  font-weight: 400;
 }
 #tip .effect-heading small {
   color: var(--muted);

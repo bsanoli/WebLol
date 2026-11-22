@@ -94,9 +94,6 @@
   #v-comps.draft-view .tm > .draft-phase {
     display: none;
   }
-  #v-comps.draft-view .tm > .draft-phase + .pk + .pk + .pk {
-    margin-bottom: 4px;
-  }
   #v-comps.draft-view .draft-bans {
     display: flex;
     align-items: center;
@@ -129,13 +126,6 @@
     padding: var(--wl-space-2);
     border-radius: 0;
   }
-  #v-comps.draft-view .tm.r > .pk {
-    align-items: flex-end;
-    text-align: right;
-    border-left-width: 1px;
-    border-left-color: var(--line);
-    border-right: var(--wl-accent-bar) solid var(--wl-side-red);
-  }
   #v-comps.draft-view .tm > .pk.mine .pick-splash {
     inset: 0;
     width: 100%;
@@ -167,9 +157,6 @@
     direction: rtl;
     text-align: right;
   }
-  #v-comps.draft-view .tm.r .pick-choice > * {
-    direction: ltr;
-  }
   #v-comps.draft-view .tm.r .pick-choice .pkh {
     justify-content: flex-end;
   }
@@ -182,6 +169,16 @@
   }
   #v-comps.draft-view .tm > .pk {
     min-height: 0;
+  }
+  #v-comps.draft-view .tm.r > .pk {
+    align-items: flex-end;
+    text-align: right;
+    border-left-width: 1px;
+    border-left-color: var(--line);
+    border-right: var(--wl-accent-bar) solid var(--wl-side-red);
+  }
+  #v-comps.draft-view .tm > .draft-phase + .pk + .pk + .pk {
+    margin-bottom: 4px;
   }
 
   /* Centro */
@@ -334,8 +331,8 @@
   #v-comps.draft-view .dz-slot .champ-picker > * {
     flex: none;
   }
-  #v-comps.draft-view .dz-slot .champ-picker > #grid {
-    flex: 1 1 0;
+  #v-comps.draft-view .tm.r .pick-choice > * {
+    direction: ltr;
   }
   #v-comps.draft-view .dz-slot #grid {
     flex: 1 1 0;
@@ -344,8 +341,11 @@
     overflow: auto;
     overscroll-behavior: contain;
   }
-  #v-comps.draft-view > .comp-workspace ~ * .draft-help,
-  #v-comps.draft-view .draft-help {
+  #v-comps.draft-view .dz-slot .champ-picker > #grid {
+    flex: 1 1 0;
+  }
+  #v-comps.draft-view .draft-help,
+  #v-comps.draft-view > .comp-workspace ~ * .draft-help {
     text-align: center;
   }
 }
@@ -373,15 +373,16 @@
 
 /* Lane do time ao lado de "Ordenar por" (substitui o quadro de destino) */
 #target[hidden] {
+  /* biome-ignore lint/complexity/noImportantStyles: #v-comps #target (2,0,0) define display: grid e tem especificidade maior */
   display: none !important;
-}
-#champ-picker .gtools select,
-#champ-picker .gtools input {
-  width: 100%;
 }
 #lane-target-tool select {
   color: var(--wl-accent);
   font-weight: 700;
+}
+#champ-picker .gtools select,
+#champ-picker .gtools input {
+  width: 100%;
 }
 
 /* Opções do pick: só o retrato (sem nota e sem ⋯) */
@@ -512,10 +513,6 @@
 #champ-picker .gtools .team-select {
   margin-top: 2px;
 }
-#champ-picker .gtools .team-select [data-team-trigger="select"] .lane-icon {
-  width: 14px;
-  height: 14px;
-}
 #champ-picker #gfoot[hidden] {
   display: none;
 }
@@ -632,6 +629,10 @@
 #champ-picker .gtools .roles button .lane-icon {
   width: 16px;
   height: 16px;
+}
+#champ-picker .gtools .team-select [data-team-trigger="select"] .lane-icon {
+  width: 14px;
+  height: 14px;
 }
 #champ-picker .gtools .team-select-field {
   flex: none;

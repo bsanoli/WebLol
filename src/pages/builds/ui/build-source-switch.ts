@@ -7,5 +7,5 @@ export function switchBuildSource(event: Event, pathFor: (source: string) => str
   if (!source || source === DATASET.source) return
   const path = pathFor(source)
   if (isEmbedded()) navigateHost({ path, focusSource: true })
-  else location.assign("./#" + path)
+  else location.assign(`./#${path}`)
 }

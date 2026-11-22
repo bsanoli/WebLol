@@ -1,5 +1,5 @@
 // Aba Administração (admin e capitão): desbloqueio, leitura do banco, montagem e ações.
-import { fb, ONLINE } from "@/shared/firestore"
+import { fb, IS_ONLINE } from "@/shared/firestore"
 import { $, esc } from "@/shared/lib/dom"
 import { loadAdminData } from "../model/admin-data"
 import { isCaptain, isFirebaseAdmin, pending, preview, user } from "../model/identity"
@@ -73,7 +73,7 @@ export async function renderAdmin() {
   const region = $("#admin")
   const account: Account | null = user()
   if (!account || (!account.admin && !isCaptain())) return
-  if (!ONLINE) {
+  if (!IS_ONLINE) {
     region.innerHTML = PANEL("O banco online ainda não foi configurado neste app.")
     return
   }

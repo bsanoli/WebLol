@@ -82,6 +82,7 @@ body {
   opacity: 0.55;
 }
 [hidden] {
+  /* biome-ignore lint/complexity/noImportantStyles: o atributo hidden precisa esconder mesmo com regras de display mais específicas */
   display: none !important;
 }
 :where(button, input, textarea, select, a, summary, [tabindex]):focus-visible {
@@ -200,7 +201,9 @@ dialog::backdrop {
   *,
   *::before,
   *::after {
+    /* biome-ignore lint/complexity/noImportantStyles: o usuário pediu menos movimento; precisa vencer qualquer regra e estilo inline */
     transition: none !important;
+    /* biome-ignore lint/complexity/noImportantStyles: o usuário pediu menos movimento; precisa vencer qualquer regra e estilo inline */
     scroll-behavior: auto !important;
   }
 }

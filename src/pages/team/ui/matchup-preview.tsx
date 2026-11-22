@@ -20,7 +20,11 @@ export function SideMark({ side }: { side: DraftSide }) {
 
 export function Preview({ html }: { html: string }) {
   return html ? (
-    <span className="mini matchup-preview" dangerouslySetInnerHTML={{ __html: html }} />
+    <span
+      className="mini matchup-preview"
+      // biome-ignore lint/security/noDangerouslySetInnerHtml: miniatura em SVG gerada pelo WebLol a partir do draft
+      dangerouslySetInnerHTML={{ __html: html }}
+    />
   ) : (
     <span className="mini matchup-preview">
       <small>vazia</small>

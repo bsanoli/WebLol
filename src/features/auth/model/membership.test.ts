@@ -4,7 +4,7 @@ const docs = vi.hoisted(() => new Map<string, unknown>())
 const written = vi.hoisted(() => [] as unknown[][])
 vi.mock("@/shared/firestore", () => ({
   // biome-ignore lint/style/useNamingConvention: nome exportado pelo módulo real
-  ONLINE: true,
+  IS_ONLINE: true,
   currentFirebase: () => ({
     auth: { currentUser: docs.get("__email__") ? { email: docs.get("__email__") } : null },
   }),

@@ -43,21 +43,8 @@ body:has(#v-comps.on) {
   gap: var(--wl-space-3);
   padding: var(--wl-panel-padding);
 }
-#v-comps .comp-library > h2 {
-  display: block;
-  padding: 0;
-  margin: 0;
-  font-size: 15px;
-}
 #v-comps .library-search {
   display: block;
-}
-#v-comps #comps .comp-library .library-search label {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  overflow: hidden;
-  clip-path: inset(50%);
 }
 #v-comps #csearch {
   min-height: var(--wl-button-height-sm);
@@ -89,12 +76,6 @@ body:has(#v-comps.on) {
   padding: var(--wl-space-3);
   border: 1px solid var(--line);
   border-radius: var(--wl-card-radius);
-}
-#v-comps .ci b {
-  display: block;
-  padding-inline-end: var(--wl-space-8);
-  font-size: 13px;
-  overflow-wrap: anywhere;
 }
 #v-comps #clist .ci.on {
   border-left: var(--wl-accent-bar) solid var(--wl-accent);
@@ -264,17 +245,33 @@ summary::-webkit-details-marker {
 .champ-priority b {
   font-size: 14px;
 }
+#v-comps .ci b {
+  display: block;
+  padding-inline-end: var(--wl-space-8);
+  font-size: 13px;
+  overflow-wrap: anywhere;
+}
 #v-comps .chip .av {
   border-radius: var(--wl-control-radius);
   width: 32px;
   height: 32px;
 }
+#v-comps .pk-target > .av {
+  width: 32px;
+  height: 32px;
+  border-radius: var(--wl-control-radius);
+}
+#v-comps .ch .av,
+#picker-dialog .ch .av {
+  width: var(--wl-button-height);
+  height: var(--wl-button-height);
+  max-width: 100%;
+  border-radius: var(--wl-control-radius);
+  outline: none;
+}
 #v-comps .chip.primary .av {
   width: 44px;
   height: 44px;
-}
-#v-comps.draft-view .chip.primary .av {
-  border: 1px solid var(--line);
 }
 #v-comps .chip.primary {
   margin-right: 12px;
@@ -401,11 +398,6 @@ summary::-webkit-details-marker {
   min-height: var(--wl-button-height-sm);
   text-align: left;
 }
-#v-comps .pk-target > .av {
-  width: 32px;
-  height: 32px;
-  border-radius: var(--wl-control-radius);
-}
 #v-comps .pkh {
   flex: none;
 }
@@ -473,6 +465,12 @@ summary::-webkit-details-marker {
   margin: 0;
   font: 700 var(--wl-card-title-size) / 1.25 var(--wl-font);
 }
+#v-comps .comp-library > h2 {
+  display: block;
+  padding: 0;
+  margin: 0;
+  font-size: 15px;
+}
 #close-picker {
   display: none;
 }
@@ -500,6 +498,13 @@ summary::-webkit-details-marker {
   clip-path: none;
   font-size: 11px;
   color: var(--mut);
+}
+#v-comps #comps .comp-library .library-search label {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
 }
 #v-comps #target select,
 #picker-dialog #target select {
@@ -562,14 +567,6 @@ summary::-webkit-details-marker {
   gap: 4px;
   border-radius: var(--wl-card-radius);
 }
-#v-comps .ch .av,
-#picker-dialog .ch .av {
-  width: var(--wl-button-height);
-  height: var(--wl-button-height);
-  max-width: 100%;
-  border-radius: var(--wl-control-radius);
-  outline: none;
-}
 #v-comps .ch .nm,
 #picker-dialog .ch .nm {
   font-size: 11px;
@@ -586,6 +583,9 @@ summary::-webkit-details-marker {
 }
 #champ-picker .ch[aria-pressed="true"] .av {
   box-shadow: 0 0 0 2px var(--wl-accent);
+}
+#v-comps.draft-view .chip.primary .av {
+  border: 1px solid var(--line);
 }
 .ch[aria-pressed="true"] .tag {
   display: none;
@@ -664,16 +664,16 @@ summary::-webkit-details-marker {
   #v-comps .chip.primary {
     margin-right: 0;
   }
-  #v-comps .chip.primary .av {
-    width: 36px;
-    height: 36px;
-  }
   .champ-priority b {
     font-size: 12px;
   }
   #v-comps .chip .av {
     width: 28px;
     height: 28px;
+  }
+  #v-comps .chip.primary .av {
+    width: 36px;
+    height: 36px;
   }
   #v-comps .dz {
     grid-template-columns: minmax(0, 1fr);
@@ -742,11 +742,6 @@ summary::-webkit-details-marker {
 #v-comps .pk.mine {
   display: grid;
   grid-template-columns: minmax(110px, 1fr) auto;
-}
-#v-comps .pk.r .pk-target,
-#v-comps .pk.r .pkf {
-  grid-column: auto;
-  grid-row: auto;
 }
 #v-comps .pkf {
   flex-wrap: nowrap;
@@ -918,6 +913,11 @@ summary::-webkit-details-marker {
 #v-comps .pkf {
   align-items: center;
 }
+#v-comps .pk.r .pk-target,
+#v-comps .pk.r .pkf {
+  grid-column: auto;
+  grid-row: auto;
+}
 #v-comps .draft-alternatives-label {
   display: none;
 }
@@ -1010,10 +1010,6 @@ summary::-webkit-details-marker {
   #v-comps .chip.primary {
     margin-right: 24px;
   }
-  #v-comps .chip.primary .av {
-    width: 58px;
-    height: 58px;
-  }
   #v-comps .champ-priority b {
     font-size: 18px;
   }
@@ -1024,13 +1020,13 @@ summary::-webkit-details-marker {
     width: 40px;
     height: 40px;
   }
+  #v-comps .chip.primary .av {
+    width: 58px;
+    height: 58px;
+  }
   #v-comps .lane:not(.ban-strip) .chip .av {
     width: 44px;
     height: 44px;
-  }
-  #v-comps .lane:not(.ban-strip) .chip.primary .av {
-    width: 54px;
-    height: 54px;
   }
   #v-comps .ban-strip {
     min-height: 64px;
@@ -1038,6 +1034,10 @@ summary::-webkit-details-marker {
   #v-comps .ban-strip .chip.primary .av {
     width: 40px;
     height: 40px;
+  }
+  #v-comps .lane:not(.ban-strip) .chip.primary .av {
+    width: 54px;
+    height: 54px;
   }
   #v-comps .ban-strip .chip.primary {
     margin-right: 0;
@@ -1058,6 +1058,10 @@ summary::-webkit-details-marker {
     text-overflow: ellipsis;
     white-space: nowrap;
   }
+}
+
+/* Largura ampla: quadro do draft */
+@media (min-width: 1600px) {
   #v-comps .draft-toolbar {
     display: flex;
     gap: var(--wl-space-4);
@@ -1127,6 +1131,10 @@ summary::-webkit-details-marker {
     width: 27px;
     height: 27px;
   }
+}
+
+/* Largura ampla: seletor de campeões */
+@media (min-width: 1600px) {
   #v-comps .picker-heading {
     padding: 16px 16px 8px;
   }
@@ -1182,16 +1190,6 @@ summary::-webkit-details-marker {
 }
 
 /* Shared toolbar for both composition modes. */
-#v-comps #comps > .composition-toolbar {
-  grid-column: 1 / -1;
-  display: flex;
-  flex-direction: row;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--wl-space-2);
-  padding: var(--wl-space-2) var(--wl-panel-padding);
-}
 #v-comps .editor-controls {
   display: flex;
   align-items: center;
@@ -1237,6 +1235,16 @@ summary::-webkit-details-marker {
 #v-comps .composition-toolbar {
   order: -1;
 }
+#v-comps #comps > .composition-toolbar {
+  grid-column: 1 / -1;
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--wl-space-2);
+  padding: var(--wl-space-2) var(--wl-panel-padding);
+}
 #v-comps .local-save-actions {
   position: relative;
 }
@@ -1245,12 +1253,12 @@ summary::-webkit-details-marker {
   justify-content: space-between;
   min-width: 208px;
 }
+#v-comps .local-save-actions[data-save-error] .saved {
+  color: var(--wl-danger);
+}
 #v-comps .local-save-actions[data-draft="pending"] > summary .saved {
   color: var(--wl-accent);
   font-weight: 600;
-}
-#v-comps .local-save-actions[data-save-error] .saved {
-  color: var(--wl-danger);
 }
 .local-save-chevron {
   width: calc(var(--wl-space-1) * 1.5);

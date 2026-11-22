@@ -97,6 +97,7 @@ export function TabsList({
       scroll.removeEventListener("scroll", update)
     }
   }, [update])
+  // biome-ignore lint/correctness/useExhaustiveDependencies: `active` dispara de novo a rolagem até a aba ativa
   useLayoutEffect(() => {
     reveal(list.current?.querySelector<HTMLElement>('[role="tab"][data-state="active"]') ?? null)
   }, [active, reveal])

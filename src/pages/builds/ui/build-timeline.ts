@@ -5,6 +5,7 @@ import { ico } from "@/entities/champion"
 import { championSlug, esc } from "@/entities/match"
 import { DATASET, isReference } from "@/shared/dataset"
 import { revealContent } from "@/shared/lib/motion"
+import { requireElement } from "@/shared/lib/dom"
 
 export type TimelineGame = (typeof games)[number]
 type Game = TimelineGame
@@ -16,15 +17,17 @@ const percent = new Intl.NumberFormat("pt-BR", { maximumFractionDigits: 0 })
 const number = new Intl.NumberFormat("pt-BR")
 const gamesPerPage = 5
 const rounds: Record<string, string> = {
+  // biome-ignore-start lint/style/useNamingConvention: chaves vindas da API de partidas
   QUARTERFINALS: "Quartas",
   SEMIFINALS: "Semifinal",
   FINAL: "Final",
   FINALS: "Final",
+  // biome-ignore-end lint/style/useNamingConvention: fim da exceção
 }
 
 function stageLabel(game: Game, player: Player) {
   if (game.stage === "soloq")
-    return `${player.player} · ${game.round} · ${new Date(game.date + "T12:00:00").toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit" })}`
+    return `${player.player} · ${game.round} · ${new Date(`${game.date}T12:00:00`).toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit" })}`
   const round = rounds[game.round] ?? `Rodada ${game.round.replace(/\D/g, "")}`
   return `${game.stage === "playin" ? "Play-in · " : ""}${round} · Jogo ${game.number}`
 }
@@ -119,17 +122,17 @@ function timeline(player: Player) {
   const hasMajor = events.some(([, items]) => items.some(item => item > 0 && isMajor(item)))
   return `<ol class="build-timeline-events" aria-label="Compras por minuto">${events
     .map(([minute, items]) => {
-      const major = items.some(item => item > 0 && isMajor(item))
+      const isMajorMinute = items.some(item => item > 0 && isMajor(item))
       const icons = items
         .map(item => {
-          const sold = item < 0
+          const isSold = item < 0
           const id = Math.abs(item)
-          const kind = sold ? "sold" : isMajor(id) ? "major" : "minor"
-          const usage = sold ? `vendeu aos ${minute} min` : `${minute} min`
+          const kind = isSold ? "sold" : isMajor(id) ? "major" : "minor"
+          const usage = isSold ? `vendeu aos ${minute} min` : `${minute} min`
           return `<span class="build-timeline-item" data-kind="${kind}">${itemIcon(id, usage)}</span>`
         })
         .join("")
-      return `<li class="build-timeline-minute"${major ? " data-major" : ""}><span class="build-timeline-time">${minute}'</span><div class="build-timeline-items">${icons}</div></li>`
+      return `<li class="build-timeline-minute"${isMajorMinute ? " data-major" : ""}><span class="build-timeline-time">${minute}'</span><div class="build-timeline-items">${icons}</div></li>`
     })
     .join("")}</ol>
     ${hasMajor ? "" : '<p class="build-timeline-no-major">Sem itens completos ou botas.</p>'}`
@@ -196,8 +199,8 @@ export function renderBuildTimeline(section: HTMLElement, games: TimelineGame[])
       <p class="build-data-sample">${DATASET.sourceNote}</p>
     </footer>`
 
-  const list = section.querySelector<HTMLOListElement>(".build-timeline-games")!
-  const count = section.querySelector<HTMLElement>(".build-timeline-count")!
+  const list = requireElement<HTMLOListElement>(".build-timeline-games", section)
+  const count = requireElement<HTMLElement>(".build-timeline-count", section)
   const more = section.querySelector<HTMLButtonElement>(".build-timeline-more")
   more?.addEventListener("click", () => {
     const start = visible

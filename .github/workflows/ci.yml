@@ -30,7 +30,7 @@ jobs:
         run: npm ci
 
       - name: Formato e lint (Biome)
-        run: npx biome ci .
+        run: npx biome ci --error-on-warnings .
 
       - name: Arquitetura e tipos
         run: npm run check

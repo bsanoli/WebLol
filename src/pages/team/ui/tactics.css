@@ -105,23 +105,6 @@
   border-color: var(--wl-accent);
   background: var(--wl-accent-soft);
 }
-#v-comps .tx-tabs .dz-tab b {
-  display: flex;
-  flex: 1 1 auto;
-  min-width: 0;
-  align-items: center;
-  max-width: 100%;
-  font-size: 12px;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-#v-comps .tx-tabs .dz-tab b > .icon {
-  flex: none;
-  width: 14px;
-  height: 14px;
-  margin-right: 4px;
-}
 #v-comps .tx-tabs .dz-tab .mini {
   display: grid;
   grid-template-columns: repeat(5, 24px);
@@ -129,16 +112,6 @@
   width: auto;
   margin: 0;
   flex: none;
-}
-#v-comps .tx-tabs .dz-tab .mini .av {
-  width: 24px;
-  height: 24px;
-  border-radius: var(--wl-control-radius);
-}
-#v-comps .tx-tabs .dz-tab .mini small {
-  color: var(--mut);
-  font-size: 11px;
-  white-space: nowrap;
 }
 
 .tx-draft {
@@ -174,12 +147,6 @@
   gap: 2px;
   margin: 0 0 8px;
   font-size: 13px;
-}
-.tx-side-col h3 small {
-  margin-left: auto;
-  color: var(--mut);
-  font-size: 11px;
-  font-weight: 500;
 }
 .tx-bans {
   display: grid;
@@ -379,9 +346,6 @@
 }
 .tx-notes-content ol {
   list-style: decimal;
-}
-.tx-notes-content li > p {
-  margin: 0;
 }
 .tx-notes-content ul[data-type="taskList"] {
   padding-left: 4px;
@@ -583,12 +547,6 @@
   font-weight: 600;
   cursor: pointer;
 }
-#v-comps .tx-scope-btn b {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  font-weight: inherit;
-}
 #v-comps .tx-scope-btn:hover {
   color: var(--txt);
   background: color-mix(in srgb, var(--txt) 8%, transparent);
@@ -625,11 +583,6 @@
   grid-template-columns: minmax(0, 1fr) 0;
   column-gap: 0;
 }
-.tx.drawer-closed .tx-aside {
-  overflow: hidden;
-  opacity: 0;
-  visibility: hidden;
-}
 @media (prefers-reduced-motion: reduce) {
   .tx,
   .tx-aside,
@@ -641,13 +594,13 @@
 /* Janela de desenho (Excalidraw) */
 .tx-sketch-dialog {
   width: 96vw;
-  max-width: 1600px !important;
+  max-width: 1600px;
   height: 92vh;
-  padding: 16px !important;
+  padding: 16px;
 }
 /* O showDialog embrulha o conteúdo em divs; a cadeia até a janela precisa esticar para o canvas ganhar altura. */
 .tx-sketch-dialog {
-  display: flex !important;
+  display: flex;
   flex-direction: column;
 }
 .tx-sketch-dialog :has(.tx-sketch-host) {
@@ -803,10 +756,6 @@
   font-size: 13px;
   font-weight: 600;
   cursor: pointer;
-}
-#v-comps .tx-listtab small {
-  font-size: 11px;
-  font-weight: 500;
 }
 #v-comps .tx-listtab:hover {
   color: var(--txt);
@@ -965,11 +914,38 @@
   font-size: 11px;
   font-weight: 600;
 }
+.matchup-preview small {
+  color: var(--mut);
+  font-size: 11px;
+}
+.tx-side-col h3 small {
+  margin-left: auto;
+  color: var(--mut);
+  font-size: 11px;
+  font-weight: 500;
+}
 .matchup-pick-text b {
   overflow: hidden;
   font-size: 14px;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+.tx-side-col h3 small {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  padding-left: 8px;
+}
+.tx-side-col h3 small {
+  margin: 0 0 0 8px;
+  padding: 0;
+  color: var(--txt);
+  font-size: 13px;
+  font-weight: 600;
+}
+.tx-side-col.blue h3 small {
+  margin: 0 0 0 auto;
+  text-align: right;
 }
 .matchup-pick.rival .matchup-pick-text small {
   color: var(--wl-danger);
@@ -1002,6 +978,15 @@
   flex-direction: row-reverse;
   align-items: center;
 }
+#v-comps .tx-listtab small {
+  font-size: 11px;
+  font-weight: 500;
+}
+#v-comps .tx-tabs .dz-tab .mini small {
+  color: var(--mut);
+  font-size: 11px;
+  white-space: nowrap;
+}
 .matchup > .matchup-team:first-child .matchup-pick-text small .side-dot {
   margin-left: 4px;
   margin-right: 0;
@@ -1012,16 +997,6 @@
   flex-wrap: nowrap;
   gap: 2px;
   margin: 0;
-}
-#v-comps .matchup-preview .av {
-  flex: none;
-  width: 24px;
-  height: 24px;
-  border-radius: var(--wl-control-radius);
-}
-.matchup-preview small {
-  color: var(--mut);
-  font-size: 11px;
 }
 #v-comps .matchup-swap {
   display: inline-flex;
@@ -1038,11 +1013,6 @@
 #v-comps .matchup-item.new {
   color: var(--wl-accent);
   font-weight: 600;
-}
-#v-comps .matchup-item.new .icon {
-  width: 14px;
-  height: 14px;
-  vertical-align: -2px;
 }
 #v-comps .draft-phase-sep {
   margin: 4px 0;
@@ -1099,7 +1069,7 @@
   gap: 8px;
   width: 380px;
   max-width: calc(100vw - 16px);
-  padding: 8px !important;
+  padding: 8px;
 }
 .matchup-list {
   display: flex;
@@ -1144,10 +1114,6 @@
   border-color: var(--wl-accent);
   background: var(--wl-accent-soft);
 }
-.matchup-item.none b {
-  color: var(--mut);
-  font-weight: 500;
-}
 /* Lista do diálogo "Novo confronto": nome da comp e retratos dos campeões, no portal fora de #v-comps */
 .mx-opt {
   display: flex;
@@ -1166,6 +1132,27 @@
   text-overflow: ellipsis;
   white-space: nowrap;
 }
+.matchup-item.none b {
+  color: var(--mut);
+  font-weight: 500;
+}
+#v-comps .tx-scope-btn b {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-weight: inherit;
+}
+#v-comps .tx-tabs .dz-tab b {
+  display: flex;
+  flex: 1 1 auto;
+  min-width: 0;
+  align-items: center;
+  max-width: 100%;
+  font-size: 12px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
 .mx-opt-preview,
 .mx-opt-empty {
   display: flex;
@@ -1181,6 +1168,12 @@
   width: 28px;
   height: 28px;
   margin: 0;
+  border-radius: var(--wl-control-radius);
+}
+#v-comps .matchup-preview .av {
+  flex: none;
+  width: 24px;
+  height: 24px;
   border-radius: var(--wl-control-radius);
 }
 .mx-opt-empty {
@@ -1249,12 +1242,6 @@
 .tx-side-col h3 {
   min-width: 0;
   white-space: nowrap;
-}
-.tx-side-col h3 small {
-  min-width: 0;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  padding-left: 8px;
 }
 .tx-mx-row {
   width: 100%;
@@ -1380,16 +1367,6 @@
 #v-comps.tactics-view .tx-side-col .bsq.has {
   border-style: solid;
 }
-#v-comps.tactics-view .tx-side-col .bsq .dm,
-#v-comps.tactics-view .tx-side-col .bsq .av {
-  display: block;
-  width: 100%;
-  height: 100%;
-  border-radius: 0;
-}
-#v-comps.tactics-view .tx-side-col .bsq .av {
-  filter: grayscale(0.85);
-}
 #v-comps.tactics-view .tx-side-col .draft-ban-remove {
   position: absolute;
   top: 0;
@@ -1451,19 +1428,6 @@
   font-weight: 700;
   white-space: nowrap;
 }
-#v-comps.tactics-view .tx-side-col .pk-mini .av {
-  display: block;
-  width: 28px;
-  height: 28px;
-  margin: 0;
-  border: 1px solid var(--wl-white-alpha-27);
-  border-radius: var(--wl-control-radius);
-}
-#v-comps.tactics-view .tx-side-col .pk-mini.primary .av {
-  width: 32px;
-  height: 32px;
-  border: 2px solid var(--wl-accent, var(--gold));
-}
 #v-comps.tactics-view .tx-side-col .pk-target {
   position: static;
   flex: none;
@@ -1497,9 +1461,6 @@
 #v-comps.tactics-view .tx-side-col .pk:has(.pk-target:focus-visible) {
   outline: 2px solid var(--wl-accent, var(--gold));
   outline-offset: -2px;
-}
-#v-comps.tactics-view .tx-side-col .pk-target > .icon {
-  display: none;
 }
 #v-comps.tactics-view .tx-side-col .pkh {
   flex: none;
@@ -1605,10 +1566,6 @@
   background: none;
   cursor: pointer;
 }
-#v-comps.tactics-view .tx-side-col button.pk-mini:hover .av {
-  border-color: var(--txt);
-  filter: brightness(1.15);
-}
 #v-comps.tactics-view .tx-side-col button.pk-mini:focus-visible {
   outline: 2px solid var(--wl-accent, var(--gold));
   outline-offset: 1px;
@@ -1671,10 +1628,6 @@
 .tx-pos-cells {
   display: contents;
 }
-.tx-pos-col.empty .tx-col-empty {
-  grid-row: 2 / -1;
-  min-height: 0;
-}
 .tx-pos-names-head {
   padding-top: 4px;
 }
@@ -1711,17 +1664,6 @@
 .tx-side-col.blue h3 {
   flex-direction: row-reverse;
 }
-.tx-side-col h3 small {
-  margin: 0 0 0 8px;
-  padding: 0;
-  color: var(--txt);
-  font-size: 13px;
-  font-weight: 600;
-}
-.tx-side-col.blue h3 small {
-  margin: 0 0 0 auto;
-  text-align: right;
-}
 .tx-pos-slot.drop {
   outline: 2px dashed var(--wl-accent, var(--gold));
   outline-offset: -2px;
@@ -1746,14 +1688,52 @@
   overflow: hidden;
   font-size: 10px;
 }
+#v-comps .tx-pos-ic .av {
+  border-radius: var(--wl-control-radius);
+}
+#v-comps .tx-pos-ic.main .av {
+  flex: none;
+  width: 40px;
+  height: 40px;
+}
+#v-comps.tactics-view .tx-side-col .bsq .av {
+  filter: grayscale(0.85);
+}
+#v-comps .tx-tabs .dz-tab .mini .av {
+  width: 24px;
+  height: 24px;
+  border-radius: var(--wl-control-radius);
+}
+#v-comps.tactics-view .tx-side-col .bsq .dm,
+#v-comps.tactics-view .tx-side-col .bsq .av {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border-radius: 0;
+}
+#v-comps.tactics-view .tx-side-col .pk-mini .av {
+  display: block;
+  width: 28px;
+  height: 28px;
+  margin: 0;
+  border: 1px solid var(--wl-white-alpha-27);
+  border-radius: var(--wl-control-radius);
+}
 #v-comps .tx-pos-ic .av img {
   width: 100%;
   height: 100%;
   object-fit: cover;
 }
+.tx-pos-col.left .tx-pos-ic.main {
+  flex-direction: row-reverse;
+}
 #v-comps .tx-pos-ic.main {
   width: 36px;
   height: 36px;
+}
+.tx-pos-slot .tx-pos-ic.alt {
+  width: 32px;
+  height: 32px;
 }
 #v-comps .tx-pos-ic.alt,
 #v-comps .tx-pos-ic.ban {
@@ -1811,9 +1791,6 @@
 
 /* Visão Lane no estilo do Draft, compacta: arte escurecida ao fundo, campeão com nome e alternativas */
 /* Ícones quadrados como na Ordem do draft; o campeão principal não é clicável, só arrastável */
-#v-comps .tx-pos-ic .av {
-  border-radius: var(--wl-control-radius);
-}
 #v-comps .tx-pos-ic.main {
   cursor: grab;
 }
@@ -1827,11 +1804,6 @@
   color: var(--txt);
   box-shadow: none;
 }
-#v-comps .tx-pos-ic.main .av {
-  flex: none;
-  width: 40px;
-  height: 40px;
-}
 .tx-pos-champ {
   min-width: 0;
   overflow: hidden;
@@ -1840,13 +1812,6 @@
   text-overflow: ellipsis;
   white-space: nowrap;
   text-shadow: 0 1px 2px rgb(0 0 0 / 0.7);
-}
-.tx-pos-col.left .tx-pos-ic.main {
-  flex-direction: row-reverse;
-}
-.tx-pos-slot .tx-pos-ic.alt {
-  width: 32px;
-  height: 32px;
 }
 .tx-side-col h3 .tx-side-name {
   font-size: 13px;
@@ -1938,6 +1903,15 @@
   height: 20px;
   border-radius: var(--wl-control-radius);
 }
+#v-comps.tactics-view .tx-side-col .pk-mini.primary .av {
+  width: 32px;
+  height: 32px;
+  border: 2px solid var(--wl-accent, var(--gold));
+}
+#v-comps.tactics-view .tx-side-col button.pk-mini:hover .av {
+  border-color: var(--txt);
+  filter: brightness(1.15);
+}
 #v-comps .tx-tabs .tx-mx-row .dz-tab b {
   align-self: center;
   display: block;
@@ -1968,9 +1942,6 @@
   height: 14px;
   transform: rotate(-90deg);
   transition: transform 0.2s ease;
-}
-#v-comps .tx-list-toggle[aria-expanded="false"] .icon {
-  transform: rotate(90deg);
 }
 #v-comps .tx-tabs.list-collapsed {
   flex: none;
@@ -2005,6 +1976,23 @@
   width: 14px;
   height: 14px;
 }
+#v-comps .tx-list-toggle[aria-expanded="false"] .icon {
+  transform: rotate(90deg);
+}
+#v-comps .matchup-item.new .icon {
+  width: 14px;
+  height: 14px;
+  vertical-align: -2px;
+}
+#v-comps .tx-tabs .dz-tab b > .icon {
+  flex: none;
+  width: 14px;
+  height: 14px;
+  margin-right: 4px;
+}
+#v-comps.tactics-view .tx-side-col .pk-target > .icon {
+  display: none;
+}
 
 /* Trocar a comp com confronto aberto: substituir ou criar outro */
 .matchup-branch {
@@ -2017,10 +2005,18 @@
   font-size: 14px;
   overflow-wrap: anywhere;
 }
+.tx-notes-content li > p {
+  margin: 0;
+}
 
 /* Gaveta em coluna flex: abas/lista no topo, barra do quadro e quadro ocupando o resto (Draft e Lane com a mesma altura) */
 .tx-aside {
   overflow: hidden;
+}
+.tx.drawer-closed .tx-aside {
+  overflow: hidden;
+  opacity: 0;
+  visibility: hidden;
 }
 .tx-tabs {
   /* Cresce com a altura da tela (120px em 720p, 230px a partir de 830p); o quadro fica com o resto. */
@@ -2086,6 +2082,10 @@
 .tx-draft > .tx-col-empty,
 .tx-draft > .tx-draft-empty {
   flex: 1 1 auto;
+}
+.tx-pos-col.empty .tx-col-empty {
+  grid-row: 2 / -1;
+  min-height: 0;
 }
 
 /* Gaveta de Táticas (visão Draft): a posição do pick é um seletor, como na Ordem do draft */

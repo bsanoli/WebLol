@@ -32,13 +32,13 @@ function runeImage(id: number) {
   )
 }
 
-function runeChoice(id: number, games: number, count: number, active = false) {
+function runeChoice(id: number, games: number, count: number, isActive = false) {
   const name = names[id] ?? String(id)
   const key = icons[id]?.[0] ?? id
   const rate = `${percent.format(games ? (count / games) * 100 : 0)}%`
   const usage = `${rate} · ${count} de ${games} ${games === 1 ? "jogo" : "jogos"}`
   return `<div class="rune-frequency-choice">
-    <button type="button" class="rune-choice${active ? " is-selected" : ""}" data-game-tip="rune:${esc(key)}"
+    <button type="button" class="rune-choice${isActive ? " is-selected" : ""}" data-game-tip="rune:${esc(key)}"
       data-tip-name="${esc(name)}" data-tip="${usage}" aria-label="${esc(`${name} · ${usage}`)}">${runeImage(id)}</button>
     <small aria-hidden="true">${count ? rate : ""}</small>
   </div>`
@@ -50,33 +50,33 @@ function runeSlot(slot: number[], entries: Frequency[], games: number, active?: 
     .join("")}</div>`
 }
 
-function treePanel(tree: Frequency, build: RuneBuild, secondary: boolean, activeTree: boolean) {
+function treePanel(tree: Frequency, build: RuneBuild, isSecondary: boolean, isActiveTree: boolean) {
   const layout = assets.runeTrees.find(candidate => candidate.id === tree.value)
   if (!layout) return ""
   const name = names[tree.value] ?? String(tree.value)
-  const slots = secondary ? layout.slots.slice(1) : layout.slots
-  const entries = secondary ? slots.map(() => build.secondaryRunes) : build.primaryRunes
+  const slots = isSecondary ? layout.slots.slice(1) : layout.slots
+  const entries = isSecondary ? slots.map(() => build.secondaryRunes) : build.primaryRunes
   const leaders = slots.map((slot, index) => entries[index]?.find(entry => slot.includes(entry.value)))
-  const secondaryLeaders = secondary
+  const secondaryLeaders = isSecondary
     ? leaders
         .filter(entry => entry !== undefined)
         .sort((a, b) => b.count - a.count)
         .slice(0, 2)
     : []
-  return `<div class="rune-slots" data-rune-view="${tree.value}" data-rune-tree="${esc(name)}"${activeTree ? "" : " hidden"}>${slots
+  return `<div class="rune-slots" data-rune-view="${tree.value}" data-rune-tree="${esc(name)}"${isActiveTree ? "" : " hidden"}>${slots
     .map((slot, index) => {
       const leader = leaders[index]
-      const active = !secondary || (leader && secondaryLeaders.includes(leader)) ? leader?.value : undefined
+      const active = !isSecondary || (leader && secondaryLeaders.includes(leader)) ? leader?.value : undefined
       return runeSlot(slot, entries[index] ?? [], tree.count, active)
     })
     .join("")}</div>`
 }
 
-function treeColumn(trees: Frequency[], build: RuneBuild, secondary = false) {
+function treeColumn(trees: Frequency[], build: RuneBuild, isSecondary = false) {
   const first = trees[0]
   if (!first) return ""
-  const label = secondary ? "Árvore secundária" : "Árvore primária"
-  const title = secondary ? "Secundária" : "Primária"
+  const label = isSecondary ? "Árvore secundária" : "Árvore primária"
+  const title = isSecondary ? "Secundária" : "Primária"
   const treeLabel = (tree: Frequency) => `${names[tree.value] ?? tree.value} ${percent.format(tree.percent)}%`
   const heading =
     trees.length === 1
@@ -96,7 +96,7 @@ function treeColumn(trees: Frequency[], build: RuneBuild, secondary = false) {
       <h6>${title}</h6>
       ${heading}
     </div>
-    ${trees.map((tree, index) => treePanel(tree, build, secondary, index === 0)).join("")}
+    ${trees.map((tree, index) => treePanel(tree, build, isSecondary, index === 0)).join("")}
   </div>`
 }
 

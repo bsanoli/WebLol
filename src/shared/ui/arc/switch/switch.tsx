@@ -50,8 +50,8 @@ export const Switch = forwardRef<ElementRef<typeof SwitchPrimitive.Root>, Switch
   useEffect(() => {
     if (shown.current === on) return
     shown.current = on
-    const fromPress = performance.now() - releasedAt.current < 250
-    if (reduceMotion || fromPress) return
+    const isFromPress = performance.now() - releasedAt.current < 250
+    if (reduceMotion || isFromPress) return
     // The stretch spans the same time as the thumb glide, so both land together.
     const controls = animate(scaleX, [1, 1.16, 1], {
       duration: glide.visualDuration,

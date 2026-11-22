@@ -1,5 +1,6 @@
 import { expect, test } from "@playwright/test"
-import { size, vision, visionButton, mapPoint, drag, waitForRealisticMap } from "./support/tactical-map"
+import { boxOf, required } from "./support/box"
+import { size, visionButton, mapPoint, drag, waitForRealisticMap } from "./support/tactical-map"
 
 test("Paredes e arbustos recortam a visão do campeão conforme sua posição", async ({ page }) => {
   await page.setViewportSize(size)
@@ -14,7 +15,7 @@ test("Paredes e arbustos recortam a visão do campeão conforme sua posição", 
     coverage.evaluate((path: SVGPathElement, point) => path.isPointInFill(new DOMPoint(point.x, point.y)), { x, y })
 
   async function moveChampion(x: number, y: number) {
-    const bounds = (await champion.boundingBox())!
+    const bounds = await boxOf(champion)
     await drag(
       page,
       { x: bounds.x + bounds.width / 2, y: bounds.y + bounds.height / 2 },
@@ -37,7 +38,7 @@ test("Paredes e arbustos recortam a visão do campeão conforme sua posição", 
   const riverBrush = await brush.getAttribute("data-active-brush")
   await moveChampion(23.3, 23.9)
   await expect(brush).toHaveCount(1)
-  await expect(brush).not.toHaveAttribute("data-active-brush", riverBrush!)
+  await expect(brush).not.toHaveAttribute("data-active-brush", required(riverBrush, "pincel do rio"))
   await visionButton(page, "vermelha").click()
   await expect(brush).toHaveCount(0)
   await visionButton(page, "geral").click()
@@ -109,7 +110,7 @@ test("Move campeões nas duas visões e reseta a visão e o quadro em edição",
   const blue = page.getByRole("button", { name: "Azul TOP" })
   const red = page.getByRole("button", { name: "Vermelho TOP" })
   const coverage = page.locator("#tactical-fog [data-champion-sight]").first()
-  const blueBox = (await blue.boundingBox())!
+  const blueBox = await boxOf(blue)
   await page.mouse.move(blueBox.x + blueBox.width / 2, blueBox.y + blueBox.height / 2)
   await page.mouse.down()
   const target = await mapPoint(page, 0.22, 0.38)
@@ -127,7 +128,9 @@ test("Move campeões nas duas visões e reseta a visão e o quadro em edição",
   const cameraCenter = () =>
     page.locator("#map-viewport").evaluate(viewport => {
       const view = viewport.getBoundingClientRect()
-      const board = viewport.querySelector("#map")!.getBoundingClientRect()
+      const map = viewport.querySelector("#map")
+      if (!map) throw new Error("Mapa não encontrado")
+      const board = map.getBoundingClientRect()
       return [
         (view.left + view.width / 2 - board.left) / board.width,
         (view.top + view.height / 2 - board.top) / board.height,
@@ -220,7 +223,7 @@ test("Navega pelo menu superior e coloca waves nas três rotas com o mapa inteir
     await placeWave.click()
     const target = await mapPoint(team, x, y)
     await page.mouse.move(target.x, target.y)
-    await expect(team.locator("#map-wave-detected")).toHaveText("Rota detectada: " + lane)
+    await expect(team.locator("#map-wave-detected")).toHaveText(`Rota detectada: ${lane}`)
     await page.mouse.click(target.x, target.y)
   }
   await placeWave.click()
@@ -237,7 +240,7 @@ test("Navega pelo menu superior e coloca waves nas três rotas com o mapa inteir
 
   await page.setViewportSize({ width: 800, height: 620 })
   const panel = team.getByRole("button", { name: "Painel", exact: true })
-  const beforePanel = (await viewport.boundingBox())!
+  const beforePanel = await boxOf(viewport)
   expect(beforePanel.y + beforePanel.height).toBeLessThanOrEqual(620)
   await panel.click()
   await expect(team.getByRole("tablist", { name: "Painel do mapa" }).getByRole("tab")).toHaveText([
@@ -253,8 +256,8 @@ test("Navega pelo menu superior e coloca waves nas três rotas com o mapa inteir
   await expect(layers).toHaveAttribute("aria-selected", "true")
   await expect(team.getByRole("switch", { name: "Lumes adicionais" })).toBeVisible()
   expect(await viewport.boundingBox()).toEqual(beforePanel)
-  const sidebar = (await team.getByRole("complementary", { name: "Painel do mapa" }).boundingBox())!
-  const camera = (await team.getByRole("group", { name: "Câmera do mapa" }).boundingBox())!
+  const sidebar = await boxOf(team.getByRole("complementary", { name: "Painel do mapa" }))
+  const camera = await boxOf(team.getByRole("group", { name: "Câmera do mapa" }))
   expect(camera.x + camera.width).toBeLessThan(sidebar.x)
   await team.getByRole("button", { name: "Aumentar zoom" }).click()
   await expect(team.locator("#map-zoom-value")).toHaveText("125%")
@@ -321,7 +324,7 @@ test("Arquivos, paginação e zoom usam o espaço do mapa sem rolagem", async ({
             id: "paginated",
             name: "Jogada longa",
             live: frame,
-            steps: Array.from({ length: 30 }, (_, i) => ({ label: "Estratégia " + (i + 1), ...frame })),
+            steps: Array.from({ length: 30 }, (_, i) => ({ label: `Estratégia ${i + 1}`, ...frame })),
           },
         ],
       }),
@@ -359,11 +362,11 @@ test("Arquivos, paginação e zoom usam o espaço do mapa sem rolagem", async ({
 
   const board = team.locator("#map"),
     viewport = team.locator("#map-viewport")
-  const before = (await board.boundingBox())!,
-    available = (await viewport.boundingBox())!
+  const before = await boxOf(board),
+    available = await boxOf(viewport)
   expect(available.width).toBeGreaterThan(before.width)
   await team.getByRole("button", { name: "Aumentar zoom" }).click()
-  const after = (await board.boundingBox())!
+  const after = await boxOf(board)
   expect(after.width).toBeGreaterThan(before.width)
   expect(after.x).toBeLessThan(before.x)
   expect(await viewport.boundingBox()).toEqual(available)

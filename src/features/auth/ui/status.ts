@@ -1,5 +1,5 @@
 // Menu da conta: texto de sincronização, botão de envio e os seletores "Ver como" e "Ver o time" do admin.
-import { dbList, fb, ONLINE } from "@/shared/firestore"
+import { dbList, fb, IS_ONLINE } from "@/shared/firestore"
 import type { FrameHandlers } from "@/shared/host-bridge"
 import { $, esc, toast } from "@/shared/lib/dom"
 import { closeModal } from "./login-dialog"
@@ -48,7 +48,7 @@ const roleLabel = (): string => {
 }
 
 /** Atualiza o menu da conta e os atributos do `body` que o cabeçalho React lê. */
-export function updateStatus(keepChip = false) {
+export function updateStatus(shouldKeepChip = false) {
   const account = user()
   void renderTeamView()
   renderPreview()
@@ -84,12 +84,12 @@ export function updateStatus(keepChip = false) {
     return
   }
   $("#sync").onclick = () => void refreshTeam()
-  if (!ONLINE || !session.net || !session.off) {
-    if (!keepChip) setSync(ONLINE ? "Sincronizar com o time" : "Banco online não configurado", "warn")
+  if (!IS_ONLINE || !session.net || !session.off) {
+    if (!shouldKeepChip) setSync(IS_ONLINE ? "Sincronizar com o time" : "Banco online não configurado", "warn")
     send.hidden = true
     return
   }
-  if (!keepChip)
+  if (!shouldKeepChip)
     setSync(
       `${session.team.viewing ? "Vendo " : ""}${session.team.name} · versão oficial v${session.off.version}`,
       "ok",

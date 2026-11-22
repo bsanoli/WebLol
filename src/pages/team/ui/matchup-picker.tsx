@@ -23,8 +23,8 @@ export function InlineName({
   onClose: () => void
 }) {
   const [value, setValue] = useState(item.name)
-  const done = (save: boolean) => {
-    if (save) onSave(value)
+  const done = (shouldSave: boolean) => {
+    if (shouldSave) onSave(value)
     onClose()
   }
   return (
@@ -101,9 +101,9 @@ export function CompPicker({
     document.addEventListener(CHOOSE_EVENT, handleRequest)
     return () => document.removeEventListener(CHOOSE_EVENT, handleRequest)
   }, [kind, setOpen])
-  const handleOpenChange = (next: boolean) => {
-    setOpen(next)
-    if (!next) {
+  const handleOpenChange = (shouldOpen: boolean) => {
+    setOpen(shouldOpen)
+    if (!shouldOpen) {
       setAnchor(null)
       setPending(null)
     }
@@ -158,6 +158,7 @@ export function CompPicker({
         onCloseAutoFocus={keepFocusOutsideFrame}
       >
         {pending ? (
+          // biome-ignore lint/a11y/useSemanticElements: fieldset traria borda e margens do navegador para a troca
           <div className="matchup-branch" role="group" aria-label={`Trocar por ${pending.title}`}>
             <p>
               Trocar por <b>{pending.title}</b>
@@ -185,6 +186,7 @@ export function CompPicker({
               autoFocus
               onChange={event => setQuery(event.target.value)}
             />
+            {/* biome-ignore lint/a11y/useSemanticElements: fieldset traria borda e margens do navegador para a lista */}
             <div className="matchup-list" role="group" aria-label={label}>
               {!q && (
                 <button type="button" className="matchup-item new" onClick={create}>

@@ -35,14 +35,14 @@ describe("terrainSightOutline", () => {
       [70, 70],
       [20, 60],
     ]
-    let grew = false
+    let hasGrown = false
     for (const point of samples) {
       const near = extent(terrainSightOutline(point, "minimap", 300))
       const far = extent(terrainSightOutline(point, "minimap", 1200))
       expect(far).toBeGreaterThanOrEqual(near)
-      if (far > near) grew = true
+      if (far > near) hasGrown = true
     }
-    expect(grew).toBe(true)
+    expect(hasGrown).toBe(true)
   })
 })
 

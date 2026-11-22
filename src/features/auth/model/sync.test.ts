@@ -10,7 +10,7 @@ const ui = vi.hoisted(() => ({ toasts: [] as string[], routes: [] as string[] })
 
 vi.mock("@/shared/firestore", () => ({
   // biome-ignore lint/style/useNamingConvention: nome exportado pelo módulo real
-  ONLINE: true,
+  IS_ONLINE: true,
   currentFirebase: () => ({ auth: { currentUser: { email: "x" } } }),
   fb: async () => ({}),
   dbGet: async (collection: string, id: string) => {

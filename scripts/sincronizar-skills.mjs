@@ -3,7 +3,7 @@ import { fileURLToPath } from "node:url"
 
 const sources = new URL("../.agents/skills/", import.meta.url)
 const adapters = new URL("../.claude/skills/", import.meta.url)
-const checkOnly = process.argv.includes("--check")
+const isCheckOnly = process.argv.includes("--check")
 const marker = "<!-- Gerado por scripts/sincronizar-skills.mjs. -->"
 const directories = await readdir(sources, { withFileTypes: true })
 const expected = new Set()
@@ -16,7 +16,7 @@ for (const directory of directories.filter(entry => entry.isDirectory())) {
   const header = input.match(/^---\r?\n([\s\S]*?)\r?\n---(?:\r?\n|$)/)?.[1]
   const sourceName = header?.match(/^name: (.+)$/m)?.[1]
   const description = header?.match(/^description: (.+)$/m)?.[1]
-  const manualOnly = /^disable-model-invocation: true$/m.test(header ?? "")
+  const isManualOnly = /^disable-model-invocation: true$/m.test(header ?? "")
   if (!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(name) || sourceName !== name || !description) {
     throw new Error(`Use name igual à pasta e description em uma linha em ${source}`)
   }
@@ -26,7 +26,7 @@ for (const directory of directories.filter(entry => entry.isDirectory())) {
     "---",
     `name: ${name}`,
     `description: ${description}`,
-    ...(manualOnly ? ["disable-model-invocation: true"] : []),
+    ...(isManualOnly ? ["disable-model-invocation: true"] : []),
     "---",
     "",
     marker,
@@ -41,7 +41,7 @@ for (const directory of directories.filter(entry => entry.isDirectory())) {
     throw error
   })
   if (previous.replaceAll("\r\n", "\n") === output) continue
-  if (checkOnly) {
+  if (isCheckOnly) {
     problems.push(`Adaptador ausente ou desatualizado: ${name}`)
   } else {
     await mkdir(new URL("./", target), { recursive: true })

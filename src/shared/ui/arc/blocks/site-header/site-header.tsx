@@ -271,7 +271,7 @@ export const SiteHeader = forwardRef<HTMLElement, SiteHeaderProps>(function Site
   ref,
 ) {
   const id = useId()
-  const reduced = !!useReducedMotion()
+  const isReduced = !!useReducedMotion()
   const scrolled = useScrolled(scrollThreshold, scrollContainer)
   const [innerCurrent, setInnerCurrent] = useState(defaultCurrent)
   const current = currentProp ?? innerCurrent
@@ -289,7 +289,7 @@ export const SiteHeader = forwardRef<HTMLElement, SiteHeaderProps>(function Site
     closeTimer = useRef<number | undefined>(undefined)
   const focusFirst = useRef(false)
   const hasPanels = variant !== "centered" && items.some(item => item.links?.length)
-  const compactPanel = variant === "simple"
+  const isCompactPanel = variant === "simple"
   const openItem = open ? items.find(item => item.value === open.value) : undefined
 
   const setRefs = useCallback(
@@ -322,19 +322,19 @@ export const SiteHeader = forwardRef<HTMLElement, SiteHeaderProps>(function Site
   )
 
   const close = useCallback(
-    (restoreFocus = false) => {
+    (shouldRestoreFocus = false) => {
       clearTimers()
       const was = open?.value
       openPanel(null)
-      if (restoreFocus && was) triggerRefs.current.get(was)?.focus()
+      if (shouldRestoreFocus && was) triggerRefs.current.get(was)?.focus()
     },
     [open, openPanel, clearTimers],
   )
 
-  const closeMenu = useCallback((restoreFocus = false) => {
+  const closeMenu = useCallback((shouldRestoreFocus = false) => {
     setMenuOpen(false)
     setExpanded(null)
-    if (restoreFocus) menuButtonRef.current?.focus()
+    if (shouldRestoreFocus) menuButtonRef.current?.focus()
   }, [])
 
   const choose = useCallback(
@@ -431,7 +431,7 @@ export const SiteHeader = forwardRef<HTMLElement, SiteHeaderProps>(function Site
     if (index < 0) return
     event.preventDefault()
     const nextIndex = (index + (event.key === "ArrowRight" ? 1 : -1) + triggers.length) % triggers.length
-    triggers[nextIndex]!.focus()
+    triggers[nextIndex]?.focus()
     if (open) {
       const item = items[nextIndex]
       openPanel(item && hasPanels && item.links?.length ? item.value : null)
@@ -534,7 +534,7 @@ export const SiteHeader = forwardRef<HTMLElement, SiteHeaderProps>(function Site
               <ul className={styles.navList}>
                 {items.map(item => {
                   const isCurrent = current === item.value
-                  const withPanel = hasPanels && !!item.links?.length
+                  const hasPanel = hasPanels && !!item.links?.length
                   const isOpen = open?.value === item.value
                   const panelId = `${id}-panel`
                   const common = {
@@ -544,7 +544,7 @@ export const SiteHeader = forwardRef<HTMLElement, SiteHeaderProps>(function Site
                     "data-current": isCurrent ? "" : undefined,
                     "data-open": isOpen ? "" : undefined,
                     onPointerEnter: (event: ReactPointerEvent) => {
-                      if (withPanel) onTriggerPointerEnter(event, item.value)
+                      if (hasPanel) onTriggerPointerEnter(event, item.value)
                       else if (event.pointerType === "mouse" && open)
                         closeTimer.current = window.setTimeout(() => openPanel(null), LEAVE_GRACE)
                     },
@@ -556,13 +556,13 @@ export const SiteHeader = forwardRef<HTMLElement, SiteHeaderProps>(function Site
                           key={`current-${variant}`}
                           layoutId={`current-${variant}`}
                           className={styles.indicator}
-                          transition={reduced ? { duration: 0 } : motionTokens.spring.morph}
+                          transition={isReduced ? { duration: 0 } : motionTokens.spring.morph}
                           aria-hidden="true"
                         />
                       )}
                     </>
                   )
-                  if (compactPanel && item.links?.length)
+                  if (isCompactPanel && item.links?.length)
                     return (
                       <li key={item.value} className={styles.navCell}>
                         <IntentNavbarMenu
@@ -580,7 +580,7 @@ export const SiteHeader = forwardRef<HTMLElement, SiteHeaderProps>(function Site
                     )
                   return (
                     <li key={item.value} className={styles.navCell}>
-                      {withPanel ? (
+                      {hasPanel ? (
                         <button
                           {...common}
                           ref={(node: HTMLButtonElement | null) => {
@@ -638,11 +638,11 @@ export const SiteHeader = forwardRef<HTMLElement, SiteHeaderProps>(function Site
                 <motion.span
                   key={menuOpen ? "close" : "open"}
                   className={styles.menuIcon}
-                  initial={reduced ? { opacity: 0 } : { opacity: 0, rotate: menuOpen ? -45 : 45, scale: 0.8 }}
+                  initial={isReduced ? { opacity: 0 } : { opacity: 0, rotate: menuOpen ? -45 : 45, scale: 0.8 }}
                   animate={{ opacity: 1, rotate: 0, scale: 1 }}
-                  exit={reduced ? { opacity: 0 } : { opacity: 0, rotate: menuOpen ? 45 : -45, scale: 0.8 }}
+                  exit={isReduced ? { opacity: 0 } : { opacity: 0, rotate: menuOpen ? 45 : -45, scale: 0.8 }}
                   transition={
-                    reduced
+                    isReduced
                       ? { duration: 0 }
                       : { ...motionTokens.spring.snappy, opacity: { duration: motionTokens.duration.instant } }
                   }
@@ -659,7 +659,7 @@ export const SiteHeader = forwardRef<HTMLElement, SiteHeaderProps>(function Site
           {toolbar}
         </div>
 
-        {hasPanels && !compactPanel && (
+        {hasPanels && !isCompactPanel && (
           <AnimatePresence>
             {openItem?.links && (
               <motion.div
@@ -670,10 +670,10 @@ export const SiteHeader = forwardRef<HTMLElement, SiteHeaderProps>(function Site
                 role="region"
                 aria-label={openItem.label}
                 onKeyDown={onPanelKeyDown}
-                initial={reduced ? { opacity: 0 } : { opacity: 0, y: -6, scale: 0.985 }}
+                initial={isReduced ? { opacity: 0 } : { opacity: 0, y: -6, scale: 0.985 }}
                 animate={{ opacity: 1, y: 0, scale: 1, height: panel.height ?? "auto" }}
                 exit={
-                  reduced
+                  isReduced
                     ? { opacity: 0, transition: { duration: motionTokens.duration.instant } }
                     : {
                         opacity: 0,
@@ -683,7 +683,7 @@ export const SiteHeader = forwardRef<HTMLElement, SiteHeaderProps>(function Site
                       }
                 }
                 transition={
-                  reduced
+                  isReduced
                     ? { duration: 0 }
                     : {
                         height: panel.grow ? GROW : SHRINK,
@@ -694,7 +694,7 @@ export const SiteHeader = forwardRef<HTMLElement, SiteHeaderProps>(function Site
                 }
               >
                 <AnimatePresence initial={false} custom={open?.direction ?? 0}>
-                  <Face key={openItem.value} direction={open?.direction ?? 0} reduced={reduced} onHeight={onHeight}>
+                  <Face key={openItem.value} direction={open?.direction ?? 0} reduced={isReduced} onHeight={onHeight}>
                     <div className={styles.faceGrid} data-featured={openItem.feature ? "" : undefined}>
                       <ul className={styles.panelLinks}>
                         {openItem.links.map(link => (
@@ -722,12 +722,14 @@ export const SiteHeader = forwardRef<HTMLElement, SiteHeaderProps>(function Site
                           link={{ label: openItem.feature.title, href: openItem.feature.href }}
                           className={styles.feature}
                           data-panel-link=""
-                          onChoose={() =>
-                            choose(
-                              { label: openItem.feature!.title, href: openItem.feature!.href, section: openItem.value },
-                              openItem.value,
-                            )
-                          }
+                          onChoose={() => {
+                            const { feature } = openItem
+                            if (feature)
+                              choose(
+                                { label: feature.title, href: feature.href, section: openItem.value },
+                                openItem.value,
+                              )
+                          }}
                         >
                           {openItem.feature.image && (
                             <span className={styles.featureImage}>
@@ -762,7 +764,7 @@ export const SiteHeader = forwardRef<HTMLElement, SiteHeaderProps>(function Site
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              transition={{ duration: reduced ? 0 : motionTokens.duration.standard, ease: standard }}
+              transition={{ duration: isReduced ? 0 : motionTokens.duration.standard, ease: standard }}
               aria-hidden="true"
             />
             <motion.div
@@ -770,29 +772,29 @@ export const SiteHeader = forwardRef<HTMLElement, SiteHeaderProps>(function Site
               id={`${id}-sheet`}
               ref={sheetRef}
               className={styles.sheet}
-              initial={reduced ? { opacity: 0 } : { height: 0 }}
-              animate={reduced ? { opacity: 1 } : { height: "auto" }}
-              exit={reduced ? { opacity: 0 } : { height: 0, transition: SHRINK }}
-              transition={reduced ? { duration: 0 } : GROW}
+              initial={isReduced ? { opacity: 0 } : { height: 0 }}
+              animate={isReduced ? { opacity: 1 } : { height: "auto" }}
+              exit={isReduced ? { opacity: 0 } : { height: 0, transition: SHRINK }}
+              transition={isReduced ? { duration: 0 } : GROW}
             >
               <nav className={styles.sheetInner} aria-label={label}>
                 <ul className={styles.sheetList}>
                   {items.map((item, index) => {
                     const isCurrent = current === item.value
-                    const group = !!item.links?.length && hasPanels
+                    const hasGroup = !!item.links?.length && hasPanels
                     const isExpanded = expanded === item.value
                     const rowMotion = {
-                      initial: reduced ? false : { opacity: 0, y: -6 },
+                      initial: isReduced ? false : { opacity: 0, y: -6 },
                       animate: { opacity: 1, y: 0 },
                       transition: {
                         duration: motionTokens.duration.standard,
                         ease: enter,
-                        delay: reduced ? 0 : 0.04 + index * motionTokens.stagger.item,
+                        delay: isReduced ? 0 : 0.04 + index * motionTokens.stagger.item,
                       },
                     } as const
                     return (
                       <motion.li key={item.value} className={styles.sheetItem} {...rowMotion}>
-                        {group ? (
+                        {hasGroup ? (
                           <>
                             <button
                               type="button"
@@ -816,11 +818,11 @@ export const SiteHeader = forwardRef<HTMLElement, SiteHeaderProps>(function Site
                                   key="group"
                                   id={`${id}-group-${item.value}`}
                                   className={styles.sheetGroup}
-                                  initial={reduced ? { opacity: 0 } : { height: 0, opacity: 0 }}
-                                  animate={reduced ? { opacity: 1 } : { height: "auto", opacity: 1 }}
-                                  exit={reduced ? { opacity: 0 } : { height: 0, opacity: 0 }}
+                                  initial={isReduced ? { opacity: 0 } : { height: 0, opacity: 0 }}
+                                  animate={isReduced ? { opacity: 1 } : { height: "auto", opacity: 1 }}
+                                  exit={isReduced ? { opacity: 0 } : { height: 0, opacity: 0 }}
                                   transition={
-                                    reduced
+                                    isReduced
                                       ? { duration: 0 }
                                       : {
                                           height: motionTokens.spring.smooth,
@@ -829,7 +831,7 @@ export const SiteHeader = forwardRef<HTMLElement, SiteHeaderProps>(function Site
                                   }
                                 >
                                   <ul>
-                                    {item.links!.map(link => (
+                                    {item.links?.map(link => (
                                       <li key={link.label}>
                                         <Destination
                                           link={link}
@@ -874,12 +876,12 @@ export const SiteHeader = forwardRef<HTMLElement, SiteHeaderProps>(function Site
                 {(secondaryAction || primaryAction) && (
                   <motion.div
                     className={styles.sheetActions}
-                    initial={reduced ? false : { opacity: 0, y: -6 }}
+                    initial={isReduced ? false : { opacity: 0, y: -6 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{
                       duration: motionTokens.duration.standard,
                       ease: enter,
-                      delay: reduced ? 0 : 0.04 + items.length * motionTokens.stagger.item,
+                      delay: isReduced ? 0 : 0.04 + items.length * motionTokens.stagger.item,
                     }}
                   >
                     {secondaryAction && actionNode(secondaryAction, "secondary")}

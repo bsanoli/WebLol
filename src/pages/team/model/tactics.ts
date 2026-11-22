@@ -93,6 +93,7 @@ export function readTacticDocument(state: TacticsState, compId: string | null): 
 }
 
 /** Depois que o bloco de notas gravou as anotações antigas, elas saem da comp para não aparecer duas vezes. */
+// biome-ignore lint/nursery/useConsistentBooleanName: limpa as anotações e devolve se algo mudou
 export function clearCompNotes(comp: Composition): boolean {
   if (!pendingCompNotes(comp)) return false
   comp.notes = ""

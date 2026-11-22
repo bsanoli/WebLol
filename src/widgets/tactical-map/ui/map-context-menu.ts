@@ -1,4 +1,5 @@
 import { iconMarkup } from "@/shared/ui/icon"
+import { requireElement } from "@/shared/lib/dom"
 
 type MenuItem = {
   label: string
@@ -23,10 +24,10 @@ export function mountMapContextMenu(
   resolve: (event: MouseEvent | KeyboardEvent) => ContextAction | undefined,
   quickActions: () => MenuItem[],
 ) {
-  const menu = document.querySelector<HTMLElement>("#map-context-menu")!
-  const items = menu.querySelector<HTMLElement>(".map-context-items")!
-  const title = menu.querySelector<HTMLElement>(".map-context-title")!
-  const ring = map.querySelector<HTMLElement>("#map-context-target")!
+  const menu = requireElement<HTMLElement>("#map-context-menu")
+  const items = requireElement<HTMLElement>(".map-context-items", menu)
+  const title = requireElement<HTMLElement>(".map-context-title", menu)
+  const ring = requireElement<HTMLElement>("#map-context-target", map)
   let action: ContextAction | undefined
   let trigger: HTMLElement | undefined
 

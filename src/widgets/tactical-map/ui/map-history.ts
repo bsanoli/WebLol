@@ -1,3 +1,4 @@
+import { requireElement } from "@/shared/lib/dom"
 export function mountMapHistory<Snapshot>({
   capture,
   restore,
@@ -7,8 +8,8 @@ export function mountMapHistory<Snapshot>({
   restore: (snapshot: Snapshot) => Snapshot | undefined
   canEdit: () => boolean
 }) {
-  const undoButton = document.querySelector<HTMLButtonElement>("#undo")!
-  const redoButton = document.querySelector<HTMLButtonElement>("#redo")!
+  const undoButton = requireElement<HTMLButtonElement>("#undo")
+  const redoButton = requireElement<HTMLButtonElement>("#redo")
   const undo: Snapshot[] = [],
     redo: Snapshot[] = []
   function update() {
@@ -18,7 +19,9 @@ export function mountMapHistory<Snapshot>({
   function step(from: Snapshot[], to: Snapshot[]) {
     if (!canEdit()) return
     while (from.length) {
-      const previous = restore(from.pop()!)
+      const snapshot = from.pop()
+      if (!snapshot) break
+      const previous = restore(snapshot)
       if (!previous) continue
       to.push(previous)
       break
@@ -29,7 +32,7 @@ export function mountMapHistory<Snapshot>({
   redoButton.onclick = () => step(redo, undo)
   document.addEventListener("keydown", event => {
     if (
-      !document.getElementById("v-map")!.classList.contains("on") ||
+      !requireElement("#v-map").classList.contains("on") ||
       !canEdit() ||
       (event.target as Element).closest("input, textarea, select, [role=slider], [contenteditable], [role=dialog]") ||
       !(event.ctrlKey || event.metaKey)

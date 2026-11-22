@@ -1,4 +1,5 @@
 import { expect, test } from "@playwright/test"
+import { boxOf } from "./support/box"
 import { size, visionButton, choose, mapPoint, drag, waitForRealisticMap } from "./support/tactical-map"
 
 test("Setas retas e curvas encaixam o traço na ponta", async ({ page }) => {
@@ -19,7 +20,8 @@ test("Setas retas e curvas encaixam o traço na ponta", async ({ page }) => {
   await expect(arrowhead).toBeHidden()
   const canvas = page.locator("#cv")
   await canvas.evaluate((node: HTMLCanvasElement) => {
-    const context = node.getContext("2d")!
+    const context = node.getContext("2d")
+    if (!context) throw new Error("Canvas sem contexto 2d")
     let path: [number, number][] = []
     let strokeEnd: [number, number] | undefined
     const { beginPath, moveTo, lineTo, stroke, fill } = context
@@ -174,8 +176,8 @@ test("Aviso de visão e menus de ferramenta preservam a área e a câmera do map
   const narrow = await bounds()
   await arrow.click()
   await expect(options).toBeVisible()
-  const panel = (await options.boundingBox())!,
-    anchor = (await arrow.boundingBox())!
+  const panel = await boxOf(options),
+    anchor = await boxOf(arrow)
   expect(panel.y).toBeGreaterThanOrEqual(anchor.y + anchor.height)
   expect(panel.x).toBeGreaterThanOrEqual(0)
   expect(panel.x + panel.width).toBeLessThanOrEqual(800)
@@ -196,24 +198,24 @@ test("Desenha no zoom, limpa apenas setas e mantém a câmera em tela cheia", as
   await expect(clearArrows).toBeDisabled()
   const mover = team.getByRole("radio", { name: "Mover", exact: true })
   await expect(mover).toBeVisible()
-  const toolsAtFit = (await mover.boundingBox())!
-  expect(toolsAtFit.x).toBeCloseTo((await team.locator("#map").boundingBox())!.x)
+  const toolsAtFit = await boxOf(mover)
+  expect(toolsAtFit.x).toBeCloseTo((await boxOf(team.locator("#map"))).x)
   await expect(visionButton(team, "geral")).toHaveAttribute("aria-pressed", "true")
   await expect(team.getByRole("tab", { name: "Camadas" })).toBeVisible()
 
   const zoom = team.locator("#map-zoom-value")
   const viewport = team.getByRole("region", { name: "Mapa da jogada" })
   const camera = team.getByRole("group", { name: "Câmera do mapa" })
-  const cameraAtFit = await camera.boundingBox()
-  const area = (await viewport.boundingBox())!
-  expect(area.x + area.width - (cameraAtFit!.x + cameraAtFit!.width)).toBeCloseTo(8)
-  expect(area.y + area.height - (cameraAtFit!.y + cameraAtFit!.height)).toBeCloseTo(8)
+  const cameraAtFit = await boxOf(camera)
+  const area = await boxOf(viewport)
+  expect(area.x + area.width - (cameraAtFit.x + cameraAtFit.width)).toBeCloseTo(8)
+  expect(area.y + area.height - (cameraAtFit.y + cameraAtFit.height)).toBeCloseTo(8)
   const anchor = await mapPoint(team, 0.5, 0.44)
   await page.mouse.move(anchor.x, anchor.y)
   await page.mouse.wheel(0, -120)
   await expect(zoom).toHaveText("127%")
   expect(await camera.boundingBox()).toEqual(cameraAtFit)
-  const toolsAtZoom = (await mover.boundingBox())!
+  const toolsAtZoom = await boxOf(mover)
   expect(toolsAtZoom.x).toBeCloseTo(toolsAtFit.x, 1)
   expect(toolsAtZoom.y).toBeCloseTo(toolsAtFit.y, 1)
   const afterZoom = await mapPoint(team, 0.5, 0.44)
@@ -239,7 +241,7 @@ test("Desenha no zoom, limpa apenas setas e mantém a câmera em tela cheia", as
   await page.keyboard.up("Space")
   await expect(viewport).not.toHaveClass(/map-temporary-hand/)
   expect(await team.locator("#map").evaluate(map => map.style.transform)).not.toBe(beforePan)
-  const toolsAfterPan = (await mover.boundingBox())!
+  const toolsAfterPan = await boxOf(mover)
   expect(toolsAfterPan.x).toBeCloseTo(toolsAtFit.x, 1)
   expect(toolsAfterPan.y).toBeCloseTo(toolsAtFit.y, 1)
   await expect(clearAll).toBeDisabled()

@@ -34,13 +34,16 @@ export type HostGlobals = {
   weblolDraft?: () => HostDraft
   captainAccess?: () => boolean
   canManageTeam?: () => boolean
+  // biome-ignore-start lint/style/useNamingConvention: TEAM_NAME é contrato com os iframes
   TEAM_NAME?: () => string
+  // biome-ignore-end lint/style/useNamingConvention: fim da exceção
   renderCaptainPanel?: (panel: HTMLElement) => void | Promise<void>
   weblolImages?: HostImages
 }
 
 /** O que o app principal chama na janela do iframe. */
 export type FrameHandlers = {
+  // biome-ignore lint/suspicious/noConfusingVoidType: o app principal não usa o retorno; os handlers podem não devolver nada
   applyWebLolRoute?: (route: string[], params?: URLSearchParams) => Promise<boolean | void> | boolean | void
   weblolTeamChanged?: () => void
 }
@@ -72,8 +75,8 @@ export const hostImages = (): HostImages | null => {
 }
 
 export const hostDraft = (): HostDraft | null => fromHost(host => host.weblolDraft?.(), null)
-export const hostHasCaptainAccess = () => !!fromHost(host => host.captainAccess?.(), false)
-export const hostCanManageTeam = () => !!fromHost(host => host.canManageTeam?.(), false)
+export const hasHostCaptainAccess = () => !!fromHost(host => host.captainAccess?.(), false)
+export const canHostManageTeam = () => !!fromHost(host => host.canManageTeam?.(), false)
 export const hostTeamName = () => fromHost(host => host.TEAM_NAME?.(), "")
 
 /** Pede ao app principal para abrir um destino (rota, cópia de link). Fora de um iframe, não faz nada. */

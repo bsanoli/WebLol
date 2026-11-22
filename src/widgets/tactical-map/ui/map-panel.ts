@@ -1,3 +1,4 @@
+import { requireElement } from "@/shared/lib/dom"
 const tabs = [
   { value: "map-layers", label: "Camadas" },
   { value: "map-comps", label: "Composições" },
@@ -14,7 +15,7 @@ export function mountMapPanel(
     change: (value: string) => void,
   ) => void,
 ) {
-  const host = document.getElementById("map-sidebar-tabs")!
+  const host = requireElement("#map-sidebar-tabs")
   const panels = Array.from(document.querySelectorAll<HTMLElement>("[data-map-tab]"))
   function select(value: string) {
     for (const panel of panels) panel.hidden = panel.dataset.mapTab !== value
@@ -24,12 +25,12 @@ export function mountMapPanel(
 }
 
 export function mountStepPages() {
-  const list = document.getElementById("steps")!
-  const slot = document.getElementById("map-steps-slot")!
-  const pager = document.getElementById("map-step-pager")!
-  const previous = document.getElementById("map-steps-prev")!
-  const next = document.getElementById("map-steps-next")!
-  const output = document.getElementById("map-steps-page")!
+  const list = requireElement("#steps")
+  const slot = requireElement("#map-steps-slot")
+  const pager = requireElement("#map-step-pager")
+  const previous = requireElement("#map-steps-prev")
+  const next = requireElement("#map-steps-next")
+  const output = requireElement("#map-steps-page")
   let page = 0,
     capacity = 1,
     total = 0,

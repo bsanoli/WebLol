@@ -21,9 +21,9 @@ function skillSequence(champion: string, value: string) {
   const cells = Array.from({ length: Math.max(levelCount, points.length) }, (_, index) => {
     const number = index + 1
     const slot = points[index]
-    const extra = number > levelCount
+    const isExtra = number > levelCount
     const point = hasExtraPoints ? `Ponto registrado ${number}` : `Nível ${number}`
-    const numberLabel = extra ? `+${number - levelCount}` : number
+    const numberLabel = isExtra ? `+${number - levelCount}` : number
     if (!slot)
       return `<li class="build-skill-level" aria-label="${point} · Sem registro">
       <span aria-hidden="true">${numberLabel}</span><span class="build-skill-key" aria-hidden="true">–</span></li>`

@@ -18,7 +18,12 @@ function OptionLabel({ item }: { item: Option }) {
     <span className="mx-opt">
       <b title={item.name}>{item.name}</b>
       {item.preview ? (
-        <span className="mx-opt-preview" aria-hidden="true" dangerouslySetInnerHTML={{ __html: item.preview }} />
+        <span
+          className="mx-opt-preview"
+          aria-hidden="true"
+          // biome-ignore lint/security/noDangerouslySetInnerHtml: miniatura em SVG gerada pelo WebLol a partir do draft
+          dangerouslySetInnerHTML={{ __html: item.preview }}
+        />
       ) : (
         <small className="mx-opt-empty">vazia</small>
       )}
@@ -124,10 +129,10 @@ export function askMatchup(ours: Option[], enemies: Option[], initialOurs: strin
     const host = document.createElement("div")
     document.body.append(host)
     const root = createRoot(host)
-    let finished = false
+    let isFinished = false
     const finish = (choice?: MatchupChoice) => {
-      if (finished) return
-      finished = true
+      if (isFinished) return
+      isFinished = true
       queueMicrotask(() => {
         root.unmount()
         host.remove()

@@ -12,6 +12,7 @@ import { connectAnalytics } from "./analytics-bridge"
 import { initializeTheme } from "@/shared/config"
 import { UI_VERSIONS } from "../config/ui-versions"
 import { exposeHostGlobals, session, startPanel, startSignup } from "@/features/auth"
+import { requireElement } from "@/shared/lib/dom"
 
 const sections = [
   { value: "worlds", label: "Worlds", href: "#/worlds" },
@@ -95,6 +96,7 @@ function App() {
 
   return (
     <>
+      {/* biome-ignore lint/a11y/useValidAnchor: o link de pular também move o foco para o conteúdo */}
       <a
         className="skip-link"
         href="#screens"
@@ -213,7 +215,7 @@ function App() {
   )
 }
 
-const root = createRoot(document.getElementById("app")!)
+const root = createRoot(requireElement("#app"))
 flushSync(() => root.render(<App />))
 
 connectAnalytics(document.getElementById("v-worlds") as HTMLIFrameElement)
@@ -224,7 +226,7 @@ async function start() {
     exposeHostGlobals()
     await startPanel()
   } catch {
-    const error = document.getElementById("screen-error")!
+    const error = requireElement("#screen-error")
     error.textContent = "Não foi possível iniciar o painel. Recarregue a página para tentar novamente."
     error.hidden = false
   }

@@ -111,8 +111,10 @@ const tokens = new RegExp(
 const passiveIcons: Partial<Record<string, string>> = {
   "Lâmina Arcana": "matchups",
   "Feridas Dolorosas": "warning",
+  // biome-ignore-start lint/style/useNamingConvention: nomes de passivas como vêm dos dados da Riot
   Renascimento: "reset",
   Energizado: "ascending",
+  // biome-ignore-end lint/style/useNamingConvention: fim da exceção
   "Salva-Vidas": "admin",
 }
 
@@ -143,7 +145,7 @@ export function effectText(description: string, effects: BuildDetail["effects"])
   body.className = "game-tip-description"
   for (const paragraph of description.split("\n\n")) {
     const lines = paragraph.split("\n")
-    const name = Object.keys(effects ?? {}).find(label => lines[0] === label || lines[0].startsWith(label + " ("))
+    const name = Object.keys(effects ?? {}).find(label => lines[0] === label || lines[0].startsWith(`${label} (`))
     if (name) {
       const heading = document.createElement("div")
       heading.className = "effect-heading"

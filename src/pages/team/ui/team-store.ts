@@ -60,15 +60,15 @@ export const boardSide = (): DraftSide => activeMatchup()?.side ?? "blue"
 export const localSave = $<HTMLDetailsElement>("#local-save")
 
 export const SAVE_RESULT_EVENT = "weblol:save-result"
-let lastSaveFailed = false
-export const saveFailed = () => lastSaveFailed
+let didLastSaveFail = false
+export const saveFailed = () => didLastSaveFail
 
 export function save() {
   try {
     localStorage.setItem(KEY, JSON.stringify(teamStateToSaved(S)))
-    lastSaveFailed = false
+    didLastSaveFail = false
   } catch {
-    lastSaveFailed = true
+    didLastSaveFail = true
   }
   document.dispatchEvent(new Event(SAVE_RESULT_EVENT))
 }
@@ -90,6 +90,7 @@ export function clearUndo() {
   if (undoAction) setUndo(null)
 }
 /** Desfaz a última ação desfazível; devolve `false` quando não há nada a desfazer. */
+// biome-ignore lint/nursery/useConsistentBooleanName: desfaz e devolve se havia algo para desfazer
 export function runUndo() {
   const action = undoAction
   if (!action) return false

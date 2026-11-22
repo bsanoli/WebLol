@@ -2,6 +2,7 @@ import { STORAGE_KEYS } from "@/shared/config"
 import moveCursor from "./cursors/move.svg?raw"
 import openHandCursor from "./cursors/hand.svg?raw"
 import closedHandCursor from "./cursors/hand-closed.svg?raw"
+import { requireElement } from "@/shared/lib/dom"
 
 const colors = [
   { id: "green", label: "Verde", fill: "#49fa60", highlight: "#d5ffdd" },
@@ -19,7 +20,7 @@ const colorKey = STORAGE_KEYS.mapCursorColor
 const sizeKey = STORAGE_KEYS.mapCursorSize
 
 export function mountMapCursorColor(layout: HTMLElement) {
-  const palette = layout.querySelector<HTMLElement>("#map-cursor-colors")!
+  const palette = requireElement<HTMLElement>("#map-cursor-colors", layout)
   const sizeButtons = Array.from(layout.querySelectorAll<HTMLButtonElement>("[data-cursor-size]"))
   let savedColor: string | null = null
   let savedSize: string | null = null
@@ -70,10 +71,11 @@ export function mountMapCursorColor(layout: HTMLElement) {
         `url("data:image/svg+xml,${encodeURIComponent(artwork)}") ${scaledHotspot}, ${fallback}`,
       )
     }
-    colorButtons.forEach((button, index) => button.setAttribute("aria-pressed", String(colors[index] === activeColor)))
-    sizeButtons.forEach(button =>
-      button.setAttribute("aria-pressed", String(Number(button.dataset.cursorSize) === activeSize)),
-    )
+    colorButtons.forEach((button, index) => {
+      button.setAttribute("aria-pressed", String(colors[index] === activeColor))
+    })
+    for (const button of sizeButtons)
+      button.setAttribute("aria-pressed", String(Number(button.dataset.cursorSize) === activeSize))
   }
 
   apply()
