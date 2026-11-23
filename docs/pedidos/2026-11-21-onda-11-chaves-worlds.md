@@ -40,4 +40,4 @@ Renomeado em `worlds.json`, `soloq/summary.json`, `soloq.py`, `worlds-build-time
 - `players`: `n`→`games`, `w`→`wins`, `k`/`d`/`a`→`avg…`, `ch`→`champions`. Raiz: `mgames`→`compGames`.
 - Decisão: as linhas de `lanes` e `matchups` continuam arrays posicionais (virar objeto aumentaria o JSON e mexeria em todas as colunas). A chave `series:game` dos drafts não mudou.
 - Conferência: os dados convertidos, com as chaves de volta, são idênticos aos do `HEAD`. Bundle: Worlds 89,81 kB e SoloQ 205,13 kB gzip (antes 89,8 e 205,5).
-- Não feito (fora dos critérios): tipo único do summary em `entities/` com validação na fronteira; os tipos seguem derivados de `typeof DATA`. Fica para a refatoração de tipos.
+- Tipo único do summary em `entities/` com validação na fronteira: entregue em 22/11/2026 ([fechamento](2026-11-22-fechamento-ondas-6-e-7.md)).

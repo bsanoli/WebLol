@@ -97,6 +97,16 @@ Zerados em 21/11/2026 (Onda 8). `npm run check:fsd` roda com `--fail-on-warnings
 
 `tests/accessibility.spec.ts` aceita só a regra `label-content-name-mismatch`, nos picks do draft (`draft-board.ts`) e nos seletores do confronto (`matchup-bar.tsx`) em Composições. O `aria-label` desses botões não contém o texto visível na mesma ordem, o que atrapalha quem usa comando de voz (critério 2.5.3 da WCAG). Corrigir na Onda 3, junto com os nomes da Área do time.
 
+## Dívida aceita (fechamento das Ondas 6 e 7)
+
+Registrada em 22/11/2026, sem onda própria; detalhes no [pedido de fechamento](pedidos/2026-11-22-fechamento-ondas-6-e-7.md).
+
+- Linhas de `lanes` e `matchups` do resumo continuam arrays posicionais (formato de dado publicado; mudar exige migração e ADR).
+- `compGames` é número no Worlds e `[]` na SoloQ, e nenhum código o lê; fica fora do tipo `TournamentSummary`.
+- `tests-rules/` está fora do `tsconfig`; o emulador usa a porta 8080 fixa e o CI baixa o JAR sem cache.
+- Regras de `model/` sem teste próprio fora de `features/auth` (Onda 7, item 2, parcial).
+- Avisos antigos do Knip: `SideMark`, `wireFloatingPicker` e `SavedImage`.
+
 ## Backlog por ondas
 
 Cada onda é uma ou mais entregas M ou G com pedido em `docs/pedidos/`. As ondas 3 a 7 mexem nos arquivos da Área do time e começam depois que o trabalho de Táticas em andamento for commitado. As ferramentas e versões estão na [ADR 0004](decisoes/0004-ferramentas-de-qualidade.md).
@@ -176,7 +186,7 @@ Renomeações vão em commits próprios, sem mudança de comportamento, de prefe
 
 ### Onda 6. Desempenho
 
-**Situação:** parcial, 2026-11-20. Feitos os itens 1, 2, 4 e 5 e, no item 3, o código de Builds e Composições do Worlds sai do pacote inicial (268 → 89 kB gzip). Os retratos dos campeões passaram de PNG para WebP (4,86 → 0,73 MB). Os dados da SoloQ por campeão entraram na Onda 10 (bundle da lista de Builds 4,27 → 2,00 MB); as chaves do resumo (`worlds.json` e `soloq/summary.json`) ficaram legíveis na Onda 11 (`stage`, `series`, `game`, `blue`, `red`, `blueWon`, `lanes`; amostras com `sampleGames`, `wins`, `avgKills`…); seguem como arrays posicionais as linhas de `lanes` e de `matchups`; a meta de metade do volume só vale para as rotas que carregam os retratos (por exemplo Composições). Ver [pedido](pedidos/2026-11-20-ondas-6-e-7.md).
+**Situação:** pronta com ressalvas, em 22/11/2026: a meta de metade do volume por rota segue **não atingida** fora das rotas com retratos (aceito pelo Fabiano; o orçamento do `npm run size` impede que piore). Feitos os itens 1, 2, 4 e 5 e, no item 3, o código de Builds e Composições do Worlds sai do pacote inicial (268 → 89 kB gzip). Os retratos dos campeões passaram de PNG para WebP (4,86 → 0,73 MB). Os dados da SoloQ por campeão entraram na Onda 10 (bundle da lista de Builds 4,27 → 2,00 MB); as chaves do resumo (`worlds.json` e `soloq/summary.json`) ficaram legíveis na Onda 11 e o tipo único do resumo (`TournamentSummary`, em `entities/match`) é conferido por `parseTournamentSummary` na entrada das telas. A conferência visual de Composições e Visão geral foi feita. Dívida aceita, fora da onda: as linhas de `lanes` e de `matchups` seguem como arrays posicionais, porque virar objeto muda um formato de dados publicado e aumenta o JSON, sem ganho de velocidade (precisa de migração e ADR se um dia compensar). Ver [pedido](pedidos/2026-11-20-ondas-6-e-7.md) e [fechamento](pedidos/2026-11-22-fechamento-ondas-6-e-7.md).
 
 1. Montar só a aba ativa da Área do time.
 2. Carregar o mapa realista e o Excalidraw sob demanda.
@@ -188,7 +198,7 @@ Renomeações vão em commits próprios, sem mudança de comportamento, de prefe
 
 ### Onda 7. Testes
 
-**Situação:** parcial, 2026-11-20. Feitos os itens 1 e 3; no item 2 há Vitest para `tactic-doc`, `wards`, `battlefield`, `final-series`, `composition`, `champion-slots`, `tactics`, `local-state`, `champion-catalog`, `lol-media`, `faelights`, `terrain-sight` e `identity` (148 testes). Depois entraram `effect-text`, `build-statistics`, `ui-hooks`, `team-create`, `images` e `migrate` (171 testes). Faltam `membership`, `start`, `router`, `sync`, `admin-data` e `host-globals` de `features/auth/model`, que dependem do login real do Firebase. Ver [pedido](pedidos/2026-11-20-ondas-6-e-7.md).
+**Situação:** pronta com ressalvas, em 22/11/2026: módulos de `model/` fora de `features/auth` e do resumo (por exemplo os de Táticas e Composições salvas) seguem sem teste próprio e entram na dívida abaixo. Feitos os itens 1 e 3; o item 2 tem Vitest em cada regra de `model/` tocada nas ondas 3 e 4, incluindo `membership`, `start`, `router`, `sync`, `admin-data` e `host-globals` de `features/auth/model` (doubles do Firebase, sem login real) e o tipo do resumo em `entities/match`. As regras do `firestore.rules` têm 35 testes no emulador (`npm run test:rules`, job `regras` do CI). Ver [pedido](pedidos/2026-11-20-ondas-6-e-7.md), [testes de autenticação](pedidos/2026-11-21-testes-autenticacao.md) e [fechamento](pedidos/2026-11-22-fechamento-ondas-6-e-7.md).
 
 1. Dividir `tests/tactical-map.spec.ts` por fluxo.
 2. Cobrir com Vitest cada regra de `model/` tocada nas ondas 3 e 4.

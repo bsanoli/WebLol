@@ -2,7 +2,7 @@ import { createElement } from "react"
 import { createRoot, type Root } from "react-dom/client"
 import { TournamentOverview } from "@/widgets/tournament-overview"
 import DATA from "@dataset/summary"
-import { LANES } from "@/entities/match"
+import { LANES, parseTournamentSummary } from "@/entities/match"
 import { exposeFrameHandlers, isEmbedded, navigateHost, sendHostAnalytics, signalHost } from "@/shared/host-bridge"
 import { initializeTheme } from "@/shared/config"
 import { revealContent } from "@/shared/lib/motion"
@@ -29,6 +29,8 @@ async function loadPage(id: string) {
   }
 }
 initializeTheme()
+// Falha cedo, com o campo que saiu do formato, se o JSON do resumo não bater com o tipo.
+parseTournamentSummary(DATA)
 renderKpis()
 renderWorldsFinal()
 const G = DATA.games

@@ -1,21 +1,18 @@
 import DATA from "@dataset/summary"
 import { iconMarkup, laneIconMarkup } from "@/shared/ui/icon"
 import { ico } from "@/entities/champion"
-import { championSlug, esc } from "@/entities/match"
+import { championSlug, esc, type TournamentSummary } from "@/entities/match"
 import { DATASET } from "@/shared/dataset"
 import type { Champion } from "../model/build-statistics"
 import { gameCount } from "./build-icons"
 
 type Matchup = [opponent: string, games: number, wins: number, ...stats: number[]]
-const matchups: Record<string, Record<string, (string | number)[][]>> = DATA.matchups
+const matchups: TournamentSummary["matchups"] = DATA.matchups
 export const MATCHUP_PAGE_SIZE = 5
 
 function orderedMatchups(position: string, champion: string) {
   return (matchups[position]?.[champion] ?? [])
-    .filter(
-      (row): row is Matchup =>
-        row.length >= 3 && typeof row[0] === "string" && row.slice(1).every(value => typeof value === "number"),
-    )
+    .filter((row): row is Matchup => row.length >= 3)
     .sort((a, b) => b[1] - a[1] || b[2] / b[1] - a[2] / a[1])
 }
 

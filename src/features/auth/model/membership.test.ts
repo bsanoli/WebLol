@@ -2,6 +2,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 
 const docs = vi.hoisted(() => new Map<string, unknown>())
 const written = vi.hoisted(() => [] as unknown[][])
+const signIns = vi.hoisted(() => [] as string[])
 vi.mock("@/shared/firestore", () => ({
   IS_ONLINE: true,
   currentFirebase: () => ({
@@ -10,7 +11,8 @@ vi.mock("@/shared/firestore", () => ({
   fb: async () => ({
     auth: { currentUser: null },
     au: {
-      signInWithEmailAndPassword: async () => {
+      signInWithEmailAndPassword: async (_: unknown, __: string, password: string) => {
+        signIns.push(password)
         if (docs.get("__senha_errada__")) throw new Error("auth/wrong-password")
       },
     },
@@ -31,7 +33,10 @@ vi.mock("@/shared/config", async importOriginal => ({
 vi.mock("@/shared/lib/admin-crypto", async importOriginal => ({
   ...(await importOriginal<typeof import("@/shared/lib/admin-crypto")>()),
   fingerprint: async (admin: { encPub: { n: string } }) => `fp-${admin.encPub.n}`,
-  unlockAdmin: async () => ({ fp: "chaves-falsas" }),
+  unlockAdmin: async () => {
+    if (docs.get("__cofre_errado__")) throw new Error("senha do cofre")
+    return { fp: "chaves-falsas" }
+  },
 }))
 
 import { ADMINS } from "@/shared/config"
@@ -48,6 +53,7 @@ const jogador = { id: "Ana#BR1", admin: false }
 beforeEach(() => {
   docs.clear()
   written.length = 0
+  signIns.length = 0
   resetSession()
 })
 afterEach(() => vi.unstubAllGlobals())
@@ -254,5 +260,20 @@ describe("adminUnlock", () => {
     const error = (await adminUnlock("senha").catch(e => e)) as Error & { keys?: unknown }
     expect(error.message).toBe("fb")
     expect(error.keys).toEqual({ fp: "chaves-falsas" })
+  })
+
+  it("senha errada do cofre: o erro sobe e nem tenta entrar no banco", async () => {
+    stubStorage({ [UKEY]: { id: "panda#zada", admin: true } })
+    docs.set("__cofre_errado__", true)
+    session.admin = record("1") as never
+    await expect(adminUnlock("errada")).rejects.toThrow("senha do cofre")
+    expect(signIns).toEqual([])
+  })
+
+  it("senha do banco diferente da do cofre: entra no banco com a senha do banco", async () => {
+    stubStorage({ [UKEY]: { id: "panda#zada", admin: true } })
+    session.admin = record("1") as never
+    await adminUnlock("do-cofre", "do-banco")
+    expect(signIns).toEqual(["do-banco"])
   })
 })

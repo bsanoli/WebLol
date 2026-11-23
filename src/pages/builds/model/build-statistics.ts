@@ -1,10 +1,9 @@
-import type DATA from "@dataset/summary"
 import { champions, opponents as opponentCounts } from "@dataset/builds"
-import { championSlug } from "@/entities/match"
+import { championSlug, type SummaryChampion, type SummaryLaneSample } from "@/entities/match"
 import { encountersFor } from "./encounters"
 
-export type Champion = (typeof DATA.champs)[number]
-export type LaneSample = Extract<Champion["lanes"][keyof Champion["lanes"]], { sampleGames: number }>
+export type Champion = SummaryChampion
+export type LaneSample = SummaryLaneSample
 export type Frequency<T> = { value: T; count: number; percent: number }
 type SampleBuild = (typeof champions.Ezreal)["all"]
 export type BuildData = Omit<SampleBuild, "skillOrder" | "starterItems" | "runePage"> & {
